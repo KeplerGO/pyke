@@ -1,0 +1,14 @@
+# Revision 1.0  2010-01-01 Martin Still martin.still@nasa.gov
+#
+# NASA Ames Research Center
+# Moffett Field, CA 94035, USA
+#
+# Help definitions for the Kepler package
+
+$kepler      = "./"
+
+
+kepler      men = kepler$kepler.men,
+            hlp = kepler$kepler.men,
+            sys = kepler$kepler.hlp,
+            src = kepler$kepler.cl

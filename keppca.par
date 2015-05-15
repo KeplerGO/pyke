@@ -1,0 +1,11 @@
+infile,s,a,'kplr006115530-2010355172524_lpd-targ.fits',,,'Name of input target pixel FITS file (string)'
+maskfile,s,a,'all',,,'Name of mask defintion ASCII file (string)'
+outfile,s,a,'kplr006115530-2010355172524_pca.fits',,,'Name of output FITS file (string)'
+components,s,a,'1-3',,,'Principal components to be removed (string)'
+plotpca,b,h,'yes',,,'Create PCA plots? (boolean)'
+nmaps,i,a,10,1,999,'Number of principal components to include in report (integer)'
+clobber,b,h,'yes',,,'Overwrite output file? (boolean)'
+verbose,b,h,'yes',,,'Write to log file? (boolean)'
+logfile,s,h,'keppca.log',,,'Name of ascii log file? (string)'
+status,i,h,0,,,'Exit status (0=good)'
+mode,s,h,"al"

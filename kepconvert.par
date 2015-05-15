@@ -1,0 +1,10 @@
+infile,s,a,'kplr007659570-2009259160929_llc.fits',,,'Name of input file (string)'
+outfile,s,a,'7659570-Q3.txt',,,'Name of output file (string)'
+conversion,s,a,'fits2asc','fits2asc|asc2fits',,'Type of data conversion (string)'
+columns,s,a,'TIME,SAP_FLUX,SAP_FLUX_ERR',,,'Comma-delimited list of data columns'
+baddata,b,h,'yes',,,'Output rows which have been flagged as questionable (boolean)'
+clobber,b,h,'no',,,'Overwrite output file? (boolean)'
+verbose,b,h,'no',,,'Write to log file? (boolean)'
+logfile,s,h,'kepconvert.log',,,'Name of ascii log file? (string)'
+status,i,h,0,,,'Exit status (0=good)'
+mode,s,h,"al"

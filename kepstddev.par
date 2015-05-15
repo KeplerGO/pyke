@@ -1,0 +1,9 @@
+infile,s,a,'kplr012557548-2012277125453_llc.fits',,,'Name of input FITS file (string)'
+outfile,s,a,'kplr012557548-2012277125453_cdpp.fits',,,'Name of output FITS file (string)'
+datacol,s,a,'DETSAP_FLUX',,,'Name of data column (string)'
+timescale,r,a,6.5,1.0,48.0,'CDPP timescale [hours] (float)'
+clobber,b,h,'yes',,,'Overwrite output file? (boolean)'
+verbose,b,h,'yes',,,'Write to log file? (boolean)'
+logfile,s,h,'kepstddev.log',,,'Name of ascii log file? (string)'
+status,i,h,0,,,'Exit status (0=good)'
+mode,s,h,"al"

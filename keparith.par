@@ -1,0 +1,12 @@
+infile,s,a,'kepler.fits',,,'Input file (string)'
+outfile,s,a,'keparith.fits',,,'Name of output FITS file (string)'
+datacol,s,a,'SAP_FLUX',,,'Name of the column containing the flux time series (string)'
+constantfunc,s,a,'None','None|median|mean|MAD|std|max|range','A value calculated from a function to be used in operation (string)'
+constantval,r,a,None,,,'Use a given number in operation  (float)'
+operation,s,a,'Add','add|subtract|multiply|divide','Divide flux by a constant (float)'
+clobber,b,h,'no',,,'Overwrite output file? (boolean)'
+verbose,b,h,'no',,,'Write to log file? (boolean)'
+logfile,s,h,'kepcotrend.log',,,'Name of ascii log file? (string)'
+status,i,h,0,,,'Exit status (0=good)'
+mode,s,h,"al"
+
