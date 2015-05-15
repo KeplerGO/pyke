@@ -1,0 +1,9 @@
+infile,s,a,'kplr006932990-2011177032512_lpd-targ.fits',,,'Name of input target pixel FITS file (string)'
+outfix,s,a,'kplr006932990',,,'Name of output target pixel FITS file (string)'
+imtype,s,a,'flux','raw_cnts|flux|flux_err|flux_bkg|flux_bkg_err|cosmic_rays','Output image type (string)'
+ranges,s,a,'all',,,'BJD range of output files (string)'
+clobber,b,h,'yes',,,'Overwrite output file? (boolean)'
+verbose,b,h,'yes',,,'Write to log file? (boolean)'
+logfile,s,h,'kepimages.log',,,'Name of ascii log file? (string)'
+status,i,h,0,,,'Exit status (0=good)'
+mode,s,h,"al"

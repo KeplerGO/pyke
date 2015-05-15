@@ -1,0 +1,11 @@
+infile,s,a,'kepft.fits',,,'List of input files (string)'
+outfile,s,a,'kepwindow.fits',,,'Name of output FITS file (string)'
+fcol,s,a,'SAP_FLUX',,,'Name of flux column in input file (string)'
+fmax,r,a,1.0,,,'Maximum frequency [1/day] (float)'
+nfreq,i,a,100,,,'Number of frequency intervals (integer)'
+plot,b,a,'no',,,'Plot result? (boolean)'
+clobber,b,h,'no',,,'Overwrite output file? (boolean)'
+verbose,b,h,'no',,,'Write to log file? (boolean)'
+logfile,s,h,'kepwindow.log',,,'Name of ascii log file? (string)'
+status,i,h,0,,,'Exit status (0=good)'
+mode,s,h,"al"

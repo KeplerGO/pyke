@@ -1,0 +1,7 @@
+infile,s,a,'kplr011086270-2011271113734_lpd-targ.fits',,,'Name of input file (string)'
+outfile,s,a,'keptimefix.fits',,,'Name of output FITS file (string)'
+clobber,b,h,'yes',,,'Overwrite output file? (boolean)'
+verbose,b,h,'yes',,,'Write to log file? (boolean)'
+logfile,s,h,'keptimefix.log',,,'Name of ascii log file? (string)'
+status,i,h,0,,,'Exit status (0=good)'
+mode,s,h,"al"

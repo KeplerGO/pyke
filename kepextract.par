@@ -1,0 +1,9 @@
+infile,s,a,'kplr005110407-2010078095331_lpd-targ.fits',,,'Name of input target pixel FITS file (string)'
+maskfile,s,a,'kepmask.txt',,,'Name of mask defintion ASCII file (string)'
+outfile,s,a,'kepextract.fits',,,'Name of output light curve FITS file (string)'
+background,b,a,'no',,,'Subtract background from data? (boolean)'
+clobber,b,h,'yes',,,'Overwrite output file? (boolean)'
+verbose,b,h,'yes',,,'Write to log file? (boolean)'
+logfile,s,h,'kepextract.log',,,'Name of ascii log file? (string)'
+status,i,h,0,,,'Exit status (0=good)'
+mode,s,h,"al"

@@ -1,0 +1,12 @@
+infile,s,a,'kepinput.fits',,,'Name of input file (string)'
+outfile,s,a,'kepregr.fits',,,'Name of output FITS file (string)'
+datacol,s,a,'PDCSAP_FLUX',,,'Name of data column to filter (string)'
+kmethod,s,a,'kdtree','eucld|kdtree',,'Method to detect k-neighbors (string)'
+kneighb,i,a,'10',,,'Number of k-neighbors to look for (int)'
+plot,b,a,'yes',,,'Plot result? (boolean)'
+plotlab,s,a,'e$^-$ s$^{-1}$',,,'Plot axis label (string)'
+clobber,b,h,'no',,,'Overwrite output file? (boolean)'
+verbose,b,h,'no',,,'Write to log file? (boolean)'
+logfile,s,h,'kepregr.log',,,'Name of ascii log file? (string)'
+status,i,h,0,,,'Exit status (0=good)'
+mode,s,h,"al"

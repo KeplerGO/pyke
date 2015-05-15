@@ -1,0 +1,12 @@
+# Adapted from the Gemini v1.7 IRAF Package for the Kepler GO program.  
+#
+# Revision 1.0  2010-06-29 Martin Still martin.d.still@nasa.gov
+#
+# NASA Ames Research Center
+# Moffett Field, CA 94035, USA
+#
+# Parameters for the Kepler package
+ 
+version,s,h,"29Jun2010",,,"Package version date"
+verno,s,h,"v1.0",,,"Package version number"
+motd,b,h,"yes",,,"Print welcome message"
