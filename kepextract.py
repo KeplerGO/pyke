@@ -205,10 +205,14 @@ def kepextract(infile,maskfile,outfile,subback,clobber,verbose,logfile,status):
 # ...or use old subimage bitmap
 
     if status == 0 and 'aper' in maskfile.lower():
+        aperx = array([],'int')
+        apery = array([],'int')
         aperb = array([],'int')
         for i in range(maskmap.shape[0]):
             for j in range(maskmap.shape[1]):
                 aperb = append(aperb,maskmap[i,j])
+                aperx = append(aperx,crval1p + (j + 1 - crpix1p) * cdelt1p)
+                apery = append(apery,crval2p + (i + 1 - crpix2p) * cdelt2p)
 
 # ...or use all pixels
 
@@ -328,10 +332,13 @@ def kepextract(infile,maskfile,outfile,subback,clobber,verbose,logfile,status):
                     k += 1
                     modf[k] = flux[i,j]
                     args = (modx, mody, modf)
-            ans = leastsq(kepfunc.PRFgauss2d,guess,args=args,xtol=1.0e-8,ftol=1.0e-4,full_output=True)
-            s_sq = (ans[2]['fvec']**2).sum() / (ntime-len(guess))
-            psf_centr1[i] = ans[0][0]
-            psf_centr2[i] = ans[0][1]
+            try:
+                ans = leastsq(kepfunc.PRFgauss2d,guess,args=args,xtol=1.0e-8,ftol=1.0e-4,full_output=True)
+                s_sq = (ans[2]['fvec']**2).sum() / (ntime-len(guess))
+                psf_centr1[i] = ans[0][0]
+                psf_centr2[i] = ans[0][1]
+            except:
+                pass
             try:
                 psf_centr1_err[i] = sqrt(diag(ans[1] * s_sq))[0]
             except:
