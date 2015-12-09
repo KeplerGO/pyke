@@ -571,7 +571,8 @@ def keppca(infile,maskfile,outfile,components,plotpca,nreps,clobber,verbose,logf
             if (k % (npp - 1) == 0):     
                 pylab.figure(figsize=[10,16])
                 subplot2grid((npp,6),(0,0), colspan=2)
-                imshow(log10(pixMean.reshape(xdim,ydim).T-min(pixMean)+1),interpolation="nearest",cmap='RdYlBu')
+#                imshow(log10(pixMean.reshape(xdim,ydim).T-min(pixMean)+1),interpolation="nearest",cmap='RdYlBu')
+                imshow(log10(flipud(pixMean.reshape(ydim,xdim))-min(pixMean)+1),interpolation="nearest",cmap='RdYlBu')
                 xticks([])
                 yticks([])
                 ax1 = subplot2grid((npp,6),(0,2), colspan=4)
