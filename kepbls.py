@@ -361,7 +361,7 @@ if '--shell' in sys.argv:
     parser.add_argument('--datacol', default='DETSAP_FLUX', help='Name of data column to plot', type=str)
     parser.add_argument('--errcol', default='DETSAP_FLUX_ERR', help='Name of data error column to plot', type=str)
     parser.add_argument('--minper', default=1.0, help='Minimum search period [days]', type=float)
-    parser.add_argument('--minper', default=30.0, help='Maxiimum search period [days]', type=float)
+    parser.add_argument('--maxper', default=30.0, help='Maximum search period [days]', type=float)
     parser.add_argument('--mindur', default=0.5, help='Minimum transit duration [hours]', type=float)
     parser.add_argument('--maxdur', default=12.0, help='Maximum transit duration [hours]', type=float)
     parser.add_argument('--nsearch', default=1000, help='Number of test periods between minper and maxper', type=int)
