@@ -1,0 +1,8 @@
+lightcurve>=0.5.1
+matplotlib>=1.5.1
+numpy>=1.11.1
+orbit>=0.2
+pyfits>=3.4
+pylab>=0.1.3
+pyraf>=2.1.10
+scipy>=0.17.1
