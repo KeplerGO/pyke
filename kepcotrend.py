@@ -657,7 +657,7 @@ def kepcotrendsc(infile,outfile,bvfile,listbv,fitmethod,fitpower,iterate,sigma,m
 				lc_flux_o = table.field('ap_raw_flux') / 54.178 #convert to e-/s
 				lc_err_o = table.field('ap_raw_err') / 54.178 #convert to e-/s
 
-		elif version == 2:
+		elif version >= 2:
 			if str(instr[0].header['OBSMODE']) == 'long cadence':
 				#print 'Light curve was taken in Long Cadence mode!'
 
