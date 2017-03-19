@@ -1,9 +1,9 @@
-import pylab, numpy, pyfits, scipy
+import pylab, numpy, scipy
+from astropy.io import fits as pyfits
 from pylab import *
 from matplotlib import *
 from matplotlib import pyplot
 from numpy import *
-from pyfits import *
 import kepio, kepmsg, kepkey, kepplot, kepfit, keparray, kepfunc, kepstat
 import sys, time, re, math, glob
 from scipy import interpolate, optimize, ndimage, stats
@@ -245,22 +245,6 @@ def kepprf(infile,plotfile,rownum,columns,rows,fluxes,border,background,focus,pr
             prf = prf + prfn[i] / prfWeight[i]
         prf = prf / nansum(prf) / cdelt1p[0] / cdelt2p[0]
 
-# interpolate the calibrated PRF shape to the target position
-
-#    if status == 0:
-#        prf = zeros(shape(prfn[0,:,:]),dtype='float32')
-#        px = crval1p + len(PRFx) / 2 * cdelt1p[0]
-#        py = crval2p + len(PRFy) / 2 * cdelt2p[0]
-#        pp = [[px[0],py[0]],
-#              [px[1],py[1]],
-#              [px[2],py[2]],
-#              [px[3],py[3]],
-#              [px[4],py[4]]]
-#        for index,value in ndenumerate(prf):
-#            pz = prfn[:,index[0],index[1]]
-#            prf[index] = griddata(pp, pz, ([column], [row]), method='linear')
-#        print shape(prf)
-
 # location of the data image centered on the PRF image (in PRF pixel units)
 
     if status == 0:
@@ -349,53 +333,6 @@ def kepprf(infile,plotfile,rownum,columns,rows,fluxes,border,background,focus,pr
                 txt += 'X = %9.4f pix ' % OBJx[i]
                 txt += 'Y = %9.4f pix ' % OBJy[i]
                 kepmsg.log(logfile,txt,True)
-#
-#        params = {'backend': 'png',
-#                  'axes.linewidth': 2.5,
-#                  'axes.labelsize': 24,
-#                  'axes.font': 'sans-serif',
-#                  'axes.fontweight' : 'bold',
-#                  'text.fontsize': 12,
-#                  'legend.fontsize': 12,
-#                  'xtick.labelsize': 24,
-#                  'ytick.labelsize': 24}
-#        pylab.rcParams.update(params)
-#
-#        pylab.figure(figsize=[20,10])
-#        ax = pylab.axes([0.05,0.08,0.46,0.9])
-#        xxx = numpy.arange(397.5,402.5,0.02)
-#        yyy = numpy.sum(PRFmod,axis=0) / numpy.max(numpy.sum(PRFmod,axis=0))
-#        pylab.plot(xxx,yyy,color='b',linewidth=3.0)
-#        xxx = numpy.append(numpy.insert(xxx,[0],[xxx[0]]),xxx[-1])
-#        yyy = numpy.append(numpy.insert(yyy,[0],[0.0]),yyy[-1])
-#        pylab.fill(xxx,yyy,fc='y',linewidth=0.0,alpha=0.3)
-#        pylab.xlabel('Pixel Column Number')
-#        pylab.xlim(397.5,402.5)
-#        pylab.ylim(1.0e-30,1.02)
-#        for xmaj in numpy.arange(397.5,402.5,1.0):
-#            pylab.plot([xmaj,xmaj],[0.0,1.1],color='k',linewidth=0.5,linestyle=':')
-#        for xmaj in numpy.arange(0.2,1.2,0.2):
-#            pylab.plot([0.0,2000.0],[xmaj,xmaj],color='k',linewidth=0.5,linestyle=':')
-#
-#
-#        ax = pylab.axes([0.51,0.08,0.46,0.9])
-#        xxx = numpy.arange(32.5,37.5,0.02)
-#        yyy = numpy.sum(PRFmod,axis=1) / numpy.max(numpy.sum(PRFmod,axis=1))
-#        pylab.plot(xxx,yyy,color='b',linewidth=3.0)
-#        xxx = numpy.append(numpy.insert(xxx,[0],[xxx[0]]),xxx[-1])
-#        yyy = numpy.append(numpy.insert(yyy,[0],[0.0]),yyy[-1])
-#        pylab.fill(xxx,yyy,fc='y',linewidth=0.0,alpha=0.3)
-#        pylab.setp(pylab.gca(),yticklabels=[])
-#        pylab.xlabel('Pixel Row Number')
-#        pylab.xlim(32.5,37.5)
-#        pylab.ylim(1.0e-30,1.02)
-#        for xmaj in numpy.arange(32.5,37.5,1.0):
-#            pylab.plot([xmaj,xmaj],[0.0,1.1],color='k',linewidth=0.5,linestyle=':')
-#        for xmaj in numpy.arange(0.2,1.2,0.2):
-#            pylab.plot([0.0,2000.0],[xmaj,xmaj],color='k',linewidth=0.5,linestyle=':')
-#        pylab.ion()
-#        pylab.plot([])
-#        pylab.ioff()
 
         if verbose and background:
             bterms = border + 1
@@ -506,21 +443,14 @@ def kepprf(infile,plotfile,rownum,columns,rows,fluxes,border,background,focus,pr
         pylab.figure(figsize=[12,10])
         pylab.clf()
         plotimage(imgdat_pl,zminfl,zmaxfl,1,row,column,xdim,ydim,0.07,0.53,'observation',colmap,labcol)
-#        pylab.text(830.0,242.1,'A',horizontalalignment='center',verticalalignment='center',
-#                   fontsize=28,fontweight=500,color='white')
-#        pylab.text(831.1,240.62,'B',horizontalalignment='center',verticalalignment='center',
-#                   fontsize=28,fontweight=500,color='white')
-#        plotimage(imgprf_pl,0.0,zmaxpr/0.5,2,row,column,xdim,ydim,0.52,0.52,'model',colmap)
         plotimage(imgprf_pl,zminpr,zmaxpr,2,row,column,xdim,ydim,0.44,0.53,'model',colmap,labcol)
         kepplot.borders(maskimg,xdim,ydim,pixcoord1,pixcoord2,1,apercol,'--',0.5)
         kepplot.borders(maskimg,xdim,ydim,pixcoord1,pixcoord2,2,apercol,'-',3.0)
         plotimage(imgfit_pl,zminfl,zmaxfl,3,row,column,xdim,ydim,0.07,0.08,'fit',colmap,labcol)
-#        plotimage(imgres_pl,-zmaxre,zmaxre,4,row,column,xdim,ydim,0.44,0.08,'residual',colmap,'k')
         plotimage(imgres_pl,zminfl,zmaxfl,4,row,column,xdim,ydim,0.44,0.08,'residual',colmap,labcol)
 
 # plot data color bar
 
-#    barwin = pylab.axes([0.84,0.53,0.06,0.45])
     barwin = pylab.axes([0.84,0.08,0.06,0.9])
     if imscale == 'linear':
         brange = numpy.arange(zminfl,zmaxfl,(zmaxfl-zminfl)/1000)
@@ -551,28 +481,6 @@ def kepprf(infile,plotfile,rownum,columns,rows,fluxes,border,background,focus,pr
     pylab.ylabel('Flux (10$^%d$ e$^-$ s$^{-1}$)' % nrm)
     setp(barwin.get_yticklabels(), 'rotation', 90)
     barwin.yaxis.set_major_formatter(ticker.FormatStrFormatter('%.1f'))
-
-# plot residual color bar
-
-#    barwin = pylab.axes([0.84,0.08,0.06,0.45])
-#    Brange = numpy.arange(-zmaxre,zmaxre,(zmaxre+zmaxre)/1000)
-#    try:
-#        nrm = len(str(int(numpy.nanmax(brange))))-1
-#    except:
-#        nrm = 0
-#    brange = brange / 10**nrm
-#    barimg = numpy.resize(brange,(1000,1))
-#    pylab.imshow(barimg,aspect='auto',interpolation='nearest',origin='lower',
-#           vmin=brange[0],vmax=brange[-1],extent=(0.0,1.0,brange[0],brange[-1]),cmap=colmap)
-#    barwin.yaxis.tick_right()
-#    barwin.yaxis.set_label_position('right')
-#    barwin.yaxis.set_major_formatter(ticker.FormatStrFormatter('%.1f'))
-#    barwin.yaxis.set_major_locator(MaxNLocator(7))
-#    pylab.gca().yaxis.set_major_formatter(pylab.ScalarFormatter(useOffset=False))
-#    pylab.gca().set_autoscale_on(False)
-#    pylab.setp(pylab.gca(),xticklabels=[],xticks=[])
-#    pylab.ylabel('Residual (10$^%d$ e$^-$ s$^{-1}$)' % nrm)
-#    setp(barwin.get_yticklabels(), 'rotation', 90)
 
 # render plot
 

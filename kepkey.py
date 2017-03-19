@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 
 import kepmsg, kepio
-import pyfits, numpy
+import numpy
+from astropy.io import fits as pyfits
 
 # -----------------------------------------------------------
 # get keyword value
