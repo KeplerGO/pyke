@@ -1,27 +1,26 @@
-import pylab, numpy, pyfits, scipy, multiprocessing, itertools
+import pylab, numpy, scipy, multiprocessing, itertools
 from pylab import *
 from matplotlib import *
 from numpy import *
-from pyfits import *
+from astropy.io import fits as pyfits
 import kepio, kepmsg, kepkey, kepplot, kepfit, keparray, kepfunc
 import sys, time, re, math, glob
 from scipy import stats, interpolate, optimize, ndimage
 from scipy.optimize import fmin_powell
 from scipy.interpolate import RectBivariateSpline
-from scipy.stats import nanmean
 
 # -----------------------------------------------------------
 # core code
 
 def kepprfphot(infile,outroot,columns,rows,fluxes,border,background,focus,prfdir,ranges,
-               tolerance,ftolerance,qualflags,plt,clobber,verbose,logfile,status,cmdLine=False): 
+               tolerance,ftolerance,qualflags,plt,clobber,verbose,logfile,status,cmdLine=False):
 
 # input arguments
 
     status = 0
-    seterr(all="ignore") 
+    seterr(all="ignore")
 
-# log the call 
+# log the call
 
     hashline = '----------------------------------------------------------------------------'
     kepmsg.log(logfile,hashline,verbose)
@@ -73,7 +72,7 @@ def kepprfphot(infile,outroot,columns,rows,fluxes,border,background,focus,prfdir
         work = re.sub(';',',',work)
         nsrc = len(work.split(','))
 
-# construct inital guess vector for fit 
+# construct inital guess vector for fit
 
     if status == 0:
         guess = []
@@ -127,7 +126,7 @@ def kepprfphot(infile,outroot,columns,rows,fluxes,border,background,focus,prfdir
     for i in range(nsrc):
         outfile = '%s_%d.fits' % (outroot, i)
         if clobber: status = kepio.clobber(outfile,logfile,verbose)
-        if kepio.fileexists(outfile): 
+        if kepio.fileexists(outfile):
             message = 'ERROR -- KEPPRFPHOT: ' + outfile + ' exists. Use --clobber'
             status = kepmsg.err(logfile,message,verbose)
 
@@ -232,7 +231,7 @@ def kepprfphot(infile,outroot,columns,rows,fluxes,border,background,focus,prfdir
         cdelt2p = numpy.zeros((5),dtype='float32')
         for i in range(5):
             prfn[i], crpix1p[i], crpix2p[i], crval1p[i], crval2p[i], cdelt1p[i], cdelt2p[i], status \
-                = kepio.readPRFimage(prffile,i+1,logfile,verbose)    
+                = kepio.readPRFimage(prffile,i+1,logfile,verbose)
         PRFx = arange(0.5,shape(prfn[0])[1]+0.5)
         PRFy = arange(0.5,shape(prfn[0])[0]+0.5)
         PRFx = (PRFx - size(PRFx) / 2) * cdelt1p[0]
@@ -402,7 +401,7 @@ def kepprfphot(infile,outroot,columns,rows,fluxes,border,background,focus,prfdir
                 ans = anslist.transpose()
             except:
                 pass
-            
+
 # single processor version
 
     if status == 0 and not cmdLine:
@@ -448,7 +447,7 @@ def kepprfphot(infile,outroot,columns,rows,fluxes,border,background,focus,prfdir
             wx = ans[-3,:]; wy = ans[-2,:]; angle = ans[-1,:]
         else:
             wx = ones((na)); wy = ones((na)); angle = zeros((na))
-        
+
 # constuct model PRF in detector coordinates
 
     if status == 0:
@@ -479,7 +478,7 @@ def kepprfphot(infile,outroot,columns,rows,fluxes,border,background,focus,prfdir
                     n += 1
             PRFres = DATimg - PRFfit
             residual.append(numpy.nansum(PRFres) / npix)
-    
+
 # calculate the sum squared difference between data and model
 
             chi2.append(abs(numpy.nansum(numpy.square(DATimg - PRFfit) / PRFfit)))
@@ -525,7 +524,7 @@ def kepprfphot(infile,outroot,columns,rows,fluxes,border,background,focus,prfdir
         fa = angle
         rs = residual
         ch = chi2
-                
+
 # construct output primary extension
 
     if status == 0:
@@ -588,31 +587,31 @@ def kepprfphot(infile,outroot,columns,rows,fluxes,border,background,focus,prfdir
 
 # close input structure
 
-            status = kepio.closefits(struct,logfile,verbose)	    
+            status = kepio.closefits(struct,logfile,verbose)
 
 # clean up x-axis unit
 
     if status == 0:
 	barytime0 = float(int(t[0] / 100) * 100.0)
 	t -= barytime0
-        t = numpy.insert(t,[0],[t[0]]) 
+        t = numpy.insert(t,[0],[t[0]])
         t = numpy.append(t,[t[-1]])
         xlab = 'BJD $-$ %d' % barytime0
 
 # plot the light curves
 
     if status == 0:
-        bg = numpy.insert(bg,[0],[-1.0e10]) 
+        bg = numpy.insert(bg,[0],[-1.0e10])
         bg = numpy.append(bg,-1.0e10)
-        fx = numpy.insert(fx,[0],[fx[0]]) 
+        fx = numpy.insert(fx,[0],[fx[0]])
         fx = numpy.append(fx,fx[-1])
-        fy = numpy.insert(fy,[0],[fy[0]]) 
+        fy = numpy.insert(fy,[0],[fy[0]])
         fy = numpy.append(fy,fy[-1])
-        fa = numpy.insert(fa,[0],[fa[0]]) 
+        fa = numpy.insert(fa,[0],[fa[0]])
         fa = numpy.append(fa,fa[-1])
-        rs = numpy.insert(rs,[0],[-1.0e10]) 
+        rs = numpy.insert(rs,[0],[-1.0e10])
         rs = numpy.append(rs,-1.0e10)
-        ch = numpy.insert(ch,[0],[-1.0e10]) 
+        ch = numpy.insert(ch,[0],[-1.0e10])
         ch = numpy.append(ch,-1.0e10)
         for i in range(nsrc):
 
@@ -627,7 +626,7 @@ def kepprfphot(infile,outroot,columns,rows,fluxes,border,background,focus,prfdir
             xx = copy(dx[i])
             yy = copy(dy[i])
             ylab2 = 'offset (pixels)'
-            
+
 # data limits
 
             xmin = numpy.nanmin(t)
@@ -657,7 +656,7 @@ def kepprfphot(infile,outroot,columns,rows,fluxes,border,background,focus,prfdir
             yr6 = ymax6 - ymin6
             yr7 = ymax7 - ymin7
             yr8 = ymax8 - ymin8
-            fl[i] = numpy.insert(fl[i],[0],[0.0]) 
+            fl[i] = numpy.insert(fl[i],[0],[0.0])
             fl[i] = numpy.append(fl[i],0.0)
 
 # plot style
@@ -725,7 +724,7 @@ def kepprfphot(infile,outroot,columns,rows,fluxes,border,background,focus,prfdir
                 pylab.ylim(1.0e-10, ymax1 + yr1 * 0.01)
             else:
                 pylab.ylim(ymin1 - yr1 * 0.01, ymax1 + yr1 * 0.01)
-           
+
 # plot labels
 
 #            pylab.xlabel(xlab, {'color' : 'k'})
@@ -776,7 +775,7 @@ def kepprfphot(infile,outroot,columns,rows,fluxes,border,background,focus,prfdir
 
             pylab.xlim(xmin - xr * 0.01, xmax + xr * 0.01)
             pylab.ylim(ymin2 - yr2 * 0.03, ymax2 + yr2 * 0.03)
-           
+
 # plot labels
 
             ax1.set_ylabel('X-' + ylab2, color='k', fontsize=11)
@@ -812,7 +811,7 @@ def kepprfphot(infile,outroot,columns,rows,fluxes,border,background,focus,prfdir
 
             pylab.xlim(xmin - xr * 0.01, xmax + xr * 0.01)
             pylab.ylim(ymin3 - yr3 * 0.03, ymax3 + yr3 * 0.03)
-           
+
 # plot labels
 
             ax2.set_ylabel('Y-' + ylab2, color='k',fontsize=11)
@@ -857,10 +856,10 @@ def kepprfphot(infile,outroot,columns,rows,fluxes,border,background,focus,prfdir
 
                 pylab.xlim(xmin - xr * 0.01, xmax + xr * 0.01)
                 pylab.ylim(ymin4 - yr4 * 0.03, ymax4 + yr4 * 0.03)
-           
+
 # plot labels
 
-                ax1.set_ylabel('Background \n(e$^-$ s$^{-1}$ pix$^{-1}$)', 
+                ax1.set_ylabel('Background \n(e$^-$ s$^{-1}$ pix$^{-1}$)',
                                multialignment='center', color='k',fontsize=11)
 
 # make grid on plot
@@ -877,7 +876,7 @@ def kepprfphot(infile,outroot,columns,rows,fluxes,border,background,focus,prfdir
                 ax1 = pylab.axes(axs)
 
 # force tick labels to be absolute rather than relative
-                
+
                 pylab.gca().xaxis.set_major_formatter(pylab.ScalarFormatter(useOffset=False))
                 pylab.gca().yaxis.set_major_formatter(pylab.ScalarFormatter(useOffset=False))
                 pylab.setp(pylab.gca(),xticklabels=[])
@@ -920,10 +919,10 @@ def kepprfphot(infile,outroot,columns,rows,fluxes,border,background,focus,prfdir
 
                 pylab.xlim(xmin - xr * 0.01, xmax + xr * 0.01)
                 pylab.ylim(ymin5 - yr5 * 0.03, ymax5 + yr5 * 0.03)
-           
+
 # plot labels
 
-                ax1.set_ylabel('Pixel Scale\nFactor', 
+                ax1.set_ylabel('Pixel Scale\nFactor',
                                multialignment='center', color='k',fontsize=11)
 
 # Focus rotation - position second axes inside the plotting window
@@ -954,10 +953,10 @@ def kepprfphot(infile,outroot,columns,rows,fluxes,border,background,focus,prfdir
                 ax2.plot(ltime,ldata,color='#000080',linestyle='-',linewidth=1.0)
 
 # define plot y limits
-                
+
                 pylab.xlim(xmin - xr * 0.01, xmax + xr * 0.01)
                 pylab.ylim(ymin6 - yr6 * 0.03, ymax6 + yr6 * 0.03)
-           
+
 # plot labels
 
                 ax2.set_ylabel('Rotation (deg)', color='k',fontsize=11)
@@ -998,10 +997,10 @@ def kepprfphot(infile,outroot,columns,rows,fluxes,border,background,focus,prfdir
 
             pylab.xlim(xmin - xr * 0.01, xmax + xr * 0.01)
             pylab.ylim(ymin7 - yr7 * 0.03, ymax7 + yr7 * 0.03)
-           
+
 # plot labels
 
-            ax1.set_ylabel('Residual \n(e$^-$ s$^{-1}$)', 
+            ax1.set_ylabel('Residual \n(e$^-$ s$^{-1}$)',
                            multialignment='center', color='k',fontsize=11)
 
 # make grid on plot
@@ -1043,7 +1042,7 @@ def kepprfphot(infile,outroot,columns,rows,fluxes,border,background,focus,prfdir
 
             pylab.xlim(xmin - xr * 0.01, xmax + xr * 0.01)
             pylab.ylim(ymin8 - yr8 * 0.03, ymax8 + yr8 * 0.03)
-           
+
 # plot labels
 
             ax1.set_ylabel('$\chi^2$ (%d dof)' % (npix-len(guess)-1),color='k',fontsize=11)
@@ -1058,13 +1057,13 @@ def kepprfphot(infile,outroot,columns,rows,fluxes,border,background,focus,prfdir
             if status == 0:
                 pylab.savefig(outroot + '_' + str(i) + '.png')
             if status == 0 and plt:
-                if cmdLine: 
+                if cmdLine:
                     pylab.show(block=True)
-                else: 
+                else:
                     pylab.ion()
                     pylab.plot([])
                     pylab.ioff()
-	
+
 # stop time
 
     kepmsg.clock('\n\nKEPPRFPHOT ended at',logfile,verbose)
@@ -1101,7 +1100,7 @@ def PRFfits(args):
     elif args[14] and not args[15]:
         argm = (args[2],args[3],DATimg,DATerr,args[4],args[10],args[18],args[19])
         ans = fmin_powell(kepfunc.PRFwithFocus,args[11],args=argm,xtol=args[12],
-                          ftol=args[13],disp=False)                    
+                          ftol=args[13],disp=False)
     elif args[15] and not args[14]:
         argm = (args[2],args[3],DATimg,DATerr,args[4],args[5],args[6],args[7],args[10],args[18],args[19])
         ans = fmin_powell(kepfunc.PRFwithBackground,args[11],args=argm,xtol=args[12],
@@ -1128,7 +1127,7 @@ def PRFfits(args):
 
 if '--shell' in sys.argv:
     import argparse
-    
+
     parser = argparse.ArgumentParser(description='Fitting PRF model to Target Pixel time series')
     parser.add_argument('--shell', action='store_true', help='Are we running from the shell?')
 
@@ -1157,7 +1156,7 @@ if '--shell' in sys.argv:
                args.background,args.focus,args.prfdir,args.ranges,args.tolerance,
                args.ftolerance,args.qualflags,args.plot,args.clobber,args.verbose,
                args.logfile,args.status,cmdLine)
-    
+
 else:
     from pyraf import iraf
     parfile = iraf.osfn("kepler$kepprfphot.par")

@@ -1,4 +1,3 @@
-
 """
 Name: kepcotrend.py
 Written by: Tom Barclay
@@ -25,7 +24,7 @@ from matplotlib.cbook import is_numlike
 from scipy.optimize import leastsq
 from scipy.optimize import fmin as effmin
 from scipy.interpolate import interp1d
-import pyfits
+from astropy.io import fits as pyfits
 from numpy.linalg import lstsq, inv
 from numpy import interp as interpolat
 from numpy import *
@@ -35,7 +34,8 @@ import kepmsg, kepio, kepkey
 
 def cutBadData(cad,date,flux,err):
 	"""
-	this function finds cadences with bad data in and removes them returning only cadences which contain good data
+	this function finds cadences with bad data in and removes them
+        returning only cadences which contain good data
 	"""
 	date2 = date[logical_and(logical_and(isfinite(date),
 	isfinite(flux)),flux != 0.0)]
@@ -51,7 +51,8 @@ def cutBadData(cad,date,flux,err):
 
 def putInNans(bad_data,flux):
 	"""
-	Function finds the cadences where the data has been removed using cutBadData() and puts data back in. The flux data put back in is nan.
+	Function finds the cadences where the data has been removed using
+        cutBadData() and puts data back in. The flux data put back in is nan.
 	This function is used when writing data to a FITS files.
 	bad_data == True means the datapoint is good!!
 	"""
@@ -65,17 +66,10 @@ def putInNans(bad_data,flux):
 			newflux[i] = nan
 	return newflux
 
-# def get_pcomp_list_newformat(pcompdata,pcomplist,newcad):
-# 	pcomp = zeros((len(pcomplist),len(newcad)))
-# 	for i in range(len(array(pcomplist))):
-# 		j = int(array(pcomplist)[i])-1
-# 		dat = pcompdata[...,j+4]
-# 		pcomp[i] = dat[in1d(pcompdata[...,0],newcad)]
-# 	return pcomp
-
 def get_pcomp_list_newformat(bvdat,pcomplist,newcad,short,scinterp):
 	"""
-	Finds cotrending basis vectors which have been requested to be used by the user and adds them to an array.
+	Finds cotrending basis vectors which have been requested to be
+        used by the user and adds them to an array.
 	"""
 	status = False
 	pcomp = zeros((len(pcomplist),len(newcad)))
@@ -104,13 +98,8 @@ def get_pcomp_list_newformat(bvdat,pcomplist,newcad,short,scinterp):
 				upper = [logical_and(arange(p_len) > mid_pt,pcomp[i] == 0)]
 				pcomp[i][lower] = bv_data[0]
 				pcomp[i][upper] = bv_data[-1]
-
-
 		else:
 			pcomp[i] = dat[in1d(bvdat.field('CADENCENO'),newcad)]
-		#except NameError:
-		#	status = True
-		#	break
 	return pcomp,status
 
 def make_sc_lc(obs_cad,bv_cad,flux):
@@ -123,9 +112,6 @@ def make_sc_lc(obs_cad,bv_cad,flux):
 		newflux[i] = obs_cad[mask]
 	return newflux
 
-
-
-
 def near_intpl(xout,xin,yin):
 	"""
 	Interpolate the curve defined by (xin, yin) at points xout. The array
@@ -137,18 +123,18 @@ def near_intpl(xout,xin,yin):
 	:param xout: x values of output interpolated curve
 	:param method: interpolation method ('linear' | 'nearest')
 
-  	@:rtype: numpy array with interpolated curve
-  	"""
-  	lenxin = len(xin)
+	@:rtype: numpy array with interpolated curve
+	"""
+	lenxin = len(xin)
 
-  	i1 = searchsorted(xin, xout)
-  	i1[ i1==0 ] = 1
-  	i1[ i1==lenxin ] = lenxin-1
+	i1 = searchsorted(xin, xout)
+	i1[ i1==0 ] = 1
+	i1[ i1==lenxin ] = lenxin-1
 
-  	x0 = xin[i1-1]
-  	x1 = xin[i1]
-  	y0 = yin[i1-1]
-  	y1 = yin[i1]
+        x0 = xin[i1-1]
+	x1 = xin[i1]
+	y0 = yin[i1-1]
+	y1 = yin[i1]
 
 	return where(abs(xout - x0) < abs(xout - x1), y0, y1)
 
@@ -657,7 +643,7 @@ def kepcotrendsc(infile,outfile,bvfile,listbv,fitmethod,fitpower,iterate,sigma,m
 				lc_flux_o = table.field('ap_raw_flux') / 54.178 #convert to e-/s
 				lc_err_o = table.field('ap_raw_err') / 54.178 #convert to e-/s
 
-		elif version == 2:
+		elif version >= 2:
 			if str(instr[0].header['OBSMODE']) == 'long cadence':
 				#print 'Light curve was taken in Long Cadence mode!'
 
@@ -689,16 +675,6 @@ def kepcotrendsc(infile,outfile,bvfile,listbv,fitmethod,fitpower,iterate,sigma,m
 			lc_date_o = lc_date_o[lc_cad_o >= 11914]
 			lc_flux_o = lc_flux_o[lc_cad_o >= 11914]
 			lc_err_o = lc_err_o[lc_cad_o >= 11914]
-
-		# bvfilename = '%s/Q%s_%s_%s_map.txt' %(bvfile,quarter,module,output)
-		# if str(quarter) == str(5):
-		# 	bvdata = genfromtxt(bvfilename)
-		# elif str(quarter) == str(3) or str(quarter) == str(4):
-		# 	bvdata = genfromtxt(bvfilename,skip_header=22)
-		# elif str(quarter) == str(1):
-		# 	bvdata = genfromtxt(bvfilename,skip_header=10)
-		# else:
-		# 	bvdata = genfromtxt(bvfilename,skip_header=13)
 
 		if short and scinterp == 'None':
 			message = 'You cannot select None as the interpolation method because you are using short cadence data and therefore must use some form of interpolation. I reccommend nearest if you are unsure.'

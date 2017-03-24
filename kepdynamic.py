@@ -1,6 +1,5 @@
-
-import numpy, sys, time, pyfits, pylab, math, re
-from pyfits import *
+import numpy, sys, time, pylab, math, re
+from astropy.io import fits as pyfits
 from numpy import *
 from pylab import *
 from matplotlib import *
@@ -8,7 +7,7 @@ from math import *
 import kepio, kepmsg, kepkey, kepfit, kepstat, kepfourier, keplab
 
 def kepdynamic(infile,outfile,fcol,pmin,pmax,nfreq,deltat,nslice,
-          plot,plotscale,cmap,clobber,verbose,logfile,status,cmdLine=False): 
+          plot,plotscale,cmap,clobber,verbose,logfile,status,cmdLine=False):
 
 # startup parameters
 
@@ -21,9 +20,9 @@ def kepdynamic(infile,outfile,fcol,pmin,pmax,nfreq,deltat,nslice,
     lwidth = 1.0
     fcolor = '#ffff00'
     falpha = 0.2
-    numpy.seterr(all="ignore") 
+    numpy.seterr(all="ignore")
 
-# log the call 
+# log the call
 
     hashline = '----------------------------------------------------------------------------'
     kepmsg.log(logfile,hashline,verbose)
@@ -68,7 +67,7 @@ def kepdynamic(infile,outfile,fcol,pmin,pmax,nfreq,deltat,nslice,
 # clobber output file
 
     if clobber: status = kepio.clobber(outfile,logfile,verbose)
-    if kepio.fileexists(outfile): 
+    if kepio.fileexists(outfile):
         message = 'ERROR -- KEPDYNAMIC: ' + outfile + ' exists. Use clobber'
         status = kepmsg.err(logfile,message,verbose)
 
@@ -110,7 +109,7 @@ def kepdynamic(infile,outfile,fcol,pmin,pmax,nfreq,deltat,nslice,
     if status == 0:
 	    incols = [barytime, signal]
 	    outcols = kepstat.removeinfinlc(signal, incols)
-	    barytime = outcols[0] 
+	    barytime = outcols[0]
 	    signal = outcols[1]
 
 # period to frequency conversion
@@ -164,7 +163,7 @@ def kepdynamic(infile,outfile,fcol,pmin,pmax,nfreq,deltat,nslice,
 
     if status == 0:
         instr.append(ImageHDU())
-        instr[-1].data = dynam.transpose() 
+        instr[-1].data = dynam.transpose()
         instr[-1].header.update('EXTNAME','DYNAMIC FT','extension name')
         instr[-1].header.update('WCSAXES',2,'number of WCS axes')
         instr[-1].header.update('CRPIX1',0.5,'reference pixel along axis 1')
@@ -177,7 +176,7 @@ def kepdynamic(infile,outfile,fcol,pmin,pmax,nfreq,deltat,nslice,
         instr[-1].header.update('CTYPE1','BJD','data type of dimension 1')
         instr[-1].header.update('CTYPE2','FREQUENCY','data type of dimension 2')
         instr.writeto(outfile)
-    
+
 # history keyword in output file
 
     if status == 0:
@@ -186,7 +185,7 @@ def kepdynamic(infile,outfile,fcol,pmin,pmax,nfreq,deltat,nslice,
 # close input file
 
     if status == 0:
-	    status = kepio.closefits(instr,logfile,verbose)	    
+	    status = kepio.closefits(instr,logfile,verbose)
 
 # clean up x-axis unit
 
@@ -237,7 +236,7 @@ def kepdynamic(infile,outfile,fcol,pmin,pmax,nfreq,deltat,nslice,
         pylab.axes([0.08,0.113,0.91,0.86])
         dynam = dynam.transpose()
         pylab.imshow(dynam,origin='lower',aspect='auto',cmap=cmap,vmin=zmin,vmax=zmax,
-                     extent=[barytime[0],barytime[-1],fmin,fmax],interpolation='bilinear')            
+                     extent=[barytime[0],barytime[-1],fmin,fmax],interpolation='bilinear')
         xlabel(xlab, {'color' : 'k'})
         ylabel(r'Frequency (d$^{-1}$)', {'color' : 'k'})
         grid()
@@ -245,14 +244,13 @@ def kepdynamic(infile,outfile,fcol,pmin,pmax,nfreq,deltat,nslice,
 
 # render plot
 
-        if cmdLine: 
+        if cmdLine:
             pylab.show()
-        else: 
+        else:
             pylab.ion()
             pylab.plot([])
             pylab.ioff()
-	
-   
+
     return status
 
 ## end time
@@ -266,7 +264,7 @@ def kepdynamic(infile,outfile,fcol,pmin,pmax,nfreq,deltat,nslice,
 # main
 if '--shell' in sys.argv:
     import argparse
-    
+
     parser = argparse.ArgumentParser(description='Construct a dynamic (time-dependent) power spectrum from Kepler time series data')
     parser.add_argument('--shell', action='store_true', help='Are we running from the shell?')
 
@@ -294,12 +292,12 @@ if '--shell' in sys.argv:
 
 
     args = parser.parse_args()
-    
+
     cmdLine=True
 
     kepynamic(args.infile, args.outfile, args.fcol, args.pmin, args.pmax, args.nfreq, args.deltat, args.nslice,
           args.plot,args.plotscale,args.cmap,args.clobber,args.verbose,args.logfile,args.status,cmdLine)
-    
+
 
 else:
     from pyraf import iraf

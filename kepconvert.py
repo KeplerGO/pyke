@@ -1,6 +1,5 @@
-
-import numpy, sys, time, pyfits, re
-from pyfits import *
+import numpy, sys, time, re
+from astropy.io import fits as pyfits
 from numpy import *
 import kepio, kepmsg, kepkey
 
@@ -8,13 +7,13 @@ __svnid__ = "$Id: kepconvert.py 6165 2014-03-26 21:16:27Z mstill $"
 __url__ = "$URL: svn+ssh://mstill@murzim.amn.nasa.gov/data-repo/trunk/data/flight/go/PyKE/kepler/kepconvert.py $"
 
 
-def kepconvert(infile,outfile,conversion,columns,baddata,clobber,verbose,logfile,status): 
+def kepconvert(infile,outfile,conversion,columns,baddata,clobber,verbose,logfile,status):
 
 # startup parameters
 
     status = 0
 
-# log the call 
+# log the call
 
     hashline = '----------------------------------------------------------------------------'
     kepmsg.log(logfile,hashline,verbose)
@@ -34,7 +33,7 @@ def kepconvert(infile,outfile,conversion,columns,baddata,clobber,verbose,logfile
     call += 'verbose='+chatter+' '
     call += 'logfile='+logfile
     kepmsg.log(logfile,call+'\n',verbose)
-    
+
 # start time
 
     kepmsg.clock('KEPCONVERT started at',logfile,verbose)

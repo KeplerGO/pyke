@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import pyfits
+from astropy.io import fits as pyfits
 import kepio
 import kepmsg
 import sys

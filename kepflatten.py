@@ -1,7 +1,7 @@
-import numpy, scipy, sys, time, pyfits, pylab, math, re
+import numpy, scipy, sys, time, pylab, math, re
 from scipy import stats
-from pyfits import *
 from pylab import *
+from astropy.io import fits as pyfits
 from matplotlib import *
 from math import *
 import matplotlib.pyplot as plt

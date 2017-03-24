@@ -13,11 +13,11 @@ import kepmsg
 # method -- the method of interpolation, options are:
 #       'linear', 'nearest', 'zero', 'slinear', 'quadratic', 'cubic' or
 #	 an integer (i), which interpolates using a spline of order (i)
-	
+
 # interpm -- method of performing the integration
-#      	 can either be 'quad' or 'romberg'
-	
-def rebin(date,flux,nbins=None,binwidth=None,ownbins=None,method='linear',interpm='quad',logfile,verbose):
+#	 can either be 'quad' or 'romberg'
+
+def rebin(date,flux,logfile,verbose,nbins=None,binwidth=None,ownbins=None,method='linear',interpm='quad'):
 
     status = 0
     bflux = []
@@ -36,12 +36,12 @@ def rebin(date,flux,nbins=None,binwidth=None,ownbins=None,method='linear',interp
             if binMethod is None:
                 i += 1
         if i != 2:
-        txt = 'ERROR -- KEPREBIN.REBIN: Supply one and only one of nbin, binwidth, ownbins'
-        status = kepmsg.err(logfile,txt,verbose)
+            txt = 'ERROR -- KEPREBIN.REBIN: Supply one and only one of nbin, binwidth, ownbins'
+            status = kepmsg.err(logfile,txt,verbose)
 
 # catch bad choice of interpolation method
-	
-    if status == 0 and not method in [i for i in ['linear','nearest', 'zero', 'slinear', 
+
+    if status == 0 and not method in [i for i in ['linear','nearest', 'zero', 'slinear',
                                                   'quadratic' or 'cubic']]:
         try:
             testcase =  "Integer %d" % int(method)
@@ -51,20 +51,20 @@ def rebin(date,flux,nbins=None,binwidth=None,ownbins=None,method='linear',interp
         status = kepmsg.err(logfile,txt,verbose)
 
 # catch bad choice of integration method
-	
+
     if status == 0 and not interpm in [i for i in ['quad','romberg']]:
         txt = 'ERROR -- KEPREBIN.REBIN: Integration method must either be quad or romberg'
         status = kepmsg.err(logfile,txt,verbose)
-		
+
 # perform the interpolation on the data
 
     if status == 0:
         try:
             intpl = scipy.interpolate.interp1d(date,flux,kind=method)
         except:
-            txt = 'ERROR -- KEPREBIN.REBIN: Cannot define interpolation function with scipy.interpolate.interp1d')
+            txt = 'ERROR -- KEPREBIN.REBIN: Cannot define interpolation function with scipy.interpolate.interp1d'
             status = kepmsg.err(logfile,txt,verbose)
-	
+
 # calculate bin bounds, should be of length nbins+1
 
     if status == 0:

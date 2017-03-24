@@ -1,5 +1,5 @@
-
-import pylab, numpy, pyfits
+import pylab, numpy
+from astropy.io import fits as pyfits
 from pylab import *
 from matplotlib import *
 from numpy import *
@@ -20,7 +20,7 @@ pkepmag = None; pkepid = None; pra = None; pdec = None; cmdLine = False
 # core code
 
 def kepffi(ffifile,kepid,ra,dec,aperfile,imin,imax,iscale,cmap,npix,
-            verbose,logfile,status,cmdLine=False): 
+            verbose,logfile,status,cmdLine=False):
 
     global pimg, zscale, zmin, zmax, xmin, xmax, ymin, ymax, quarter
     global kepmag, skygroup, season, channel

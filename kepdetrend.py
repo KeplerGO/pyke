@@ -1,6 +1,5 @@
-
-import numpy, sys, time, pyfits, pylab, math, re
-from pyfits import *
+import numpy, sys, time, pylab, math, re
+from astropy.io import fits as pyfits
 from pylab import *
 from matplotlib import *
 from math import *
@@ -9,7 +8,7 @@ from numpy import logical_and
 
 def kepdetrend(infile,outfile,datacol,errcol,ranges1,npoly1,nsig1,niter1,
                ranges2,npoly2,nsig2,niter2,popnans,plot,clobber,verbose,logfile,
-               status,cmdLine=False): 
+               status,cmdLine=False):
 
 # startup parameters
 
@@ -23,8 +22,7 @@ def kepdetrend(infile,outfile,datacol,errcol,ranges1,npoly1,nsig1,niter1,
     fcolor = '#ffff00'
     falpha = 0.2
 
-# log the call 
-          
+# log the call
 
     hashline = '----------------------------------------------------------------------------'
     kepmsg.log(logfile,hashline,verbose)

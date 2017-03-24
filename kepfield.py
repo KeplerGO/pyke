@@ -1,9 +1,9 @@
-import pylab, numpy, pyfits, scipy
+import pylab, numpy, scipy
 from pylab import *
 from matplotlib import *
 from numpy import *
 from scipy import *
-from pyfits import *
+from astropy.io import fits as pyfits
 import kepio, kepmsg, kepkey, kepplot, kepfit, keparray, kepstat
 import sys, time, re, math, glob, urllib
 

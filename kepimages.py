@@ -1,6 +1,6 @@
-import time, numpy, sys, pyfits
+import time, numpy, sys
 from numpy import array
-from pyfits import *
+from astropy.io import fits as pyfits
 import kepio, kepmsg, kepkey, kepstat
 
 def kepimages(infile,outfix,imtype,ranges,clobber,verbose,logfile,status): 

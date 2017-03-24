@@ -1,12 +1,11 @@
-
-import numpy, sys, time, pyfits, pylab, math, re
-from pyfits import *
+import numpy, sys, time, pylab, math, re
+from astropy.io import fits as pyfits
 from pylab import *
 from matplotlib import *
 from math import *
 import kepio, kepmsg, kepkey, kepstat, kepfourier
 
-def kepclip(infile,outfile,ranges,plot,plotcol,clobber,verbose,logfile,status,cmdLine=False): 
+def kepclip(infile,outfile,ranges,plot,plotcol,clobber,verbose,logfile,status,cmdLine=False):
 
 # startup parameters
 
@@ -20,7 +19,7 @@ def kepclip(infile,outfile,ranges,plot,plotcol,clobber,verbose,logfile,status,cm
     fcolor = '#ffff00'
     falpha = 0.2
 
-# log the call 
+# log the call
 
     hashline = '----------------------------------------------------------------------------'
     kepmsg.log(logfile,hashline,verbose)
@@ -52,7 +51,7 @@ def kepclip(infile,outfile,ranges,plot,plotcol,clobber,verbose,logfile,status,cm
 # clobber output file
 
     if clobber: status = kepio.clobber(outfile,logfile,verbose)
-    if kepio.fileexists(outfile): 
+    if kepio.fileexists(outfile):
 	    message = 'ERROR -- KEPCLIP: ' + outfile + ' exists. Use --clobber'
 	    status = kepmsg.err(logfile,message,verbose)
 
@@ -125,7 +124,7 @@ def kepclip(infile,outfile,ranges,plot,plotcol,clobber,verbose,logfile,status,cm
         comment = 'NaN cadences removed from data'
         status = kepkey.new('NANCLEAN',True,comment,instr[1],outfile,logfile,verbose)
         instr.writeto(outfile)
-    
+
 # clean up x-axis unit
 
     if status == 0:
@@ -205,9 +204,9 @@ def kepclip(infile,outfile,ranges,plot,plotcol,clobber,verbose,logfile,status,cm
 
 # plot fill data
 
-        barytime = insert(barytime,[0],[barytime[0]]) 
+        barytime = insert(barytime,[0],[barytime[0]])
         barytime = append(barytime,[barytime[-1]])
-        flux = insert(flux,[0],[0.0]) 
+        flux = insert(flux,[0],[0.0])
         flux = append(flux,[0.0])
 	fill(barytime,flux,fc=fcolor,linewidth=0.0,alpha=falpha)
 	xlim(xmin-xr*0.01,xmax+xr*0.01)
@@ -222,17 +221,17 @@ def kepclip(infile,outfile,ranges,plot,plotcol,clobber,verbose,logfile,status,cm
 # render plot
 
     if status == 0 and plot:
-        if cmdLine: 
+        if cmdLine:
             pylab.show()
-        else: 
+        else:
             pylab.ion()
             pylab.plot([])
             pylab.ioff()
-	
+
 # close input file
 
     if status == 0:
-        status = kepio.closefits(instr,logfile,verbose)	    
+        status = kepio.closefits(instr,logfile,verbose)
 
 # end time
 
@@ -245,7 +244,7 @@ def kepclip(infile,outfile,ranges,plot,plotcol,clobber,verbose,logfile,status,cm
 # main
 if '--shell' in sys.argv:
     import argparse
-    
+
     parser = argparse.ArgumentParser(description='Remove unwanted time ranges from Kepler time series data')
     parser.add_argument('--shell', action='store_true', help='Are we running from the shell?')
 
@@ -253,7 +252,7 @@ if '--shell' in sys.argv:
     parser.add_argument('outfile', help='Name of FITS file to output', type=str)
 
     parser.add_argument('ranges', help='List of time domain ranges to be excluded', type=str)
-    
+
     parser.add_argument('--plot', action='store_true', help='Plot result?')
     parser.add_argument('--plotcol', '-p',help='Data column to plot', default='SAP_FLUX', dest='plotcol', type=str)
 
@@ -264,12 +263,10 @@ if '--shell' in sys.argv:
 
 
     args = parser.parse_args()
-    
+
     cmdLine = True
 
-    kepclip(args.infile, args.outfile, args.ranges, args.plot, args.plotcol, args.clobber, args.verbose, args.logfile, 
-        args.status,cmdLine)
-    
+    kepclip(args.infile, args.outfile, args.ranges, args.plot, args.plotcol, args.clobber, args.verbose, args.logfile, args.status,cmdLine)
 
 else:
     from pyraf import iraf

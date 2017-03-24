@@ -1,4 +1,5 @@
-import numpy, scipy, sys, time, pyfits, pylab, copy, math
+import numpy, scipy, sys, time, pylab, copy, math
+from astropy.io import fits as pyfits
 from pylab import *
 from matplotlib import *
 import kepio, kepmsg, kepstat, kepkey

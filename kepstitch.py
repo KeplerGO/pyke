@@ -1,5 +1,5 @@
-
-import numpy, sys, time, pyfits
+import numpy, sys, time
+from astropy.io import fits as pyfits
 import kepio, kepmsg, kepkey, kepstat
 
 def kepstitch(infiles,outfile,clobber,verbose,logfile,status): 

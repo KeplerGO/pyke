@@ -4,7 +4,7 @@ import sys
 sys.path.append('/usr/stsci/kepler/' )
 import kepio, kepmsg, kepkey
 
-import pyfits
+from astropy.io import fits as pyfits
 import pylab as plt
 from scipy.interpolate import interp1d
 from scipy import integrate
@@ -14,56 +14,56 @@ def bin_funct(date,flux,nbins=None,binwidth=None,ownbins=None,method='linear',
 	interpm='quad'):
 	"""
 	A function to bin light curve data
-	
-	Arguements:
-	date -- the array containing the time the observations were made
+
+        Arguements:
+        date -- the array containing the time the observations were made
 	flux -- the flux values corresponding to the date array
-	
+
 	flux and date must be the same length and should have been cleaned of
 	nan values
-	
-	nbin -- if specifying the number of bins then give the number here
-	binwidth -- the width of each bin
-	ownbins -- an array which has been read from a user supplied file
-	
+
+        nbin -- if specifying the number of bins then give the number here
+        binwidth -- the width of each bin
+        ownbins -- an array which has been read from a user supplied file
+
 	only ONE of nbin, binwidth and ownbins should be defined
 	No bin can be larger than the largest gap in data <- should fix
-	
+
 	method -- the method of interpolation, options are:
 	'linear', 'nearest', 'zero', 'slinear', 'quadratic' or 'cubic'
 	or
 	an integer (i), which interpolates using a spline of order (i)
-	
+
 	interpm -- method of performing the integration
 	can either be 'quad' or 'romberg'
 	"""
-	
+
 	# Try to catch any bad values.
 	if n.shape(date) != n.shape(flux):
 		raise IndexError('date and flux arrays should be the same length')
-	
+
 	i = 0
 	for binMethod in [nbins,binwidth,ownbins]:
 		if binMethod is None:
 			i += 1
 	if i != 2:
 		raise TypeError('Supply one and only one of nbin, binwidth, ownbins')
-	
-	if not method in [i for i in ['linear','nearest', 'zero', 'slinear', 
-	'quadratic' or 'cubic']]:
+
+	if not method in [i for i in ['linear','nearest', 'zero', 'slinear',
+	                              'quadratic' or 'cubic']]:
 		try:
 			testcase =  "Integer %d" % int(method)
 		except ValueError:
 			raise ValueError("method needs to be one of: 'linear', 'nearest', 'zero', 'slinear', 'quadratic' or 'cubic'or an integer (i), which interpolates using a  spline of order (i)")
-	
+
 	if not interpm in [i for i in ['quad','romberg']]:
 		raise ValueError("Integration method must either be 'quad' or 'romberg'")
-	
 
-	
+
+
 	#perform the interpolation on the data
 	intpl = interp1d(date,flux,kind=method)
-	
+
 	#caculate bin bounds using the correct method, should be of length nbins+1
 	if binwidth is not None:
 		bounds = n.arange(date[0],date[-1]+1e-10,binwidth)
@@ -77,21 +77,21 @@ def bin_funct(date,flux,nbins=None,binwidth=None,ownbins=None,method='linear',
 		bdate = n.zeros(len(bounds)-1)
 		for i in range(len(bdate)):
 			bdate[i] = bounds[i]+(0.5*(bounds[i+1] - bounds[i]))
-	
-	
+
+
 	minbin = []
 	for i in range(1,len(bounds)):
 		minbin.append(bounds[i] - bounds[i-1])
-	
+
 	mincad = []
 	for i in range(1,len(date)):
 		mincad.append(date[i] - date[i-1])
 
 #	if min(minbin) < max(mincad):
 #		raise ValueError('Smallest bin must be larger than largest gap between cadences')
-	
+
 	bflux =[]
-	
+
 	#Iterate over the bins starting with bounds[1]
 	for i in range(1,len(bounds)):
 		#Initialise variables that need to be reet after each iteration
@@ -101,7 +101,7 @@ def bin_funct(date,flux,nbins=None,binwidth=None,ownbins=None,method='linear',
 		extrabitLow = 0.
 		eb1 = None
 		eb2 = None
-		
+
 		#Iterate over the length of the flux array
 		for j in range(len(flux)):
 			#Catch all date bins within the bounds of the bin
@@ -111,24 +111,24 @@ def bin_funct(date,flux,nbins=None,binwidth=None,ownbins=None,method='linear',
 		try:
 			tmin = min(t)
 			tmax = max(t)
-		
+
 			#We now have to deal with the bits either side of date[tmin]
 			#and date[tmax]
-		
+
 		#First the bit between date[tmax] and bounds[i]
 			if bounds[i] > date[tmax]+1e-6:
 				if interpm == 'quad':
 					extrabitHigh = integrate.quad(intpl,date[tmax],bounds[i])[0]
 				elif interpm == 'romberg':
 					extrabitHigh = integrate.romberg(intpl,date[tmax],bounds[i])
-					
+
 			#Now the bit between bound[i-1] and t[min]
 			if bounds[i-1] < date[tmin]-1e-6:
 				if interpm == 'quad':
 					extrabitLow = integrate.quad(intpl,bounds[i-1],date[tmin])[0]
 				elif interpm == 'romberg':
 					extrabitLow = integrate.romberg(intpl,bounds[i-1],date[tmin])
-					
+
 			#Scale the extrabits as if they were the size of a full bin
 			#Catch error if there is no extrabit
 			try:
@@ -136,22 +136,18 @@ def bin_funct(date,flux,nbins=None,binwidth=None,ownbins=None,method='linear',
 				bin.append(eb1)
 			except ZeroDivisionError:
 				pass
-			
 			try:
 				eb2 = (extrabitLow/(float(date[tmin]-bounds[i-1])))
 				bin.append(eb2)
 			except ZeroDivisionError:
 				pass
-		
 		except ValueError:
 			if interpm == 'quad':
 				totbin = integrate.quad(intpl,bounds[i-1],bounds[i])[0]
 			elif interpm == 'romberg':
 				totbin =  integrate.romberg(intpl,bounds[i-1],bounds[i])
-			
 			eb = (totbin/(float(bounds[i]-bounds[i-1])))
 			bin.append(eb)
-		
 		binflux = n.mean(bin)
 		bflux.append(binflux)
 	return bdate,bflux
@@ -186,24 +182,9 @@ def do_plot(date,flux,status=0):
 		status = 1
 
 	if status == 0:
-#		plt.figure(figsize=[12,5])
 		plt.clf()
-#	plt.axes([0.2,0.2,0.94,0.88])
-#	ltime = [date[0]]; ldata = [flux[0]]
-#	for i in range(1,len(flux)):
-#            if (date[i-1] > date[i] - 0.025):
-#                ltime.append(date[i])
-#                ldata.append(flux[i])
-#            else:
-#                ltime = n.array(ltime, dtype='float64')
-#                ldata = n.array(ldata, dtype='float64')
-#                plt.plot(ltime,ldata,color='#0000ff',linestyle='-'
-#                	,linewidth=1.0)
-#                ltime = []; ldata = []
-#	ltime = n.array(ltime, dtype='float64')
-#	ldata = n.array(ldata, dtype='float64')
 
-	plt.plot(date,flux,color='#0000ff',linestyle='-',linewidth=1.0)
+        plt.plot(date,flux,color='#0000ff',linestyle='-',linewidth=1.0)
 	date = n.insert(date,[0],[date[0]]) 
 	date = n.append(date,[date[-1]])
 	flux = n.insert(flux,[0],[0.0]) 
@@ -265,16 +246,13 @@ def kepbin(infile,outfile,fluxcol,do_nbin,nbins,do_binwidth,binwidth,
 
 	# test log file
 	logfile = kepmsg.test(logfile)
-    
 	# clobber output file
 	if clobber:
 		status = kepio.clobber(outfile,logfile,verbose)
-	if kepio.fileexists(outfile): 
+	if kepio.fileexists(outfile):
 		message = 'ERROR -- KEPCLIP: ' + outfile + ' exists. Use --clobber'
 		status = kepmsg.err(logfile,message,verbose)
 
-
-	
 	# open input file
 	if status == 0:
 		instr, status = kepio.openfits(infile,'readonly',logfile,verbose)
@@ -292,12 +270,10 @@ def kepbin(infile,outfile,fluxcol,do_nbin,nbins,do_binwidth,binwidth,
 	# read time and flux columns
 	date = table.field('barytime')
 	flux = table.field(fluxcol)
-	
-	
 	#cut out infinites and zero flux columns
 	date,flux = cutBadData(date,flux)
-	
-	if do_nbin:
+
+        if do_nbin:
 		bdate,bflux = bin_funct(date,flux,nbins=nbins
 			,method=method,interpm=interpm)
 	elif do_binwidth:
@@ -312,10 +288,8 @@ def kepbin(infile,outfile,fluxcol,do_nbin,nbins,do_binwidth,binwidth,
 		ownbins = n.array(ownbins)
 		bdate,bflux = bin_funct(date,flux,ownbins=ownbins
 			,method=method,interpm=interpm)
-	
 	if plot:
 		do_plot(bdate,bflux)
-		
 	if status == 0:
 		col1 = pyfits.Column(name='bdate',format='E',unit='day',array=bdate)
 		col2 = pyfits.Column(name='bflux',format='E',unit='e-/cadence',array=bflux)
@@ -323,14 +297,12 @@ def kepbin(infile,outfile,fluxcol,do_nbin,nbins,do_binwidth,binwidth,
 		instr.append(pyfits.new_table(cols))
 		instr[-1].header.update('EXTNAME','BINNED DATA','extension name')
 		instr.writeto(outfile)
-    
-	
 	# close input file
 	if status == 0:
-		status = kepio.closefits(instr,logfile,verbose)	    
+		status = kepio.closefits(instr,logfile,verbose)
 
 	# end time
-	if (status == 0):
+	if status == 0:
 		message = 'KEPBIN completed at'
 	else:
 		message = '\nKEPBIN aborted at'

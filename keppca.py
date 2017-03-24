@@ -1,6 +1,6 @@
 import sys, re
-import numpy, pyfits, scipy, pylab
-from pyfits import *
+import numpy, scipy, pylab
+from astropy.io import fits as pyfits
 from numpy import *
 from pylab import *
 from matplotlib import *

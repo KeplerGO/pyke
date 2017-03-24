@@ -1,8 +1,7 @@
-
-import numpy, scipy, sys, time, pyfits, pylab
+import numpy, scipy, sys, time, pylab
 from numpy import *
 from scipy import stats
-from pyfits import *
+from astropy.io import fits as pyfits
 from pylab import *
 from matplotlib import *
 import kepio, kepmsg, kepkey, kepstat, kepfit
@@ -10,7 +9,7 @@ import kepio, kepmsg, kepkey, kepstat, kepfit
 # global variables
 
 def kepfold(infile,outfile,period,phasezero,bindata,binmethod,threshold,niter,nbins,
-            rejqual,plottype,plotlab,clobber,verbose,logfile,status,cmdLine=False): 
+            rejqual,plottype,plotlab,clobber,verbose,logfile,status,cmdLine=False):
 
 # startup parameters
 
@@ -18,7 +17,7 @@ def kepfold(infile,outfile,period,phasezero,bindata,binmethod,threshold,niter,nb
     labelsize = 32; ticksize = 18; xsize = 18; ysize = 10
     lcolor = '#0000ff'; lwidth = 2.0; fcolor = '#ffff00'; falpha = 0.2
 
-# log the call 
+# log the call
 
     hashline = '----------------------------------------------------------------------------'
     kepmsg.log(logfile,hashline,verbose)
@@ -59,7 +58,7 @@ def kepfold(infile,outfile,period,phasezero,bindata,binmethod,threshold,niter,nb
 # clobber output file
 
     if clobber: status = kepio.clobber(outfile,logfile,verbose)
-    if kepio.fileexists(outfile): 
+    if kepio.fileexists(outfile):
         message = 'ERROR -- KEPFOLD: ' + outfile + ' exists. Use --clobber'
         status = kepmsg.err(logfile,message,verbose)
 
@@ -209,7 +208,7 @@ def kepfold(infile,outfile,period,phasezero,bindata,binmethod,threshold,niter,nb
 
     if status == 0:
         ptuple = []
-        phase3 = []; 
+        phase3 = [];
         sap3 = []; saperr3 = []
         pdc3 = []; pdcerr3 = []
         cbv3 = []; cbverr3 = []
@@ -284,22 +283,22 @@ def kepfold(infile,outfile,period,phasezero,bindata,binmethod,threshold,niter,nb
                         deterr4 = append(deterr4,kepstat.mean_err(work8))
                     else:
                         coeffs, errors, covar, iiter, sigma, chi2, dof, fit, plotx, ploty, status = \
-                            kepfit.lsqclip('poly0',[scipy.stats.nanmean(work1)],arange(0.0,float(len(work1)),1.0),work1,work2,
+                            kepfit.lsqclip('poly0',[nanmean(work1)],arange(0.0,float(len(work1)),1.0),work1,work2,
                                            threshold,threshold,niter,logfile,False)
                         sap4 = append(sap4,coeffs[0])
                         saperr4 = append(saperr4,kepstat.mean_err(work2))
                         coeffs, errors, covar, iiter, sigma, chi2, dof, fit, plotx, ploty, status = \
-                            kepfit.lsqclip('poly0',[scipy.stats.nanmean(work3)],arange(0.0,float(len(work3)),1.0),work3,work4,
+                            kepfit.lsqclip('poly0',[nanmean(work3)],arange(0.0,float(len(work3)),1.0),work3,work4,
                                            threshold,threshold,niter,logfile,False)
                         pdc4 = append(pdc4,coeffs[0])
                         pdcerr4 = append(pdcerr4,kepstat.mean_err(work4))
                         coeffs, errors, covar, iiter, sigma, chi2, dof, fit, plotx, ploty, status = \
-                            kepfit.lsqclip('poly0',[scipy.stats.nanmean(work5)],arange(0.0,float(len(work5)),1.0),work5,work6,
+                            kepfit.lsqclip('poly0',[nanmean(work5)],arange(0.0,float(len(work5)),1.0),work5,work6,
                                            threshold,threshold,niter,logfile,False)
                         cbv4 = append(cbv4,coeffs[0])
                         cbverr4 = append(cbverr4,kepstat.mean_err(work6))
                         coeffs, errors, covar, iiter, sigma, chi2, dof, fit, plotx, ploty, status = \
-                            kepfit.lsqclip('poly0',[scipy.stats.nanmean(work7)],arange(0.0,float(len(work7)),1.0),work7,work8,
+                            kepfit.lsqclip('poly0',[nanmean(work7)],arange(0.0,float(len(work7)),1.0),work7,work8,
                                            threshold,threshold,niter,logfile,False)
                         det4 = append(det4,coeffs[0])
                         deterr4 = append(deterr4,kepstat.mean_err(work8))
@@ -379,7 +378,7 @@ def kepfold(infile,outfile,period,phasezero,bindata,binmethod,threshold,niter,nb
         if binmethod =='sigclip':
             instr[-1].header.update('THRSHOLD',threshold,'sigma-clipping threshold [sigma]')
             instr[-1].header.update('NITER',niter,'max number of sigma-clipping iterations')
-    
+
 # history keyword in output file
 
     if status == 0:
@@ -402,13 +401,13 @@ def kepfold(infile,outfile,period,phasezero,bindata,binmethod,threshold,niter,nb
             if plottype == 'det':
                 work = det4
             for i in range(len(phase4)):
-                if (phase4[i] > 0.5): 
+                if (phase4[i] > 0.5):
                     ptime2 = append(ptime2,phase4[i] - 1.0)
                     pout2 = append(pout2,work[i])
             ptime2 = append(ptime2,phase4)
             pout2 = append(pout2,work)
             for i in range(len(phase4)):
-                if (phase4[i] <= 0.5): 
+                if (phase4[i] <= 0.5):
                     ptime2 = append(ptime2,phase4[i] + 1.0)
                     pout2 = append(pout2,work[i])
         work = sap3
@@ -419,13 +418,13 @@ def kepfold(infile,outfile,period,phasezero,bindata,binmethod,threshold,niter,nb
         if plottype == 'det':
             work = det3
         for i in range(len(phase3)):
-            if (phase3[i] > 0.5): 
+            if (phase3[i] > 0.5):
                 ptime1 = append(ptime1,phase3[i] - 1.0)
                 pout1 = append(pout1,work[i])
         ptime1 = append(ptime1,phase3)
         pout1 = append(pout1,work)
         for i in range(len(phase3)):
-            if (phase3[i] <= 0.5): 
+            if (phase3[i] <= 0.5):
                 ptime1 = append(ptime1,phase3[i] + 1.0)
                 pout1 = append(pout1,work[i])
     xlab = 'Orbital Phase ($\phi$)'
@@ -452,16 +451,16 @@ def kepfold(infile,outfile,period,phasezero,bindata,binmethod,threshold,niter,nb
         ymax = pout1[isfinite(pout1)].max()
         xr = xmax - xmin
         yr = ymax - ymin
-        ptime1 = insert(ptime1,[0],[ptime1[0]]) 
+        ptime1 = insert(ptime1,[0],[ptime1[0]])
         ptime1 = append(ptime1,[ptime1[-1]])
-        pout1 = insert(pout1,[0],[0.0]) 
+        pout1 = insert(pout1,[0],[0.0])
         pout1 = append(pout1,0.0)
         if bindata:
-            ptime2 = insert(ptime2,[0],ptime2[0] - 1.0 / nbins) 
-            ptime2 = insert(ptime2,[0],ptime2[0]) 
+            ptime2 = insert(ptime2,[0],ptime2[0] - 1.0 / nbins)
+            ptime2 = insert(ptime2,[0],ptime2[0])
             ptime2 = append(ptime2,[ptime2[-1] + 1.0 / nbins, ptime2[-1] + 1.0 / nbins])
-            pout2 = insert(pout2,[0],[pout2[-1]]) 
-            pout2 = insert(pout2,[0],[0.0]) 
+            pout2 = insert(pout2,[0],[pout2[-1]])
+            pout2 = insert(pout2,[0],[0.0])
             pout2 = append(pout2,[pout2[2],0.0])
 
 # plot new light curve
@@ -500,15 +499,15 @@ def kepfold(infile,outfile,period,phasezero,bindata,binmethod,threshold,niter,nb
 	xlabel(xlab, {'color' : 'k'})
 	ylabel(ylab, {'color' : 'k'})
         xlim(-0.49999,1.49999)
-        if ymin >= 0.0: 
+        if ymin >= 0.0:
             ylim(ymin-yr*0.01,ymax+yr*0.01)
 #            ylim(0.96001,1.03999)
         else:
             ylim(1.0e-10,ymax+yr*0.01)
         grid()
-        if cmdLine: 
+        if cmdLine:
             pylab.show()
-        else: 
+        else:
             pylab.ion()
             pylab.plot([])
             pylab.ioff()
@@ -516,7 +515,7 @@ def kepfold(infile,outfile,period,phasezero,bindata,binmethod,threshold,niter,nb
 # close input file
 
     if status == 0:
-        status = kepio.closefits(instr,logfile,verbose)	    
+        status = kepio.closefits(instr,logfile,verbose)
 
 # stop time
 
@@ -525,7 +524,7 @@ def kepfold(infile,outfile,period,phasezero,bindata,binmethod,threshold,niter,nb
 # main
 if '--shell' in sys.argv:
     import argparse
-    
+
     parser = argparse.ArgumentParser(description='Low bandpass or high bandpass signal filtering')
 
     parser.add_argument('--shell', action='store_true', help='Are we running from the shell?')
@@ -533,7 +532,7 @@ if '--shell' in sys.argv:
     parser.add_argument('infile', help='Name of input file', type=str)
     parser.add_argument('outfile', help='Name of FITS file to output', type=str)
     parser.add_argument('--period', help='Period to fold data upon [days]', type=float)
-    parser.add_argument('--bjd0', help='time of zero phase for the folded period [BJD]', type=float) 
+    parser.add_argument('--bjd0', help='time of zero phase for the folded period [BJD]', type=float)
     parser.add_argument('--bindata', action='store_true', help='Bin output data?')
     parser.add_argument('--binmethod', default='mean', help='Binning method', type=str, choices=['mean','median','sigclip'])
     parser.add_argument('--threshold', default=1.0, help='Sigma clipping threshold [sigma]', type=float)
@@ -548,13 +547,13 @@ if '--shell' in sys.argv:
     parser.add_argument('--status', '-e', help='Exit status (0=good)', default=0, dest='status', type=int)
 
     args = parser.parse_args()
-    
+
     cmdLine=True
 
     kepfold(args.infile,args.outfile,args.period,args.bjd0,args.bindata,args.binmethod,args.threshold,
             args.niter,args.nbins,args.quality,args.plottype,args.plotlab,args.clobber,args.verbose,
             args.logfile,args.status,cmdLine)
-    
+
 
 else:
     from pyraf import iraf

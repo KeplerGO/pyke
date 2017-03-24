@@ -25,7 +25,7 @@ from matplotlib.cbook import is_numlike
 from scipy.optimize import leastsq
 from scipy.optimize import fmin as effmin
 from scipy.interpolate import interp1d
-import pyfits
+from astropy.io import fits as pyfits
 import sys
 from numpy.linalg import lstsq, inv
 from numpy import interp as interpolat
@@ -894,7 +894,7 @@ def kepcotrendsc(infile,outfile,bvfile,listbv,fitmethod,fitpower,iterate,sigma,m
 
 if len(sys.argv[1:]) > 0:
 	import argparse
-	
+
 	parser = argparse.ArgumentParser(description='Remove systematic trends in photometry using cotrending basis vectors')
 	#parser.add_argument('--infile', '-i', help='Name of input file', dest='infile',type=str,required=True)
 	parser.add_argument('infile', help='Name of input file', type=str)
@@ -904,7 +904,7 @@ if len(sys.argv[1:]) > 0:
 	parser.add_argument('cbvfile', help='Name of file containing the CBVs', type=str)
 	#parser.add_argument('--vectors', '-v', help='The CBVs to use', dest='listbv',type=str,required=True)
 	parser.add_argument('--vectors', dest='listbv', help='The CBVs to use', type=str)
-	
+
 	parser.add_argument('--method', '-m', help='Fitting method',default='llsq',dest='fitmethod',type=str,choices=['llsq','simplex','lst_sq'])
 	parser.add_argument('--fitpower', '-f', help='The index of the merit function (simplex only)', default=1, type=float, dest='fitpower')
 	parser.add_argument('--iterate', action='store_true', help='Fit iteratively ', dest='iterate')
@@ -919,15 +919,11 @@ if len(sys.argv[1:]) > 0:
 
 
 	args = parser.parse_args()
-	
+
 	kepcotrendsc(args.infile,args.outfile,args.bvfile,args.listbv, args.fitmethod, args.fitpower, args.iterate, args.sigma, args.maskfile, args.scinterp, args.plot, args.clobber, args.verbose, args.logfile, args.status)
-	
-	
 
 else:
 	from pyraf import iraf
-	
-	parfile = iraf.osfn("kepler$kepcotrend.par")
-	t = iraf.IrafTaskFactory(taskname="kepcotrend", value=parfile, function=kepcotrendsc)
-	
 
+        parfile = iraf.osfn("kepler$kepcotrend.par")
+	t = iraf.IrafTaskFactory(taskname="kepcotrend", value=parfile, function=kepcotrendsc)

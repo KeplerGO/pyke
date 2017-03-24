@@ -1,6 +1,5 @@
-
-import numpy, sys, time, pyfits, pylab, math, re
-from pyfits import *
+import numpy, sys, time, pylab, math, re
+from astropy.io import fits as pyfits
 from pylab import *
 from matplotlib import *
 import matplotlib.mlab as mlab

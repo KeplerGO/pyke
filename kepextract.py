@@ -1,7 +1,6 @@
-
-import numpy, sys, time, pyfits, pylab, math
+import numpy, sys, time, pylab, math
 from numpy import *
-from pyfits import *
+from astropy.io import fits as pyfits
 from pylab import *
 from matplotlib import *
 from scipy.optimize import leastsq
@@ -9,14 +8,14 @@ import kepio, kepmsg, kepkey, kepstat, kepfunc
 
 # global variables
 
-def kepextract(infile,maskfile,outfile,subback,clobber,verbose,logfile,status): 
+def kepextract(infile,maskfile,outfile,subback,clobber,verbose,logfile,status):
 
 # startup parameters
 
     status = 0
-    seterr(all="ignore") 
+    seterr(all="ignore")
 
-# log the call 
+# log the call
 
     hashline = '----------------------------------------------------------------------------'
     kepmsg.log(logfile,hashline,verbose)
@@ -47,7 +46,7 @@ def kepextract(infile,maskfile,outfile,subback,clobber,verbose,logfile,status):
 # clobber output file
 
     if clobber: status = kepio.clobber(outfile,logfile,verbose)
-    if kepio.fileexists(outfile): 
+    if kepio.fileexists(outfile):
         message = 'ERROR -- KEPEXTRACT: ' + outfile + ' exists. Use --clobber'
         status = kepmsg.err(logfile,message,verbose)
 
@@ -241,7 +240,7 @@ def kepextract(infile,maskfile,outfile,subback,clobber,verbose,logfile,status):
         if len(aperb) == 0:
             message = 'ERROR -- KEPEXTRACT: no legal pixels within the subimage are defined.'
             status = kepmsg.err(logfile,message,verbose)
-        
+
 # construct new table flux data
 
     if status == 0:
@@ -478,7 +477,7 @@ def kepextract(infile,maskfile,outfile,subback,clobber,verbose,logfile,status):
 # close input structure
 
     if status == 0:
-        status = kepio.closefits(instr,logfile,verbose)	    
+        status = kepio.closefits(instr,logfile,verbose)
 
 # end time
 
@@ -488,7 +487,7 @@ def kepextract(infile,maskfile,outfile,subback,clobber,verbose,logfile,status):
 
 if '--shell' in sys.argv:
     import argparse
-    
+
     parser = argparse.ArgumentParser(description=
         'Derive a light curve from a target pixel file, with user-defined apertures')
     parser.add_argument('--shell', action='store_true', help='Are we running from the shell?')
@@ -504,7 +503,7 @@ if '--shell' in sys.argv:
 
 
     args = parser.parse_args()
-    
+
     kepextract(args.infile,args.maskfile,args.outfile, args.background, args.clobber, args.verbose,
                args.logfile, args.status)
     

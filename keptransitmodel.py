@@ -1,7 +1,7 @@
 import lightcurve as tmod
 import matplotlib.pyplot as plt 
 import numpy as np 
-import pyfits
+from astropy.io import fits as pyfits
 from scipy.optimize import leastsq, fmin
 #remove this line
 import sys

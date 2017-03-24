@@ -1,7 +1,7 @@
 from pyraf import iraf
-import numpy, sys, time, pyfits, pylab
+import numpy, sys, time, pylab
 from numpy import *
-from pyfits import *
+from astropy.io import fits as pyfits
 from pylab import *
 from matplotlib import *
 import kepio, kepmsg, kepkey, kepstat, kepfit
@@ -9,7 +9,7 @@ import kepio, kepmsg, kepkey, kepstat, kepfit
 # global variables
 
 def kepfoldimg(infile,outfile,datacol,period,phasezero,binmethod,threshold,niter,nbins,
-            plot,plotlab,clobber,verbose,logfile,status): 
+               plot,plotlab,clobber,verbose,logfile,status):
 
 # startup parameters
 
@@ -17,7 +17,7 @@ def kepfoldimg(infile,outfile,datacol,period,phasezero,binmethod,threshold,niter
     labelsize = 24; ticksize = 16; xsize = 17; ysize = 7
     lcolor = '#0000ff'; lwidth = 1.0; fcolor = '#ffff00'; falpha = 0.2
 
-# log the call 
+# log the call
 
     hashline = '----------------------------------------------------------------------------'
     kepmsg.log(logfile,hashline,verbose)
@@ -221,9 +221,9 @@ def kepfoldimg(infile,outfile,datacol,period,phasezero,binmethod,threshold,niter
 	ymax = pout.max()
 	xr = xmax - xmin
 	yr = ymax - ymin
-        ptime = insert(ptime,[0],[ptime[0]]) 
+        ptime = insert(ptime,[0],[ptime[0]])
         ptime = append(ptime,[ptime[-1]])
-        pout = insert(pout,[0],[0.0]) 
+        pout = insert(pout,[0],[0.0])
         pout = append(pout,0.0)
 
 # plot new light curve
@@ -239,7 +239,7 @@ def kepfoldimg(infile,outfile,datacol,period,phasezero,binmethod,threshold,niter
                       'legend.fontsize': 12,
                       'xtick.labelsize': ticksize,
                       'ytick.labelsize': ticksize}
-            pylab.rcParams.update(params)
+           pylab.rcParams.update(params)
         except:
             print 'ERROR -- KEPFOLD: install latex for scientific plotting'
             status = 1
@@ -254,7 +254,7 @@ def kepfoldimg(infile,outfile,datacol,period,phasezero,binmethod,threshold,niter
 	xlabel(xlab, {'color' : 'k'})
 	ylabel(ylab, {'color' : 'k'})
         xlim(-0.49999,1.49999)
-        if ymin >= 0.0: 
+        if ymin >= 0.0:
             ylim(ymin-yr*0.01,ymax+yr*0.01)
         else:
             ylim(1.0e-10,ymax+yr*0.01)

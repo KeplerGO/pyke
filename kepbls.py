@@ -1,17 +1,17 @@
-import numpy, scipy, sys, time, pyfits, pylab, math, re
+import numpy, scipy, sys, time, pylab, math, re
 from scipy import stats
-from pyfits import *
+from astropy.io import fits as pyfits
 from pylab import *
 from matplotlib import *
 from math import *
 import kepio, kepmsg, kepkey
 
 def kepbls(infile,outfile,datacol,errcol,minper,maxper,mindur,maxdur,nsearch,
-           nbins,plot,clobber,verbose,logfile,status,cmdLine=False): 
+           nbins,plot,clobber,verbose,logfile,status,cmdLine=False):
 
 # startup parameters
 
-    numpy.seterr(all="ignore") 
+    numpy.seterr(all="ignore")
     status = 0
     labelsize = 32
     ticksize = 18

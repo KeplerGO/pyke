@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 
 import kepmsg, kepkey
-import sys, pyfits, tempfile, os, shutil, glob, numpy, warnings
+import sys, tempfile, os, shutil, glob, numpy, warnings
+from astropy.io import fits as pyfits
 
 # -----------------------------------------------------------
 # delete a file
@@ -55,7 +56,6 @@ def closeascii(file,logfile,verbose):
     except:
 	message = 'ERROR - KEPIO.CLOSEASCII: cannot close ASCII file ' + str(file)
 	status = kepmsg.err(logfile,message,verbose)
-    
     return status
 
 # -----------------------------------------------------------
@@ -585,14 +585,14 @@ def timeranges(ranges,logfile,verbose):
             txt = 'ERROR -- KEPIO.TIMERANGES: cannot understand time ranges provided'
             status = kepmsg.err(logfile,txt,verbose)
             return tstart, tstop, status
-        
+
     return tstart, tstop, status
 
 ## -----------------------------------------------------------
 ## manual calculation of median cadence within a time series
 
 def cadence(instr,infile,logfile,verbose,status):
-    
+
     try:
         intime = instr[1].data.field('barytime')
     except:

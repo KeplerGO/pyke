@@ -5,7 +5,7 @@ import numpy, scipy, math, random
 from math import *
 from scipy import stats, linalg
 from scipy.linalg import pinv
-from numpy import * 
+from numpy import *
 
 # -----------------------------------------------------------
 # calculate sum of array
@@ -30,7 +30,7 @@ def sumerr(a):
 def mean(list):
 
     try:
-        mean = scipy.stats.nanmean(list)
+        mean = nanmean(list)
     except:
         total = 0.0
         for item in list:
@@ -65,7 +65,7 @@ def median(list,logfile):
     else:
 	median = list[n/2]
     return median
-	
+
 # -----------------------------------------------------------
 # minimum of array
 
@@ -178,7 +178,7 @@ def removeinfinlc(x, cols):
 # filter on data within time ranges
 
 def filterOnRange(intime,tstart,tstop):
-    
+
     status = 0
     outlist = []
     for i in range(len(intime)):
@@ -188,7 +188,7 @@ def filterOnRange(intime,tstart,tstop):
                     outlist.append(i)
                 elif i > outlist[-1]:
                     outlist.append(i)
-                    
+
     return outlist, status
 
 #------------------------------------------------------------------
@@ -259,7 +259,7 @@ def inv_normal_cummulative_function(p):
 # bit map decoding
 
 def bitInBitmap(bitmap,bit):
-    
+
     flag = False
     for i in range(10,-1,-1):
         if (bitmap - 2**i >= 0):
@@ -276,21 +276,21 @@ def bitInBitmap(bitmap,bit):
 
 def princomp(A):
 
- """ performs principal components analysis 
+ """ performs principal components analysis
      (PCA) on the n-by-p data matrix A
-     Rows of A correspond to observations, columns to variables. 
+     Rows of A correspond to observations, columns to variables.
 
- Returns :  
+ Returns :
   coeff :
-    is a p-by-p matrix, each column containing coefficients 
+    is a p-by-p matrix, each column containing coefficients
     for one principal component.
-  score : 
-    the principal component scores; that is, the representation 
-    of A in the principal component space. Rows of SCORE 
+  score :
+    the principal component scores; that is, the representation
+    of A in the principal component space. Rows of SCORE
     correspond to observations, columns to components.
 
-  latent : 
-    a vector containing the eigenvalues 
+  latent :
+    a vector containing the eigenvalues
     of the covariance matrix of A.
  """
 
@@ -398,7 +398,7 @@ def running_frac_std(time,flux,wid,sig=None):
     for i in range(len(time)):
         valsinwid = flux[logical_and(time < time[i] + hwid, time > time[i] - hwid)]
         if sig is None:
-            runstd[i] = std(valsinwid) / mean(valsinwid) 
+            runstd[i] = std(valsinwid) / mean(valsinwid)
         else:
             runstd[i] = std(sig_clip(valsinwid,sig)) / mean(valsinwid)
 

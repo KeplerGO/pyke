@@ -4,7 +4,7 @@ Regression based on k-nearest neighbor algorithm
 
 from pyraf import iraf
 import numpy, sys, time, pyfits, pylab
-from pyfits import *
+from astropy.io import fits as pygfits
 from pylab import *
 from matplotlib import *
 from math import *

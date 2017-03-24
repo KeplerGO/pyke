@@ -1,6 +1,6 @@
-import numpy, sys, time, pyfits, pylab, urllib
+import numpy, sys, time, pylab, urllib
 from numpy import *
-from pyfits import *
+from astropy.io import fits as pyfits
 from pylab import *
 from matplotlib import *
 import kepio, kepmsg, kepkey, kepstat
