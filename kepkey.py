@@ -40,7 +40,7 @@ def new(keyword,value,comment,hdu,file,logfile,verbose):
 
     status = 0
     try:
-        hdu.header.update(keyword,value,comment)
+        hdu.header[keyword] = (value, comment)
     except:
 	message = 'ERROR -- KEPKEY.NEW: Cannot create keyword ' + keyword
 	message += ' in ' + file
