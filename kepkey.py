@@ -82,7 +82,7 @@ def change(keyword,value,hdu,file,logfile,verbose):
 
     status = 0
     try:
-	hdu.header.update(keyword,value)
+	hdu.header[keyword] = value
     except:
 	message = 'ERROR -- KEPKEY.CHANGE: Cannot update keyword ' + keyword
 	message += ' in ' + file
@@ -249,7 +249,6 @@ def getWCSs(file,struct,logfile,verbose):
         pc = numpy.linalg.inv(pc)
     except:
         pass
-    
 
     return crpix1, crpix2, crval1, crval2, cdelt1, cdelt2, pc, status
 
@@ -275,6 +274,4 @@ def emptykeys(struct,file,logfile,verbose):
             head = struct[hdu].header[keyword]
             if ('pyfits' in str(head) and 'Undefined' in str(head)):
                 status = delete(keyword,struct[hdu],file,logfile,verbose)
-        
     return struct
-
