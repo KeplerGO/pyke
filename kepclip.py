@@ -1,7 +1,7 @@
-import numpy, sys, time, pylab, math, re
+import numpy as np
+import sys, time, math, re
 from astropy.io import fits as pyfits
-from pylab import *
-from matplotlib import *
+from matplotlib import pyplot as plt
 from math import *
 import kepio, kepmsg, kepkey, kepstat, kepfourier
 
@@ -98,18 +98,18 @@ def kepclip(infile,outfile,ranges,plot,plotcol,clobber,verbose,logfile,status,cm
 
     if status == 0:
         naxis2 = 0
-        work1 = array([],'float64')
-        work2 = array([],'float32')
+        work1 = np.array([],'float64')
+        work2 = np.array([],'float32')
         for i in range(len(barytime)):
-            if (numpy.isfinite(barytime[i]) and numpy.isfinite(flux[i]) and flux[i] != 0.0):
+            if (np.isfinite(barytime[i]) and np.isfinite(flux[i]) and flux[i] != 0.0):
                 reject = False
                 for j in range(len(t1)):
                     if (barytime[i] >= t1[j] and barytime[i] <= t2[j]):
                         reject = True
                 if not reject:
                     table[naxis2] = table[i]
-                    work1 = append(work1,barytime[i])
-                    work2 = append(work2,flux[i])
+                    work1 = np.append(work1,barytime[i])
+                    work2 = np.append(work2,flux[i])
                     naxis2 += 1
 
 # comment keyword in output file
@@ -151,40 +151,22 @@ def kepclip(infile,outfile,ranges,plot,plotcol,clobber,verbose,logfile,status,cm
 	xr = xmax - xmin
 	yr = ymax - ymin
 
-# plotting arguments
-
-    if status == 0 and plot:
-        try:
-            params = {'backend': 'png',
-                      'axes.linewidth': 2.5,
-                      'axes.labelsize': labelsize,
-                      'axes.font': 'sans-serif',
-                      'axes.fontweight' : 'bold',
-                      'text.fontsize': 12,
-                      'legend.fontsize': 12,
-                      'xtick.labelsize': ticksize,
-                      'ytick.labelsize': ticksize}
-            rcParams.update(params)
-        except:
-            print 'ERROR -- KEPCLIP: install latex for scientific plotting'
-            status = 1
-
 # clear window, plot box
 
     if status == 0 and plot:
-        pylab.figure(figsize=[xsize,ysize])
-        pylab.clf()
-	ax = pylab.axes([0.05,0.1,0.94,0.88])
+        plt.figure(figsize=[xsize,ysize])
+        plt.clf()
+        ax = plt.axes([0.05,0.1,0.94,0.88])
 
 # force tick labels to be absolute rather than relative
 
-        pylab.gca().xaxis.set_major_formatter(pylab.ScalarFormatter(useOffset=False))
-        pylab.gca().yaxis.set_major_formatter(pylab.ScalarFormatter(useOffset=False))
+        plt.gca().xaxis.set_major_formatter(plt.ScalarFormatter(useOffset=False))
+        plt.gca().yaxis.set_major_formatter(plt.ScalarFormatter(useOffset=False))
 
 # rotate y labels by 90 deg
 
         labels = ax.get_yticklabels()
-        setp(labels, 'rotation', 90, fontsize=12)
+        plt.setp(labels, 'rotation', 90, fontsize=12)
 
 # plot line data
 
@@ -194,39 +176,34 @@ def kepclip(infile,outfile,ranges,plot,plotcol,clobber,verbose,logfile,status,cm
                 ltime.append(barytime[i])
                 ldata.append(flux[i])
             else:
-                ltime = array(ltime, dtype=float64)
-                ldata = array(ldata, dtype=float64)
-                pylab.plot(ltime,ldata,color=lcolor,linestyle='-',linewidth=lwidth)
+                ltime = np.array(ltime, dtype=np.float)
+                ldata = np.array(ldata, dtype=np.float)
+                plt.plot(ltime,ldata,color=lcolor,linestyle='-',linewidth=lwidth)
                 ltime = []; ldata = []
-	ltime = array(ltime, dtype=float64)
-	ldata = array(ldata, dtype=float64)
-	pylab.plot(ltime,ldata,color=lcolor,linestyle='-',linewidth=lwidth)
+	ltime = np.array(ltime, dtype=np.float)
+	ldata = np.array(ldata, dtype=np.float)
+	plt.plot(ltime,ldata,color=lcolor,linestyle='-',linewidth=lwidth)
 
 # plot fill data
 
-        barytime = insert(barytime,[0],[barytime[0]])
-        barytime = append(barytime,[barytime[-1]])
-        flux = insert(flux,[0],[0.0])
-        flux = append(flux,[0.0])
-	fill(barytime,flux,fc=fcolor,linewidth=0.0,alpha=falpha)
-	xlim(xmin-xr*0.01,xmax+xr*0.01)
+        barytime = np.insert(barytime,[0],[barytime[0]])
+        barytime = np.append(barytime,[barytime[-1]])
+        flux = np.insert(flux,[0],[0.0])
+        flux = np.append(flux,[0.0])
+        plt.fill(barytime,flux,fc=fcolor,linewidth=0.0,alpha=falpha)
+        plt.xlim(xmin-xr*0.01,xmax+xr*0.01)
 	if ymin-yr*0.01 <= 0.0:
-            ylim(1.0e-10,ymax+yr*0.01)
+            plt.ylim(1.0e-10,ymax+yr*0.01)
 	else:
-            ylim(ymin-yr*0.01,ymax+yr*0.01)
-	xlabel(xlab, {'color' : 'k'})
-	ylabel(ylab, {'color' : 'k'})
-	grid()
+            plt.ylim(ymin-yr*0.01,ymax+yr*0.01)
+	plt.xlabel(xlab, {'color' : 'k'})
+	plt.ylabel(ylab, {'color' : 'k'})
+	plt.grid()
 
 # render plot
 
     if status == 0 and plot:
-        if cmdLine:
-            pylab.show()
-        else:
-            pylab.ion()
-            pylab.plot([])
-            pylab.ioff()
+        plt.show()
 
 # close input file
 
