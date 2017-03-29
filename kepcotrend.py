@@ -350,7 +350,7 @@ def make_outfile(fitsfile,outfile,flux_new,bvsum,version):
 	col2 = pyfits.Column(name='CBVSAP_FLUX',format='E13.7   ',
 		unit=unit,array=flux_new)
 	cols = fitsfile[1].columns + col1 + col2
-	fitsfile[1] = pyfits.new_table(cols,header=fitsfile[1].header)
+	fitsfile[1] = pyfits.BinTableHDU.from_columns(cols,header=fitsfile[1].header)
 	fitsfile.writeto(outfile)
 
 def do_plot(date,flux_old,flux_new,bvsum,cad,bad_data,cad_nans,version, cmdLine=False):
@@ -474,12 +474,7 @@ def do_plot(date,flux_old,flux_new,bvsum,cad,bad_data,cad_nans,version, cmdLine=
 
 # render plot
 
-        if cmdLine:
-            plt.show()
-        else:
-            plt.ion()
-            plt.plot([])
-            plt.ioff()
+        plt.show()
 
 def split_on_nans(bad_data,cad):
 	blocks = []
