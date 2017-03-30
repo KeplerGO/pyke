@@ -1,8 +1,6 @@
-import numpy, sys, time, pylab, math
-from numpy import *
+import sys, time, math
+import numpy as np
 from astropy.io import fits as pyfits
-from pylab import *
-from matplotlib import *
 from scipy.optimize import leastsq
 import kepio, kepmsg, kepkey, kepstat, kepfunc
 
@@ -13,7 +11,7 @@ def kepextract(infile,maskfile,outfile,subback,clobber,verbose,logfile,status):
 # startup parameters
 
     status = 0
-    seterr(all="ignore")
+    np.seterr(all="ignore")
 
 # log the call
 
@@ -69,7 +67,7 @@ def kepextract(infile,maskfile,outfile,subback,clobber,verbose,logfile,status):
         cards1 = instr[1].header.cards
         cards2 = instr[2].header.cards
         table = instr[1].data[:]
-        maskmap = copy(instr[2].data)
+        maskmap = np.copy(instr[2].data)
 
 # input table data
 
@@ -77,17 +75,17 @@ def kepextract(infile,maskfile,outfile,subback,clobber,verbose,logfile,status):
         kepid, channel, skygroup, module, output, quarter, season, \
             ra, dec, column, row, kepmag, xdim, ydim, time, status = \
             kepio.readTPF(infile,'TIME',logfile,verbose)
-        time = numpy.array(time,dtype='float64')
+        time = np.array(time,dtype='float64')
     if status == 0:
         kepid, channel, skygroup, module, output, quarter, season, \
             ra, dec, column, row, kepmag, xdim, ydim, timecorr, status = \
             kepio.readTPF(infile,'TIMECORR',logfile,verbose)
-        timecorr = numpy.array(timecorr,dtype='float32')
+        timecorr = np.array(timecorr,dtype='float32')
     if status == 0:
         kepid, channel, skygroup, module, output, quarter, season, \
             ra, dec, column, row, kepmag, xdim, ydim, cadenceno, status = \
             kepio.readTPF(infile,'CADENCENO',logfile,verbose)
-        cadenceno = numpy.array(cadenceno,dtype='int')
+        cadenceno = np.array(cadenceno,dtype='int')
     if status == 0:
         kepid, channel, skygroup, module, output, quarter, season, \
             ra, dec, column, row, kepmag, xdim, ydim, raw_cnts, status = \
@@ -116,33 +114,31 @@ def kepextract(infile,maskfile,outfile,subback,clobber,verbose,logfile,status):
         kepid, channel, skygroup, module, output, quarter, season, \
             ra, dec, column, row, kepmag, xdim, ydim, quality, status = \
             kepio.readTPF(infile,'QUALITY',logfile,verbose)
-        quality = numpy.array(quality,dtype='int')
+        quality = np.array(quality,dtype='int')
     if status == 0:
         try:
-            pos_corr1 = numpy.array(table.field('POS_CORR1'),dtype='float64')  #  ---for FITS wave #2
+            pos_corr1 = np.array(table.field('POS_CORR1'),dtype='float64')  #  ---for FITS wave #2
         except:
-            pos_corr1 = empty(len(time)); pos_corr1[:] = numpy.nan   # ---temporary before FITS wave #2
+            pos_corr1 = np.empty(len(time)); pos_corr1[:] = np.nan   # ---temporary before FITS wave #2
         try:
-            pos_corr2 = numpy.array(table.field('POS_CORR2'),dtype='float64')  #  ---for FITS wave #2
+            pos_corr2 = np.array(table.field('POS_CORR2'),dtype='float64')  #  ---for FITS wave #2
         except:
-            pos_corr2 = empty(len(time)); pos_corr2[:] = numpy.nan   # ---temporary before FITS wave #2
+            pos_corr2 = np.empty(len(time)); pos_corr2[:] = np.nan   # ---temporary before FITS wave #2
 
 # dummy columns for output file
 
-        psf_centr1 = empty(len(time)); psf_centr1[:] = numpy.nan
-        psf_centr1_err = empty(len(time)); psf_centr1_err[:] = numpy.nan
-        psf_centr2 = empty(len(time)); psf_centr2[:] = numpy.nan
-        psf_centr2_err = empty(len(time)); psf_centr2_err[:] = numpy.nan
-#        mom_centr1 = empty(len(time)); mom_centr1[:] = numpy.nan
-        mom_centr1_err = empty(len(time)); mom_centr1_err[:] = numpy.nan
-#        mom_centr2 = empty(len(time)); mom_centr2[:] = numpy.nan
-        mom_centr2_err = empty(len(time)); mom_centr2_err[:] = numpy.nan
+        psf_centr1 = np.empty(len(time)); psf_centr1[:] = np.nan
+        psf_centr1_err = np.empty(len(time)); psf_centr1_err[:] = np.nan
+        psf_centr2 = np.empty(len(time)); psf_centr2[:] = np.nan
+        psf_centr2_err = np.empty(len(time)); psf_centr2_err[:] = np.nan
+        mom_centr1_err = np.empty(len(time)); mom_centr1_err[:] = np.nan
+        mom_centr2_err = np.empty(len(time)); mom_centr2_err[:] = np.nan
 
 # read mask definition file
 
     if status == 0 and 'aper' not in maskfile.lower() and maskfile.lower() != 'all':
-        maskx = array([],'int')
-        masky = array([],'int')
+        maskx = np.array([],'int')
+        masky = np.array([],'int')
         lines, status = kepio.openascii(maskfile,'r',logfile,verbose)
         for line in lines:
             line = line.strip().split('|')
@@ -152,8 +148,8 @@ def kepextract(infile,maskfile,outfile,subback,clobber,verbose,logfile,status):
                 line = line[5].split(';')
                 for items in line:
                     try:
-                        masky = append(masky,y0 + int(items.split(',')[0]))
-                        maskx = append(maskx,x0 + int(items.split(',')[1]))
+                        masky = np.append(masky,y0 + int(items.split(',')[0]))
+                        maskx = np.append(maskx,x0 + int(items.split(',')[1]))
                     except:
                         continue
         status = kepio.closeascii(lines,logfile,verbose)
@@ -174,17 +170,17 @@ def kepextract(infile,maskfile,outfile,subback,clobber,verbose,logfile,status):
 # define new subimage bitmap...
 
     if status == 0 and 'aper' not in maskfile.lower() and maskfile.lower() != 'all':
-        aperx = array([],'int')
-        apery = array([],'int')
-        aperb = array([],'int')
+        aperx = np.array([],'int')
+        apery = np.array([],'int')
+        aperb = np.array([],'int')
         for i in range(maskmap.shape[0]):
             for j in range(maskmap.shape[1]):
-                aperx = append(aperx,crval1p + (j + 1 - crpix1p) * cdelt1p)
-                apery = append(apery,crval2p + (i + 1 - crpix2p) * cdelt2p)
+                aperx = np.append(aperx,crval1p + (j + 1 - crpix1p) * cdelt1p)
+                apery = np.append(apery,crval2p + (i + 1 - crpix2p) * cdelt2p)
                 if maskmap[i,j] == 0:
-                    aperb = append(aperb,0)
+                    aperb = np.append(aperb,0)
                 else:
-                    aperb = append(aperb,1)
+                    aperb = np.append(aperb,1)
                     maskmap[i,j] = 1
                     for k in range(len(maskx)):
                         if aperx[-1] == maskx[k] and apery[-1] == masky[k]:
@@ -194,43 +190,43 @@ def kepextract(infile,maskfile,outfile,subback,clobber,verbose,logfile,status):
 # trap case where no aperture needs to be defined but pixel positions are still required for centroiding
 
     if status == 0 and maskfile.lower() == 'all':
-        aperx = array([],'int')
-        apery = array([],'int')
+        aperx = np.array([],'int')
+        apery = np.array([],'int')
         for i in range(maskmap.shape[0]):
             for j in range(maskmap.shape[1]):
-                aperx = append(aperx,crval1p + (j + 1 - crpix1p) * cdelt1p)
-                apery = append(apery,crval2p + (i + 1 - crpix2p) * cdelt2p)
+                aperx = np.append(aperx,crval1p + (j + 1 - crpix1p) * cdelt1p)
+                apery = np.append(apery,crval2p + (i + 1 - crpix2p) * cdelt2p)
 
 # ...or use old subimage bitmap
 
     if status == 0 and 'aper' in maskfile.lower():
-        aperx = array([],'int')
-        apery = array([],'int')
-        aperb = array([],'int')
+        aperx = np.array([],'int')
+        apery = np.array([],'int')
+        aperb = np.array([],'int')
         for i in range(maskmap.shape[0]):
             for j in range(maskmap.shape[1]):
-                aperb = append(aperb,maskmap[i,j])
-                aperx = append(aperx,crval1p + (j + 1 - crpix1p) * cdelt1p)
-                apery = append(apery,crval2p + (i + 1 - crpix2p) * cdelt2p)
+                aperb = np.append(aperb,maskmap[i,j])
+                aperx = np.append(aperx,crval1p + (j + 1 - crpix1p) * cdelt1p)
+                apery = np.append(apery,crval2p + (i + 1 - crpix2p) * cdelt2p)
 
 # ...or use all pixels
 
     if status == 0 and maskfile.lower() == 'all':
-        aperb = array([],'int')
+        aperb = np.array([],'int')
         for i in range(maskmap.shape[0]):
             for j in range(maskmap.shape[1]):
                 if maskmap[i,j] == 0:
-                    aperb = append(aperb,0)
+                    aperb = np.append(aperb,0)
                 else:
-                    aperb = append(aperb,3)
+                    aperb = np.append(aperb,3)
                     maskmap[i,j] = 3
 
 # subtract median pixel value for background?
 
     if status == 0:
-        sky = array([],'float32')
+        sky = np.array([],'float32')
         for i in range(len(time)):
-            sky = append(sky,median(flux[i,:]))
+            sky = np.append(sky,np.median(flux[i,:]))
         if not subback:
             sky[:] = 0.0
 
@@ -246,44 +242,44 @@ def kepextract(infile,maskfile,outfile,subback,clobber,verbose,logfile,status):
     if status == 0:
         naper = (aperb == 3).sum()
         ntime = len(time)
-        sap_flux = array([],'float32')
-        sap_flux_err = array([],'float32')
-        sap_bkg = array([],'float32')
-        sap_bkg_err = array([],'float32')
-        raw_flux = array([],'float32')
+        sap_flux = np.array([],'float32')
+        sap_flux_err = np.array([],'float32')
+        sap_bkg = np.array([],'float32')
+        sap_bkg_err = np.array([],'float32')
+        raw_flux = np.array([],'float32')
         for i in range(len(time)):
-            work1 = array([],'float64')
-            work2 = array([],'float64')
-            work3 = array([],'float64')
-            work4 = array([],'float64')
-            work5 = array([],'float64')
+            work1 = np.array([],'float64')
+            work2 = np.array([],'float64')
+            work3 = np.array([],'float64')
+            work4 = np.array([],'float64')
+            work5 = np.array([],'float64')
             for j in range(len(aperb)):
                 if (aperb[j] == 3):
-                    work1 = append(work1,flux[i,j]-sky[i])
-                    work2 = append(work2,flux_err[i,j])
-                    work3 = append(work3,flux_bkg[i,j])
-                    work4 = append(work4,flux_bkg_err[i,j])
-                    work5 = append(work5,raw_cnts[i,j])
-            sap_flux = append(sap_flux,kepstat.sum(work1))
-            sap_flux_err = append(sap_flux_err,kepstat.sumerr(work2))
-            sap_bkg = append(sap_bkg,kepstat.sum(work3))
-            sap_bkg_err = append(sap_bkg_err,kepstat.sumerr(work4))
-            raw_flux = append(raw_flux,kepstat.sum(work5))
+                    work1 = np.append(work1,flux[i,j]-sky[i])
+                    work2 = np.append(work2,flux_err[i,j])
+                    work3 = np.append(work3,flux_bkg[i,j])
+                    work4 = np.append(work4,flux_bkg_err[i,j])
+                    work5 = np.append(work5,raw_cnts[i,j])
+            sap_flux = np.append(sap_flux,kepstat.sum(work1))
+            sap_flux_err = np.append(sap_flux_err,kepstat.sumerr(work2))
+            sap_bkg = np.append(sap_bkg,kepstat.sum(work3))
+            sap_bkg_err = np.append(sap_bkg_err,kepstat.sumerr(work4))
+            raw_flux = np.append(raw_flux,kepstat.sum(work5))
 
 # construct new table moment data
 
     if status == 0:
-        mom_centr1 = zeros(shape=(ntime))
-        mom_centr2 = zeros(shape=(ntime))
-        mom_centr1_err = zeros(shape=(ntime))
-        mom_centr2_err = zeros(shape=(ntime))
+        mom_centr1 = np.zeros(shape=(ntime))
+        mom_centr2 = np.zeros(shape=(ntime))
+        mom_centr1_err = np.zeros(shape=(ntime))
+        mom_centr2_err = np.zeros(shape=(ntime))
         for i in range(ntime):
-            xf = zeros(shape=(naper))
-            yf = zeros(shape=(naper))
-            f = zeros(shape=(naper))
-            xfe = zeros(shape=(naper))
-            yfe = zeros(shape=(naper))
-            fe = zeros(shape=(naper))
+            xf = np.zeros(shape=(naper))
+            yf = np.zeros(shape=(naper))
+            f = np.zeros(shape=(naper))
+            xfe = np.zeros(shape=(naper))
+            yfe = np.zeros(shape=(naper))
+            fe = np.zeros(shape=(naper))
             k = -1
             for j in range(len(aperb)):
                 if (aperb[j] == 3):
@@ -297,25 +293,25 @@ def kepextract(infile,maskfile,outfile,subback,clobber,verbose,logfile,status):
             xfsum = kepstat.sum(xf)
             yfsum = kepstat.sum(yf)
             fsum = kepstat.sum(f)
-            xfsume = sqrt(kepstat.sum(square(xfe)) / naper)
-            yfsume = sqrt(kepstat.sum(square(yfe)) / naper)
-            fsume = sqrt(kepstat.sum(square(fe)) / naper)
+            xfsume = math.sqrt(kepstat.sum(xfe * xfe) / naper)
+            yfsume = math.sqrt(kepstat.sum(yfe * yfe) / naper)
+            fsume = math.sqrt(kepstat.sum(fe * fe) / naper)
             mom_centr1[i] = xfsum / fsum
             mom_centr2[i] = yfsum / fsum
-            mom_centr1_err[i] = sqrt((xfsume / xfsum)**2 + ((fsume / fsum)**2))
-            mom_centr2_err[i] = sqrt((yfsume / yfsum)**2 + ((fsume / fsum)**2))
+            mom_centr1_err[i] = math.sqrt((xfsume / xfsum)**2 + ((fsume / fsum)**2))
+            mom_centr2_err[i] = math.sqrt((yfsume / yfsum)**2 + ((fsume / fsum)**2))
         mom_centr1_err = mom_centr1_err * mom_centr1
         mom_centr2_err = mom_centr2_err * mom_centr2
 
 # construct new table PSF data
 
     if status == 0:
-        psf_centr1 = zeros(shape=(ntime))
-        psf_centr2 = zeros(shape=(ntime))
-        psf_centr1_err = zeros(shape=(ntime))
-        psf_centr2_err = zeros(shape=(ntime))
-        modx = zeros(shape=(naper))
-        mody = zeros(shape=(naper))
+        psf_centr1 = np.zeros(shape=(ntime))
+        psf_centr2 = np.zeros(shape=(ntime))
+        psf_centr1_err = np.zeros(shape=(ntime))
+        psf_centr2_err = np.zeros(shape=(ntime))
+        modx = np.zeros(shape=(naper))
+        mody = np.zeros(shape=(naper))
         k = -1
         for j in range(len(aperb)):
             if (aperb[j] == 3):
@@ -323,9 +319,9 @@ def kepextract(infile,maskfile,outfile,subback,clobber,verbose,logfile,status):
                 modx[k] = aperx[j]
                 mody[k] = apery[j]
         for i in range(ntime):
-            modf = zeros(shape=(naper))
+            modf = np.zeros(shape=(naper))
             k = -1
-            guess = [mom_centr1[i], mom_centr2[i], nanmax(flux[i:]), 1.0, 1.0, 0.0, 0.0]
+            guess = [mom_centr1[i], mom_centr2[i], np.nanmax(flux[i:]), 1.0, 1.0, 0.0, 0.0]
             for j in range(len(aperb)):
                 if (aperb[j] == 3):
                     k += 1
@@ -341,132 +337,135 @@ def kepextract(infile,maskfile,outfile,subback,clobber,verbose,logfile,status):
             try:
                 psf_centr1_err[i] = sqrt(diag(ans[1] * s_sq))[0]
             except:
-                psf_centr1_err[i] = numpy.nan
+                psf_centr1_err[i] = np.nan
             try:
                 psf_centr2_err[i] = sqrt(diag(ans[1] * s_sq))[1]
             except:
-                psf_centr2_err[i] = numpy.nan
+                psf_centr2_err[i] = np.nan
 
 # construct output primary extension
 
     if status == 0:
         hdu0 = pyfits.PrimaryHDU()
         for i in range(len(cards0)):
-            if cards0[i].key not in hdu0.header.keys():
-                hdu0.header.update(cards0[i].key, cards0[i].value, cards0[i].comment)
+            if cards0[i].keyword not in hdu0.header.keys():
+                hdu0.header[cards0[i].keyword] = (cards0[i].value, cards0[i].comment)
             else:
-                hdu0.header.cards[cards0[i].key].comment = cards0[i].comment
+                hdu0.header.cards[cards0[i].keyword].comment = cards0[i].comment
         status = kepkey.history(call,hdu0,outfile,logfile,verbose)
-        outstr = HDUList(hdu0)
+        outstr = pyfits.HDUList(hdu0)
 
 # construct output light curve extension
 
     if status == 0:
-        col1 = Column(name='TIME',format='D',unit='BJD - 2454833',array=time)
-        col2 = Column(name='TIMECORR',format='E',unit='d',array=timecorr)
-        col3 = Column(name='CADENCENO',format='J',array=cadenceno)
-        col4 = Column(name='SAP_FLUX',format='E',array=sap_flux)
-        col5 = Column(name='SAP_FLUX_ERR',format='E',array=sap_flux_err)
-        col6 = Column(name='SAP_BKG',format='E',array=sap_bkg)
-        col7 = Column(name='SAP_BKG_ERR',format='E',array=sap_bkg_err)
-        col8 = Column(name='PDCSAP_FLUX',format='E',array=sap_flux)
-        col9 = Column(name='PDCSAP_FLUX_ERR',format='E',array=sap_flux_err)
-        col10 = Column(name='SAP_QUALITY',format='J',array=quality)
-        col11 = Column(name='PSF_CENTR1',format='E',unit='pixel',array=psf_centr1)
-        col12 = Column(name='PSF_CENTR1_ERR',format='E',unit='pixel',array=psf_centr1_err)
-        col13 = Column(name='PSF_CENTR2',format='E',unit='pixel',array=psf_centr2)
-        col14 = Column(name='PSF_CENTR2_ERR',format='E',unit='pixel',array=psf_centr2_err)
-        col15 = Column(name='MOM_CENTR1',format='E',unit='pixel',array=mom_centr1)
-        col16 = Column(name='MOM_CENTR1_ERR',format='E',unit='pixel',array=mom_centr1_err)
-        col17 = Column(name='MOM_CENTR2',format='E',unit='pixel',array=mom_centr2)
-        col18 = Column(name='MOM_CENTR2_ERR',format='E',unit='pixel',array=mom_centr2_err)
-        col19 = Column(name='POS_CORR1',format='E',unit='pixel',array=pos_corr1)
-        col20 = Column(name='POS_CORR2',format='E',unit='pixel',array=pos_corr2)
-        col21 = Column(name='RAW_FLUX',format='E',array=raw_flux)
-        cols = ColDefs([col1,col2,col3,col4,col5,col6,col7,col8,col9,col10,col11, \
-                            col12,col13,col14,col15,col16,col17,col18,col19,col20,col21])
-        hdu1 = new_table(cols)
-        hdu1.header.update('TTYPE1','TIME','column title: data time stamps')
-        hdu1.header.update('TFORM1','D','data type: float64')
-        hdu1.header.update('TUNIT1','BJD - 2454833','column units: barycenter corrected JD')
-        hdu1.header.update('TDISP1','D12.7','column display format')
-        hdu1.header.update('TTYPE2','TIMECORR','column title: barycentric-timeslice correction')
-        hdu1.header.update('TFORM2','E','data type: float32')
-        hdu1.header.update('TUNIT2','d','column units: days')
-        hdu1.header.update('TTYPE3','CADENCENO','column title: unique cadence number')
-        hdu1.header.update('TFORM3','J','column format: signed integer32')
-        hdu1.header.update('TTYPE4','SAP_FLUX','column title: aperture photometry flux')
-        hdu1.header.update('TFORM4','E','column format: float32')
-        hdu1.header.update('TUNIT4','e-/s','column units: electrons per second')
-        hdu1.header.update('TTYPE5','SAP_FLUX_ERR','column title: aperture phot. flux error')
-        hdu1.header.update('TFORM5','E','column format: float32')
-        hdu1.header.update('TUNIT5','e-/s','column units: electrons per second (1-sigma)')
-        hdu1.header.update('TTYPE6','SAP_BKG','column title: aperture phot. background flux')
-        hdu1.header.update('TFORM6','E','column format: float32')
-        hdu1.header.update('TUNIT6','e-/s','column units: electrons per second')
-        hdu1.header.update('TTYPE7','SAP_BKG_ERR','column title: ap. phot. background flux error')
-        hdu1.header.update('TFORM7','E','column format: float32')
-        hdu1.header.update('TUNIT7','e-/s','column units: electrons per second (1-sigma)')
-        hdu1.header.update('TTYPE8','PDCSAP_FLUX','column title: PDC photometry flux')
-        hdu1.header.update('TFORM8','E','column format: float32')
-        hdu1.header.update('TUNIT8','e-/s','column units: electrons per second')
-        hdu1.header.update('TTYPE9','PDCSAP_FLUX_ERR','column title: PDC flux error')
-        hdu1.header.update('TFORM9','E','column format: float32')
-        hdu1.header.update('TUNIT9','e-/s','column units: electrons per second (1-sigma)')
-        hdu1.header.update('TTYPE10','SAP_QUALITY','column title: aperture photometry quality flag')
-        hdu1.header.update('TFORM10','J','column format: signed integer32')
-        hdu1.header.update('TTYPE11','PSF_CENTR1','column title: PSF fitted column centroid')
-        hdu1.header.update('TFORM11','E','column format: float32')
-        hdu1.header.update('TUNIT11','pixel','column units: pixel')
-        hdu1.header.update('TTYPE12','PSF_CENTR1_ERR','column title: PSF fitted column error')
-        hdu1.header.update('TFORM12','E','column format: float32')
-        hdu1.header.update('TUNIT12','pixel','column units: pixel')
-        hdu1.header.update('TTYPE13','PSF_CENTR2','column title: PSF fitted row centroid')
-        hdu1.header.update('TFORM13','E','column format: float32')
-        hdu1.header.update('TUNIT13','pixel','column units: pixel')
-        hdu1.header.update('TTYPE14','PSF_CENTR2_ERR','column title: PSF fitted row error')
-        hdu1.header.update('TFORM14','E','column format: float32')
-        hdu1.header.update('TUNIT14','pixel','column units: pixel')
-        hdu1.header.update('TTYPE15','MOM_CENTR1','column title: moment-derived column centroid')
-        hdu1.header.update('TFORM15','E','column format: float32')
-        hdu1.header.update('TUNIT15','pixel','column units: pixel')
-        hdu1.header.update('TTYPE16','MOM_CENTR1_ERR','column title: moment-derived column error')
-        hdu1.header.update('TFORM16','E','column format: float32')
-        hdu1.header.update('TUNIT16','pixel','column units: pixel')
-        hdu1.header.update('TTYPE17','MOM_CENTR2','column title: moment-derived row centroid')
-        hdu1.header.update('TFORM17','E','column format: float32')
-        hdu1.header.update('TUNIT17','pixel','column units: pixel')
-        hdu1.header.update('TTYPE18','MOM_CENTR2_ERR','column title: moment-derived row error')
-        hdu1.header.update('TFORM18','E','column format: float32')
-        hdu1.header.update('TUNIT18','pixel','column units: pixel')
-        hdu1.header.update('TTYPE19','POS_CORR1','column title: col correction for vel. abbern')
-        hdu1.header.update('TFORM19','E','column format: float32')
-        hdu1.header.update('TUNIT19','pixel','column units: pixel')
-        hdu1.header.update('TTYPE20','POS_CORR2','column title: row correction for vel. abbern')
-        hdu1.header.update('TFORM20','E','column format: float32')
-        hdu1.header.update('TUNIT20','pixel','column units: pixel')
-        hdu1.header.update('TTYPE21','RAW_FLUX','column title: raw aperture photometry flux')
-        hdu1.header.update('TFORM21','E','column format: float32')
-        hdu1.header.update('TUNIT21','e-/s','column units: electrons per second')
-        hdu1.header.update('EXTNAME','LIGHTCURVE','name of extension')
+        col1 = pyfits.Column(name='TIME',format='D',unit='BJD - 2454833',array=time)
+        col2 = pyfits.Column(name='TIMECORR',format='E',unit='d',array=timecorr)
+        col3 = pyfits.Column(name='CADENCENO',format='J',array=cadenceno)
+        col4 = pyfits.Column(name='SAP_FLUX',format='E',array=sap_flux)
+        col5 = pyfits.Column(name='SAP_FLUX_ERR',format='E',array=sap_flux_err)
+        col6 = pyfits.Column(name='SAP_BKG',format='E',array=sap_bkg)
+        col7 = pyfits.Column(name='SAP_BKG_ERR',format='E',array=sap_bkg_err)
+        col8 = pyfits.Column(name='PDCSAP_FLUX',format='E',array=sap_flux)
+        col9 = pyfits.Column(name='PDCSAP_FLUX_ERR',format='E',array=sap_flux_err)
+        col10 = pyfits.Column(name='SAP_QUALITY',format='J',array=quality)
+        col11 = pyfits.Column(name='PSF_CENTR1',format='E',unit='pixel',array=psf_centr1)
+        col12 = pyfits.Column(name='PSF_CENTR1_ERR',format='E',unit='pixel',array=psf_centr1_err)
+        col13 = pyfits.Column(name='PSF_CENTR2',format='E',unit='pixel',array=psf_centr2)
+        col14 = pyfits.Column(name='PSF_CENTR2_ERR',format='E',unit='pixel',array=psf_centr2_err)
+        col15 = pyfits.Column(name='MOM_CENTR1',format='E',unit='pixel',array=mom_centr1)
+        col16 = pyfits.Column(name='MOM_CENTR1_ERR',format='E',unit='pixel',array=mom_centr1_err)
+        col17 = pyfits.Column(name='MOM_CENTR2',format='E',unit='pixel',array=mom_centr2)
+        col18 = pyfits.Column(name='MOM_CENTR2_ERR',format='E',unit='pixel',array=mom_centr2_err)
+        col19 = pyfits.Column(name='POS_CORR1',format='E',unit='pixel',array=pos_corr1)
+        col20 = pyfits.Column(name='POS_CORR2',format='E',unit='pixel',array=pos_corr2)
+        col21 = pyfits.Column(name='RAW_FLUX',format='E',array=raw_flux)
+        cols = pyfits.ColDefs([col1,col2,col3,col4,col5,col6,col7,col8,col9,
+                               col10,col11,col12,col13,col14,col15,col16,
+                               col17,col18,col19,col20,col21])
+        hdu1 = pyfits.BinTableHDU.from_columns(cols)
+        hdu1.header['TTYPE1'] = ('TIME','column title: data time stamps')
+        hdu1.header['TFORM1'] = ('D','data type: float64')
+        hdu1.header['TUNIT1'] = ('BJD - 2454833','column units: barycenter corrected JD')
+        hdu1.header['TDISP1'] = ('D12.7','column display format')
+        hdu1.header['TTYPE2'] = ('TIMECORR','column title: barycentric-timeslice correction')
+        hdu1.header['TFORM2'] = ('E','data type: float32')
+        hdu1.header['TUNIT2'] = ('d','column units: days')
+        hdu1.header['TTYPE3'] = ('CADENCENO','column title: unique cadence number')
+        hdu1.header['TFORM3'] = ('J','column format: signed integer32')
+        hdu1.header['TTYPE4'] = ('SAP_FLUX','column title: aperture photometry flux')
+        hdu1.header['TFORM4'] = ('E','column format: float32')
+        hdu1.header['TUNIT4'] = ('e-/s','column units: electrons per second')
+        hdu1.header['TTYPE5'] = ('SAP_FLUX_ERR','column title: aperture phot. flux error')
+        hdu1.header['TFORM5'] = ('E','column format: float32')
+        hdu1.header['TUNIT5'] = ('e-/s','column units: electrons per second (1-sigma)')
+        hdu1.header['TTYPE6'] = ('SAP_BKG','column title: aperture phot. background flux')
+        hdu1.header['TFORM6'] = ('E','column format: float32')
+        hdu1.header['TUNIT6'] = ('e-/s','column units: electrons per second')
+        hdu1.header['TTYPE7'] = ('SAP_BKG_ERR','column title: ap. phot. background flux error')
+        hdu1.header['TFORM7'] = ('E','column format: float32')
+        hdu1.header['TUNIT7'] = ('e-/s','column units: electrons per second (1-sigma)')
+        hdu1.header['TTYPE8'] = ('PDCSAP_FLUX','column title: PDC photometry flux')
+        hdu1.header['TFORM8'] = ('E','column format: float32')
+        hdu1.header['TUNIT8'] = ('e-/s','column units: electrons per second')
+        hdu1.header['TTYPE9'] = ('PDCSAP_FLUX_ERR','column title: PDC flux error')
+        hdu1.header['TFORM9'] = ('E','column format: float32')
+        hdu1.header['TUNIT9'] = ('e-/s','column units: electrons per second (1-sigma)')
+        hdu1.header['TTYPE10'] = ('SAP_QUALITY','column title: aperture photometry quality flag')
+        hdu1.header['TFORM10'] = ('J','column format: signed integer32')
+        hdu1.header['TTYPE11'] = ('PSF_CENTR1','column title: PSF fitted column centroid')
+        hdu1.header['TFORM11'] = ('E','column format: float32')
+        hdu1.header['TUNIT11'] = ('pixel','column units: pixel')
+        hdu1.header['TTYPE12'] = ('PSF_CENTR1_ERR','column title: PSF fitted column error')
+        hdu1.header['TFORM12'] = ('E','column format: float32')
+        hdu1.header['TUNIT12'] = ('pixel','column units: pixel')
+        hdu1.header['TTYPE13'] = ('PSF_CENTR2','column title: PSF fitted row centroid')
+        hdu1.header['TFORM13'] = ('E','column format: float32')
+        hdu1.header['TUNIT13'] = ('pixel','column units: pixel')
+        hdu1.header['TTYPE14'] = ('PSF_CENTR2_ERR','column title: PSF fitted row error')
+        hdu1.header['TFORM14'] = ('E','column format: float32')
+        hdu1.header['TUNIT14'] = ('pixel','column units: pixel')
+        hdu1.header['TTYPE15'] = ('MOM_CENTR1','column title: moment-derived column centroid')
+        hdu1.header['TFORM15'] = ('E','column format: float32')
+        hdu1.header['TUNIT15'] = ('pixel','column units: pixel')
+        hdu1.header['TTYPE16'] = ('MOM_CENTR1_ERR','column title: moment-derived column error')
+        hdu1.header['TFORM16'] = ('E','column format: float32')
+        hdu1.header['TUNIT16'] = ('pixel','column units: pixel')
+        hdu1.header['TTYPE17'] = ('MOM_CENTR2','column title: moment-derived row centroid')
+        hdu1.header['TFORM17'] = ('E','column format: float32')
+        hdu1.header['TUNIT17'] = ('pixel','column units: pixel')
+        hdu1.header['TTYPE18'] = ('MOM_CENTR2_ERR','column title: moment-derived row error')
+        hdu1.header['TFORM18'] = ('E','column format: float32')
+        hdu1.header['TUNIT18'] = ('pixel','column units: pixel')
+        hdu1.header['TTYPE19'] = ('POS_CORR1','column title: col correction for vel. abbern')
+        hdu1.header['TFORM19'] = ('E','column format: float32')
+        hdu1.header['TUNIT19'] = ('pixel','column units: pixel')
+        hdu1.header['TTYPE20'] = ('POS_CORR2','column title: row correction for vel. abbern')
+        hdu1.header['TFORM20'] = ('E','column format: float32')
+        hdu1.header['TUNIT20'] = ('pixel','column units: pixel')
+        hdu1.header['TTYPE21'] = ('RAW_FLUX','column title: raw aperture photometry flux')
+        hdu1.header['TFORM21'] = ('E','column format: float32')
+        hdu1.header['TUNIT21'] = ('e-/s','column units: electrons per second')
+        hdu1.header['EXTNAME'] = ('LIGHTCURVE','name of extension')
         for i in range(len(cards1)):
-            if (cards1[i].key not in hdu1.header.keys() and
-                cards1[i].key[:4] not in ['TTYP','TFOR','TUNI','TDIS','TDIM','WCAX','1CTY',
-                                          '2CTY','1CRP','2CRP','1CRV','2CRV','1CUN','2CUN',
-                                          '1CDE','2CDE','1CTY','2CTY','1CDL','2CDL','11PC',
-                                          '12PC','21PC','22PC']):
-                hdu1.header.update(cards1[i].key, cards1[i].value, cards1[i].comment)
+            if (cards1[i].keyword not in hdu1.header.keys() and
+                cards1[i].keyword[:4] not in ['TTYP', 'TFOR', 'TUNI', 'TDIS',
+                                              'TDIM', 'WCAX', '1CTY', '2CTY',
+                                              '1CRP', '2CRP', '1CRV', '2CRV',
+                                              '1CUN', '2CUN', '1CDE', '2CDE',
+                                              '1CTY', '2CTY', '1CDL', '2CDL',
+                                              '11PC', '12PC', '21PC', '22PC']):
+                hdu1.header[cards1[i].keyword] = (cards1[i].value, cards1[i].comment)
         outstr.append(hdu1)
 
 # construct output mask bitmap extension
 
     if status == 0:
-        hdu2 = ImageHDU(maskmap)
+        hdu2 = pyfits.ImageHDU(maskmap)
         for i in range(len(cards2)):
-            if cards2[i].key not in hdu2.header.keys():
-                hdu2.header.update(cards2[i].key, cards2[i].value, cards2[i].comment)
+            if cards2[i].keyword not in hdu2.header.keys():
+                hdu2.header[cards2[i].keyword] = (cards2[i].value, cards2[i].comment)
             else:
-                hdu2.header.cards[cards2[i].key].comment = cards2[i].comment
+                hdu2.header.cards[cards2[i].keyword].comment = cards2[i].comment
         outstr.append(hdu2)
 
 # write output file
@@ -497,7 +496,7 @@ if '--shell' in sys.argv:
     parser.add_argument('--background', action='store_true', help='Subtract background from data?')
     parser.add_argument('--clobber', action='store_true', help='Overwrite output file?')
     parser.add_argument('--verbose', action='store_true', help='Write to a log file?')
-    parser.add_argument('--logfile', '-l', help='Name of ascii log file', default='kepcotrend.log', 
+    parser.add_argument('--logfile', '-l', help='Name of ascii log file', default='kepextract.log',
         dest='logfile', type=str)
     parser.add_argument('--status', '-e', help='Exit status (0=good)', default=0, dest='status', type=int)
 
@@ -506,13 +505,7 @@ if '--shell' in sys.argv:
 
     kepextract(args.infile,args.maskfile,args.outfile, args.background, args.clobber, args.verbose,
                args.logfile, args.status)
-    
-    
-
 else:
     from pyraf import iraf
-    
-    
     parfile = iraf.osfn("kepler$kepextract.par")
     t = iraf.IrafTaskFactory(taskname="kepextract", value=parfile, function=kepextract)
-
