@@ -3,3 +3,4 @@ def test_import():
     from ..kepoutlier import kepoutlier
     from ..kepcotrend import kepcotrendsc
     from ..kepdetrend import kepdetrend
+    from ..kepdiffim import kepdiffim
