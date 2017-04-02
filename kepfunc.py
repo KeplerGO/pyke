@@ -8,59 +8,59 @@ from scipy.interpolate import RectBivariateSpline, interp2d
 from keparray import rebin2D
 from numpy import square, nansum, shape, array, empty, zeros, absolute, size
 from sys import stdout, exit
- 
+
 # -----------------------------------------------
 # define functions
 
-def poly0(): 
+def poly0():
     return lambda p, x: p[0] + 0.0 * x
 
-def poly1(): 
+def poly1():
     return lambda p, x: p[0] + p[1] * x
 
-def poly2(): 
+def poly2():
     return lambda p, x: p[0] + p[1] * x + p[2] * x * x
 
-def poly3(): 
+def poly3():
     return lambda p, x: p[0] + p[1] * x + p[2] * x**2 + p[3] * x**3
 
-def poly4(): 
+def poly4():
     return lambda p, x: p[0] + p[1] * x + p[2] * x**2 + p[3] * x**3 + p[4] * x**4
 
-def poly5(): 
+def poly5():
     return lambda p, x: p[0] + p[1] * x + p[2] * x**2 + p[3] * x**3 + p[4] * x**4 + p[5] * x**5
 
-def poly6(): 
+def poly6():
     return lambda p, x: p[0] + p[1] * x + p[2] * x**2 + p[3] * x**3 + p[4] * x**4 + p[5] * x**5 + p[6] * x**6
 
-def poly7(): 
+def poly7():
     return lambda p, x: p[0] + p[1] * x + p[2] * x**2 + p[3] * x**3 + p[4] * x**4 + p[5] * x**5 + p[6] * x**6 + p[7] * x**7
 
-def poly8(): 
+def poly8():
     return lambda p, x: p[0] + p[1] * x + p[2] * x**2 + p[3] * x**3 + p[4] * x**4 + p[5] * x**5 + p[6] * x**6 + p[7] * x**7 + p[8] * x**8
 
-def poly9(): 
+def poly9():
     return lambda p, x: p[0] + p[1] * x + p[2] * x**2 + p[3] * x**3 + p[4] * x**4 + p[5] * x**5 + p[6] * x**6 + p[7] * x**7 + p[8] * x**8 + p[9] * x**9
 
-def poly10(): 
+def poly10():
     return lambda p, x: p[0] + p[1] * x + p[2] * x**2 + p[3] * x**3 + p[4] * x**4 + p[5] * x**5 + p[6] * x**6 + p[7] * x**7 + p[8] * x**8 + p[9] * x**9 + p[10] * x**10
 
-def poly1con(): 
+def poly1con():
     return lambda p, x: p[0] + x
 
-def gauss(): 
+def gauss():
     return lambda p, x: p[0] * scipy.exp(-(x - p[1])**2 / (2.0 * p[2]**2))
 
-def gauss0(): 
+def gauss0():
     return lambda p, x: p[0] * scipy.exp(-x**2 / (2.0 * p[1]**2))
 
-def congauss(): 
+def congauss():
     return lambda p, x: p[0] + p[1] * scipy.exp(-(x - p[2])**2 / (2.0 * p[3]**2))
 
-def moffat0(): 
+def moffat0():
     return lambda p, x: p[0] / (1.0 + (x / p[1])**2)**p[2]
 
-def conmoffat(): 
+def conmoffat():
     return lambda p, x: p[0] + p[1] / (1.0 + ((x - p[2]) / p[3])**2)**p[4]
 
 def sine():
@@ -74,59 +74,58 @@ def powerlaw():
 
 def smooth(x,window_len=10,window='hanning'):
 
-     """smooth the data using a window with requested size.
-     
-     This method is based on the convolution of a scaled window with the signal.
-     The signal is prepared by introducing reflected copies of the signal 
-     (with the window size) in both ends so that transient parts are minimized
-     in the begining and end part of the output signal.
-     
-     input:
-         x: the input signal 
-         window_len: the dimension of the smoothing window
-         window: the type of window from 'flat', 'hanning', 'hamming', 'bartlett', 'blackman'
-             flat window will produce a moving average smoothing.
- 
-     output:
-         the smoothed signal
-         
-     example:
- 
-     t=linspace(-2,2,0.1)
-     x=sin(t)+randn(len(t))*0.1
-     y=smooth(x)
-     
-     see also: 
-     
-     numpy.hanning, numpy.hamming, numpy.bartlett, numpy.blackman, numpy.convolve
-     scipy.signal.lfilter
-  
-     TODO: the window parameter could be the window itself if an array instead of a string   
-     """
- 
-     if x.ndim != 1:
-         raise ValueError, "smooth only accepts 1 dimension arrays."
- 
-     if x.size < window_len:
-         raise ValueError, "Input vector needs to be bigger than window size."
- 
- 
-     if window_len<3:
-         return x
- 
- 
-     if not window in ['flat', 'hanning', 'hamming', 'bartlett', 'blackman']:
-         raise ValueError, "Window is one of 'flat', 'hanning', 'hamming', 'bartlett', 'blackman'"
- 
- 
-     s=numpy.r_[2*x[0]-x[window_len:1:-1],x,2*x[-1]-x[-1:-window_len:-1]]
-     if window == 'flat': #moving average
-         w=numpy.ones(window_len,'d')
-     else:
-         w=eval('numpy.'+window+'(window_len)')
- 
-     y=numpy.convolve(w/w.sum(),s,mode='same')
-     return y[window_len-1:-window_len+1]
+    """smooth the data using a window with requested size.
+
+    This method is based on the convolution of a scaled window with the signal.
+    The signal is prepared by introducing reflected copies of the signal
+    (with the window size) in both ends so that transient parts are minimized
+    in the begining and end part of the output signal.
+
+    input:
+     x: the input signal
+     window_len: the dimension of the smoothing window
+     window: the type of window from 'flat', 'hanning', 'hamming', 'bartlett', 'blackman'
+         flat window will produce a moving average smoothing.
+
+    output:
+     the smoothed signal
+
+    example:
+
+    t=linspace(-2,2,0.1)
+    x=sin(t)+randn(len(t))*0.1
+    y=smooth(x)
+
+    see also:
+
+    numpy.hanning, numpy.hamming, numpy.bartlett, numpy.blackman, numpy.convolve
+    scipy.signal.lfilter
+
+    TODO: the window parameter could be the window itself if an array instead of a string
+    """
+    window_len = int(window_len)
+
+    if x.ndim != 1:
+        raise ValueError, "smooth only accepts 1 dimension arrays."
+
+    if x.size < window_len:
+        raise ValueError, "Input vector needs to be bigger than window size."
+
+    if window_len<3:
+        return x
+
+    if not window in ['flat', 'hanning', 'hamming', 'bartlett', 'blackman']:
+        raise ValueError, "Window is one of 'flat', 'hanning', 'hamming', 'bartlett', 'blackman'"
+
+    s=numpy.r_[2*x[0]-x[window_len:1:-1],x,2*x[-1]-x[-1:-window_len:-1]]
+    if window == 'flat': #moving average
+        w=numpy.ones(window_len,'d')
+    else:
+        w=eval('numpy.'+window+'(window_len)')
+
+    y=numpy.convolve(w/w.sum(),s,mode='same')
+
+    return y[window_len-1:-window_len+1]
 
 #-------------------------------
 def pei(law,wave,ebmv,rv,a_i,lambda_i,b_i,n_i):
