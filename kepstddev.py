@@ -1,15 +1,14 @@
-import numpy, scipy, sys, time, pylab, copy, math
+import sys
+import math
+import numpy as np
 from astropy.io import fits as pyfits
-from pylab import *
-from matplotlib import *
+from matplotlib import pyplot as plt
 import kepio, kepmsg, kepstat, kepkey
 from scipy import stats
 from kepstat import savitzky_golay, running_frac_std
 from copy import copy
-from math import ceil, sqrt
-from numpy import insert, append, array, median, ones, isfinite, nan, zeros
 
-def kepstddev(infile,outfile,datacol,timescale,clobber,verbose,logfile,status,cmdLine=False): 
+def kepstddev(infile,outfile,datacol,timescale,clobber,verbose,logfile,status,cmdLine=False):
 
 # startup parameters
 
@@ -52,7 +51,7 @@ def kepstddev(infile,outfile,datacol,timescale,clobber,verbose,logfile,status,cm
 # clobber output file
 
     if clobber: status = kepio.clobber(outfile,logfile,verbose)
-    if kepio.fileexists(outfile): 
+    if kepio.fileexists(outfile):
         message = 'ERROR -- KEPSTDDEV: ' + outfile + ' exists. Use clobber=yes'
         status = kepmsg.err(logfile,message,verbose)
 
@@ -82,10 +81,10 @@ def kepstddev(infile,outfile,datacol,timescale,clobber,verbose,logfile,status,cm
 # filter input data table
 
     if status == 0:
-        work1 = numpy.array([table.field('time'), table.field(datacol)])
-        work1 = numpy.rot90(work1,3)
-        work1 = work1[~numpy.isnan(work1).any(1)]            
- 
+        work1 = np.array([table.field('time'), table.field(datacol)])
+        work1 = np.rot90(work1,3)
+        work1 = work1[~np.isnan(work1).any(1)]
+
 # read table columns
 
     if status == 0:
@@ -96,33 +95,28 @@ def kepstddev(infile,outfile,datacol,timescale,clobber,verbose,logfile,status,cm
 
     if status == 0:
         stddev = running_frac_std(intime,indata,timescale/24) * 1.0e6
-        astddev = numpy.std(indata) * 1.0e6
-        cdpp = stddev / sqrt(timescale * 3600.0 / cadence)
+        astddev = np.std(indata) * 1.0e6
+        cdpp = stddev / math.sqrt(timescale * 3600.0 / cadence)
+        print '\nStandard deviation = %d ppm' % astddev
 
 # filter cdpp
 
     if status == 0:
         for i in range(len(cdpp)):
-            if cdpp[i] > median(cdpp) * 10.0: cdpp[i] = cdpp[i-1]
+            if cdpp[i] > np.median(cdpp) * 10.0: cdpp[i] = cdpp[i-1]
 
 # calculate median STDDEV
 
     if status == 0:
-        medcdpp = ones((len(cdpp)),dtype='float32') * median(cdpp[:])
-#        print '\nMedian %.1fhr standard deviation = %d ppm' % (timescale, median(stddev[:]))
-        print '\nStandard deviation = %d ppm' % astddev
-
-# calculate median STDDEV
-
-    if status == 0:
-        medcdpp = ones((len(cdpp)),dtype='float32') * median(cdpp[:])
-        print 'Median %.1fhr CDPP = %d ppm' % (timescale, median(cdpp[:]))
+        med = np.median(cdpp[:])
+        medcdpp = np.ones((len(cdpp)),dtype='float32') * med
+        print 'Median %.1fhr CDPP = %d ppm' % (timescale, med)
 
 # calculate RMS STDDEV
 
     if status == 0:
-        rms, status = kepstat.rms(cdpp,zeros(len(stddev)),logfile,verbose)
-        rmscdpp = ones((len(cdpp)),dtype='float32') * rms
+        rms, status = kepstat.rms(cdpp,np.zeros(len(stddev)),logfile,verbose)
+        rmscdpp = np.ones((len(cdpp)),dtype='float32') * rms
         print '   RMS %.1fhr CDPP = %d ppm\n' % (timescale, rms)
 
 # clean up x-axis unit
@@ -136,9 +130,7 @@ def kepstddev(infile,outfile,datacol,timescale,clobber,verbose,logfile,status,cm
 
     if status == 0:
         pout = copy(cdpp)
-        nrm = math.ceil(math.log10(median(cdpp))) - 1.0
-#	pout = pout / 10**nrm
-#	ylab = '%.1fhr $\sigma$ (10$^%d$ ppm)' % (timescale,nrm)
+        nrm = math.ceil(math.log10(np.median(cdpp))) - 1.0
 	ylab = '%.1fhr $\sigma$ (ppm)' % timescale
 
 # data limits
@@ -149,124 +141,91 @@ def kepstddev(infile,outfile,datacol,timescale,clobber,verbose,logfile,status,cm
 	ymax = pout.max()
 	xr = xmax - xmin
 	yr = ymax - ymin
-        ptime = insert(ptime,[0],[ptime[0]]) 
-        ptime = append(ptime,[ptime[-1]])
-        pout = insert(pout,[0],[0.0]) 
-        pout = append(pout,0.0)
-
-# plot style
-
-    if status == 0:
-        try:
-            params = {'backend': 'png',
-                      'axes.linewidth': 2.5,
-                      'axes.labelsize': 36,
-                      'axes.font': 'sans-serif',
-                      'axes.fontweight' : 'bold',
-                      'text.fontsize': 12,
-                      'legend.fontsize': 12,
-                      'xtick.labelsize': 32,
-                      'ytick.labelsize': 36}
-            pylab.rcParams.update(params)
-        except:
-            pass
+        ptime = np.insert(ptime,[0],[ptime[0]])
+        ptime = np.append(ptime,[ptime[-1]])
+        pout = np.insert(pout,[0],[0.0])
+        pout = np.append(pout,0.0)
 
 # define size of plot on monitor screen
 
-	pylab.figure(figsize=[xsize,ysize])
+	plt.figure(figsize=[xsize,ysize])
 
 # delete any fossil plots in the matplotlib window
 
-        pylab.clf()
+        plt.clf()
 
 # position first axes inside the plotting window
 
-        ax = pylab.axes([0.07,0.15,0.92,0.83])
+        ax = plt.axes([0.07,0.15,0.92,0.83])
 
 # force tick labels to be absolute rather than relative
 
-        pylab.gca().xaxis.set_major_formatter(pylab.ScalarFormatter(useOffset=False))
-        pylab.gca().yaxis.set_major_formatter(pylab.ScalarFormatter(useOffset=False))
-        ax.yaxis.set_major_locator(MaxNLocator(5))
+        plt.gca().xaxis.set_major_formatter(plt.ScalarFormatter(useOffset=False))
+        plt.gca().yaxis.set_major_formatter(plt.ScalarFormatter(useOffset=False))
+        ax.yaxis.set_major_locator(plt.MaxNLocator(5))
 
 # rotate y labels by 90 deg
 
         labels = ax.get_yticklabels()
-        pylab.setp(labels, 'rotation', 90,fontsize=36)
+        plt.setp(labels, 'rotation', 90,fontsize=36)
 
 # plot flux vs time
 
-        ltime = array([],dtype='float64')
-        ldata = array([],dtype='float32')
+        ltime = np.array([],dtype='float64')
+        ldata = np.array([],dtype='float32')
         dt = 0
         work1 = 2.0 * cadence / 86400
         for i in range(1,len(ptime)-1):
             dt = ptime[i] - ptime[i-1]
             if dt < work1:
-                ltime = append(ltime,ptime[i])
-                ldata = append(ldata,pout[i])
+                ltime = np.append(ltime,ptime[i])
+                ldata = np.append(ldata,pout[i])
             else:
-                pylab.plot(ltime,ldata,color='#0000ff',linestyle='-',linewidth=1.0)
-                ltime = array([],dtype='float64')
-                ldata = array([],dtype='float32')
-        pylab.plot(ltime,ldata,color='#0000ff',linestyle='-',linewidth=1.0)
+                plt.plot(ltime,ldata,color='#0000ff',linestyle='-',linewidth=1.0)
+                ltime = np.array([],dtype='float64')
+                ldata = np.array([],dtype='float32')
+        plt.plot(ltime,ldata,color='#0000ff',linestyle='-',linewidth=1.0)
 
 # plot the fill color below data time series, with no data gaps
 
-	pylab.fill(ptime,pout,fc='#ffff00',linewidth=0.0,alpha=0.2)
-
-# plot median CDPP
-
-#        pylab.plot(intime - intime0,medcdpp / 10**nrm,color='r',linestyle='-',linewidth=2.0)
-#        pylab.plot(intime - intime0,medcdpp,color='r',linestyle='-',linewidth=2.0)
-
-# plot RMS CDPP
-
-#        pylab.plot(intime - intime0,rmscdpp / 10**nrm,color='r',linestyle='--',linewidth=2.0)
+	plt.fill(ptime,pout,fc='#ffff00',linewidth=0.0,alpha=0.2)
 
 # define plot x and y limits
 
-	pylab.xlim(xmin - xr * 0.01, xmax + xr * 0.01)
+	plt.xlim(xmin - xr * 0.01, xmax + xr * 0.01)
 	if ymin - yr * 0.01 <= 0.0:
-            pylab.ylim(1.0e-10, ymax + yr * 0.01)
+            plt.ylim(1.0e-10, ymax + yr * 0.01)
 	else:
-            pylab.ylim(ymin - yr * 0.01, ymax + yr * 0.01)
-           
+            plt.ylim(ymin - yr * 0.01, ymax + yr * 0.01)
 # plot labels
 
-	pylab.xlabel(xlab, {'color' : 'k'})
-        pylab.ylabel(ylab, {'color' : 'k'})
+	plt.xlabel(xlab, {'color' : 'k'})
+        plt.ylabel(ylab, {'color' : 'k'})
 
 # make grid on plot
 
-	pylab.grid()
+	plt.grid()
 
 # render plot
 
     if status == 0:
-        if cmdLine: 
-            pylab.show(block=True)
-        else: 
-            pylab.ion()
-            pylab.plot([])
-            pylab.ioff()
+        plt.show(block=True)
 
 # add NaNs back into data
 
     if status == 0:
         n = 0
-        work1 = array([],dtype='float32')
+        work1 = np.array([],dtype='float32')
         instr, status = kepio.openfits(infile,'readonly',logfile,verbose)
 	table, status = kepio.readfitstab(infile,instr[1],logfile,verbose)
         for i in range(len(table.field(0))):
             if isfinite(table.field('time')[i]) and isfinite(table.field(datacol)[i]):
-                work1 = append(work1,cdpp[n])
+                work1 = np.append(work1,cdpp[n])
                 n += 1
             else:
-                work1 = append(work1,nan)
+                work1 = np.append(work1,nan)
 
 # write output file
-                
     if status == 0:
         status = kepkey.new('MCDPP%d' % (timescale * 10.0),medcdpp[0],
                             'Median %.1fhr CDPP (ppm)' % timescale,
@@ -279,7 +238,6 @@ def kepstddev(infile,outfile,datacol,timescale,clobber,verbose,logfile,status,cm
 	cols = instr[1].data.columns + col1
 	instr[1] = pyfits.new_table(cols,header=instr[1].header)
 	instr.writeto(outfile)
-	
 # comment keyword in output file
 
     if status == 0:
@@ -288,7 +246,7 @@ def kepstddev(infile,outfile,datacol,timescale,clobber,verbose,logfile,status,cm
 # close FITS
 
     if status == 0:
-        status = kepio.closefits(instr,logfile,verbose)	    
+        status = kepio.closefits(instr,logfile,verbose)
 
 # end time
 
@@ -297,8 +255,6 @@ def kepstddev(infile,outfile,datacol,timescale,clobber,verbose,logfile,status,cm
     else:
 	    message = '\nKEPSTDDEV aborted at'
     kepmsg.clock(message,logfile,verbose)
-
-
 
 # -----------------------------------------------------------
 # main
@@ -318,7 +274,7 @@ if '--shell' in sys.argv:
     args = parser.parse_args()
     cmdLine=True
     kepstddev(args.infile,args.outfile,args.datacol,args.timescale,args.clobber,args.verbose,
-           args.logfile,args.status,cmdLine)    
+           args.logfile,args.status,cmdLine)
 else:
     from pyraf import iraf
     parfile = iraf.osfn("kepler$kepstddev.par")
