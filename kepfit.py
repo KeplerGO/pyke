@@ -93,11 +93,11 @@ def leastsquare(functype,pinit,xdata,ydata,yerr,logfile,verbose):
 # calculate 1-sigma error on coefficients
 
     errors = []
-    if (covar == None):
+    if (covar is None):
 	message = 'WARNING -- KEPFIT.leastsquare: NULL covariance matrix'
 #	kepmsg.log(logfile,message,verbose)
     for i in range(len(coeffs)):
-	if (covar != None and len(coeffs) > 1):
+	if (covar is not None and len(coeffs) > 1):
 	    errors.append(math.sqrt(abs(covar[i][i])))
 	else:
 	    errors.append(coeffs[i])
