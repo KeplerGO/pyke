@@ -2,6 +2,7 @@ import sys, time, math
 import numpy as np
 from astropy.io import fits as pyfits
 from scipy.optimize import leastsq
+from copy import copy
 import kepio, kepmsg, kepkey, kepstat, kepfunc
 
 # global variables
@@ -67,7 +68,7 @@ def kepextract(infile,maskfile,outfile,subback,clobber,verbose,logfile,status):
         cards1 = instr[1].header.cards
         cards2 = instr[2].header.cards
         table = instr[1].data[:]
-        maskmap = np.copy(instr[2].data)
+        maskmap = copy(instr[2].data)
 
 # input table data
 

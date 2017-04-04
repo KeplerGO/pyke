@@ -2,6 +2,7 @@ import numpy as np
 import scipy, sys, time, math, re
 from astropy.io import fits as pyfits
 import matplotlib.pyplot as plt
+from copy import copy
 import kepio, kepmsg, kepkey, kepfit, kepstat
 
 def kepflatten(infile,outfile,datacol,errcol,nsig,stepsize,winsize,npoly,
@@ -168,7 +169,7 @@ def kepflatten(infile,outfile,datacol,errcol,nsig,stepsize,winsize,npoly,
 # clean up y-axis units
 
     if status == 0:
-        pout = np.copy(indata)
+        pout = copy(indata)
 	nrm = len(str(int(pout.max())))-1
 	pout = pout / 10**nrm
 	ylab = '10$^%d$ e$^-$ s$^{-1}$' % nrm
@@ -324,7 +325,7 @@ def kepflatten(infile,outfile,datacol,errcol,nsig,stepsize,winsize,npoly,
 # clean up y-axis units
 
     if status == 0:
-        pout = np.copy(outdata)
+        pout = copy(outdata)
 	ylab = 'Normalized Flux'
 
 # data limits

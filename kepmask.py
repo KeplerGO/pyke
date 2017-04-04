@@ -1,6 +1,7 @@
+import numpy as np
 from astropy.io import fits as pyfits
 from matplotlib import pyplot as plt
-import numpy as np
+from copy import copy
 import kepio, kepmsg, kepkey, kepplot
 import sys, time, re, math
 
@@ -84,13 +85,13 @@ def kepmask(infile,mfile,pfile,tabrow,imin,imax,iscale,cmap,verbose,logfile,stat
             ra, dec, column, row, kepmag, xdim, ydim, pixels, status = \
             kepio.readTPF(infile,'FLUX',logfile,verbose)
         img = pixels[tabrow]
-        pkepid = np.copy(kepid)
-        pra = np.copy(ra)
-        pdec = np.copy(dec)
-        pkepmag = np.copy(kepmag)
-        pxdim = np.copy(xdim)
-        pydim = np.copy(ydim)
-        pimg = np.copy(img)
+        pkepid = copy(kepid)
+        pra = copy(ra)
+        pdec = copy(dec)
+        pkepmag = copy(kepmag)
+        pxdim = copy(xdim)
+        pydim = copy(ydim)
+        pimg = copy(img)
 
 # print target data
 
@@ -110,9 +111,9 @@ def kepmask(infile,mfile,pfile,tabrow,imin,imax,iscale,cmap,verbose,logfile,stat
 # subimage of channel for plot
 
     if status == 0:
-        ymin = np.copy(row)
+        ymin = copy(row)
         ymax = ymin + ydim
-        xmin = np.copy(column)
+        xmin = copy(column)
         xmax = xmin + xdim
 
 # intensity scale
@@ -129,8 +130,8 @@ def kepmask(infile,mfile,pfile,tabrow,imin,imax,iscale,cmap,verbose,logfile,stat
             zmin *= 1.0
             zmax *= 1.0
         else:
-            zmin = np.copy(imin)
-            zmax = np.copy(imax)
+            zmin = copy(imin)
+            zmax = copy(imax)
 
 # plot limits
 
