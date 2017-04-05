@@ -209,7 +209,7 @@ def pei_paramters():
 
 
 #------------------------------
-# 1-d polynomial interpolation 
+# 1-d polynomial interpolation
 
 def polyval(x,c,tensor=True):
 
@@ -229,7 +229,7 @@ def polyval(x,c,tensor=True):
 
 
 #------------------------------
-# 2-d polynomial interpolation 
+# 2-d polynomial interpolation
 
 def polyval2d(x,y,c):
 
@@ -244,7 +244,7 @@ def polyval2d(x,y,c):
 
 
 #------------------------------
-# 2-d Gaussian interpolation 
+# 2-d Gaussian interpolation
 
 def PRFgauss2d(params,*args):
 
@@ -270,8 +270,8 @@ def PRFgauss2d(params,*args):
     posy = args[1]
     flux = args[2]
 
-    dx = posx - cen[0] 
-    dy = posy - cen[1] 
+    dx = posx - cen[0]
+    dy = posy - cen[1]
     z = square(dx) / sigma[0]**2 + square(dy) / sigma[1]**2
     g = A * scipy.exp(-z - B * dx * dy) + D
 
@@ -290,10 +290,10 @@ def PRF2DET2(flux,OBJx,OBJy,DATx,DATy,splineInterpolation):
     for i in range(len(flux)):
         FRCx,INTx = modf(OBJx[i])
         FRCy,INTy = modf(OBJy[i])
-        if FRCx > 0.5: 
+        if FRCx > 0.5:
             FRCx -= 1.0
             INTx += 1.0
-        if FRCy > 0.5: 
+        if FRCy > 0.5:
             FRCy -= 1.0
             INTy += 1.0
         FRCx = -FRCx
@@ -326,10 +326,10 @@ def PRF2DET(flux,OBJx,OBJy,DATx,DATy,wx,wy,a,splineInterpolation):
     for i in range(len(flux)):
         FRCx,INTx = modf(OBJx[i])
         FRCy,INTy = modf(OBJy[i])
-        if FRCx > 0.5: 
+        if FRCx > 0.5:
             FRCx -= 1.0
             INTx += 1.0
-        if FRCy > 0.5: 
+        if FRCy > 0.5:
             FRCy -= 1.0
             INTy += 1.0
         FRCx = -FRCx
@@ -349,7 +349,7 @@ def PRF2DET(flux,OBJx,OBJy,DATx,DATy,wx,wy,a,splineInterpolation):
 
 
 #------------------------------
-# PRF model 
+# PRF model
 
 def PRF(params,*args):
 
@@ -365,7 +365,6 @@ def PRF(params,*args):
     row = args[7]
 
 # parameters
-    
     f = empty((nsrc))
     x = empty((nsrc))
     y = empty((nsrc))
@@ -380,7 +379,6 @@ def PRF(params,*args):
 
 # calculate the sum squared difference between data and model
 
-#    PRFres = nansum(square(DATimg - PRFfit) / square(DATerr))
     PRFres = nansum(square(DATimg - PRFfit))
 
 # keep the fit centered
@@ -411,7 +409,6 @@ def PRFwithBackground(params,*args):
     row = args[10]
 
 # parameters
-    
     f = empty((nsrc))
     x = empty((nsrc))
     y = empty((nsrc))
@@ -419,13 +416,13 @@ def PRFwithBackground(params,*args):
         f[i] = params[i]
         x[i] = params[nsrc+i]
         y[i] = params[nsrc*2+i]
-    b = array([params[nsrc*3:nsrc*3+bterms],params[nsrc*3+bterms:nsrc*3+bterms*2]]) 
+    b = array([params[nsrc*3:nsrc*3+bterms],params[nsrc*3+bterms:nsrc*3+bterms*2]])
 
 # calculate PRF model binned to the detector pixel size
 
     PRFfit = PRF2DET(f,x,y,DATx,DATy,1.0,1.0,0.0,splineInterpolation)
 
-# add background 
+# add background
 
     if bterms == 1:
         PRFfit += params[nsrc*3]
@@ -464,7 +461,6 @@ def PRFwithFocusAndBackground(params,*args):
     row = args[10]
 
 # parameters
-    
     f = empty((nsrc))
     x = empty((nsrc))
     y = empty((nsrc))
@@ -475,7 +471,7 @@ def PRFwithFocusAndBackground(params,*args):
     if bterms == 1:
         b = params[nsrc*3]
     else:
-        b = array([params[nsrc*3:nsrc*3+bterms],params[nsrc*3+bterms:nsrc*3+bterms*2]]) 
+        b = array([params[nsrc*3:nsrc*3+bterms],params[nsrc*3+bterms:nsrc*3+bterms*2]])
     wx = params[-3]
     wy = params[-2]
     a = params[-1]
@@ -483,7 +479,7 @@ def PRFwithFocusAndBackground(params,*args):
     try:
         PRFfit = PRF2DET(f,x,y,DATx,DATy,wx,wy,a,splineInterpolation)
 
-# add background 
+# add background
 
         if bterms == 1:
             PRFfit = PRFfit + b
@@ -492,15 +488,9 @@ def PRFwithFocusAndBackground(params,*args):
 
 # calculate the sum squared difference between data and model
 
-#        PRFres = nansum(square(DATimg - PRFfit))
-#        PRFres = nansum(numpy.abs(square(DATimg - PRFfit) / PRFfit))
         PRFres = nansum(square(DATimg - PRFfit) / square(DATerr))
     except:
         PRFres = 1.0e30
-#    if wx > 1.15 or wx < 0.85:
-#        PRFres = 1.0e30
-#    if wy > 1.15 or wy < 0.85:
-#        PRFres = 1.0e30
 
 # keep the fit centered
 
@@ -527,7 +517,6 @@ def PRFwithFocus(params,*args):
     row = args[7]
 
 # parameters
-    
     f = empty((nsrc))
     x = empty((nsrc))
     y = empty((nsrc))
@@ -549,10 +538,6 @@ def PRFwithFocus(params,*args):
         PRFres = nansum(square(DATimg - PRFfit) / square(DATerr))
     except:
         PRFres = 1.0e30
-#    if wx > 1.15 or wx < 0.85:
-#        PRFres = 1.0e30
-#    if wy > 1.15 or wy < 0.85:
-#        PRFres = 1.0e30
 
 # keep the fit centered
 
@@ -599,16 +584,9 @@ def kepler_prf_2d(params,*args):
 # write out parameters
 
     if verbose:
-#        txt = '\rFlux = %.2f e-/s ' % f
-#        txt += 'X = %.4f pix ' % (x * prfDelX)
-#        txt += 'Y = %.4f pix ' % (y * prfDelY)
-#        txt += ' ' * 5
-#        sys.stdout.write(txt)
-#        sys.stdout.flush()
-
         txt = '\rPearson\'s chisq = %d for %d dof' % \
             (int(nansum(square(data - model * f) / absolute(data))), (shape(data)[0] * shape(data)[1] - len(params)))
-        txt += ' ' * 5 
+        txt += ' ' * 5
         sys.stdout.write(txt)
         sys.stdout.flush()
 
@@ -634,7 +612,7 @@ def kepler_multi_prf_2d(params,*args):
     verbose = args[9]
 
 # parameters
-    
+
     nsrc = len(params) / 3
     f = empty((nsrc))
     y = empty((nsrc))
@@ -674,7 +652,7 @@ def kepler_multi_prf_2d(params,*args):
 #        else:
         txt = '\rPearson\'s chisq = %d for %d dof' % \
             (int(nansum(square(data - model) / absolute(data))), (shape(data)[0] * shape(data)[1] - len(params)))
-        txt += ' ' * 5 
+        txt += ' ' * 5
         sys.stdout.write(txt)
         sys.stdout.flush()
 
@@ -700,7 +678,6 @@ def kepler_bkg_multi_prf_2d(params,*args):
     verbose = args[9]
 
 # parameters
-    
     nsrc = (len(params) - 1) / 3
     f = empty((nsrc))
     y = empty((nsrc))
@@ -710,7 +687,7 @@ def kepler_bkg_multi_prf_2d(params,*args):
     for i in range(nsrc):
         f[i] = params[i]
         y[i] = params[nsrc+i]
-        x[i] = params[nsrc*2+i]    
+        x[i] = params[nsrc*2+i]
 
 # interpolate PRF centroid to new pixel position
 
@@ -735,7 +712,7 @@ def kepler_bkg_multi_prf_2d(params,*args):
     if verbose:
         txt = '\rPearson\'s chisq = %d for %d dof' % \
             (int(nansum(square(data - model) / data)), (shape(data)[0] * shape(data)[1] - len(params)))
-        txt += ' ' * 5 
+        txt += ' ' * 5
         sys.stdout.write(txt)
         sys.stdout.flush()
 
@@ -759,7 +736,6 @@ def kepler_focus_multi_prf_2d(params,*args):
     verbose = args[7]
 
 # parameters
-    
     nsrc = (len(params) - 2) / 3
     f = empty((nsrc))
     y = empty((nsrc))
@@ -773,7 +749,7 @@ def kepler_focus_multi_prf_2d(params,*args):
     for i in range(nsrc):
         f[i] = params[i]
         y[i] = params[nsrc+i]
-        x[i] = params[nsrc*2+i]    
+        x[i] = params[nsrc*2+i]
 
 # dimensions of data image if it had PRF-sized pixels
 
@@ -820,7 +796,7 @@ def kepler_focus_multi_prf_2d(params,*args):
     if verbose:
         txt = '\rPearson\'s chisq = %d for %d dof' % \
             (int(nansum(square(data - model) / data)), (shape(data)[0] * shape(data)[1] - len(params)))
-        txt += ' ' * 5 
+        txt += ' ' * 5
         sys.stdout.write(txt)
         sys.stdout.flush()
 
@@ -848,7 +824,7 @@ def kepler_prf_1d(params,*args):
 
     dataY = data.sum(axis=1)
     dataX = data.sum(axis=0)
-    prfY = prf.sum(axis=1) 
+    prfY = prf.sum(axis=1)
     prfX = prf.sum(axis=0)
 
 # interpolate PRF centroid to new pixel position
@@ -948,4 +924,3 @@ def inv_normal_cummulative_function(p):
     r = q * q
     return (((((a[0] * r + a[1]) * r + a[2]) * r + a[3]) * r + a[4]) * r + a[5]) * q / \
         (((((b[0] * r + b[1]) * r + b[2]) * r+ b[3]) * r + b[4]) * r + 1)
-
