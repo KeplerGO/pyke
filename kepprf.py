@@ -1,27 +1,24 @@
-import pylab, numpy, scipy
+import numpy as np
+from matplotlib import pyplot as plt
+from matplotlib import ticker
 from astropy.io import fits as pyfits
-from pylab import *
-from matplotlib import *
-from matplotlib import pyplot
-from numpy import *
 import kepio, kepmsg, kepkey, kepplot, kepfit, keparray, kepfunc, kepstat
 import sys, time, re, math, glob
 from scipy import interpolate, optimize, ndimage, stats
 from scipy.optimize import fmin_powell
-from scipy.interpolate import RectBivariateSpline, interp2d
+from scipy.interpolate import RectBivariateSpline
 from scipy.ndimage import interpolation
-from scipy.ndimage.interpolation import shift, rotate
 
 # -----------------------------------------------------------
 # core code
 
 def kepprf(infile,plotfile,rownum,columns,rows,fluxes,border,background,focus,prfdir,xtol,ftol,
-           imscale,colmap,labcol,apercol,plt,verbose,logfile,status,cmdLine=False):
+           imscale,colmap,labcol,apercol,plot,verbose,logfile,status,cmdLine=False):
 
 # input arguments
 
     status = 0
-    seterr(all="ignore")
+    np.seterr(all="ignore")
 
 # log the call
 
@@ -49,7 +46,7 @@ def kepprf(infile,plotfile,rownum,columns,rows,fluxes,border,background,focus,pr
     call += 'labcol='+labcol+' '
     call += 'apercol='+apercol+' '
     plotit = 'n'
-    if (plt): plotit = 'y'
+    if (plot): plotit = 'y'
     call += 'plot='+plotit+' '
     chatter = 'n'
     if (verbose): chatter = 'y'
@@ -68,7 +65,7 @@ def kepprf(infile,plotfile,rownum,columns,rows,fluxes,border,background,focus,pr
 # reference color map
 
     if colmap == 'browse':
-        status = cmap_plot(cmdLine)
+        status = plt.cmap_plot(cmdLine)
 
 # construct inital guess vector for fit
 
@@ -154,7 +151,7 @@ def kepprf(infile,plotfile,rownum,columns,rows,fluxes,border,background,focus,pr
 
     if status == 0:
         maskimg, pixcoord1, pixcoord2, status = kepio.readMaskDefinition(infile,logfile,verbose)
-        npix = numpy.size(numpy.nonzero(maskimg)[0])
+        npix = np.size(np.nonzero(maskimg)[0])
 
 # print target data
 
@@ -175,7 +172,7 @@ def kepprf(infile,plotfile,rownum,columns,rows,fluxes,border,background,focus,pr
 # is this a good row with finite timestamp and pixels?
 
     if status == 0:
-        if not numpy.isfinite(barytime[rownum-1]) or numpy.nansum(fluxpixels[rownum-1,:]) == numpy.nan:
+        if not np.isfinite(barytime[rownum-1]) or np.nansum(fluxpixels[rownum-1,:]) == np.nan:
             message = 'ERROR -- KEPFIELD: Row ' + str(rownum) + ' is a bad quality timestamp'
             status = kepmsg.err(logfile,message,verbose)
 
@@ -184,16 +181,16 @@ def kepprf(infile,plotfile,rownum,columns,rows,fluxes,border,background,focus,pr
     if status == 0:
         flux = fluxpixels[rownum-1,:]
         ferr = errpixels[rownum-1,:]
-        DATx = arange(column,column+xdim)
-        DATy = arange(row,row+ydim)
-#        if numpy.nanmin > 420000.0: flux -= 420000.0
+        DATx = np.arange(column,column+xdim)
+        DATy = np.arange(row,row+ydim)
+#        if np.nanmin > 420000.0: flux -= 420000.0
 
 # image scale and intensity limits of pixel data
 
     if status == 0:
         n = 0
-        DATimg = empty((ydim,xdim))
-        ERRimg = empty((ydim,xdim))
+        DATimg = np.empty((ydim,xdim))
+        ERRimg = np.empty((ydim,xdim))
         for i in range(ydim):
             for j in range(xdim):
                 DATimg[i,j] = flux[n]
@@ -218,53 +215,53 @@ def kepprf(infile,plotfile,rownum,columns,rows,fluxes,border,background,focus,pr
 
     if status == 0:
         prfn = [0,0,0,0,0]
-        crpix1p = numpy.zeros((5),dtype='float32')
-        crpix2p = numpy.zeros((5),dtype='float32')
-        crval1p = numpy.zeros((5),dtype='float32')
-        crval2p = numpy.zeros((5),dtype='float32')
-        cdelt1p = numpy.zeros((5),dtype='float32')
-        cdelt2p = numpy.zeros((5),dtype='float32')
+        crpix1p = np.zeros((5),dtype='float32')
+        crpix2p = np.zeros((5),dtype='float32')
+        crval1p = np.zeros((5),dtype='float32')
+        crval2p = np.zeros((5),dtype='float32')
+        cdelt1p = np.zeros((5),dtype='float32')
+        cdelt2p = np.zeros((5),dtype='float32')
         for i in range(5):
             prfn[i], crpix1p[i], crpix2p[i], crval1p[i], crval2p[i], cdelt1p[i], cdelt2p[i], status \
                 = kepio.readPRFimage(prffile,i+1,logfile,verbose)
-        prfn = array(prfn)
-        PRFx = arange(0.5,shape(prfn[0])[1]+0.5)
-        PRFy = arange(0.5,shape(prfn[0])[0]+0.5)
-        PRFx = (PRFx - size(PRFx) / 2) * cdelt1p[0]
-        PRFy = (PRFy - size(PRFy) / 2) * cdelt2p[0]
+        prfn = np.array(prfn)
+        PRFx = np.arange(0.5,np.shape(prfn[0])[1]+0.5)
+        PRFy = np.arange(0.5,np.shape(prfn[0])[0]+0.5)
+        PRFx = (PRFx - np.size(PRFx) / 2) * cdelt1p[0]
+        PRFy = (PRFy - np.size(PRFy) / 2) * cdelt2p[0]
 
 # interpolate the calibrated PRF shape to the target position
 
     if status == 0:
-        prf = zeros(shape(prfn[0]),dtype='float32')
-        prfWeight = zeros((5),dtype='float32')
+        prf = np.zeros(np.shape(prfn[0]),dtype='float32')
+        prfWeight = np.zeros((5),dtype='float32')
         for i in xrange(5):
-            prfWeight[i] = sqrt((column - crval1p[i])**2 + (row - crval2p[i])**2)
+            prfWeight[i] = math.sqrt((column - crval1p[i])**2 + (row - crval2p[i])**2)
             if prfWeight[i] == 0.0:
                 prfWeight[i] = 1.0e-6
             prf = prf + prfn[i] / prfWeight[i]
-        prf = prf / nansum(prf) / cdelt1p[0] / cdelt2p[0]
+        prf = prf / np.nansum(prf) / cdelt1p[0] / cdelt2p[0]
 
 # location of the data image centered on the PRF image (in PRF pixel units)
 
     if status == 0:
         prfDimY = int(ydim / cdelt1p[0])
         prfDimX = int(xdim / cdelt2p[0])
-        PRFy0 = (shape(prf)[0] - prfDimY) / 2
-        PRFx0 = (shape(prf)[1] - prfDimX) / 2
+        PRFy0 = int(np.round((np.shape(prf)[0] - prfDimY) / 2))
+        PRFx0 = int(np.round((np.shape(prf)[1] - prfDimX) / 2))
 
 # interpolation function over the PRF
 
     if status == 0:
-        splineInterpolation = scipy.interpolate.RectBivariateSpline(PRFx,PRFy,prf)
+        splineInterpolation = RectBivariateSpline(PRFx,PRFy,prf)
 
 # construct mesh for background model
 
     if status == 0 and background:
-        bx = numpy.arange(1.,float(xdim+1))
-        by = numpy.arange(1.,float(ydim+1))
-        xx, yy = numpy.meshgrid(numpy.linspace(bx.min(), bx.max(), xdim),
-                                numpy.linspace(by.min(), by.max(), ydim))
+        bx = np.arange(1.,float(xdim+1))
+        by = np.arange(1.,float(ydim+1))
+        xx, yy = np.meshgrid(np.linspace(bx.min(), bx.max(), xdim),
+                                np.linspace(by.min(), by.max(), ydim))
 
 # fit PRF model to pixel data
 
@@ -292,11 +289,11 @@ def kepprf(infile,plotfile,rownum,columns,rows,fluxes,border,background,focus,pr
 
     if status == 0:
         flux = []; OBJx = []; OBJy = []
-        PRFmod = numpy.zeros((prfDimY,prfDimX))
+        PRFmod = np.zeros((prfDimY,prfDimX))
         if PRFy0 < 0 or PRFx0 < 0.0:
-            PRFmod = numpy.zeros((prfDimY,prfDimX))
-            superPRF = zeros((prfDimY+1,prfDimX+1))
-            superPRF[abs(PRFy0):abs(PRFy0)+shape(prf)[0],abs(PRFx0):abs(PRFx0)+shape(prf)[1]] = prf
+            PRFmod = np.zeros((prfDimY,prfDimX))
+            superPRF = np.zeros((prfDimY+1,prfDimX+1))
+            superPRF[abs(PRFy0):abs(PRFy0)+np.shape(prf)[0],abs(PRFx0):abs(PRFx0)+np.shape(prf)[1]] = prf
             prf = superPRF * 1.0
             PRFy0 = 0
             PRFx0 = 0
@@ -305,7 +302,7 @@ def kepprf(infile,plotfile,rownum,columns,rows,fluxes,border,background,focus,pr
 
         if focus:
             angle = ans[-1]
-            prf = rotate(prf,-angle,reshape=False,mode='nearest')
+            prf = interpolation.rotate(prf,-angle,reshape=False,mode='nearest')
 
 # iterate through the sources in the best fit PSF model
 
@@ -316,9 +313,9 @@ def kepprf(infile,plotfile,rownum,columns,rows,fluxes,border,background,focus,pr
 
 # calculate best-fit model
 
-            y = (OBJy[i]-mean(DATy)) / cdelt1p[0]
-            x = (OBJx[i]-mean(DATx)) / cdelt2p[0]
-            prfTmp = shift(prf,[y,x],order=3,mode='constant')
+            y = (OBJy[i]-np.mean(DATy)) / cdelt1p[0]
+            x = (OBJx[i]-np.mean(DATx)) / cdelt2p[0]
+            prfTmp = interpolation.shift(prf,[y,x],order=3,mode='constant')
             prfTmp = prfTmp[PRFy0:PRFy0+prfDimY,PRFx0:PRFx0+prfDimX]
             PRFmod = PRFmod + prfTmp * flux[i]
             wx = 1.0
@@ -339,9 +336,9 @@ def kepprf(infile,plotfile,rownum,columns,rows,fluxes,border,background,focus,pr
             if bterms == 1:
                 b = ans[nsrc*3]
             else:
-                bcoeff = array([ans[nsrc*3:nsrc*3+bterms],ans[nsrc*3+bterms:nsrc*3+bterms*2]])
+                bcoeff = np.array([ans[nsrc*3:nsrc*3+bterms],ans[nsrc*3+bterms:nsrc*3+bterms*2]])
                 bkg = kepfunc.polyval2d(xx,yy,bcoeff)
-                b = nanmean(bkg.reshape(bkg.size))
+                b = np.nanmean(bkg.reshape(bkg.size))
             txt = '\n   Mean background = %.2f e-/s' % b
             kepmsg.log(logfile,txt,True)
         if focus:
@@ -358,8 +355,8 @@ def kepprf(infile,plotfile,rownum,columns,rows,fluxes,border,background,focus,pr
     if status == 0:
         PRFall = kepfunc.PRF2DET(flux,OBJx,OBJy,DATx,DATy,wx,wy,angle,splineInterpolation)
         PRFone = kepfunc.PRF2DET([flux[0]],[OBJx[0]],[OBJy[0]],DATx,DATy,wx,wy,angle,splineInterpolation)
-        FluxInMaskAll = numpy.nansum(PRFall)
-        FluxInMaskOne = numpy.nansum(PRFone)
+        FluxInMaskAll = np.nansum(PRFall)
+        FluxInMaskOne = np.nansum(PRFone)
         FluxInAperAll = 0.0
         FluxInAperOne = 0.0
         for i in range(1,ydim):
@@ -394,13 +391,13 @@ def kepprf(infile,plotfile,rownum,columns,rows,fluxes,border,background,focus,pr
 
     if status == 0:
         PRFres = DATimg - PRFfit
-        FLUXres = numpy.nansum(PRFres) / npix
+        FLUXres = np.nansum(PRFres) / npix
 
 # calculate the sum squared difference between data and model
 
     if status == 0:
-        Pearson = abs(numpy.nansum(numpy.square(DATimg - PRFfit) / PRFfit))
-        Chi2 = numpy.nansum(numpy.square(DATimg - PRFfit) / numpy.square(ERRimg))
+        Pearson = abs(np.nansum(np.square(DATimg - PRFfit) / PRFfit))
+        Chi2 = np.nansum(np.square(DATimg - PRFfit) / np.square(ERRimg))
         DegOfFreedom = npix - len(guess) - 1
         try:
             kepmsg.log(logfile,'\n       Residual flux = %.2f e-/s' % FLUXres,True)
@@ -419,7 +416,7 @@ def kepprf(infile,plotfile,rownum,columns,rows,fluxes,border,background,focus,pr
         if imscale == 'linear':
             zmaxpr *= 0.9
         elif imscale == 'logarithmic':
-            zmaxpr = numpy.max(zmaxpr)
+            zmaxpr = np.max(zmaxpr)
             zminpr = zmaxpr / 2
 
 # plot style
@@ -437,11 +434,11 @@ def kepprf(infile,plotfile,rownum,columns,rows,fluxes,border,background,focus,pr
                       'ytick.labelsize': 20,
                       'xtick.major.pad': 6,
                       'ytick.major.pad': 6}
-            pylab.rcParams.update(params)
+            plt.rcParams.update(params)
         except:
             pass
-        pylab.figure(figsize=[12,10])
-        pylab.clf()
+        plt.figure(figsize=[12,10])
+        plt.clf()
         plotimage(imgdat_pl,zminfl,zmaxfl,1,row,column,xdim,ydim,0.07,0.53,'observation',colmap,labcol)
         plotimage(imgprf_pl,zminpr,zmaxpr,2,row,column,xdim,ydim,0.44,0.53,'model',colmap,labcol)
         kepplot.borders(maskimg,xdim,ydim,pixcoord1,pixcoord2,1,apercol,'--',0.5)
@@ -451,48 +448,43 @@ def kepprf(infile,plotfile,rownum,columns,rows,fluxes,border,background,focus,pr
 
 # plot data color bar
 
-    barwin = pylab.axes([0.84,0.08,0.06,0.9])
+    barwin = plt.axes([0.84,0.08,0.06,0.9])
     if imscale == 'linear':
-        brange = numpy.arange(zminfl,zmaxfl,(zmaxfl-zminfl)/1000)
+        brange = np.arange(zminfl,zmaxfl,(zmaxfl-zminfl)/1000)
     elif imscale == 'logarithmic':
-        brange = numpy.arange(10.0**zminfl,10.0**zmaxfl,(10.0**zmaxfl-10.0**zminfl)/1000)
+        brange = np.arange(10.0**zminfl,10.0**zmaxfl,(10.0**zmaxfl-10.0**zminfl)/1000)
     elif imscale == 'squareroot':
-        brange = numpy.arange(zminfl**2,zmaxfl**2,(zmaxfl**2-zminfl**2)/1000)
+        brange = np.arange(zminfl**2,zmaxfl**2,(zmaxfl**2-zminfl**2)/1000)
     if imscale == 'linear':
-        barimg = numpy.resize(brange,(1000,1))
+        barimg = np.resize(brange,(1000,1))
     elif imscale == 'logarithmic':
-        barimg = numpy.log10(numpy.resize(brange,(1000,1)))
+        barimg = np.log10(np.resize(brange,(1000,1)))
     elif imscale == 'squareroot':
-        barimg = numpy.sqrt(numpy.resize(brange,(1000,1)))
+        barimg = np.sqrt(np.resize(brange,(1000,1)))
     try:
-        nrm = len(str(int(numpy.nanmax(brange))))-1
+        nrm = len(str(int(np.nanmax(brange))))-1
     except:
         nrm = 0
     brange = brange / 10**nrm
-    pylab.imshow(barimg,aspect='auto',interpolation='nearest',origin='lower',
-                 vmin=numpy.nanmin(barimg),vmax=numpy.nanmax(barimg),
+    plt.imshow(barimg,aspect='auto',interpolation='nearest',origin='lower',
+                 vmin=np.nanmin(barimg),vmax=np.nanmax(barimg),
                  extent=(0.0,1.0,brange[0],brange[-1]),cmap=colmap)
     barwin.yaxis.tick_right()
     barwin.yaxis.set_label_position('right')
-    barwin.yaxis.set_major_locator(MaxNLocator(7))
-    pylab.gca().yaxis.set_major_formatter(pylab.ScalarFormatter(useOffset=False))
-    pylab.gca().set_autoscale_on(False)
-    pylab.setp(pylab.gca(),xticklabels=[],xticks=[])
-    pylab.ylabel('Flux (10$^%d$ e$^-$ s$^{-1}$)' % nrm)
-    setp(barwin.get_yticklabels(), 'rotation', 90)
+    barwin.yaxis.set_major_locator(plt.MaxNLocator(7))
+    plt.gca().yaxis.set_major_formatter(plt.ScalarFormatter(useOffset=False))
+    plt.gca().set_autoscale_on(False)
+    plt.setp(plt.gca(),xticklabels=[],xticks=[])
+    plt.ylabel('Flux (10$^%d$ e$^-$ s$^{-1}$)' % nrm)
+    plt.setp(barwin.get_yticklabels(), 'rotation', 90)
     barwin.yaxis.set_major_formatter(ticker.FormatStrFormatter('%.1f'))
 
 # render plot
 
     if status == 0 and len(plotfile) > 0 and plotfile.lower() != 'none':
-        pylab.savefig(plotfile)
-    if status == 0 and plt:
-        if cmdLine:
-            pylab.show(block=True)
-        else:
-            pylab.ion()
-            pylab.plot([])
-            pylab.ioff()
+        plt.savefig(plotfile)
+    if status == 0 and plot:
+        plt.show(block=True)
 
 # stop time
 
@@ -521,25 +513,25 @@ def plotimage(imgflux_pl,zminfl,zmaxfl,plmode,row,column,xdim,ydim,winx,winy,tla
 
 # plot the image window
 
-    ax = pylab.axes([winx,winy,0.37,0.45])
-    pylab.imshow(imgflux_pl,aspect='auto',interpolation='nearest',origin='lower',
+    ax = plt.axes([winx,winy,0.37,0.45])
+    plt.imshow(imgflux_pl,aspect='auto',interpolation='nearest',origin='lower',
            vmin=zminfl,vmax=zmaxfl,extent=(xmin,xmax,ymin,ymax),cmap=colmap)
-    pylab.gca().set_autoscale_on(False)
+    plt.gca().set_autoscale_on(False)
     labels = ax.get_yticklabels()
-    setp(labels, 'rotation', 90)
-    pylab.gca().xaxis.set_major_formatter(pylab.ScalarFormatter(useOffset=False))
-    pylab.gca().yaxis.set_major_formatter(pylab.ScalarFormatter(useOffset=False))
+    plt.setp(labels, 'rotation', 90)
+    plt.gca().xaxis.set_major_formatter(plt.ScalarFormatter(useOffset=False))
+    plt.gca().yaxis.set_major_formatter(plt.ScalarFormatter(useOffset=False))
     if plmode == 1:
-        pylab.setp(pylab.gca(),xticklabels=[])
+        plt.setp(plt.gca(),xticklabels=[])
     if plmode == 2:
-        pylab.setp(pylab.gca(),xticklabels=[],yticklabels=[])
+        plt.setp(plt.gca(),xticklabels=[],yticklabels=[])
     if plmode == 4:
-        pylab.setp(pylab.gca(),yticklabels=[])
+        plt.setp(plt.gca(),yticklabels=[])
     if plmode == 3 or plmode == 4:
-        pylab.xlabel('Pixel Column Number', {'color' : 'k'})
+        plt.xlabel('Pixel Column Number', {'color' : 'k'})
     if plmode == 1 or plmode == 3:
-        pylab.ylabel('Pixel Row Number', {'color' : 'k'})
-    pylab.text(0.05, 0.93,tlabel,horizontalalignment='left',verticalalignment='center',
+        plt.ylabel('Pixel Row Number', {'color' : 'k'})
+    plt.text(0.05, 0.93,tlabel,horizontalalignment='left',verticalalignment='center',
                fontsize=36,fontweight=500,color=labcol,transform=ax.transAxes)
 
     return
@@ -549,27 +541,22 @@ def plotimage(imgflux_pl,zminfl,zmaxfl,plmode,row,column,xdim,ydim,winx,winy,tla
 
 def cmap_plot(cmdLine):
 
-    pylab.figure(figsize=[5,10])
+    plt.figure(figsize=[5,10])
     a=outer(ones(10),arange(0,1,0.01))
-    subplots_adjust(top=0.99,bottom=0.00,left=0.01,right=0.8)
+    plt.subplots_adjust(top=0.99,bottom=0.00,left=0.01,right=0.8)
     maps=[m for m in cm.datad if not m.endswith("_r")]
     maps.sort()
     l=len(maps)+1
     for i, m in enumerate(maps):
         print m
         subplot(l,1,i+1)
-        pylab.setp(pylab.gca(),xticklabels=[],xticks=[],yticklabels=[],yticks=[])
-        imshow(a,aspect='auto',cmap=get_cmap(m),origin="lower")
-        pylab.text(100.85,0.5,m,fontsize=10)
+        plt.setp(plt.gca(),xticklabels=[],xticks=[],yticklabels=[],yticks=[])
+        plt.imshow(a,aspect='auto',cmap=get_cmap(m),origin="lower")
+        plt.text(100.85,0.5,m,fontsize=10)
 
 # render plot
 
-    if cmdLine:
-        pylab.show(block=True)
-    else:
-        pylab.ion()
-        pylab.plot([])
-        pylab.ioff()
+    plt.show(block=True)
 
     status = 1
     return status
