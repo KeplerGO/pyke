@@ -1,11 +1,10 @@
-import pylab, numpy, scipy, multiprocessing, itertools
-from pylab import *
-from matplotlib import *
-from numpy import *
+import math
+import multiprocessing, itertools
+from matplotlib import pyplot as plt
+import numpy as np
 from astropy.io import fits as pyfits
 import kepio, kepmsg, kepkey, kepplot, kepfit, keparray, kepfunc
 import sys, time, re, math, glob
-from scipy import stats, interpolate, optimize, ndimage
 from scipy.optimize import fmin_powell
 from scipy.interpolate import RectBivariateSpline
 
@@ -13,12 +12,12 @@ from scipy.interpolate import RectBivariateSpline
 # core code
 
 def kepprfphot(infile,outroot,columns,rows,fluxes,border,background,focus,prfdir,ranges,
-               tolerance,ftolerance,qualflags,plt,clobber,verbose,logfile,status,cmdLine=False):
+               tolerance,ftolerance,qualflags,plot,clobber,verbose,logfile,status,cmdLine=False):
 
 # input arguments
 
     status = 0
-    seterr(all="ignore")
+    np.seterr(all="ignore")
 
 # log the call
 
@@ -45,7 +44,7 @@ def kepprfphot(infile,outroot,columns,rows,fluxes,border,background,focus,prfdir
     if (qualflags): quality = 'y'
     call += 'qualflags='+quality+' '
     plotit = 'n'
-    if (plt): plotit = 'y'
+    if (plot): plotit = 'y'
     call += 'plot='+plotit+' '
     overwrite = 'n'
     if (clobber): overwrite = 'y'
@@ -161,16 +160,16 @@ def kepprfphot(infile,outroot,columns,rows,fluxes,border,background,focus,prfdir
             ra, dec, column, row, kepmag, xdim, ydim, poscorr1, status = \
             kepio.readTPF(infile,'POS_CORR1',logfile,verbose)
         if status != 0:
-            poscorr1 = numpy.zeros((len(barytime)),dtype='float32')
-            poscorr1[:] = numpy.nan
+            poscorr1 = np.zeros((len(barytime)),dtype='float32')
+            poscorr1[:] = np.nan
             status = 0
     if status == 0:
         kepid, channel, skygroup, module, output, quarter, season, \
             ra, dec, column, row, kepmag, xdim, ydim, poscorr2, status = \
             kepio.readTPF(infile,'POS_CORR2',logfile,verbose)
         if status != 0:
-            poscorr2 = numpy.zeros((len(barytime)),dtype='float32')
-            poscorr2[:] = numpy.nan
+            poscorr2 = np.zeros((len(barytime)),dtype='float32')
+            poscorr2[:] = np.nan
             status = 0
     if status == 0:
         kepid, channel, skygroup, module, output, quarter, season, \
@@ -187,8 +186,8 @@ def kepprfphot(infile,outroot,columns,rows,fluxes,border,background,focus,prfdir
         cards0 = struct[0].header.cards
         cards1 = struct[1].header.cards
         cards2 = struct[2].header.cards
-        maskmap = copy(struct[2].data)
-        npix = numpy.size(numpy.nonzero(maskmap)[0])
+        maskmap = np.copy(struct[2].data)
+        npix = np.size(np.nonzero(maskmap)[0])
 
 # print target data
 
@@ -223,31 +222,31 @@ def kepprfphot(infile,outroot,columns,rows,fluxes,border,background,focus,prfdir
 
     if status == 0:
         prfn = [0,0,0,0,0]
-        crpix1p = numpy.zeros((5),dtype='float32')
-        crpix2p = numpy.zeros((5),dtype='float32')
-        crval1p = numpy.zeros((5),dtype='float32')
-        crval2p = numpy.zeros((5),dtype='float32')
-        cdelt1p = numpy.zeros((5),dtype='float32')
-        cdelt2p = numpy.zeros((5),dtype='float32')
+        crpix1p = np.zeros((5),dtype='float32')
+        crpix2p = np.zeros((5),dtype='float32')
+        crval1p = np.zeros((5),dtype='float32')
+        crval2p = np.zeros((5),dtype='float32')
+        cdelt1p = np.zeros((5),dtype='float32')
+        cdelt2p = np.zeros((5),dtype='float32')
         for i in range(5):
             prfn[i], crpix1p[i], crpix2p[i], crval1p[i], crval2p[i], cdelt1p[i], cdelt2p[i], status \
                 = kepio.readPRFimage(prffile,i+1,logfile,verbose)
-        PRFx = arange(0.5,shape(prfn[0])[1]+0.5)
-        PRFy = arange(0.5,shape(prfn[0])[0]+0.5)
-        PRFx = (PRFx - size(PRFx) / 2) * cdelt1p[0]
-        PRFy = (PRFy - size(PRFy) / 2) * cdelt2p[0]
+        PRFx = np.arange(0.5,np.shape(prfn[0])[1]+0.5)
+        PRFy = np.arange(0.5,np.shape(prfn[0])[0]+0.5)
+        PRFx = (PRFx - np.size(PRFx) / 2) * cdelt1p[0]
+        PRFy = (PRFy - np.size(PRFy) / 2) * cdelt2p[0]
 
 # interpolate the calibrated PRF shape to the target position
 
     if status == 0:
-        prf = zeros(shape(prfn[0]),dtype='float32')
-        prfWeight = zeros((5),dtype='float32')
+        prf = np.zeros(np.shape(prfn[0]),dtype='float32')
+        prfWeight = np.zeros((5),dtype='float32')
         for i in xrange(5):
-            prfWeight[i] = sqrt((column - crval1p[i])**2 + (row - crval2p[i])**2)
+            prfWeight[i] = math.sqrt((column - crval1p[i])**2 + (row - crval2p[i])**2)
             if prfWeight[i] == 0.0:
                 prfWeight[i] = 1.0e6
             prf = prf + prfn[i] / prfWeight[i]
-        prf = prf / nansum(prf)
+        prf = prf / np.nansum(prf)
         prf = prf / cdelt1p[0] / cdelt2p[0]
 
 # location of the data image centered on the PRF image (in PRF pixel units)
@@ -255,43 +254,43 @@ def kepprfphot(infile,outroot,columns,rows,fluxes,border,background,focus,prfdir
     if status == 0:
         prfDimY = ydim / cdelt1p[0]
         prfDimX = xdim / cdelt2p[0]
-        PRFy0 = (shape(prf)[0] - prfDimY) / 2
-        PRFx0 = (shape(prf)[1] - prfDimX) / 2
+        PRFy0 = (np.shape(prf)[0] - prfDimY) / 2
+        PRFx0 = (np.shape(prf)[1] - prfDimX) / 2
 
 # construct input pixel image
 
     if status == 0:
-        DATx = arange(column,column+xdim)
-        DATy = arange(row,row+ydim)
+        DATx = np.arange(column,column+xdim)
+        DATy = np.arange(row,row+ydim)
 
 # interpolation function over the PRF
 
     if status == 0:
-        splineInterpolation = scipy.interpolate.RectBivariateSpline(PRFx,PRFy,prf,kx=3,ky=3)
+        splineInterpolation = RectBivariateSpline(PRFx,PRFy,prf,kx=3,ky=3)
 
 # construct mesh for background model
 
     if status == 0:
-        bx = numpy.arange(1.,float(xdim+1))
-        by = numpy.arange(1.,float(ydim+1))
-        xx, yy = numpy.meshgrid(numpy.linspace(bx.min(), bx.max(), xdim),
-                                numpy.linspace(by.min(), by.max(), ydim))
+        bx = np.arange(1.,float(xdim+1))
+        by = np.arange(1.,float(ydim+1))
+        xx, yy = np.meshgrid(np.linspace(bx.min(), bx.max(), xdim),
+                                np.linspace(by.min(), by.max(), ydim))
 
 # Get time ranges for new photometry, flag good data
 
     if status == 0:
         barytime += bjdref
         tstart,tstop,status = kepio.timeranges(ranges,logfile,verbose)
-        incl = numpy.zeros((len(barytime)),dtype='int')
+        incl = np.zeros((len(barytime)),dtype='int')
         for rownum in xrange(len(barytime)):
             for winnum in xrange(len(tstart)):
                 if barytime[rownum] >= tstart[winnum] and \
                         barytime[rownum] <= tstop[winnum] and \
                         (qual[rownum] == 0 or qualflags) and \
-                        numpy.isfinite(barytime[rownum]) and \
-                        numpy.isfinite(numpy.nansum(fluxpixels[rownum,:])):
+                        np.isfinite(barytime[rownum]) and \
+                        np.isfinite(np.nansum(fluxpixels[rownum,:])):
                     incl[rownum] = 1
-        if not numpy.in1d(1,incl):
+        if not np.in1d(1,incl):
             message = 'ERROR -- KEPPRFPHOT: No legal data within the range ' + ranges
             status = kepmsg.err(logfile,message,verbose)
 
@@ -300,14 +299,14 @@ def kepprfphot(infile,outroot,columns,rows,fluxes,border,background,focus,prfdir
     if status == 0:
         n = 0
         nincl = (incl == 1).sum()
-        tim = zeros((nincl),'float64')
-        tco = zeros((nincl),'float32')
-        cad = zeros((nincl),'float32')
-        flu = zeros((nincl,len(fluxpixels[0])),'float32')
-        fer = zeros((nincl,len(fluxpixels[0])),'float32')
-        pc1 = zeros((nincl),'float32')
-        pc2 = zeros((nincl),'float32')
-        qua = zeros((nincl),'float32')
+        tim = np.zeros((nincl),'float64')
+        tco = np.zeros((nincl),'float32')
+        cad = np.zeros((nincl),'float32')
+        flu = np.zeros((nincl,len(fluxpixels[0])),'float32')
+        fer = np.zeros((nincl,len(fluxpixels[0])),'float32')
+        pc1 = np.zeros((nincl),'float32')
+        pc2 = np.zeros((nincl),'float32')
+        qua = np.zeros((nincl),'float32')
         for rownum in xrange(len(barytime)):
             if incl[rownum] == 1:
                 tim[n] = barytime[rownum]
@@ -331,17 +330,17 @@ def kepprfphot(infile,outroot,columns,rows,fluxes,border,background,focus,prfdir
 # initialize plot arrays
 
     if status == 0:
-        t = numpy.array([],dtype='float64')
+        t = np.array([],dtype='float64')
         fl = []; dx = []; dy = []; bg = []; fx = []; fy = []; fa = []; rs = []; ch = []
         for i in range(nsrc):
-            fl.append(numpy.array([],dtype='float32'))
-            dx.append(numpy.array([],dtype='float32'))
-            dy.append(numpy.array([],dtype='float32'))
+            fl.append(np.array([],dtype='float32'))
+            dx.append(np.array([],dtype='float32'))
+            dy.append(np.array([],dtype='float32'))
 
 # Preparing fit data message
 
     if status == 0:
-        progress = numpy.arange(nincl)
+        progress = np.arange(nincl)
         if verbose:
             txt  = 'Preparing...'
             sys.stdout.write(txt)
@@ -351,7 +350,7 @@ def kepprfphot(infile,outroot,columns,rows,fluxes,border,background,focus,prfdir
 
     if status == 0:# and not cmdLine:
         oldtime = 0.0
-        for rownum in xrange(numpy.min([80,len(barytime)])):
+        for rownum in xrange(np.min([80,len(barytime)])):
             try:
                 if barytime[rownum] - oldtime > 0.5:
                     ftol = 1.0e-10; xtol = 1.0e-10
@@ -371,11 +370,11 @@ def kepprfphot(infile,outroot,columns,rows,fluxes,border,background,focus,prfdir
             try:
                 fluxp = fluxpixels[cad1:cad2,:]
                 errp = errpixels[cad1:cad2,:]
-                progress = numpy.arange(cad1,cad2)
+                progress = np.arange(cad1,cad2)
             except:
                 fluxp = fluxpixels[cad1:nincl,:]
                 errp = errpixels[cad1:nincl,:]
-                progress = numpy.arange(cad1,nincl)
+                progress = np.arange(cad1,nincl)
             try:
                 args = itertools.izip(fluxp,errp,itertools.repeat(DATx),itertools.repeat(DATy),
                                       itertools.repeat(nsrc),itertools.repeat(border),itertools.repeat(xx),
@@ -383,7 +382,7 @@ def kepprfphot(infile,outroot,columns,rows,fluxes,border,background,focus,prfdir
                                       itertools.repeat(splineInterpolation),itertools.repeat(guess),
                                       itertools.repeat(ftolerance),itertools.repeat(tolerance),
                                       itertools.repeat(focus),itertools.repeat(background),progress,
-                                      itertools.repeat(numpy.arange(cad1,nincl)[-1]),
+                                      itertools.repeat(np.arange(cad1,nincl)[-1]),
                                       itertools.repeat(float(x[0])),
                                       itertools.repeat(float(y[0])),itertools.repeat(True))
                 p = multiprocessing.Pool()
@@ -394,7 +393,7 @@ def kepprfphot(infile,outroot,columns,rows,fluxes,border,background,focus,prfdir
                 cad1 += 50; cad2 += 50
                 ans = array([array(item) for item in zip(*model)])
                 try:
-                    anslist = numpy.concatenate((anslist,ans.transpose()),axis=0)
+                    anslist = np.concatenate((anslist,ans.transpose()),axis=0)
                 except:
                     anslist = ans.transpose()
                 guess = anslist[-1]
@@ -419,13 +418,13 @@ def kepprfphot(infile,outroot,columns,rows,fluxes,border,background,focus,prfdir
             guess = PRFfits(args)
             ans.append(guess)
             ftol = ftolerance; xtol = tolerance; oldtime = barytime[rownum]
-        ans = array(ans).transpose()
+        ans = np.array(ans).transpose()
 
 # unpack the best fit parameters
 
     if status == 0:
         flux = []; OBJx = []; OBJy = []
-        na = shape(ans)[1]
+        na = np.shape(ans)[1]
         for i in range(nsrc):
             flux.append(ans[i,:])
             OBJx.append(ans[nsrc+i,:])
@@ -435,27 +434,27 @@ def kepprfphot(infile,outroot,columns,rows,fluxes,border,background,focus,prfdir
             if bterms == 1:
                 b = ans[nsrc*3,:]
             else:
-                b = array([])
+                b = np.array([])
                 bkg = []
                 for i in range(na):
-                    bcoeff = array([ans[nsrc*3:nsrc*3+bterms,i],ans[nsrc*3+bterms:nsrc*3+bterms*2,i]])
+                    bcoeff = np.array([ans[nsrc*3:nsrc*3+bterms,i],ans[nsrc*3+bterms:nsrc*3+bterms*2,i]])
                     bkg.append(kepfunc.polyval2d(xx,yy,bcoeff))
-                    b = numpy.append(b,nanmean(bkg[-1].reshape(bkg[-1].size)))
+                    b = np.append(b,nanmean(bkg[-1].reshape(bkg[-1].size)))
         except:
-            b = zeros((na))
+            b = np.zeros((na))
         if focus:
             wx = ans[-3,:]; wy = ans[-2,:]; angle = ans[-1,:]
         else:
-            wx = ones((na)); wy = ones((na)); angle = zeros((na))
+            wx = np.ones((na)); wy = np.ones((na)); angle = np.zeros((na))
 
 # constuct model PRF in detector coordinates
 
     if status == 0:
         residual = []; chi2 = []
         for i in range(na):
-            f = empty((nsrc))
-            x = empty((nsrc))
-            y = empty((nsrc))
+            f = np.empty((nsrc))
+            x = np.empty((nsrc))
+            y = np.empty((nsrc))
             for j in range(nsrc):
                 f[j] = flux[j][i]
                 x[j] = OBJx[j][i]
@@ -468,20 +467,20 @@ def kepprfphot(infile,outroot,columns,rows,fluxes,border,background,focus,prfdir
 
 # calculate residual of DATA - FIT
 
-            xdim = shape(xx)[1]
-            ydim = shape(yy)[0]
-            DATimg = numpy.empty((ydim,xdim))
+            xdim = np.shape(xx)[1]
+            ydim = np.shape(yy)[0]
+            DATimg = np.empty((ydim,xdim))
             n = 0
             for k in range(ydim):
                 for j in range(xdim):
                     DATimg[k,j] = fluxpixels[i,n]
                     n += 1
             PRFres = DATimg - PRFfit
-            residual.append(numpy.nansum(PRFres) / npix)
+            residual.append(np.nansum(PRFres) / npix)
 
 # calculate the sum squared difference between data and model
 
-            chi2.append(abs(numpy.nansum(numpy.square(DATimg - PRFfit) / PRFfit)))
+            chi2.append(abs(np.nansum(np.square(DATimg - PRFfit) / PRFfit)))
 
 # load the output arrays
 
@@ -498,10 +497,10 @@ def kepprfphot(infile,outroot,columns,rows,fluxes,border,background,focus,prfdir
         opsf_rotation = angle
         opsf_residual = residual
         opsf_chi2 = chi2
-        opsf_flux_err = numpy.empty((na)); opsf_flux_err.fill(numpy.nan)
-        opsf_centr1_err = numpy.empty((na)); opsf_centr1_err.fill(numpy.nan)
-        opsf_centr2_err = numpy.empty((na)); opsf_centr2_err.fill(numpy.nan)
-        opsf_bkg_err = numpy.empty((na)); opsf_bkg_err.fill(numpy.nan)
+        opsf_flux_err = np.empty((na)); opsf_flux_err.fill(np.nan)
+        opsf_centr1_err = np.empty((na)); opsf_centr1_err.fill(np.nan)
+        opsf_centr2_err = np.empty((na)); opsf_centr2_err.fill(np.nan)
+        opsf_bkg_err = np.empty((na)); opsf_bkg_err.fill(np.nan)
         opsf_flux = []
         opsf_centr1 = []
         opsf_centr2 = []
@@ -531,54 +530,54 @@ def kepprfphot(infile,outroot,columns,rows,fluxes,border,background,focus,prfdir
         for j in range(nsrc):
             hdu0 = pyfits.PrimaryHDU()
             for i in range(len(cards0)):
-                if cards0[i].key not in hdu0.header.keys():
-                    hdu0.header.update(cards0[i].key, cards0[i].value, cards0[i].comment)
+                if cards0[i].keyword not in hdu0.header.keys():
+                    hdu0.header[cards0[i].keyword] = (cards0[i].value, cards0[i].comment)
                 else:
-                    hdu0.header.cards[cards0[i].key].comment = cards0[i].comment
+                    hdu0.header.cards[cards0[i].keyword].comment = cards0[i].comment
             status = kepkey.history(call,hdu0,outfile,logfile,verbose)
-            outstr = HDUList(hdu0)
+            outstr = pyfits.HDUList(hdu0)
 
 # construct output light curve extension
 
-            col1 = Column(name='TIME',format='D',unit='BJD - 2454833',array=otime)
-            col2 = Column(name='TIMECORR',format='E',unit='d',array=otimecorr)
-            col3 = Column(name='CADENCENO',format='J',array=ocadenceno)
-            col4 = Column(name='PSF_FLUX',format='E',unit='e-/s',array=opsf_flux[j])
-            col5 = Column(name='PSF_FLUX_ERR',format='E',unit='e-/s',array=opsf_flux_err)
-            col6 = Column(name='PSF_BKG',format='E',unit='e-/s/pix',array=opsf_bkg)
-            col7 = Column(name='PSF_BKG_ERR',format='E',unit='e-/s',array=opsf_bkg_err)
-            col8 = Column(name='PSF_CENTR1',format='E',unit='pixel',array=opsf_centr1[j])
-            col9 = Column(name='PSF_CENTR1_ERR',format='E',unit='pixel',array=opsf_centr1_err)
-            col10 = Column(name='PSF_CENTR2',format='E',unit='pixel',array=opsf_centr2[j])
-            col11 = Column(name='PSF_CENTR2_ERR',format='E',unit='pixel',array=opsf_centr2_err)
-            col12 = Column(name='PSF_FOCUS1',format='E',array=opsf_focus1)
-            col13 = Column(name='PSF_FOCUS2',format='E',array=opsf_focus2)
-            col14 = Column(name='PSF_ROTATION',format='E',unit='deg',array=opsf_rotation)
-            col15 = Column(name='PSF_RESIDUAL',format='E',unit='e-/s',array=opsf_residual)
-            col16 = Column(name='PSF_CHI2',format='E',array=opsf_chi2)
-            col17 = Column(name='POS_CORR1',format='E',unit='pixel',array=opos_corr1)
-            col18 = Column(name='POS_CORR2',format='E',unit='pixel',array=opos_corr2)
-            col19 = Column(name='SAP_QUALITY',format='J',array=oquality)
-            cols = ColDefs([col1,col2,col3,col4,col5,col6,col7,col8,col9,col10,col11,
+            col1 = pyfits.Column(name='TIME',format='D',unit='BJD - 2454833',array=otime)
+            col2 = pyfits.Column(name='TIMECORR',format='E',unit='d',array=otimecorr)
+            col3 = pyfits.Column(name='CADENCENO',format='J',array=ocadenceno)
+            col4 = pyfits.Column(name='PSF_FLUX',format='E',unit='e-/s',array=opsf_flux[j])
+            col5 = pyfits.Column(name='PSF_FLUX_ERR',format='E',unit='e-/s',array=opsf_flux_err)
+            col6 = pyfits.Column(name='PSF_BKG',format='E',unit='e-/s/pix',array=opsf_bkg)
+            col7 = pyfits.Column(name='PSF_BKG_ERR',format='E',unit='e-/s',array=opsf_bkg_err)
+            col8 = pyfits.Column(name='PSF_CENTR1',format='E',unit='pixel',array=opsf_centr1[j])
+            col9 = pyfits.Column(name='PSF_CENTR1_ERR',format='E',unit='pixel',array=opsf_centr1_err)
+            col10 = pyfits.Column(name='PSF_CENTR2',format='E',unit='pixel',array=opsf_centr2[j])
+            col11 = pyfits.Column(name='PSF_CENTR2_ERR',format='E',unit='pixel',array=opsf_centr2_err)
+            col12 = pyfits.Column(name='PSF_FOCUS1',format='E',array=opsf_focus1)
+            col13 = pyfits.Column(name='PSF_FOCUS2',format='E',array=opsf_focus2)
+            col14 = pyfits.Column(name='PSF_ROTATION',format='E',unit='deg',array=opsf_rotation)
+            col15 = pyfits.Column(name='PSF_RESIDUAL',format='E',unit='e-/s',array=opsf_residual)
+            col16 = pyfits.Column(name='PSF_CHI2',format='E',array=opsf_chi2)
+            col17 = pyfits.Column(name='POS_CORR1',format='E',unit='pixel',array=opos_corr1)
+            col18 = pyfits.Column(name='POS_CORR2',format='E',unit='pixel',array=opos_corr2)
+            col19 = pyfits.Column(name='SAP_QUALITY',format='J',array=oquality)
+            cols = pyfits.ColDefs([col1,col2,col3,col4,col5,col6,col7,col8,col9,col10,col11,
                             col12,col13,col14,col15,col16,col17,col18,col19])
-            hdu1 = new_table(cols)
+            hdu1 = pyfits.BinTableHDU.from_columns(cols)
             for i in range(len(cards1)):
-                if (cards1[i].key not in hdu1.header.keys() and
-                    cards1[i].key[:4] not in ['TTYP','TFOR','TUNI','TDIS','TDIM','WCAX','1CTY',
+                if (cards1[i].keyword not in hdu1.header.keys() and
+                    cards1[i].keyword[:4] not in ['TTYP','TFOR','TUNI','TDIS','TDIM','WCAX','1CTY',
                                               '2CTY','1CRP','2CRP','1CRV','2CRV','1CUN','2CUN',
                                               '1CDE','2CDE','1CTY','2CTY','1CDL','2CDL','11PC',
                                               '12PC','21PC','22PC']):
-                    hdu1.header.update(cards1[i].key, cards1[i].value, cards1[i].comment)
+                    hdu1.header[cards1[i].keyword] = (cards1[i].value, cards1[i].comment)
             outstr.append(hdu1)
 
 # construct output mask bitmap extension
 
-            hdu2 = ImageHDU(maskmap)
+            hdu2 = pyfits.ImageHDU(maskmap)
             for i in range(len(cards2)):
-                if cards2[i].key not in hdu2.header.keys():
-                    hdu2.header.update(cards2[i].key, cards2[i].value, cards2[i].comment)
+                if cards2[i].keyword not in hdu2.header.keys():
+                    hdu2.header[cards2[i].keyword] = (cards2[i].value, cards2[i].comment)
                 else:
-                    hdu2.header.cards[cards2[i].key].comment = cards2[i].comment
+                    hdu2.header.cards[cards2[i].keyword].comment = cards2[i].comment
             outstr.append(hdu2)
 
 # write output file
@@ -594,59 +593,59 @@ def kepprfphot(infile,outroot,columns,rows,fluxes,border,background,focus,prfdir
     if status == 0:
 	barytime0 = float(int(t[0] / 100) * 100.0)
 	t -= barytime0
-        t = numpy.insert(t,[0],[t[0]])
-        t = numpy.append(t,[t[-1]])
+        t = np.insert(t,[0],[t[0]])
+        t = np.append(t,[t[-1]])
         xlab = 'BJD $-$ %d' % barytime0
 
 # plot the light curves
 
     if status == 0:
-        bg = numpy.insert(bg,[0],[-1.0e10])
-        bg = numpy.append(bg,-1.0e10)
-        fx = numpy.insert(fx,[0],[fx[0]])
-        fx = numpy.append(fx,fx[-1])
-        fy = numpy.insert(fy,[0],[fy[0]])
-        fy = numpy.append(fy,fy[-1])
-        fa = numpy.insert(fa,[0],[fa[0]])
-        fa = numpy.append(fa,fa[-1])
-        rs = numpy.insert(rs,[0],[-1.0e10])
-        rs = numpy.append(rs,-1.0e10)
-        ch = numpy.insert(ch,[0],[-1.0e10])
-        ch = numpy.append(ch,-1.0e10)
+        bg = np.insert(bg,[0],[-1.0e10])
+        bg = np.append(bg,-1.0e10)
+        fx = np.insert(fx,[0],[fx[0]])
+        fx = np.append(fx,fx[-1])
+        fy = np.insert(fy,[0],[fy[0]])
+        fy = np.append(fy,fy[-1])
+        fa = np.insert(fa,[0],[fa[0]])
+        fa = np.append(fa,fa[-1])
+        rs = np.insert(rs,[0],[-1.0e10])
+        rs = np.append(rs,-1.0e10)
+        ch = np.insert(ch,[0],[-1.0e10])
+        ch = np.append(ch,-1.0e10)
         for i in range(nsrc):
 
 # clean up y-axis units
 
-            nrm = math.ceil(math.log10(numpy.nanmax(fl[i]))) - 1.0
+            nrm = math.ceil(math.log10(np.nanmax(fl[i]))) - 1.0
             fl[i] /= 10**nrm
             if nrm == 0:
                 ylab1 = 'e$^-$ s$^{-1}$'
             else:
                 ylab1 = '10$^{%d}$ e$^-$ s$^{-1}$' % nrm
-            xx = copy(dx[i])
-            yy = copy(dy[i])
+            xx = np.copy(dx[i])
+            yy = np.copy(dy[i])
             ylab2 = 'offset (pixels)'
 
 # data limits
 
-            xmin = numpy.nanmin(t)
-            xmax = numpy.nanmax(t)
-            ymin1 = numpy.nanmin(fl[i])
-            ymax1 = numpy.nanmax(fl[i])
-            ymin2 = numpy.nanmin(xx)
-            ymax2 = numpy.nanmax(xx)
-            ymin3 = numpy.nanmin(yy)
-            ymax3 = numpy.nanmax(yy)
-            ymin4 = numpy.nanmin(bg[1:-1])
-            ymax4 = numpy.nanmax(bg[1:-1])
-            ymin5 = numpy.nanmin([numpy.nanmin(fx),numpy.nanmin(fy)])
-            ymax5 = numpy.nanmax([numpy.nanmax(fx),numpy.nanmax(fy)])
-            ymin6 = numpy.nanmin(fa[1:-1])
-            ymax6 = numpy.nanmax(fa[1:-1])
-            ymin7 = numpy.nanmin(rs[1:-1])
-            ymax7 = numpy.nanmax(rs[1:-1])
-            ymin8 = numpy.nanmin(ch[1:-1])
-            ymax8 = numpy.nanmax(ch[1:-1])
+            xmin = np.nanmin(t)
+            xmax = np.nanmax(t)
+            ymin1 = np.nanmin(fl[i])
+            ymax1 = np.nanmax(fl[i])
+            ymin2 = np.nanmin(xx)
+            ymax2 = np.nanmax(xx)
+            ymin3 = np.nanmin(yy)
+            ymax3 = np.nanmax(yy)
+            ymin4 = np.nanmin(bg[1:-1])
+            ymax4 = np.nanmax(bg[1:-1])
+            ymin5 = np.nanmin([np.nanmin(fx),np.nanmin(fy)])
+            ymax5 = np.nanmax([np.nanmax(fx),np.nanmax(fy)])
+            ymin6 = np.nanmin(fa[1:-1])
+            ymax6 = np.nanmax(fa[1:-1])
+            ymin7 = np.nanmin(rs[1:-1])
+            ymax7 = np.nanmax(rs[1:-1])
+            ymin8 = np.nanmin(ch[1:-1])
+            ymax8 = np.nanmax(ch[1:-1])
             xr = xmax - xmin
             yr1 = ymax1 - ymin1
             yr2 = ymax2 - ymin2
@@ -656,87 +655,71 @@ def kepprfphot(infile,outroot,columns,rows,fluxes,border,background,focus,prfdir
             yr6 = ymax6 - ymin6
             yr7 = ymax7 - ymin7
             yr8 = ymax8 - ymin8
-            fl[i] = numpy.insert(fl[i],[0],[0.0])
-            fl[i] = numpy.append(fl[i],0.0)
-
-# plot style
-
-            try:
-                params = {'backend': 'png',
-                          'axes.linewidth': 2.5,
-                          'axes.labelsize': 24,
-                          'axes.font': 'sans-serif',
-                          'axes.fontweight' : 'bold',
-                          'text.fontsize': 12,
-                          'legend.fontsize': 12,
-                          'xtick.labelsize': 12,
-                          'ytick.labelsize': 12}
-                pylab.rcParams.update(params)
-            except:
-                pass
+            fl[i] = np.insert(fl[i],[0],[0.0])
+            fl[i] = np.append(fl[i],0.0)
 
 # define size of plot on monitor screen
 
-            pylab.figure(str(i+1) + ' ' + str(time.asctime(time.localtime())),figsize=[12,16])
+            plt.figure(str(i+1) + ' ' + str(time.asctime(time.localtime())),figsize=[12,16])
 
 # delete any fossil plots in the matplotlib window
 
-            pylab.clf()
+            plt.clf()
 
 # position first axes inside the plotting window
 
-            ax = pylab.axes([0.11,0.523,0.78,0.45])
+            ax = plt.axes([0.11,0.523,0.78,0.45])
 
 # force tick labels to be absolute rather than relative
 
-            pylab.gca().xaxis.set_major_formatter(pylab.ScalarFormatter(useOffset=False))
-            pylab.gca().yaxis.set_major_formatter(pylab.ScalarFormatter(useOffset=False))
+            plt.gca().xaxis.set_major_formatter(plt.ScalarFormatter(useOffset=False))
+            plt.gca().yaxis.set_major_formatter(plt.ScalarFormatter(useOffset=False))
 
 # no x-label
 
-            pylab.setp(pylab.gca(),xticklabels=[])
+            plt.setp(plt.gca(),xticklabels=[])
 
 # plot flux vs time
 
-            ltime = numpy.array([],dtype='float64')
-            ldata = numpy.array([],dtype='float32')
+            ltime = np.array([],dtype='float64')
+            ldata = np.array([],dtype='float32')
             dt = 0
             work1 = 2.0 * cadence / 86400
             for j in range(1,len(t)-1):
                 dt = t[j] - t[j-1]
                 if dt < work1:
-                    ltime = numpy.append(ltime,t[j])
-                    ldata = numpy.append(ldata,fl[i][j])
+                    ltime = np.append(ltime,t[j])
+                    ldata = np.append(ldata,fl[i][j])
                 else:
-                    pylab.plot(ltime,ldata,color='#0000ff',linestyle='-',linewidth=1.0)
-                    ltime = numpy.array([],dtype='float64')
-                    ldata = numpy.array([],dtype='float32')
-            pylab.plot(ltime,ldata,color='#0000ff',linestyle='-',linewidth=1.0)
+                    plt.plot(ltime,ldata,color='#0000ff',linestyle='-',linewidth=1.0)
+                    ltime = np.array([],dtype='float64')
+                    ldata = np.array([],dtype='float32')
+            plt.plot(ltime,ldata,color='#0000ff',linestyle='-',linewidth=1.0)
 
 # plot the fill color below data time series, with no data gaps
 
-            pylab.fill(t,fl[i],fc='#ffff00',linewidth=0.0,alpha=0.2)
+            plt.fill(t,fl[i],fc='#ffff00',linewidth=0.0,alpha=0.2)
 
 # define plot x and y limits
 
-            pylab.xlim(xmin - xr * 0.01, xmax + xr * 0.01)
+            plt.xlim(xmin - xr * 0.01, xmax + xr * 0.01)
             if ymin1 - yr1 * 0.01 <= 0.0:
-                pylab.ylim(1.0e-10, ymax1 + yr1 * 0.01)
+                plt.ylim(1.0e-10, ymax1 + yr1 * 0.01)
             else:
-                pylab.ylim(ymin1 - yr1 * 0.01, ymax1 + yr1 * 0.01)
+                plt.ylim(ymin1 - yr1 * 0.01, ymax1 + yr1 * 0.01)
 
 # plot labels
 
-#            pylab.xlabel(xlab, {'color' : 'k'})
+#            plt.xlabel(xlab, {'color' : 'k'})
             try:
-                pylab.ylabel('Source (' + ylab1 + ')', {'color' : 'k'})
+                plt.ylabel('Source (' + ylab1 + ')', {'color' : 'k'})
             except:
                 ylab1 = '10**%d e-/s' % nrm
-                pylab.ylabel('Source (' + ylab1 + ')', {'color' : 'k'})
+                plt.ylabel('Source (' + ylab1 + ')', {'color' : 'k'})
 
 # make grid on plot
 
-            pylab.grid()
+            plt.grid()
 
 # plot centroid tracks - position second axes inside the plotting window
 
@@ -746,35 +729,35 @@ def kepprfphot(infile,outroot,columns,rows,fluxes,border,background,focus,prfdir
                 axs = [0.11,0.388,0.78,0.135]
             else:
                 axs = [0.11,0.253,0.78,0.27]
-            ax1 = pylab.axes(axs)
+            ax1 = plt.axes(axs)
 
 # force tick labels to be absolute rather than relative
 
-            pylab.gca().xaxis.set_major_formatter(pylab.ScalarFormatter(useOffset=False))
-            pylab.gca().yaxis.set_major_formatter(pylab.ScalarFormatter(useOffset=False))
-            pylab.setp(pylab.gca(),xticklabels=[])
+            plt.gca().xaxis.set_major_formatter(plt.ScalarFormatter(useOffset=False))
+            plt.gca().yaxis.set_major_formatter(plt.ScalarFormatter(useOffset=False))
+            plt.setp(plt.gca(),xticklabels=[])
 
 # plot dx vs time
 
-            ltime = numpy.array([],dtype='float64')
-            ldata = numpy.array([],dtype='float32')
+            ltime = np.array([],dtype='float64')
+            ldata = np.array([],dtype='float32')
             dt = 0
             work1 = 2.0 * cadence / 86400
             for j in range(1,len(t)-1):
                 dt = t[j] - t[j-1]
                 if dt < work1:
-                    ltime = numpy.append(ltime,t[j])
-                    ldata = numpy.append(ldata,xx[j-1])
+                    ltime = np.append(ltime,t[j])
+                    ldata = np.append(ldata,xx[j-1])
                 else:
                     ax1.plot(ltime,ldata,color='r',linestyle='-',linewidth=1.0)
-                    ltime = numpy.array([],dtype='float64')
-                    ldata = numpy.array([],dtype='float32')
+                    ltime = np.array([],dtype='float64')
+                    ldata = np.array([],dtype='float32')
             ax1.plot(ltime,ldata,color='r',linestyle='-',linewidth=1.0)
 
 # define plot x and y limits
 
-            pylab.xlim(xmin - xr * 0.01, xmax + xr * 0.01)
-            pylab.ylim(ymin2 - yr2 * 0.03, ymax2 + yr2 * 0.03)
+            plt.xlim(xmin - xr * 0.01, xmax + xr * 0.01)
+            plt.ylim(ymin2 - yr2 * 0.03, ymax2 + yr2 * 0.03)
 
 # plot labels
 
@@ -786,31 +769,31 @@ def kepprfphot(infile,outroot,columns,rows,fluxes,border,background,focus,prfdir
 
 # force tick labels to be absolute rather than relative
 
-            pylab.gca().xaxis.set_major_formatter(pylab.ScalarFormatter(useOffset=False))
-            pylab.gca().yaxis.set_major_formatter(pylab.ScalarFormatter(useOffset=False))
-            pylab.setp(pylab.gca(),xticklabels=[])
+            plt.gca().xaxis.set_major_formatter(plt.ScalarFormatter(useOffset=False))
+            plt.gca().yaxis.set_major_formatter(plt.ScalarFormatter(useOffset=False))
+            plt.setp(plt.gca(),xticklabels=[])
 
 # plot dy vs time
 
-            ltime = numpy.array([],dtype='float64')
-            ldata = numpy.array([],dtype='float32')
+            ltime = np.array([],dtype='float64')
+            ldata = np.array([],dtype='float32')
             dt = 0
             work1 = 2.0 * cadence / 86400
             for j in range(1,len(t)-1):
                 dt = t[j] - t[j-1]
                 if dt < work1:
-                    ltime = numpy.append(ltime,t[j])
-                    ldata = numpy.append(ldata,yy[j-1])
+                    ltime = np.append(ltime,t[j])
+                    ldata = np.append(ldata,yy[j-1])
                 else:
                     ax2.plot(ltime,ldata,color='g',linestyle='-',linewidth=1.0)
-                    ltime = numpy.array([],dtype='float64')
-                    ldata = numpy.array([],dtype='float32')
+                    ltime = np.array([],dtype='float64')
+                    ldata = np.array([],dtype='float32')
             ax2.plot(ltime,ldata,color='g',linestyle='-',linewidth=1.0)
 
 # define plot y limits
 
-            pylab.xlim(xmin - xr * 0.01, xmax + xr * 0.01)
-            pylab.ylim(ymin3 - yr3 * 0.03, ymax3 + yr3 * 0.03)
+            plt.xlim(xmin - xr * 0.01, xmax + xr * 0.01)
+            plt.ylim(ymin3 - yr3 * 0.03, ymax3 + yr3 * 0.03)
 
 # plot labels
 
@@ -823,39 +806,39 @@ def kepprfphot(infile,outroot,columns,rows,fluxes,border,background,focus,prfdir
             if background and not focus:
                 axs = [0.11,0.253,0.78,0.135]
             if background:
-                ax1 = pylab.axes(axs)
+                ax1 = plt.axes(axs)
 
 # force tick labels to be absolute rather than relative
 
-                pylab.gca().xaxis.set_major_formatter(pylab.ScalarFormatter(useOffset=False))
-                pylab.gca().yaxis.set_major_formatter(pylab.ScalarFormatter(useOffset=False))
-                pylab.setp(pylab.gca(),xticklabels=[])
+                plt.gca().xaxis.set_major_formatter(plt.ScalarFormatter(useOffset=False))
+                plt.gca().yaxis.set_major_formatter(plt.ScalarFormatter(useOffset=False))
+                plt.setp(plt.gca(),xticklabels=[])
 
 # plot background vs time
 
-                ltime = numpy.array([],dtype='float64')
-                ldata = numpy.array([],dtype='float32')
+                ltime = np.array([],dtype='float64')
+                ldata = np.array([],dtype='float32')
                 dt = 0
                 work1 = 2.0 * cadence / 86400
                 for j in range(1,len(t)-1):
                     dt = t[j] - t[j-1]
                     if dt < work1:
-                        ltime = numpy.append(ltime,t[j])
-                        ldata = numpy.append(ldata,bg[j])
+                        ltime = np.append(ltime,t[j])
+                        ldata = np.append(ldata,bg[j])
                     else:
                         ax1.plot(ltime,ldata,color='#0000ff',linestyle='-',linewidth=1.0)
-                        ltime = numpy.array([],dtype='float64')
-                        ldata = numpy.array([],dtype='float32')
+                        ltime = np.array([],dtype='float64')
+                        ldata = np.array([],dtype='float32')
                 ax1.plot(ltime,ldata,color='#0000ff',linestyle='-',linewidth=1.0)
 
 # plot the fill color below data time series, with no data gaps
 
-                pylab.fill(t,bg,fc='#ffff00',linewidth=0.0,alpha=0.2)
+                plt.fill(t,bg,fc='#ffff00',linewidth=0.0,alpha=0.2)
 
 # define plot x and y limits
 
-                pylab.xlim(xmin - xr * 0.01, xmax + xr * 0.01)
-                pylab.ylim(ymin4 - yr4 * 0.03, ymax4 + yr4 * 0.03)
+                plt.xlim(xmin - xr * 0.01, xmax + xr * 0.01)
+                plt.ylim(ymin4 - yr4 * 0.03, ymax4 + yr4 * 0.03)
 
 # plot labels
 
@@ -864,7 +847,7 @@ def kepprfphot(infile,outroot,columns,rows,fluxes,border,background,focus,prfdir
 
 # make grid on plot
 
-                pylab.grid()
+                plt.grid()
 
 # position focus axes inside the plotting window
 
@@ -873,52 +856,52 @@ def kepprfphot(infile,outroot,columns,rows,fluxes,border,background,focus,prfdir
             if focus and not background:
                 axs = [0.11,0.253,0.78,0.135]
             if focus:
-                ax1 = pylab.axes(axs)
+                ax1 = plt.axes(axs)
 
 # force tick labels to be absolute rather than relative
 
-                pylab.gca().xaxis.set_major_formatter(pylab.ScalarFormatter(useOffset=False))
-                pylab.gca().yaxis.set_major_formatter(pylab.ScalarFormatter(useOffset=False))
-                pylab.setp(pylab.gca(),xticklabels=[])
+                plt.gca().xaxis.set_major_formatter(plt.ScalarFormatter(useOffset=False))
+                plt.gca().yaxis.set_major_formatter(plt.ScalarFormatter(useOffset=False))
+                plt.setp(plt.gca(),xticklabels=[])
 
 # plot x-axis PSF width vs time
 
-                ltime = numpy.array([],dtype='float64')
-                ldata = numpy.array([],dtype='float32')
+                ltime = np.array([],dtype='float64')
+                ldata = np.array([],dtype='float32')
                 dt = 0
                 work1 = 2.0 * cadence / 86400
                 for j in range(1,len(t)-1):
                     dt = t[j] - t[j-1]
                     if dt < work1:
-                        ltime = numpy.append(ltime,t[j])
-                        ldata = numpy.append(ldata,fx[j])
+                        ltime = np.append(ltime,t[j])
+                        ldata = np.append(ldata,fx[j])
                     else:
                         ax1.plot(ltime,ldata,color='r',linestyle='-',linewidth=1.0)
-                        ltime = numpy.array([],dtype='float64')
-                        ldata = numpy.array([],dtype='float32')
+                        ltime = np.array([],dtype='float64')
+                        ldata = np.array([],dtype='float32')
                 ax1.plot(ltime,ldata,color='r',linestyle='-',linewidth=1.0)
 
 # plot y-axis PSF width vs time
 
-                ltime = numpy.array([],dtype='float64')
-                ldata = numpy.array([],dtype='float32')
+                ltime = np.array([],dtype='float64')
+                ldata = np.array([],dtype='float32')
                 dt = 0
                 work1 = 2.0 * cadence / 86400
                 for j in range(1,len(t)-1):
                     dt = t[j] - t[j-1]
                     if dt < work1:
-                        ltime = numpy.append(ltime,t[j])
-                        ldata = numpy.append(ldata,fy[j])
+                        ltime = np.append(ltime,t[j])
+                        ldata = np.append(ldata,fy[j])
                     else:
                         ax1.plot(ltime,ldata,color='g',linestyle='-',linewidth=1.0)
-                        ltime = numpy.array([],dtype='float64')
-                        ldata = numpy.array([],dtype='float32')
+                        ltime = np.array([],dtype='float64')
+                        ldata = np.array([],dtype='float32')
                 ax1.plot(ltime,ldata,color='g',linestyle='-',linewidth=1.0)
 
 # define plot x and y limits
 
-                pylab.xlim(xmin - xr * 0.01, xmax + xr * 0.01)
-                pylab.ylim(ymin5 - yr5 * 0.03, ymax5 + yr5 * 0.03)
+                plt.xlim(xmin - xr * 0.01, xmax + xr * 0.01)
+                plt.ylim(ymin5 - yr5 * 0.03, ymax5 + yr5 * 0.03)
 
 # plot labels
 
@@ -931,31 +914,31 @@ def kepprfphot(infile,outroot,columns,rows,fluxes,border,background,focus,prfdir
 
 # force tick labels to be absolute rather than relative
 
-                pylab.gca().xaxis.set_major_formatter(pylab.ScalarFormatter(useOffset=False))
-                pylab.gca().yaxis.set_major_formatter(pylab.ScalarFormatter(useOffset=False))
-                pylab.setp(pylab.gca(),xticklabels=[])
+                plt.gca().xaxis.set_major_formatter(plt.ScalarFormatter(useOffset=False))
+                plt.gca().yaxis.set_major_formatter(plt.ScalarFormatter(useOffset=False))
+                plt.setp(plt.gca(),xticklabels=[])
 
 # plot dy vs time
 
-                ltime = numpy.array([],dtype='float64')
-                ldata = numpy.array([],dtype='float32')
+                ltime = np.array([],dtype='float64')
+                ldata = np.array([],dtype='float32')
                 dt = 0
                 work1 = 2.0 * cadence / 86400
                 for j in range(1,len(t)-1):
                     dt = t[j] - t[j-1]
                     if dt < work1:
-                        ltime = numpy.append(ltime,t[j])
-                        ldata = numpy.append(ldata,fa[j])
+                        ltime = np.append(ltime,t[j])
+                        ldata = np.append(ldata,fa[j])
                     else:
                         ax2.plot(ltime,ldata,color='#000080',linestyle='-',linewidth=1.0)
-                        ltime = numpy.array([],dtype='float64')
-                        ldata = numpy.array([],dtype='float32')
+                        ltime = np.array([],dtype='float64')
+                        ldata = np.array([],dtype='float32')
                 ax2.plot(ltime,ldata,color='#000080',linestyle='-',linewidth=1.0)
 
 # define plot y limits
 
-                pylab.xlim(xmin - xr * 0.01, xmax + xr * 0.01)
-                pylab.ylim(ymin6 - yr6 * 0.03, ymax6 + yr6 * 0.03)
+                plt.xlim(xmin - xr * 0.01, xmax + xr * 0.01)
+                plt.ylim(ymin6 - yr6 * 0.03, ymax6 + yr6 * 0.03)
 
 # plot labels
 
@@ -964,39 +947,39 @@ def kepprfphot(infile,outroot,columns,rows,fluxes,border,background,focus,prfdir
 # fit residuals - position fifth axes inside the plotting window
 
             axs = [0.11,0.163,0.78,0.09]
-            ax1 = pylab.axes(axs)
+            ax1 = plt.axes(axs)
 
 # force tick labels to be absolute rather than relative
 
-            pylab.gca().xaxis.set_major_formatter(pylab.ScalarFormatter(useOffset=False))
-            pylab.gca().yaxis.set_major_formatter(pylab.ScalarFormatter(useOffset=False))
-            pylab.setp(pylab.gca(),xticklabels=[])
+            plt.gca().xaxis.set_major_formatter(plt.ScalarFormatter(useOffset=False))
+            plt.gca().yaxis.set_major_formatter(plt.ScalarFormatter(useOffset=False))
+            plt.setp(plt.gca(),xticklabels=[])
 
 # plot residual vs time
 
-            ltime = numpy.array([],dtype='float64')
-            ldata = numpy.array([],dtype='float32')
+            ltime = np.array([],dtype='float64')
+            ldata = np.array([],dtype='float32')
             dt = 0
             work1 = 2.0 * cadence / 86400
             for j in range(1,len(t)-1):
                 dt = t[j] - t[j-1]
                 if dt < work1:
-                    ltime = numpy.append(ltime,t[j])
-                    ldata = numpy.append(ldata,rs[j])
+                    ltime = np.append(ltime,t[j])
+                    ldata = np.append(ldata,rs[j])
                 else:
                     ax1.plot(ltime,ldata,color='b',linestyle='-',linewidth=1.0)
-                    ltime = numpy.array([],dtype='float64')
-                    ldata = numpy.array([],dtype='float32')
+                    ltime = np.array([],dtype='float64')
+                    ldata = np.array([],dtype='float32')
             ax1.plot(ltime,ldata,color='b',linestyle='-',linewidth=1.0)
 
 # plot the fill color below data time series, with no data gaps
 
-            pylab.fill(t,rs,fc='#ffff00',linewidth=0.0,alpha=0.2)
+            plt.fill(t,rs,fc='#ffff00',linewidth=0.0,alpha=0.2)
 
 # define plot x and y limits
 
-            pylab.xlim(xmin - xr * 0.01, xmax + xr * 0.01)
-            pylab.ylim(ymin7 - yr7 * 0.03, ymax7 + yr7 * 0.03)
+            plt.xlim(xmin - xr * 0.01, xmax + xr * 0.01)
+            plt.ylim(ymin7 - yr7 * 0.03, ymax7 + yr7 * 0.03)
 
 # plot labels
 
@@ -1005,71 +988,63 @@ def kepprfphot(infile,outroot,columns,rows,fluxes,border,background,focus,prfdir
 
 # make grid on plot
 
-            pylab.grid()
+            plt.grid()
 
 # fit chi square - position sixth axes inside the plotting window
 
             axs = [0.11,0.073,0.78,0.09]
-            ax1 = pylab.axes(axs)
+            ax1 = plt.axes(axs)
 
 # force tick labels to be absolute rather than relative
 
-            pylab.gca().xaxis.set_major_formatter(pylab.ScalarFormatter(useOffset=False))
-            pylab.gca().yaxis.set_major_formatter(pylab.ScalarFormatter(useOffset=False))
+            plt.gca().xaxis.set_major_formatter(plt.ScalarFormatter(useOffset=False))
+            plt.gca().yaxis.set_major_formatter(plt.ScalarFormatter(useOffset=False))
 
 # plot background vs time
 
-            ltime = numpy.array([],dtype='float64')
-            ldata = numpy.array([],dtype='float32')
+            ltime = np.array([],dtype='float64')
+            ldata = np.array([],dtype='float32')
             dt = 0
             work1 = 2.0 * cadence / 86400
             for j in range(1,len(t)-1):
                 dt = t[j] - t[j-1]
                 if dt < work1:
-                    ltime = numpy.append(ltime,t[j])
-                    ldata = numpy.append(ldata,ch[j])
+                    ltime = np.append(ltime,t[j])
+                    ldata = np.append(ldata,ch[j])
                 else:
                     ax1.plot(ltime,ldata,color='b',linestyle='-',linewidth=1.0)
-                    ltime = numpy.array([],dtype='float64')
-                    ldata = numpy.array([],dtype='float32')
+                    ltime = np.array([],dtype='float64')
+                    ldata = np.array([],dtype='float32')
             ax1.plot(ltime,ldata,color='b',linestyle='-',linewidth=1.0)
 
 # plot the fill color below data time series, with no data gaps
 
-            pylab.fill(t,ch,fc='#ffff00',linewidth=0.0,alpha=0.2)
+            plt.fill(t,ch,fc='#ffff00',linewidth=0.0,alpha=0.2)
 
 # define plot x and y limits
 
-            pylab.xlim(xmin - xr * 0.01, xmax + xr * 0.01)
-            pylab.ylim(ymin8 - yr8 * 0.03, ymax8 + yr8 * 0.03)
+            plt.xlim(xmin - xr * 0.01, xmax + xr * 0.01)
+            plt.ylim(ymin8 - yr8 * 0.03, ymax8 + yr8 * 0.03)
 
 # plot labels
 
             ax1.set_ylabel('$\chi^2$ (%d dof)' % (npix-len(guess)-1),color='k',fontsize=11)
-            pylab.xlabel(xlab, {'color' : 'k'})
+            plt.xlabel(xlab, {'color' : 'k'})
 
 # make grid on plot
 
-            pylab.grid()
+            plt.grid()
 
 # render plot
 
-            if status == 0:
-                pylab.savefig(outroot + '_' + str(i) + '.png')
-            if status == 0 and plt:
-                if cmdLine:
-                    pylab.show(block=True)
-                else:
-                    pylab.ion()
-                    pylab.plot([])
-                    pylab.ioff()
+            plt.savefig(outroot + '_' + str(i) + '.png')
+            plt.show(block=True)
 
 # stop time
 
     kepmsg.clock('\n\nKEPPRFPHOT ended at',logfile,verbose)
 
     return
-
 
 
 def PRFfits(args):
@@ -1080,10 +1055,10 @@ def PRFfits(args):
 
 # extract image from the time series
 
-    xdim = shape(args[6])[1]
-    ydim = shape(args[6])[0]
-    DATimg = numpy.empty((ydim,xdim))
-    DATerr = numpy.empty((ydim,xdim))
+    xdim = np.shape(args[6])[1]
+    ydim = np.shape(args[6])[0]
+    DATimg = np.empty((ydim,xdim))
+    DATerr = np.empty((ydim,xdim))
     n = 0
     for i in range(ydim):
         for j in range(xdim):
