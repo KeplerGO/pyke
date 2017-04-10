@@ -231,7 +231,7 @@ def kepdynamic(infile,outfile,fcol,pmin,pmax,nfreq,deltat,nslice,
         plt.savefig(re.sub('\.\S+','.png',outfile),dpi=100)
 
 # render plot
-
+        plt.ion()
         plt.show()
 
     return status

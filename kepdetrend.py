@@ -312,6 +312,7 @@ def kepdetrend(infile,outfile,datacol,errcol,ranges1,npoly1,nsig1,niter1,
 # render plot
 
     if status == 0:
+        plt.ion()
         plt.show()
 
 # write output file

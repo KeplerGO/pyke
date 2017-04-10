@@ -150,6 +150,7 @@ def keptrial(infile,outfile,datacol,errcol,fmin,fmax,nfreq,method,
 # render plot
 
         if plot:
+            plt.ion()
             plt.show()
 # period results
 
@@ -183,7 +184,7 @@ def keptrial(infile,outfile,datacol,errcol,fmin,fmax,nfreq,method,
 # history keyword in output file
 
     if status == 0:
-	    status = kepkey.history(call,instr[0],outfile,logfile,verbose)
+	status = kepkey.history(call,instr[0],outfile,logfile,verbose)
 
 ## write output file
 

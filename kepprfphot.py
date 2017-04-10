@@ -1038,6 +1038,7 @@ def kepprfphot(infile,outroot,columns,rows,fluxes,border,background,focus,prfdir
 # render plot
 
             plt.savefig(outroot + '_' + str(i) + '.png')
+            plt.ion()
             plt.show(block=True)
 
 # stop time

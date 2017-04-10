@@ -195,7 +195,7 @@ def kepsmooth(infile,outfile,datacol,function,fscale,plot,plotlab,
         plt.grid()
 
 # render plot
-
+        plt.ion()
         plt.show()
 ## write output file
 

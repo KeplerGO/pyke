@@ -232,6 +232,7 @@ def kepfilter(infile,outfile,datacol,function,cutoff,passband,plot,plotlab,
             plt.ylim(1.0e-10,ymax+yr*0.01)
         plt.grid()
 # render plot
+        plt.ion()
         plt.show()
 ## write output file
 

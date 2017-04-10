@@ -167,6 +167,7 @@ def kepft(infile,outfile,fcol,pmin,pmax,nfreq,plot,clobber,verbose,logfile,statu
         plt.grid()
 
 # render plot
+        plt.ion()
         plt.show()
 ## end time
 

@@ -203,6 +203,7 @@ def kepclip(infile,outfile,ranges,plot,plotcol,clobber,verbose,logfile,status,cm
 # render plot
 
     if status == 0 and plot:
+        plt.ion()
         plt.show()
 
 # close input file

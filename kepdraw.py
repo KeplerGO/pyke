@@ -241,6 +241,7 @@ def kepdraw(infile,outfile,datacol,ploterr,errcol,quality,
 	plt.savefig(outfile)
 
 # render plot
+        plt.ion()
         plt.show(block=True)
 # end time
 

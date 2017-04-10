@@ -209,6 +209,7 @@ def kepstddev(infile,outfile,datacol,timescale,clobber,verbose,logfile,status,cm
 # render plot
 
     if status == 0:
+        plt.ion()
         plt.show(block=True)
 
 # add NaNs back into data

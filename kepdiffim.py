@@ -371,7 +371,7 @@ def plotimage(imgsum_pl,imgvar_pl,imgdev_pl,zminsum,zminvar,zmindev,
     plt.title('Normalized Standard Deviation', {'color' : 'k', 'fontsize' : '24'})
 
 # render plot
-
+    plt.ion()
     plt.show()
 
     if plotfile.lower() != 'none':

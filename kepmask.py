@@ -261,7 +261,7 @@ def plotimage(cmdLine=False):
     fid = plt.connect('key_press_event',clicker6)
 
 # render plot
-
+    plt.ion()
     plt.show()
 # -----------------------------------------------------------
 # clear all pixels from pixel mask
@@ -414,12 +414,9 @@ def cmap_plot():
 
 # render plot
 
-    if cmdLine:
-        plt.show()
-    else:
-        plt.ion()
-        plt.plot([])
-        plt.ioff()
+    plt.ion()
+    plt.show()
+
     status = 1
     return status
 

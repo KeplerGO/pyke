@@ -473,7 +473,7 @@ def do_plot(date,flux_old,flux_new,bvsum,cad,bad_data,cad_nans,version, cmdLine=
 	plt.gca().yaxis.set_major_formatter(plt.ScalarFormatter(useOffset=False))
 
 # render plot
-
+        plt.ion()
         plt.show()
 
 def split_on_nans(bad_data,cad):

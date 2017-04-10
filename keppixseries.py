@@ -455,7 +455,7 @@ def keppixseries(infile,outfile,plotfile,plottype,filter,function,cutoff,clobber
                     plt.ylim(1.0e-10,ymax * 1.05)
 
 # render plot
-
+        plt.ion()
         plt.show()
 
 # stop time

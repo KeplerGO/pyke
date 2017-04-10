@@ -295,7 +295,7 @@ def kepoutlier(infile,outfile,datacol,nsig,stepsize,npoly,niter,
             plt.ylim(1.0e-10,ymax+yr*0.01)
 
 # render plot
-
+        plt.ion()
         plt.show()
 
 # write output file

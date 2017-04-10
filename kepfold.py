@@ -488,6 +488,7 @@ def kepfold(infile,outfile,period,phasezero,bindata,binmethod,threshold,niter,nb
         else:
             plt.ylim(1.0e-10,ymax+yr*0.01)
         plt.grid()
+        plt.ion()
         plt.show()
 
 # close input file
