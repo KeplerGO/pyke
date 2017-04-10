@@ -1,9 +1,8 @@
 import numpy as np
-from astropy.io import fits as pyfits
 from matplotlib import pyplot as plt
 from copy import copy
 import kepio, kepmsg, kepkey, kepplot
-import sys, time, re, math
+import sys, time, re, math, os
 
 # global variables
 
