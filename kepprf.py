@@ -485,7 +485,7 @@ def kepprf(infile,plotfile,rownum,columns,rows,fluxes,border,background,focus,pr
         plt.savefig(plotfile)
     if status == 0 and plot:
         plt.ion()
-        plt.show(block=True)
+        plt.show()
 
 # stop time
 

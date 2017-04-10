@@ -1039,7 +1039,7 @@ def kepprfphot(infile,outroot,columns,rows,fluxes,border,background,focus,prfdir
 
             plt.savefig(outroot + '_' + str(i) + '.png')
             plt.ion()
-            plt.show(block=True)
+            plt.show()
 
 # stop time
 

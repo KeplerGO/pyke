@@ -357,7 +357,7 @@ def kepflatten(infile,outfile,datacol,errcol,nsig,stepsize,winsize,npoly,
     if status == 0 and plot:
         plt.savefig(re.sub('.fits','.png',outfile))
         plt.ion()
-        plt.show(block=True)
+        plt.show()
 
 # add NaNs back into data
 
