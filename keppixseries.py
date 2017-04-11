@@ -423,9 +423,9 @@ def keppixseries(infile,outfile,plotfile,plottype,filter,function,cutoff,clobber
                 ymin = fmin - (fmax - fmin) / 20
                 ymax = fmax + (fmax - fmin) / 20
                 if kepstat.bitInBitmap(maskimg[i,j],2):
-                    plt.axes([0.06+float(j)*dx,0.05+i*dy,dx,dy],facecolor='lightslategray')
+                    plt.axes([0.06+float(j)*dx,0.05+i*dy,dx,dy],axisbg='lightslategray')
                 elif maskimg[i,j] == 0:
-                    plt.axes([0.06+float(j)*dx,0.05+i*dy,dx,dy],facecolor='black')
+                    plt.axes([0.06+float(j)*dx,0.05+i*dy,dx,dy],axisbg='black')
                 else:
                     plt.axes([0.06+float(j)*dx,0.05+i*dy,dx,dy])
                 if j == int(xdim / 2) and i == 0:
