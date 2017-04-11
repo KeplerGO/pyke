@@ -58,3 +58,12 @@ target/
 
 # Custom additions
 pyraf
+
+# Mac OSX
+.DS_Store
+
+# FITS
+*.fits
+
+# vim
+.*.swp

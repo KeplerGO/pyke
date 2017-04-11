@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 
 import kepmsg, kepkey
-import sys, pyfits, tempfile, os, shutil, glob, numpy, warnings
+import sys, tempfile, os, shutil, glob, numpy, warnings
+from astropy.io import fits as pyfits
 
 # -----------------------------------------------------------
 # delete a file
