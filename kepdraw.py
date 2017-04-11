@@ -143,23 +143,6 @@ def kepdraw(infile,outfile,datacol,ploterr,errcol,quality,
         data = np.insert(data,[0],[-10000.0])
         data = np.append(data,-10000.0)
 
-
-# define plot formats
-
-        try:
-            params = {'backend': 'png',
-                      'axes.linewidth': 2.5,
-                      'axes.labelsize': labelsize,
-                      'axes.font': 'sans-serif',
-                      'axes.fontweight' : 'bold',
-                      'text.fontsize': 12,
-                      'legend.fontsize': 12,
-                      'xtick.labelsize': ticksize,
-                      'ytick.labelsize': ticksize}
-            plt.rcParams.update(params)
-        except:
-            pass
-
 # define size of plot on monitor screen
 
 	plt.figure(figsize=[xsize,ysize])
