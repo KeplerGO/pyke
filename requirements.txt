@@ -2,5 +2,5 @@ lightcurve>=0.5.1
 matplotlib==1.5.3
 numpy==1.11
 orbit>=0.2
-pyraf==2.1.11
+pyraf>=2.1.10
 scipy==0.19
