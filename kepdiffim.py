@@ -128,9 +128,9 @@ def kepdiffim(infile,outfile,plotfile,imscale,colmap,filter,function,cutoff,
         for i in range(ydim*xdim):
             npts = 0
             for k in range(nrows):
-                if qual[k] == 0 and \
-                        np.isfinite(barytime[k]) and \
-                        np.isfinite(fluxpixels[k,int(ydim*xdim/2)]):
+                if (qual[k] == 0 and
+                    np.isfinite(barytime[k]) and
+                    np.isfinite(fluxpixels[k,int(ydim*xdim/2)])):
                     time[npts] = barytime[k]
                     timecorr[npts] = tcorr[k]
                     cadenceno[npts] = cadno[k]
@@ -294,20 +294,6 @@ def kepdiffim(infile,outfile,plotfile,imscale,colmap,filter,function,cutoff,
         xmax = float(xmax) - 0.5
 
 # plot style
-
-        try:
-            params = {'backend': 'png',
-                      'axes.linewidth': 2.5,
-                      'axes.labelsize': 24,
-                      'axes.font': 'sans-serif',
-                      'axes.fontweight' : 'bold',
-                      'text.fontsize': 12,
-                      'legend.fontsize': 12,
-                      'xtick.labelsize': 10,
-                      'ytick.labelsize': 10}
-            plt.rcParams.update(params)
-        except:
-            pass
 
     if status == 0:
         plotimage(imgsum_pl,imgvar_pl,imgdev_pl,zminsum,zminvar,zmindev,
