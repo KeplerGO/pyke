@@ -1,11 +1,11 @@
 import numpy as np
-import sys, time, math, re
+import sys
 from astropy.io import fits as pyfits
 from matplotlib import pyplot as plt
-from math import *
-import kepio, kepmsg, kepkey, kepstat, kepfourier
+import kepio, kepmsg, kepkey, kepstat
 
-def kepclip(infile,outfile,ranges,plot,plotcol,clobber,verbose,logfile,status,cmdLine=False):
+def kepclip(infile, outfile, ranges, plot, plotcol, clobber, verbose, logfile,
+            status, cmdLine=False):
 
 # startup parameters
 
@@ -223,28 +223,32 @@ def kepclip(infile,outfile,ranges,plot,plotcol,clobber,verbose,logfile,status,cm
 if '--shell' in sys.argv:
     import argparse
 
-    parser = argparse.ArgumentParser(description='Remove unwanted time ranges from Kepler time series data')
-    parser.add_argument('--shell', action='store_true', help='Are we running from the shell?')
+    parser = argparse.ArgumentParser(description='Remove unwanted time '
+                                     'ranges from Kepler time series data')
+    parser.add_argument('--shell', action='store_true',
+                        help='Are we running from the shell?')
 
     parser.add_argument('infile', help='Name of input file', type=str)
-    parser.add_argument('outfile', help='Name of FITS file to output', type=str)
-
-    parser.add_argument('ranges', help='List of time domain ranges to be excluded', type=str)
-
+    parser.add_argument('outfile', help='Name of FITS file to output',
+                        type=str)
+    parser.add_argument('ranges',
+                        help='List of time domain ranges to be excluded',
+                        type=str)
     parser.add_argument('--plot', action='store_true', help='Plot result?')
-    parser.add_argument('--plotcol', '-p',help='Data column to plot', default='SAP_FLUX', dest='plotcol', type=str)
-
-    parser.add_argument('--clobber', action='store_true', help='Overwrite output file?')
-    parser.add_argument('--verbose', action='store_true', help='Write to a log file?')
-    parser.add_argument('--logfile', '-l', help='Name of ascii log file', default='kepcotrend.log', dest='logfile', type=str)
-    parser.add_argument('--status', '-e', help='Exit status (0=good)', default=0, dest='status', type=int)
-
-
+    parser.add_argument('--plotcol', '-p',help='Data column to plot',
+                        default='SAP_FLUX', dest='plotcol', type=str)
+    parser.add_argument('--clobber', action='store_true',
+                        help='Overwrite output file?')
+    parser.add_argument('--verbose', action='store_true',
+                        help='Write to a log file?')
+    parser.add_argument('--logfile', '-l', help='Name of ascii log file',
+                        default='kepcotrend.log', dest='logfile', type=str)
+    parser.add_argument('--status', '-e', help='Exit status (0=good)',
+                        default=0, dest='status', type=int)
     args = parser.parse_args()
-
     cmdLine = True
-
-    kepclip(args.infile, args.outfile, args.ranges, args.plot, args.plotcol, args.clobber, args.verbose, args.logfile, args.status,cmdLine)
+    kepclip(args.infile, args.outfile, args.ranges, args.plot, args.plotcol,
+            args.clobber, args.verbose, args.logfile, args.status,cmdLine)
 
 else:
     from pyraf import iraf
