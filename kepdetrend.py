@@ -2,7 +2,6 @@ import sys, time, math, re
 import numpy as np
 from astropy.io import fits as pyfits
 from matplotlib import pyplot as plt
-from math import *
 import kepio, kepmsg, kepkey, kepfit, kepstat
 
 def kepdetrend(infile,outfile,datacol,errcol,ranges1,npoly1,nsig1,niter1,
@@ -238,20 +237,6 @@ def kepdetrend(infile,outfile,datacol,errcol,ranges1,npoly1,nsig1,niter1,
 # plot light curve
 
     if status == 0 and plot:
-        try:
-            params = {'backend': 'png',
-                      'axes.linewidth': 2.5,
-                      'axes.labelsize': labelsize,
-                      'axes.font': 'sans-serif',
-                      'axes.fontweight' : 'bold',
-                      'text.fontsize': 12,
-                      'legend.fontsize': 12,
-                      'xtick.labelsize': ticksize,
-                      'ytick.labelsize': ticksize}
-            rcParams.update(params)
-        except:
-            pass
-
         plt.figure(figsize=[xsize,ysize])
         plt.clf()
 
@@ -336,7 +321,7 @@ def kepdetrend(infile,outfile,datacol,errcol,ranges1,npoly1,nsig1,niter1,
 
 ## end time
 
-    if (status == 0):
+    if status == 0:
 	    message = 'KEPDETREND completed at'
     else:
 	    message = '\nKEPDETREND aborted at'
@@ -373,12 +358,8 @@ if '--shell' in sys.argv:
     parser.add_argument('--verbose', action='store_true', help='Write to a log file?')
     parser.add_argument('--logfile', '-l', help='Name of ascii log file', default='kepcotrend.log', dest='logfile', type=str)
     parser.add_argument('--status', '-e', help='Exit status (0=good)', default=0, dest='status', type=int)
-
-
     args = parser.parse_args()
-
     cmdLine=True
-
     kepdetrend(args.infile, args.outfile, args.datacol, args.errcol,
                args.ranges1, args.npoly1, args.nsig1, args.niter1,
                args.ranges2, args.npoly2, args.nsig2, args.niter2,
