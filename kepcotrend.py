@@ -14,39 +14,32 @@ Changelog:
 __svnid__ = "$Id: kepcotrend.py 6165 2014-03-26 21:16:27Z mstill $"
 __url__ = "$URL: svn+ssh://mstill@murzim.amn.nasa.gov/data-repo/trunk/data/flight/go/PyKE/kepler/kepcotrend.py $"
 
-#some of the module imports are at the bottom because because I
-#import different modules depending on the way the program is called
-
-
 import sys
 import matplotlib.pyplot as plt
+import numpy as np
+import math
 from matplotlib.cbook import is_numlike
 from scipy.optimize import leastsq
 from scipy.optimize import fmin as effmin
 from scipy.interpolate import interp1d
 from astropy.io import fits as pyfits
-from numpy.linalg import lstsq, inv
-from numpy import interp as interpolat
-from numpy import *
 import kepmsg, kepio, kepkey
-
-
 
 def cutBadData(cad,date,flux,err):
     """
     this function finds cadences with bad data in and removes them
     returning only cadences which contain good data
     """
-    date2 = date[logical_and(logical_and(isfinite(date),
-    isfinite(flux)),flux != 0.0)]
-    cad2 = cad[logical_and(logical_and(isfinite(date),
-    isfinite(flux)),flux != 0.0)]
-    flux2 = flux[logical_and(logical_and(isfinite(date),
-    isfinite(flux)),flux != 0.0)]
-    err2 = err[logical_and(logical_and(isfinite(date),
-    isfinite(flux)),flux != 0.0)]
-    bad_data = logical_and(logical_and(isfinite(date),
-    isfinite(flux)),flux != 0.0)
+    date2 = date[np.logical_and(np.logical_and(np.isfinite(date),
+    np.isfinite(flux)),flux != 0.0)]
+    cad2 = cad[np.logical_and(np.logical_and(np.isfinite(date),
+    np.isfinite(flux)),flux != 0.0)]
+    flux2 = flux[np.logical_and(np.logical_and(np.isfinite(date),
+    np.isfinite(flux)),flux != 0.0)]
+    err2 = err[np.logical_and(np.logical_and(np.isfinite(date),
+    np.isfinite(flux)),flux != 0.0)]
+    bad_data = np.logical_and(np.logical_and(np.isfinite(date),
+    np.isfinite(flux)),flux != 0.0)
 
     return cad2,date2,flux2,err2,bad_data
 
@@ -57,14 +50,14 @@ def putInNans(bad_data,flux):
     This function is used when writing data to a FITS files.
     bad_data == True means the datapoint is good!!
     """
-    newflux = zeros(len(bad_data))
+    newflux = np.zeros(len(bad_data))
     j = 0
     for i in range(len(bad_data)):
         if bad_data[i] == True:
             newflux[i] = flux[j]
             j += 1
         elif bad_data[i] == False:
-            newflux[i] = nan
+            newflux[i] = np.nan
     return newflux
 
 def get_pcomp_list_newformat(bvdat,pcomplist,newcad,short,scinterp):
@@ -73,41 +66,41 @@ def get_pcomp_list_newformat(bvdat,pcomplist,newcad,short,scinterp):
     used by the user and adds them to an array.
     """
     status = False
-    pcomp = zeros((len(pcomplist),len(newcad)))
-    for i in range(len(array(pcomplist))):
-        j = int(array(pcomplist)[i])
-        dat = bvdat.field('VECTOR_%s' %j)[isnan(bvdat.field('CADENCENO')) == False]
-        bvcadfull = bvdat.field('CADENCENO')[isnan(bvdat.field('CADENCENO')) == False]
+    pcomp = np.zeros((len(pcomplist),len(newcad)))
+    for i in range(len(np.array(pcomplist))):
+        j = int(np.array(pcomplist)[i])
+        dat = bvdat.field('VECTOR_%s' %j)[np.isnan(bvdat.field('CADENCENO')) == False]
+        bvcadfull = bvdat.field('CADENCENO')[np.isnan(bvdat.field('CADENCENO')) == False]
         #try:
         if short:
             #if the data is short cadence the interpolate the basis vectors
-            bv_data = dat[in1d(bvdat.field('CADENCENO'),newcad)]
-            bv_cad = bvcadfull[in1d(bvdat.field('CADENCENO'),newcad)]
+            bv_data = dat[np.in1d(bvdat.field('CADENCENO'),newcad)]
+            bv_cad = bvcadfull[np.in1d(bvdat.field('CADENCENO'),newcad)]
             #funny things happen why I use interp1d for linear interpolation
             #so I have opted to use the numpy interp function for linear
             if scinterp == 'linear':
-                intpl = interpolat(newcad,bv_cad,bv_data,left=bv_data[0],right=bv_data[-1])
+                intpl = np.interp(newcad,bv_cad,bv_data,left=bv_data[0],right=bv_data[-1])
                 pcomp[i] = intpl
             else:
                 intpl = interp1d(bv_cad,bv_data,kind=scinterp,bounds_error=False,fill_value=None)
-                pcomp[i] = where(isnan(intpl(newcad)),0,intpl(newcad))
-                mid_pt = floor(median(arange(len(pcomp[i]))))
+                pcomp[i] = np.where(np.isnan(intpl(newcad)),0,intpl(newcad))
+                mid_pt = np.floor(np.median(np.arange(len(pcomp[i]))))
                 p_len = len(pcomp[i])
-                lower = [logical_and(arange(p_len) < mid_pt,pcomp[i] == 0)]
-                upper = [logical_and(arange(p_len) > mid_pt,pcomp[i] == 0)]
+                lower = [np.logical_and(arange(p_len) < mid_pt,pcomp[i] == 0)]
+                upper = [np.logical_and(arange(p_len) > mid_pt,pcomp[i] == 0)]
                 pcomp[i][lower] = bv_data[0]
                 pcomp[i][upper] = bv_data[-1]
         else:
-            pcomp[i] = dat[in1d(bvdat.field('CADENCENO'),newcad)]
+            pcomp[i] = dat[np.in1d(bvdat.field('CADENCENO'),newcad)]
     return pcomp,status
 
 def make_sc_lc(obs_cad,bv_cad,flux):
     """
     make short cadence data look like long cadence data
     """
-    newflux = zeros(len(bv_cad))
+    newflux = np.zeros(len(bv_cad))
     for i in range(len(bv_cad)):
-        mask = logical_and(obs_cad > bv_cad[i] - 15,obs_cad < bv_cad[i] + 15)
+        mask = np.logical_and(obs_cad > bv_cad[i] - 15,obs_cad < bv_cad[i] + 15)
         newflux[i] = obs_cad[mask]
     return newflux
 
@@ -134,15 +127,15 @@ def near_intpl(xout,xin,yin):
     y0 = yin[i1-1]
     y1 = yin[i1]
 
-    return where(abs(xout - x0) < abs(xout - x1), y0, y1)
+    return np.where(abs(xout - x0) < abs(xout - x1), y0, y1)
 
 
 def get_pcomp_list(pcompdata,pcomplist,newcad):
-    pcomp = zeros((len(pcomplist),len(newcad)))
-    for i in range(len(array(pcomplist))):
-        j = int(array(pcomplist)[i])-1
+    pcomp = np.zeros((len(pcomplist),len(newcad)))
+    for i in range(len(np.array(pcomplist))):
+        j = int(np.array(pcomplist)[i])-1
         dat = pcompdata[...,j+2]
-        pcomp[i] = dat[in1d(pcompdata[...,1],newcad)]
+        pcomp[i] = dat[np.in1d(pcompdata[...,1],newcad)]
     return pcomp
 
 
@@ -162,18 +155,18 @@ def do_lsq_uhat(pcomps,cad,flux,orthog=True):
     fit instead of relying on any orthogonality
     """
 
-    U_hat = matrix(pcomps).transpose()
-    y_hat = matrix(flux).transpose()
+    U_hat = np.matrix(pcomps).transpose()
+    y_hat = np.matrix(flux).transpose()
 
     U_trans = U_hat.transpose()
 
     if orthog == True:
-        coeffs = inv(U_trans * U_hat) * U_trans * y_hat
+        coeffs = np.linalg.inv(U_trans * U_hat) * U_trans * y_hat
 
     elif orthog == False:
-        coeffs = inv(U_trans * U_hat) * U_trans * y_hat
+        coeffs = np.linalg.inv(U_trans * U_hat) * U_trans * y_hat
 
-    coeffs = array(0. - coeffs)
+    coeffs = np.array(0. - coeffs)
 
     return coeffs
 
@@ -184,9 +177,9 @@ def do_lsq_nlin(pcomps,cad,flux):
     squares fit. The initial guess is an array of zeros
     """
 
-    guess = append(array([1.]),zeros(len(pcomps)-1))
+    guess = np.append(np.array([1.]),np.zeros(len(pcomps)-1))
     t = leastsq(fitfunct,guess, args=(pcomps,cad,flux),full_output=0)
-    return -array(t[0])
+    return -np.array(t[0])
 
 def do_lsq_fmin(pcomps,cad,flux):
     """
@@ -195,9 +188,9 @@ def do_lsq_fmin(pcomps,cad,flux):
     value of all other elements in the array
     """
 
-    guess = append(array([1.]),zeros(len(pcomps)-1))
+    guess = np.append(np.array([1.]),np.zeros(len(pcomps)-1))
     t = effmin(fitfunct_fmin,guess,args=(pcomps,cad,flux))
-    return -array(t)
+    return -np.array(t)
 
 def do_lsq_fmin_pow(pcomps,cad,flux,order):
     """
@@ -206,22 +199,22 @@ def do_lsq_fmin_pow(pcomps,cad,flux,order):
     value of all other elements in the array
     """
 
-    guess = array([1,0])
+    guess = np.array([1,0])
     initial = effmin(fitfunct_fmin_pow,guess,args=(pcomps[0:2],cad,flux,order))
-    #guess = append(array([1.]),zeros(len(pcomps)-1))
-    guess = append(initial,zeros(len(pcomps)-2))
+    #guess = np.append(np.array([1.]),zeros(len(pcomps)-1))
+    guess = np.append(initial,np.zeros(len(pcomps)-2))
     t = effmin(fitfunct_fmin_pow,guess,args=(pcomps,cad,flux,order))
-    return -array(t)
+    return -np.array(t)
 
 def fitfunct_fmin(scale,pcomp,date,zeroflux):
     """
     the function called by the simplex fitting alogirthm
     """
 
-    outflux = copy(zeroflux)
-    for i in range(shape(pcomp)[0]):
+    outflux = np.copy(zeroflux)
+    for i in range(np.shape(pcomp)[0]):
         outflux -= scale[i]*pcomp[i]
-    sumsq = sum(abs(array(outflux)))
+    sumsq = sum(abs(np.array(outflux)))
     #sumsq = sum(array(outflux)**2)
     return sumsq
 
@@ -230,10 +223,10 @@ def fitfunct_fmin_pow(scale,pcomp,date,zeroflux,order):
     the function called by the simplex fitting alogirthm
     """
 
-    outflux = copy(zeroflux)
-    for i in range(shape(pcomp)[0]):
+    outflux = np.copy(zeroflux)
+    for i in range(np.shape(pcomp)[0]):
         outflux -= scale[i]*pcomp[i]
-    sumsq = sum(power(abs(array(outflux)),order))
+    sumsq = sum(power(abs(np.array(outflux)),order))
     #sumsq = sum(array(outflux)**2)
     return sumsq
 
@@ -242,8 +235,8 @@ def fitfunct(scale,pcomp,date,zeroflux):
     the function called by the least squares fitting algorithm
     """
 
-    outflux = copy(zeroflux)
-    for i in range(shape(pcomp)[0]):
+    outflux = np.copy(zeroflux)
+    for i in range(np.shape(pcomp)[0]):
         outflux -= scale[i]*pcomp[i]
     return outflux
 
@@ -255,7 +248,7 @@ def get_newflux(oldflux,pcomps,s):
     the light curve
     """
 
-    newflux = copy(oldflux)
+    newflux = np.copy(oldflux)
     for i in range(len(s)):
         newflux += s[i]*pcomps[i]
     return newflux
@@ -290,7 +283,7 @@ def rms(O,E):
     calculates a root mean square of the model fit to the data
     """
 
-    rms= sqrt(sum((O-E)**2)/len(O))
+    rms = math.sqrt(np.sum((O-E)**2)/len(O))
     return rms
 
 def do_lst_iter(bvs,cad,flux,nsigma,niter,method,order):
@@ -301,9 +294,9 @@ def do_lst_iter(bvs,cad,flux,nsigma,niter,method,order):
     The sigma actually means a median absolute deviation from the median.
     """
     iiter = 1
-    fluxnew = copy(flux)
-    lcnew = copy(cad)
-    bvsnew = copy(bvs)
+    fluxnew = np.copy(flux)
+    lcnew = np.copy(cad)
+    bvsnew = np.copy(bvs)
     if method == 'matrix':
         t = do_lsq_uhat(bvsnew,lcnew,fluxnew,False)
     elif method == 'lst_sq':
@@ -322,12 +315,12 @@ def do_lst_iter(bvs,cad,flux,nsigma,niter,method,order):
         fluxnew = fluxnew[mask]
         lcnew = lcnew[mask]
         try:
-            bvsnew = copy(bvsnew2)
+            bvsnew = np.copy(bvsnew2)
         except:
             pass
         bvsnew2 = newpcompsarray(bvsnew,mask)
         #print shape(bvsnew),shape(bvsnew2),shape(mask[mask])
-        for i in range(shape(bvsnew)[0]):
+        for i in range(np.shape(bvsnew)[0]):
             bvsnew2[i] = bvsnew[i][mask]
         if method == 'matrix':
             t = do_lsq_uhat(bvsnew2,lcnew,fluxnew,False)
@@ -342,7 +335,7 @@ def do_lst_iter(bvs,cad,flux,nsigma,niter,method,order):
     return t,mask
 
 def newpcompsarray(pcomp,mask):
-    pcompnew = zeros((shape(pcomp)[0],len(mask[mask])))
+    pcompnew = np.zeros((np.shape(pcomp)[0],len(mask[mask])))
     return pcompnew
 
 
@@ -350,8 +343,8 @@ def MAD_model(xx,minSd=1E-16):
   """Median Absolute Deviation"""
 
   absdev=abs(xx)
-  mad=median(absdev,0)
-  mad=maximum(mad,multiply(ones(mad.shape,float32),(minSd/1.48)))
+  mad=np.median(absdev,0)
+  mad=maximum(mad,np.multiply(np.ones(mad.shape,np.float32),(minSd/1.48)))
   return mad
 
 
@@ -423,19 +416,19 @@ def do_plot(date,flux_old,flux_new,bvsum,cad,bad_data,cad_nans,version, cmdLine=
             block = [blocks[0],blocks[i]]
         else:
             block = [blocks[i-1],blocks[i]]
-        mask = logical_and(cad >= block[0],cad <= block[1])
+        mask = np.logical_and(cad >= block[0],cad <= block[1])
         plot_x = date_sub[mask]
         plot_y = flux_old_sub[mask]
-        if nan in plot_y:
+        if np.nan in plot_y:
                 break
         plt.plot(plot_x,plot_y,color='#0000ff',linestyle='-',linewidth=1.0)
         plot_y = bvsum_sub[mask]
         plt.plot(plot_x,plot_y,color='red',linestyle='-',
         linewidth=2.0)
-    date2 = insert(date_sub,[0],[date_sub[0]])
-    date2 = append(date2,[date_sub[-1]])
-    flux2 = insert(flux_old_sub,[0],[0.0])
-    flux2 = append(flux2,[0.0])
+    date2 = np.insert(date_sub,[0],[date_sub[0]])
+    date2 = np.append(date2,[date_sub[-1]])
+    flux2 = np.insert(flux_old_sub,[0],[0.0])
+    flux2 = np.append(flux2,[0.0])
     plt.fill(date2,flux2,fc='#FFFACD',linewidth=0.0)
     plt.xlim(xmin-xr*0.01,xmax+xr*0.01)
     if ymin1-yr1*0.01 <= 0.0:
@@ -454,18 +447,18 @@ def do_plot(date,flux_old,flux_new,bvsum,cad,bad_data,cad_nans,version, cmdLine=
             block = [blocks[0],blocks[i]]
         else:
             block = [blocks[i-1],blocks[i]]
-        mask = logical_and(cad >= block[0],cad <= block[1])
+        mask = np.logical_and(cad >= block[0],cad <= block[1])
         plot_x = date_sub[mask]
         plot_y = flux_new_sub[mask]
-        if nan in plot_y:
+        if np.nan in plot_y:
             break
         plt.plot(plot_x,plot_y,color='#0000ff',linestyle='-',linewidth=1.0)
         plot_y = bvsum_sub[mask]
 
-    date2 = insert(date_sub,[0],[date_sub[0]])
-    date2 = append(date2,[date_sub[-1]])
-    flux2 = insert(flux_new_sub,[0],[0.0])
-    flux2 = append(flux2,[0.0])
+    date2 = np.insert(date_sub,[0],[date_sub[0]])
+    date2 = np.append(date2,[date_sub[-1]])
+    flux2 = np.insert(flux_new_sub,[0],[0.0])
+    flux2 = np.append(flux2,[0.0])
     plt.fill(date2,flux2,fc='#FFFACD',linewidth=0.0)
     plt.xlim(xmin-xr*0.01,xmax+xr*0.01)
 
@@ -742,7 +735,7 @@ def kepcotrendsc(infile,outfile,bvfile,listbv,fitmethod,fitpower,iterate,
 
 
     if status == 0:
-        bvlist = fromstring(listbv,dtype=int,sep=separator)
+        bvlist = np.fromstring(listbv,dtype=int,sep=separator)
         if bvlist[0] == 0:
             message = 'Must use at least one basis vector'
             status = kepmsg.err(logfile,message,verbose)
@@ -760,9 +753,9 @@ def kepcotrendsc(infile,outfile,bvfile,listbv,fitmethod,fitpower,iterate,
             status = kepmsg.err(logfile,message,verbose)
     if status == 0:
 
-        medflux = median(lc_flux)
+        medflux = np.median(lc_flux)
         n_flux = (lc_flux /medflux)-1
-        n_err = sqrt(pow(lc_err,2)/ pow(medflux,2))
+        n_err = np.sqrt(lc_err * lc_err / (medflux * medflux))
 
         if maskfile != '':
             domasking = True
@@ -774,32 +767,31 @@ def kepcotrendsc(infile,outfile,bvfile,listbv,fitmethod,fitpower,iterate,
 
     if status == 0:
         if domasking:
-            lc_date_masked = copy(lc_date)
-            n_flux_masked = copy(n_flux)
-            lc_cad_masked = copy(lc_cad)
-            n_err_masked = copy(n_err)
+            lc_date_masked = np.copy(lc_date)
+            n_flux_masked = np.copy(n_flux)
+            lc_cad_masked = np.copy(lc_cad)
+            n_err_masked = np.copy(n_err)
             maskdata = atleast_2d(genfromtxt(maskfile,delimiter=','))
             #make a mask of True values incase there are not regions in maskfile to exclude.
-            mask = zeros(len(lc_date_masked)) == 0.
+            mask = np.zeros(len(lc_date_masked)) == 0.
             for maskrange in maskdata:
-                    if version == 1:
-                            start = maskrange[0] - 2400000.0
-                            end = maskrange[1] - 2400000.0
-                    elif version == 2:
-                            start = maskrange[0] - 2454833.
-                            end = maskrange[1] - 2454833.
-                    masknew = logical_xor(lc_date < start,lc_date > end)
-                    mask = logical_and(mask,masknew)
-
+                if version == 1:
+                    start = maskrange[0] - 2400000.0
+                    end = maskrange[1] - 2400000.0
+                elif version == 2:
+                    start = maskrange[0] - 2454833.
+                    end = maskrange[1] - 2454833.
+                masknew = logical_xor(lc_date < start,lc_date > end)
+                mask = np.logical_and(mask,masknew)
             lc_date_masked = lc_date_masked[mask]
             n_flux_masked = n_flux_masked[mask]
             lc_cad_masked = lc_cad_masked[mask]
             n_err_masked = n_err_masked[mask]
         else:
-            lc_date_masked = copy(lc_date)
-            n_flux_masked = copy(n_flux)
-            lc_cad_masked = copy(lc_cad)
-            n_err_masked = copy(n_err)
+            lc_date_masked = np.copy(lc_date)
+            n_flux_masked = np.copy(n_flux)
+            lc_cad_masked = np.copy(lc_cad)
+            n_err_masked = np.copy(n_err)
 
         bvectors_masked,hasin1d = get_pcomp_list_newformat(bvdata,bvlist,
                                                            lc_cad_masked,
@@ -843,7 +835,7 @@ def kepcotrendsc(infile,outfile,bvfile,listbv,fitmethod,fitpower,iterate,
         flux_after_nans = putInNans(bad_data, flux_after)
 
 	if plot and status == 0:
-            newmedflux = median(flux_after + 1)
+            newmedflux = np.median(flux_after + 1)
             bvsum_un_norm = newmedflux*(1-bvsum)
             do_plot(lc_date, lc_flux, flux_after, bvsum_un_norm, lc_cad,
                     bad_data, lc_cad_o, version, cmdLine)
@@ -881,7 +873,6 @@ def kepcotrendsc(infile,outfile,bvfile,listbv,fitmethod,fitpower,iterate,
     kepmsg.clock(message,logfile,verbose)
 
     return
-
 
 if '--shell' in sys.argv:
     import argparse
