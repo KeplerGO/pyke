@@ -43,7 +43,7 @@ def kepft(infile,outfile,fcol,pmin,pmax,nfreq,plot,clobber,verbose,logfile,statu
 
 ## start time
 
-    kepmsg.clock('Start time is',logfile,verbose)
+    kepmsg.clock('Start time is', logfile, verbose)
 
 ## test log file
 
@@ -51,17 +51,20 @@ def kepft(infile,outfile,fcol,pmin,pmax,nfreq,plot,clobber,verbose,logfile,statu
 
 ## clobber output file
 
-    if clobber: status = kepio.clobber(outfile,logfile,verbose)
+    if clobber: status = kepio.clobber(outfile, logfile, verbose)
     if kepio.fileexists(outfile):
         message = 'ERROR -- KEPFT: ' + outfile + ' exists. Use --clobber'
-        status = kepmsg.err(logfile,message,verbose)
+        status = kepmsg.err(logfile, message, verbose)
 
 ## open input file
 
     if status == 0:
-        instr, status = kepio.openfits(infile,'readonly',logfile,verbose)
+        instr, status = kepio.openfits(infile, 'readonly', logfile, verbose)
     if status == 0:
-        tstart, tstop, bjdref, cadence, status = kepio.timekeys(instr,infile,logfile,verbose,status)
+        tstart, tstop, bjdref, cadence, status = kepio.timekeys(instr, infile,
+                                                                logfile,
+                                                                verbose,
+                                                                status)
 
 ## fudge non-compliant FITS keywords with no values
 
@@ -74,8 +77,10 @@ def kepft(infile,outfile,fcol,pmin,pmax,nfreq,plot,clobber,verbose,logfile,statu
 	try:
             barytime = instr[1].data.field('barytime')
 	except:
-            barytime, status = kepio.readfitscol(infile,instr[1].data,'time',logfile,verbose)
-	signal, status = kepio.readfitscol(infile,instr[1].data,fcol,logfile,verbose)
+            barytime, status = kepio.readfitscol(infile, instr[1].data,
+                                                 'time', logfile, verbose)
+	signal, status = kepio.readfitscol(infile, instr[1].data, fcol,
+                                           logfile, verbose)
     if status == 0:
         barytime = barytime + bjdref
 
@@ -134,23 +139,6 @@ def kepft(infile,outfile,fcol,pmin,pmax,nfreq,plot,clobber,verbose,logfile,statu
         power = np.insert(power,[0],0.0)
         power = np.append(power,0.0)
 
-## plot power spectrum
-
-    if status == 0 and plot:
-        try:
-            params = {'backend': 'png',
-                      'axes.linewidth': 2.5,
-                      'axes.labelsize': labelsize,
-                      'axes.font': 'sans-serif',
-                      'axes.fontweight' : 'bold',
-                      'text.fontsize': 12,
-                      'legend.fontsize': 12,
-                      'xtick.labelsize': ticksize,
-                      'ytick.labelsize': ticksize}
-            rcParams.update(params)
-        except:
-            pass
-
     if status == 0 and plot:
         plt.figure(1,figsize=[xsize,ysize])
         plt.clf()
@@ -172,43 +160,41 @@ def kepft(infile,outfile,fcol,pmin,pmax,nfreq,plot,clobber,verbose,logfile,statu
 ## end time
 
     if (status == 0):
-	    message = 'KEPFT completed at'
+        message = 'KEPFT completed at'
     else:
-	    message = '\nKEPFT aborted at'
+	message = '\nKEPFT aborted at'
     kepmsg.clock(message,logfile,verbose)
 
 ## main
 if '--shell' in sys.argv:
     import argparse
-
-    parser = argparse.ArgumentParser(description='Calculate and store a Fourier Transform from a Kepler time series')
-    parser.add_argument('--shell', action='store_true', help='Are we running from the shell?')
-
+    parser = argparse.ArgumentParser(description=('Calculate and store a '
+                                                  'Fourier Transform from a '
+                                                  'Kepler time series')
+    parser.add_argument('--shell', action='store_true',
+                        help='Are we running from the shell?')
     parser.add_argument('infile', help='Name of input file', type=str)
-    parser.add_argument('outfile', help='Name of FITS file to output', type=str)
-
-    parser.add_argument('--datacol', default='SAP_FLUX', help='Name of data column to plot', type=str, dest='fcol')
-
+    parser.add_argument('outfile', help='Name of FITS file to output',
+                        type=str)
+    parser.add_argument('--datacol', default='SAP_FLUX',
+                        help='Name of data column to plot', type=str, dest='fcol')
     parser.add_argument('--pmin', default=0.1, help='Minimum search period [days]', type=float)
-    parser.add_argument('--pmax', default=10., help='Maximum search period [days]', type=float)
-    parser.add_argument('--nfreq', default=100, help='Number of frequency intervals', type=int)
-
-
-
-    parser.add_argument('--clobber', action='store_true', help='Overwrite output file?')
-    parser.add_argument('--verbose', action='store_true', help='Write to a log file?')
-    parser.add_argument('--logfile', '-l', help='Name of ascii log file', default='kepcotrend.log', dest='logfile', type=str)
-    parser.add_argument('--status', '-e', help='Exit status (0=good)', default=0, dest='status', type=int)
-
-
+    parser.add_argument('--pmax', default=10.,
+                        help='Maximum search period [days]', type=float)
+    parser.add_argument('--nfreq', default=100,
+                        help='Number of frequency intervals', type=int)
+    parser.add_argument('--clobber', action='store_true',
+                        help='Overwrite output file?')
+    parser.add_argument('--verbose', action='store_true',
+                        help='Write to a log file?')
+    parser.add_argument('--logfile', '-l', help='Name of ascii log file',
+                        default='kepcotrend.log', dest='logfile', type=str)
+    parser.add_argument('--status', '-e', help='Exit status (0=good)',
+                        default=0, dest='status', type=int)
     args = parser.parse_args()
-
     cmdLine=True
-
     kepft(args.infile,args.outfile, args.fcol, args.pmin, args.pmax, args.nfreq,
         args.plot, args.clobber, args.verbose, args.logfile, args.status, cmdLine)
-
-
 else:
     from pyraf import iraf
     parfile = iraf.osfn("kepler$kepft.par")
