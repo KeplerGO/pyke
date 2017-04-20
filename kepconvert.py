@@ -3,9 +3,6 @@ import numpy as np
 from astropy.io import fits as pyfits
 import kepio, kepmsg, kepkey
 
-__svnid__ = "$Id: kepconvert.py 6165 2014-03-26 21:16:27Z mstill $"
-__url__ = "$URL: svn+ssh://mstill@murzim.amn.nasa.gov/data-repo/trunk/data/flight/go/PyKE/kepler/kepconvert.py $"
-
 
 def kepconvert(infile,outfile,conversion,columns,baddata,clobber,verbose,logfile,status):
 # startup parameters
@@ -64,7 +61,6 @@ def kepconvert(infile,outfile,conversion,columns,baddata,clobber,verbose,logfile
             status = kepmsg.err(logfile,message,verbose)
 
 # open FITS input file
-
 
     if status == 0 and conversion == 'fits2asc':
         instr, status = kepio.openfits(infile,'readonly',logfile,verbose)
@@ -323,19 +319,23 @@ if '--shell' in sys.argv:
     parser.add_argument('infile', help='Name of input file', type=str)
     parser.add_argument('outfile', help='Name of output file', type=str)
 
-    parser.add_argument('conversion', help='Type of data conversion', type=str,choices=['fits2asc','asc2fits'])
-    parser.add_argument('--columns', '-c', default='TIME,SAP_FLUX,SAP_FLUX_ERR', dest='columns', help='Comma-delimited list of data columns', type=str)
-    parser.add_argument('--baddata', action='store_false', help='Output rows which have been flagged as questionable')
-
-    parser.add_argument('--clobber', action='store_true', help='Overwrite output file?')
-    parser.add_argument('--verbose', action='store_true', help='Write to a log file?')
-    parser.add_argument('--logfile', '-l', help='Name of ascii log file', default='kepcotrend.log', dest='logfile', type=str)
-    parser.add_argument('--status', '-e', help='Exit status (0=good)', default=0, dest='status', type=int)
-
-
+    parser.add_argument('conversion', help='Type of data conversion', type=str,
+                        choices=['fits2asc','asc2fits'])
+    parser.add_argument('--columns', '-c', default='TIME,SAP_FLUX,SAP_FLUX_ERR',
+                        dest='columns', help='Comma-delimited list of data columns', type=str)
+    parser.add_argument('--baddata', action='store_false',
+                        help='Output rows which have been flagged as questionable')
+    parser.add_argument('--clobber', action='store_true',
+                        help='Overwrite output file?')
+    parser.add_argument('--verbose', action='store_true',
+                        help='Write to a log file?')
+    parser.add_argument('--logfile', '-l', help='Name of ascii log file',
+                        default='kepcotrend.log', dest='logfile', type=str)
+    parser.add_argument('--status', '-e', help='Exit status (0=good)',
+                        default=0, dest='status', type=int)
     args = parser.parse_args()
-    kepconvert(args.infile, args.outfile, args.conversion, args.columns, args.baddata, args.clobber, args.verbose, args.logfile, args.status)
-
+    kepconvert(args.infile, args.outfile, args.conversion, args.columns,
+               args.baddata, args.clobber, args.verbose, args.logfile, args.status)
 else:
     from pyraf import iraf
     parfile = iraf.osfn("kepler$kepconvert.par")
