@@ -131,7 +131,7 @@ def readfitscol(file,table,column,logfile,verbose):
     try:
 	data = table.field(column)
     except:
-	message  = 'ERROR -- KEPIO.READFITSCOL: could not extract ' + column 
+	message  = 'ERROR -- KEPIO.READFITSCOL: could not extract ' + column
 	message += ' data from ' + file
 	status = kepmsg.err(logfile,message,verbose)
 	data = None
@@ -405,7 +405,6 @@ def fileexists(file):
 
 # -----------------------------------------------------------
 # move file
-   
 def move(file1,file2,logfile,verbose):
 
     status = 0
@@ -421,7 +420,6 @@ def move(file1,file2,logfile,verbose):
 
 # -----------------------------------------------------------
 # copy file
-   
 def copy(file1,file2,logfile,verbose):
 
     status = 0
@@ -441,7 +439,6 @@ def copy(file1,file2,logfile,verbose):
 def parselist(inlist,logfile,verbose):
 
 # test input name list
-   
     status = 0
     inlist.strip()
     if (len(inlist) == 0 or inlist.count(' ') > 0):

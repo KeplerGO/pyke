@@ -3,13 +3,13 @@ from numpy import array
 from astropy.io import fits as pyfits
 import kepio, kepmsg, kepkey, kepstat
 
-def kepimages(infile,outfix,imtype,ranges,clobber,verbose,logfile,status): 
+def kepimages(infile,outfix,imtype,ranges,clobber,verbose,logfile,status):
 
 # startup parameters
 
     status = 0
 
-# log the call 
+# log the call
 
     hashline = '----------------------------------------------------------------------------'
     kepmsg.log(logfile,hashline,verbose)
@@ -95,7 +95,7 @@ def kepimages(infile,outfix,imtype,ranges,clobber,verbose,logfile,status):
         for cadence in cadencelis:
             outfile = outfix + '_BJD%.4f' % time[cadence] + '.fits'
             if clobber and status == 0: status = kepio.clobber(outfile,logfile,verbose)
-            if kepio.fileexists(outfile) and status == 0: 
+            if kepio.fileexists(outfile) and status == 0:
                 message = 'ERROR -- KEPIMAGES: ' + outfile + ' exists. Use --clobber'
                 status = kepmsg.err(logfile,message,True)
 
@@ -108,31 +108,36 @@ def kepimages(infile,outfix,imtype,ranges,clobber,verbose,logfile,status):
             hdu0 = pyfits.PrimaryHDU()
             for i in range(len(cards0)):
                 try:
-                    if cards0[i].key not in hdu0.header.keys():
-                        hdu0.header.update(cards0[i].key, cards0[i].value, cards0[i].comment)
+                    if cards0[i].keyword not in hdu0.header.keys():
+                        hdu0.header[cards0[i].keyword] = (cards0[i].value, cards0[i].comment)
                     else:
                         hdu0.header.cards[cards0[i].key].comment = cards0[i].comment
                 except:
                     pass
             status = kepkey.history(call,hdu0,outfile,logfile,verbose)
-            outstr = HDUList(hdu0)
+            outstr = pyfits.HDUList(hdu0)
 
 # construct output image extension
 
-            hdu1 = ImageHDU(flux[cadence])
+            hdu1 = pyfits.ImageHDU(flux[cadence])
             for i in range(len(cards2)):
                 try:
-                    if cards2[i].key not in hdu1.header.keys():
-                        hdu1.header.update(cards2[i].key, cards2[i].value, cards2[i].comment)
+                    if cards2[i].keyword not in hdu1.header.keys():
+                        hdu1.header[cards2[i].key] = (cards2[i].value, cards2[i].comment)
                 except:
                     pass
             for i in range(len(cards1)):
-                if (cards1[i].key not in hdu1.header.keys() and
-                    cards1[i].key[:4] not in ['TTYP','TFOR','TUNI','TDIS','TDIM','WCAX','1CTY',
-                                              '2CTY','1CRP','2CRP','1CRV','2CRV','1CUN','2CUN',
-                                              '1CDE','2CDE','1CTY','2CTY','1CDL','2CDL','11PC',
-                                              '12PC','21PC','22PC','WCSN','TFIE']):
-                    hdu1.header.update(cards1[i].key, cards1[i].value, cards1[i].comment)
+                if (cards1[i].keyword not in hdu1.header.keys() and
+                    cards1[i].keyword[:4] not in ['TTYP', 'TFOR', 'TUNI',
+                                                  'TDIS', 'TDIM', 'WCAX',
+                                                  '1CTY', '2CTY', '1CRP',
+                                                  '2CRP', '1CRV', '2CRV',
+                                                  '1CUN', '2CUN', '1CDE',
+                                                  '2CDE', '1CTY', '2CTY',
+                                                  '1CDL', '2CDL', '11PC',
+                                                  '12PC', '21PC', '22PC',
+                                                  'WCSN','TFIE']):
+                    hdu1.header[cards1[i].keyword] = (cards1[i].value, cards1[i].comment)
             try:
                 int_time = cards1['INT_TIME'].value
             except:
@@ -145,50 +150,52 @@ def kepimages(infile,outfix,imtype,ranges,clobber,verbose,logfile,status):
                 num_frm = cards1['NUM_FRM'].value
             except:
                 kepmsg.warn(logfile,'WARNING -- KEPIMAGES: cannot find NUM_FRM keyword')
-            hdu1.header.update('EXTNAME','IMAGE','name of extension')
+
+            hdu1.header['EXTNAME'] = ('IMAGE','name of extension')
+
             try:
-                hdu1.header.update('TELAPSE',frametim * num_frm,'[s] elapsed time for exposure')
+                hdu1.header['TELAPSE'] = (frametim * num_frm,'[s] elapsed time for exposure')
             except:
-                hdu1.header.update('TELAPSE',-999,'[s] elapsed time for exposure')
+                hdu1.header['TELAPSE'] = (-999,'[s] elapsed time for exposure')
             try:
-                hdu1.header.update('LIVETIME',int_time * num_frm,'[s] TELASPE multiplied by DEADC')
+                hdu1.header['LIVETIME'] = (int_time * num_frm,'[s] TELASPE multiplied by DEADC')
             except:
-                hdu1.header.update('LIVETIME',-999,'[s] TELASPE multiplied by DEADC')
+                hdu1.header['LIVETIME'] = (-999,'[s] TELASPE multiplied by DEADC')
             try:
-                hdu1.header.update('EXPOSURE',int_time * num_frm,'[s] time on source')
+                hdu1.header['EXPOSURE'] = (int_time * num_frm,'[s] time on source')
             except:
-                hdu1.header.update('EXPOSURE',-999,'[s] time on source')
+                hdu1.header['EXPOSURE'] = (-999,'[s] time on source')
             try:
-                hdu1.header.update('MIDTIME',time[cadence],'[BJD] mid-time of exposure')
+                hdu1.header['MIDTIME'] = (time[cadence],'[BJD] mid-time of exposure')
             except:
-                hdu1.header.update('MIDTIME',-999,'[BJD] mid-time of exposure')
+                hdu1.header['MIDTIME'] = (-999,'[BJD] mid-time of exposure')
             try:
-                hdu1.header.update('TIMECORR',timecorr[cadence],'[d] barycenter - timeslice correction')
+                hdu1.header['TIMECORR'] = (timecorr[cadence],'[d] barycenter - timeslice correction')
             except:
-                hdu1.header.update('TIMECORR',-999,'[d] barycenter - timeslice correction')
+                hdu1.header['TIMECORR'] = (-999,'[d] barycenter - timeslice correction')
             try:
-                hdu1.header.update('CADENCEN',cadenceno[cadence],'unique cadence number')
+                hdu1.header['CADENCEN'] = (cadenceno[cadence],'unique cadence number')
             except:
-                hdu1.header.update('CADENCEN',-999,'unique cadence number')
+                hdu1.header['CADENCEN'] = (-999,'unique cadence number')
             try:
-                hdu1.header.update('QUALITY',quality[cadence],'pixel quality flag')
+                hdu1.header['QUALITY'] = (quality[cadence],'pixel quality flag')
             except:
-                hdu1.header.update('QUALITY',-999,'pixel quality flag')
+                hdu1.header['QUALITY'] = (-999,'pixel quality flag')
             try:
                 if True in numpy.isfinite(cosmic_rays[cadence]):
-                    hdu1.header.update('COSM_RAY',True,'cosmic ray detected?')
+                    hdu1.header['COSM_RAY'] = (True,'cosmic ray detected?')
                 else:
-                    hdu1.header.update('COSM_RAY',False,'cosmic ray detected?')
+                    hdu1.header['COSM_RAY'] = (False,'cosmic ray detected?')
             except:
-                hdu1.header.update('COSM_RAY',-999,'cosmic ray detected?')
+                hdu1.header['COSM_RAY'] = (-999,'cosmic ray detected?')
             try:
                 pc1 = str(pos_corr1[cadence])
                 pc2 = str(pos_corr2[cadence])
-                hdu1.header.update('POSCORR1',pc1,'[pix] column position correction')
-                hdu1.header.update('POSCORR2',pc2,'[pix] row position correction')
+                hdu1.header['POSCORR1'] = (pc1,'[pix] column position correction')
+                hdu1.header['POSCORR2'] = (pc2,'[pix] row position correction')
             except:
-                hdu1.header.update('POSCORR1',-999,'[pix] column position correction')
-                hdu1.header.update('POSCORR2',-999,'[pix] row position correction')
+                hdu1.header['POSCORR1'] = (-999,'[pix] column position correction')
+                hdu1.header['POSCORR2'] = (-999,'[pix] row position correction')
             outstr.append(hdu1)
 
 # write output file
@@ -204,7 +211,7 @@ def kepimages(infile,outfix,imtype,ranges,clobber,verbose,logfile,status):
 # close input structure
 
     if status == 0:
-        status = kepio.closefits(instr,logfile,verbose)	    
+        status = kepio.closefits(instr,logfile,verbose)
         print '\n'
 
 # end time
@@ -216,7 +223,6 @@ def kepimages(infile,outfix,imtype,ranges,clobber,verbose,logfile,status):
 
 if '--shell' in sys.argv:
     import argparse
-    
     parser = argparse.ArgumentParser(description='Export images within a Target Pixel File to a series of FITS image files')
     parser.add_argument('--shell', action='store_true', help='Are we running from the shell?')
     parser.add_argument('infile', help='Name of input target pixel file', type=str)
@@ -226,16 +232,15 @@ if '--shell' in sys.argv:
     parser.add_argument('--ranges', help='Time ranges for output [BJD]', type=str)
     parser.add_argument('--clobber', action='store_true', help='Overwrite output file?')
     parser.add_argument('--verbose', action='store_true', help='Write to a log file?')
-    parser.add_argument('--logfile', help='Name of ascii log file', default='kepimages.log', 
-        dest='logfile', type=str)
+    parser.add_argument('--logfile', help='Name of ascii log file', default='kepimages.log',
+                        dest='logfile', type=str)
     parser.add_argument('--status', help='Exit status (0=good)', default=0, dest='status', type=int)
 
     args = parser.parse_args()
-    
-    kepimages(args.infile,args.outfix,args.imtype,args.ranges,args.clobber,args.verbose,args.logfile,args.status)
+    kepimages(args.infile, args.outfix, args.imtype, args.ranges,
+              args.clobber, args.verbose, args.logfile, args.status)
 
 else:
     from pyraf import iraf
-        
     parfile = iraf.osfn("kepler$kepimages.par")
     t = iraf.IrafTaskFactory(taskname="kepimages", value=parfile, function=kepimages)
