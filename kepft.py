@@ -170,7 +170,7 @@ if '--shell' in sys.argv:
     import argparse
     parser = argparse.ArgumentParser(description=('Calculate and store a '
                                                   'Fourier Transform from a '
-                                                  'Kepler time series')
+                                                  'Kepler time series'))
     parser.add_argument('--shell', action='store_true',
                         help='Are we running from the shell?')
     parser.add_argument('infile', help='Name of input file', type=str)
