@@ -1,8 +1,7 @@
-import numpy, sys, time, pylab
+import sys, time
+import numpy as np
 from astropy.io import fits as pyfits
-from numpy import *
-from pylab import *
-from matplotlib import *
+from matplotlib import pyplot as plt
 import kepio, kepmsg, kepkey
 
 # global variables
@@ -16,7 +15,8 @@ mask = []; aid = None; bid = None; cid = None; did = None; eid = None; fid = Non
 clobb = True; outf = ''; verb = True; logf = ''; rinf = ''
 cmdLine = False
 
-def keprange(infile,rinfile,outfile,column,clobber,verbose,logfile,status,cLine=False): 
+def keprange(infile, rinfile, outfile, column, clobber, verbose, logfile,
+             status, cLine=False):
 
 # startup parameters
 
@@ -25,7 +25,7 @@ def keprange(infile,rinfile,outfile,column,clobber,verbose,logfile,status,cLine=
     global xmin, xmax, ymin, ymax, xr, yr, xlab, ylab
     global clobb, outf, verb, logf, rinf, col, bjdref, cade, cmdLine
 
-# log the call 
+# log the call
 
     if rinfile.lower() == 'none':
         rinfile = ''
@@ -62,7 +62,7 @@ def keprange(infile,rinfile,outfile,column,clobber,verbose,logfile,status,cLine=
 # clobber output file
 
     if clobber: status = kepio.clobber(outfile,logfile,verbose)
-    if kepio.fileexists(outfile): 
+    if kepio.fileexists(outfile):
         message = 'ERROR -- KEPRANGE: ' + outfile + ' exists. Use --clobber'
         status = kepmsg.err(logfile,message,verbose)
 
@@ -71,7 +71,11 @@ def keprange(infile,rinfile,outfile,column,clobber,verbose,logfile,status,cLine=
     if status == 0:
         instr, status = kepio.openfits(infile,'readonly',logfile,verbose)
     if status == 0:
-        tstart, tstop, bjdref, cadence, status = kepio.timekeys(instr,infile,logfile,verbose,status)
+        tstart, tstop, bjdref, cadence, status = kepio.timekeys(instr,
+                                                                infile,
+                                                                logfile,
+                                                                verbose,
+                                                                status)
     if status == 0:
         try:
             work = instr[0].header['FILEVER']
@@ -83,7 +87,7 @@ def keprange(infile,rinfile,outfile,column,clobber,verbose,logfile,status,cLine=
 # fudge non-compliant FITS keywords with no values
 
     if status == 0:
-        instr = kepkey.emptykeys(instr,infile,logfile,verbose)
+        instr = kepkey.emptykeys(instr, infile, logfile, verbose)
 
 # input data
 
@@ -95,7 +99,7 @@ def keprange(infile,rinfile,outfile,column,clobber,verbose,logfile,status,cLine=
     work1 = []; work2 = []
     col = column
     if status == 0:
-        barytime, status = kepio.readtimecol(infile,table,logfile,verbose)
+        barytime, status = kepio.readtimecol(infile, table, logfile, verbose)
     if status == 0:
         try:
             flux = instr[1].data.field(col)
@@ -104,11 +108,11 @@ def keprange(infile,rinfile,outfile,column,clobber,verbose,logfile,status,cLine=
             status = kepmsg.err(file,message,verbose)
     if status == 0:
         for i in range(len(barytime)):
-            if (numpy.isfinite(barytime[i]) and numpy.isfinite(flux[i]) and flux[i] != 0.0):
+            if (np.isfinite(barytime[i]) and np.isfinite(flux[i]) and flux[i] != 0.0):
                 work1.append(barytime[i] + bjdref)
                 work2.append(flux[i])
-        barytime = array(work1,dtype='float64')
-        flux = array(work2,dtype='float32') / cadenom
+        barytime = np.array(work1, dtype=np.float64)
+        flux = np.array(work2, dtype=np.float32) / cadenom
 
 # clean up x-axis unit
 
@@ -138,29 +142,12 @@ def keprange(infile,rinfile,outfile,column,clobber,verbose,logfile,status,cLine=
 # plot new light curve
 
     if status == 0:
-        try:
-            params = {'backend': 'png',
-                      'axes.linewidth': 2.5,
-                      'axes.labelsize': labelsize,
-                      'axes.font': 'sans-serif',
-                      'axes.fontweight' : 'bold',
-                      'text.fontsize': 12,
-                      'legend.fontsize': 12,
-                      'xtick.labelsize': ticksize,
-                      'ytick.labelsize': ticksize}
-            pylab.rcParams.update(params)
-        except:
-            print 'ERROR -- KEPRANGE: install latex for scientific plotting'
-            status = 1
-    if status == 0:
-	pylab.figure(figsize=[xsize,ysize])
-        pylab.clf()
+	plt.figure(figsize=[xsize,ysize])
+        plt.clf()
         plotlc(cmdLine)
 
-# close input file
-
-    if status == 0:
-        status = kepio.closefits(instr,logfile,verbose)	    
+    #if status == 0:
+    #    status = kepio.closefits(instr, logfile, verbose)
 
 
 # -----------------------------------------------------------
@@ -172,110 +159,104 @@ def plotlc(cmdLine):
 
 # load button
 
-    pylab.ion()
-    pylab.clf()
-    pylab.axes([0.06,0.02,0.22,0.1])
-    pylab.text(0.5,0.5,'LOAD',fontsize=24,weight='heavy',
-               horizontalalignment='center',verticalalignment='center')
-    pylab.setp(pylab.gca(),xticklabels=[],xticks=[],yticklabels=[],yticks=[])
-    pylab.fill([0.0,1.0,1.0,0.0,0.0],[0.0,0.0,1.0,1.0,0.0],'#ffffee')
-    xlim(0.0,1.0)
-    ylim(0.0,1.0)
-    aid = connect('button_press_event',clicker1)
+    plt.ion()
+    plt.clf()
+    plt.axes([0.06,0.02,0.22,0.1])
+    plt.text(0.5,0.5,'LOAD',fontsize=24,weight='heavy',
+             horizontalalignment='center', verticalalignment='center')
+    plt.setp(plt.gca(),xticklabels=[],xticks=[],yticklabels=[],yticks=[])
+    plt.fill([0.0,1.0,1.0,0.0,0.0],[0.0,0.0,1.0,1.0,0.0],'#ffffee')
+    plt.xlim(0.0,1.0)
+    plt.ylim(0.0,1.0)
+    aid = plt.connect('button_press_event',clicker1)
 
 # save button
 
-    pylab.axes([0.2933,0.02,0.22,0.1])
-    pylab.text(0.5,0.5,'SAVE',fontsize=24,weight='heavy',
-               horizontalalignment='center',verticalalignment='center')
-    pylab.setp(pylab.gca(),xticklabels=[],xticks=[],yticklabels=[],yticks=[])
-    pylab.fill([0.0,1.0,1.0,0.0,0.0],[0.0,0.0,1.0,1.0,0.0],'#ffffee')
-    xlim(0.0,1.0)
-    ylim(0.0,1.0)
-    bid = connect('button_press_event',clicker2)
+    plt.axes([0.2933,0.02,0.22,0.1])
+    plt.text(0.5,0.5,'SAVE',fontsize=24,weight='heavy',
+             horizontalalignment='center',verticalalignment='center')
+    plt.setp(plt.gca(),xticklabels=[],xticks=[],yticklabels=[],yticks=[])
+    plt.fill([0.0,1.0,1.0,0.0,0.0],[0.0,0.0,1.0,1.0,0.0],'#ffffee')
+    plt.xlim(0.0,1.0)
+    plt.ylim(0.0,1.0)
+    bid = plt.connect('button_press_event',clicker2)
 
 # clear button
 
-    pylab.axes([0.5266,0.02,0.22,0.1])
-    pylab.text(0.5,0.5,'CLEAR',fontsize=24,weight='heavy',
-               horizontalalignment='center',verticalalignment='center')
-    pylab.setp(pylab.gca(),xticklabels=[],xticks=[],yticklabels=[],yticks=[])
-    pylab.fill([0.0,1.0,1.0,0.0,0.0],[0.0,0.0,1.0,1.0,0.0],'#ffffee')
-    xlim(0.0,1.0)
-    ylim(0.0,1.0)
-    cid = connect('button_press_event',clicker3)
+    plt.axes([0.5266,0.02,0.22,0.1])
+    plt.text(0.5,0.5,'CLEAR',fontsize=24,weight='heavy',
+             horizontalalignment='center',verticalalignment='center')
+    plt.setp(plt.gca(),xticklabels=[],xticks=[],yticklabels=[],yticks=[])
+    plt.fill([0.0,1.0,1.0,0.0,0.0],[0.0,0.0,1.0,1.0,0.0],'#ffffee')
+    plt.xlim(0.0,1.0)
+    plt.ylim(0.0,1.0)
+    cid = plt.connect('button_press_event',clicker3)
 
 # print button
 
-    pylab.axes([0.76,0.02,0.22,0.1])
-    pylab.text(0.5,0.5,'PRINT',fontsize=24,weight='heavy',
-               horizontalalignment='center',verticalalignment='center')
-    pylab.setp(pylab.gca(),xticklabels=[],xticks=[],yticklabels=[],yticks=[])
-    pylab.fill([0.0,1.0,1.0,0.0,0.0],[0.0,0.0,1.0,1.0,0.0],'#ffffee')
-    xlim(0.0,1.0)
-    ylim(0.0,1.0)
-    did = connect('button_press_event',clicker4)
+    plt.axes([0.76,0.02,0.22,0.1])
+    plt.text(0.5,0.5,'PRINT',fontsize=24,weight='heavy',
+             horizontalalignment='center',verticalalignment='center')
+    plt.setp(plt.gca(),xticklabels=[],xticks=[],yticklabels=[],yticks=[])
+    plt.fill([0.0,1.0,1.0,0.0,0.0],[0.0,0.0,1.0,1.0,0.0],'#ffffee')
+    plt.xlim(0.0,1.0)
+    plt.ylim(0.0,1.0)
+    did = plt.connect('button_press_event',clicker4)
 
 # light curve
 
-    pylab.axes([0.06,0.213,0.92,0.77])
-    pylab.gca().xaxis.set_major_formatter(pylab.ScalarFormatter(useOffset=False))
-    pylab.gca().yaxis.set_major_formatter(pylab.ScalarFormatter(useOffset=False))
+    plt.axes([0.06,0.213,0.92,0.77])
+    plt.gca().xaxis.set_major_formatter(plt.ScalarFormatter(useOffset=False))
+    plt.gca().yaxis.set_major_formatter(plt.ScalarFormatter(useOffset=False))
     ltime = []; ldata = []
     work1 = instr[1].data.field(0) + bjdref
     work2 = instr[1].data.field(col) / cade
     for i in range(len(work1)):
-        if numpy.isfinite(work1[i]) or numpy.isfinite(work2[i]):
+        if np.isfinite(work1[i]) or np.isfinite(work2[i]):
             ltime.append(work1[i])
             ldata.append(work2[i])
         else:
-            ltime = array(ltime, dtype=float64) - barytime0
-            ldata = array(ldata, dtype=float64) / 10**nrm
-            plot(ltime,ldata,color=lcolor,linestyle='-',linewidth=lwidth)
+            ltime = np.array(ltime, dtype=np.float64) - barytime0
+            ldata = np.array(ldata, dtype=np.float64) / 10**nrm
+            plt.plot(ltime,ldata,color=lcolor,linestyle='-',linewidth=lwidth)
             ltime = []; ldata = []
-    ltime = array(ltime, dtype=float64) - barytime0
-    ldata = array(ldata, dtype=float64) / 10**nrm
-    plot(ltime,ldata,color=lcolor,linestyle='-',linewidth=lwidth)
-    fill(barytime,flux,fc=fcolor,linewidth=0.0,alpha=falpha)
-    xlabel(xlab, {'color' : 'k'})
-    ylabel(ylab, {'color' : 'k'})
-    grid()
+    ltime = np.array(ltime, dtype=np.float64) - barytime0
+    ldata = np.array(ldata, dtype=np.float64) / 10**nrm
+    plt.plot(ltime,ldata,color=lcolor,linestyle='-',linewidth=lwidth)
+    plt.fill(barytime,flux,fc=fcolor,linewidth=0.0,alpha=falpha)
+    plt.xlabel(xlab, {'color' : 'k'})
+    plt.ylabel(ylab, {'color' : 'k'})
+    plt.grid()
 
-# plot masks
+# plt.plot masks
 
     for i in range(len(mask)):
         t = float(mask[i])
-        plot([t,t],[ymin,ymax],color='g',linestyle='-',linewidth=0.5)
+        plt.plot([t,t],[ymin,ymax],color='g',linestyle='-',linewidth=0.5)
     nt = 0
     for i in range(int(len(mask)/2)):
         t1 = float(mask[nt])
         t2 = float(mask[nt+1])
         nt += 2
-        fill([t1,t1,t2,t2,t1],[ymin,ymax,ymax,ymin,ymin],
-             fc='g',linewidth=0.0,alpha=0.5)
-       
-      
+        plt.fill([t1,t1,t2,t2,t1],[ymin,ymax,ymax,ymin,ymin],
+                 fc='g',linewidth=0.0,alpha=0.5)
 # plot ranges
 
-    xlim(xmin-xr*0.01,xmax+xr*0.01)
+    plt.xlim(xmin-xr*0.01,xmax+xr*0.01)
     if ymin-yr*0.01 <= 0.0:
-        ylim(1.0e-10,ymax+yr*0.01)
+        plt.ylim(1.0e-10,ymax+yr*0.01)
     else:
-        ylim(ymin-yr*0.01,ymax+yr*0.01)
- 
+        plt.ylim(ymin-yr*0.01,ymax+yr*0.01)
+
 # ranges
 
-    eid = connect('key_press_event',clicker6)
+    eid = plt.connect('key_press_event',clicker6)
 
 # render plot
 
-    if cmdLine: 
-        pylab.show()
-    else: 
-        pylab.ion()
-        pylab.plot([])
-        pylab.ioff()
-	
+    plt.ion()
+    plt.show()
+
 # -----------------------------------------------------------
 # load mask from ascii file
 
@@ -305,15 +286,15 @@ def clicker1(event):
                             message = 'ERROR -- KEPRANGE: ascii format of ranges '
                             message += 'file not recognized.'
                             status = kepmsg.err(logf,message,False)
-                    disconnect(aid)
-                    disconnect(bid)
-                    disconnect(cid)
-                    disconnect(did)
-                    disconnect(eid)
-                    disconnect(fid)
+                    plt.disconnect(aid)
+                    plt.disconnect(bid)
+                    plt.disconnect(cid)
+                    plt.disconnect(did)
+                    plt.disconnect(eid)
+                    plt.disconnect(fid)
                     plotlc(cmdLine)
                 else:
-                    print 'WARNING -- KEPRANGE: input ranges file does not exist or was not provided'
+                    print('WARNING -- KEPRANGE: input ranges file does not exist or was not provided')
     return
 
 # -----------------------------------------------------------
@@ -324,7 +305,7 @@ def clicker2(event):
     global mask, aid, bid, cid, did, eid, fid, clobb, cmdLine
 
     if clobb: status = kepio.clobber(outf,logf,verb)
-    if kepio.fileexists(outf): 
+    if kepio.fileexists(outf):
         message = 'ERROR -- KEPRANGE: ' + outf + ' exists. Use --clobber'
         status = kepmsg.err(logf,message,verb)
     else:
@@ -359,12 +340,12 @@ def clicker3(event):
             if (event.x > 723 and event.x < 1022 and
                 event.y > 12 and event.y < 68):
                 mask = []
-                disconnect(aid)
-                disconnect(bid)
-                disconnect(cid)
-                disconnect(did)
-                disconnect(eid)
-                disconnect(fid)
+                plt.disconnect(aid)
+                plt.disconnect(bid)
+                plt.disconnect(cid)
+                plt.disconnect(did)
+                plt.disconnect(eid)
+                plt.disconnect(fid)
                 plotlc(cmdLine)
     return
 
@@ -388,13 +369,13 @@ def clicker4(event):
                     txt += str(t1) + ',' + str(t2) + '\n'
                     nt += 2
                 txt = txt.strip()
-                print '\n' + txt
-                disconnect(aid)
-                disconnect(bid)
-                disconnect(cid)
-                disconnect(did)
-                disconnect(eid)
-                disconnect(fid)
+                print('\n' + txt)
+                plt.disconnect(aid)
+                plt.disconnect(bid)
+                plt.disconnect(cid)
+                plt.disconnect(did)
+                plt.disconnect(eid)
+                plt.disconnect(fid)
                 plotlc(cmdLine)
     return
 
@@ -462,31 +443,37 @@ def clicker6(event):
                         mask[-2] = event.xdata
 		plotlc(cmdLine)
         if event.key == 'z':
-		pylab.close()
-		return
+            kepio.closefits(instr, "keprangelog.txt", True)
+	    plt.close()
+	    return
 
 # main
 if '--shell' in sys.argv:
     import argparse
-    
     parser = argparse.ArgumentParser(description='Interactively define and store time ranges via a GUI')
-    parser.add_argument('--shell', action='store_true', help='Are we running from the shell?')
+    parser.add_argument('--shell', action='store_true',
+                        help='Are we running from the shell?')
     parser.add_argument('infile', help='Name of input file', type=str)
-    parser.add_argument('--rinfile', default='', help='Name of input ASCII time ranges file', type=str)
-    parser.add_argument('--outfile', default='', help='Name of output ASCII time ranges file', type=str)
-    parser.add_argument('--column', default='SAP_FLUX', help='Name of diagnostic FITS column', type=str)
-    parser.add_argument('--clobber', action='store_true', help='Overwrite output file?')
-    parser.add_argument('--verbose', action='store_true', help='Write to a log file?')
-    parser.add_argument('--logfile', '-l', help='Name of ascii log file', default='kepcotrend.log', dest='logfile', type=str)
-    parser.add_argument('--status', '-e', help='Exit status (0=good)', default=0, dest='status', type=int)
-
+    parser.add_argument('--rinfile', default='',
+                        help='Name of input ASCII time ranges file', type=str)
+    parser.add_argument('--outfile', default='',
+                        help='Name of output ASCII time ranges file',
+                        type=str)
+    parser.add_argument('--column', default='SAP_FLUX',
+                        help='Name of diagnostic FITS column', type=str)
+    parser.add_argument('--clobber', action='store_true',
+                        help='Overwrite output file?')
+    parser.add_argument('--verbose', action='store_true',
+                        help='Write to a log file?')
+    parser.add_argument('--logfile', '-l', help='Name of ascii log file',
+                        default='kepcotrend.log', dest='logfile', type=str)
+    parser.add_argument('--status', '-e', help='Exit status (0=good)',
+                        default=0, dest='status', type=int)
     args = parser.parse_args()
     cmdLine=True
-
-    keprange(args.infile,args.rinfile,args.outfile,args.column,args.clobber,args.verbose,args.logfile,args.status, cmdLine)
-    
+    keprange(args.infile, args.rinfile, args.outfile, args.column,
+             args.clobber, args.verbose, args.logfile, args.status, cmdLine)
 else:
     from pyraf import iraf
     parfile = iraf.osfn("kepler$keprange.par")
     t = iraf.IrafTaskFactory(taskname="keprange", value=parfile, function=keprange)
-
