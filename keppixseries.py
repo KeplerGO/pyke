@@ -457,6 +457,7 @@ def keppixseries(infile,outfile,plotfile,plottype,filter,function,cutoff,clobber
 # render plot
         plt.ion()
         plt.show()
+        plt.savefig(plotfile)
 
 # stop time
 
