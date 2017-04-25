@@ -119,7 +119,7 @@ def keptrial(infile,outfile,datacol,errcol,fmin,fmax,nfreq,method,
 # plot stop-motion histogram
 
             plt.ion()
-	    plt.figure(1,figsize=[7,10])
+            plt.figure(1,figsize=[7,10])
             plt.clf()
 	    plt.axes([0.08,0.08,0.88,0.89])
             plt.gca().xaxis.set_major_formatter(plt.ScalarFormatter(useOffset=False))
