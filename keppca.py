@@ -1,23 +1,30 @@
 import sys, re
-import numpy, scipy, pylab
 from astropy.io import fits as pyfits
-from numpy import *
-from pylab import *
-from matplotlib import *
+import numpy as np
+from scipy import optimize as opt
+from matplotlib import pyplot as plt
 import kepmsg, kepio, kepkey, kepplot
 import random
 
 # -----------------------------------------------------------
 # core code
 
-def keppca(infile,maskfile,outfile,components,plotpca,nreps,clobber,verbose,logfile,status,cmdLine=False): 
+def keppca(infile, maskfile, outfile, components, plotpca, nreps, clobber,
+           verbose, logfile, status, cmdLine=False):
 
     try:
         import mdp
     except:
-        msg = 'ERROR -- KEPPCA: this task has an external python dependency to MDP, a Modular toolkit for Data Processing (http://mdp-toolkit.sourceforge.net). In order to take advantage of this PCA task, the user must first install MDP with their current python distribution. Note carefully that you may have more than python installation on your machine, and ensure that MDP is installed with the same version of python that the PyKE tools employ. Installation instructions for MDP can be found at the URL provided above.'
+        msg = ("ERROR -- KEPPCA: this task has an external python dependency "
+               "to MDP, a Modular toolkit for Data Processing "
+               "(http://mdp-toolkit.sourceforge.net). In order to take "
+               "advantage of this PCA task, the user must first install "
+               "MDP with their current python distribution. Note carefully "
+               "that you may have more than python installation on your "
+               "machine, and ensure that MDP is installed with the same "
+               "version of python that the PyKE tools employ. Installation "
+               "instructions for MDP can be found at the URL provided above.")
         status = kepmsg.err(None,msg,True)
-    
 # startup parameters
 
     status = 0
@@ -29,9 +36,9 @@ def keppca(infile,maskfile,outfile,components,plotpca,nreps,clobber,verbose,logf
     lwidth = 1.0
     fcolor = '#ffff00'
     falpha = 0.2
-    seterr(all="ignore") 
+    np.seterr(all="ignore")
 
-# log the call 
+# log the call
 
     if status == 0:
         hashline = '----------------------------------------------------------------------------'
@@ -53,7 +60,7 @@ def keppca(infile,maskfile,outfile,components,plotpca,nreps,clobber,verbose,logf
         call += 'verbose='+chatter+' '
         call += 'logfile='+logfile
         kepmsg.log(logfile,call+'\n',verbose)
-        
+
 # start time
 
     if status == 0:
@@ -63,24 +70,24 @@ def keppca(infile,maskfile,outfile,components,plotpca,nreps,clobber,verbose,logf
 
     if status == 0:
         logfile = kepmsg.test(logfile)
-    
+
 # clobber output file
 
     if status == 0:
         if clobber: status = kepio.clobber(outfile,logfile,verbose)
-        if kepio.fileexists(outfile): 
+        if kepio.fileexists(outfile):
             message = 'ERROR -- KEPPCA: ' + outfile + ' exists. Use clobber=yes'
             status = kepmsg.err(logfile,message,verbose)
 
 # Set output file names - text file with data and plot
 
     if status == 0:
-        dataout = copy(outfile)
+        dataout = np.copy(outfile)
         repname = re.sub('.fits','.png',outfile)
 
 # open input file
 
-    if status == 0:    
+    if status == 0:
         instr = pyfits.open(infile,mode='readonly',memmap=True)
         tstart, tstop, bjdref, cadence, status = kepio.timekeys(instr,infile,logfile,verbose,status)
 
@@ -132,12 +139,12 @@ def keppca(infile,maskfile,outfile,components,plotpca,nreps,clobber,verbose,logf
     if status == 0:
         xdimorig = xdim
         ydimorig = ydim
-    
+
 # read mask definition file if it has been supplied
 
     if status == 0 and 'aper' not in maskfile.lower() and maskfile.lower() != 'all':
-        maskx = array([],'int')
-        masky = array([],'int')
+        maskx = np.array([],'int')
+        masky = np.array([],'int')
         lines, status = kepio.openascii(maskfile,'r',logfile,verbose)
         for line in lines:
             line = line.strip().split('|')
@@ -147,8 +154,8 @@ def keppca(infile,maskfile,outfile,components,plotpca,nreps,clobber,verbose,logf
                 line = line[5].split(';')
                 for items in line:
                     try:
-                        masky = numpy.append(masky,y0 + int(items.split(',')[0]))
-                        maskx = numpy.append(maskx,x0 + int(items.split(',')[1]))
+                        masky = np.append(masky,y0 + int(items.split(',')[0]))
+                        maskx = np.append(maskx,x0 + int(items.split(',')[1]))
                     except:
                         continue
         status = kepio.closeascii(lines,logfile,verbose)
@@ -160,20 +167,20 @@ def keppca(infile,maskfile,outfile,components,plotpca,nreps,clobber,verbose,logf
 
 # pad mask to ensure it is rectangular
 
-        workx = array([],'int')
-        worky = array([],'int')
-        for ip in arange(min(maskx),max(maskx) + 1):
-            for jp in arange(min(masky),max(masky) + 1):
-                workx = append(workx,ip)
-                worky = append(worky,jp)
+        workx = np.array([],'int')
+        worky = np.array([],'int')
+        for ip in np.arange(min(maskx),max(maskx) + 1):
+            for jp in np.arange(min(masky),max(masky) + 1):
+                workx = np.append(workx,ip)
+                worky = np.append(worky,jp)
         maskx = workx
         masky = worky
 
 # define new subimage bitmap...
 
     if status == 0 and maskfile.lower() != 'all':
-        aperx = numpy.array([],'int')
-        apery = numpy.array([],'int')
+        aperx = np.array([],'int')
+        apery = np.array([],'int')
         aperb = maskx - x0 + xdimorig * (masky - y0)   # aperb is an array that contains the pixel numbers in the mask
         npix = len(aperb)
 
@@ -181,8 +188,8 @@ def keppca(infile,maskfile,outfile,components,plotpca,nreps,clobber,verbose,logf
 
     if status == 0 and maskfile.lower() == 'all':
         npix = xdimorig*ydimorig
-        aperb = array([],'int')
-        aperb = numpy.r_[0:npix]
+        aperb = np.array([],'int')
+        aperb = np.r_[0:npix]
 
 # legal mask defined?
 
@@ -208,108 +215,110 @@ def keppca(infile,maskfile,outfile,components,plotpca,nreps,clobber,verbose,logf
                     message = 'ERROR -- KEPPCA: cannot understand principal component list requested'
                     status = kepmsg.err(logfile,message,verbose)
     if status == 0:
-        pcaout = set(sort(pcaout))
-    pcarem = array(list(pcaout))-1    # The list of pca component numbers to be removed
+        pcaout = set(np.sort(pcaout))
+    pcarem = np.array(list(pcaout))-1    # The list of pca component numbers to be removed
 
 # Initialize arrays and variables, and apply pixel mask to the data
 
     if status == 0:
         ntim = 0
-        time = numpy.array([],dtype='float64')
-        timecorr = numpy.array([],dtype='float32')
-        cadenceno = numpy.array([],dtype='int')
-        pixseries = numpy.array([],dtype='float32')
-        errseries = numpy.array([],dtype='float32')
-        bkgseries = numpy.array([],dtype='float32')
-        berseries = numpy.array([],dtype='float32')
-        quality = numpy.array([],dtype='float32')
-        pos_corr1 = numpy.array([],dtype='float32')
-        pos_corr2 = numpy.array([],dtype='float32')
-        nrows = numpy.size(fluxpixels,0)
-        
-# Apply the pixel mask so we are left with only the desired pixels       
+        time = np.array([],dtype='float64')
+        timecorr = np.array([],dtype='float32')
+        cadenceno = np.array([],dtype='int')
+        pixseries = np.array([],dtype='float32')
+        errseries = np.array([],dtype='float32')
+        bkgseries = np.array([],dtype='float32')
+        berseries = np.array([],dtype='float32')
+        quality = np.array([],dtype='float32')
+        pos_corr1 = np.array([],dtype='float32')
+        pos_corr2 = np.array([],dtype='float32')
+        nrows = np.size(fluxpixels,0)
 
+# Apply the pixel mask so we are left with only the desired pixels
     if status == 0:
         pixseriesb = fluxpixels[:,aperb]
         errseriesb = errpixels[:,aperb]
         bkgseriesb = flux_bkg[:,aperb]
         berseriesb = flux_bkg_err[:,aperb]
 
-# Read in the data to various arrays 
-   
+# Read in the data to various arrays
+
     if status == 0:
         for i in range(nrows):
             if qual[i] < 10000 and \
-                    numpy.isfinite(barytime[i]) and \
-                    numpy.isfinite(fluxpixels[i,int(ydim*xdim/2+0.5)]) and \
-                    numpy.isfinite(fluxpixels[i,1+int(ydim*xdim/2+0.5)]):
+                    np.isfinite(barytime[i]) and \
+                    np.isfinite(fluxpixels[i,int(ydim*xdim/2+0.5)]) and \
+                    np.isfinite(fluxpixels[i,1+int(ydim*xdim/2+0.5)]):
                 ntim += 1
-                time = numpy.append(time,barytime[i])
-                timecorr = numpy.append(timecorr,tcorr[i])
-                cadenceno = numpy.append(cadenceno,cadno[i])
-                pixseries = numpy.append(pixseries,pixseriesb[i])
-                errseries = numpy.append(errseries,errseriesb[i])
-                bkgseries = numpy.append(bkgseries,bkgseriesb[i])
-                berseries = numpy.append(berseries,berseriesb[i])
-                quality = numpy.append(quality,qual[i])
-                pos_corr1 = numpy.append(pos_corr1,pcorr1[i])
-                pos_corr2 = numpy.append(pos_corr2,pcorr2[i])
-        pixseries = numpy.reshape(pixseries,(ntim,npix))
-        errseries = numpy.reshape(errseries,(ntim,npix))
-        bkgseries = numpy.reshape(bkgseries,(ntim,npix))
-        berseries = numpy.reshape(berseries,(ntim,npix))        
-        tmp =  numpy.median(pixseries,axis=1)     
+                time = np.append(time,barytime[i])
+                timecorr = np.append(timecorr,tcorr[i])
+                cadenceno = np.append(cadenceno,cadno[i])
+                pixseries = np.append(pixseries,pixseriesb[i])
+                errseries = np.append(errseries,errseriesb[i])
+                bkgseries = np.append(bkgseries,bkgseriesb[i])
+                berseries = np.append(berseries,berseriesb[i])
+                quality = np.append(quality,qual[i])
+                pos_corr1 = np.append(pos_corr1,pcorr1[i])
+                pos_corr2 = np.append(pos_corr2,pcorr2[i])
+        pixseries = np.reshape(pixseries,(ntim,npix))
+        errseries = np.reshape(errseries,(ntim,npix))
+        bkgseries = np.reshape(bkgseries,(ntim,npix))
+        berseries = np.reshape(berseries,(ntim,npix))
+        tmp =  np.ma.median(np.ma.masked_invalid(pixseries),axis=1)
+
         for i in range(len(tmp)):
              pixseries[i] = pixseries[i] - tmp[i]
+
+        pixseries = np.ma.masked_invalid(pixseries)
+
 
 # Figure out which pixels are undefined/nan and remove them. Keep track for adding back in later
 
     if status == 0:
-        nanpixels = numpy.array([],dtype='int')
+        nanpixels = np.array([],dtype='int')
         i = 0
         while (i < npix):
-            if numpy.isnan(pixseries[0,i]):
-                nanpixels = numpy.append(nanpixels,i)
+            if np.isnan(pixseries[0,i]):
+                nanpixels = np.append(nanpixels,i)
                 npix = npix - 1
             i = i + 1
-        pixseries = numpy.delete(pixseries,nanpixels,1)
-        errseries = numpy.delete(errseries,nanpixels,1)
-        pixseries[numpy.isnan(pixseries)] = random.gauss(100,10)
-        errseries[numpy.isnan(errseries)] = 10
- 
+        pixseries = np.delete(pixseries,nanpixels,1)
+        errseries = np.delete(errseries,nanpixels,1)
+        pixseries[np.isnan(pixseries)] = random.gauss(100,10)
+        errseries[np.isnan(errseries)] = 10
 # Compute statistical weights, means, standard deviations
 
     if status == 0:
         weightseries = (pixseries/errseries)**2
-        pixMean = numpy.average(pixseries,axis=0,weights=weightseries)
-        pixStd  = numpy.std(pixseries,axis=0)
+        pixMean = np.average(pixseries,axis=0,weights=weightseries)
+        pixStd  = np.std(pixseries,axis=0)
 
-# Normalize the input by subtracting the mean and divising by the standard deviation. 
+# Normalize the input by subtracting the mean and divising by the standard deviation.
 # This makes it a correlation-based PCA, which is what we want.
 
     if status == 0:
-        pixseriesnorm = (pixseries - pixMean)/pixStd
+        pixseriesnorm = (pixseries - pixMean) / pixStd
 
 # Number of principal components to compute. Setting it equal to the number of pixels
 
     if status == 0:
-        nvecin = npix  
+        nvecin = npix
 
 # Run PCA using the MDP Whitening PCA, which produces normalized PCA components (zero mean and unit variance)
-    
+
     if status == 0:
         pcan = mdp.nodes.WhiteningNode(svd=True)
         pcar = pcan.execute(pixseriesnorm)
         eigvec = pcan.get_recmatrix()
         model = pcar
- 
+
 # Re-insert nan columns as zeros
 
     if status == 0:
         for i in range(0,len(nanpixels)):
             nanpixels[i] = nanpixels[i]-i
-        eigvec = numpy.insert(eigvec,nanpixels,0,1)
-        pixMean = numpy.insert(pixMean,nanpixels,0,0)
+        eigvec = np.insert(eigvec,nanpixels,0,1)
+        pixMean = np.insert(pixMean,nanpixels,0,0)
 
 #  Make output eigenvectors (correlation images) into xpix by ypix images
 
@@ -319,15 +328,15 @@ def keppca(infile,maskfile,outfile,components,plotpca,nreps,clobber,verbose,logf
 # Calculate sum of all pixels to display as raw lightcurve and other quantities
 
     if status == 0:
-        pixseriessum = sum(pixseries,axis=1)
+        pixseriessum = np.sum(pixseries,axis=1)
         nrem=len(pcarem)  # Number of components to remove
-        nplot = npix      # Number of pcas to plot - currently set to plot all components, but could set 
+        nplot = npix      # Number of pcas to plot - currently set to plot all components, but could set
                           # nplot = nrem to just plot as many components as is being removed
 
 # Subtract components by fitting them to the summed light curve
 
     if status == 0:
-        x0 = numpy.tile(-1.0,1)
+        x0 = np.tile(-1.0,1)
         for k in range(0,nrem):
             def f(x):
                 fluxcor = pixseriessum
@@ -335,13 +344,13 @@ def keppca(infile,maskfile,outfile,components,plotpca,nreps,clobber,verbose,logf
                     fluxcor = fluxcor - x[k]*model[:,pcarem[k]]
                 return mad(fluxcor)
             if k==0:
-                x0 = array([-1.0])
+                x0 = np.array([-1.0])
             else:
-                x0 = numpy.append(x0,1.0)
-            myfit = scipy.optimize.fmin(f,x0,maxiter=50000,maxfun=50000,disp=False)
+                x0 = np.append(x0,1.0)
+            myfit = opt.fmin(f,x0,maxiter=50000,maxfun=50000,disp=False)
             x0 = myfit
-    
-# Now that coefficients for all components have been found, subtract them to produce a calibrated time-series, 
+
+# Now that coefficients for all components have been found, subtract them to produce a calibrated time-series,
 # and then divide by the robust mean to produce a normalized time series as well
 
     if status == 0:
@@ -349,7 +358,7 @@ def keppca(infile,maskfile,outfile,components,plotpca,nreps,clobber,verbose,logf
         fluxcor = pixseriessum
         for k in range(0,nrem):
             fluxcor = fluxcor - c[k]*model[:,pcarem[k]]
-            normfluxcor = fluxcor/mean(reject_outliers(fluxcor,2))
+            normfluxcor = fluxcor/np.mean(reject_outliers(fluxcor,2))
 
 # input file data
 
@@ -358,7 +367,7 @@ def keppca(infile,maskfile,outfile,components,plotpca,nreps,clobber,verbose,logf
         cards1 = instr[1].header.cards
         cards2 = instr[2].header.cards
         table = instr[1].data[:]
-        maskmap = copy(instr[2].data)
+        maskmap = np.copy(instr[2].data)
 
 # subimage physical WCS data
 
@@ -373,19 +382,19 @@ def keppca(infile,maskfile,outfile,components,plotpca,nreps,clobber,verbose,logf
 # dummy columns for output file
 
     if status == 0:
-        sap_flux_err = numpy.empty(len(time)); sap_flux_err[:] = numpy.nan
-        sap_bkg = numpy.empty(len(time)); sap_bkg[:] = numpy.nan
-        sap_bkg_err = numpy.empty(len(time)); sap_bkg_err[:] = numpy.nan
-        pdc_flux = numpy.empty(len(time)); pdc_flux[:] = numpy.nan
-        pdc_flux_err = numpy.empty(len(time)); pdc_flux_err[:] = numpy.nan
-        psf_centr1 = numpy.empty(len(time)); psf_centr1[:] = numpy.nan
-        psf_centr1_err = numpy.empty(len(time)); psf_centr1_err[:] = numpy.nan
-        psf_centr2 = numpy.empty(len(time)); psf_centr2[:] = numpy.nan
-        psf_centr2_err = numpy.empty(len(time)); psf_centr2_err[:] = numpy.nan
-        mom_centr1 = numpy.empty(len(time)); mom_centr1[:] = numpy.nan
-        mom_centr1_err = numpy.empty(len(time)); mom_centr1_err[:] = numpy.nan
-        mom_centr2 = numpy.empty(len(time)); mom_centr2[:] = numpy.nan
-        mom_centr2_err = numpy.empty(len(time)); mom_centr2_err[:] = numpy.nan
+        sap_flux_err = np.empty(len(time)); sap_flux_err[:] = np.nan
+        sap_bkg = np.empty(len(time)); sap_bkg[:] = np.nan
+        sap_bkg_err = np.empty(len(time)); sap_bkg_err[:] = np.nan
+        pdc_flux = np.empty(len(time)); pdc_flux[:] = np.nan
+        pdc_flux_err = np.empty(len(time)); pdc_flux_err[:] = np.nan
+        psf_centr1 = np.empty(len(time)); psf_centr1[:] = np.nan
+        psf_centr1_err = np.empty(len(time)); psf_centr1_err[:] = np.nan
+        psf_centr2 = np.empty(len(time)); psf_centr2[:] = np.nan
+        psf_centr2_err = np.empty(len(time)); psf_centr2_err[:] = np.nan
+        mom_centr1 = np.empty(len(time)); mom_centr1[:] = np.nan
+        mom_centr1_err = np.empty(len(time)); mom_centr1_err[:] = np.nan
+        mom_centr2 = np.empty(len(time)); mom_centr2[:] = np.nan
+        mom_centr2_err = np.empty(len(time)); mom_centr2_err[:] = np.nan
 
 # mask bitmap
 
@@ -412,36 +421,36 @@ def keppca(infile,maskfile,outfile,components,plotpca,nreps,clobber,verbose,logf
             else:
                 hdu0.header.cards[cards0[i].keyword].comment = cards0[i].comment
         status = kepkey.history(call,hdu0,outfile,logfile,verbose)
-        outstr = HDUList(hdu0)
+        outstr = pyfits.HDUList(hdu0)
 
 # construct output light curve extension
 
     if status == 0:
-        col1 = Column(name='TIME',format='D',unit='BJD - 2454833',array=time)
-        col2 = Column(name='TIMECORR',format='E',unit='d',array=timecorr)
-        col3 = Column(name='CADENCENO',format='J',array=cadenceno)
-        col4 = Column(name='SAP_FLUX',format='E',unit='e-/s',array=pixseriessum)
-        col5 = Column(name='SAP_FLUX_ERR',format='E',unit='e-/s',array=sap_flux_err)
-        col6 = Column(name='SAP_BKG',format='E',unit='e-/s',array=sap_bkg)
-        col7 = Column(name='SAP_BKG_ERR',format='E',unit='e-/s',array=sap_bkg_err)
-        col8 = Column(name='PDCSAP_FLUX',format='E',unit='e-/s',array=pdc_flux)
-        col9 = Column(name='PDCSAP_FLUX_ERR',format='E',unit='e-/s',array=pdc_flux_err)
-        col10 = Column(name='SAP_QUALITY',format='J',array=quality)
-        col11 = Column(name='PSF_CENTR1',format='E',unit='pixel',array=psf_centr1)
-        col12 = Column(name='PSF_CENTR1_ERR',format='E',unit='pixel',array=psf_centr1_err)
-        col13 = Column(name='PSF_CENTR2',format='E',unit='pixel',array=psf_centr2)
-        col14 = Column(name='PSF_CENTR2_ERR',format='E',unit='pixel',array=psf_centr2_err)
-        col15 = Column(name='MOM_CENTR1',format='E',unit='pixel',array=mom_centr1)
-        col16 = Column(name='MOM_CENTR1_ERR',format='E',unit='pixel',array=mom_centr1_err)
-        col17 = Column(name='MOM_CENTR2',format='E',unit='pixel',array=mom_centr2)
-        col18 = Column(name='MOM_CENTR2_ERR',format='E',unit='pixel',array=mom_centr2_err)
-        col19 = Column(name='POS_CORR1',format='E',unit='pixel',array=pos_corr1)
-        col20 = Column(name='POS_CORR2',format='E',unit='pixel',array=pos_corr2)
-        col21 = Column(name='PCA_FLUX',format='E',unit='e-/s',array=fluxcor)
-        col22 = Column(name='PCA_FLUX_NRM',format='E',array=normfluxcor)
-        cols = ColDefs([col1,col2,col3,col4,col5,col6,col7,col8,col9,col10,col11, \
+        col1 = pyfits.Column(name='TIME',format='D',unit='BJD - 2454833',array=time)
+        col2 = pyfits.Column(name='TIMECORR',format='E',unit='d',array=timecorr)
+        col3 = pyfits.Column(name='CADENCENO',format='J',array=cadenceno)
+        col4 = pyfits.Column(name='SAP_FLUX',format='E',unit='e-/s',array=pixseriessum)
+        col5 = pyfits.Column(name='SAP_FLUX_ERR',format='E',unit='e-/s',array=sap_flux_err)
+        col6 = pyfits.Column(name='SAP_BKG',format='E',unit='e-/s',array=sap_bkg)
+        col7 = pyfits.Column(name='SAP_BKG_ERR',format='E',unit='e-/s',array=sap_bkg_err)
+        col8 = pyfits.Column(name='PDCSAP_FLUX',format='E',unit='e-/s',array=pdc_flux)
+        col9 = pyfits.Column(name='PDCSAP_FLUX_ERR',format='E',unit='e-/s',array=pdc_flux_err)
+        col10 = pyfits.Column(name='SAP_QUALITY',format='J',array=quality)
+        col11 = pyfits.Column(name='PSF_CENTR1',format='E',unit='pixel',array=psf_centr1)
+        col12 = pyfits.Column(name='PSF_CENTR1_ERR',format='E',unit='pixel',array=psf_centr1_err)
+        col13 = pyfits.Column(name='PSF_CENTR2',format='E',unit='pixel',array=psf_centr2)
+        col14 = pyfits.Column(name='PSF_CENTR2_ERR',format='E',unit='pixel',array=psf_centr2_err)
+        col15 = pyfits.Column(name='MOM_CENTR1',format='E',unit='pixel',array=mom_centr1)
+        col16 = pyfits.Column(name='MOM_CENTR1_ERR',format='E',unit='pixel',array=mom_centr1_err)
+        col17 = pyfits.Column(name='MOM_CENTR2',format='E',unit='pixel',array=mom_centr2)
+        col18 = pyfits.Column(name='MOM_CENTR2_ERR',format='E',unit='pixel',array=mom_centr2_err)
+        col19 = pyfits.Column(name='POS_CORR1',format='E',unit='pixel',array=pos_corr1)
+        col20 = pyfits.Column(name='POS_CORR2',format='E',unit='pixel',array=pos_corr2)
+        col21 = pyfits.Column(name='PCA_FLUX',format='E',unit='e-/s',array=fluxcor)
+        col22 = pyfits.Column(name='PCA_FLUX_NRM',format='E',array=normfluxcor)
+        cols = pyfits.ColDefs([col1,col2,col3,col4,col5,col6,col7,col8,col9,col10,col11, \
                             col12,col13,col14,col15,col16,col17,col18,col19,col20,col21,col22])
-        hdu1 = new_table(cols)
+        hdu1 = pyfits.BinTableHDU.from_columns(cols)
         hdu1.header['TTYPE1'] = ('TIME','column title: data time stamps')
         hdu1.header['TFORM1'] = ('D','data type: float64')
         hdu1.header['TUNIT1'] = ('BJD - 2454833','column units: barycenter corrected JD')
@@ -519,7 +528,7 @@ def keppca(infile,maskfile,outfile,components,plotpca,nreps,clobber,verbose,logf
 # construct output mask bitmap extension
 
     if status == 0:
-        hdu2 = ImageHDU(maskmap)
+        hdu2 = pyfits.ImageHDU(maskmap)
         for i in range(len(cards2)):
             if cards2[i].keyword not in hdu2.header.keys():
                 hdu2.header[cards2[i].keyword] = (cards2[i].value, cards2[i].comment)
@@ -530,20 +539,21 @@ def keppca(infile,maskfile,outfile,components,plotpca,nreps,clobber,verbose,logf
 # construct principal component table
 
     if status == 0:
-        cols = [Column(name='TIME',format='E',unit='BJD - 2454833',array=time)]
+        cols = [pyfits.Column(name='TIME',format='E',unit='BJD - 2454833',array=time)]
         for i in range(len(pcar[0,:])):
             colname = 'PC' + str(i + 1)
-            col = Column(name=colname,format='E',array=pcar[:,i])
+            col = pyfits.Column(name=colname,format='E', array=pcar[:,i])
             cols.append(col)
-        hdu3 = new_table(ColDefs(cols))
+        hdu3 = pyfits.BinTableHDU.from_columns(pyfits.ColDefs(cols))
         hdu3.header['EXTNAME'] = ('PRINCIPAL_COMPONENTS','name of extension')
         hdu3.header['TTYPE1'] = ('TIME','column title: data time stamps')
         hdu3.header['TFORM1'] = ('D','data type: float64')
         hdu3.header['TUNIT1'] = ('BJD - 2454833','column units: barycenter corrected JD')
         hdu3.header['TDISP1'] = ('D12.7','column display format')
         for i in range(len(pcar[0,:])):
-            hdu3.header['TTYPE' + str(i + 2)] = \
-                ('PC' + str(i + 1), 'column title: principal component number' + str(i + 1))
+            hdu3.header['TTYPE' + str(i + 2)] = ("PC" + str(i + 1),
+                                                 "column title: principal "
+                                                 "component number " + str(i + 1))
             hdu3.header['TFORM' + str(i + 2)] = ('E','column format: float32')
         outstr.append(hdu3)
 
@@ -551,13 +561,13 @@ def keppca(infile,maskfile,outfile,components,plotpca,nreps,clobber,verbose,logf
 
     if status == 0:
         outstr.writeto(outfile)
-    
+
 # close input structure
 
     if status == 0:
         status = kepio.closefits(instr,logfile,verbose)
-        
-# Create PCA report 
+
+# Create PCA report
 
     if status == 0 and plotpca:
         npp = 7 # Number of plots per page
@@ -565,120 +575,117 @@ def keppca(infile,maskfile,outfile,components,plotpca,nreps,clobber,verbose,logf
         repcnt = 1
         for k in range(nreps):
 
-# First plot of every pagewith flux image, flux and calibrated time series 
+# First plot of every pagewith flux image, flux and calibrated time series
 
-            status = kepplot.define(16,12,logfile,verbose)
-            if (k % (npp - 1) == 0):     
-                pylab.figure(figsize=[10,16])
-                subplot2grid((npp,6),(0,0), colspan=2)
-#                imshow(log10(pixMean.reshape(xdim,ydim).T-min(pixMean)+1),interpolation="nearest",cmap='RdYlBu')
-                imshow(log10(flipud(pixMean.reshape(ydim,xdim))-min(pixMean)+1),interpolation="nearest",cmap='RdYlBu')
-                xticks([])
-                yticks([])
-                ax1 = subplot2grid((npp,6),(0,2), colspan=4)
-                px = copy(time) + bjdref
-                py = copy(pixseriessum)
-                px, xlab, status = kepplot.cleanx(px,logfile,verbose) 
+            if (k % (npp - 1) == 0):
+                plt.figure(figsize=[10,16])
+                plt.subplot2grid((npp,6),(0,0), colspan=2)
+                plt.imshow(np.log10(np.flipud(pixMean.reshape(ydim,xdim))-min(pixMean)+1),
+                           interpolation="nearest",cmap='RdYlBu')
+                plt.xticks([])
+                plt.yticks([])
+                ax1 = plt.subplot2grid((npp,6),(0,2), colspan=4)
+                px = np.copy(time) + bjdref
+                py = np.copy(pixseriessum)
+                px, xlab, status = kepplot.cleanx(px,logfile,verbose)
                 py, ylab, status = kepplot.cleany(py,1.0,logfile,verbose)
                 kepplot.RangeOfPlot(px,py,0.01,False)
                 kepplot.plot1d(px,py,cadence,lcolor,lwidth,fcolor,falpha,True)
-                py = copy(fluxcor)
+                py = np.copy(fluxcor)
                 py, ylab, status = kepplot.cleany(py,1.0,logfile,verbose)
-                plot(px,py,marker='.',color='r',linestyle='',markersize=1.0)
+                plt.plot(px,py,marker='.',color='r',linestyle='',markersize=1.0)
                 kepplot.labels('',re.sub('\)','',re.sub('Flux \(','',ylab)),'k',18)
-                grid()
-                setp(ax1.get_xticklabels(), visible=False)
+                plt.grid()
+                plt.setp(ax1.get_xticklabels(), visible=False)
 
 # plot principal components
 
-            subplot2grid((npp,6),(l,0), colspan=2)
-            imshow(eigvec[k],interpolation="nearest",cmap='RdYlBu')
-            xlim(-0.5,xdim-0.5)
-            ylim(-0.5,ydim-0.5)
-            xticks([])
-            yticks([])
+            plt.subplot2grid((npp,6),(l,0), colspan=2)
+            plt.imshow(eigvec[k],interpolation="nearest",cmap='RdYlBu')
+            plt.xlim(-0.5,xdim-0.5)
+            plt.ylim(-0.5,ydim-0.5)
+            plt.xticks([])
+            plt.yticks([])
 
 # The last plot on the page that should have the xlabel
 
-            if ( k% (npp - 1) == npp - 2 or k == nvecin - 1):  
-                subplot2grid((npp,6),(l,2), colspan=4)
-                py = copy(model[:,k])
+            if ( k% (npp - 1) == npp - 2 or k == nvecin - 1):
+                plt.subplot2grid((npp,6),(l,2), colspan=4)
+                py = np.copy(model[:,k])
                 kepplot.RangeOfPlot(px,py,0.01,False)
                 kepplot.plot1d(px,py,cadence,'r',lwidth,'g',falpha,True)
                 kepplot.labels(xlab,'PC ' + str(k+1),'k',18)
-                pylab.grid()
-                pylab.tight_layout()
+                plt.grid()
+                plt.tight_layout()
                 l = 1
-                pylab.savefig(re.sub('.png','_%d.png' % repcnt,repname))
-                if not cmdLine: kepplot.render(cmdLine)
+                plt.savefig(re.sub('.png','_%d.png' % repcnt,repname))
                 repcnt += 1
 
 # The other plots on the page that should have no xlabel
 
             else:
-                ax2 = subplot2grid((npp,6),(l,2), colspan=4)
-                py = copy(model[:,k])
+                ax2 = plt.subplot2grid((npp,6),(l,2), colspan=4)
+                py = np.copy(model[:,k])
                 kepplot.RangeOfPlot(px,py,0.01,False)
                 kepplot.plot1d(px,py,cadence,'r',lwidth,'g',falpha,True)
                 kepplot.labels('','PC ' + str(k+1),'k',18)
-                grid()
-                setp(ax2.get_xticklabels(), visible=False)
-                pylab.tight_layout()
+                plt.grid()
+                plt.setp(ax2.get_xticklabels(), visible=False)
+                plt.tight_layout()
                 l=l+1
-        pylab.savefig(re.sub('.png','_%d.png' % repcnt,repname))
-        if not cmdLine: kepplot.render(cmdLine)
+        plt.savefig(re.sub('.png','_%d.png' % repcnt,repname))
 
 # plot style and size
 
     if status == 0 and plotpca:
-        status = kepplot.define(labelsize,ticksize,logfile,verbose)
-        pylab.figure(figsize=[xsize,ysize])
-        pylab.clf()
+        plt.figure(figsize=[xsize,ysize])
+        plt.clf()
 
 # plot aperture photometry and PCA corrected data
 
     if status == 0 and plotpca:
         ax = kepplot.location([0.06,0.54,0.93,0.43])
-        px = copy(time) + bjdref
-        py = copy(pixseriessum)
-        px, xlab, status = kepplot.cleanx(px,logfile,verbose) 
+        px = np.copy(time) + bjdref
+        py = np.copy(pixseriessum)
+        px, xlab, status = kepplot.cleanx(px,logfile,verbose)
         py, ylab, status = kepplot.cleany(py,1.0,logfile,verbose)
         kepplot.RangeOfPlot(px,py,0.01,False)
         kepplot.plot1d(px,py,cadence,lcolor,lwidth,fcolor,falpha,True)
-        py = copy(fluxcor)
+        py = np.copy(fluxcor)
         py, ylab, status = kepplot.cleany(py,1.0,logfile,verbose)
         kepplot.plot1d(px,py,cadence,'r',2,fcolor,0.0,True)
-        pylab.setp(pylab.gca(),xticklabels=[])
+        plt.setp(plt.gca(),xticklabels=[])
         kepplot.labels('',ylab,'k',24)
-        pylab.grid()
+        plt.grid()
 
 # plot aperture photometry and PCA corrected data
 
     if status == 0 and plotpca:
         ax = kepplot.location([0.06,0.09,0.93,0.43])
-        yr = array([],'float32')
+        yr = np.array([],'float32')
         npc = min([6,nrem])
         for i in range(npc-1,-1,-1):
             py = pcar[:,i] * c[i]
             py, ylab, status = kepplot.cleany(py,1.0,logfile,verbose)
             cl = float(i) / (float(npc))
             kepplot.plot1d(px,py,cadence,[1.0-cl,0.0,cl],2,fcolor,0.0,True)
-            yr = append(yr,py)
+            yr = np.append(yr,py)
         y1 = max(yr)
         y2 = -min(yr)
-        kepplot.RangeOfPlot(px,array([-y1,y1,-y2,y2]),0.01,False)
+        kepplot.RangeOfPlot(px,np.array([-y1,y1,-y2,y2]),0.01,False)
         kepplot.labels(xlab,'Principal Components','k',24)
-        pylab.grid()
+        plt.grid()
 
 # save plot to file
 
     if status == 0 and plotpca:
-        pylab.savefig(repname)
+        plt.savefig(repname)
 
 # render plot
 
     if status == 0 and plotpca:
-        kepplot.render(cmdLine)
+        plt.ion()
+        plt.show()
 
 # stop time
 
@@ -692,36 +699,48 @@ def keppca(infile,maskfile,outfile,components,plotpca,nreps,clobber,verbose,logf
 # Outlier rejection for computing robust mean later
 
 def reject_outliers(data, m):
-    return data[abs(data - numpy.mean(data)) < m * numpy.std(data)]
+    return data[np.abs(data - np.mean(data)) < m * np.std(data)]
 
 # -----------------------------------------------------------
-# Mean absolute deviation function used for fitting the PCA components to the data and subtracting them out 
+# Mean absolute deviation function used for fitting the PCA components to the data and subtracting them out
 # Could replace with whateve minimization function you want
 
 def mad(data):
-    return mean(absolute(data - mean(data)))
+    return np.mean(np.absolute(data - np.mean(data)))
 
 # -----------------------------------------------------------
 # main
 
 if '--shell' in sys.argv:
     import argparse
-    parser = argparse.ArgumentParser(description='Correct aperture photmetry using target motion')
-    parser.add_argument('--shell', action='store_true', help='Are we running from the shell?')
-    parser.add_argument('infile', help='Name of input target pixel FITS file', type=str)
-    parser.add_argument('maskfile', help='Name of mask defintion ASCII file', type=str)
+    parser = argparse.ArgumentParser(description=('Correct aperture photmetry '
+                                                  'using target motion'))
+    parser.add_argument('--shell', action='store_true',
+                        help='Are we running from the shell?')
+    parser.add_argument('infile', help='Name of input target pixel FITS file',
+                        type=str)
+    parser.add_argument('maskfile', help='Name of mask defintion ASCII file',
+                        type=str)
     parser.add_argument('outfile', help='Name of output FITS file', type=str)
-    parser.add_argument('--components', default='1-3', help='Principal components to be removed', type=str)
-    parser.add_argument('--plotpca', action='store_true', help='Create PCA plots?')
-    parser.add_argument('--nmaps', default=10, help='Number of principal components to include in report', type=int)
-    parser.add_argument('--clobber', action='store_true', help='Overwrite output file?')
-    parser.add_argument('--verbose', action='store_true', help='Write to a log file?')
-    parser.add_argument('--logfile', '-l', help='Name of ascii log file', default='keppca.log', dest='logfile', type=str)
-    parser.add_argument('--status', '-e', help='Exit status (0=good)', default=0, dest='status', type=int)
+    parser.add_argument('--components', default='1-3',
+                        help='Principal components to be removed', type=str)
+    parser.add_argument('--plotpca', action='store_true',
+                        help='Create PCA plots?')
+    parser.add_argument('--nmaps', default=10,
+                        help='Number of principal components to include in report',
+                        type=int)
+    parser.add_argument('--clobber', action='store_true',
+                        help='Overwrite output file?')
+    parser.add_argument('--verbose', action='store_true',
+                        help='Write to a log file?')
+    parser.add_argument('--logfile', '-l', help='Name of ascii log file',
+                        default='keppca.log', dest='logfile', type=str)
+    parser.add_argument('--status', '-e', help='Exit status (0=good)',
+                        default=0, dest='status', type=int)
     args = parser.parse_args()
     cmdLine = True
     keppca(args.infile,args.maskfile,args.outfile,args.components,args.plotpca,
-           args.nmaps,args.clobber,args.verbose,args.logfile,args.status,cmdLine)    
+           args.nmaps,args.clobber,args.verbose,args.logfile,args.status,cmdLine)
 else:
     from pyraf import iraf
     parfile = iraf.osfn("kepler$keppca.par")
