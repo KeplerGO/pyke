@@ -87,7 +87,7 @@ def kepbls(infile,outfile,datacol,errcol,minper,maxper,mindur,maxdur,nsearch,
 # read table structure
 
     if status == 0:
-	table, status = kepio.readfitstab(infile,instr[1],logfile,verbose)
+        table, status = kepio.readfitstab(infile,instr[1],logfile,verbose)
 
 # filter input data table
 
@@ -211,23 +211,23 @@ def kepbls(infile,outfile,datacol,errcol,minper,maxper,mindur,maxdur,nsearch,
 # clean up x-axis unit
 
     if status == 0:
-	ptime = copy(trialPeriods)
-	xlab = 'Trial Period (days)'
+        ptime = copy(trialPeriods)
+        xlab = 'Trial Period (days)'
 
 # clean up y-axis units
 
     if status == 0:
         pout = copy(srMax)
-	ylab = 'Normalized Signal Residue'
+        ylab = 'Normalized Signal Residue'
 
 # data limits
 
-	xmin = ptime.min()
-	xmax = ptime.max()
-	ymin = pout.min()
-	ymax = pout.max()
-	xr = xmax - xmin
-	yr = ymax - ymin
+        xmin = ptime.min()
+        xmax = ptime.max()
+        ymin = pout.min()
+        ymax = pout.max()
+        xr = xmax - xmin
+        yr = ymax - ymin
         ptime = np.insert(ptime,[0],[ptime[0]])
         ptime = np.append(ptime,[ptime[-1]])
         pout = np.insert(pout,[0],[0.0])
@@ -273,7 +273,7 @@ def kepbls(infile,outfile,datacol,errcol,minper,maxper,mindur,maxdur,nsearch,
     if status == 0 and plot:
         plt.plot(ptime[1:-1],pout[1:-1],color=lcolor,linestyle='-',linewidth=lwidth)
         plt.fill(ptime,pout,color=fcolor,linewidth=0.0,alpha=falpha)
-	plt.xlabel(xlab, {'color' : 'k'})
+        plt.xlabel(xlab, {'color' : 'k'})
         plt.ylabel(ylab, {'color' : 'k'})
         plt.grid()
 
@@ -341,9 +341,9 @@ def kepbls(infile,outfile,datacol,errcol,minper,maxper,mindur,maxdur,nsearch,
 # end time
 
     if status == 0:
-	message = 'KEPBLS completed at'
+        message = 'KEPBLS completed at'
     else:
-	message = '\nKEPBLS aborted at'
+        message = '\nKEPBLS aborted at'
     kepmsg.clock(message,logfile,verbose)
 
 # main
