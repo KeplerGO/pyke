@@ -90,7 +90,7 @@ def kepflatten(infile,outfile,datacol,errcol,nsig,stepsize,winsize,npoly,
 # read table structure
 
     if status == 0:
-	table, status = kepio.readfitstab(infile,instr[1],logfile,verbose)
+        table, status = kepio.readfitstab(infile,instr[1],logfile,verbose)
 
 # filter input data table
 
@@ -162,26 +162,26 @@ def kepflatten(infile,outfile,datacol,errcol,nsig,stepsize,winsize,npoly,
 # clean up x-axis unit
 
     if status == 0:
-	intime0 = float(int(tstart / 100) * 100.0)
-	ptime = intime - intime0
-	xlab = 'BJD $-$ %d' % intime0
+        intime0 = float(int(tstart / 100) * 100.0)
+        ptime = intime - intime0
+        xlab = 'BJD $-$ %d' % intime0
 
 # clean up y-axis units
 
     if status == 0:
         pout = copy(indata)
-	nrm = len(str(int(pout.max())))-1
-	pout = pout / 10**nrm
-	ylab = '10$^%d$ e$^-$ s$^{-1}$' % nrm
+        nrm = len(str(int(pout.max())))-1
+        pout = pout / 10**nrm
+        ylab = '10$^%d$ e$^-$ s$^{-1}$' % nrm
 
 # data limits
 
-	xmin = ptime.min()
-	xmax = ptime.max()
-	ymin = pout.min()
-	ymax = pout.max()
-	xr = xmax - xmin
-	yr = ymax - ymin
+        xmin = ptime.min()
+        xmax = ptime.max()
+        ymin = pout.min()
+        ymax = pout.max()
+        xr = xmax - xmin
+        yr = ymax - ymin
         ptime = np.insert(ptime,[0],[ptime[0]])
         ptime = np.append(ptime,[ptime[-1]])
         pout = np.insert(pout,[0],[0.0])
@@ -326,20 +326,20 @@ def kepflatten(infile,outfile,datacol,errcol,nsig,stepsize,winsize,npoly,
 
     if status == 0:
         pout = copy(outdata)
-	ylab = 'Normalized Flux'
+        ylab = 'Normalized Flux'
 
 # data limits
 
     if status == 0 and plot:
-	ymin = pout.min()
-	ymax = pout.max()
-	yr = ymax - ymin
+        ymin = pout.min()
+        ymax = pout.max()
+        yr = ymax - ymin
         pout = np.insert(pout,[0],[0.0])
         pout = np.append(pout,0.0)
 
         plt.plot(ptime[1:-1],pout[1:-1],color=lcolor,linestyle='-',linewidth=lwidth)
         plt.fill(ptime,pout,color=fcolor,linewidth=0.0,alpha=falpha)
-	plt.xlabel(xlab, {'color' : 'k'})
+        plt.xlabel(xlab, {'color' : 'k'})
         plt.ylabel(ylab, {'color' : 'k'})
         plt.grid()
 
@@ -366,7 +366,7 @@ def kepflatten(infile,outfile,datacol,errcol,nsig,stepsize,winsize,npoly,
         work1 = np.array([],dtype='float32')
         work2 = np.array([],dtype='float32')
         instr, status = kepio.openfits(infile,'readonly',logfile,verbose)
-	table, status = kepio.readfitstab(infile,instr[1],logfile,verbose)
+        table, status = kepio.readfitstab(infile,instr[1],logfile,verbose)
         tn = table.field('time')
         dn = table.field(datacol)
         for i in range(len(table.field(0))):
@@ -410,10 +410,10 @@ def kepflatten(infile,outfile,datacol,errcol,nsig,stepsize,winsize,npoly,
 
 ## end time
 
-    if (status == 0):
-	    message = 'KEPFLATTEN completed at'
+    if status == 0:
+        message = 'KEPFLATTEN completed at'
     else:
-	    message = '\nKEPFLATTEN aborted at'
+        message = '\nKEPFLATTEN aborted at'
     kepmsg.clock(message,logfile,verbose)
 
 # main

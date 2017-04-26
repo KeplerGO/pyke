@@ -464,7 +464,7 @@ def kepfold(infile,outfile,period,phasezero,bindata,binmethod,threshold,niter,nb
 # plot new light curve
 
     if status == 0 and plottype != 'none':
-	plt.figure(figsize=[17,7])
+        plt.figure(figsize=[17,7])
         plt.clf()
         ax = plt.axes([0.06,0.11,0.93,0.86])
         plt.gca().xaxis.set_major_formatter(plt.ScalarFormatter(useOffset=False))
@@ -479,8 +479,8 @@ def kepfold(infile,outfile,period,phasezero,bindata,binmethod,threshold,niter,nb
         plt.plot(ptime1,pout1,color=lcolor,linestyle='',linewidth=lwidth,marker='.')
         if bindata:
             plt.plot(ptime2[1:-1],pout2[1:-1],color='r',linestyle='-',linewidth=lwidth,marker='')
-	plt.xlabel(xlab, {'color' : 'k'})
-	plt.ylabel(ylab, {'color' : 'k'})
+        plt.xlabel(xlab, {'color' : 'k'})
+        plt.ylabel(ylab, {'color' : 'k'})
         plt.xlim(-0.49999,1.49999)
         if ymin >= 0.0:
             plt.ylim(ymin-yr*0.01,ymax+yr*0.01)

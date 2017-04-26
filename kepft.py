@@ -74,12 +74,12 @@ def kepft(infile,outfile,fcol,pmin,pmax,nfreq,plot,clobber,verbose,logfile,statu
 ## read table columns
 
     if status == 0:
-	try:
+        try:
             barytime = instr[1].data.field('barytime')
-	except:
+        except:
             barytime, status = kepio.readfitscol(infile, instr[1].data,
                                                  'time', logfile, verbose)
-	signal, status = kepio.readfitscol(infile, instr[1].data, fcol,
+        signal, status = kepio.readfitscol(infile, instr[1].data, fcol,
                                            logfile, verbose)
     if status == 0:
         barytime = barytime + bjdref
@@ -128,12 +128,12 @@ def kepft(infile,outfile,fcol,pmin,pmax,nfreq,plot,clobber,verbose,logfile,statu
         nrm = int(math.log10(power.max()))
         power = power / 10**nrm
         ylab = 'Power (x10$^{%d}$)' % nrm
-	xmin = fr.min()
-	xmax = fr.max()
-	ymin = power.min()
-	ymax = power.max()
-	xr = xmax - xmin
-	yr = ymax - ymin
+        xmin = fr.min()
+        xmax = fr.max()
+        ymin = power.min()
+        ymax = power.max()
+        xr = xmax - xmin
+        yr = ymax - ymin
         fr = np.insert(fr,[0],fr[0])
         fr = np.append(fr,fr[-1])
         power = np.insert(power,[0],0.0)
@@ -162,7 +162,7 @@ def kepft(infile,outfile,fcol,pmin,pmax,nfreq,plot,clobber,verbose,logfile,statu
     if (status == 0):
         message = 'KEPFT completed at'
     else:
-	message = '\nKEPFT aborted at'
+        message = '\nKEPFT aborted at'
     kepmsg.clock(message,logfile,verbose)
 
 ## main

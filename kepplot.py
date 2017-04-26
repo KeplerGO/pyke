@@ -104,7 +104,7 @@ def cleany(signal,cadence,logfile,verbose):
     try:
         signal /= cadence
         nrm = math.ceil(math.log10(numpy.nanmax(signal))) - 1.0
-	signal = signal / 10**nrm
+        signal = signal / 10**nrm
         if nrm == 0:
             label = 'Flux (e$^-$ s$^{-1}$)'
         else:

@@ -126,7 +126,7 @@ def kepbls(infile,outfile,datacol,errcol,minper,maxper,mindur,maxdur,nsearch,
         dPeriod = (maxper - minper) / nsearch
         trialPeriods = np.arange(minper,maxper+dPeriod,dPeriod,dtype='float32')
         complete = 0
-        print ' '
+        print(' ')
         for trialPeriod in trialPeriods:
             fracComplete = float(complete) / float(len(trialPeriods) - 1) * 100.0
             txt  = '\r'
@@ -206,7 +206,7 @@ def kepbls(infile,outfile,datacol,errcol,minper,maxper,mindur,maxdur,nsearch,
         srMax /= bestSr
         transitDuration *= trialPeriods / 24.0
         BJD0 = np.array(transitPhase * trialPeriods / nbins,dtype='float64') + intime[0] - 2454833.0
-        print '\n'
+        print('\n')
 
 # clean up x-axis unit
 
@@ -235,21 +235,6 @@ def kepbls(infile,outfile,datacol,errcol,minper,maxper,mindur,maxdur,nsearch,
 
 # plot light curve
 
-    if status == 0 and plot:
-        plotLatex = True
-        try:
-            params = {'backend': 'png',
-                      'axes.linewidth': 2.5,
-                      'axes.labelsize': labelsize,
-                      'axes.font': 'sans-serif',
-                      'axes.fontweight' : 'bold',
-                      'text.fontsize': 12,
-                      'legend.fontsize': 12,
-                      'xtick.labelsize': ticksize,
-                      'ytick.labelsize': ticksize}
-            rcParams.update(params)
-        except:
-            plotLatex = False
     if status == 0 and plot:
         plt.figure(figsize=[xsize,ysize])
         plt.clf()
@@ -333,10 +318,10 @@ def kepbls(infile,outfile,datacol,errcol,minper,maxper,mindur,maxdur,nsearch,
 # print best trial period results
 
     if status == 0:
-        print '      Best trial period = %.5f days' % trialPeriods[bestTrial]
-        print '    Time of mid-transit = BJD %.5f' % (BJD0[bestTrial] + 2454833.0)
-        print '       Transit duration = %.5f hours' % transitDuration[bestTrial]
-        print ' Maximum signal residue = %.4g \n' % (srMax[bestTrial] * bestSr)
+        print('      Best trial period = %.5f days' % trialPeriods[bestTrial])
+        print('    Time of mid-transit = BJD %.5f' % (BJD0[bestTrial] + 2454833.0))
+        print('       Transit duration = %.5f hours' % transitDuration[bestTrial])
+        print(' Maximum signal residue = %.4g \n' % (srMax[bestTrial] * bestSr))
 
 # end time
 
@@ -356,18 +341,25 @@ if '--shell' in sys.argv:
     parser.add_argument('outfile', help='Name of FITS file to output', type=str)
     parser.add_argument('--datacol', default='DETSAP_FLUX',
                         help='Name of data column to plot', type=str)
-    parser.add_argument('--errcol', default='DETSAP_FLUX_ERR', help='Name of data error column to plot', type=str)
+    parser.add_argument('--errcol', default='DETSAP_FLUX_ERR',
+                        help='Name of data error column to plot', type=str)
     parser.add_argument('--minper', default=1.0, help='Minimum search period [days]', type=float)
     parser.add_argument('--maxper', default=30.0, help='Maximum search period [days]', type=float)
     parser.add_argument('--mindur', default=0.5, help='Minimum transit duration [hours]', type=float)
     parser.add_argument('--maxdur', default=12.0, help='Maximum transit duration [hours]', type=float)
-    parser.add_argument('--nsearch', default=1000, help='Number of test periods between minper and maxper', type=int)
-    parser.add_argument('--nbins', default=1000, help='Number of bins in the folded time series at any test period', type=int)
+    parser.add_argument('--nsearch', default=1000,
+                        help='Number of test periods between minper and maxper',
+                        type=int)
+    parser.add_argument('--nbins', default=1000,
+                        help='Number of bins in the folded time series at any test period',
+                        type=int)
     parser.add_argument('--plot', action='store_true', help='Plot result?')
     parser.add_argument('--clobber', action='store_true', help='Overwrite output file?')
     parser.add_argument('--verbose', action='store_true', help='Write to a log file?')
-    parser.add_argument('--logfile', '-l', help='Name of ascii log file', default='kepcotrend.log', dest='logfile', type=str)
-    parser.add_argument('--status', '-e', help='Exit status (0=good)', default=0, dest='status', type=int)
+    parser.add_argument('--logfile', '-l', help='Name of ascii log file',
+                        default='kepbls.log', dest='logfile', type=str)
+    parser.add_argument('--status', '-e', help='Exit status (0=good)',
+                        default=0, dest='status', type=int)
     args = parser.parse_args()
     cmdLine=True
     kepbls(args.infile,args.outfile,args.datacol,args.errcol,args.minper,args.maxper,args.mindur,

@@ -392,7 +392,7 @@ def keppixseries(infile,outfile,plotfile,plottype,filter,function,cutoff,clobber
     fmin = 1.0e33
     fmax = -1.033
     if status == 0:
-	plt.figure(num=None,figsize=[12,12])
+        plt.figure(num=None,figsize=[12,12])
         plt.clf()
         dx = 0.93 / xdim
         dy = 0.94 / ydim

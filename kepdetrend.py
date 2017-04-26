@@ -64,8 +64,8 @@ def kepdetrend(infile,outfile,datacol,errcol,ranges1,npoly1,nsig1,niter1,
 
     if clobber: status = kepio.clobber(outfile,logfile,verbose)
     if kepio.fileexists(outfile):
-	    message = 'ERROR -- KEPDETREND: ' + outfile + ' exists. Use clobber=yes'
-	    status = kepmsg.err(logfile,message,verbose)
+        message = 'ERROR -- KEPDETREND: ' + outfile + ' exists. Use clobber=yes'
+        status = kepmsg.err(logfile,message,verbose)
 
 # open input file
 
@@ -83,7 +83,7 @@ def kepdetrend(infile,outfile,datacol,errcol,ranges1,npoly1,nsig1,niter1,
 # read table structure
 
     if status == 0:
-	table, status = kepio.readfitstab(infile,instr[1],logfile,verbose)
+        table, status = kepio.readfitstab(infile,instr[1],logfile,verbose)
 
 # filter input data table
 
@@ -196,12 +196,12 @@ def kepdetrend(infile,outfile,datacol,errcol,ranges1,npoly1,nsig1,niter1,
 # clean up x-axis unit
 
     if status == 0:
-	intime0 = float(int(tstart / 100) * 100.0)
+        intime0 = float(int(tstart / 100) * 100.0)
         if intime0 < 2.4e6: intime0 += 2.4e6
-	ptime = intime - intime0
-	plotx1 = plotx1 - intime0
-	plotx2 = plotx2 - intime0
-	xlab = 'BJD $-$ %d' % intime0
+        ptime = intime - intime0
+        plotx1 = plotx1 - intime0
+        plotx2 = plotx2 - intime0
+        xlab = 'BJD $-$ %d' % intime0
 
 # clean up y-axis units
 
@@ -209,24 +209,24 @@ def kepdetrend(infile,outfile,datacol,errcol,ranges1,npoly1,nsig1,niter1,
         pout = outdata
         ploty1
         ploty2
-	nrm = len(str(int(np.nanmax(indata))))-1
-	indata = indata / 10**nrm
-	pout = pout / 10**nrm
-	ploty1 = ploty1 / 10**nrm
-	ploty2 = ploty2 / 10**nrm
-	ylab = '10$^%d$ e$^-$ s$^{-1}$' % nrm
+        nrm = len(str(int(np.nanmax(indata))))-1
+        indata = indata / 10**nrm
+        pout = pout / 10**nrm
+        ploty1 = ploty1 / 10**nrm
+        ploty2 = ploty2 / 10**nrm
+        ylab = '10$^%d$ e$^-$ s$^{-1}$' % nrm
 
 # data limits
 
-	xmin = ptime.min()
-	xmax = ptime.max()
-	ymin = indata.min()
-	ymax = indata.max()
-	omin = pout.min()
-	omax = pout.max()
-	xr = xmax - xmin
-	yr = ymax - ymin
-	oo = omax - omin
+        xmin = ptime.min()
+        xmax = ptime.max()
+        ymin = indata.min()
+        ymax = indata.max()
+        omin = pout.min()
+        omax = pout.max()
+        xr = xmax - xmin
+        yr = ymax - ymin
+        oo = omax - omin
         ptime = np.insert(ptime,[0],[ptime[0]])
         ptime = np.append(ptime,[ptime[-1]])
         indata = np.insert(indata,[0],[0.0])
@@ -263,7 +263,7 @@ def kepdetrend(infile,outfile,datacol,errcol,ranges1,npoly1,nsig1,niter1,
             plt.ylim(ymin-yr*0.01,ymax+yr*0.01)
         else:
             plt.ylim(1.0e-10,ymax+yr*0.01)
-	    plt.ylabel(ylab, {'color' : 'k'})
+            plt.ylabel(ylab, {'color' : 'k'})
         plt.grid()
 
 # plot detrended data
@@ -287,7 +287,7 @@ def kepdetrend(infile,outfile,datacol,errcol,ranges1,npoly1,nsig1,niter1,
             plt.ylim(omin-oo*0.01,omax+oo*0.01)
         else:
             plt.ylim(1.0e-10,omax+oo*0.01)
-	plt.xlabel(xlab, {'color' : 'k'})
+        plt.xlabel(xlab, {'color' : 'k'})
         try:
             plt.ylabel(ylab, {'color' : 'k'})
         except:
@@ -322,9 +322,9 @@ def kepdetrend(infile,outfile,datacol,errcol,ranges1,npoly1,nsig1,niter1,
 ## end time
 
     if status == 0:
-	    message = 'KEPDETREND completed at'
+        message = 'KEPDETREND completed at'
     else:
-	    message = '\nKEPDETREND aborted at'
+        message = '\nKEPDETREND aborted at'
     kepmsg.clock(message,logfile,verbose)
 
 # main

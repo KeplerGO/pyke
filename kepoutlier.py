@@ -61,8 +61,8 @@ def kepoutlier(infile,outfile,datacol,nsig,stepsize,npoly,niter,
 
     if clobber: status = kepio.clobber(outfile,logfile,verbose)
     if kepio.fileexists(outfile):
-	message = 'ERROR -- KEPOUTLIER: ' + outfile + ' exists. Use clobber=yes'
-	status = kepmsg.err(logfile,message,verbose)
+        message = 'ERROR -- KEPOUTLIER: ' + outfile + ' exists. Use clobber=yes'
+        status = kepmsg.err(logfile,message,verbose)
 
 # open input file
 
@@ -85,7 +85,7 @@ def kepoutlier(infile,outfile,datacol,nsig,stepsize,npoly,niter,
 # read table structure
 
     if status == 0:
-	table, status = kepio.readfitstab(infile,instr[1],logfile,verbose)
+        table, status = kepio.readfitstab(infile,instr[1],logfile,verbose)
 
 # filter input data table
 
@@ -114,11 +114,11 @@ def kepoutlier(infile,outfile,datacol,nsig,stepsize,npoly,niter,
 # read table columns
 
     if status == 0:
-	try:
+        try:
             intime = instr[1].data.field('barytime') + 2.4e6
-	except:
+        except:
             intime, status = kepio.readfitscol(infile,instr[1].data,'time',logfile,verbose)
-	indata, status = kepio.readfitscol(infile,instr[1].data,datacol,logfile,verbose)
+        indata, status = kepio.readfitscol(infile,instr[1].data,datacol,logfile,verbose)
     if status == 0:
         intime = intime + bjdref
         indata = indata / cadenom
@@ -164,26 +164,26 @@ def kepoutlier(infile,outfile,datacol,nsig,stepsize,npoly,niter,
 # clean up x-axis unit
 
     if status == 0:
-	intime0 = float(int(tstart / 100) * 100.0)
-	ptime = intime - intime0
-	xlab = 'BJD $-$ %d' % intime0
+        intime0 = float(int(tstart / 100) * 100.0)
+        ptime = intime - intime0
+        xlab = 'BJD $-$ %d' % intime0
 
 # clean up y-axis units
 
     if status == 0:
         pout = indata * 1.0
-	nrm = len(str(int(pout.max())))-1
-	pout = pout / 10**nrm
-	ylab = '10$^%d$ e$^-$ s$^{-1}$' % nrm
+        nrm = len(str(int(pout.max())))-1
+        pout = pout / 10**nrm
+        ylab = '10$^%d$ e$^-$ s$^{-1}$' % nrm
 
 # data limits
 
-	xmin = ptime.min()
-	xmax = ptime.max()
-	ymin = pout.min()
-	ymax = pout.max()
-	xr = xmax - xmin
-	yr = ymax - ymin
+        xmin = ptime.min()
+        xmax = ptime.max()
+        ymin = pout.min()
+        ymax = pout.max()
+        xr = xmax - xmin
+        yr = ymax - ymin
         ptime = np.insert(ptime,[0],[ptime[0]])
         ptime = np.append(ptime,[ptime[-1]])
         pout = np.insert(pout,[0],[0.0])
@@ -226,7 +226,7 @@ def kepoutlier(infile,outfile,datacol,nsig,stepsize,npoly,niter,
 
         plt.plot(ptime,pout,color=lcolor,linestyle='-',linewidth=lwidth)
         plt.fill(ptime,pout,color=fcolor,linewidth=0.0,alpha=falpha)
-	plt.xlabel(xlab, {'color' : 'k'})
+        plt.xlabel(xlab, {'color' : 'k'})
         if not plotLatex:
             ylab = '10**%d electrons/sec' % nrm
         plt.ylabel(ylab, {'color' : 'k'})
@@ -310,9 +310,9 @@ def kepoutlier(infile,outfile,datacol,nsig,stepsize,npoly,niter,
 # end time
 
     if (status == 0):
-	    message = 'KEPOUTLIER completed at'
+            message = 'KEPOUTLIER completed at'
     else:
-	    message = '\nKEPOUTLIER aborted at'
+            message = '\nKEPOUTLIER aborted at'
     kepmsg.clock(message,logfile,verbose)
 
 # main
@@ -320,39 +320,42 @@ if '--shell' in sys.argv:
     import argparse
     parser = argparse.ArgumentParser(description='Remove or replace data outliers from a time series')
     parser.add_argument('--shell', action='store_true', help='Are we running from the shell?')
-
     parser.add_argument('infile', help='Name of input file', type=str)
-
     parser.add_argument('outfile', help='Name of FITS file to output', type=str)
-
-    parser.add_argument('--datacol', default='SAP_FLUX', help='Name of data column to plot', type=str)
-
-    parser.add_argument('--nsig', default=3., help='Sigma clipping threshold for outliers', type=float)
-    parser.add_argument('--stepsize', default=1.0, help='Stepsize on which to fit data [days]', type=float)
+    parser.add_argument('--datacol', default='SAP_FLUX',
+                        help='Name of data column to plot', type=str)
+    parser.add_argument('--nsig', default=3.,
+                        help='Sigma clipping threshold for outliers',
+                        type=float)
+    parser.add_argument('--stepsize', default=1.0,
+                        help='Stepsize on which to fit data [days]',
+                        type=float)
     parser.add_argument('--npoly', default=3, help='Polynomial order for each fit', type=int)
     parser.add_argument('--niter', default=1, help='Maximum number of clipping iterations', type=int)
-
-    parser.add_argument('--operation', default='remove', help='Remove or replace outliers?',
-        type=str, choices=['replace','remove'])
-
-    parser.add_argument('--ranges', default='0,0', help='Time ranges of regions to filter', type=str)
-
+    parser.add_argument('--operation', default='remove',
+                        help='Remove or replace outliers?', type=str,
+                        choices=['replace','remove'])
+    parser.add_argument('--ranges', default='0,0',
+                        help='Time ranges of regions to filter', type=str)
     parser.add_argument('--plot', action='store_true', help='Plot result?')
-    parser.add_argument('--plotfit', action='store_true', help='Plot fit over results?')
-
-    parser.add_argument('--clobber', action='store_true', help='Overwrite output file?')
-    parser.add_argument('--verbose', action='store_true', help='Write to a log file?')
-    parser.add_argument('--logfile', '-l', help='Name of ascii log file', default='kepcotrend.log', dest='logfile', type=str)
-    parser.add_argument('--status', '-e', help='Exit status (0=good)', default=0, dest='status', type=int)
-
-
+    parser.add_argument('--plotfit', action='store_true',
+                        help='Plot fit over results?')
+    parser.add_argument('--clobber', action='store_true',
+                        help='Overwrite output file?')
+    parser.add_argument('--verbose', action='store_true',
+                        help='Write to a log file?')
+    parser.add_argument('--logfile', '-l', help='Name of ascii log file',
+                        default='kepoutlier.log', dest='logfile', type=str)
+    parser.add_argument('--status', '-e', help='Exit status (0=good)',
+                        default=0, dest='status', type=int)
     args = parser.parse_args()
-
     cmdLine=True
-
-    kepoutlier(args.infile,args.outfile,args.datacol,args.nsig,args.stepsize,args.npoly,args.niter,
-               args.operation,args.ranges,args.plot,args.plotfit,args.clobber,args.verbose,args.logfile,args.status, cmdLine)
+    kepoutlier(args.infile, args.outfile, args.datacol, args.nsig,
+               args.stepsize, args.npoly,args.niter, args.operation,
+               args.ranges, args.plot, args.plotfit, args.clobber,
+               args.verbose, args.logfile, args.status, cmdLine)
 else:
     from pyraf import iraf
     parfile = iraf.osfn("kepler$kepoutlier.par")
-    t = iraf.IrafTaskFactory(taskname="kepoutlier", value=parfile, function=kepoutlier)
+    t = iraf.IrafTaskFactory(taskname="kepoutlier", value=parfile,
+                             function=kepoutlier)

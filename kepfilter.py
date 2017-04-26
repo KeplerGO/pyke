@@ -56,8 +56,8 @@ def kepfilter(infile,outfile,datacol,function,cutoff,passband,plot,plotlab,
 
     if clobber: status = kepio.clobber(outfile,logfile,verbose)
     if kepio.fileexists(outfile):
-	    message = 'ERROR -- KEPFILTER: ' + outfile + ' exists. Use clobber=yes'
-	    status = kepmsg.err(logfile,message,verbose)
+        message = 'ERROR -- KEPFILTER: ' + outfile + ' exists. Use clobber=yes'
+        status = kepmsg.err(logfile,message,verbose)
 
 ## open input file
 
@@ -79,7 +79,7 @@ def kepfilter(infile,outfile,datacol,function,cutoff,passband,plot,plotlab,
 ## read table structure
 
     if status == 0:
-	table, status = kepio.readfitstab(infile,instr[1],logfile,verbose)
+        table, status = kepio.readfitstab(infile,instr[1],logfile,verbose)
 
 # read time and flux columns
 
@@ -107,7 +107,7 @@ def kepfilter(infile,outfile,datacol,function,cutoff,passband,plot,plotlab,
     if status == 0:
         intime, status = kepio.readtimecol(infile,instr[1].data,logfile,verbose)
     if status == 0:
-	indata, status = kepio.readfitscol(infile,instr[1].data,datacol,logfile,verbose)
+        indata, status = kepio.readfitscol(infile,instr[1].data,datacol,logfile,verbose)
     if status == 0:
         intime = intime + bjdref
         indata = indata / cadenom
@@ -173,29 +173,29 @@ def kepfilter(infile,outfile,datacol,function,cutoff,passband,plot,plotlab,
 ## clean up x-axis unit
 
     if status == 0:
-	intime0 = float(int(tstart / 100) * 100.0)
+        intime0 = float(int(tstart / 100) * 100.0)
         if intime0 < 2.4e6: intime0 += 2.4e6
-	ptime = intime - intime0
-	xlab = 'BJD $-$ %d' % intime0
+        ptime = intime - intime0
+        xlab = 'BJD $-$ %d' % intime0
 
 ## clean up y-axis units
 
     if status == 0:
         pout = indata * 1.0
         pout2 = outdata * 1.0
-	nrm = len(str(int(np.nanmax(pout))))-1
-	pout = pout / 10**nrm
-	pout2 = pout2 / 10**nrm
-	ylab = '10$^%d$ %s' % (nrm, plotlab)
+        nrm = len(str(int(np.nanmax(pout))))-1
+        pout = pout / 10**nrm
+        pout2 = pout2 / 10**nrm
+        ylab = '10$^%d$ %s' % (nrm, plotlab)
 
 ## data limits
 
-	xmin = ptime.min()
-	xmax = ptime.max()
-	ymin = np.nanmin(pout)
-	ymax = np.nanmax(pout)
-	xr = xmax - xmin
-	yr = ymax - ymin
+        xmin = ptime.min()
+        xmax = ptime.max()
+        ymin = np.nanmin(pout)
+        ymax = np.nanmax(pout)
+        xr = xmax - xmin
+        yr = ymax - ymin
         ptime = np.insert(ptime,[0],[ptime[0]])
         ptime = np.append(ptime,[ptime[-1]])
         pout = np.insert(pout,[0],[0.0])
@@ -223,9 +223,9 @@ def kepfilter(infile,outfile,datacol,function,cutoff,passband,plot,plotlab,
         else:
             plt.plot(ptime,pout2,color=lcolor,linestyle='-',linewidth=lwidth)
             plt.fill(ptime,pout2,color=lcolor,linewidth=0.0,alpha=falpha)
-	plt.xlabel(xlab, {'color' : 'k'})
-	plt.ylabel(ylab, {'color' : 'k'})
-	plt.xlim(xmin-xr*0.01,xmax+xr*0.01)
+        plt.xlabel(xlab, {'color' : 'k'})
+        plt.ylabel(ylab, {'color' : 'k'})
+        plt.xlim(xmin-xr*0.01,xmax+xr*0.01)
         if ymin >= 0.0:
             plt.ylim(ymin-yr*0.01,ymax+yr*0.01)
         else:
@@ -248,10 +248,10 @@ def kepfilter(infile,outfile,datacol,function,cutoff,passband,plot,plotlab,
 
 ## end time
 
-    if (status == 0):
-	    message = 'KEPFILTER completed at'
+    if status == 0:
+        message = 'KEPFILTER completed at'
     else:
-	    message = '\nKEPFILTER aborted at'
+        message = '\nKEPFILTER aborted at'
     kepmsg.clock(message,logfile,verbose)
 
 ## main

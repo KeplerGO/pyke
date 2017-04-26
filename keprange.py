@@ -117,32 +117,32 @@ def keprange(infile, rinfile, outfile, column, clobber, verbose, logfile,
 # clean up x-axis unit
 
     if status == 0:
-	barytime0 = float(int(tstart / 100) * 100.0)
-	barytime = barytime - barytime0
+        barytime0 = float(int(tstart / 100) * 100.0)
+        barytime = barytime - barytime0
         xlab = 'BJD $-$ %d' % barytime0
 
 # clean up y-axis units
 
     if status == 0:
-	nrm = len(str(int(flux.max())))-1
-	flux = flux / 10**nrm
-	ylab = '10$^%d$ e$^-$ s$^{-1}$' % nrm
+        nrm = len(str(int(flux.max())))-1
+        flux = flux / 10**nrm
+        ylab = '10$^%d$ e$^-$ s$^{-1}$' % nrm
 
 # data limits
 
-	xmin = barytime.min()
-	xmax = barytime.max()
-	ymin = flux.min()
-	ymax = flux.max()
-	xr = xmax - xmin
-	yr = ymax - ymin
-	flux[0] = 0.0
-	flux[-1] = 0.0
+        xmin = barytime.min()
+        xmax = barytime.max()
+        ymin = flux.min()
+        ymax = flux.max()
+        xr = xmax - xmin
+        yr = ymax - ymin
+        flux[0] = 0.0
+        flux[-1] = 0.0
 
 # plot new light curve
 
     if status == 0:
-	plt.figure(figsize=[xsize,ysize])
+        plt.figure(figsize=[xsize,ysize])
         plt.clf()
         plotlc(cmdLine)
 
@@ -441,11 +441,11 @@ def clicker6(event):
                     else:
                         mask.append(mask[-1])
                         mask[-2] = event.xdata
-		plotlc(cmdLine)
+                plotlc(cmdLine)
         if event.key == 'z':
             kepio.closefits(instr, "keprangelog.txt", True)
-	    plt.close()
-	    return
+            plt.close()
+            return
 
 # main
 if '--shell' in sys.argv:

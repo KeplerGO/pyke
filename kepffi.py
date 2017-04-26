@@ -482,8 +482,8 @@ def openfits(file,mode):
     try:
         struct = pyfits.open(file,mode=mode)
     except:
-	txt = 'ERROR -- cannot open ' + file + ' as a FITS file'
-	sys.exit(txt)
+        txt = 'ERROR -- cannot open ' + file + ' as a FITS file'
+        sys.exit(txt)
     return struct, status
 
 # -----------------------------------------------------------
@@ -493,10 +493,10 @@ def closefits(struct):
 
     status = 0
     try:
-	struct.close()
+        struct.close()
     except:
-	txt = 'ERROR -- cannot close HDU structure'
-	sys.exit(txt)
+        txt = 'ERROR -- cannot close HDU structure'
+        sys.exit(txt)
     return status
 
 # -----------------------------------------------------------
@@ -506,10 +506,10 @@ def readimage(struct,hdu):
 
     status = 0
     try:
-	imagedata = struct[hdu].data
+        imagedata = struct[hdu].data
     except:
-	txt = 'ERROR -- cannot read image data from HDU ' + str(hdu)
-	sys.exit(txt)
+        txt = 'ERROR -- cannot read image data from HDU ' + str(hdu)
+        sys.exit(txt)
     return imagedata, status
 
 # -----------------------------------------------------------

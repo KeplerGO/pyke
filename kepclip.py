@@ -52,8 +52,8 @@ def kepclip(infile, outfile, ranges, plot, plotcol, clobber, verbose, logfile,
 
     if clobber: status = kepio.clobber(outfile,logfile,verbose)
     if kepio.fileexists(outfile):
-	    message = 'ERROR -- KEPCLIP: ' + outfile + ' exists. Use --clobber'
-	    status = kepmsg.err(logfile,message,verbose)
+        message = 'ERROR -- KEPCLIP: ' + outfile + ' exists. Use --clobber'
+        status = kepmsg.err(logfile,message,verbose)
 
 # time ranges for region
 
@@ -128,8 +128,8 @@ def kepclip(infile, outfile, ranges, plot, plotcol, clobber, verbose, logfile,
 # clean up x-axis unit
 
     if status == 0:
-	barytime0 = float(int(tstart / 100) * 100.0)
-	barytime = work1 - barytime0
+        barytime0 = float(int(tstart / 100) * 100.0)
+        barytime = work1 - barytime0
         xlab = 'BJD $-$ %d' % barytime0
 
 # clean up y-axis units
@@ -139,17 +139,17 @@ def kepclip(infile, outfile, ranges, plot, plotcol, clobber, verbose, logfile,
             nrm = len(str(int(work2.max())))-1
         except:
             nrm = 0
-	flux = work2 / 10**nrm
-	ylab = '10$^%d$ e$^-$ s$^{-1}$' % nrm
+        flux = work2 / 10**nrm
+        ylab = '10$^%d$ e$^-$ s$^{-1}$' % nrm
 
 # data limits
 
-	xmin = barytime.min()
-	xmax = barytime.max()
-	ymin = flux.min()
-	ymax = flux.max()
-	xr = xmax - xmin
-	yr = ymax - ymin
+        xmin = barytime.min()
+        xmax = barytime.max()
+        ymin = flux.min()
+        ymax = flux.max()
+        xr = xmax - xmin
+        yr = ymax - ymin
 
 # clear window, plot box
 
@@ -170,8 +170,8 @@ def kepclip(infile, outfile, ranges, plot, plotcol, clobber, verbose, logfile,
 
 # plot line data
 
-	ltime = [barytime[0]]; ldata = [flux[0]]
-	for i in range(1,len(flux)):
+        ltime = [barytime[0]]; ldata = [flux[0]]
+        for i in range(1,len(flux)):
             if (barytime[i-1] > barytime[i] - 0.025):
                 ltime.append(barytime[i])
                 ldata.append(flux[i])
@@ -180,9 +180,9 @@ def kepclip(infile, outfile, ranges, plot, plotcol, clobber, verbose, logfile,
                 ldata = np.array(ldata, dtype=np.float)
                 plt.plot(ltime,ldata,color=lcolor,linestyle='-',linewidth=lwidth)
                 ltime = []; ldata = []
-	ltime = np.array(ltime, dtype=np.float)
-	ldata = np.array(ldata, dtype=np.float)
-	plt.plot(ltime,ldata,color=lcolor,linestyle='-',linewidth=lwidth)
+        ltime = np.array(ltime, dtype=np.float)
+        ldata = np.array(ldata, dtype=np.float)
+        plt.plot(ltime,ldata,color=lcolor,linestyle='-',linewidth=lwidth)
 
 # plot fill data
 
@@ -192,13 +192,13 @@ def kepclip(infile, outfile, ranges, plot, plotcol, clobber, verbose, logfile,
         flux = np.append(flux,[0.0])
         plt.fill(barytime,flux,fc=fcolor,linewidth=0.0,alpha=falpha)
         plt.xlim(xmin-xr*0.01,xmax+xr*0.01)
-	if ymin-yr*0.01 <= 0.0:
+        if ymin-yr*0.01 <= 0.0:
             plt.ylim(1.0e-10,ymax+yr*0.01)
-	else:
+        else:
             plt.ylim(ymin-yr*0.01,ymax+yr*0.01)
-	plt.xlabel(xlab, {'color' : 'k'})
-	plt.ylabel(ylab, {'color' : 'k'})
-	plt.grid()
+        plt.xlabel(xlab, {'color' : 'k'})
+        plt.ylabel(ylab, {'color' : 'k'})
+        plt.grid()
 
 # render plot
 
@@ -214,9 +214,9 @@ def kepclip(infile, outfile, ranges, plot, plotcol, clobber, verbose, logfile,
 # end time
 
     if (status == 0):
-	    message = 'KEPCLIP completed at'
+        message = 'KEPCLIP completed at'
     else:
-	    message = '\nKEPCLIP aborted at'
+        message = '\nKEPCLIP aborted at'
     kepmsg.clock(message,logfile,verbose)
 
 # main

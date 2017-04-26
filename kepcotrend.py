@@ -6,7 +6,7 @@ Date released: July 27 2011
 Changelog:
 1.0 released
 1.0.1 caught not having a new version of numpy with the in1d function and changed the simplex algorithm so that it fits the first two BV then fits
-		the rest of them, now much more stable (Sep 5 2011)
+                the rest of them, now much more stable (Sep 5 2011)
 2.0 code will now work on short cadence data by interpolating the basis vectors down to short cadence, several interpolation methods are available
 3.0 made it possible to run from the command line if there are arguements given to the call to kepcotrend
 """
@@ -482,12 +482,12 @@ def split_on_nans(bad_data,cad):
     blocks = []
     time_of_nans = cad[bad_data == False]
     if bad_data[0] == True:
-	blocks.append(cad[0])
+        blocks.append(cad[0])
     for i in range(1,len(time_of_nans)):
-	if time_of_nans[i] - time_of_nans[i-1] > 1:
-	    blocks.append(time_of_nans[i])
-	if bad_data[-1] == True:
-	    blocks.append(cad[-1])
+        if time_of_nans[i] - time_of_nans[i-1] > 1:
+            blocks.append(time_of_nans[i])
+        if bad_data[-1] == True:
+            blocks.append(cad[-1])
     return blocks
 
 def kepcotrendsc(infile,outfile,bvfile,listbv,fitmethod,fitpower,iterate,
@@ -557,7 +557,7 @@ def kepcotrendsc(infile,outfile,bvfile,listbv,fitmethod,fitpower,iterate,
     call += 'infile='+infile+' '
     call += 'outfile='+outfile+' '
     call += 'bvfile='+bvfile+' '
-#	call += 'numpcomp= '+str(numpcomp)+' '
+#       call += 'numpcomp= '+str(numpcomp)+' '
     call += 'listbv= '+str(listbv)+' '
     call += 'fitmethod=' +str(fitmethod)+ ' '
     call += 'fitpower=' + str(fitpower)+ ' '
@@ -607,23 +607,23 @@ def kepcotrendsc(infile,outfile,bvfile,listbv,fitmethod,fitpower,iterate,
             message = 'ERROR -- KEPCOTREND: ' + bvfile + ' does not exist.'
             status = kepmsg.err(logfile,message,verbose)
 
-	#lsq_sq - nonlinear least squares fitting and simplex_abs have been
-	#removed from the options in PyRAF but they are still in the code!
+        #lsq_sq - nonlinear least squares fitting and simplex_abs have been
+        #removed from the options in PyRAF but they are still in the code!
     if status == 0:
-	if fitmethod not in ['llsq','matrix','lst_sq','simplex_abs','simplex']:
-	    message = 'Fit method must either: llsq, matrix, lst_sq or simplex'
-	    status = kepmsg.err(logfile,message,verbose)
-
-    if status == 0:
-	if not is_numlike(fitpower) and fitpower is not None:
-	    message = 'Fit power must be an real number or None'
-	    status = kepmsg.err(logfile,message,verbose)
-
-
+        if fitmethod not in ['llsq','matrix','lst_sq','simplex_abs','simplex']:
+            message = 'Fit method must either: llsq, matrix, lst_sq or simplex'
+            status = kepmsg.err(logfile,message,verbose)
 
     if status == 0:
-	if fitpower is None:
-	    fitpower = 1.
+        if not is_numlike(fitpower) and fitpower is not None:
+            message = 'Fit power must be an real number or None'
+            status = kepmsg.err(logfile,message,verbose)
+
+
+
+    if status == 0:
+        if fitpower is None:
+            fitpower = 1.
 
     # input data
     if status == 0:
@@ -797,9 +797,9 @@ def kepcotrendsc(infile,outfile,bvfile,listbv,fitmethod,fitpower,iterate,
                                                            lc_cad_masked,
                                                            short,scinterp)
 
-	if iterate and sigma is None:
-	    message = 'If fitting iteratively you must specify a clipping range'
-	    status = kepmsg.err(logfile,message,verbose)
+        if iterate and sigma is None:
+            message = 'If fitting iteratively you must specify a clipping range'
+            status = kepmsg.err(logfile,message,verbose)
 
     if status == 0:
         #uses Pvals = yhat * U_transpose
@@ -834,14 +834,14 @@ def kepcotrendsc(infile,outfile,bvfile,listbv,fitmethod,fitpower,iterate,
         bvsum_nans = putInNans(bad_data, bvsum)
         flux_after_nans = putInNans(bad_data, flux_after)
 
-	if plot and status == 0:
+        if plot and status == 0:
             newmedflux = np.median(flux_after + 1)
             bvsum_un_norm = newmedflux*(1-bvsum)
             do_plot(lc_date, lc_flux, flux_after, bvsum_un_norm, lc_cad,
                     bad_data, lc_cad_o, version, cmdLine)
 
     if status == 0:
-	make_outfile(instr,outfile,flux_after_nans,bvsum_nans,version)
+        make_outfile(instr,outfile,flux_after_nans,bvsum_nans,version)
 
     # close input file
     if status == 0:

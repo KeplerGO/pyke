@@ -4,8 +4,9 @@ from matplotlib import pyplot as plt
 import numpy as np
 import kepio, kepmsg, kepkey, kepfit, kepstat, kepfourier, keplab
 
-def kepdynamic(infile,outfile,fcol,pmin,pmax,nfreq,deltat,nslice,
-               plot,plotscale,cmap,clobber,verbose,logfile,status,cmdLine=False):
+def kepdynamic(infile, outfile, fcol, pmin, pmax, nfreq, deltat, nslice,
+               plot, plotscale, cmap, clobber, verbose, logfile, status,
+               cmdLine=False):
 
 # startup parameters
 
@@ -77,7 +78,7 @@ def kepdynamic(infile,outfile,fcol,pmin,pmax,nfreq,deltat,nslice,
 # open input file
 
     if status == 0:
-	    instr, status = kepio.openfits(infile,'readonly',logfile,verbose)
+        instr, status = kepio.openfits(infile,'readonly',logfile,verbose)
     if status == 0:
         tstart, tstop, bjdref, cadence, status = kepio.timekeys(instr,infile,logfile,verbose,status)
     if status == 0:
@@ -90,7 +91,7 @@ def kepdynamic(infile,outfile,fcol,pmin,pmax,nfreq,deltat,nslice,
 # fudge non-compliant FITS keywords with no values
 
     if status == 0:
-	    instr = kepkey.emptykeys(instr,file,logfile,verbose)
+        instr = kepkey.emptykeys(instr,file,logfile,verbose)
 
 # read table columns
 
@@ -105,10 +106,10 @@ def kepdynamic(infile,outfile,fcol,pmin,pmax,nfreq,deltat,nslice,
 # remove infinite data from time series
 
     if status == 0:
-	    incols = [barytime, signal]
-	    outcols = kepstat.removeinfinlc(signal, incols)
-	    barytime = outcols[0]
-	    signal = outcols[1]
+        incols = [barytime, signal]
+        outcols = kepstat.removeinfinlc(signal, incols)
+        barytime = outcols[0]
+        signal = outcols[1]
 
 # period to frequency conversion
 
@@ -147,7 +148,7 @@ def kepdynamic(infile,outfile,fcol,pmin,pmax,nfreq,deltat,nslice,
 
 # determine FT power
 
-	    fr, power = kepfourier.ft(x,y,fmin,fmax,deltaf,False)
+            fr, power = kepfourier.ft(x,y,fmin,fmax,deltaf,False)
             for j in range(len(power)):
                 dynam.append(power[j])
             print 'Timeslice: %.4f  Pmax: %.2E' % ((t2[i] + t1[i]) / 2, power.max())
@@ -178,19 +179,19 @@ def kepdynamic(infile,outfile,fcol,pmin,pmax,nfreq,deltat,nslice,
 # history keyword in output file
 
     if status == 0:
-	    status = kepkey.history(call,instr[0],outfile,logfile,verbose)
+        status = kepkey.history(call,instr[0],outfile,logfile,verbose)
 
 # close input file
 
     if status == 0:
-	    status = kepio.closefits(instr,logfile,verbose)
+        status = kepio.closefits(instr,logfile,verbose)
 
 # clean up x-axis unit
 
     if status == 0:
-	time0 = float(int(barytime[0] / 100) * 100.0)
-	barytime = barytime - time0
-	xlab = 'BJD $-$ %d' % time0
+        time0 = float(int(barytime[0] / 100) * 100.0)
+        barytime = barytime - time0
+        xlab = 'BJD $-$ %d' % time0
 
 # image intensity min and max
 
@@ -238,10 +239,10 @@ def kepdynamic(infile,outfile,fcol,pmin,pmax,nfreq,deltat,nslice,
 
 ## end time
 
-    if (status == 0):
-	    message = 'KEPDYNAMIC completed at'
+    if status == 0:
+        message = 'KEPDYNAMIC completed at'
     else:
-	    message = '\nKEPDYNAMIC aborted at'
+        message = '\nKEPDYNAMIC aborted at'
     kepmsg.clock(message,logfile,verbose)
 
 # main

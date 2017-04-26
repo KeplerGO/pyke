@@ -591,8 +591,8 @@ def kepprfphot(infile,outroot,columns,rows,fluxes,border,background,focus,prfdir
 # clean up x-axis unit
 
     if status == 0:
-	barytime0 = float(int(t[0] / 100) * 100.0)
-	t -= barytime0
+        barytime0 = float(int(t[0] / 100) * 100.0)
+        t -= barytime0
         t = np.insert(t,[0],[t[0]])
         t = np.append(t,[t[-1]])
         xlab = 'BJD $-$ %d' % barytime0

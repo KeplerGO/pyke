@@ -9,8 +9,8 @@ __url__ = "$URL: svn+ssh://mstill@murzim.amn.nasa.gov/data-repo/trunk/data/fligh
 
 
 def kepdraw(infile,outfile,datacol,ploterr,errcol,quality,
-	    lcolor,lwidth,fcolor,falpha,labelsize,ticksize,
-	    xsize,ysize,fullrange,chooserange,y1,y2,plotgrid,
+            lcolor,lwidth,fcolor,falpha,labelsize,ticksize,
+            xsize,ysize,fullrange,chooserange,y1,y2,plotgrid,
             ylabel,plottype,verbose,logfile,status,cmdLine=False):
 
 # log the call
@@ -73,21 +73,21 @@ def kepdraw(infile,outfile,datacol,ploterr,errcol,quality,
 # read table structure
 
     if status == 0:
-	table, status = kepio.readfitstab(infile,struct[1],logfile,verbose)
+        table, status = kepio.readfitstab(infile,struct[1],logfile,verbose)
 
 # read table columns
 
     if status == 0:
         intime, status = kepio.readtimecol(infile,table,logfile,verbose)
         intime += bjdref
-	indata, status = kepio.readfitscol(infile,table,datacol,logfile,verbose)
+        indata, status = kepio.readfitscol(infile,table,datacol,logfile,verbose)
         indataerr, status = kepio.readfitscol(infile,table,errcol,logfile,verbose)
         qualty, status = kepio.readfitscol(infile,table,'SAP_QUALITY',logfile,verbose)
 
 # close infile
 
     if status == 0:
-	status = kepio.closefits(struct,logfile,verbose)
+        status = kepio.closefits(struct,logfile,verbose)
 
 # remove infinities and bad data
 
@@ -110,8 +110,8 @@ def kepdraw(infile,outfile,datacol,ploterr,errcol,quality,
 # clean up x-axis unit
 
     if status == 0:
-	barytime0 = float(int(tstart / 100) * 100.0)
-	barytime -= barytime0
+        barytime0 = float(int(tstart / 100) * 100.0)
+        barytime -= barytime0
         xlab = 'BJD $-$ %d' % barytime0
 
 # clean up y-axis units
@@ -121,7 +121,7 @@ def kepdraw(infile,outfile,datacol,ploterr,errcol,quality,
             nrm = len(str(int(np.nanmax(data))))-1
         except:
             nrm = 0
-	data = data / 10**nrm
+        data = data / 10**nrm
         if 'e$^-$ s$^{-1}$' in ylabel or 'default' in ylabel:
             if nrm == 0:
                 ylab1 = 'e$^-$ s$^{-1}$'
@@ -132,12 +132,12 @@ def kepdraw(infile,outfile,datacol,ploterr,errcol,quality,
 
 # data limits
 
-	xmin = np.nanmin(barytime)
-	xmax = np.nanmax(barytime)
-	ymin = np.nanmin(data)
-	ymax = np.nanmax(data)
-	xr = xmax - xmin
-	yr = ymax - ymin
+        xmin = np.nanmin(barytime)
+        xmax = np.nanmax(barytime)
+        ymin = np.nanmin(data)
+        ymax = np.nanmax(data)
+        xr = xmax - xmin
+        yr = ymax - ymin
         barytime = np.insert(barytime,[0],[barytime[0]])
         barytime = np.append(barytime,[barytime[-1]])
         data = np.insert(data,[0],[-10000.0])
@@ -145,7 +145,7 @@ def kepdraw(infile,outfile,datacol,ploterr,errcol,quality,
 
 # define size of plot on monitor screen
 
-	plt.figure(figsize=[xsize,ysize])
+        plt.figure(figsize=[xsize,ysize])
 
 # delete any fossil plots in the matplotlib window
 
@@ -154,8 +154,8 @@ def kepdraw(infile,outfile,datacol,ploterr,errcol,quality,
 # position axes inside the plotting window
 
 #        ax = plt.axes([0.1,0.11,0.89,0.87])
-	ax = plt.subplot(111)
-	plt.subplots_adjust(0.06,0.15,0.92,0.83)
+        ax = plt.subplot(111)
+        plt.subplots_adjust(0.06,0.15,0.92,0.83)
 
 # force tick labels to be absolute rather than relative
 
@@ -193,21 +193,21 @@ def kepdraw(infile,outfile,datacol,ploterr,errcol,quality,
 
 # plot the fill color below data time series, with no data gaps
 
-	plt.fill(barytime,data,fc=fcolor,linewidth=0.0,alpha=falpha)
+        plt.fill(barytime,data,fc=fcolor,linewidth=0.0,alpha=falpha)
 
 # define plot x and y limits
 
-	plt.xlim(xmin-xr*0.01,xmax+xr*0.01)
-	if ymin-yr*0.01 <= 0.0 or fullrange:
+        plt.xlim(xmin-xr*0.01,xmax+xr*0.01)
+        if ymin-yr*0.01 <= 0.0 or fullrange:
             plt.ylim(1.0e-10,ymax+yr*0.01)
-	else:
+        else:
             plt.ylim(ymin-yr*0.01,ymax+yr*0.01)
         if chooserange:
             plt.ylim(y1,y2)
 
 # plot labels
 
-	plt.xlabel(xlab, {'color' : 'k'})
+        plt.xlabel(xlab, {'color' : 'k'})
         try:
             plt.ylabel(ylab1, {'color' : 'k'})
         except:
@@ -221,7 +221,7 @@ def kepdraw(infile,outfile,datacol,ploterr,errcol,quality,
 # save plot to file
 
     if status == 0 and outfile.lower() != 'none':
-	plt.savefig(outfile)
+        plt.savefig(outfile)
 
 # render plot
         plt.ion()

@@ -1,3 +1,6 @@
+from .kepio        import *
+from .kepmsg       import *
+from .kepfit       import *
 from .kepbls       import kepbls
 from .kepclip      import kepclip
 from .kepconvert   import kepconvert

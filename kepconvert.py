@@ -73,11 +73,11 @@ def kepconvert(infile,outfile,conversion,columns,baddata,clobber,verbose,logfile
 
 # check columns exist in FITS file
     if not baddata and status == 0 and conversion == 'fits2asc':
-	    try:
-	        qualcol = table.field('SAP_QUALITY') == 0
-	    except:
-		message = 'No SAP_QUALITY column in data, are you using an old FITS file?'
-		status = kepmsg.err(logfile,message,verbose)
+            try:
+                qualcol = table.field('SAP_QUALITY') == 0
+            except:
+                message = 'No SAP_QUALITY column in data, are you using an old FITS file?'
+                status = kepmsg.err(logfile,message,verbose)
 
     if status == 0 and conversion == 'fits2asc':
         work = []
@@ -304,10 +304,10 @@ def kepconvert(infile,outfile,conversion,columns,baddata,clobber,verbose,logfile
 
 ## end time
 
-    if (status == 0):
-	message = 'KEPCONVERT completed at'
+    if status == 0:
+        message = 'KEPCONVERT completed at'
     else:
-	message = '\nKEPCONVERT aborted at'
+        message = '\nKEPCONVERT aborted at'
     kepmsg.clock(message,logfile,verbose)
 
 ## main
