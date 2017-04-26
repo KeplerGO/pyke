@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 import kepmsg
 import numpy, scipy, math, random
 from math import *
@@ -20,7 +18,7 @@ def sumerr(a):
 
     work = 0.0
     for item in a:
-	work += item**2
+        work += item**2
     err = sqrt(work)
     return err
 
@@ -45,7 +43,7 @@ def mean_err(list):
 
     total = 0.0
     for item in list:
-	total = total + item**2
+        total = total + item**2
     err = sqrt(total) / len(list)
     return err
 
@@ -57,13 +55,13 @@ def median(list,logfile):
     list.sort()
     n = len(list)
     if (n == 0):
-	message = 'ERROR -- KEPSTAT.MEDIAN: Supplied list is empty'
-	status = kepmsg.err(logfile,message)
-	median = None
+        message = 'ERROR -- KEPSTAT.MEDIAN: Supplied list is empty'
+        status = kepmsg.err(logfile,message)
+        median = None
     elif (n < 3):
-	median = mean(list)
+        median = mean(list)
     else:
-	median = list[n/2]
+        median = list[n/2]
     return median
 
 # -----------------------------------------------------------
@@ -73,7 +71,7 @@ def min(array):
 
     minm = array[0]
     for i in range(1,len(array)):
-	if (array[i] < minm): minm = array[i]
+        if (array[i] < minm): minm = array[i]
     return minm
 
 # -----------------------------------------------------------
@@ -83,7 +81,7 @@ def max(array):
 
     maxm = array[0]
     for i in range(1,len(array)):
-	if (array[i] > maxm): maxm = array[i]
+        if (array[i] > maxm): maxm = array[i]
     return maxm
 
 # -----------------------------------------------------------
@@ -93,7 +91,7 @@ def mine(array,error):
 
     minm = array[0] - error[0]
     for i in range(1,len(array)):
-	if (array[i] - error[i] < minm): minm = array[i] - error[i]
+        if (array[i] - error[i] < minm): minm = array[i] - error[i]
     return minm
 
 # -----------------------------------------------------------
@@ -103,7 +101,7 @@ def maxe(array,error):
 
     maxm = array[0] + error[0]
     for i in range(1,len(array)):
-	if (array[i] + error[i] > maxm): maxm = array[i] + error[i]
+        if (array[i] + error[i] > maxm): maxm = array[i] + error[i]
     return maxm
 
 # -----------------------------------------------------------
@@ -114,13 +112,13 @@ def rms(array1,array2,logfile,verbose):
     sigma = 0
     status = 0
     if (len(array1) != len(array2)):
-	message  = 'ERROR -- KEPSTAT.RMS: Arrays have unequal sizes - '
-	message += 'Array1 = ' + str(len(array1)) + ', array2 = ' + str(len(array2))
-	status = kepmsg.err(logfile,message,verbose)
+        message  = 'ERROR -- KEPSTAT.RMS: Arrays have unequal sizes - '
+        message += 'Array1 = ' + str(len(array1)) + ', array2 = ' + str(len(array2))
+        status = kepmsg.err(logfile,message,verbose)
     if (status == 0):
-	for i in range(len(array1)):
-	    sigma += (array1[i] - array2[i])**2
-	sigma = math.sqrt(sigma / len(array1))
+        for i in range(len(array1)):
+            sigma += (array1[i] - array2[i])**2
+        sigma = math.sqrt(sigma / len(array1))
     return sigma, status
 
 # -----------------------------------------------------------
@@ -132,8 +130,8 @@ def rms2d(array1,array2):
     n = 0
     array3 = (array1 - array2)**2
     for a in array3:
-	sigma += a
-	n += 1
+        sigma += a
+        n += 1
     sigma /= n
     return sigma
 
@@ -145,7 +143,7 @@ def stdev(array):
     sigma = 0.0
     average = mean(array)
     for i in range(len(array)):
-	sigma += (array[i] - average)**2
+        sigma += (array[i] - average)**2
     sigma = math.sqrt(sigma / len(array))
     return average, sigma
 
@@ -168,7 +166,7 @@ def removeinfinlc(x, cols):
     for j in range(len(cols)):
         work = []
         datatype = cols[j].dtype
-	for i in range(len(x)):
+        for i in range(len(x)):
             if numpy.isfinite(x[i]):
                 work.append(cols[j][i])
         cols[j] = numpy.array(work,dtype=datatype)

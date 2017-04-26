@@ -2,7 +2,7 @@ import numpy
 import orbit
 import ma02
 import scipy.optimize
-import pylab
+from matplotlib import pyplot as plt
 
 def lightcurve(JD, P, p, Ttr = 0, Ecc = 0, a = 10, \
                incl = numpy.pi/2, \
@@ -23,7 +23,7 @@ def lightcurve(JD, P, p, Ttr = 0, Ecc = 0, a = 10, \
         #i*5 + 2
         JDnew[(i*5)] = JD[i] - (2.*avediff*0.25)
         JDnew[(i*5)+1] = JD[i] - (avediff*0.25)
-        JDnew[(i*5)+2] = JD[i] 
+        JDnew[(i*5)+2] = JD[i]
         JDnew[(i*5)+3] = JD[i] + (avediff*0.25)
         JDnew[(i*5)+4] = JD[i] + (2.*avediff*0.25)
 
@@ -49,9 +49,9 @@ def lightcurve(JD, P, p, Ttr = 0, Ecc = 0, a = 10, \
     f_secnew = numpy.zeros(len(JDorig))
     znew = numpy.zeros(len(JDorig))
     for i in numpy.arange(len(JDorig)):
-        f_trnew[i] = (f_tr[(i*5)] + f_tr[(i*5)+1] + f_tr[(i*5)+2] + 
+        f_trnew[i] = (f_tr[(i*5)] + f_tr[(i*5)+1] + f_tr[(i*5)+2] +
             f_tr[(i*5)+3] + f_tr[(i*5)+4]) / 5.
-        f_secnew[i] = (f_sec[(i*5)] + f_sec[(i*5)+1] + f_sec[(i*5)+2] + 
+        f_secnew[i] = (f_sec[(i*5)] + f_sec[(i*5)+1] + f_sec[(i*5)+2] +
             f_sec[(i*5)+3] + f_sec[(i*5)+4]) / 5.
         znew[i] = z[(i*5)+2]
     f_tr = f_trnew
@@ -73,7 +73,7 @@ def transit_fit_example():
     epoch Ttr, inclination, and ratio of semi-major axis to stellar
     radius (a/Rs), while holding the other parameters fixed at their
     true values.'''
-    JD = numpy.arange(100) * 0.01 - 0.5 + pylab.normal(0, 0.005, 100)
+    JD = numpy.arange(100) * 0.01 - 0.5 + numpy.random.normal(0, 0.005, 100)
     P = 3.0
     Ttr_true = 0.0; Ttr_guess = 0.02
     p_true = 0.1; p_guess = 0.08
@@ -82,8 +82,8 @@ def transit_fit_example():
     cn = [0, 0.45, 0, 0.05]
     Ecc = 0; omega = 0; sec = 0
     truth = lightcurve(JD, P, p_true, Ttr_true, Ecc, a_true, incl_true, \
-                       omega, cn, sec) 
-    flux = truth + pylab.normal(0, 0.002, numpy.size(JD))
+                       omega, cn, sec)
+    flux = truth + nupmy.random.normal(0, 0.002, numpy.size(JD))
     flux_err = numpy.ones(numpy.size(JD)) * 0.002
     initial_guess = lightcurve(JD, P, p_guess, Ttr_guess, \
                                Ecc, a_guess, incl_guess, omega, cn, sec)
@@ -93,12 +93,12 @@ def transit_fit_example():
             args = ([P, Ecc, omega, cn, sec], JD, flux, flux_err))
     fit = lightcurve(JD, P, p_fit, Ttr_fit, \
                                Ecc, a_fit, incl_fit, omega, cn, sec)
-    pylab.clf()
-    pylab.errorbar(JD, flux, yerr = flux_err, fmt = 'k.', label = 'data')
-    pylab.plot(JD, truth, 'k-', label = 'true')
-    pylab.plot(JD, initial_guess, 'b--', label = 'initial')
-    pylab.plot(JD, fit, 'r-', label = 'fit')
-    pylab.legend(loc = 'lower right')
+    plt.clf()
+    plt.errorbar(JD, flux, yerr = flux_err, fmt = 'k.', label = 'data')
+    plt.plot(JD, truth, 'k-', label = 'true')
+    plt.plot(JD, initial_guess, 'b--', label = 'initial')
+    plt.plot(JD, fit, 'r-', label = 'fit')
+    plt.legend(loc = 'lower right')
     print p_true, p_guess, p_fit
     print Ttr_true, Ttr_guess, Ttr_fit
     print incl_true, incl_guess, incl_fit

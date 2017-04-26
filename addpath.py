@@ -1,5 +1,5 @@
 # Inserts the directory containing links
-# to all Python-based tasks in the STSDAS tree to 
+# to all Python-based tasks in the STSDAS tree to
 # the default Python path.
 
 import iraf,sys

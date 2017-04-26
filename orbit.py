@@ -26,7 +26,7 @@ def eccan(Ecc, M, Tol = 1.0e-8, Nmax = 50):
                 return M
             Flag = 1
             i = 0
-            Eo = M 
+            Eo = M
             Diff = 1
     return En
 
@@ -44,7 +44,7 @@ def truean(JD, P, T0 = 0, Ecc = 0):
     M = 2 * numpy.pi * Phase # mean anomaly
     if Ecc <= machep:
         return M
-    eccanV = numpy.vectorize(eccan) 
+    eccanV = numpy.vectorize(eccan)
     E = eccanV(Ecc, M) % (2 * numpy.pi)  # eccentric anomaly
     cosE = numpy.cos(E)
     cosNu = (cosE - Ecc) / (1 - Ecc * cosE)
@@ -93,7 +93,7 @@ def radvel(JD, P, K, T0 = 0, V0 = 0, Ecc = 0, omega = 0):
 
 def getT0(P, Ttr, omega = 0, Ecc = 0):
     """Compute time of periastron passage from time of transit centre
-    and other orbital elements."""    
+    and other orbital elements."""
     nu = numpy.pi/2 - omega
     cosnu = numpy.cos(nu)
     cosE = (Ecc + cosnu) / (1 + Ecc * cosnu)

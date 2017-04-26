@@ -38,7 +38,7 @@ def kepimages(infile,outfix,imtype,ranges,clobber,verbose,logfile,status):
 # open input file
 
     status = 0
-    print ' '
+    print (' ')
     instr = pyfits.open(infile,mode='readonly',memmap=True)
     cards0 = instr[0].header.cards
     cards1 = instr[1].header.cards
@@ -212,7 +212,7 @@ def kepimages(infile,outfix,imtype,ranges,clobber,verbose,logfile,status):
 
     if status == 0:
         status = kepio.closefits(instr,logfile,verbose)
-        print '\n'
+        print ('\n')
 
 # end time
 

@@ -1,4 +1,4 @@
-# Adapted from the Gemini v1.7 IRAF Package for the Kepler Guest Obsever Program.  
+# Adapted from the Gemini v1.7 IRAF Package for the Kepler Guest Obsever Program.
 #
 # Revision 1.0  2010-01-01 Martin Still martin.d.still@nasa.gov
 #
@@ -35,22 +35,16 @@ hidetask pyexecute
 hidetask nopyraf
 
 # PyKEP tasks
-#pyexecute("kepler$kepbin.py",verbose=no)
-#pyexecute("kepler$kepbinary.py",verbose=no)
 pyexecute("kepler$kepbls.py",verbose=no)
 pyexecute("kepler$kepclip.py",verbose=no)
 pyexecute("kepler$kepconvert.py",verbose=no)
 pyexecute("kepler$kepcotrend.py",verbose=no)
-#pyexecute("kepler$kepdeltapix.py",verbose=no)
 pyexecute("kepler$kepdetrend.py",verbose=no)
 pyexecute("kepler$kepdiffim.py",verbose=no)
-#pyexecute("kepler$kepdip.py",verbose=no)
 pyexecute("kepler$kepdynamic.py",verbose=no)
 pyexecute("kepler$kepdraw.py",verbose=no)
 pyexecute("kepler$kepextract.py",verbose=no)
-#pyexecute("kepler$kepfake.py",verbose=no)
 pyexecute("kepler$kepffi.py",verbose=no)
-pyexecute("kepler$kepfield.py",verbose=no)
 pyexecute("kepler$kepfilter.py",verbose=no)
 pyexecute("kepler$kepflatten.py",verbose=no)
 pyexecute("kepler$kepfold.py",verbose=no)
@@ -65,15 +59,11 @@ pyexecute("kepler$keppixseries.py",verbose=no)
 pyexecute("kepler$kepprf.py",verbose=no)
 pyexecute("kepler$kepprfphot.py",verbose=no)
 pyexecute("kepler$keprange.py",verbose=no)
-#pyexecute("kepler$kepregr.py",verbose=no)
-#pyexecute("kepler$kepsimulate.py",verbose=no)
-pyexecute("kepler$kepsff.py",verbose=no)
 pyexecute("kepler$kepsmooth.py",verbose=no)
 pyexecute("kepler$kepstddev.py",verbose=no)
 pyexecute("kepler$kepstitch.py",verbose=no)
 pyexecute("kepler$keptimefix.py",verbose=no)
 pyexecute("kepler$keptransit.py",verbose=no)
-#pyexecute("kepler$keptransitmodel.py",verbose=no)
 pyexecute("kepler$keptrial.py",verbose=no)
 pyexecute("kepler$keptrim.py",verbose=no)
 pyexecute("kepler$kepwindow.py",verbose=no)

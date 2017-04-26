@@ -74,31 +74,27 @@ def rebin2D(a, newdims, method='linear', centre=False, minusone=False):
         if ndims > 1:
             # need one more transpose to return to original dimensions
             newa = newa.transpose(trorder)
-
         return newa
+
     elif method in ['spline']:
         oslices = [slice(0,j) for j in old]
         oldcoords = n.ogrid[oslices]
         nslices = [slice(0,j) for j in list(newdims)]
         newcoords = n.mgrid[nslices]
-
         newcoords_dims = range(n.rank(newcoords))
         #make first index last
         newcoords_dims.append(newcoords_dims.pop(0))
         newcoords_tr = newcoords.transpose(newcoords_dims)
         # makes a view that affects newcoords
-
         newcoords_tr += ofs
-
         deltas = (n.asarray(old) - m1) / (newdims - m1)
         newcoords_tr *= deltas
-
         newcoords_tr -= ofs
-
         newa = scipy.ndimage.map_coordinates(a, newcoords)
         return newa
+
     else:
-        print "Congrid error: Unrecognized interpolation type.\n", \
-              "Currently only \'neighbour\', \'nearest\',\'linear\',", \
-              "and \'spline\' are supported."
+        print("Congrid error: Unrecognized interpolation type.\n "
+              "Currently only \'neighbour\', \'nearest\',\'linear\', "
+              "and \'spline\' are supported.")
         return None

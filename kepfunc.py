@@ -147,11 +147,11 @@ def pei(law,wave,ebmv,rv,a_i,lambda_i,b_i,n_i):
 
     xi = 0.
     for i in range(6):
-	term  = math.pow((wave / lambda_i[law,i]),n_i[law,i])
-	term += math.pow((lambda_i[law,i] / wave),n_i[law,i])
-	term += b_i[law,i]
-	term  = a_i[law,i] / term
-	xi   += term
+        term  = math.pow((wave / lambda_i[law,i]),n_i[law,i])
+        term += math.pow((lambda_i[law,i] / wave),n_i[law,i])
+        term += b_i[law,i]
+        term  = a_i[law,i] / term
+        xi   += term
 
 # remove a_b normalization on the extinction curve
 

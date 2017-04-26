@@ -77,11 +77,11 @@ def kepwindow(infile,outfile,fcol,fmax,nfreq,plot,clobber,verbose,logfile,status
 ## read table columns
 
     if status == 0:
-	try:
+        try:
             barytime = instr[1].data.field('barytime')
-	except:
+        except:
             barytime, status = kepio.readfitscol(infile,instr[1].data,'time',logfile,verbose)
-	signal, status = kepio.readfitscol(infile,instr[1].data,fcol,logfile,verbose)
+        signal, status = kepio.readfitscol(infile,instr[1].data,fcol,logfile,verbose)
 
 ## remove infinite data from time series
 
@@ -147,12 +147,12 @@ def kepwindow(infile,outfile,fcol,fmax,nfreq,plot,clobber,verbose,logfile,status
         nrm = len(str(int(power.max())))-1
         power = power / 10**nrm
         ylab = 'Power (x10$^%d$)' % nrm
-	xmin = fr.min()
-	xmax = fr.max()
-	ymin = power.min()
-	ymax = power.max()
-	xr = xmax - xmin
-	yr = ymax - ymin
+        xmin = fr.min()
+        xmax = fr.max()
+        ymin = power.min()
+        ymax = power.max()
+        xr = xmax - xmin
+        yr = ymax - ymin
         fr = np.insert(fr,[0],fr[0])
         fr = np.append(fr,fr[-1])
         power = np.insert(power,[0],0.0)
@@ -180,9 +180,9 @@ def kepwindow(infile,outfile,fcol,fmax,nfreq,plot,clobber,verbose,logfile,status
 ## end time
 
     if (status == 0):
-	message = 'KEPWINDOW completed at'
+        message = 'KEPWINDOW completed at'
     else:
-	message = '\nKEPWINDOW aborted at'
+        message = '\nKEPWINDOW aborted at'
     kepmsg.clock(message,logfile,verbose)
 
 ## main
