@@ -134,8 +134,8 @@ def kepaddconstant(infile, outfile, datacol, constant, constantval, sign,
                 instr[1].data.field(errcol)[:] = where(isfinite(instr[1].data.field(errcol)[:]),
                                                        (lc_err / subtractor),nan)
         elif sign.lower() == 'multiply':
-                instr[1].data.field(datacol)[:] = where(isfinite(instr[1].data.field(datacol)[:]),
-                                                        (lc_flux * subtractor),nan)
+            instr[1].data.field(datacol)[:] = where(isfinite(instr[1].data.field(datacol)[:]),
+                                                    (lc_flux * subtractor),nan)
             if haveerr:
                 instr[1].data.field(errcol)[:] = where(isfinite(instr[1].data.field(errcol)[:]),
                                                        (lc_err * subtractor),nan)

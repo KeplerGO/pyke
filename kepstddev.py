@@ -76,7 +76,7 @@ def kepstddev(infile,outfile,datacol,timescale,clobber,verbose,logfile,status,cm
 # read table structure
 
     if status == 0:
-	table, status = kepio.readfitstab(infile,instr[1],logfile,verbose)
+        table, status = kepio.readfitstab(infile,instr[1],logfile,verbose)
 
 # filter input data table
 
@@ -122,25 +122,25 @@ def kepstddev(infile,outfile,datacol,timescale,clobber,verbose,logfile,status,cm
 # clean up x-axis unit
 
     if status == 0:
-	intime0 = float(int(tstart / 100) * 100.0)
-	ptime = intime - intime0
-	xlab = 'BJD $-$ %d' % intime0
+        intime0 = float(int(tstart / 100) * 100.0)
+        ptime = intime - intime0
+        xlab = 'BJD $-$ %d' % intime0
 
 # clean up y-axis units
 
     if status == 0:
         pout = copy(cdpp)
         nrm = math.ceil(math.log10(np.median(cdpp))) - 1.0
-	ylab = '%.1fhr $\sigma$ (ppm)' % timescale
+        ylab = '%.1fhr $\sigma$ (ppm)' % timescale
 
 # data limits
 
-	xmin = ptime.min()
-	xmax = ptime.max()
-	ymin = pout.min()
-	ymax = pout.max()
-	xr = xmax - xmin
-	yr = ymax - ymin
+        xmin = ptime.min()
+        xmax = ptime.max()
+        ymin = pout.min()
+        ymax = pout.max()
+        xr = xmax - xmin
+        yr = ymax - ymin
         ptime = np.insert(ptime,[0],[ptime[0]])
         ptime = np.append(ptime,[ptime[-1]])
         pout = np.insert(pout,[0],[0.0])
@@ -148,7 +148,7 @@ def kepstddev(infile,outfile,datacol,timescale,clobber,verbose,logfile,status,cm
 
 # define size of plot on monitor screen
 
-	plt.figure(figsize=[xsize,ysize])
+        plt.figure(figsize=[xsize,ysize])
 
 # delete any fossil plots in the matplotlib window
 
@@ -188,23 +188,23 @@ def kepstddev(infile,outfile,datacol,timescale,clobber,verbose,logfile,status,cm
 
 # plot the fill color below data time series, with no data gaps
 
-	plt.fill(ptime,pout,fc='#ffff00',linewidth=0.0,alpha=0.2)
+        plt.fill(ptime,pout,fc='#ffff00',linewidth=0.0,alpha=0.2)
 
 # define plot x and y limits
 
-	plt.xlim(xmin - xr * 0.01, xmax + xr * 0.01)
-	if ymin - yr * 0.01 <= 0.0:
+        plt.xlim(xmin - xr * 0.01, xmax + xr * 0.01)
+        if ymin - yr * 0.01 <= 0.0:
             plt.ylim(1.0e-10, ymax + yr * 0.01)
-	else:
+        else:
             plt.ylim(ymin - yr * 0.01, ymax + yr * 0.01)
 # plot labels
 
-	plt.xlabel(xlab, {'color' : 'k'})
+        plt.xlabel(xlab, {'color' : 'k'})
         plt.ylabel(ylab, {'color' : 'k'})
 
 # make grid on plot
 
-	plt.grid()
+        plt.grid()
 
 # render plot
 
@@ -218,7 +218,7 @@ def kepstddev(infile,outfile,datacol,timescale,clobber,verbose,logfile,status,cm
         n = 0
         work1 = np.array([],dtype='float32')
         instr, status = kepio.openfits(infile,'readonly',logfile,verbose)
-	table, status = kepio.readfitstab(infile,instr[1],logfile,verbose)
+        table, status = kepio.readfitstab(infile,instr[1],logfile,verbose)
         for i in range(len(table.field(0))):
             if isfinite(table.field('time')[i]) and isfinite(table.field(datacol)[i]):
                 work1 = np.append(work1,cdpp[n])
@@ -235,10 +235,10 @@ def kepstddev(infile,outfile,datacol,timescale,clobber,verbose,logfile,status,cm
                             'RMS %.1fhr CDPP (ppm)' % timescale,
                             instr[1],outfile,logfile,verbose)
         colname = 'CDPP_%d' % (timescale * 10)
-	col1 = pyfits.Column(name=colname,format='E13.7',array=work1)
-	cols = instr[1].data.columns + col1
-	instr[1] = pyfits.new_table(cols,header=instr[1].header)
-	instr.writeto(outfile)
+        col1 = pyfits.Column(name=colname,format='E13.7',array=work1)
+        cols = instr[1].data.columns + col1
+        instr[1] = pyfits.new_table(cols,header=instr[1].header)
+        instr.writeto(outfile)
 # comment keyword in output file
 
     if status == 0:
@@ -251,10 +251,10 @@ def kepstddev(infile,outfile,datacol,timescale,clobber,verbose,logfile,status,cm
 
 # end time
 
-    if (status == 0):
-	    message = 'KEPSTDDEV completed at'
+    if status == 0:
+        message = 'KEPSTDDEV completed at'
     else:
-	    message = '\nKEPSTDDEV aborted at'
+        message = '\nKEPSTDDEV aborted at'
     kepmsg.clock(message,logfile,verbose)
 
 # -----------------------------------------------------------

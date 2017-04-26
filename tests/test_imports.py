@@ -1,4 +1,5 @@
 def test_import():
+    from ..keparith     import MAD, kepaddconstant
     from ..kepbls       import kepbls
     from ..kepclip      import kepclip
     from ..kepconvert   import kepconvert
