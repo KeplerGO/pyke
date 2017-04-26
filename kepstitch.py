@@ -41,22 +41,22 @@ def kepstitch(infiles,outfile,clobber,verbose,logfile,status):
 
     if clobber: status = kepio.clobber(outfile,logfile,verbose)
     if kepio.fileexists(outfile):
-	message = 'ERROR -- KEPSTITCH: ' + outfile + ' exists. Use clobber=yes'
-	kepmsg.err(logfile,message,verbose)
-	status = 1
+        message = 'ERROR -- KEPSTITCH: ' + outfile + ' exists. Use clobber=yes'
+        kepmsg.err(logfile,message,verbose)
+        status = 1
 
 # open output file
 
     if status == 0:
-	outstr, status = kepio.openfits(infiles[0],'readonly',logfile,verbose)
-	nrows1 = outstr[1].data.shape[0]
+        outstr, status = kepio.openfits(infiles[0],'readonly',logfile,verbose)
+        nrows1 = outstr[1].data.shape[0]
 
 # fudge non-compliant FITS keywords with no values
 
     if status == 0:
-	outstr = kepkey.emptykeys(outstr,file,logfile,verbose)
-	head0 = outstr[0].header
-	head1 = outstr[1].header
+        outstr = kepkey.emptykeys(outstr,file,logfile,verbose)
+        head0 = outstr[0].header
+        head1 = outstr[1].header
 
 # open input files
 
@@ -131,20 +131,20 @@ def kepstitch(infiles,outfile,clobber,verbose,logfile,status):
 # comment keyword in output file
 
     if status == 0:
-	status = kepkey.comment(call, outstr[0], outfile, logfile, verbose)
+        status = kepkey.comment(call, outstr[0], outfile, logfile, verbose)
 
 # close output file
 
     if status == 0:
-	outstr.writeto(outfile)
-	status = kepio.closefits(outstr, logfile, verbose)
+        outstr.writeto(outfile)
+        status = kepio.closefits(outstr, logfile, verbose)
 
 ## end time
 
     if status == 0:
-	message = 'KEPSTITCH completed at'
+        message = 'KEPSTITCH completed at'
     else:
-	message = '\nKEPSTITCH aborted at'
+        message = '\nKEPSTITCH aborted at'
     kepmsg.clock(message,logfile,verbose)
 
 # main
