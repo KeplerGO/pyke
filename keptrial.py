@@ -57,9 +57,9 @@ def keptrial(infile,outfile,datacol,errcol,fmin,fmax,nfreq,method,
 
     if clobber: status = kepio.clobber(outfile,logfile,verbose)
     if kepio.fileexists(outfile):
-	    message = 'ERROR -- KEPTRIAL: ' + outfile + ' exists. Use clobber=yes'
-	    kepmsg.err(logfile,message,verbose)
-	    status = 1
+        message = 'ERROR -- KEPTRIAL: ' + outfile + ' exists. Use clobber=yes'
+        kepmsg.err(logfile,message,verbose)
+        status = 1
 
 # open input file
 
@@ -74,9 +74,9 @@ def keptrial(infile,outfile,datacol,errcol,fmin,fmax,nfreq,method,
 # input data
 
     if status == 0:
-	try:
+        try:
             barytime = instr[1].data.field('barytime')
-	except:
+        except:
             barytime, status = kepio.readfitscol(infile,instr[1].data,'time',logfile,verbose)
     if status == 0:
         signal, status = kepio.readfitscol(infile,instr[1].data,datacol,logfile,verbose)
@@ -89,8 +89,8 @@ def keptrial(infile,outfile,datacol,errcol,fmin,fmax,nfreq,method,
         try:
             nanclean = instr[1].header['NANCLEAN']
         except:
-	    incols = [barytime, signal, err]
-	    [barytime, signal, err] = kepstat.removeinfinlc(signal, incols)
+            incols = [barytime, signal, err]
+            [barytime, signal, err] = kepstat.removeinfinlc(signal, incols)
 
 # frequency steps and Monte Carlo iterations
 
@@ -121,7 +121,7 @@ def keptrial(infile,outfile,datacol,errcol,fmin,fmax,nfreq,method,
             plt.ion()
             plt.figure(1,figsize=[7,10])
             plt.clf()
-	    plt.axes([0.08,0.08,0.88,0.89])
+            plt.axes([0.08,0.08,0.88,0.89])
             plt.gca().xaxis.set_major_formatter(plt.ScalarFormatter(useOffset=False))
             plt.gca().yaxis.set_major_formatter(plt.ScalarFormatter(useOffset=False))
             n,bins,patches = plt.hist(freq,bins=nfreq,range=[fmin,fmax],
@@ -145,7 +145,7 @@ def keptrial(infile,outfile,datacol,errcol,fmin,fmax,nfreq,method,
                 plt.xlabel(r'Frequency (1/d)', {'color' : 'k'})
             plt.ylabel('N', {'color' : 'k'})
             plt.xlim(fmin,fmax)
-	    plt.grid()
+            plt.grid()
 
 # render plot
 
@@ -184,7 +184,7 @@ def keptrial(infile,outfile,datacol,errcol,fmin,fmax,nfreq,method,
 # history keyword in output file
 
     if status == 0:
-	status = kepkey.history(call,instr[0],outfile,logfile,verbose)
+        status = kepkey.history(call,instr[0],outfile,logfile,verbose)
 
 ## write output file
 
@@ -235,14 +235,14 @@ def keptrial(infile,outfile,datacol,errcol,fmin,fmax,nfreq,method,
 # close input file
 
     if status == 0:
-	    status = kepio.closefits(instr,logfile,verbose)
+        status = kepio.closefits(instr,logfile,verbose)
 
 ## end time
 
-    if (status == 0):
-	    message = 'KEPTRAIL completed at'
+    if status == 0:
+        message = 'KEPTRAIL completed at'
     else:
-	    message = '\nKEPTRIAL aborted at'
+        message = '\nKEPTRIAL aborted at'
     kepmsg.clock(message,logfile,verbose)
 
 # main
@@ -251,33 +251,27 @@ if '--shell' in sys.argv:
     parser = argparse.ArgumentParser(description='Calculate best period and error estimate from Fourier transform')
     parser.add_argument('--shell', action='store_true', help='Are we running from the shell?')
     parser.add_argument('infile', help='Name of input file', type=str)
-
     parser.add_argument('outfile', help='Name of FITS file to output', type=str)
-
     parser.add_argument('--datacol', default='SAP_FLUX', help='Name of data column', type=str)
     parser.add_argument('--errcol', default='SAP_FLUX_ERR', help='Name of data error column', type=str)
-
     parser.add_argument('--fmin', default=0.1, help='Minimum search frequency [1/day]', type=float)
     parser.add_argument('--fmax', default=50., help='Minimum search frequency [1/day]', type=float)
     parser.add_argument('--nfreq', default=100, help='Number of frequency intervals', type=int)
-
-    parser.add_argument('--method', default='ft', help='Frequency search method', type=int, choices=['ft'])
+    parser.add_argument('--method', default='ft',
+                        help='Frequency search method', type=int, choices=['ft'])
     parser.add_argument('--ntrials', default=1000, help='Number of search trials', type=int)
-
     parser.add_argument('--plot', action='store_true', help='Plot result?')
-
     parser.add_argument('--clobber', action='store_true', help='Overwrite output file?')
     parser.add_argument('--verbose', action='store_true', help='Write to a log file?')
     parser.add_argument('--logfile', '-l', help='Name of ascii log file',
                         default='keptrial.log', dest='logfile', type=str)
-    parser.add_argument('--status', '-e', help='Exit status (0=good)', default=0, dest='status', type=int)
-
+    parser.add_argument('--status', '-e', help='Exit status (0=good)',
+                        default=0, dest='status', type=int)
     args = parser.parse_args()
     cmdLine=True
-
-    keptrial(args.infile,args.outfile,args.datacol,args.errcol,args.fmin,args.fmax,args.nfreq,args.method,
-             args.ntrials,args.plot,args.clobber,args.verbose,args.logfile,args.status, cmdLine)
-
+    keptrial(args.infile, args.outfile, args.datacol, args.errcol, args.fmin,
+             args.fmax, args.nfreq, args.method, args.ntrials, args.plot,
+             args.clobber, args.verbose, args.logfile, args.status, cmdLine)
 else:
     from pyraf import iraf
     parfile = iraf.osfn("kepler$keptrial.par")
