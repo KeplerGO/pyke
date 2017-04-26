@@ -1,92 +1,76 @@
 #!/usr/bin/env python
 
-import sys, time, string
+import string
+import sys
+import time
 
-# -----------------------------------------------------------
-# write message to log file and shell
 
-def log(file,message,verbose):
-
+def log(filename, message, verbose):
+    """write message to log file and shell"""
+    # print to shell
     if (verbose):
+        print(message)
 
-# print to shell
+    # print to log file
+    if (filename):
+        output = open(filename, 'a')
+        output.write('{}\n'.format(message))
+        output.close()
 
-	print (message)
 
-# print to log file
-
-	if (file):
-	    output = open(file,'a')
-	    output.write(message+'\n')
-	    output.close()
-
-# -----------------------------------------------------------
-# write error message to log file and shell
-
-def err(file,message,verbose):
-
+def err(filename, message, verbose):
+    """write error message to log file and shell"""
     if verbose:
-        log(file,message,verbose)
+        log(filename, message, verbose)
     else:
         pass
     return 1
 
-# -----------------------------------------------------------
-# write warning message to log file and shell
 
-def warn(file,message):
-
-    log(file,message,True)
+def warn(filename, message):
+    """write warning message to log file and shell"""
+    log(filename, message, True)
     return 0
 
-# -----------------------------------------------------------
-# write error message and time to shell and exit
 
-def abort(message,file,verbose):
-
-    clock('Abort time is: ',file,verbose)
+def abort(message, filename, verbose):
+    """write error message and time to shell and exit"""
+    clock('Abort time is: ', filename, verbose)
     if verbose:
-        log(file,message,True)
+        log(filename, message, True)
     else:
         print message
         sys.exit(2)
 
-# -----------------------------------------------------------
-# write error message to shell and exit
 
 def exit(message):
-
+    """write error message to shell and exit"""
     sys.exit(message)
 
-# -----------------------------------------------------------
-# write time to log file and shell
 
-def clock(text,file,verbose):
-
+def clock(text, filename, verbose):
+    """write time to log file and shell"""
     if (verbose):
-	message = text + ': ' + time.asctime(time.localtime())
-	log(file,message,verbose)
+        message = text + ': ' + time.asctime(time.localtime())
+    log(filename, message, verbose)
 
-# -----------------------------------------------------------
-# write message to log file
 
-def file(file,message,verbose):
-
-    if (file and verbose):
-        output = open(file,'a')
-        output.write(message+'\n')
+def file(filename, message, verbose):
+    """write message to log file"""
+    if (filename and verbose):
+        output = open(filename, 'a')
+        output.write('{}\n'.format(message))
         output.close()
 
-# -----------------------------------------------------------
-# test the logfile name is good
 
-def test(file):
+def test(filename):
+    """test the logfile name is good"""
+    newlog = string.join(filename.split(), "")
+    if (len(newlog) == 0):
+        newlog = 'kepler.log'
+    if (newlog != filename):
+        filename = newlog
+    message = 'WARNING: logfile renamed to {}\n\n'.format(filename)
+    log(False, message, True)
 
-    newlog = string.join(file.split(),"")
-    if (len(newlog) == 0): newlog = 'kepler.log'
-    if (newlog != file):
-	file = newlog
-	message = 'WARNING: logfile renamed to '+file+'\n\n'
-	log(False,message,True)
-
-    return file
+    return filename
