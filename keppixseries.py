@@ -472,27 +472,19 @@ if '--shell' in sys.argv:
     import argparse
     parser = argparse.ArgumentParser(description='Individual time series photometry for all pixels within a target mask')
     parser.add_argument('--shell', action='store_true', help='Are we running from the shell?')
-
     parser.add_argument('infile', help='Name of input file', type=str)
-
     parser.add_argument('outfile', help='Name of FITS file to output', type=str)
     parser.add_argument('--plotfile', default='None', help='name of output PNG plot file', type=str)
-
     parser.add_argument('--plottype', default='global', help='Plotting type', type=str, choices=['local','global','full'])
-
     parser.add_argument('--filter', action='store_true', help='High-pass Filter data?')
     parser.add_argument('--function', default='boxcar', help='Type of filter', type=str, choices=['boxcar','gauss','sinc'])
     parser.add_argument('--cutoff', default=1.0, help='Characteristic frequency cutoff of filter [1/days]', type=float)
-
     parser.add_argument('--clobber', action='store_true', help='Overwrite output file?')
     parser.add_argument('--verbose', action='store_true', help='Write to a log file?')
-    parser.add_argument('--logfile', '-l', help='Name of ascii log file', default='kepcotrend.log', dest='logfile', type=str)
+    parser.add_argument('--logfile', '-l', help='Name of ascii log file', default='keppixseries.log', dest='logfile', type=str)
     parser.add_argument('--status', '-e', help='Exit status (0=good)', default=0, dest='status', type=int)
-
-
     args = parser.parse_args()
     cmdLine=True
-
     keppixseries(args.infile,args.outfile,args.plotfile,args.plottype,
         args.filter,args.function,args.cutoff,args.clobber,args.verbose,args.logfile,args.status, cmdLine)
 
