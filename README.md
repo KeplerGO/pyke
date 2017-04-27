@@ -14,4 +14,4 @@ After that, run the following commands on a terminal of your preference:
 2. ``pyraf``
 3. ``kepler``
 
-This package was mostly developed by Tom Barclay (@mrtommyb) and Martin Still.
+*This package was mostly developed by Tom Barclay ([@mrtommyb](http://www.github.com/mrtommyb)) and Martin Still.*
