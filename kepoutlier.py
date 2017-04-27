@@ -1,13 +1,12 @@
-
-import numpy, sys, time, pyfits, pylab, math, re
-from pyfits import *
-from pylab import *
-from matplotlib import *
+import numpy as np
+import sys, time, re
+from astropy.io import fits as pyfits
+from matplotlib import pyplot as plt
 from math import *
 import kepio, kepmsg, kepkey, kepfit, kepstat
 
 def kepoutlier(infile,outfile,datacol,nsig,stepsize,npoly,niter,
-               operation,ranges,plot,plotfit,clobber,verbose,logfile,status, cmdLine=False): 
+               operation,ranges,plot,plotfit,clobber,verbose,logfile,status, cmdLine=False):
 
 # startup parameters
 
@@ -21,7 +20,7 @@ def kepoutlier(infile,outfile,datacol,nsig,stepsize,npoly,niter,
     fcolor = '#ffff00'
     falpha = 0.2
 
-# log the call 
+# log the call
 
     hashline = '----------------------------------------------------------------------------'
     kepmsg.log(logfile,hashline,verbose)
@@ -61,9 +60,9 @@ def kepoutlier(infile,outfile,datacol,nsig,stepsize,npoly,niter,
 # clobber output file
 
     if clobber: status = kepio.clobber(outfile,logfile,verbose)
-    if kepio.fileexists(outfile): 
-	    message = 'ERROR -- KEPOUTLIER: ' + outfile + ' exists. Use clobber=yes'
-	    status = kepmsg.err(logfile,message,verbose)
+    if kepio.fileexists(outfile):
+        message = 'ERROR -- KEPOUTLIER: ' + outfile + ' exists. Use clobber=yes'
+        status = kepmsg.err(logfile,message,verbose)
 
 # open input file
 
@@ -86,7 +85,7 @@ def kepoutlier(infile,outfile,datacol,nsig,stepsize,npoly,niter,
 # read table structure
 
     if status == 0:
-	table, status = kepio.readfitstab(infile,instr[1],logfile,verbose)
+        table, status = kepio.readfitstab(infile,instr[1],logfile,verbose)
 
 # filter input data table
 
@@ -97,29 +96,29 @@ def kepoutlier(infile,outfile,datacol,nsig,stepsize,npoly,niter,
             naxis2 = 0
             try:
                 for i in range(len(table.field(0))):
-                    if numpy.isfinite(table.field('barytime')[i]) and \
-                            numpy.isfinite(table.field(datacol)[i]):
+                    if np.isfinite(table.field('barytime')[i]) and \
+                            np.isfinite(table.field(datacol)[i]):
                         table[naxis2] = table[i]
                         naxis2 += 1
                         instr[1].data = table[:naxis2]
             except:
                 for i in range(len(table.field(0))):
-                    if numpy.isfinite(table.field('time')[i]) and \
-                            numpy.isfinite(table.field(datacol)[i]):
+                    if np.isfinite(table.field('time')[i]) and \
+                            np.isfinite(table.field(datacol)[i]):
                         table[naxis2] = table[i]
                         naxis2 += 1
                         instr[1].data = table[:naxis2]
             comment = 'NaN cadences removed from data'
             status = kepkey.new('NANCLEAN',True,comment,instr[1],outfile,logfile,verbose)
- 
+
 # read table columns
 
     if status == 0:
-	try:
+        try:
             intime = instr[1].data.field('barytime') + 2.4e6
-	except:
+        except:
             intime, status = kepio.readfitscol(infile,instr[1].data,'time',logfile,verbose)
-	indata, status = kepio.readfitscol(infile,instr[1].data,datacol,logfile,verbose)
+        indata, status = kepio.readfitscol(infile,instr[1].data,datacol,logfile,verbose)
     if status == 0:
         intime = intime + bjdref
         indata = indata / cadenom
@@ -137,7 +136,7 @@ def kepoutlier(infile,outfile,datacol,nsig,stepsize,npoly,niter,
         work = intime[0]
         while work < intime[-1]:
             tstep1.append(work)
-            tstep2.append(array([work+stepsize,intime[-1]],dtype='float64').min())
+            tstep2.append(np.array([work+stepsize,intime[-1]],dtype='float64').min())
             work += stepsize
 
 # find cadence limits of each time step
@@ -165,30 +164,30 @@ def kepoutlier(infile,outfile,datacol,nsig,stepsize,npoly,niter,
 # clean up x-axis unit
 
     if status == 0:
-	intime0 = float(int(tstart / 100) * 100.0)
-	ptime = intime - intime0
-	xlab = 'BJD $-$ %d' % intime0
+        intime0 = float(int(tstart / 100) * 100.0)
+        ptime = intime - intime0
+        xlab = 'BJD $-$ %d' % intime0
 
 # clean up y-axis units
 
     if status == 0:
         pout = indata * 1.0
-	nrm = len(str(int(pout.max())))-1
-	pout = pout / 10**nrm
-	ylab = '10$^%d$ e$^-$ s$^{-1}$' % nrm
+        nrm = len(str(int(pout.max())))-1
+        pout = pout / 10**nrm
+        ylab = '10$^%d$ e$^-$ s$^{-1}$' % nrm
 
 # data limits
 
-	xmin = ptime.min()
-	xmax = ptime.max()
-	ymin = pout.min()
-	ymax = pout.max()
-	xr = xmax - xmin
-	yr = ymax - ymin
-        ptime = insert(ptime,[0],[ptime[0]]) 
-        ptime = append(ptime,[ptime[-1]])
-        pout = insert(pout,[0],[0.0]) 
-        pout = append(pout,0.0)
+        xmin = ptime.min()
+        xmax = ptime.max()
+        ymin = pout.min()
+        ymax = pout.max()
+        xr = xmax - xmin
+        yr = ymax - ymin
+        ptime = np.insert(ptime,[0],[ptime[0]])
+        ptime = np.append(ptime,[ptime[-1]])
+        pout = np.insert(pout,[0],[0.0])
+        pout = np.append(pout,0.0)
 
 # plot light curve
 
@@ -208,43 +207,43 @@ def kepoutlier(infile,outfile,datacol,nsig,stepsize,npoly,niter,
         except:
             plotLatex = False
     if status == 0 and plot:
-        pylab.figure(figsize=[xsize,ysize])
-        pylab.clf()
+        plt.figure(figsize=[xsize,ysize])
+        plt.clf()
 
 # plot data
 
-        ax = pylab.axes([0.06,0.1,0.93,0.87])
+        ax = plt.axes([0.06,0.1,0.93,0.87])
 
 # force tick labels to be absolute rather than relative
 
-        pylab.gca().xaxis.set_major_formatter(pylab.ScalarFormatter(useOffset=False))
-        pylab.gca().yaxis.set_major_formatter(pylab.ScalarFormatter(useOffset=False))
+        plt.gca().xaxis.set_major_formatter(plt.ScalarFormatter(useOffset=False))
+        plt.gca().yaxis.set_major_formatter(plt.ScalarFormatter(useOffset=False))
 
 # rotate y labels by 90 deg
 
         labels = ax.get_yticklabels()
-        setp(labels, 'rotation', 90, fontsize=12)
+        plt.setp(labels, 'rotation', 90, fontsize=12)
 
-        pylab.plot(ptime,pout,color=lcolor,linestyle='-',linewidth=lwidth)
-        fill(ptime,pout,color=fcolor,linewidth=0.0,alpha=falpha)
-	xlabel(xlab, {'color' : 'k'})
+        plt.plot(ptime,pout,color=lcolor,linestyle='-',linewidth=lwidth)
+        plt.fill(ptime,pout,color=fcolor,linewidth=0.0,alpha=falpha)
+        plt.xlabel(xlab, {'color' : 'k'})
         if not plotLatex:
             ylab = '10**%d electrons/sec' % nrm
-        ylabel(ylab, {'color' : 'k'})
-        grid()
+        plt.ylabel(ylab, {'color' : 'k'})
+        plt.grid()
 
 # loop over each time step, fit data, determine rms
 
     if status == 0:
         masterfit = indata * 0.0
-        mastersigma = zeros(len(masterfit))
+        mastersigma = np.zeros(len(masterfit))
         functype = 'poly' + str(npoly)
         for i in range(len(cstep1)):
             pinit = [indata[cstep1[i]:cstep2[i]+1].mean()]
             if npoly > 0:
                 for j in range(npoly):
                     pinit.append(0.0)
-            pinit = array(pinit,dtype='float32')
+            pinit = np.array(pinit,dtype='float32')
             try:
                 coeffs, errors, covar, iiter, sigma, chi2, dof, fit, plotx, ploty, status = \
                     kepfit.lsqclip(functype,pinit,intime[cstep1[i]:cstep2[i]+1]-intime[cstep1[i]],
@@ -256,12 +255,12 @@ def kepoutlier(infile,outfile,datacol,nsig,stepsize,npoly,niter,
                 for j in range(cstep1[i],cstep2[i]+1):
                     mastersigma[j] = sigma
                 if plotfit:
-                    pylab.plot(plotx+intime[cstep1[i]]-intime0,ploty / 10**nrm,
+                    plt.plot(plotx+intime[cstep1[i]]-intime0,ploty / 10**nrm,
                                'g',lw='3')
             except:
                 for j in range(cstep1[i],cstep2[i]+1):
                     masterfit[j] = indata[j]
-                    mastersigma[j] = 1.0e10               
+                    mastersigma[j] = 1.0e10
                 message  = 'WARNING -- KEPOUTLIER: could not fit range '
                 message += str(intime[cstep1[i]]) + '-' + str(intime[cstep2[i]])
                 kepmsg.warn(None,message)
@@ -283,86 +282,80 @@ def kepoutlier(infile,outfile,datacol,nsig,stepsize,npoly,niter,
                 table[naxis2] = table[i]
                 naxis2 += 1
         instr[1].data = table[:naxis2]
-        rejtime = array(rejtime,dtype='float64')
-        rejdata = array(rejdata,dtype='float32')
-        pylab.plot(rejtime-intime0,rejdata / 10**nrm,'ro')
+        rejtime = np.array(rejtime,dtype='float64')
+        rejdata = np.array(rejdata,dtype='float32')
+        plt.plot(rejtime-intime0,rejdata / 10**nrm,'ro')
 
 # plot ranges
 
-        xlim(xmin-xr*0.01,xmax+xr*0.01)
-        if ymin >= 0.0: 
-            ylim(ymin-yr*0.01,ymax+yr*0.01)
+        plt.xlim(xmin-xr*0.01,xmax+xr*0.01)
+        if ymin >= 0.0:
+            plt.ylim(ymin-yr*0.01,ymax+yr*0.01)
         else:
-            ylim(1.0e-10,ymax+yr*0.01)
+            plt.ylim(1.0e-10,ymax+yr*0.01)
 
 # render plot
+        plt.ion()
+        plt.show()
 
-        if cmdLine: 
-            pylab.show()
-        else: 
-            pylab.ion()
-            pylab.plot([])
-            pylab.ioff()
-	
 # write output file
 
     if status == 0:
         instr.writeto(outfile)
-    
 # close input file
 
     if status == 0:
-        status = kepio.closefits(instr,logfile,verbose)	    
+        status = kepio.closefits(instr,logfile,verbose)
 
 # end time
 
     if (status == 0):
-	    message = 'KEPOUTLIER completed at'
+            message = 'KEPOUTLIER completed at'
     else:
-	    message = '\nKEPOUTLIER aborted at'
+            message = '\nKEPOUTLIER aborted at'
     kepmsg.clock(message,logfile,verbose)
 
 # main
 if '--shell' in sys.argv:
     import argparse
-    
     parser = argparse.ArgumentParser(description='Remove or replace data outliers from a time series')
     parser.add_argument('--shell', action='store_true', help='Are we running from the shell?')
-
     parser.add_argument('infile', help='Name of input file', type=str)
-
     parser.add_argument('outfile', help='Name of FITS file to output', type=str)
-
-    parser.add_argument('--datacol', default='SAP_FLUX', help='Name of data column to plot', type=str)
-
-    parser.add_argument('--nsig', default=3., help='Sigma clipping threshold for outliers', type=float)
-    parser.add_argument('--stepsize', default=1.0, help='Stepsize on which to fit data [days]', type=float)
+    parser.add_argument('--datacol', default='SAP_FLUX',
+                        help='Name of data column to plot', type=str)
+    parser.add_argument('--nsig', default=3.,
+                        help='Sigma clipping threshold for outliers',
+                        type=float)
+    parser.add_argument('--stepsize', default=1.0,
+                        help='Stepsize on which to fit data [days]',
+                        type=float)
     parser.add_argument('--npoly', default=3, help='Polynomial order for each fit', type=int)
     parser.add_argument('--niter', default=1, help='Maximum number of clipping iterations', type=int)
-
-    parser.add_argument('--operation', default='remove', help='Remove or replace outliers?', 
-        type=str, choices=['replace','remove'])
-
-    parser.add_argument('--ranges', default='0,0', help='Time ranges of regions to filter', type=str)
-
+    parser.add_argument('--operation', default='remove',
+                        help='Remove or replace outliers?', type=str,
+                        choices=['replace','remove'])
+    parser.add_argument('--ranges', default='0,0',
+                        help='Time ranges of regions to filter', type=str)
     parser.add_argument('--plot', action='store_true', help='Plot result?')
-    parser.add_argument('--plotfit', action='store_true', help='Plot fit over results?')
-
-    parser.add_argument('--clobber', action='store_true', help='Overwrite output file?')
-    parser.add_argument('--verbose', action='store_true', help='Write to a log file?')
-    parser.add_argument('--logfile', '-l', help='Name of ascii log file', default='kepcotrend.log', dest='logfile', type=str)
-    parser.add_argument('--status', '-e', help='Exit status (0=good)', default=0, dest='status', type=int)
-
-
+    parser.add_argument('--plotfit', action='store_true',
+                        help='Plot fit over results?')
+    parser.add_argument('--clobber', action='store_true',
+                        help='Overwrite output file?')
+    parser.add_argument('--verbose', action='store_true',
+                        help='Write to a log file?')
+    parser.add_argument('--logfile', '-l', help='Name of ascii log file',
+                        default='kepoutlier.log', dest='logfile', type=str)
+    parser.add_argument('--status', '-e', help='Exit status (0=good)',
+                        default=0, dest='status', type=int)
     args = parser.parse_args()
-    
     cmdLine=True
-
-    kepoutlier(args.infile,args.outfile,args.datacol,args.nsig,args.stepsize,args.npoly,args.niter,
-               args.operation,args.ranges,args.plot,args.plotfit,args.clobber,args.verbose,args.logfile,args.status, cmdLine)
-    
-
+    kepoutlier(args.infile, args.outfile, args.datacol, args.nsig,
+               args.stepsize, args.npoly,args.niter, args.operation,
+               args.ranges, args.plot, args.plotfit, args.clobber,
+               args.verbose, args.logfile, args.status, cmdLine)
 else:
     from pyraf import iraf
     parfile = iraf.osfn("kepler$kepoutlier.par")
-    t = iraf.IrafTaskFactory(taskname="kepoutlier", value=parfile, function=kepoutlier)
+    t = iraf.IrafTaskFactory(taskname="kepoutlier", value=parfile,
+                             function=kepoutlier)

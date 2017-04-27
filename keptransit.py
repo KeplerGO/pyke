@@ -14,7 +14,7 @@ in some way to remove instrumental signals and stellar variability.
 
 Reference:
 The transit model a Mandel and Agol model
-<http://adsabs.harvard.edu/abs/2002ApJ...580L.171M>. 
+<http://adsabs.harvard.edu/abs/2002ApJ...580L.171M>.
 
 This code calls a a module called lightcurve
 This code was created by Ian Crossfield <http://www.astro.ucla.edu/~ianc/>
@@ -26,44 +26,42 @@ on a finer grid than the original data.
 """
 
 import lightcurve as tmod
-import matplotlib.pyplot as plt 
-import numpy as np 
-from numpy import logical_and, isfinite, nan
-import pyfits
-from scipy.optimize import leastsq, fmin, anneal
-#remove this line
+import matplotlib.pyplot as plt
+import numpy as np
+from astropy.io import fits as pyfits
+from scipy.optimize import leastsq, fmin
 import sys
-#sys.path.append('/Users/tom/svn_code/PyKE/kepler/')
 import kepio, kepmsg, kepkey, kepfit, kepstat
 
-np.seterr(all="ignore") 
+np.seterr(all="ignore")
 
 def cutBadData(date,flux,err,removeflaggeddata,qualflag):
     """
-    this function finds cadences with bad data in and removes them returning only cadences which contain good data
+    this function finds cadences with bad data in and removes them
+    returning only cadences which contain good data
     """
-    mask = logical_and(logical_and(isfinite(date),
-    isfinite(flux)),flux != 0.0)
+    mask = np.logical_and(np.logical_and(np.isfinite(date),
+                          np.isfinite(flux)), flux != 0.0)
     if removeflaggeddata:
         quality = np.where(qualflag == 0,True,False)
-        finmask = logical_and(mask,quality)
+        finmask = np.logical_and(mask,quality)
     else:
         finmask = mask
-
 
     date2 = date[finmask]
     flux2 = flux[finmask]
     err2 = err[finmask]
     bad_data = finmask
+
     return date2,flux2,err2,bad_data
 
 def get_chi2(obs,model,error):
     chi2 = (obs - model)**2 / error**2
+
     return chi2
 
-def fit_tmod(params,args):
-    period_d,rprs,T0, Ecc,ars, inc, omega, sec, fluxoffset = params
-    LDparams,time,flux,error,fixed_dict,guess_params = args
+def fit_tmod(params, LDparams, time, flux, error, fixed_dict, guess_params):
+    period_d, rprs, T0, Ecc, ars, inc, omega, sec, fluxoffset = params
 
     #fix things and stop params going crazy
     #here!
@@ -93,9 +91,10 @@ def fit_tmod(params,args):
     if omega > np.pi * 2.:
         return 10**(12.)
 
-    mod_output = tmod.lightcurve(time,period_d,rprs,T0,Ecc,ars, inc, omega, LDparams, sec)
+    mod_output = tmod.lightcurve(time, period_d, rprs, T0, Ecc, ars, inc,
+                                 omega, LDparams, sec)
     model = mod_output
-    chi2 = get_chi2(flux,model,error)
+    chi2 = get_chi2(flux, model, error)
 
     return chi2
 
@@ -120,7 +119,7 @@ def fit_tmod2(params,LDparams,time,flux,error,fixed_dict,guess_params):
         omega = guess_params[6]
     if fixed_dict['sec'] == True:
         sec = guess_params[7]
-    
+
     if fixed_dict['fluxoffset'] == False:
         flux = flux + fluxoffset
 
@@ -132,14 +131,6 @@ def fit_tmod2(params,LDparams,time,flux,error,fixed_dict,guess_params):
 
     mod_output = tmod.lightcurve(time,period_d,rprs,T0,Ecc,ars, inc, omega, LDparams, sec)
     model = mod_output
-
-    #try ignoring unity elements in the model
-    #mask = model != 1.0
-
-    #flux2 = flux[mask]
-    #model2 = model[mask]
-    #error2 = error[mask]
-
 
     chi2 = get_chi2(flux,model,error)
 
@@ -159,20 +150,6 @@ def fix_params(fixperiod,fixrprs,fixT0,
     return fixed_dict
 
 def do_plot(time,model,flux,error,period,T0,cmdLine=False):
-    try:
-        params = {'backend': 'eps',
-            'axes.linewidth': 2.5,
-            'axes.labelsize': 24,
-            'axes.font': 'sans-serif',
-            'axes.fontweight' : 'bold',
-            'text.fontsize': 12,
-            'legend.fontsize': 12,
-            'xtick.labelsize': 16,
-            'ytick.labelsize': 16}
-        plt.rcParams.update(params)
-    except:
-        #print 'ERROR -- KEPCLIP: install latex for scientific plotting'
-        pass
     plt.figure(figsize=[15,8])
     plt.clf()
 
@@ -182,9 +159,9 @@ def do_plot(time,model,flux,error,period,T0,cmdLine=False):
     plt.plot(time,flux,color='#0000ff',linestyle='-',linewidth=1.0)
     plt.plot(time,model,color='red',linestyle='-',
         linewidth=2.0)
-    time2 = np.insert(time,[0],[time[0]]) 
+    time2 = np.insert(time,[0],[time[0]])
     time2 = np.append(time2,[time[-1]])
-    flux2 = np.insert(flux,[0],[0.0]) 
+    flux2 = np.insert(flux,[0],[0.0])
     flux2 = np.append(flux2,[0.0])
     plt.fill(time2,flux2,fc='#FFFACD',linewidth=0.0)
 
@@ -206,9 +183,9 @@ def do_plot(time,model,flux,error,period,T0,cmdLine=False):
     plt.plot(phi,fluxfold,color='#0000ff',linestyle='-',linewidth=1.0)
     plt.plot(phi,modelfold,color='red',linestyle='-',
         linewidth=2.0)
-    time2 = np.insert(phi,[0],[phi[0]]) 
+    time2 = np.insert(phi,[0],[phi[0]])
     time2 = np.append(time2,[phi[-1]])
-    flux2 = np.insert(fluxfold,[0],[0.0]) 
+    flux2 = np.insert(fluxfold,[0],[0.0])
     flux2 = np.append(flux2,[0.0])
     plt.fill(time2,flux2,fc='#FFFACD',linewidth=0.0)
     plt.xlim([-10.,10.])
@@ -216,17 +193,13 @@ def do_plot(time,model,flux,error,period,T0,cmdLine=False):
     plt.xlabel('Hours from mid-transit', {'color' : 'k'})
     plt.ylabel('Flux', {'color' : 'k'})
     plt.grid()
-    if cmdLine: 
-        plt.show()
-    else: 
-        plt.ion()
-        plt.plot([])
-        plt.ioff()
+    plt.ion()
+    plt.show()
 
 def fold_data(time,model,flux,error,period,T0):
     date1 = (time - T0) + period
     date1 = (time - T0) + 0.5*period
-    phi1 = (((date1 / period) - 
+    phi1 = (((date1 / period) -
         np.floor(date1/period)) *24.*period) - 12.*period
 
     sort_mask = np.argsort(phi1)
@@ -240,8 +213,12 @@ def fold_data(time,model,flux,error,period,T0):
 
 def make_outfile(fitsfile,outfile,phi,model,baddata):
     """
-    creates a fits file identical to the input fits file save from containing two extra columns - TRANSIT_MODL and PHASE which are the sum of basis vectors fit to the data and the resulting corrected flux after the basis vector fit has been subtracted
+    creates a fits file identical to the input fits file save from containing
+    two extra columns - TRANSIT_MODL and PHASE which are the sum of basis
+    vectors fit to the data and the resulting corrected flux after the basis
+    vector fit has been subtracted
     """
+
     newmodel = putInNans(baddata,model)
     newphi = putInNans(phi,model)
     col1 = pyfits.Column(name='TRANSIT_MODL',
@@ -249,15 +226,17 @@ def make_outfile(fitsfile,outfile,phi,model,baddata):
     col2 = pyfits.Column(name='PHASE',format='E13.7   ',
         unit='days',array=newphi / 24.) # phi is in hours by default
     cols = fitsfile[1].columns + col1 + col2
-    fitsfile[1] = pyfits.new_table(cols,header=fitsfile[1].header)
+    fitsfile[1] = pyfits.BinTableHDU.from_columns(cols,header=fitsfile[1].header)
     fitsfile.writeto(outfile)
 
 def putInNans(bad_data,flux):
     """
-    Function finds the cadences where the data has been removed using cutBadData() and puts data back in. The flux data put back in is nan.
+    Function finds the cadences where the data has been removed using
+    cutBadData() and puts data back in. The flux data put back in is nan.
     This function is used when writing data to a FITS files.
     bad_data == True means the datapoint is good!!
     """
+
     newflux = np.zeros(len(bad_data))
     j = 0
     for i in range(len(bad_data)):
@@ -265,13 +244,16 @@ def putInNans(bad_data,flux):
             newflux[i] = flux[j]
             j += 1
         elif bad_data[i] == False:
-            newflux[i] = nan
+            newflux[i] = np.nan
     return newflux
 
-def keptransit(inputfile,outputfile,datacol,errorcol,periodini_d,rprsini,T0ini,
-    Eccini,arsini,incini,omegaini,LDparams,secini,fixperiod,fixrprs,fixT0,
-    fixEcc,fixars,fixinc,fixomega,fixsec,fixfluxoffset,removeflaggeddata,ftol=0.0001,fitter='nothing',norm=False,
-    clobber=False, plot=True,verbose=0,logfile='logfile.dat',status=0,cmdLine=False):
+def keptransit(inputfile, outputfile, datacol, errorcol, periodini_d,
+               rprsini, T0ini, Eccini, arsini, incini, omegaini,
+               LDparams, secini,fixperiod, fixrprs, fixT0, fixEcc, fixars,
+               fixinc, fixomega, fixsec, fixfluxoffset, removeflaggeddata,
+               ftol=0.0001, fitter='nothing', norm=False, clobber=False,
+               plot=True, verbose=0, logfile='logfile.dat', status=0,
+               cmdLine=False):
     """
     tmod.lightcurve(xdata,period,rprs,T0,Ecc,ars, incl, omega, ld, sec)
 
@@ -297,7 +279,7 @@ def keptransit(inputfile,outputfile,datacol,errorcol,periodini_d,rprsini,T0ini,
     Nothing at all -- uniform limb-darkening (set NL=0)
     """
 
-    np.seterr(all="ignore") 
+    np.seterr(all="ignore")
 
     #write to a logfile
     hashline = '----------------------------------------------------------------------------'
@@ -331,18 +313,13 @@ def keptransit(inputfile,outputfile,datacol,errorcol,periodini_d,rprsini,T0ini,
     call += 'norm='+str(norm)+' '
 
     plotit = 'n'
-    if (plot): plotit = 'y'
+    if plot: plotit = 'y'
     call += 'plot='+plotit+ ' '
     overwrite = 'n'
-    if (clobber): overwrite = 'y'
+    if clobber: overwrite = 'y'
     call += 'clobber='+overwrite+ ' '
-    #chatter = 'n'
-    #if (verbose): chatter = 'y'
-    #call += 'verbose='+chatter+' '
     call += 'logfile='+logfile
     kepmsg.log(logfile,call+'\n',verbose)
-
-
     kepmsg.clock('KEPTRANSIT started at',logfile,verbose)
 
     # test log file
@@ -351,9 +328,9 @@ def keptransit(inputfile,outputfile,datacol,errorcol,periodini_d,rprsini,T0ini,
 
 # clobber output file
 
-    if clobber: 
+    if clobber:
         status = kepio.clobber(outputfile,logfile,verbose)
-    if kepio.fileexists(outputfile): 
+    if kepio.fileexists(outputfile):
         message = 'ERROR -- KEPTRANSIT: ' + outputfile + ' exists. Use clobber=yes'
         status = kepmsg.err(logfile,message,verbose)
 
@@ -391,7 +368,10 @@ def keptransit(inputfile,outputfile,datacol,errorcol,periodini_d,rprsini,T0ini,
             qualflag = np.zeros(len(intime_o))
 
     if status == 0:
-        intime, indata, inerr, baddata = cutBadData(intime_o, influx_o, inerr_o,removeflaggeddata,qualflag)
+        intime, indata, inerr, baddata = cutBadData(intime_o, influx_o,
+                                                    inerr_o,
+                                                    removeflaggeddata,
+                                                    qualflag)
 
     if status == 0 and norm:
         #first remove outliers before normalizing
@@ -403,9 +383,7 @@ def keptransit(inputfile,outputfile,datacol,errorcol,periodini_d,rprsini,T0ini,
     if status == 0:
         #need to check if LD params are sensible and in right format
         LDparams = [float(i) for i in LDparams.split()]
-
         incini = incini * np.pi / 180.
-
         omegaini = omegaini * np.pi / 180.
 
     if arsini*np.cos(incini) > 1.0 + rprsini:
@@ -420,25 +398,20 @@ def keptransit(inputfile,outputfile,datacol,errorcol,periodini_d,rprsini,T0ini,
     fluxoffsetini = 0.0
 
     if status == 0:
-        guess_params = [periodini_d,rprsini,T0ini,Eccini,arsini, incini, omegaini, 
-        secini,fluxoffsetini]
+        guess_params = [periodini_d, rprsini, T0ini, Eccini, arsini, incini,
+                        omegaini, secini, fluxoffsetini]
 
         print 'cleaning done: about to fit transit'
 
         if fitter == 'leastsq':
-            fit_output = leastsq(fit_tmod,guess_params,
-                args=[LDparams,intime,indata,inerr,fixed_dict,guess_params],
-                full_output=True,ftol=ftol)
+            fit_output = leastsq(fit_tmod, guess_params,
+                                 args=(LDparams, intime, indata, inerr,
+                                       fixed_dict, guess_params),
+                                 full_output=True, ftol=ftol)
         elif fitter == 'fmin':
-
             fit_output = fmin(fit_tmod2,guess_params,
-                args=[LDparams,intime,indata,inerr,fixed_dict,guess_params],
-                full_output=True,ftol=ftol,xtol=ftol)
-
-        elif fitter == 'anneal':
-            fit_output = anneal(fit_tmod2,guess_params,
-                args=[LDparams,intime,indata,inerr,fixed_dict,guess_params],
-                full_output=True)
+                              args=(LDparams,intime,indata,inerr,fixed_dict,guess_params),
+                              full_output=True,ftol=ftol,xtol=ftol)
 
     if status == 0:
         if fixed_dict['period'] == True:
@@ -493,22 +466,17 @@ def keptransit(inputfile,outputfile,datacol,errorcol,periodini_d,rprsini,T0ini,
             newfluxoffset = fit_output[0][8]
             print 'Fit flux offset = ' + str(newfluxoffset)
 
-    
-
         modelfit = tmod.lightcurve(intime,newperiod,newrprs,newT0,newEcc,
             newars,newinc,newomega,LDparams,newsec)
 
         if fixfluxoffset == False:
             modelfit += newfluxoffset
 
-
         #output to a file
-        phi, fluxfold, modelfold, errorfold, phiNotFold = fold_data(intime, 
+        phi, fluxfold, modelfold, errorfold, phiNotFold = fold_data(intime,
             modelfit,indata,inerr,newperiod,newT0)
 
-
         make_outfile(instr,outputfile,phiNotFold,modelfit, baddata)
-
 
     # end time
 
@@ -521,51 +489,33 @@ def keptransit(inputfile,outputfile,datacol,errorcol,periodini_d,rprsini,T0ini,
     if plot and status == 0:
         do_plot(intime,modelfit,indata,inerr,newperiod,newT0,cmdLine)
 
-    
-
-
-
-    
-
-    
-
-
-
 if '--shell' in sys.argv:
     import argparse
-
-    #inputfile,outputfile,datacol,errorcol,periodini_d,rprsini,T0ini,
-    #Eccini,arsini,incini,omegaini,LDparams,secini,fixperiod,fixrprs,fixT0,
-    #fixEcc,fixars,fixinc,fixomega,fixsec,ftol=0.0001,fitter='nothing'
-    #clobber=False, plot=True,logfile='logfile.dat',verbose=0,status=0,cmdLine=False
-    
     parser = argparse.ArgumentParser(description='Fit a exoplanet transit model to the light curve')
-    #parser.add_argument('--infile', '-i', help='Name of input file', dest='infile',type=str,required=True)
     parser.add_argument('--shell', action='store_true', help='Are we running from the shell?')
-
     parser.add_argument('infile', help='Name of input file', type=str, dest=inputfile)
     parser.add_argument('outfile', help='Name of output FITS file', type=str, dest=outputfile)
-    parser.add_argument('--datacol', help='Column containing flux data to fit', type=str, 
+    parser.add_argument('--datacol', help='Column containing flux data to fit', type=str,
         default='DETSAP_FLUX')
-    parser.add_argument('--errorcol', help='Column containing flux uncertainty', type=str, 
+    parser.add_argument('--errorcol', help='Column containing flux uncertainty', type=str,
         default='DETSAP_FLUX_ERR')
-    parser.add_argument('period', help='Guess for planet orbital period', 
+    parser.add_argument('period', help='Guess for planet orbital period',
         type=float, dest=periodini_d)
-    parser.add_argument('rprs', help='Guess for radius of the planet / radius of the star', 
+    parser.add_argument('rprs', help='Guess for radius of the planet / radius of the star',
         type=float, dest=rprsini)
-    parser.add_argument('T0', help='Guess mid-time of first transit', 
+    parser.add_argument('T0', help='Guess mid-time of first transit',
         type=float, dest=T0ini)
-    parser.add_argument('--ecc', help='Guess eccentricity', 
+    parser.add_argument('--ecc', help='Guess eccentricity',
         type=float, dest=Eccini, default=0.)
-    parser.add_argument('ars', help='Guess semi-major axis / radius of the star', 
+    parser.add_argument('ars', help='Guess semi-major axis / radius of the star',
         type=float, dest=arsini)
-    parser.add_argument('--inc', help='Guess inclination', 
+    parser.add_argument('--inc', help='Guess inclination',
         type=float, dest=incini, default=90.)
-    parser.add_argument('--omega', help='Guess periastron angle', 
+    parser.add_argument('--omega', help='Guess periastron angle',
         type=float, dest=omegaini, default=0.)
-    parser.add_argument('--LDparams', help='Limb darkening parameters, seperate by a space', 
+    parser.add_argument('--LDparams', help='Limb darkening parameters, seperate by a space',
         type=str, default='')
-    parser.add_argument('--sec', help='Guess secondary eclipse depth', 
+    parser.add_argument('--sec', help='Guess secondary eclipse depth',
         type=float, dest=secini, default=0.)
     parser.add_argument('--fixperiod', action='store_true', help='Fix period?')
     parser.add_argument('--fixrprs', action='store_true', help='Fix rp/r*?')
@@ -587,28 +537,19 @@ if '--shell' in sys.argv:
     parser.add_argument('--status', '-e', help='Exit status (0=good)', default=0, dest='status', type=int)
 
     cmdLine=True
-
-
-    
-
-
     args = parser.parse_args()
-    
     keptransit(args.inputfile, args.outputfile, args.datacol, args.errorcol,
-        args.periodini_d, args.rprsini, args.T0ini,
-        args.Eccini, args.arsini, args.incini, args.omegaini, args.LDparams, args.secini,
-        args.fixperiod, args.fixrprs, args.fixT0,
-        args.fixEcc, args.fixars, args.fixinc, args.fixomega, args.fixsec, args.fixfluxoffset,
-        args.removeflaggeddata, args.ftol,
-        args.fitter, args.norm,
-        args.clobber, args.plot, args.verbose, args.logfile, args.status,
-        cmdLine)
-    
-    
-
+               args.periodini_d, args.rprsini, args.T0ini,
+               args.Eccini, args.arsini, args.incini, args.omegaini, args.LDparams, args.secini,
+               args.fixperiod, args.fixrprs, args.fixT0,
+               args.fixEcc, args.fixars, args.fixinc, args.fixomega, args.fixsec, args.fixfluxoffset,
+               args.removeflaggeddata, args.ftol,
+               args.fitter, args.norm,
+               args.clobber, args.plot, args.verbose, args.logfile, args.status,
+               cmdLine)
 else:
     from pyraf import iraf
-    
+
     parfile = iraf.osfn("kepler$keptransit.par")
     t = iraf.IrafTaskFactory(taskname="keptransit", value=parfile, function=keptransit)
-    
+

@@ -1,11 +1,9 @@
 #!/usr/bin/env python
-
 import kepmsg, kepstat
-import numpy, scipy, pylab
+import numpy, scipy
 import scipy.stats
 from numpy import *
-from pylab import *
-from matplotlib import *
+from matplotlib import pyplot as plt
 
 # -----------------------------------------------------------
 # shape the window, enforce absolute scaling, rotate the labels
@@ -14,20 +12,16 @@ def location(shape):
 
 # position first axes inside the plotting window
 
-    ax = pylab.axes(shape)
-    
+    ax = plt.axes(shape)
 # force tick labels to be absolute rather than relative
-    
-    pylab.gca().xaxis.set_major_formatter(pylab.ScalarFormatter(useOffset=False))
-    pylab.gca().yaxis.set_major_formatter(pylab.ScalarFormatter(useOffset=False))
-    ax.yaxis.set_major_locator(MaxNLocator(5))
-    
+    plt.gca().xaxis.set_major_formatter(plt.ScalarFormatter(useOffset=False))
+    plt.gca().yaxis.set_major_formatter(plt.ScalarFormatter(useOffset=False))
+    ax.yaxis.set_major_locator(plt.MaxNLocator(5))
 # rotate y labels by 90 deg
-    
     labels = ax.get_yticklabels()
-    pylab.setp(labels, 'rotation', 90)
+    plt.setp(labels, 'rotation', 90)
 
-    return ax 
+    return ax
 
 # -----------------------------------------------------------
 # plot a 1d distribution
@@ -36,9 +30,9 @@ def plot1d(x,y,cadence,lcolor,lwidth,fcolor,falpha,underfill):
 
 # pad first and last points in case a fill is required
 
-    x = insert(x,[0],[x[0]]) 
+    x = insert(x,[0],[x[0]])
     x = append(x,[x[-1]])
-    y = insert(y,[0],[-1.0e10]) 
+    y = insert(y,[0],[-1.0e10])
     y = append(y,-1.0e10)
 
 # plot data so that data gaps are not spanned by a line
@@ -50,15 +44,15 @@ def plot1d(x,y,cadence,lcolor,lwidth,fcolor,falpha,underfill):
             ltime = append(ltime,x[i])
             ldata = append(ldata,y[i])
         else:
-            pylab.plot(ltime,ldata,color=lcolor,linestyle='-',linewidth=lwidth)
+            plt.plot(ltime,ldata,color=lcolor,linestyle='-',linewidth=lwidth)
             ltime = array([],dtype='float64')
             ldata = array([],dtype='float32')
-    pylab.plot(ltime,ldata,color=lcolor,linestyle='-',linewidth=lwidth)
+    plt.plot(ltime,ldata,color=lcolor,linestyle='-',linewidth=lwidth)
 
 # plot the fill color below data time series, with no data gaps
 
     if underfill:
-        pylab.fill(x,y,fc=fcolor,linewidth=0.0,alpha=falpha)
+        plt.fill(x,y,fc=fcolor,linewidth=0.0,alpha=falpha)
 
         return
 
@@ -73,13 +67,13 @@ def RangeOfPlot(x,y,pad,origin):
     ymax = y.max()
     xr = xmax - xmin
     yr = ymax - ymin
-    xlim(xmin - xr * pad, xmax + xr * pad)
-    ylim(ymin - yr * pad, ymax + yr * pad)
+    plt.xlim(xmin - xr * pad, xmax + xr * pad)
+    plt.ylim(ymin - yr * pad, ymax + yr * pad)
     if origin:
         if ymin - yr * pad <= 0.0:
-            ylim(1.0e-10, ymax + yr * pad)
+            plt.ylim(1.0e-10, ymax + yr * pad)
         else:
-            ylim(ymin - yr * pad, ymax + yr * pad)
+            plt.ylim(ymin - yr * pad, ymax + yr * pad)
 
     return
 
@@ -110,7 +104,7 @@ def cleany(signal,cadence,logfile,verbose):
     try:
         signal /= cadence
         nrm = math.ceil(math.log10(numpy.nanmax(signal))) - 1.0
-	signal = signal / 10**nrm
+        signal = signal / 10**nrm
         if nrm == 0:
             label = 'Flux (e$^-$ s$^{-1}$)'
         else:
@@ -135,9 +129,9 @@ def limits(x,y,logfile,verbose):
         ymax = y.max()
         xr = xmax - xmin
         yr = ymax - ymin
-        x = insert(x,[0],[x[0]]) 
+        x = insert(x,[0],[x[0]])
         x = append(x,[x[-1]])
-        y = insert(y,[0],[0.0]) 
+        y = insert(y,[0],[0.0])
         y = append(y,0.0)
     except:
         txt = 'ERROR -- KEPPLOT.LIMITS: cannot calculate plot limits'
@@ -150,53 +144,17 @@ def limits(x,y,logfile,verbose):
 
 def labels(xlab,ylab,labcol,fs):
 
-    pylab.xlabel(xlab, fontsize=fs, color=labcol)
-    pylab.ylabel(ylab, fontsize=fs, color=labcol)
+    plt.xlabel(xlab, fontsize=fs, color=labcol)
+    plt.ylabel(ylab, fontsize=fs, color=labcol)
 
     return
-
-# -----------------------------------------------------------
-# render plot
-
-def render(cmdLine):
-
-    if cmdLine: 
-        pylab.show(block=True)
-    else: 
-        pylab.ion()
-        pylab.plot([])
-        pylab.ioff()
-
-    return
-
-# -----------------------------------------------------------
-# plot look and feel
-
-def define(labelsize,ticksize,logfile,verbose):
-
-    status = 0
-    try:
-        params = {'backend': 'png',
-                  'axes.linewidth': 2.5,
-                  'axes.labelsize': labelsize,
-                  'axes.font': 'sans-serif',
-                  'axes.fontweight' : 'bold',
-                  'text.fontsize': 12,
-                  'legend.fontsize': 12,
-                  'xtick.labelsize': ticksize,
-                  'ytick.labelsize': ticksize}
-        pylab.rcParams.update(params)
-    except:
-        pass
-
-    return status
 
 # -----------------------------------------------------------
 # intensity scale limits of 1d array
 
 def intScale1D(image,imscale):
 
-    seterr(all="ignore") 
+    seterr(all="ignore")
     nstat = 2; work2 = []
     work1 = array(sort(image),dtype=float32)
     for i in range(len(work1)):
@@ -225,7 +183,7 @@ def intScale1D(image,imscale):
 
 def intScale2D(image,imscale):
 
-    seterr(all="ignore") 
+    seterr(all="ignore")
     nstat = 2
     work1 = numpy.array([],dtype='float32')
     (ysiz,xsiz) = numpy.shape(image)
@@ -260,35 +218,35 @@ def borders(maskimg,xdim,ydim,pixcoord1,pixcoord2,bit,lcolor,lstyle,lwidth):
             if kepstat.bitInBitmap(maskimg[i,j],bit) and not kepstat.bitInBitmap(maskimg[i-1,j],bit):
                 x = array([pixcoord1[j-1,i],pixcoord1[j,i]]) + 0.5
                 y = array([pixcoord2[j,i],pixcoord2[j,i]]) - 0.5
-                pylab.plot(x,y,color=lcolor,linestyle=lstyle,linewidth=lwidth)
+                plt.plot(x,y,color=lcolor,linestyle=lstyle,linewidth=lwidth)
             if not kepstat.bitInBitmap(maskimg[i,j],bit) and kepstat.bitInBitmap(maskimg[i-1,j],bit):
                 x = array([pixcoord1[j-1,i],pixcoord1[j,i]]) + 0.5
                 y = array([pixcoord2[j,i],pixcoord2[j,i]]) - 0.5
-                pylab.plot(x,y,color=lcolor,linestyle=lstyle,linewidth=lwidth)
+                plt.plot(x,y,color=lcolor,linestyle=lstyle,linewidth=lwidth)
             if kepstat.bitInBitmap(maskimg[i,j],bit) and not kepstat.bitInBitmap(maskimg[i,j-1],bit):
                 x = array([pixcoord1[j,i],pixcoord1[j,i]]) - 0.5
                 y = array([pixcoord2[j,i-1],pixcoord2[j,i]]) + 0.5
-                pylab.plot(x,y,color=lcolor,linestyle=lstyle,linewidth=lwidth)
+                plt.plot(x,y,color=lcolor,linestyle=lstyle,linewidth=lwidth)
             if not kepstat.bitInBitmap(maskimg[i,j],bit) and kepstat.bitInBitmap(maskimg[i,j-1],bit):
                 x = array([pixcoord1[j,i],pixcoord1[j,i]]) - 0.5
                 y = array([pixcoord2[j,i-1],pixcoord2[j,i]]) + 0.5
-                pylab.plot(x,y,color=lcolor,linestyle=lstyle,linewidth=lwidth)
+                plt.plot(x,y,color=lcolor,linestyle=lstyle,linewidth=lwidth)
 
-# corner cases 
+# corner cases
 
     for j in range(ydim):
         try:
             if kepstat.bitInBitmap(maskimg[j,0],bit) and not kepstat.bitInBitmap(maskimg[j-1,0],bit):
                 x = array([pixcoord1[0,j],pixcoord1[1,j]]) - 0.5
                 y = array([pixcoord2[0,j],pixcoord2[0,j]]) - 0.5
-                pylab.plot(x,y,color=lcolor,linestyle=lstyle,linewidth=lwidth) 
+                plt.plot(x,y,color=lcolor,linestyle=lstyle,linewidth=lwidth)
         except:
             pass
         try:
             if not kepstat.bitInBitmap(maskimg[j+1,0],bit) and kepstat.bitInBitmap(maskimg[j,0],bit):
                 x = array([pixcoord1[0,j],pixcoord1[1,j]]) - 0.5
                 y = array([pixcoord2[0,j],pixcoord2[0,j]]) + 0.5
-                pylab.plot(x,y,color=lcolor,linestyle=lstyle,linewidth=lwidth) 
+                plt.plot(x,y,color=lcolor,linestyle=lstyle,linewidth=lwidth)
         except:
             pass
         if kepstat.bitInBitmap(maskimg[j,0],bit):
@@ -297,27 +255,27 @@ def borders(maskimg,xdim,ydim,pixcoord1,pixcoord2,bit,lcolor,lstyle,lwidth):
                 y = array([pixcoord2[0,j],pixcoord2[0,j+1]]) - 0.5
             except:
                 y = array([pixcoord2[0,j-1],pixcoord2[0,j]]) + 0.5
-            pylab.plot(x,y,color=lcolor,linestyle=lstyle,linewidth=lwidth)
+            plt.plot(x,y,color=lcolor,linestyle=lstyle,linewidth=lwidth)
         if kepstat.bitInBitmap(maskimg[j,xdim-1],bit):
             x = array([pixcoord1[xdim-1,j],pixcoord1[xdim-1,j]]) + 0.5
             try:
                 y = array([pixcoord2[xdim-1,j],pixcoord2[xdim-1,j+1]]) - 0.5
             except:
                 y = array([pixcoord2[xdim-1,j-1],pixcoord2[xdim-1,j]]) + 0.5
-            pylab.plot(x,y,color=lcolor,linestyle=lstyle,linewidth=lwidth)
+            plt.plot(x,y,color=lcolor,linestyle=lstyle,linewidth=lwidth)
     for i in range(xdim):
         try:
             if kepstat.bitInBitmap(maskimg[0,i],bit) and not kepstat.bitInBitmap(maskimg[0,i-1],bit):
                 x = array([pixcoord1[i,0],pixcoord1[i,0]]) - 0.5
                 y = array([pixcoord2[i,0],pixcoord2[i,1]]) - 0.5
-                pylab.plot(x,y,color=lcolor,linestyle=lstyle,linewidth=lwidth) 
+                plt.plot(x,y,color=lcolor,linestyle=lstyle,linewidth=lwidth)
         except:
             pass
         try:
             if not kepstat.bitInBitmap(maskimg[0,i+1],bit) and kepstat.bitInBitmap(maskimg[0,i],bit):
                 x = array([pixcoord1[i,0],pixcoord1[i,0]]) + 0.5
                 y = array([pixcoord2[i,0],pixcoord2[i,1]]) - 0.5
-                pylab.plot(x,y,color=lcolor,linestyle=lstyle,linewidth=lwidth) 
+                plt.plot(x,y,color=lcolor,linestyle=lstyle,linewidth=lwidth)
         except:
             pass
         if kepstat.bitInBitmap(maskimg[0,i],bit):
@@ -326,24 +284,24 @@ def borders(maskimg,xdim,ydim,pixcoord1,pixcoord2,bit,lcolor,lstyle,lwidth):
             except:
                 x = array([pixcoord1[i-1,0],pixcoord1[i,0]]) + 0.5
             y = array([pixcoord2[i,0],pixcoord2[i,0]]) - 0.5
-            pylab.plot(x,y,color=lcolor,linestyle=lstyle,linewidth=lwidth)
+            plt.plot(x,y,color=lcolor,linestyle=lstyle,linewidth=lwidth)
         if kepstat.bitInBitmap(maskimg[ydim-1,i],bit):
             try:
                 x = array([pixcoord1[i,ydim-1],pixcoord1[i+1,ydim-1]]) - 0.5
             except:
                 x = array([pixcoord1[i-1,ydim-1],pixcoord1[i,ydim-1]]) - 0.5
             y = array([pixcoord2[i,ydim-1],pixcoord2[i,ydim-1]]) + 0.5
-            pylab.plot(x,y,color=lcolor,linestyle=lstyle,linewidth=lwidth)
-            
+            plt.plot(x,y,color=lcolor,linestyle=lstyle,linewidth=lwidth)
+
     if kepstat.bitInBitmap(maskimg[ydim-1,xdim-1],bit):
         x = array([pixcoord1[xdim-2,ydim-1],pixcoord1[xdim-1,ydim-1]]) + 0.5
         y = array([pixcoord2[xdim-1,ydim-1],pixcoord2[xdim-1,ydim-1]]) + 0.5
-        pylab.plot(x,y,color=lcolor,linestyle=lstyle,linewidth=lwidth)
+        plt.plot(x,y,color=lcolor,linestyle=lstyle,linewidth=lwidth)
 
     if kepstat.bitInBitmap(maskimg[0,xdim-1],bit):
         x = array([pixcoord1[xdim-1,0],pixcoord1[xdim-1,0]]) + 0.5
         y = array([pixcoord2[xdim-1,0],pixcoord2[xdim-1,1]]) - 0.5
-        pylab.plot(x,y,color=lcolor,linestyle=lstyle,linewidth=lwidth)
+        plt.plot(x,y,color=lcolor,linestyle=lstyle,linewidth=lwidth)
 
     return
 
@@ -358,35 +316,35 @@ def PrfBorders(maskimg,xdim,ydim,pixcoord1,pixcoord2,bit,lcolor,lstyle,lwidth):
             if kepstat.bitInBitmap(maskimg[i,j],bit) and not kepstat.bitInBitmap(maskimg[i-1,j],bit):
                 x = array([pixcoord1[j-1,i],pixcoord1[j,i]]) + 0.5
                 y = array([pixcoord2[j,i],pixcoord2[j,i]]) - 0.5
-                pylab.plot(x*50,y*50,color=lcolor,linestyle=lstyle,linewidth=lwidth)
+                plt.plot(x*50,y*50,color=lcolor,linestyle=lstyle,linewidth=lwidth)
             if not kepstat.bitInBitmap(maskimg[i,j],bit) and kepstat.bitInBitmap(maskimg[i-1,j],bit):
                 x = array([pixcoord1[j-1,i],pixcoord1[j,i]]) + 0.5
                 y = array([pixcoord2[j,i],pixcoord2[j,i]]) - 0.5
-                pylab.plot(x*50,y*50,color=lcolor,linestyle=lstyle,linewidth=lwidth)
+                plt.plot(x*50,y*50,color=lcolor,linestyle=lstyle,linewidth=lwidth)
             if kepstat.bitInBitmap(maskimg[i,j],bit) and not kepstat.bitInBitmap(maskimg[i,j-1],bit):
                 x = array([pixcoord1[j,i],pixcoord1[j,i]]) - 0.5
                 y = array([pixcoord2[j,i-1],pixcoord2[j,i]]) + 0.5
-                pylab.plot(x*50,y*50,color=lcolor,linestyle=lstyle,linewidth=lwidth)
+                plt.plot(x*50,y*50,color=lcolor,linestyle=lstyle,linewidth=lwidth)
             if not kepstat.bitInBitmap(maskimg[i,j],bit) and kepstat.bitInBitmap(maskimg[i,j-1],bit):
                 x = array([pixcoord1[j,i],pixcoord1[j,i]]) - 0.5
                 y = array([pixcoord2[j,i-1],pixcoord2[j,i]]) + 0.5
-                pylab.plot(x*50,y*50,color=lcolor,linestyle=lstyle,linewidth=lwidth)
+                plt.plot(x*50,y*50,color=lcolor,linestyle=lstyle,linewidth=lwidth)
 
-# corner cases 
+# corner cases
 
     for j in range(ydim):
         try:
             if kepstat.bitInBitmap(maskimg[j,0],bit) and not kepstat.bitInBitmap(maskimg[j-1,0],bit):
                 x = array([pixcoord1[0,j],pixcoord1[1,j]]) - 0.5
                 y = array([pixcoord2[0,j],pixcoord2[0,j]]) - 0.5
-                pylab.plot(x,y,color=lcolor,linestyle=lstyle,linewidth=lwidth) 
+                plt.plot(x,y,color=lcolor,linestyle=lstyle,linewidth=lwidth)
         except:
             pass
         try:
             if not kepstat.bitInBitmap(maskimg[j+1,0],bit) and kepstat.bitInBitmap(maskimg[j,0],bit):
                 x = array([pixcoord1[0,j],pixcoord1[1,j]]) - 0.5
                 y = array([pixcoord2[0,j],pixcoord2[0,j]]) + 0.5
-                pylab.plot(x,y,color=lcolor,linestyle=lstyle,linewidth=lwidth) 
+                plt.plot(x,y,color=lcolor,linestyle=lstyle,linewidth=lwidth)
         except:
             pass
         if kepstat.bitInBitmap(maskimg[j,0],bit):
@@ -395,27 +353,27 @@ def PrfBorders(maskimg,xdim,ydim,pixcoord1,pixcoord2,bit,lcolor,lstyle,lwidth):
                 y = array([pixcoord2[0,j],pixcoord2[0,j+1]]) - 0.5
             except:
                 y = array([pixcoord2[0,j-1],pixcoord2[0,j]]) + 0.5
-            pylab.plot(x,y,color=lcolor,linestyle=lstyle,linewidth=lwidth)
+            plt.plot(x,y,color=lcolor,linestyle=lstyle,linewidth=lwidth)
         if kepstat.bitInBitmap(maskimg[j,xdim-1],bit):
             x = array([pixcoord1[xdim-1,j],pixcoord1[xdim-1,j]]) + 0.5
             try:
                 y = array([pixcoord2[xdim-1,j],pixcoord2[xdim-1,j+1]]) - 0.5
             except:
                 y = array([pixcoord2[xdim-1,j-1],pixcoord2[xdim-1,j]]) + 0.5
-            pylab.plot(x,y,color=lcolor,linestyle=lstyle,linewidth=lwidth)
+            plt.plot(x,y,color=lcolor,linestyle=lstyle,linewidth=lwidth)
     for i in range(xdim):
         try:
             if kepstat.bitInBitmap(maskimg[0,i],bit) and not kepstat.bitInBitmap(maskimg[0,i-1],bit):
                 x = array([pixcoord1[i,0],pixcoord1[i,0]]) - 0.5
                 y = array([pixcoord2[i,0],pixcoord2[i,1]]) - 0.5
-                pylab.plot(x,y,color=lcolor,linestyle=lstyle,linewidth=lwidth) 
+                plt.plot(x,y,color=lcolor,linestyle=lstyle,linewidth=lwidth)
         except:
             pass
         try:
             if not kepstat.bitInBitmap(maskimg[0,i+1],bit) and kepstat.bitInBitmap(maskimg[0,i],bit):
                 x = array([pixcoord1[i,0],pixcoord1[i,0]]) + 0.5
                 y = array([pixcoord2[i,0],pixcoord2[i,1]]) - 0.5
-                pylab.plot(x,y,color=lcolor,linestyle=lstyle,linewidth=lwidth) 
+                plt.plot(x,y,color=lcolor,linestyle=lstyle,linewidth=lwidth)
         except:
             pass
         if kepstat.bitInBitmap(maskimg[0,i],bit):
@@ -424,23 +382,23 @@ def PrfBorders(maskimg,xdim,ydim,pixcoord1,pixcoord2,bit,lcolor,lstyle,lwidth):
             except:
                 x = array([pixcoord1[i-1,0],pixcoord1[i,0]]) + 0.5
             y = array([pixcoord2[i,0],pixcoord2[i,0]]) - 0.5
-            pylab.plot(x,y,color=lcolor,linestyle=lstyle,linewidth=lwidth)
+            plt.plot(x,y,color=lcolor,linestyle=lstyle,linewidth=lwidth)
         if kepstat.bitInBitmap(maskimg[ydim-1,i],bit):
             try:
                 x = array([pixcoord1[i,ydim-1],pixcoord1[i+1,ydim-1]]) - 0.5
             except:
                 x = array([pixcoord1[i-1,ydim-1],pixcoord1[i,ydim-1]]) - 0.5
             y = array([pixcoord2[i,ydim-1],pixcoord2[i,ydim-1]]) + 0.5
-            pylab.plot(x,y,color=lcolor,linestyle=lstyle,linewidth=lwidth)
-            
+            plt.plot(x,y,color=lcolor,linestyle=lstyle,linewidth=lwidth)
+
     if kepstat.bitInBitmap(maskimg[ydim-1,xdim-1],bit):
         x = array([pixcoord1[xdim-2,ydim-1],pixcoord1[xdim-1,ydim-1]]) + 0.5
         y = array([pixcoord2[xdim-1,ydim-1],pixcoord2[xdim-1,ydim-1]]) + 0.5
-        pylab.plot(x,y,color=lcolor,linestyle=lstyle,linewidth=lwidth)
+        plt.plot(x,y,color=lcolor,linestyle=lstyle,linewidth=lwidth)
 
     if kepstat.bitInBitmap(maskimg[0,xdim-1],bit):
         x = array([pixcoord1[xdim-1,0],pixcoord1[xdim-1,0]]) + 0.5
         y = array([pixcoord2[xdim-1,0],pixcoord2[xdim-1,1]]) - 0.5
-        pylab.plot(x,y,color=lcolor,linestyle=lstyle,linewidth=lwidth)
+        plt.plot(x,y,color=lcolor,linestyle=lstyle,linewidth=lwidth)
 
     return

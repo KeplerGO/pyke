@@ -1,14 +1,12 @@
-
-import numpy, sys, time, pyfits, pylab, math, re
-from pyfits import *
-from numpy import *
-from pylab import *
-from matplotlib import *
-from math import *
+import sys, time, math, re
+from astropy.io import fits as pyfits
+from matplotlib import pyplot as plt
+import numpy as np
 import kepio, kepmsg, kepkey, kepfit, kepstat, kepfourier, keplab
 
-def kepdynamic(infile,outfile,fcol,pmin,pmax,nfreq,deltat,nslice,
-          plot,plotscale,cmap,clobber,verbose,logfile,status,cmdLine=False): 
+def kepdynamic(infile, outfile, fcol, pmin, pmax, nfreq, deltat, nslice,
+               plot, plotscale, cmap, clobber, verbose, logfile, status,
+               cmdLine=False):
 
 # startup parameters
 
@@ -21,9 +19,9 @@ def kepdynamic(infile,outfile,fcol,pmin,pmax,nfreq,deltat,nslice,
     lwidth = 1.0
     fcolor = '#ffff00'
     falpha = 0.2
-    numpy.seterr(all="ignore") 
+    np.seterr(all="ignore")
 
-# log the call 
+# log the call
 
     hashline = '----------------------------------------------------------------------------'
     kepmsg.log(logfile,hashline,verbose)
@@ -68,7 +66,7 @@ def kepdynamic(infile,outfile,fcol,pmin,pmax,nfreq,deltat,nslice,
 # clobber output file
 
     if clobber: status = kepio.clobber(outfile,logfile,verbose)
-    if kepio.fileexists(outfile): 
+    if kepio.fileexists(outfile):
         message = 'ERROR -- KEPDYNAMIC: ' + outfile + ' exists. Use clobber'
         status = kepmsg.err(logfile,message,verbose)
 
@@ -80,7 +78,7 @@ def kepdynamic(infile,outfile,fcol,pmin,pmax,nfreq,deltat,nslice,
 # open input file
 
     if status == 0:
-	    instr, status = kepio.openfits(infile,'readonly',logfile,verbose)
+        instr, status = kepio.openfits(infile,'readonly',logfile,verbose)
     if status == 0:
         tstart, tstop, bjdref, cadence, status = kepio.timekeys(instr,infile,logfile,verbose,status)
     if status == 0:
@@ -93,7 +91,7 @@ def kepdynamic(infile,outfile,fcol,pmin,pmax,nfreq,deltat,nslice,
 # fudge non-compliant FITS keywords with no values
 
     if status == 0:
-	    instr = kepkey.emptykeys(instr,file,logfile,verbose)
+        instr = kepkey.emptykeys(instr,file,logfile,verbose)
 
 # read table columns
 
@@ -108,10 +106,10 @@ def kepdynamic(infile,outfile,fcol,pmin,pmax,nfreq,deltat,nslice,
 # remove infinite data from time series
 
     if status == 0:
-	    incols = [barytime, signal]
-	    outcols = kepstat.removeinfinlc(signal, incols)
-	    barytime = outcols[0] 
-	    signal = outcols[1]
+        incols = [barytime, signal]
+        outcols = kepstat.removeinfinlc(signal, incols)
+        barytime = outcols[0]
+        signal = outcols[1]
 
 # period to frequency conversion
 
@@ -144,129 +142,113 @@ def kepdynamic(infile,outfile,fcol,pmin,pmax,nfreq,deltat,nslice,
                 if (barytime[j] >= t1[i] and barytime[j] <= t2[i]):
                     x.append(barytime[j])
                     y.append(signal[j])
-            x = array(x,dtype='float64')
-            y = array(y,dtype='float32')
-            y = y - median(y)
+            x = np.array(x,dtype='float64')
+            y = np.array(y,dtype='float')
+            y = y - np.median(y)
 
 # determine FT power
 
-	    fr, power = kepfourier.ft(x,y,fmin,fmax,deltaf,False)
+            fr, power = kepfourier.ft(x,y,fmin,fmax,deltaf,False)
             for j in range(len(power)):
                 dynam.append(power[j])
             print 'Timeslice: %.4f  Pmax: %.2E' % ((t2[i] + t1[i]) / 2, power.max())
 
 # define shape of results array
 
-        dynam = array(dynam,dtype='float64')
+        dynam = np.array(dynam,dtype='float64')
         dynam.shape = len(t1),len(power)
 
 # write output file
 
     if status == 0:
-        instr.append(ImageHDU())
-        instr[-1].data = dynam.transpose() 
-        instr[-1].header.update('EXTNAME','DYNAMIC FT','extension name')
-        instr[-1].header.update('WCSAXES',2,'number of WCS axes')
-        instr[-1].header.update('CRPIX1',0.5,'reference pixel along axis 1')
-        instr[-1].header.update('CRPIX2',0.5,'reference pixel along axis 2')
-        instr[-1].header.update('CRVAL1',t1[0],'time at reference pixel (BJD)')
-        instr[-1].header.update('CRVAL2',fmin,'frequency at reference pixel (1/day)')
-        instr[-1].header.update('CDELT1',(barytime[-1] - barytime[0]) / nslice,
-                                'pixel scale in dimension 1 (days)')
-        instr[-1].header.update('CDELT2',deltaf,'pixel scale in dimension 2 (1/day)')
-        instr[-1].header.update('CTYPE1','BJD','data type of dimension 1')
-        instr[-1].header.update('CTYPE2','FREQUENCY','data type of dimension 2')
+        instr.append(pyfits.ImageHDU())
+        instr[-1].data = dynam.transpose()
+        instr[-1].header['EXTNAME'] = ('DYNAMIC FT','extension name')
+        instr[-1].header['WCSAXES'] = (2,'number of WCS axes')
+        instr[-1].header['CRPIX1' ] = (0.5,'reference pixel along axis 1')
+        instr[-1].header['CRPIX2' ] = (0.5,'reference pixel along axis 2')
+        instr[-1].header['CRVAL1' ] = (t1[0],'time at reference pixel (BJD)')
+        instr[-1].header['CRVAL2' ] = (fmin,'frequency at reference pixel (1/day)')
+        instr[-1].header['CDELT1' ] = ((barytime[-1] - barytime[0]) / nslice,
+                        'pixel scale in dimension 1 (days)')
+        instr[-1].header['CDELT2'] = (deltaf,'pixel scale in dimension 2 (1/day)')
+        instr[-1].header['CTYPE1'] = ('BJD','data type of dimension 1')
+        instr[-1].header['CTYPE2'] = ('FREQUENCY','data type of dimension 2')
         instr.writeto(outfile)
-    
+
 # history keyword in output file
 
     if status == 0:
-	    status = kepkey.history(call,instr[0],outfile,logfile,verbose)
+        status = kepkey.history(call,instr[0],outfile,logfile,verbose)
 
 # close input file
 
     if status == 0:
-	    status = kepio.closefits(instr,logfile,verbose)	    
+        status = kepio.closefits(instr,logfile,verbose)
 
 # clean up x-axis unit
 
     if status == 0:
-	time0 = float(int(barytime[0] / 100) * 100.0)
-	barytime = barytime - time0
-	xlab = 'BJD $-$ %d' % time0
+        time0 = float(int(barytime[0] / 100) * 100.0)
+        barytime = barytime - time0
+        xlab = 'BJD $-$ %d' % time0
 
 # image intensity min and max
 
     if status == 0:
         if 'rithmic' in plotscale:
-            dynam = numpy.log10(dynam)
+            dynam = np.log10(dynam)
         elif 'sq' in plotscale:
-            dynam = numpy.sqrt(dynam)
+            dynam = np.sqrt(dynam)
         elif 'logoflog' in plotscale:
-            dynam = numpy.log10(numpy.abs(numpy.log10(dynam)))
+            dynam = np.log10(np.abs(np.log10(dynam)))
 #        dynam = -dynam
         nstat = 2; pixels = []
         for i in range(dynam.shape[0]):
             for j in range(dynam.shape[1]):
                 pixels.append(dynam[i,j])
-        pixels = array(sort(pixels),dtype=float32)
+        pixels = np.array(np.sort(pixels),dtype='float')
         if int(float(len(pixels)) * 0.1 + 0.5) > nstat:
             nstat = int(float(len(pixels)) * 0.1 + 0.5)
-        zmin = median(pixels[:nstat])
-        zmax = median(pixels[-1:])
-        if isnan(zmax): 
-            zmax = median(pixels[-nstat/2:])
-        if isnan(zmax): 
-            zmax = numpy.nanmax(pixels)        
+        zmin = np.median(pixels[:nstat])
+        zmax = np.median(pixels[-1:])
+        if np.isnan(zmax):
+            zmax = np.median(pixels[-nstat/2:])
+        if np.isnan(zmax):
+            zmax = np.nanmax(pixels)
 
 # plot power spectrum
 
     if status == 0 and plot:
-        params = {'backend': 'png',
-                  'axes.linewidth': 2.5,
-                  'axes.labelsize': labelsize,
-                  'axes.font': 'sans-serif',
-                  'axes.fontweight' : 'bold',
-                  'text.fontsize': 12,
-                  'legend.fontsize': 12,
-                  'xtick.labelsize': ticksize,
-                  'ytick.labelsize': ticksize}
-        rcParams.update(params)
-        pylab.figure(1,figsize=[xsize,ysize])
-        pylab.clf()
-        pylab.axes([0.08,0.113,0.91,0.86])
+        plt.figure(1,figsize=[xsize,ysize])
+        plt.clf()
+        plt.axes([0.08,0.113,0.91,0.86])
         dynam = dynam.transpose()
-        pylab.imshow(dynam,origin='lower',aspect='auto',cmap=cmap,vmin=zmin,vmax=zmax,
-                     extent=[barytime[0],barytime[-1],fmin,fmax],interpolation='bilinear')            
-        xlabel(xlab, {'color' : 'k'})
-        ylabel(r'Frequency (d$^{-1}$)', {'color' : 'k'})
-        grid()
-        pylab.savefig(re.sub('\.\S+','.png',outfile),dpi=100)
+        plt.imshow(dynam,origin='lower',aspect='auto',cmap=cmap,vmin=zmin,vmax=zmax,
+                     extent=[barytime[0],barytime[-1],fmin,fmax],interpolation='bilinear')
+        plt.xlabel(xlab, {'color' : 'k'})
+        plt.ylabel(r'Frequency (d$^{-1}$)', {'color' : 'k'})
+        plt.grid()
+        plt.savefig(re.sub('\.\S+','.png',outfile),dpi=100)
 
 # render plot
+        plt.ion()
+        plt.show()
 
-        if cmdLine: 
-            pylab.show()
-        else: 
-            pylab.ion()
-            pylab.plot([])
-            pylab.ioff()
-	
-   
     return status
 
 ## end time
 
-    if (status == 0):
-	    message = 'KEPDYNAMIC completed at'
+    if status == 0:
+        message = 'KEPDYNAMIC completed at'
     else:
-	    message = '\nKEPDYNAMIC aborted at'
+        message = '\nKEPDYNAMIC aborted at'
     kepmsg.clock(message,logfile,verbose)
 
 # main
 if '--shell' in sys.argv:
     import argparse
-    
+
     parser = argparse.ArgumentParser(description='Construct a dynamic (time-dependent) power spectrum from Kepler time series data')
     parser.add_argument('--shell', action='store_true', help='Are we running from the shell?')
 
@@ -282,24 +264,24 @@ if '--shell' in sys.argv:
     parser.add_argument('--nslice', default=10., help='Number of time slices', type=int)
 
     parser.add_argument('--plot', action='store_true', help='Plot result?')
-    parser.add_argument('--plotscale', default='logarithmic', help='type of image intensity scale', 
-        type=str, choices=['linear','logarithmic','squareroot'])
+    parser.add_argument('--plotscale', default='logarithmic', help='type of image intensity scale',
+                        type=str, choices=['linear','logarithmic','squareroot'])
     parser.add_argument('--cmap', default='PuBu', help='image colormap', type=str)
 
 
     parser.add_argument('--clobber', action='store_true', help='Overwrite output file?')
     parser.add_argument('--verbose', action='store_true', help='Write to a log file?')
-    parser.add_argument('--logfile', '-l', help='Name of ascii log file', default='kepcotrend.log', dest='logfile', type=str)
+    parser.add_argument('--logfile', '-l', help='Name of ascii log file', default='kepdynamic.log',
+                        dest='logfile', type=str)
     parser.add_argument('--status', '-e', help='Exit status (0=good)', default=0, dest='status', type=int)
 
 
     args = parser.parse_args()
-    
+
     cmdLine=True
 
     kepynamic(args.infile, args.outfile, args.fcol, args.pmin, args.pmax, args.nfreq, args.deltat, args.nslice,
           args.plot,args.plotscale,args.cmap,args.clobber,args.verbose,args.logfile,args.status,cmdLine)
-    
 
 else:
     from pyraf import iraf

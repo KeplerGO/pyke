@@ -1,7 +1,8 @@
 #!/usr/bin/env python
-
 import kepmsg, kepkey
-import sys, pyfits, tempfile, os, shutil, glob, numpy, warnings
+import sys, tempfile, os, shutil, glob, warnings
+import numpy as np
+from astropy.io import fits as pyfits
 
 # -----------------------------------------------------------
 # delete a file
@@ -10,10 +11,10 @@ def delete(file,logfile,verbose):
 
     status = 0
     try:
-	os.remove(file)
+        os.remove(file)
     except:
-	message = 'ERROR -- KEPIO.DELETE: could not delete ' + file
-	status = kepmsg.err(logfile,message,verbose)
+        message = 'ERROR -- KEPIO.DELETE: could not delete ' + file
+        status = kepmsg.err(logfile,message,verbose)
     return status
 
 # -----------------------------------------------------------
@@ -23,11 +24,11 @@ def clobber(file,logfile,verbose):
 
     status = 0
     if (os.path.isfile(file)):
-	try:
-	    status = delete(file,logfile,verbose)
-	except:
-	    message = 'ERROR -- KEPIO.CLOBBER: could not clobber ' + file
-	    status = kepmsg.err(logfile,message,verbose)
+        try:
+            status = delete(file,logfile,verbose)
+        except:
+            message = 'ERROR -- KEPIO.CLOBBER: could not clobber ' + file
+            status = kepmsg.err(logfile,message,verbose)
     return status
 
 # -----------------------------------------------------------
@@ -37,10 +38,10 @@ def openascii(file,type,logfile,verbose):
 
     status = 0
     try:
-	content = open(file,type)
+        content = open(file,type)
     except:
-	message = 'ERROR -- KEPIO.OPENASCII: cannot open ASCII file ' + file
-	status = kepmsg.err(logfile,message,verbose)
+        message = 'ERROR -- KEPIO.OPENASCII: cannot open ASCII file ' + file
+        status = kepmsg.err(logfile,message,verbose)
 
     return content, status
 
@@ -51,11 +52,10 @@ def closeascii(file,logfile,verbose):
 
     status = 0
     try:
-	file.close()
+        file.close()
     except:
-	message = 'ERROR - KEPIO.CLOSEASCII: cannot close ASCII file ' + str(file)
-	status = kepmsg.err(logfile,message,verbose)
-    
+        message = 'ERROR - KEPIO.CLOSEASCII: cannot close ASCII file ' + str(file)
+        status = kepmsg.err(logfile,message,verbose)
     return status
 
 # -----------------------------------------------------------
@@ -66,17 +66,17 @@ def splitfits(file,logfile,verbose):
     status = 0
     file = file.strip()
     if ('+' in file):
-	component = file.split('+')
-	filename = str(component[0])
-	hdu = int(component[1])
+        component = file.split('+')
+        filename = str(component[0])
+        hdu = int(component[1])
     elif ('[' in file):
-	file = file.strip(']')
-	component = file.split('[')
-	filename = str(component[0])
-	hdu = int(component[1])
+        file = file.strip(']')
+        component = file.split('[')
+        filename = str(component[0])
+        hdu = int(component[1])
     else:
-	message = 'ERROR -- KEPIO.SPLITFITS: cannot determine HDU number from name' + file
-	status = kepmsg.err(logfile,message,verbose)
+        message = 'ERROR -- KEPIO.SPLITFITS: cannot determine HDU number from name' + file
+        status = kepmsg.err(logfile,message,verbose)
     return filename, hdu, status
 
 # -----------------------------------------------------------
@@ -88,9 +88,9 @@ def openfits(file,mode,logfile,verbose):
     try:
         struct = pyfits.open(file,mode=mode)
     except:
-	message = 'ERROR -- KEPIO.OPENFITS: cannot open ' + file + ' as a FITS file'
-	status = kepmsg.err(logfile,message,verbose)
-	struct = None
+        message = 'ERROR -- KEPIO.OPENFITS: cannot open ' + file + ' as a FITS file'
+        status = kepmsg.err(logfile,message,verbose)
+        struct = None
     return struct, status
 
 # -----------------------------------------------------------
@@ -100,10 +100,10 @@ def closefits(struct,logfile,verbose):
 
     status = 0
     try:
-	struct.close()
+        struct.close()
     except:
-	message = 'ERROR -- KEPIO.CLOSEFITS: cannot close HDU structure'
-	status = kepmsg.err(logfile,message,verbose)
+        message = 'ERROR -- KEPIO.CLOSEFITS: cannot close HDU structure'
+        status = kepmsg.err(logfile,message,verbose)
     return status
 
 # -----------------------------------------------------------
@@ -117,9 +117,9 @@ def readfitstab(file,hdu,logfile,verbose):
             warnings.simplefilter('ignore')
             table = hdu.data
     except:
-	message = 'ERROR -- KEPIO.READFITSTAB: could not extract table from ' + file
-	status = kepmsg.err(logfile,message,verbose)
-	table = None
+        message = 'ERROR -- KEPIO.READFITSTAB: could not extract table from ' + file
+        status = kepmsg.err(logfile,message,verbose)
+        table = None
     return table, status
 
 # -----------------------------------------------------------
@@ -129,12 +129,12 @@ def readfitscol(file,table,column,logfile,verbose):
 
     status = 0
     try:
-	data = table.field(column)
+        data = table.field(column)
     except:
-	message  = 'ERROR -- KEPIO.READFITSCOL: could not extract ' + column 
-	message += ' data from ' + file
-	status = kepmsg.err(logfile,message,verbose)
-	data = None
+        message  = 'ERROR -- KEPIO.READFITSCOL: could not extract ' + column
+        message += ' data from ' + file
+        status = kepmsg.err(logfile,message,verbose)
+        data = None
     return data, status
 
 # -----------------------------------------------------------
@@ -301,12 +301,12 @@ def tabappend(hdu1,hdu2,logfile,verbose):
     nrows = nrows1 + nrows2
     out = pyfits.new_table(hdu1.columns,nrows=nrows)
     for name in hdu1.columns.names:
-	try:
-	    out.data.field(name)[nrows1:] = hdu2.data.field(name)
-	except:
-	    message  = 'WARNING -- KEPIO.TABAPPEND: could not append column '
-	    message += str(name)
-	    status = kepmsg.warn(logfile,message,verbose)
+        try:
+            out.data.field(name)[nrows1:] = hdu2.data.field(name)
+        except:
+            message  = 'WARNING -- KEPIO.TABAPPEND: could not append column '
+            message += str(name)
+            status = kepmsg.warn(logfile,message,verbose)
 
     return out, status
 
@@ -317,10 +317,10 @@ def readimage(struct,hdu,logfile,verbose):
 
     status = 0
     try:
-	imagedata = struct[hdu].data
+        imagedata = struct[hdu].data
     except:
-	message = 'ERROR -- KEPIO.READIMAGE: cannot read image data from HDU ' + str(hdu)
-	status = kepmsg.err(logfile,message,verbose)
+        message = 'ERROR -- KEPIO.READIMAGE: cannot read image data from HDU ' + str(hdu)
+        status = kepmsg.err(logfile,message,verbose)
     return imagedata, status
 
 # -----------------------------------------------------------
@@ -330,10 +330,10 @@ def writeimage(struct,hdu,imagedata,logfile,verbose):
 
     status = 0
     try:
-	struct[hdu].data = imagedata
+        struct[hdu].data = imagedata
     except:
-	message = 'ERROR -- KEPIO.WRITEIMAGE: Cannot write image data to HDU ' + str(hdu)
-	status = kepmsg.err(logfile,message,verbose)
+        message = 'ERROR -- KEPIO.WRITEIMAGE: Cannot write image data to HDU ' + str(hdu)
+        status = kepmsg.err(logfile,message,verbose)
     return struct, status
 
 # -----------------------------------------------------------
@@ -343,12 +343,12 @@ def writefits(hdu,filename,clobber,logfile,verbose):
 
     status = 0
     if (os.path.isfile(filename) and clobber):
-	delete(filename,logfile,verbose)
+        delete(filename,logfile,verbose)
     try:
-	hdu.writeto(filename)
+        hdu.writeto(filename)
     except:
-	message = 'ERROR -- KEPIO.WRITEFITS: Cannot create FITS file ' + filename
-	status = kepmsg.err(logfile,message,verbose)
+        message = 'ERROR -- KEPIO.WRITEFITS: Cannot create FITS file ' + filename
+        status = kepmsg.err(logfile,message,verbose)
     return status
 
 # -----------------------------------------------------------
@@ -358,11 +358,11 @@ def tmpfile(path,suffix,logfile,verbose):
 
     status = 0
     try:
-	tempfile.tempdir = path
+        tempfile.tempdir = path
         file = tempfile.mktemp() + suffix
     except:
-	message = 'ERROR -- KEPIO.TMPFILE: Cannot create temporary file name'
-	status = kepmsg.err(logfile,message,verbose)
+        message = 'ERROR -- KEPIO.TMPFILE: Cannot create temporary file name'
+        status = kepmsg.err(logfile,message,verbose)
     return file, status
 
 # -----------------------------------------------------------
@@ -374,23 +374,23 @@ def symlink(infile,linkfile,clobber,logfile,verbose):
 
     status = 0
     if (os.path.exists(linkfile) and not clobber):
-	message = 'ERROR: KEPIO.SYMLINK -- file ' + linkfile + ' exists, use clobber'
-	status = kepmsg.err(logfile,message,verbose)
+        message = 'ERROR: KEPIO.SYMLINK -- file ' + linkfile + ' exists, use clobber'
+        status = kepmsg.err(logfile,message,verbose)
     if (status == 0 and clobber):
-	try:
-	    os.remove(linkfile)
-	except:
-	    status = 0
+        try:
+            os.remove(linkfile)
+        except:
+            status = 0
 
 # create symbolic link
 
     if (status == 0):
-	try:
-	    os.symlink(infile,linkfile)
-	except:
-	    message  = 'ERROR: KEPIO.SYMLINK -- could not create symbolic link from '
-	    message += infile + ' to ' + linkfile
-	    status = kepmsg.err(logfile,message,verbose)
+        try:
+            os.symlink(infile,linkfile)
+        except:
+            message  = 'ERROR: KEPIO.SYMLINK -- could not create symbolic link from '
+            message += infile + ' to ' + linkfile
+            status = kepmsg.err(logfile,message,verbose)
     return status
 
 # -----------------------------------------------------------
@@ -400,12 +400,11 @@ def fileexists(file):
 
     status = True
     if not os.path.isfile(file):
-	status = False
+        status = False
     return status
 
 # -----------------------------------------------------------
 # move file
-   
 def move(file1,file2,logfile,verbose):
 
     status = 0
@@ -414,24 +413,23 @@ def move(file1,file2,logfile,verbose):
         shutil.move(file1,file2)
         kepmsg.log(logfile,message,verbose)
     except:
-	message = 'ERROR -- KEPIO.MOVE: Could not move ' + file1 + ' to ' + file2
-	status = kepmsg.err(logfile,message,verbose)
+        message = 'ERROR -- KEPIO.MOVE: Could not move ' + file1 + ' to ' + file2
+        status = kepmsg.err(logfile,message,verbose)
 
     return status
 
 # -----------------------------------------------------------
 # copy file
-   
 def copy(file1,file2,logfile,verbose):
 
     status = 0
     message = 'KEPIO.COPY -- copied ' + file1 + ' to ' + file2
     try:
-	shutil.copy2(file1,file2)
-	kepmsg.log(logfile,message,verbose)
+        shutil.copy2(file1,file2)
+        kepmsg.log(logfile,message,verbose)
     except:
-	message = 'ERROR -- KEPIO.COPY: could not copy ' + file1 + ' to ' + file2
-	status = kepmsg.err(logfile,message,verbose)
+        message = 'ERROR -- KEPIO.COPY: could not copy ' + file1 + ' to ' + file2
+        status = kepmsg.err(logfile,message,verbose)
 
     return status
 
@@ -441,43 +439,42 @@ def copy(file1,file2,logfile,verbose):
 def parselist(inlist,logfile,verbose):
 
 # test input name list
-   
     status = 0
     inlist.strip()
     if (len(inlist) == 0 or inlist.count(' ') > 0):
-	message = 'ERROR -- KEPIO.PARSELIST: list not specified'
-	status = kepmsg.err(logfile,message,verbose)
+        message = 'ERROR -- KEPIO.PARSELIST: list not specified'
+        status = kepmsg.err(logfile,message,verbose)
 
 # test @filelist exists
 
     if (inlist[0] == '@'):
-	infile = inlist.lstrip('@')
-	if not os.path.isfile(infile):
-	    message = 'ERROR -- KEPIO.PARSELIST: input list '+infile+' does not exist'
-	    status = kepmsg.err(logfile,message,verbose)
+        infile = inlist.lstrip('@')
+        if not os.path.isfile(infile):
+            message = 'ERROR -- KEPIO.PARSELIST: input list '+infile+' does not exist'
+            status = kepmsg.err(logfile,message,verbose)
 
 # parse wildcard and comma-separated lists
 
     outlist = []
     if (status == 0 and inlist[0] == '@'):
-	line = ' '
+        line = ' '
         infile = open(inlist.lstrip('@'))
-	while line:
-	    line = infile.readline()
-	    if (len(line.strip()) > 0):
-		outlist.append(line.rstrip('\r\n'))
+        while line:
+            line = infile.readline()
+            if (len(line.strip()) > 0):
+                outlist.append(line.rstrip('\r\n'))
     elif (status == 0 and inlist[0] != '@' and inlist.count('*') == 0):
-	if (inlist.count(',') == 0):
-	    outlist.append(inlist)
+        if (inlist.count(',') == 0):
+            outlist.append(inlist)
         else:
-	    list = inlist.split(',')
-	    for listitem in list:
-		outlist.append(listitem)
+            list = inlist.split(',')
+            for listitem in list:
+                outlist.append(listitem)
     elif (status == 0 and inlist[0] != '@' and inlist.count('*') > 0):
-	outlist = glob.glob(inlist)
+        outlist = glob.glob(inlist)
     if (status == 0 and len(outlist) == 0):
-	message = 'ERROR -- KEPIO.PARSELIST: raw input image list is empty'
-	status = kepmsg.err(logfile,message,verbose)
+        message = 'ERROR -- KEPIO.PARSELIST: raw input image list is empty'
+        status = kepmsg.err(logfile,message,verbose)
 
     return outlist, status
 
@@ -491,16 +488,16 @@ def createdir(path,logfile,verbose):
     message = 'KEPIO.CREATEDIR -- Created directory ' + path
     if (path[-1] != '/'): path += '/'
     if (not os.path.exists(path)):
-	try:
+        try:
             os.mkdir(path)
-	    kepmsg.log(logfile,message,verbose)
-	except:
-	    message  = 'ERROR -- KEPIO.CREATEDIR: Could not create '
-	    message += 'directory ' + path
-	    status = kepmsg.err(logfile,message,verbose)
+            kepmsg.log(logfile,message,verbose)
+        except:
+            message  = 'ERROR -- KEPIO.CREATEDIR: Could not create '
+            message += 'directory ' + path
+            status = kepmsg.err(logfile,message,verbose)
     else:
-	message = 'KEPIO.CREATEDIR -- ' + path + ' directory exists'
-	kepmsg.log(logfile,message,verbose)
+        message = 'KEPIO.CREATEDIR -- ' + path + ' directory exists'
+        kepmsg.log(logfile,message,verbose)
 
     return status
 
@@ -508,22 +505,22 @@ def createdir(path,logfile,verbose):
 # create a directory tree
 
 def createtree(path,logfile,verbose):
-
     status = 0
     path = path.strip()
     message = 'KEPIO.CREATETREE -- Created directory tree ' + path
-    if (path[-1] != '/'): path += '/'
+    if (path[-1] != '/'):
+        path += '/'
     if (not os.path.exists(path)):
-	try:
+        try:
             os.makedirs(path)
-	    kepmsg.log(logfile,message,verbose)
-	except:
-	    message  = 'ERROR -- KEPIO.CREATETREE: Could not create '
-	    message += 'directory tree ' + path
-	    status = kepmsg.err(logfile,message,verbose)
+            kepmsg.log(logfile,message,verbose)
+        except:
+            message  = 'ERROR -- KEPIO.CREATETREE: Could not create '
+            message += 'directory tree ' + path
+            status = kepmsg.err(logfile,message,verbose)
     else:
-	message = 'KEPIO.CREATETREE -- ' + path + ' directory exists'
-	kepmsg.log(logfile,message,verbose)
+        message = 'KEPIO.CREATETREE -- ' + path + ' directory exists'
+        kepmsg.log(logfile,message,verbose)
 
     return status
 
@@ -585,24 +582,24 @@ def timeranges(ranges,logfile,verbose):
             txt = 'ERROR -- KEPIO.TIMERANGES: cannot understand time ranges provided'
             status = kepmsg.err(logfile,txt,verbose)
             return tstart, tstop, status
-        
+
     return tstart, tstop, status
 
 ## -----------------------------------------------------------
 ## manual calculation of median cadence within a time series
 
 def cadence(instr,infile,logfile,verbose,status):
-    
+
     try:
         intime = instr[1].data.field('barytime')
     except:
         intime, status = kepio.readfitscol(infile,instr[1].data,'time',logfile,verbose)
     dt = []
     for i in range(1,len(intime)):
-        if numpy.isfinite(intime[i]) and numpy.isfinite(intime[i-1]):
+        if np.isfinite(intime[i]) and np.isfinite(intime[i-1]):
             dt.append(intime[i] - intime[i-1])
-    dt = numpy.array(dt,dtype='float32')
-    cadnce = numpy.median(dt) * 86400.0
+    dt = np.array(dt,dtype='float32')
+    cadnce = np.median(dt) * 86400.0
 
     return intime[0], intime[-1], len(intime), cadnce, status
 
@@ -633,10 +630,10 @@ def timekeys(instr,file,logfile,verbose,status):
     try:
         tstart = instr[1].header['TSTART']
     except:
-	try:
+        try:
             tstart = instr[1].header['STARTBJD']
             tstart += 2.4e6
-	except:
+        except:
             try:
                 tstart = instr[0].header['LC_START']
                 tstart += 2400000.5
@@ -655,10 +652,10 @@ def timekeys(instr,file,logfile,verbose,status):
     try:
         tstop = instr[1].header['TSTOP']
     except:
-	try:
+        try:
             tstop = instr[1].header['ENDBJD']
             tstop += 2.4e6
-	except:
+        except:
             try:
                 tstop = instr[0].header['LC_END']
                 tstop += 2400000.5
@@ -668,7 +665,7 @@ def timekeys(instr,file,logfile,verbose,status):
                     tstop += 2400000.5
                 except:
                     message  = 'ERROR -- KEPIO.TIMEKEYS: Cannot find TSTOP, STOPBJD or '
-                    message += 'LC_STOP in ' + file 
+                    message += 'LC_STOP in ' + file
                     status = kepmsg.err(logfile,message,verbose)
     tstop += bjdref
 
@@ -850,12 +847,12 @@ def readTPF(infile,colname,logfile,verbose):
 
 # for STSCI_PYTHON v2.12 - convert 3D data array to 2D
 
-    if status == 0 and len(numpy.shape(pixels)) == 3:
-        isize = numpy.shape(pixels)[0]
-        jsize = numpy.shape(pixels)[1]
-        ksize = numpy.shape(pixels)[2]
-        pixels = numpy.reshape(pixels,(isize,jsize*ksize))
-    
+    if status == 0 and len(np.shape(pixels)) == 3:
+        isize = np.shape(pixels)[0]
+        jsize = np.shape(pixels)[1]
+        ksize = np.shape(pixels)[2]
+        pixels = np.reshape(pixels,(isize,jsize*ksize))
+
     return kepid, channel, skygroup, module, output, quarter, season, \
         ra, dec, column, row, kepmag, xdim, ydim, pixels, status
 
@@ -898,10 +895,10 @@ def readMaskDefinition(infile,logfile,verbose):
 
     if status == 0:
         crpix1p, crpix2p, crval1p, crval2p, cdelt1p, cdelt2p, status = \
-            kepkey.getWCSp(infile,inf['APERTURE'],logfile,verbose)     
+            kepkey.getWCSp(infile,inf['APERTURE'],logfile,verbose)
     if status == 0:
-        pixelcoord1 = numpy.zeros((naxis1,naxis2))
-        pixelcoord2 = numpy.zeros((naxis1,naxis2))
+        pixelcoord1 = np.zeros((naxis1,naxis2))
+        pixelcoord2 = np.zeros((naxis1,naxis2))
         for j in range(naxis2):
             for i in range(naxis1):
                 pixelcoord1[i,j] = kepkey.wcs(i,crpix1p,crval1p,cdelt1p)

@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 
 import kepmsg, kepio
-import pyfits, numpy
+import numpy
+from astropy.io import fits as pyfits
 
 # -----------------------------------------------------------
 # get keyword value
@@ -10,12 +11,12 @@ def get(file,hdu,keyword,logfile,verbose):
 
     status = 0
     try:
-	value = hdu.header[keyword]
+        value = hdu.header[keyword]
     except:
-	message = 'ERROR -- KEPKEY.GET: Cannot read keyword ' + keyword
-	message += ' in file ' + file
-	status = kepmsg.err(logfile,message,verbose)
-	value = None
+        message = 'ERROR -- KEPKEY.GET: Cannot read keyword ' + keyword
+        message += ' in file ' + file
+        status = kepmsg.err(logfile,message,verbose)
+        value = None
     return value, status
 
 # -----------------------------------------------------------
@@ -25,11 +26,11 @@ def delete(keyword,hdu,file,logfile,verbose):
 
     status = 0
     try:
-	del hdu.header[keyword]
+        del hdu.header[keyword]
     except:
-	message = 'ERROR -- KEPKEY.DELETE: Cannot delete keyword ' + keyword
-	message += ' in ' + file
-	status = kepmsg.err(logfile,message,verbose)
+        message = 'ERROR -- KEPKEY.DELETE: Cannot delete keyword ' + keyword
+        message += ' in ' + file
+        status = kepmsg.err(logfile,message,verbose)
     return status
 
 # -----------------------------------------------------------
@@ -39,11 +40,11 @@ def new(keyword,value,comment,hdu,file,logfile,verbose):
 
     status = 0
     try:
-        hdu.header.update(keyword,value,comment)
+        hdu.header[keyword] = (value, comment)
     except:
-	message = 'ERROR -- KEPKEY.NEW: Cannot create keyword ' + keyword
-	message += ' in ' + file
-	status = kepmsg.err(logfile,message,verbose)
+        message = 'ERROR -- KEPKEY.NEW: Cannot create keyword ' + keyword
+        message += ' in ' + file
+        status = kepmsg.err(logfile,message,verbose)
     return status
 
 # -----------------------------------------------------------
@@ -53,11 +54,11 @@ def comment(txt,hdu,file,logfile,verbose):
 
     status = 0
     try:
-	hdu.header.add_comment(txt)
+        hdu.header.add_comment(txt)
     except:
-	message = 'ERROR -- KEPKEY.COMMENT: Cannot create comment keyword'
-	message += ' in ' + file
-	status = kepmsg.err(logfile,message,verbose)
+        message = 'ERROR -- KEPKEY.COMMENT: Cannot create comment keyword'
+        message += ' in ' + file
+        status = kepmsg.err(logfile,message,verbose)
     return status
 
 # -----------------------------------------------------------
@@ -67,11 +68,11 @@ def history(txt,hdu,file,logfile,verbose):
 
     status = 0
     try:
-	hdu.header.add_history(txt)
+        hdu.header.add_history(txt)
     except:
-	message = 'ERROR -- KEPKEY.HISTORY: Cannot create history keyword'
-	message += ' in ' + file
-	status = kepmsg.err(logfile,message,verbose)
+        message = 'ERROR -- KEPKEY.HISTORY: Cannot create history keyword'
+        message += ' in ' + file
+        status = kepmsg.err(logfile,message,verbose)
     return status
 
 # -----------------------------------------------------------
@@ -81,11 +82,11 @@ def change(keyword,value,hdu,file,logfile,verbose):
 
     status = 0
     try:
-	hdu.header.update(keyword,value)
+        hdu.header[keyword] = value
     except:
-	message = 'ERROR -- KEPKEY.CHANGE: Cannot update keyword ' + keyword
-	message += ' in ' + file
-	status = kepmsg.err(logfile,message,verbose)
+        message = 'ERROR -- KEPKEY.CHANGE: Cannot update keyword ' + keyword
+        message += ' in ' + file
+        status = kepmsg.err(logfile,message,verbose)
 
     return status
 
@@ -101,17 +102,17 @@ def cadence(struct,file,logfile,verbose):
         int_time, status = get(file,struct,'INT_TIME',logfile,verbose)
     except:
         txt = 'ERROR -- KEPKEY.CADENCE: Cannot read keyword INT_TIME in file ' + file + '[1]'
-	status = kepmsg.err(logfile,message,verbose)
+        status = kepmsg.err(logfile,message,verbose)
     try:
         readtime, status = get(file,struct,'READTIME',logfile,verbose)
     except:
         txt = 'ERROR -- KEPKEY.CADENCE: Cannot read keyword READTIME in file ' + file + '[1]'
-	status = kepmsg.err(logfile,message,verbose)
+        status = kepmsg.err(logfile,message,verbose)
     try:
         num_frm, status = get(file,struct,'NUM_FRM',logfile,verbose)
     except:
         txt = 'ERROR -- KEPKEY.CADENCE: Cannot read keyword NUM_FRM in file ' + file + '[1]'
-	status = kepmsg.err(logfile,message,verbose)
+        status = kepmsg.err(logfile,message,verbose)
 
 # calculate cadence
 
@@ -248,7 +249,6 @@ def getWCSs(file,struct,logfile,verbose):
         pc = numpy.linalg.inv(pc)
     except:
         pass
-    
 
     return crpix1, crpix2, crval1, crval2, cdelt1, cdelt2, pc, status
 
@@ -274,6 +274,4 @@ def emptykeys(struct,file,logfile,verbose):
             head = struct[hdu].header[keyword]
             if ('pyfits' in str(head) and 'Undefined' in str(head)):
                 status = delete(keyword,struct[hdu],file,logfile,verbose)
-        
     return struct
-

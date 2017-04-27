@@ -1,14 +1,13 @@
-import numpy, scipy, sys, time, pyfits, pylab, math, re
-from scipy import stats
-from pyfits import *
-from pylab import *
-from matplotlib import *
-from math import *
+import numpy as np
+import scipy, sys, time, math, re
+from astropy.io import fits as pyfits
 import matplotlib.pyplot as plt
+from copy import copy
 import kepio, kepmsg, kepkey, kepfit, kepstat
 
-def kepflatten(infile,outfile,datacol,errcol,nsig,stepsize,winsize,npoly,niter,ranges,
-               plot,clobber,verbose,logfile,status,cmdLine=False): 
+def kepflatten(infile,outfile,datacol,errcol,nsig,stepsize,winsize,npoly,
+               niter,ranges,plot,clobber,verbose,logfile,status,
+               cmdLine=False):
 
 # startup parameters
 
@@ -66,7 +65,7 @@ def kepflatten(infile,outfile,datacol,errcol,nsig,stepsize,winsize,npoly,niter,r
 # clobber output file
 
     if clobber: status = kepio.clobber(outfile,logfile,verbose)
-    if kepio.fileexists(outfile): 
+    if kepio.fileexists(outfile):
         message = 'ERROR -- KEPFLATTEN: ' + outfile + ' exists. Use clobber=yes'
         status = kepmsg.err(logfile,message,verbose)
 
@@ -91,7 +90,7 @@ def kepflatten(infile,outfile,datacol,errcol,nsig,stepsize,winsize,npoly,niter,r
 # read table structure
 
     if status == 0:
-	table, status = kepio.readfitstab(infile,instr[1],logfile,verbose)
+        table, status = kepio.readfitstab(infile,instr[1],logfile,verbose)
 
 # filter input data table
 
@@ -110,13 +109,13 @@ def kepflatten(infile,outfile,datacol,errcol,nsig,stepsize,winsize,npoly,niter,r
     if status == 0:
         if errcol.lower() == 'none' or errcol == 'PSF_FLUX_ERR':
             err = datac * cadence
-            err = numpy.sqrt(numpy.abs(err)) / cadence
-            work1 = numpy.array([table.field('time'), datac, err])
+            err = np.sqrt(np.abs(err)) / cadence
+            work1 = np.array([table.field('time'), datac, err])
         else:
-            work1 = numpy.array([table.field('time'), datac, err])
-        work1 = numpy.rot90(work1,3)
-        work1 = work1[~numpy.isnan(work1).any(1)]            
- 
+            work1 = np.array([table.field('time'), datac, err])
+        work1 = np.rot90(work1,3)
+        work1 = work1[~np.isnan(work1).any(1)]
+
 # read table columns
 
     if status == 0:
@@ -126,7 +125,7 @@ def kepflatten(infile,outfile,datacol,errcol,nsig,stepsize,winsize,npoly,niter,r
         if len(intime) == 0:
              message = 'ERROR -- KEPFLATTEN: one of the input arrays is all NaN'
              status = kepmsg.err(logfile,message,verbose)
-       
+
 # time ranges for region to be corrected
 
     if status == 0:
@@ -140,7 +139,7 @@ def kepflatten(infile,outfile,datacol,errcol,nsig,stepsize,winsize,npoly,niter,r
         work = intime[0]
         while work <= intime[-1]:
             tstep1.append(work)
-            tstep2.append(array([work+winsize,intime[-1]],dtype='float64').min())
+            tstep2.append(np.array([work+winsize,intime[-1]],dtype='float64').min())
             work += stepsize
 
 # find cadence limits of each time step
@@ -163,30 +162,30 @@ def kepflatten(infile,outfile,datacol,errcol,nsig,stepsize,winsize,npoly,niter,r
 # clean up x-axis unit
 
     if status == 0:
-	intime0 = float(int(tstart / 100) * 100.0)
-	ptime = intime - intime0
-	xlab = 'BJD $-$ %d' % intime0
+        intime0 = float(int(tstart / 100) * 100.0)
+        ptime = intime - intime0
+        xlab = 'BJD $-$ %d' % intime0
 
 # clean up y-axis units
 
     if status == 0:
         pout = copy(indata)
-	nrm = len(str(int(pout.max())))-1
-	pout = pout / 10**nrm
-	ylab = '10$^%d$ e$^-$ s$^{-1}$' % nrm
+        nrm = len(str(int(pout.max())))-1
+        pout = pout / 10**nrm
+        ylab = '10$^%d$ e$^-$ s$^{-1}$' % nrm
 
 # data limits
 
-	xmin = ptime.min()
-	xmax = ptime.max()
-	ymin = pout.min()
-	ymax = pout.max()
-	xr = xmax - xmin
-	yr = ymax - ymin
-        ptime = insert(ptime,[0],[ptime[0]]) 
-        ptime = append(ptime,[ptime[-1]])
-        pout = insert(pout,[0],[0.0]) 
-        pout = append(pout,0.0)
+        xmin = ptime.min()
+        xmax = ptime.max()
+        ymin = pout.min()
+        ymax = pout.max()
+        xr = xmax - xmin
+        yr = ymax - ymin
+        ptime = np.insert(ptime,[0],[ptime[0]])
+        ptime = np.append(ptime,[ptime[-1]])
+        pout = np.insert(pout,[0],[0.0])
+        pout = np.append(pout,0.0)
 
 # plot light curve
 
@@ -206,51 +205,51 @@ def kepflatten(infile,outfile,datacol,errcol,nsig,stepsize,winsize,npoly,niter,r
         except:
             plotLatex = False
     if status == 0 and plot:
-        pylab.figure(figsize=[xsize,ysize])
-        pylab.clf()
+        plt.figure(figsize=[xsize,ysize])
+        plt.clf()
 
 # plot data
 
-        ax = pylab.axes([0.06,0.54,0.93,0.43])
+        ax = plt.axes([0.06,0.54,0.93,0.43])
 
 # force tick labels to be absolute rather than relative
 
-        pylab.gca().xaxis.set_major_formatter(pylab.ScalarFormatter(useOffset=False))
-        pylab.gca().yaxis.set_major_formatter(pylab.ScalarFormatter(useOffset=False))
+        plt.gca().xaxis.set_major_formatter(plt.ScalarFormatter(useOffset=False))
+        plt.gca().yaxis.set_major_formatter(plt.ScalarFormatter(useOffset=False))
 
 # rotate y labels by 90 deg
 
         labels = ax.get_yticklabels()
-        pylab.setp(labels, 'rotation', 90)
-        pylab.setp(pylab.gca(),xticklabels=[])
+        plt.setp(labels, 'rotation', 90)
+        plt.setp(plt.gca(),xticklabels=[])
 
-        pylab.plot(ptime[1:-1],pout[1:-1],color=lcolor,linestyle='-',linewidth=lwidth)
-        pylab.fill(ptime,pout,color=fcolor,linewidth=0.0,alpha=falpha)
+        plt.plot(ptime[1:-1],pout[1:-1],color=lcolor,linestyle='-',linewidth=lwidth)
+        plt.fill(ptime,pout,color=fcolor,linewidth=0.0,alpha=falpha)
         if not plotLatex:
             ylab = '10**%d electrons/sec' % nrm
-        ylabel(ylab, {'color' : 'k'})
-        grid()
+        plt.ylabel(ylab, {'color' : 'k'})
+        plt.grid()
 
 # loop over each time step, fit data, determine rms
 
     if status == 0:
-        fitarray = numpy.zeros((len(indata),len(cstep1)),dtype='float32')
-        sigarray = numpy.zeros((len(indata),len(cstep1)),dtype='float32')
-        fitarray[:,:] = numpy.nan
-        sigarray[:,:] = numpy.nan
+        fitarray = np.zeros((len(indata),len(cstep1)),dtype='float32')
+        sigarray = np.zeros((len(indata),len(cstep1)),dtype='float32')
+        fitarray[:,:] = np.nan
+        sigarray[:,:] = np.nan
         masterfit = indata * 0.0
-        mastersigma = numpy.zeros(len(masterfit))
+        mastersigma = np.zeros(len(masterfit))
         functype = 'poly' + str(npoly)
         for i in range(len(cstep1)):
             timeSeries = intime[cstep1[i]:cstep2[i]+1]-intime[cstep1[i]]
             dataSeries = indata[cstep1[i]:cstep2[i]+1]
-            fitTimeSeries = numpy.array([],dtype='float32')
-            fitDataSeries = numpy.array([],dtype='float32')
+            fitTimeSeries = np.array([],dtype='float32')
+            fitDataSeries = np.array([],dtype='float32')
             pinit = [dataSeries.mean()]
             if npoly > 0:
                 for j in range(npoly):
                     pinit.append(0.0)
-            pinit = array(pinit,dtype='float32')
+            pinit = np.array(pinit,dtype='float32')
             try:
                 if len(fitarray[cstep1[i]:cstep2[i]+1,i]) > len(pinit):
                     coeffs, errors, covar, iiter, sigma, chi2, dof, fit, plotx, ploty, status = \
@@ -263,7 +262,7 @@ def kepflatten(infile,outfile,datacol,errcol,nsig,stepsize,winsize,npoly,niter,r
             except:
                 for j in range(cstep1[i],cstep2[i]+1):
                     fitarray[cstep1[i]:cstep2[i]+1,i] = 0.0
-                    sigarray[cstep1[i]:cstep2[i]+1,i] = 1.0e-10             
+                    sigarray[cstep1[i]:cstep2[i]+1,i] = 1.0e-10
                 message  = 'WARNING -- KEPFLATTEN: could not fit range '
                 message += str(intime[cstep1[i]]) + '-' + str(intime[cstep2[i]])
                 kepmsg.warn(None,message)
@@ -272,12 +271,12 @@ def kepflatten(infile,outfile,datacol,errcol,nsig,stepsize,winsize,npoly,niter,r
 
     if status == 0:
         for i in range(len(indata)):
-            masterfit[i] = scipy.stats.nanmean(fitarray[i,:])
-            mastersigma[i] = scipy.stats.nanmean(sigarray[i,:])
+            masterfit[i] = np.nanmean(fitarray[i,:])
+            mastersigma[i] = np.nanmean(sigarray[i,:])
         masterfit[-1] = masterfit[-4] #fudge
         masterfit[-2] = masterfit[-4] #fudge
         masterfit[-3] = masterfit[-4] #fudge
-        pylab.plot(intime-intime0, masterfit / 10**nrm,'g',lw='3')
+        plt.plot(intime-intime0, masterfit / 10**nrm,'g',lw='3')
 
 # reject outliers
 
@@ -287,10 +286,10 @@ def kepflatten(infile,outfile,datacol,errcol,nsig,stepsize,winsize,npoly,niter,r
             if abs(indata[i] - masterfit[i]) > nsig * mastersigma[i] and i in cadencelis:
                 rejtime.append(intime[i])
                 rejdata.append(indata[i])
-        rejtime = array(rejtime,dtype='float64')
-        rejdata = array(rejdata,dtype='float32')
+        rejtime = np.array(rejtime,dtype='float64')
+        rejdata = np.array(rejdata,dtype='float32')
         if plot:
-            pylab.plot(rejtime-intime0,rejdata / 10**nrm,'ro')
+            plt.plot(rejtime-intime0,rejdata / 10**nrm,'ro')
 
 # new data for output file
 
@@ -301,91 +300,86 @@ def kepflatten(infile,outfile,datacol,errcol,nsig,stepsize,winsize,npoly,niter,r
 # plot ranges
 
     if status == 0 and plot:
-        pylab.xlim(xmin-xr*0.01,xmax+xr*0.01)
-        if ymin >= 0.0: 
-            pylab.ylim(ymin-yr*0.01,ymax+yr*0.01)
+        plt.xlim(xmin-xr*0.01,xmax+xr*0.01)
+        if ymin >= 0.0:
+            plt.ylim(ymin-yr*0.01,ymax+yr*0.01)
         else:
-            pylab.ylim(1.0e-10,ymax+yr*0.01)
+            plt.ylim(1.0e-10,ymax+yr*0.01)
 
 # plot residual data
 
     if status == 0 and plot:
-        ax = pylab.axes([0.06,0.09,0.93,0.43])
+        ax = plt.axes([0.06,0.09,0.93,0.43])
 
 # force tick labels to be absolute rather than relative
 
     if status == 0 and plot:
-        pylab.gca().xaxis.set_major_formatter(pylab.ScalarFormatter(useOffset=False))
-        pylab.gca().yaxis.set_major_formatter(pylab.ScalarFormatter(useOffset=False))
+        plt.gca().xaxis.set_major_formatter(plt.ScalarFormatter(useOffset=False))
+        plt.gca().yaxis.set_major_formatter(plt.ScalarFormatter(useOffset=False))
 
 # rotate y labels by 90 deg
 
         labels = ax.get_yticklabels()
-        setp(labels, 'rotation', 90)
+        plt.setp(labels, 'rotation', 90)
 
 # clean up y-axis units
 
     if status == 0:
         pout = copy(outdata)
-	ylab = 'Normalized Flux'
+        ylab = 'Normalized Flux'
 
 # data limits
 
     if status == 0 and plot:
-	ymin = pout.min()
-	ymax = pout.max()
-	yr = ymax - ymin
-        pout = insert(pout,[0],[0.0]) 
-        pout = append(pout,0.0)
+        ymin = pout.min()
+        ymax = pout.max()
+        yr = ymax - ymin
+        pout = np.insert(pout,[0],[0.0])
+        pout = np.append(pout,0.0)
 
-        pylab.plot(ptime[1:-1],pout[1:-1],color=lcolor,linestyle='-',linewidth=lwidth)
-        pylab.fill(ptime,pout,color=fcolor,linewidth=0.0,alpha=falpha)
-	pylab.xlabel(xlab, {'color' : 'k'})
-        pylab.ylabel(ylab, {'color' : 'k'})
-        pylab.grid()
+        plt.plot(ptime[1:-1],pout[1:-1],color=lcolor,linestyle='-',linewidth=lwidth)
+        plt.fill(ptime,pout,color=fcolor,linewidth=0.0,alpha=falpha)
+        plt.xlabel(xlab, {'color' : 'k'})
+        plt.ylabel(ylab, {'color' : 'k'})
+        plt.grid()
 
 # plot ranges
 
     if status == 0 and plot:
-        pylab.xlim(xmin-xr*0.01,xmax+xr*0.01)
-        if ymin >= 0.0: 
-            pylab.ylim(ymin-yr*0.01,ymax+yr*0.01)
+        plt.xlim(xmin-xr*0.01,xmax+xr*0.01)
+        if ymin >= 0.0:
+            plt.ylim(ymin-yr*0.01,ymax+yr*0.01)
         else:
-            pylab.ylim(1.0e-10,ymax+yr*0.01)
+            plt.ylim(1.0e-10,ymax+yr*0.01)
 
 # render plot
 
     if status == 0 and plot:
-        pylab.savefig(re.sub('.fits','.png',outfile))
-        if cmdLine: 
-            pylab.show(block=True)
-        else: 
-            pylab.ion()
-            pylab.plot([])
-            pylab.ioff()
-	
-	
+        plt.savefig(re.sub('.fits','.png',outfile))
+        plt.ion()
+        plt.show()
+
 # add NaNs back into data
 
     if status == 0:
         n = 0
-        work1 = array([],dtype='float32')
-        work2 = array([],dtype='float32')
+        work1 = np.array([],dtype='float32')
+        work2 = np.array([],dtype='float32')
         instr, status = kepio.openfits(infile,'readonly',logfile,verbose)
-	table, status = kepio.readfitstab(infile,instr[1],logfile,verbose)
+        table, status = kepio.readfitstab(infile,instr[1],logfile,verbose)
         tn = table.field('time')
         dn = table.field(datacol)
         for i in range(len(table.field(0))):
-            if numpy.isfinite(tn[i]) and numpy.isfinite(dn[i]) and numpy.isfinite(err[i]):
+            if np.isfinite(tn[i]) and np.isfinite(dn[i]) and np.isfinite(err[i]):
                 try:
-                    work1 = numpy.append(work1,outdata[n])
-                    work2 = numpy.append(work2,outerr[n])
+                    work1 = np.append(work1,outdata[n])
+                    work2 = np.append(work2,outerr[n])
                     n += 1
                 except:
                     pass
             else:
-                work1 = numpy.append(work1,numpy.nan)
-                work2 = numpy.append(work2,numpy.nan)
+                work1 = np.append(work1,np.nan)
+                work2 = np.append(work2,np.nan)
 
 # history keyword in output file
 
@@ -398,7 +392,7 @@ def kepflatten(infile,outfile,datacol,errcol,nsig,stepsize,winsize,npoly,niter,r
             col1 = pyfits.Column(name='DETSAP_FLUX',format='E13.7',array=work1)
             col2 = pyfits.Column(name='DETSAP_FLUX_ERR',format='E13.7',array=work2)
             cols = instr[1].data.columns + col1 + col2
-            instr[1] = pyfits.new_table(cols,header=instr[1].header)
+            instr[1] = pyfits.BinTableHDU.from_columns(cols,header=instr[1].header)
             instr.writeto(outfile)
         except ValueError:
             try:
@@ -408,24 +402,24 @@ def kepflatten(infile,outfile,datacol,errcol,nsig,stepsize,winsize,npoly,niter,r
             except:
                 message = 'ERROR -- KEPFLATTEN: cannot add DETSAP_FLUX data to FITS file'
                 status = kepmsg.err(logfile,message,verbose)
-	
+
 # close input file
 
     if status == 0:
-        status = kepio.closefits(instr,logfile,verbose)	    
+        status = kepio.closefits(instr,logfile,verbose)
 
 ## end time
 
-    if (status == 0):
-	    message = 'KEPFLATTEN completed at'
+    if status == 0:
+        message = 'KEPFLATTEN completed at'
     else:
-	    message = '\nKEPFLATTEN aborted at'
+        message = '\nKEPFLATTEN aborted at'
     kepmsg.clock(message,logfile,verbose)
 
 # main
 if '--shell' in sys.argv:
     import argparse
-    
+
     parser = argparse.ArgumentParser(description='Remove or replace data outliers from a time series')
     parser.add_argument('--shell', action='store_true', help='Are we running from the shell?')
     parser.add_argument('infile', help='Name of input file', type=str)
@@ -434,7 +428,8 @@ if '--shell' in sys.argv:
     parser.add_argument('--errcol', default='PDCSAP_FLUX_ERR', help='Name of data error column to plot', type=str)
     parser.add_argument('--nsig', default=3., help='Sigma clipping threshold for outliers', type=float)
     parser.add_argument('--stepsize', default=0.5, help='Stepsize on which to fit data [days]', type=float)
-    parser.add_argument('--winsize', default=5.0, help='Window size of data to fit after each step (>= stepsize) [days]', type=float)
+    parser.add_argument('--winsize', default=5.0,
+                        help='Window size of data to fit after each step (>= stepsize) [days]', type=float)
     parser.add_argument('--npoly', default=3, help='Polynomial order for each fit', type=int)
     parser.add_argument('--niter', default=1, help='Maximum number of clipping iterations', type=int)
     parser.add_argument('--ranges', default='0,0', help='Time ranges of regions to filter', type=str)

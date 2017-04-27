@@ -1,15 +1,11 @@
-
-import numpy, sys, time, pyfits, pylab, math, re
-from pyfits import *
-from pylab import *
-from matplotlib import *
-import matplotlib.mlab as mlab
-from math import *
-from numpy import *
+import sys, time, math, re
+from astropy.io import fits as pyfits
+from matplotlib import pyplot as plt
+import numpy as np
 import kepio, kepmsg, kepkey, kepfit, kepfunc, kepstat, kepfourier
 
 def keptrial(infile,outfile,datacol,errcol,fmin,fmax,nfreq,method,
-             ntrials,plot,clobber,verbose,logfile,status,cmdLine=False): 
+             ntrials,plot,clobber,verbose,logfile,status,cmdLine=False):
 
 # startup parameters
 
@@ -23,7 +19,7 @@ def keptrial(infile,outfile,datacol,errcol,fmin,fmax,nfreq,method,
     fcolor = '#ffff00'
     falpha = 0.2
 
-# log the call 
+# log the call
 
     hashline = '----------------------------------------------------------------------------'
     kepmsg.log(logfile,hashline,verbose)
@@ -60,10 +56,10 @@ def keptrial(infile,outfile,datacol,errcol,fmin,fmax,nfreq,method,
 # clobber output file
 
     if clobber: status = kepio.clobber(outfile,logfile,verbose)
-    if kepio.fileexists(outfile): 
-	    message = 'ERROR -- KEPTRIAL: ' + outfile + ' exists. Use clobber=yes'
-	    kepmsg.err(logfile,message,verbose)
-	    status = 1
+    if kepio.fileexists(outfile):
+        message = 'ERROR -- KEPTRIAL: ' + outfile + ' exists. Use clobber=yes'
+        kepmsg.err(logfile,message,verbose)
+        status = 1
 
 # open input file
 
@@ -78,9 +74,9 @@ def keptrial(infile,outfile,datacol,errcol,fmin,fmax,nfreq,method,
 # input data
 
     if status == 0:
-	try:
+        try:
             barytime = instr[1].data.field('barytime')
-	except:
+        except:
             barytime, status = kepio.readfitscol(infile,instr[1].data,'time',logfile,verbose)
     if status == 0:
         signal, status = kepio.readfitscol(infile,instr[1].data,datacol,logfile,verbose)
@@ -93,27 +89,8 @@ def keptrial(infile,outfile,datacol,errcol,fmin,fmax,nfreq,method,
         try:
             nanclean = instr[1].header['NANCLEAN']
         except:
-	    incols = [barytime, signal, err]
-	    [barytime, signal, err] = kepstat.removeinfinlc(signal, incols)
-
-# set up plot
-
-    if status == 0:
-        plotLatex = True
-        try:
-            params = {'backend': 'png',
-                      'axes.linewidth': 2.5,
-                      'axes.labelsize': labelsize,
-                      'axes.font': 'sans-serif',
-                      'axes.fontweight' : 'bold',
-                      'text.fontsize': 12,
-                      'legend.fontsize': 12,
-                      'xtick.labelsize': ticksize,
-                      'ytick.labelsize': ticksize}
-            rcParams.update(params)
-        except:
-            print 'WARNING: install latex for scientific plotting'
-            plotLatex = False
+            incols = [barytime, signal, err]
+            [barytime, signal, err] = kepstat.removeinfinlc(signal, incols)
 
 # frequency steps and Monte Carlo iterations
 
@@ -141,48 +118,40 @@ def keptrial(infile,outfile,datacol,errcol,fmin,fmax,nfreq,method,
 
 # plot stop-motion histogram
 
-            pylab.ion()
-	    pylab.figure(1,figsize=[7,10])
-            clf()
-	    pylab.axes([0.08,0.08,0.88,0.89])
-            pylab.gca().xaxis.set_major_formatter(pylab.ScalarFormatter(useOffset=False))
-            pylab.gca().yaxis.set_major_formatter(pylab.ScalarFormatter(useOffset=False))
-            n,bins,patches = pylab.hist(freq,bins=nfreq,range=[fmin,fmax],
-                                        align='mid',rwidth=1,ec='#0000ff',
-                                        fc='#ffff00',lw=2)
+            plt.ion()
+            plt.figure(1,figsize=[7,10])
+            plt.clf()
+            plt.axes([0.08,0.08,0.88,0.89])
+            plt.gca().xaxis.set_major_formatter(plt.ScalarFormatter(useOffset=False))
+            plt.gca().yaxis.set_major_formatter(plt.ScalarFormatter(useOffset=False))
+            n,bins,patches = plt.hist(freq,bins=nfreq,range=[fmin,fmax],
+                                      align='mid',rwidth=1,ec='#0000ff',
+                                      fc='#ffff00',lw=2)
 
 # fit normal distribution to histogram
 
-            x = zeros(len(bins))
+            x = np.zeros(len(bins))
             for j in range(1,len(bins)):
                 x[j] = (bins[j] + bins[j-1]) / 2
-            pinit = numpy.array([float(i),freq[-1],deltaf])
+            pinit = np.array([float(i),freq[-1],deltaf])
             if i > 3:
-                n = array(n,dtype='float32')
+                n = np.array(n,dtype='float32')
                 coeffs, errors, covar, sigma, chi2, dof, fit, plotx, ploty, status = \
                     kepfit.leastsquare('gauss',pinit,x[1:],n,None,logfile,verbose)
                 fitfunc = kepfunc.gauss()
-                f = arange(fmin,fmax,(fmax-fmin)/100)
+                f = np.arange(fmin,fmax,(fmax-fmin)/100)
                 fit = fitfunc(coeffs,f)
-                pylab.plot(f,fit,'r-',linewidth=2)
-            if plotLatex:
-                xlabel(r'Frequency (d$^{-1}$)', {'color' : 'k'})
-            else:
-                xlabel(r'Frequency (1/d)', {'color' : 'k'})
-            ylabel('N', {'color' : 'k'})
-            xlim(fmin,fmax)
-	    grid()
+                plt.plot(f,fit,'r-',linewidth=2)
+                plt.xlabel(r'Frequency (1/d)', {'color' : 'k'})
+            plt.ylabel('N', {'color' : 'k'})
+            plt.xlim(fmin,fmax)
+            plt.grid()
 
 # render plot
 
         if plot:
-            if cmdLine: 
-                pylab.show()
-            else: 
-                pylab.ion()
-                pylab.plot([])
-                pylab.ioff()
-
+            plt.ion()
+            plt.show()
 # period results
 
     if status == 0:
@@ -215,104 +184,94 @@ def keptrial(infile,outfile,datacol,errcol,fmin,fmax,nfreq,method,
 # history keyword in output file
 
     if status == 0:
-	    status = kepkey.history(call,instr[0],outfile,logfile,verbose)
+        status = kepkey.history(call,instr[0],outfile,logfile,verbose)
 
 ## write output file
 
     if status == 0:
-        col1 = Column(name='TRIAL',format='J',array=trial)
-        col2 = Column(name='FREQUENCY',format='E',unit='1/day',array=freq)
-        col3 = Column(name='POWER',format='E',array=pmax)
-        cols = ColDefs([col1,col2,col3])
-        instr.append(new_table(cols))
+        col1 = pyfits.Column(name='TRIAL',format='J',array=trial)
+        col2 = pyfits.Column(name='FREQUENCY',format='E',unit='1/day',array=freq)
+        col3 = pyfits.Column(name='POWER',format='E',array=pmax)
+        cols = pyfits.ColDefs([col1,col2,col3])
+        instr.append(pyfits.BinTableHDU.from_columns(cols))
         try:
-            instr[-1].header.update('EXTNAME','TRIALS','Extension name')
+            instr[-1].header['EXTNAME' ] = ('TRIALS','Extension name')
         except:
             status = 1
         try:
-            instr[-1].header.update('SEARCHR1',1.0 / fmax,'Search range lower bound (days)')
+            instr[-1].header['SEARCHR1'] = (1.0 / fmax,'Search range lower bound (days)')
         except:
             status = 1
         try:
-            instr[-1].header.update('SEARCHR2',1.0 / fmin,'Search range upper bound (days)')
+            instr[-1].header['SEARCHR2'] = (1.0 / fmin,'Search range upper bound (days)')
         except:
             status = 1
         try:
-            instr[-1].header.update('NFREQ',nfreq,'Number of frequency bins')
+            instr[-1].header['NFREQ'   ] = (nfreq,'Number of frequency bins')
         except:
             status = 1
         try:
-            instr[-1].header.update('PERIOD',p,'Best period (days)')
+            instr[-1].header['PERIOD'  ] = (p,'Best period (days)')
         except:
             status = 1
         try:
-            instr[-1].header.update('PERIODE',perr,'1-sigma period error (days)')
-        except:
-            status = 1
-#        instr[-1].header.update('DETNCONF',powave/powstdev,'Detection significance (sigma)')
-        try:
-            instr[-1].header.update('CONFIDR1',1.0 / f2,'Trial confidence lower bound (days)')
+            instr[-1].header['PERIODE' ] = (perr,'1-sigma period error (days)')
         except:
             status = 1
         try:
-            instr[-1].header.update('CONFIDR2',1.0 / f1,'Trial confidence upper bound (days)')
+            instr[-1].header['CONFIDR1'] = (1.0 / f2,'Trial confidence lower bound (days)')
         except:
             status = 1
         try:
-            instr[-1].header.update('NTRIALS',ntrials,'Number of trials')
+            instr[-1].header['CONFIDR2'] = (1.0 / f1,'Trial confidence upper bound (days)')
+        except:
+            status = 1
+        try:
+            instr[-1].header['NTRIALS' ] = (ntrials,'Number of trials')
         except:
             status = 1
         instr.writeto(outfile)
-    
+
 # close input file
 
     if status == 0:
-	    status = kepio.closefits(instr,logfile,verbose)	    
+        status = kepio.closefits(instr,logfile,verbose)
 
 ## end time
 
-    if (status == 0):
-	    message = 'KEPTRAIL completed at'
+    if status == 0:
+        message = 'KEPTRAIL completed at'
     else:
-	    message = '\nKEPTRIAL aborted at'
+        message = '\nKEPTRIAL aborted at'
     kepmsg.clock(message,logfile,verbose)
 
 # main
 if '--shell' in sys.argv:
     import argparse
-    
     parser = argparse.ArgumentParser(description='Calculate best period and error estimate from Fourier transform')
     parser.add_argument('--shell', action='store_true', help='Are we running from the shell?')
     parser.add_argument('infile', help='Name of input file', type=str)
-
     parser.add_argument('outfile', help='Name of FITS file to output', type=str)
-
     parser.add_argument('--datacol', default='SAP_FLUX', help='Name of data column', type=str)
     parser.add_argument('--errcol', default='SAP_FLUX_ERR', help='Name of data error column', type=str)
-
     parser.add_argument('--fmin', default=0.1, help='Minimum search frequency [1/day]', type=float)
     parser.add_argument('--fmax', default=50., help='Minimum search frequency [1/day]', type=float)
     parser.add_argument('--nfreq', default=100, help='Number of frequency intervals', type=int)
-
-    parser.add_argument('--method', default='ft', help='Frequency search method', type=int, choices=['ft'])
+    parser.add_argument('--method', default='ft',
+                        help='Frequency search method', type=int, choices=['ft'])
     parser.add_argument('--ntrials', default=1000, help='Number of search trials', type=int)
-
     parser.add_argument('--plot', action='store_true', help='Plot result?')
-
     parser.add_argument('--clobber', action='store_true', help='Overwrite output file?')
     parser.add_argument('--verbose', action='store_true', help='Write to a log file?')
-    parser.add_argument('--logfile', '-l', help='Name of ascii log file', default='kepcotrend.log', dest='logfile', type=str)
-    parser.add_argument('--status', '-e', help='Exit status (0=good)', default=0, dest='status', type=int)
-
-
+    parser.add_argument('--logfile', '-l', help='Name of ascii log file',
+                        default='keptrial.log', dest='logfile', type=str)
+    parser.add_argument('--status', '-e', help='Exit status (0=good)',
+                        default=0, dest='status', type=int)
     args = parser.parse_args()
-    
     cmdLine=True
-
-    keptrial(args.infile,args.outfile,args.datacol,args.errcol,args.fmin,args.fmax,args.nfreq,args.method,
-             args.ntrials,args.plot,args.clobber,args.verbose,args.logfile,args.status, cmdLine)
-    
-
+    keptrial(args.infile, args.outfile, args.datacol, args.errcol, args.fmin,
+             args.fmax, args.nfreq, args.method, args.ntrials, args.plot,
+             args.clobber, args.verbose, args.logfile, args.status, cmdLine)
 else:
     from pyraf import iraf
     parfile = iraf.osfn("kepler$keptrial.par")

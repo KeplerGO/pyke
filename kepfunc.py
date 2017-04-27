@@ -8,59 +8,59 @@ from scipy.interpolate import RectBivariateSpline, interp2d
 from keparray import rebin2D
 from numpy import square, nansum, shape, array, empty, zeros, absolute, size
 from sys import stdout, exit
- 
+
 # -----------------------------------------------
 # define functions
 
-def poly0(): 
+def poly0():
     return lambda p, x: p[0] + 0.0 * x
 
-def poly1(): 
+def poly1():
     return lambda p, x: p[0] + p[1] * x
 
-def poly2(): 
+def poly2():
     return lambda p, x: p[0] + p[1] * x + p[2] * x * x
 
-def poly3(): 
+def poly3():
     return lambda p, x: p[0] + p[1] * x + p[2] * x**2 + p[3] * x**3
 
-def poly4(): 
+def poly4():
     return lambda p, x: p[0] + p[1] * x + p[2] * x**2 + p[3] * x**3 + p[4] * x**4
 
-def poly5(): 
+def poly5():
     return lambda p, x: p[0] + p[1] * x + p[2] * x**2 + p[3] * x**3 + p[4] * x**4 + p[5] * x**5
 
-def poly6(): 
+def poly6():
     return lambda p, x: p[0] + p[1] * x + p[2] * x**2 + p[3] * x**3 + p[4] * x**4 + p[5] * x**5 + p[6] * x**6
 
-def poly7(): 
+def poly7():
     return lambda p, x: p[0] + p[1] * x + p[2] * x**2 + p[3] * x**3 + p[4] * x**4 + p[5] * x**5 + p[6] * x**6 + p[7] * x**7
 
-def poly8(): 
+def poly8():
     return lambda p, x: p[0] + p[1] * x + p[2] * x**2 + p[3] * x**3 + p[4] * x**4 + p[5] * x**5 + p[6] * x**6 + p[7] * x**7 + p[8] * x**8
 
-def poly9(): 
+def poly9():
     return lambda p, x: p[0] + p[1] * x + p[2] * x**2 + p[3] * x**3 + p[4] * x**4 + p[5] * x**5 + p[6] * x**6 + p[7] * x**7 + p[8] * x**8 + p[9] * x**9
 
-def poly10(): 
+def poly10():
     return lambda p, x: p[0] + p[1] * x + p[2] * x**2 + p[3] * x**3 + p[4] * x**4 + p[5] * x**5 + p[6] * x**6 + p[7] * x**7 + p[8] * x**8 + p[9] * x**9 + p[10] * x**10
 
-def poly1con(): 
+def poly1con():
     return lambda p, x: p[0] + x
 
-def gauss(): 
+def gauss():
     return lambda p, x: p[0] * scipy.exp(-(x - p[1])**2 / (2.0 * p[2]**2))
 
-def gauss0(): 
+def gauss0():
     return lambda p, x: p[0] * scipy.exp(-x**2 / (2.0 * p[1]**2))
 
-def congauss(): 
+def congauss():
     return lambda p, x: p[0] + p[1] * scipy.exp(-(x - p[2])**2 / (2.0 * p[3]**2))
 
-def moffat0(): 
+def moffat0():
     return lambda p, x: p[0] / (1.0 + (x / p[1])**2)**p[2]
 
-def conmoffat(): 
+def conmoffat():
     return lambda p, x: p[0] + p[1] / (1.0 + ((x - p[2]) / p[3])**2)**p[4]
 
 def sine():
@@ -74,59 +74,58 @@ def powerlaw():
 
 def smooth(x,window_len=10,window='hanning'):
 
-     """smooth the data using a window with requested size.
-     
-     This method is based on the convolution of a scaled window with the signal.
-     The signal is prepared by introducing reflected copies of the signal 
-     (with the window size) in both ends so that transient parts are minimized
-     in the begining and end part of the output signal.
-     
-     input:
-         x: the input signal 
-         window_len: the dimension of the smoothing window
-         window: the type of window from 'flat', 'hanning', 'hamming', 'bartlett', 'blackman'
-             flat window will produce a moving average smoothing.
- 
-     output:
-         the smoothed signal
-         
-     example:
- 
-     t=linspace(-2,2,0.1)
-     x=sin(t)+randn(len(t))*0.1
-     y=smooth(x)
-     
-     see also: 
-     
-     numpy.hanning, numpy.hamming, numpy.bartlett, numpy.blackman, numpy.convolve
-     scipy.signal.lfilter
-  
-     TODO: the window parameter could be the window itself if an array instead of a string   
-     """
- 
-     if x.ndim != 1:
-         raise ValueError, "smooth only accepts 1 dimension arrays."
- 
-     if x.size < window_len:
-         raise ValueError, "Input vector needs to be bigger than window size."
- 
- 
-     if window_len<3:
-         return x
- 
- 
-     if not window in ['flat', 'hanning', 'hamming', 'bartlett', 'blackman']:
-         raise ValueError, "Window is one of 'flat', 'hanning', 'hamming', 'bartlett', 'blackman'"
- 
- 
-     s=numpy.r_[2*x[0]-x[window_len:1:-1],x,2*x[-1]-x[-1:-window_len:-1]]
-     if window == 'flat': #moving average
-         w=numpy.ones(window_len,'d')
-     else:
-         w=eval('numpy.'+window+'(window_len)')
- 
-     y=numpy.convolve(w/w.sum(),s,mode='same')
-     return y[window_len-1:-window_len+1]
+    """smooth the data using a window with requested size.
+
+    This method is based on the convolution of a scaled window with the signal.
+    The signal is prepared by introducing reflected copies of the signal
+    (with the window size) in both ends so that transient parts are minimized
+    in the begining and end part of the output signal.
+
+    input:
+     x: the input signal
+     window_len: the dimension of the smoothing window
+     window: the type of window from 'flat', 'hanning', 'hamming', 'bartlett', 'blackman'
+         flat window will produce a moving average smoothing.
+
+    output:
+     the smoothed signal
+
+    example:
+
+    t=linspace(-2,2,0.1)
+    x=sin(t)+randn(len(t))*0.1
+    y=smooth(x)
+
+    see also:
+
+    numpy.hanning, numpy.hamming, numpy.bartlett, numpy.blackman, numpy.convolve
+    scipy.signal.lfilter
+
+    TODO: the window parameter could be the window itself if an array instead of a string
+    """
+    window_len = int(window_len)
+
+    if x.ndim != 1:
+        raise ValueError, "smooth only accepts 1 dimension arrays."
+
+    if x.size < window_len:
+        raise ValueError, "Input vector needs to be bigger than window size."
+
+    if window_len<3:
+        return x
+
+    if not window in ['flat', 'hanning', 'hamming', 'bartlett', 'blackman']:
+        raise ValueError, "Window is one of 'flat', 'hanning', 'hamming', 'bartlett', 'blackman'"
+
+    s=numpy.r_[2*x[0]-x[window_len:1:-1],x,2*x[-1]-x[-1:-window_len:-1]]
+    if window == 'flat': #moving average
+        w=numpy.ones(window_len,'d')
+    else:
+        w=eval('numpy.'+window+'(window_len)')
+
+    y=numpy.convolve(w/w.sum(),s,mode='same')
+
+    return y[window_len-1:-window_len+1]
 
 #-------------------------------
 def pei(law,wave,ebmv,rv,a_i,lambda_i,b_i,n_i):
@@ -148,11 +147,11 @@ def pei(law,wave,ebmv,rv,a_i,lambda_i,b_i,n_i):
 
     xi = 0.
     for i in range(6):
-	term  = math.pow((wave / lambda_i[law,i]),n_i[law,i])
-	term += math.pow((lambda_i[law,i] / wave),n_i[law,i])
-	term += b_i[law,i]
-	term  = a_i[law,i] / term
-	xi   += term
+        term  = math.pow((wave / lambda_i[law,i]),n_i[law,i])
+        term += math.pow((lambda_i[law,i] / wave),n_i[law,i])
+        term += b_i[law,i]
+        term  = a_i[law,i] / term
+        xi   += term
 
 # remove a_b normalization on the extinction curve
 
@@ -210,7 +209,7 @@ def pei_paramters():
 
 
 #------------------------------
-# 1-d polynomial interpolation 
+# 1-d polynomial interpolation
 
 def polyval(x,c,tensor=True):
 
@@ -230,7 +229,7 @@ def polyval(x,c,tensor=True):
 
 
 #------------------------------
-# 2-d polynomial interpolation 
+# 2-d polynomial interpolation
 
 def polyval2d(x,y,c):
 
@@ -245,7 +244,7 @@ def polyval2d(x,y,c):
 
 
 #------------------------------
-# 2-d Gaussian interpolation 
+# 2-d Gaussian interpolation
 
 def PRFgauss2d(params,*args):
 
@@ -271,8 +270,8 @@ def PRFgauss2d(params,*args):
     posy = args[1]
     flux = args[2]
 
-    dx = posx - cen[0] 
-    dy = posy - cen[1] 
+    dx = posx - cen[0]
+    dy = posy - cen[1]
     z = square(dx) / sigma[0]**2 + square(dy) / sigma[1]**2
     g = A * scipy.exp(-z - B * dx * dy) + D
 
@@ -291,10 +290,10 @@ def PRF2DET2(flux,OBJx,OBJy,DATx,DATy,splineInterpolation):
     for i in range(len(flux)):
         FRCx,INTx = modf(OBJx[i])
         FRCy,INTy = modf(OBJy[i])
-        if FRCx > 0.5: 
+        if FRCx > 0.5:
             FRCx -= 1.0
             INTx += 1.0
-        if FRCy > 0.5: 
+        if FRCy > 0.5:
             FRCy -= 1.0
             INTy += 1.0
         FRCx = -FRCx
@@ -327,10 +326,10 @@ def PRF2DET(flux,OBJx,OBJy,DATx,DATy,wx,wy,a,splineInterpolation):
     for i in range(len(flux)):
         FRCx,INTx = modf(OBJx[i])
         FRCy,INTy = modf(OBJy[i])
-        if FRCx > 0.5: 
+        if FRCx > 0.5:
             FRCx -= 1.0
             INTx += 1.0
-        if FRCy > 0.5: 
+        if FRCy > 0.5:
             FRCy -= 1.0
             INTy += 1.0
         FRCx = -FRCx
@@ -350,7 +349,7 @@ def PRF2DET(flux,OBJx,OBJy,DATx,DATy,wx,wy,a,splineInterpolation):
 
 
 #------------------------------
-# PRF model 
+# PRF model
 
 def PRF(params,*args):
 
@@ -366,7 +365,6 @@ def PRF(params,*args):
     row = args[7]
 
 # parameters
-    
     f = empty((nsrc))
     x = empty((nsrc))
     y = empty((nsrc))
@@ -381,7 +379,6 @@ def PRF(params,*args):
 
 # calculate the sum squared difference between data and model
 
-#    PRFres = nansum(square(DATimg - PRFfit) / square(DATerr))
     PRFres = nansum(square(DATimg - PRFfit))
 
 # keep the fit centered
@@ -412,7 +409,6 @@ def PRFwithBackground(params,*args):
     row = args[10]
 
 # parameters
-    
     f = empty((nsrc))
     x = empty((nsrc))
     y = empty((nsrc))
@@ -420,13 +416,13 @@ def PRFwithBackground(params,*args):
         f[i] = params[i]
         x[i] = params[nsrc+i]
         y[i] = params[nsrc*2+i]
-    b = array([params[nsrc*3:nsrc*3+bterms],params[nsrc*3+bterms:nsrc*3+bterms*2]]) 
+    b = array([params[nsrc*3:nsrc*3+bterms],params[nsrc*3+bterms:nsrc*3+bterms*2]])
 
 # calculate PRF model binned to the detector pixel size
 
     PRFfit = PRF2DET(f,x,y,DATx,DATy,1.0,1.0,0.0,splineInterpolation)
 
-# add background 
+# add background
 
     if bterms == 1:
         PRFfit += params[nsrc*3]
@@ -465,7 +461,6 @@ def PRFwithFocusAndBackground(params,*args):
     row = args[10]
 
 # parameters
-    
     f = empty((nsrc))
     x = empty((nsrc))
     y = empty((nsrc))
@@ -476,7 +471,7 @@ def PRFwithFocusAndBackground(params,*args):
     if bterms == 1:
         b = params[nsrc*3]
     else:
-        b = array([params[nsrc*3:nsrc*3+bterms],params[nsrc*3+bterms:nsrc*3+bterms*2]]) 
+        b = array([params[nsrc*3:nsrc*3+bterms],params[nsrc*3+bterms:nsrc*3+bterms*2]])
     wx = params[-3]
     wy = params[-2]
     a = params[-1]
@@ -484,7 +479,7 @@ def PRFwithFocusAndBackground(params,*args):
     try:
         PRFfit = PRF2DET(f,x,y,DATx,DATy,wx,wy,a,splineInterpolation)
 
-# add background 
+# add background
 
         if bterms == 1:
             PRFfit = PRFfit + b
@@ -493,15 +488,9 @@ def PRFwithFocusAndBackground(params,*args):
 
 # calculate the sum squared difference between data and model
 
-#        PRFres = nansum(square(DATimg - PRFfit))
-#        PRFres = nansum(numpy.abs(square(DATimg - PRFfit) / PRFfit))
         PRFres = nansum(square(DATimg - PRFfit) / square(DATerr))
     except:
         PRFres = 1.0e30
-#    if wx > 1.15 or wx < 0.85:
-#        PRFres = 1.0e30
-#    if wy > 1.15 or wy < 0.85:
-#        PRFres = 1.0e30
 
 # keep the fit centered
 
@@ -528,7 +517,6 @@ def PRFwithFocus(params,*args):
     row = args[7]
 
 # parameters
-    
     f = empty((nsrc))
     x = empty((nsrc))
     y = empty((nsrc))
@@ -550,10 +538,6 @@ def PRFwithFocus(params,*args):
         PRFres = nansum(square(DATimg - PRFfit) / square(DATerr))
     except:
         PRFres = 1.0e30
-#    if wx > 1.15 or wx < 0.85:
-#        PRFres = 1.0e30
-#    if wy > 1.15 or wy < 0.85:
-#        PRFres = 1.0e30
 
 # keep the fit centered
 
@@ -600,16 +584,9 @@ def kepler_prf_2d(params,*args):
 # write out parameters
 
     if verbose:
-#        txt = '\rFlux = %.2f e-/s ' % f
-#        txt += 'X = %.4f pix ' % (x * prfDelX)
-#        txt += 'Y = %.4f pix ' % (y * prfDelY)
-#        txt += ' ' * 5
-#        sys.stdout.write(txt)
-#        sys.stdout.flush()
-
         txt = '\rPearson\'s chisq = %d for %d dof' % \
             (int(nansum(square(data - model * f) / absolute(data))), (shape(data)[0] * shape(data)[1] - len(params)))
-        txt += ' ' * 5 
+        txt += ' ' * 5
         sys.stdout.write(txt)
         sys.stdout.flush()
 
@@ -635,7 +612,7 @@ def kepler_multi_prf_2d(params,*args):
     verbose = args[9]
 
 # parameters
-    
+
     nsrc = len(params) / 3
     f = empty((nsrc))
     y = empty((nsrc))
@@ -675,7 +652,7 @@ def kepler_multi_prf_2d(params,*args):
 #        else:
         txt = '\rPearson\'s chisq = %d for %d dof' % \
             (int(nansum(square(data - model) / absolute(data))), (shape(data)[0] * shape(data)[1] - len(params)))
-        txt += ' ' * 5 
+        txt += ' ' * 5
         sys.stdout.write(txt)
         sys.stdout.flush()
 
@@ -701,7 +678,6 @@ def kepler_bkg_multi_prf_2d(params,*args):
     verbose = args[9]
 
 # parameters
-    
     nsrc = (len(params) - 1) / 3
     f = empty((nsrc))
     y = empty((nsrc))
@@ -711,7 +687,7 @@ def kepler_bkg_multi_prf_2d(params,*args):
     for i in range(nsrc):
         f[i] = params[i]
         y[i] = params[nsrc+i]
-        x[i] = params[nsrc*2+i]    
+        x[i] = params[nsrc*2+i]
 
 # interpolate PRF centroid to new pixel position
 
@@ -736,7 +712,7 @@ def kepler_bkg_multi_prf_2d(params,*args):
     if verbose:
         txt = '\rPearson\'s chisq = %d for %d dof' % \
             (int(nansum(square(data - model) / data)), (shape(data)[0] * shape(data)[1] - len(params)))
-        txt += ' ' * 5 
+        txt += ' ' * 5
         sys.stdout.write(txt)
         sys.stdout.flush()
 
@@ -760,7 +736,6 @@ def kepler_focus_multi_prf_2d(params,*args):
     verbose = args[7]
 
 # parameters
-    
     nsrc = (len(params) - 2) / 3
     f = empty((nsrc))
     y = empty((nsrc))
@@ -774,7 +749,7 @@ def kepler_focus_multi_prf_2d(params,*args):
     for i in range(nsrc):
         f[i] = params[i]
         y[i] = params[nsrc+i]
-        x[i] = params[nsrc*2+i]    
+        x[i] = params[nsrc*2+i]
 
 # dimensions of data image if it had PRF-sized pixels
 
@@ -821,7 +796,7 @@ def kepler_focus_multi_prf_2d(params,*args):
     if verbose:
         txt = '\rPearson\'s chisq = %d for %d dof' % \
             (int(nansum(square(data - model) / data)), (shape(data)[0] * shape(data)[1] - len(params)))
-        txt += ' ' * 5 
+        txt += ' ' * 5
         sys.stdout.write(txt)
         sys.stdout.flush()
 
@@ -849,7 +824,7 @@ def kepler_prf_1d(params,*args):
 
     dataY = data.sum(axis=1)
     dataX = data.sum(axis=0)
-    prfY = prf.sum(axis=1) 
+    prfY = prf.sum(axis=1)
     prfX = prf.sum(axis=0)
 
 # interpolate PRF centroid to new pixel position
@@ -949,4 +924,3 @@ def inv_normal_cummulative_function(p):
     r = q * q
     return (((((a[0] * r + a[1]) * r + a[2]) * r + a[3]) * r + a[4]) * r + a[5]) * q / \
         (((((b[0] * r + b[1]) * r + b[2]) * r+ b[3]) * r + b[4]) * r + 1)
-

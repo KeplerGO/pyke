@@ -1,23 +1,20 @@
-
-import pylab, numpy, pyfits
-from pylab import *
-from matplotlib import *
-from numpy import *
-from pyfits import *
+import numpy as np
+from matplotlib import pyplot as plt
+from astropy.io import fits as pyfits
 import kepio, kepmsg, kepkey, kepplot, kepstat
 import sys, time, re, math
 
 # -----------------------------------------------------------
 # core code
 
-def kepdiffim(infile,outfile,plotfile,imscale,colmap,filter,function,cutoff,clobber,verbose,logfile,status,cmdLine=False): 
-
+def kepdiffim(infile,outfile,plotfile,imscale,colmap,filter,function,cutoff,
+              clobber,verbose,logfile,status,cmdLine=False):
 # input arguments
 
     status = 0
-    seterr(all="ignore") 
+    np.seterr(all="ignore")
 
-# log the call 
+# log the call
 
     hashline = '----------------------------------------------------------------------------'
     kepmsg.log(logfile,hashline,verbose)
@@ -52,7 +49,7 @@ def kepdiffim(infile,outfile,plotfile,imscale,colmap,filter,function,cutoff,clob
 # clobber output file
 
     if clobber: status = kepio.clobber(outfile,logfile,verbose)
-    if kepio.fileexists(outfile): 
+    if kepio.fileexists(outfile):
         message = 'ERROR -- KEPDIFFIM: ' + outfile + ' exists. Use --clobber'
         status = kepmsg.err(logfile,message,verbose)
 
@@ -114,42 +111,41 @@ def kepdiffim(infile,outfile,plotfile,imscale,colmap,filter,function,cutoff,clob
         npts = 0
         nrows = len(fluxpixels)
         for i in range(nrows):
-            if qual[i] == 0 and \
-                    numpy.isfinite(barytime[i]) and \
-                    numpy.isfinite(fluxpixels[i,ydim*xdim/2]):
+            if qual[i] == 0 and np.isfinite(barytime[i]) \
+                    and np.isfinite(fluxpixels[i,int(ydim*xdim/2)]):
                 npts += 1
-        time = empty((npts))
-        timecorr = empty((npts))
-        cadenceno = empty((npts))
-        quality = empty((npts))
-        pixseries = empty((ydim*xdim,npts))
-        errseries = empty((ydim*xdim,npts))
+        time = np.empty((npts))
+        timecorr = np.empty((npts))
+        cadenceno = np.empty((npts))
+        quality = np.empty((npts))
+        pixseries = np.empty((ydim*xdim,npts))
+        errseries = np.empty((ydim*xdim,npts))
 
 # construct output light curves
 
     if status == 0:
-        np = 0
+        nptsx = 0
         for i in range(ydim*xdim):
             npts = 0
             for k in range(nrows):
-                if qual[k] == 0 and \
-                        numpy.isfinite(barytime[k]) and \
-                        numpy.isfinite(fluxpixels[k,ydim*xdim/2]):
+                if (qual[k] == 0 and
+                    np.isfinite(barytime[k]) and
+                    np.isfinite(fluxpixels[k,int(ydim*xdim/2)])):
                     time[npts] = barytime[k]
                     timecorr[npts] = tcorr[k]
                     cadenceno[npts] = cadno[k]
                     quality[npts] = qual[k]
-                    pixseries[i,npts] = fluxpixels[k,np]
-                    errseries[i,npts] = errpixels[k,np]
+                    pixseries[i,npts] = fluxpixels[k,nptsx]
+                    errseries[i,npts] = errpixels[k,nptsx]
                     npts += 1
-            np += 1
+            nptsx += 1
 
 # define data sampling
 
     if status == 0 and filter:
         tpf, status = kepio.openfits(infile,'readonly',logfile,verbose)
     if status == 0 and filter:
-        cadence, status = kepkey.cadence(tpf[1],infile,logfile,verbose)     
+        cadence, status = kepkey.cadence(tpf[1],infile,logfile,verbose)
         tr = 1.0 / (cadence / 86400)
         timescale = 1.0 / (cutoff / tr)
 
@@ -157,89 +153,86 @@ def kepdiffim(infile,outfile,plotfile,imscale,colmap,filter,function,cutoff,clob
 
     if status == 0 and filter:
         if function == 'boxcar':
-            filtfunc = numpy.ones(numpy.ceil(timescale))
+            filtfunc = np.ones(int(np.ceil(timescale)))
         elif function == 'gauss':
             timescale /= 2
-            dx = numpy.ceil(timescale * 10 + 1)
+            dx = np.ceil(timescale * 10 + 1)
             filtfunc = kepfunc.gauss()
             filtfunc = filtfunc([1.0,dx/2-1.0,timescale],linspace(0,dx-1,dx))
         elif function == 'sinc':
-            dx = numpy.ceil(timescale * 12 + 1)
+            dx = np.ceil(timescale * 12 + 1)
             fx = linspace(0,dx-1,dx)
             fx = fx - dx / 2 + 0.5
             fx /= timescale
-            filtfunc = numpy.sinc(fx)
-        filtfunc /= numpy.sum(filtfunc)
+            filtfunc = np.sinc(fx)
+        filtfunc /= np.sum(filtfunc)
 
 # pad time series at both ends with noise model
 
     if status == 0 and filter:
         for i in range(ydim*xdim):
             ave, sigma  = kepstat.stdev(pixseries[i,:len(filtfunc)])
-            padded = numpy.append(kepstat.randarray(numpy.ones(len(filtfunc)) * ave, \
-                                                        numpy.ones(len(filtfunc)) * sigma), pixseries[i,:])
+            padded = np.append(kepstat.randarray(np.ones(len(filtfunc)) * ave, \
+                                                        np.ones(len(filtfunc)) * sigma), pixseries[i,:])
             ave, sigma  = kepstat.stdev(pixseries[i,-len(filtfunc):])
-            padded = numpy.append(padded, kepstat.randarray(numpy.ones(len(filtfunc)) * ave, \
-                                                                numpy.ones(len(filtfunc)) * sigma))
+            padded = np.append(padded, kepstat.randarray(np.ones(len(filtfunc)) * ave, \
+                                                                np.ones(len(filtfunc)) * sigma))
 
 # convolve data
 
             if status == 0:
-                convolved = convolve(padded,filtfunc,'same')
+                convolved = np.convolve(padded,filtfunc,'same')
 
 # remove padding from the output array
 
             if status == 0:
                 outdata = convolved[len(filtfunc):-len(filtfunc)]
-                            
+
 # subtract low frequencies
 
             if status == 0:
-                outmedian = median(outdata)
+                outmedian = np.median(outdata)
                 pixseries[i,:] = pixseries[i,:] - outdata + outmedian
 
 # sum pixels over cadence
 
     if status == 0:
-        np = 0
+        nptsx = 0
         nrows = len(fluxpixels)
-        pixsum = zeros((ydim*xdim))
-        errsum = zeros((ydim*xdim))
+        pixsum = np.zeros((ydim*xdim))
+        errsum = np.zeros((ydim*xdim))
         for i in range(npts):
             if quality[i] == 0:
                 pixsum += pixseries[:,i]
                 errsum += errseries[:,i]**2
-                np += 1
-        pixsum /= np
-        errsum = sqrt(errsum) / np
+                nptsx += 1
+        pixsum /= nptsx
+        errsum = np.sqrt(errsum) / nptsx
 
 # calculate standard deviation pixels
 
     if status == 0:
-        pixvar = zeros((ydim*xdim))
+        pixvar = np.zeros((ydim*xdim))
         for i in range(npts):
             if quality[i] == 0:
-                pixvar += (pixsum - pixseries[:,i] / errseries[:,i])**2 
-        pixvar = numpy.sqrt(pixvar)
+                pixvar += (pixsum - pixseries[:,i] / errseries[:,i])**2
+        pixvar = np.sqrt(pixvar)
 
 # median pixel errors
 
     if status == 0:
-        errmed = empty((ydim*xdim))
+        errmed = np.empty((ydim*xdim))
         for i in range(ydim*xdim):
-            errmed[i] = numpy.median(errseries[:,i])
+            errmed[i] = np.median(errseries[:,i])
 
 # calculate chi distribution pixels
 
     if status == 0:
-        pixdev = zeros((ydim*xdim))
+        pixdev = np.zeros((ydim*xdim))
         for i in range(npts):
             if quality[i] == 0:
-                pixdev += ((pixsum - pixseries[:,i]) / pixsum)**2 
-        pixdev = numpy.sqrt(pixdev)
-
-
-#        pixdev = numpy.sqrt(pixvar) / errsum #errmed
+                pixdev += ((pixsum - pixseries[:,i]) / pixsum)**2
+        pixdev = np.sqrt(pixdev)
 
 # image scale and intensity limits
 
@@ -251,12 +244,12 @@ def kepdiffim(infile,outfile,plotfile,imscale,colmap,filter,function,cutoff,clob
 # construct output summed image
 
     if status == 0:
-        imgsum = empty((ydim,xdim))
-        imgvar = empty((ydim,xdim))
-        imgdev = empty((ydim,xdim))
-        imgsum_pl = empty((ydim,xdim))
-        imgvar_pl = empty((ydim,xdim))
-        imgdev_pl = empty((ydim,xdim))
+        imgsum = np.empty((ydim,xdim))
+        imgvar = np.empty((ydim,xdim))
+        imgdev = np.empty((ydim,xdim))
+        imgsum_pl = np.empty((ydim,xdim))
+        imgvar_pl = np.empty((ydim,xdim))
+        imgdev_pl = np.empty((ydim,xdim))
         n = 0
         for i in range(ydim):
             for j in range(xdim):
@@ -273,7 +266,7 @@ def kepdiffim(infile,outfile,plotfile,imscale,colmap,filter,function,cutoff,clob
     if status == 0:
         instruct, status = kepio.openfits(infile,'readonly',logfile,verbose)
         status = kepkey.history(call,instruct[0],outfile,logfile,verbose)
-        hdulist = HDUList(instruct[0])
+        hdulist = pyfits.HDUList(instruct[0])
         hdulist.writeto(outfile)
         status = kepkey.new('EXTNAME','FLUX','name of extension',instruct[2],outfile,logfile,verbose)
         pyfits.append(outfile,imgsum,instruct[2].header)
@@ -302,25 +295,10 @@ def kepdiffim(infile,outfile,plotfile,imscale,colmap,filter,function,cutoff,clob
 
 # plot style
 
-        try:
-            params = {'backend': 'png',
-                      'axes.linewidth': 2.5,
-                      'axes.labelsize': 24,
-                      'axes.font': 'sans-serif',
-                      'axes.fontweight' : 'bold',
-                      'text.fontsize': 12,
-                      'legend.fontsize': 12,
-                      'xtick.labelsize': 10,
-                      'ytick.labelsize': 10}
-            pylab.rcParams.update(params)
-        except:
-            'ERROR -- KEPDIFFIM: install latex for scientific plotting'
-            status = 1
-
     if status == 0:
         plotimage(imgsum_pl,imgvar_pl,imgdev_pl,zminsum,zminvar,zmindev,
                   zmaxsum,zmaxvar,zmaxdev,xmin,xmax,ymin,ymax,colmap,plotfile,cmdLine)
-        
+
 # stop time
 
     kepmsg.clock('KEPDIFFIM ended at: ',logfile,verbose)
@@ -333,61 +311,57 @@ def kepdiffim(infile,outfile,plotfile,imscale,colmap,filter,function,cutoff,clob
 def plotimage(imgsum_pl,imgvar_pl,imgdev_pl,zminsum,zminvar,zmindev,
               zmaxsum,zmaxvar,zmaxdev,xmin,xmax,ymin,ymax,colmap,plotfile,cmdLine):
 
-    pylab.figure(figsize=[15,6])
+    plt.figure(figsize=[15,6])
     #ion()
-    pylab.clf()
+    plt.clf()
 
 # plot the image window
 
-    ax = pylab.axes([0.04,0.11,0.31,0.78])
-    imshow(imgsum_pl,aspect='auto',interpolation='nearest',origin='lower',
+    ax = plt.axes([0.04,0.11,0.31,0.78])
+    plt.imshow(imgsum_pl,aspect='auto',interpolation='nearest',origin='lower',
            vmin=zminsum,vmax=zmaxsum,extent=(xmin,xmax,ymin,ymax),cmap=colmap)
-    pylab.gca().set_autoscale_on(False)
+    plt.gca().set_autoscale_on(False)
     labels = ax.get_yticklabels()
-    setp(labels, 'rotation', 90)
-    pylab.gca().xaxis.set_major_formatter(pylab.ScalarFormatter(useOffset=False))
-    pylab.gca().yaxis.set_major_formatter(pylab.ScalarFormatter(useOffset=False))
-    xlabel('Pixel Column Number', {'color' : 'k'})
-    ylabel('Pixel Row Number', {'color' : 'k'})
-    title('Flux', {'color' : 'k', 'fontsize' : '24'})
+    plt.setp(labels, 'rotation', 90)
+    plt.gca().xaxis.set_major_formatter(plt.ScalarFormatter(useOffset=False))
+    plt.gca().yaxis.set_major_formatter(plt.ScalarFormatter(useOffset=False))
+    plt.xlabel('Pixel Column Number', {'color' : 'k'})
+    plt.ylabel('Pixel Row Number', {'color' : 'k'})
+    plt.title('Flux', {'color' : 'k', 'fontsize' : '24'})
 
 # plot the variance window
 
-    pylab.axes([0.36,0.11,0.31,0.78])
-    imshow(imgvar_pl,aspect='auto',interpolation='nearest',origin='lower',
+    plt.axes([0.36,0.11,0.31,0.78])
+    plt.imshow(imgvar_pl,aspect='auto',interpolation='nearest',origin='lower',
            vmin=zminvar,vmax=zmaxvar,extent=(xmin,xmax,ymin,ymax),cmap=colmap)
-    pylab.gca().set_autoscale_on(False)
-    pylab.gca().xaxis.set_major_formatter(pylab.ScalarFormatter(useOffset=False))
-    pylab.gca().yaxis.set_major_formatter(pylab.ScalarFormatter(useOffset=False))
-    pylab.setp(pylab.gca(),yticklabels=[])
-    xlabel('Pixel Column Number', {'color' : 'k'})
+    plt.gca().set_autoscale_on(False)
+    plt.gca().xaxis.set_major_formatter(plt.ScalarFormatter(useOffset=False))
+    plt.gca().yaxis.set_major_formatter(plt.ScalarFormatter(useOffset=False))
+    plt.setp(plt.gca(),yticklabels=[])
+    plt.xlabel('Pixel Column Number', {'color' : 'k'})
     try:
-        title(r'$\chi$ Distribution', {'color' : 'k', 'fontsize' : '28'})
+        plt.title(r'$\chi$ Distribution', {'color' : 'k', 'fontsize' : '28'})
     except:
-        title('Chi Distribution', {'color' : 'k', 'fontsize' : '24'})
+        plt.title('Chi Distribution', {'color' : 'k', 'fontsize' : '24'})
 
 # plot the normalized standard deviation window
 
-    pylab.axes([0.68,0.11,0.31,0.78])
-    imshow(imgdev_pl,aspect='auto',interpolation='nearest',origin='lower',
+    plt.axes([0.68,0.11,0.31,0.78])
+    plt.imshow(imgdev_pl,aspect='auto',interpolation='nearest',origin='lower',
            vmin=zmindev,vmax=zmaxdev,extent=(xmin,xmax,ymin,ymax),cmap=colmap)
-    pylab.gca().set_autoscale_on(False)
-    pylab.gca().xaxis.set_major_formatter(pylab.ScalarFormatter(useOffset=False))
-    pylab.gca().yaxis.set_major_formatter(pylab.ScalarFormatter(useOffset=False))
-    pylab.setp(pylab.gca(),yticklabels=[])
-    xlabel('Pixel Column Number', {'color' : 'k'})
-    title('Normalized Standard Deviation', {'color' : 'k', 'fontsize' : '24'})
+    plt.gca().set_autoscale_on(False)
+    plt.gca().xaxis.set_major_formatter(plt.ScalarFormatter(useOffset=False))
+    plt.gca().yaxis.set_major_formatter(plt.ScalarFormatter(useOffset=False))
+    plt.setp(plt.gca(),yticklabels=[])
+    plt.xlabel('Pixel Column Number', {'color' : 'k'})
+    plt.title('Normalized Standard Deviation', {'color' : 'k', 'fontsize' : '24'})
 
 # render plot
+    plt.ion()
+    plt.show()
 
-    if cmdLine: 
-        pylab.show()
-    else: 
-        pylab.ion()
-        pylab.plot([])
-        pylab.ioff()
     if plotfile.lower() != 'none':
-        pylab.savefig(plotfile)
+        plt.savefig(plotfile)
 
     return
 
@@ -396,19 +370,19 @@ def plotimage(imgsum_pl,imgvar_pl,imgdev_pl,zminsum,zminvar,zmindev,
 
 def cmap_plot():
 
-    pylab.figure(1,figsize=[5,10])
+    plt.figure(1,figsize=[5,10])
     #ion()
     a=outer(ones(10),arange(0,1,0.01))
-    subplots_adjust(top=0.99,bottom=0.00,left=0.01,right=0.8)
+    plt.subplots_adjust(top=0.99,bottom=0.00,left=0.01,right=0.8)
     maps=[m for m in cm.datad if not m.endswith("_r")]
     maps.sort()
     l=len(maps)+1
     for i, m in enumerate(maps):
         print m
-        subplot(l,1,i+1)
-        pylab.setp(pylab.gca(),xticklabels=[],xticks=[],yticklabels=[],yticks=[])
-        imshow(a,aspect='auto',cmap=get_cmap(m),origin="lower")
-        pylab.text(100.85,0.5,m,fontsize=10)
+        plt.subplot(l,1,i+1)
+        plt.setp(plt.gca(),xticklabels=[],xticks=[],yticklabels=[],yticks=[])
+        plt.imshow(a,aspect='auto',cmap=get_cmap(m),origin="lower")
+        plt.text(100.85,0.5,m,fontsize=10)
     #ioff()
     status = 1
     return status
@@ -418,7 +392,6 @@ def cmap_plot():
 
 if '--shell' in sys.argv:
     import argparse
-    
     parser = argparse.ArgumentParser(description='Difference imaging of pixels within a target mask')
     parser.add_argument('--shell', action='store_true', help='Are we running from the shell?')
 
@@ -435,18 +408,14 @@ if '--shell' in sys.argv:
 
     parser.add_argument('--clobber', action='store_true', help='Overwrite output file?')
     parser.add_argument('--verbose', action='store_true', help='Write to a log file?')
-    parser.add_argument('--logfile', '-l', help='Name of ascii log file', default='kepcotrend.log', dest='logfile', type=str)
+    parser.add_argument('--logfile', '-l', help='Name of ascii log file', default='kepdiffim.log', dest='logfile', type=str)
     parser.add_argument('--status', '-e', help='Exit status (0=good)', default=0, dest='status', type=int)
-
 
     args = parser.parse_args()
 
     cmdLine=True
-    
     kepdiffim(args.infile, args.outfile, args.plotfile, args.imscale, args.cmap, args.filter, args.function, args.cutoff,
             args.clobber, args.verbose, args.logfile, args.status, cmdLine)
-    
-
 else:
     from pyraf import iraf
     parfile = iraf.osfn("kepler$kepdiffim.par")

@@ -1,17 +1,17 @@
-import numpy, scipy, sys, time, pyfits, pylab, math, re
+import sys, time, math, re
+import numpy as np
+from copy import copy
 from scipy import stats
-from pyfits import *
-from pylab import *
-from matplotlib import *
-from math import *
+from astropy.io import fits as pyfits
+from matplotlib import pyplot as plt
 import kepio, kepmsg, kepkey
 
 def kepbls(infile,outfile,datacol,errcol,minper,maxper,mindur,maxdur,nsearch,
-           nbins,plot,clobber,verbose,logfile,status,cmdLine=False): 
+           nbins,plot,clobber,verbose,logfile,status,cmdLine=False):
 
 # startup parameters
 
-    numpy.seterr(all="ignore") 
+    np.seterr(all="ignore")
     status = 0
     labelsize = 32
     ticksize = 18
@@ -22,7 +22,7 @@ def kepbls(infile,outfile,datacol,errcol,minper,maxper,mindur,maxdur,nsearch,
     fcolor = '#ffff00'
     falpha = 0.2
 
-# log the call 
+# log the call
 
     hashline = '----------------------------------------------------------------------------'
     kepmsg.log(logfile,hashline,verbose)
@@ -55,8 +55,9 @@ def kepbls(infile,outfile,datacol,errcol,minper,maxper,mindur,maxdur,nsearch,
 
 # is duration greater than one bin in the phased light curve?
 
-    if float(nbins) * maxdur / 24.0 / maxper <= 1.0:
-        message = 'WARNING -- KEPBLS: ' + str(maxdur) + ' hours transit duration < 1 phase bin when P = '
+    if nbins * maxdur / 24.0 / maxper <= 1.0:
+        message = ('WARNING -- KEPBLS: ' + str(maxdur) +
+                   ' hours transit duration < 1 phase bin when P = ')
         message += str(maxper) + ' days'
         kepmsg.warn(logfile,message)
 
@@ -67,7 +68,7 @@ def kepbls(infile,outfile,datacol,errcol,minper,maxper,mindur,maxdur,nsearch,
 # clobber output file
 
     if clobber: status = kepio.clobber(outfile,logfile,verbose)
-    if kepio.fileexists(outfile): 
+    if kepio.fileexists(outfile):
         message = 'ERROR -- KEPBLS: ' + outfile + ' exists. Use clobber=yes'
         status = kepmsg.err(logfile,message,verbose)
 
@@ -86,15 +87,15 @@ def kepbls(infile,outfile,datacol,errcol,minper,maxper,mindur,maxdur,nsearch,
 # read table structure
 
     if status == 0:
-	table, status = kepio.readfitstab(infile,instr[1],logfile,verbose)
+        table, status = kepio.readfitstab(infile,instr[1],logfile,verbose)
 
 # filter input data table
 
     if status == 0:
-        work1 = numpy.array([table.field('time'), table.field(datacol), table.field(errcol)])
-        work1 = numpy.rot90(work1,3)
-        work1 = work1[~numpy.isnan(work1).any(1)]            
- 
+        work1 = np.array([table.field('time'), table.field(datacol), table.field(errcol)])
+        work1 = np.rot90(work1,3)
+        work1 = work1[~np.isnan(work1).any(1)]
+
 # read table columns
 
     if status == 0:
@@ -114,33 +115,33 @@ def kepbls(infile,outfile,datacol,errcol,minper,maxper,mindur,maxdur,nsearch,
 
     if status == 0:
         work1 = intime - intime[0]
-        work2 = indata - numpy.mean(indata)
- 
+        work2 = indata - np.mean(indata)
+
 # start period search
 
     if status == 0:
-        srMax = numpy.array([],dtype='float32')
-        transitDuration = numpy.array([],dtype='float32')
-        transitPhase = numpy.array([],dtype='float32')
+        srMax = np.array([],dtype='float32')
+        transitDuration = np.array([],dtype='float32')
+        transitPhase = np.array([],dtype='float32')
         dPeriod = (maxper - minper) / nsearch
-        trialPeriods = numpy.arange(minper,maxper+dPeriod,dPeriod,dtype='float32')
+        trialPeriods = np.arange(minper,maxper+dPeriod,dPeriod,dtype='float32')
         complete = 0
-        print ' '
+        print(' ')
         for trialPeriod in trialPeriods:
-            fracComplete = float(complete) / float(len(trialPeriods) - 1) * 100.0 
-            txt  = '\r' 
-            txt += 'Trial period = ' 
-            txt += str(int(trialPeriod)) 
-            txt += ' days [' 
-            txt += str(int(fracComplete)) 
-            txt += '% complete]' 
+            fracComplete = float(complete) / float(len(trialPeriods) - 1) * 100.0
+            txt  = '\r'
+            txt += 'Trial period = '
+            txt += str(int(trialPeriod))
+            txt += ' days ['
+            txt += str(int(fracComplete))
+            txt += '% complete]'
             txt += ' ' * 20
             sys.stdout.write(txt)
             sys.stdout.flush()
             complete += 1
-            srMax = numpy.append(srMax,0.0)
-            transitDuration = numpy.append(transitDuration,numpy.nan)
-            transitPhase = numpy.append(transitPhase,numpy.nan)
+            srMax = np.append(srMax,0.0)
+            transitDuration = np.append(transitDuration,np.nan)
+            transitPhase = np.append(transitPhase,np.nan)
             trialFrequency = 1.0 / trialPeriod
 
 # minimum and maximum transit durations in quantized phase units
@@ -154,26 +155,26 @@ def kepbls(infile,outfile,datacol,errcol,minper,maxper,mindur,maxdur,nsearch,
 
 # compute folded time series with trial period
 
-            work4 = numpy.zeros((nbins),dtype='float32')
-            work5 = numpy.zeros((nbins),dtype='float32')
-            phase = numpy.array(((work1 * trialFrequency) - numpy.floor(work1 * trialFrequency)) * float(nbins),dtype='int')
-            ptuple = numpy.array([phase, work2, inerr])
-            ptuple = numpy.rot90(ptuple,3)
-            phsort = numpy.array(sorted(ptuple,key=lambda ph: ph[2]))
+            work4 = np.zeros((nbins),dtype='float32')
+            work5 = np.zeros((nbins),dtype='float32')
+            phase = np.array(((work1 * trialFrequency) - np.floor(work1 * trialFrequency)) * float(nbins),dtype='int')
+            ptuple = np.array([phase, work2, inerr])
+            ptuple = np.rot90(ptuple,3)
+            phsort = np.array(sorted(ptuple,key=lambda ph: ph[2]))
             for i in range(nbins):
-                elements = numpy.nonzero(phsort[:,2] == float(i))[0]
-                work4[i] = numpy.mean(phsort[elements,1])
-                work5[i] = math.sqrt(numpy.sum(numpy.power(phsort[elements,0], 2)) / len(elements))
+                elements = np.nonzero(phsort[:,2] == float(i))[0]
+                work4[i] = np.mean(phsort[elements,1])
+                work5[i] = math.sqrt(np.sum(np.power(phsort[elements,0], 2)) / len(elements))
 
 # extend the work arrays beyond nbins by wrapping
 
-            work4 = numpy.append(work4,work4[:duration2])
-            work5 = numpy.append(work5,work5[:duration2])
+            work4 = np.append(work4,work4[:duration2])
+            work5 = np.append(work5,work5[:duration2])
 
 # calculate weights of folded light curve points
 
-            sigmaSum = numpy.nansum(numpy.power(work5,-2))
-            omega = numpy.power(work5,-2) / sigmaSum
+            sigmaSum = np.nansum(np.power(work5,-2))
+            omega = np.power(work5,-2) / sigmaSum
 
 # calculate weighted phased light curve
 
@@ -190,8 +191,8 @@ def kepbls(infile,outfile,datacol,errcol,minper,maxper,mindur,maxdur,nsearch,
 # calculate maximum signal residue
 
                     i2 = i1 + duration
-                    sr1 = numpy.sum(numpy.power(s[i1:i2],2))
-                    sr2 = numpy.sum(omega[i1:i2])
+                    sr1 = np.sum(np.power(s[i1:i2],2))
+                    sr2 = np.sum(omega[i1:i2])
                     sr = math.sqrt(sr1 / (sr2 * (1.0 - sr2)))
                     if sr > srMax[-1]:
                         srMax[-1] = sr
@@ -200,110 +201,91 @@ def kepbls(infile,outfile,datacol,errcol,minper,maxper,mindur,maxdur,nsearch,
 
 # normalize maximum signal residue curve
 
-        bestSr = numpy.max(srMax)
-        bestTrial = numpy.nonzero(srMax == bestSr)[0][0]
+        bestSr = np.max(srMax)
+        bestTrial = np.nonzero(srMax == bestSr)[0][0]
         srMax /= bestSr
-        transitDuration *= trialPeriods / 24.0 
-        BJD0 = numpy.array(transitPhase * trialPeriods / nbins,dtype='float64') + intime[0] - 2454833.0
-        print '\n'
+        transitDuration *= trialPeriods / 24.0
+        BJD0 = np.array(transitPhase * trialPeriods / nbins,dtype='float64') + intime[0] - 2454833.0
+        print('\n')
 
 # clean up x-axis unit
 
     if status == 0:
-	ptime = copy(trialPeriods)
-	xlab = 'Trial Period (days)'
+        ptime = copy(trialPeriods)
+        xlab = 'Trial Period (days)'
 
 # clean up y-axis units
 
     if status == 0:
         pout = copy(srMax)
-	ylab = 'Normalized Signal Residue'
+        ylab = 'Normalized Signal Residue'
 
 # data limits
 
-	xmin = ptime.min()
-	xmax = ptime.max()
-	ymin = pout.min()
-	ymax = pout.max()
-	xr = xmax - xmin
-	yr = ymax - ymin
-        ptime = insert(ptime,[0],[ptime[0]]) 
-        ptime = append(ptime,[ptime[-1]])
-        pout = insert(pout,[0],[0.0]) 
-        pout = append(pout,0.0)
+        xmin = ptime.min()
+        xmax = ptime.max()
+        ymin = pout.min()
+        ymax = pout.max()
+        xr = xmax - xmin
+        yr = ymax - ymin
+        ptime = np.insert(ptime,[0],[ptime[0]])
+        ptime = np.append(ptime,[ptime[-1]])
+        pout = np.insert(pout,[0],[0.0])
+        pout = np.append(pout,0.0)
 
 # plot light curve
 
     if status == 0 and plot:
-        plotLatex = True
-        try:
-            params = {'backend': 'png',
-                      'axes.linewidth': 2.5,
-                      'axes.labelsize': labelsize,
-                      'axes.font': 'sans-serif',
-                      'axes.fontweight' : 'bold',
-                      'text.fontsize': 12,
-                      'legend.fontsize': 12,
-                      'xtick.labelsize': ticksize,
-                      'ytick.labelsize': ticksize}
-            rcParams.update(params)
-        except:
-            plotLatex = False
-    if status == 0 and plot:
-        pylab.figure(figsize=[xsize,ysize])
-        pylab.clf()
+        plt.figure(figsize=[xsize,ysize])
+        plt.clf()
 
 # plot data
 
-        ax = pylab.axes([0.06,0.10,0.93,0.87])
+        ax = plt.axes([0.06,0.10,0.93,0.87])
 
 # force tick labels to be absolute rather than relative
 
-        pylab.gca().xaxis.set_major_formatter(pylab.ScalarFormatter(useOffset=False))
-        pylab.gca().yaxis.set_major_formatter(pylab.ScalarFormatter(useOffset=False))
+        plt.gca().xaxis.set_major_formatter(plt.ScalarFormatter(useOffset=False))
+        plt.gca().yaxis.set_major_formatter(plt.ScalarFormatter(useOffset=False))
 
 # rotate y labels by 90 deg
 
         labels = ax.get_yticklabels()
-        pylab.setp(labels, 'rotation', 90)
+        plt.setp(labels, 'rotation', 90)
 
 # plot curve
 
     if status == 0 and plot:
-        pylab.plot(ptime[1:-1],pout[1:-1],color=lcolor,linestyle='-',linewidth=lwidth)
-        pylab.fill(ptime,pout,color=fcolor,linewidth=0.0,alpha=falpha)
-	pylab.xlabel(xlab, {'color' : 'k'})
-        pylab.ylabel(ylab, {'color' : 'k'})
-        pylab.grid()
+        plt.plot(ptime[1:-1],pout[1:-1],color=lcolor,linestyle='-',linewidth=lwidth)
+        plt.fill(ptime,pout,color=fcolor,linewidth=0.0,alpha=falpha)
+        plt.xlabel(xlab, {'color' : 'k'})
+        plt.ylabel(ylab, {'color' : 'k'})
+        plt.grid()
 
 # plot ranges
 
     if status == 0 and plot:
-        pylab.xlim(xmin-xr*0.01,xmax+xr*0.01)
-        if ymin >= 0.0: 
-            pylab.ylim(ymin-yr*0.01,ymax+yr*0.01)
+        plt.xlim(xmin-xr*0.01,xmax+xr*0.01)
+        if ymin >= 0.0:
+            plt.ylim(ymin-yr*0.01,ymax+yr*0.01)
         else:
-            pylab.ylim(1.0e-10,ymax+yr*0.01)
+            plt.ylim(1.0e-10,ymax+yr*0.01)
 
 # render plot
 
         if status == 0 and plot:
-            if cmdLine: 
-                pylab.show()
-            else: 
-                pylab.ion()
-                pylab.plot([])
-                pylab.ioff()
-	
+            plt.ion()
+            plt.show()
+
 # append new BLS data extension to the output file
 
     if status == 0:
-        col1 = Column(name='PERIOD',format='E',unit='days',array=trialPeriods)
-        col2 = Column(name='BJD0',format='D',unit='BJD - 2454833',array=BJD0)
-        col3 = Column(name='DURATION',format='E',unit='hours',array=transitDuration)
-        col4 = Column(name='SIG_RES',format='E',array=srMax)
-        cols = ColDefs([col1,col2,col3,col4])
-        instr.append(new_table(cols))
+        col1 = pyfits.Column(name='PERIOD',format='E',unit='days',array=trialPeriods)
+        col2 = pyfits.Column(name='BJD0',format='D',unit='BJD - 2454833',array=BJD0)
+        col3 = pyfits.Column(name='DURATION',format='E',unit='hours',array=transitDuration)
+        col4 = pyfits.Column(name='SIG_RES',format='E',array=srMax)
+        cols = pyfits.ColDefs([col1,col2,col3,col4])
+        instr.append(pyfits.BinTableHDU.from_columns(cols))
         instr[-1].header.cards['TTYPE1'].comment = 'column title: trial period'
         instr[-1].header.cards['TTYPE2'].comment = 'column title: trial mid-transit zero-point'
         instr[-1].header.cards['TTYPE3'].comment = 'column title: trial transit duration'
@@ -315,12 +297,12 @@ def kepbls(infile,outfile,datacol,errcol,minper,maxper,mindur,maxdur,nsearch,
         instr[-1].header.cards['TUNIT1'].comment = 'column units: days'
         instr[-1].header.cards['TUNIT2'].comment = 'column units: BJD - 2454833'
         instr[-1].header.cards['TUNIT3'].comment = 'column units: hours'
-        instr[-1].header.update('EXTNAME','BLS','extension name')
-        instr[-1].header.update('PERIOD',trialPeriods[bestTrial],'most significant trial period [d]')
-        instr[-1].header.update('BJD0',BJD0[bestTrial] + 2454833.0,'time of mid-transit [BJD]')
-        instr[-1].header.update('TRANSDUR',transitDuration[bestTrial],'transit duration [hours]')
-        instr[-1].header.update('SIGNRES',srMax[bestTrial] * bestSr,'maximum signal residue')
-    
+        instr[-1].header['EXTNAME' ] = ('BLS','extension name')
+        instr[-1].header['PERIOD'  ] = (trialPeriods[bestTrial],'most significant trial period [d]')
+        instr[-1].header['BJD0'    ] = (BJD0[bestTrial] + 2454833.0,'time of mid-transit [BJD]')
+        instr[-1].header['TRANSDUR'] = (transitDuration[bestTrial],'transit duration [hours]')
+        instr[-1].header['SIGNRES' ] = (srMax[bestTrial] * bestSr,'maximum signal residue')
+
 # history keyword in output file
 
     if status == 0:
@@ -330,47 +312,54 @@ def kepbls(infile,outfile,datacol,errcol,minper,maxper,mindur,maxdur,nsearch,
 # close input file
 
     if status == 0:
-        status = kepio.closefits(instr,logfile,verbose)	    
+        status = kepio.closefits(instr,logfile,verbose)
 
 
 # print best trial period results
 
     if status == 0:
-        print '      Best trial period = %.5f days' % trialPeriods[bestTrial]
-        print '    Time of mid-transit = BJD %.5f' % (BJD0[bestTrial] + 2454833.0)
-        print '       Transit duration = %.5f hours' % transitDuration[bestTrial]
-        print ' Maximum signal residue = %.4g \n' % (srMax[bestTrial] * bestSr)
+        print('      Best trial period = %.5f days' % trialPeriods[bestTrial])
+        print('    Time of mid-transit = BJD %.5f' % (BJD0[bestTrial] + 2454833.0))
+        print('       Transit duration = %.5f hours' % transitDuration[bestTrial])
+        print(' Maximum signal residue = %.4g \n' % (srMax[bestTrial] * bestSr))
 
 # end time
 
-    if (status == 0):
-	    message = 'KEPBLS completed at'
+    if status == 0:
+        message = 'KEPBLS completed at'
     else:
-	    message = '\nKEPBLS aborted at'
+        message = '\nKEPBLS aborted at'
     kepmsg.clock(message,logfile,verbose)
 
 # main
 
 if '--shell' in sys.argv:
     import argparse
-    
     parser = argparse.ArgumentParser(description='Remove or replace data outliers from a time series')
     parser.add_argument('--shell', action='store_true', help='Are we running from the shell?')
     parser.add_argument('infile', help='Name of input file', type=str)
     parser.add_argument('outfile', help='Name of FITS file to output', type=str)
-    parser.add_argument('--datacol', default='DETSAP_FLUX', help='Name of data column to plot', type=str)
-    parser.add_argument('--errcol', default='DETSAP_FLUX_ERR', help='Name of data error column to plot', type=str)
+    parser.add_argument('--datacol', default='DETSAP_FLUX',
+                        help='Name of data column to plot', type=str)
+    parser.add_argument('--errcol', default='DETSAP_FLUX_ERR',
+                        help='Name of data error column to plot', type=str)
     parser.add_argument('--minper', default=1.0, help='Minimum search period [days]', type=float)
     parser.add_argument('--maxper', default=30.0, help='Maximum search period [days]', type=float)
     parser.add_argument('--mindur', default=0.5, help='Minimum transit duration [hours]', type=float)
     parser.add_argument('--maxdur', default=12.0, help='Maximum transit duration [hours]', type=float)
-    parser.add_argument('--nsearch', default=1000, help='Number of test periods between minper and maxper', type=int)
-    parser.add_argument('--nbins', default=1000, help='Number of bins in the folded time series at any test period', type=int)
+    parser.add_argument('--nsearch', default=1000,
+                        help='Number of test periods between minper and maxper',
+                        type=int)
+    parser.add_argument('--nbins', default=1000,
+                        help='Number of bins in the folded time series at any test period',
+                        type=int)
     parser.add_argument('--plot', action='store_true', help='Plot result?')
     parser.add_argument('--clobber', action='store_true', help='Overwrite output file?')
     parser.add_argument('--verbose', action='store_true', help='Write to a log file?')
-    parser.add_argument('--logfile', '-l', help='Name of ascii log file', default='kepcotrend.log', dest='logfile', type=str)
-    parser.add_argument('--status', '-e', help='Exit status (0=good)', default=0, dest='status', type=int)
+    parser.add_argument('--logfile', '-l', help='Name of ascii log file',
+                        default='kepbls.log', dest='logfile', type=str)
+    parser.add_argument('--status', '-e', help='Exit status (0=good)',
+                        default=0, dest='status', type=int)
     args = parser.parse_args()
     cmdLine=True
     kepbls(args.infile,args.outfile,args.datacol,args.errcol,args.minper,args.maxper,args.mindur,

@@ -1,15 +1,11 @@
-#!/usr/bin/env python
-
 import kepmsg, kepstat, kepfunc, keparray
-import pylab, scipy, numpy, math, random, sys
-from pylab import polyval
+import math, sys
+import numpy as np
 from scipy import optimize, ndimage
 from scipy.optimize import fmin_powell, fmin_tnc, fmin, leastsq
 from scipy.ndimage import interpolation
 from scipy.ndimage.interpolation import shift
-from numpy import empty, zeros, shape, nansum, linspace
 from keparray import rebin2D
-from math import sqrt
 
 # -----------------------------------------------------------
 # linear least square polynomial fit using scipy
@@ -44,93 +40,93 @@ def leastsquare(functype,pinit,xdata,ydata,yerr,logfile,verbose):
 
 # if no data errors, substitude rms of fit
 
-    if (yerr == None):
-	yerr = []
-	rerr = []
-	for i in range(len(ydata)):
-	    rerr.append(1.e10)
-	try:
+    if yerr is None:
+        yerr = []
+        rerr = []
+        for i in range(len(ydata)):
+            rerr.append(1.e10)
+        try:
             out = optimize.leastsq(errfunc,pinit,args=(xdata,ydata,rerr),full_output=1)
-	except:
-	    message = 'ERROR -- KEPFIT.LEASTSQUARE: failed to fit data'
-	    status = kepmsg.err(logfile,message,verbose)
+        except:
+            message = 'ERROR -- KEPFIT.LEASTSQUARE: failed to fit data'
+            status = kepmsg.err(logfile,message,verbose)
             if functype == 'poly0':
-                out = [numpy.mean(ydata),sqrt(numpy.mean(ydata))]
-	if (functype == 'poly0' or functype == 'sineCompareBinPSF'):
-	    coeffs.append(out[0])
-	else:
-	    coeffs = out[0]
-	if (len(coeffs) > 1):
-	    fit = fitfunc(coeffs,xdata)
-	else:
-	    fit = numpy.zeros(len(xdata))
-	    for i in range(len(fit)):
-		fit[i] = coeffs[0]
-	sigma, status = kepstat.rms(ydata,fit,logfile,verbose)
-	for i in range(len(ydata)):
-	    yerr.append(sigma)
+                out = [np.mean(ydata),math.sqrt(np.mean(ydata))]
+        if (functype == 'poly0' or functype == 'sineCompareBinPSF'):
+            coeffs.append(out[0])
+        else:
+            coeffs = out[0]
+        if (len(coeffs) > 1):
+            fit = fitfunc(coeffs,xdata)
+        else:
+            fit = np.zeros(len(xdata))
+            for i in range(len(fit)):
+                fit[i] = coeffs[0]
+        sigma, status = kepstat.rms(ydata,fit,logfile,verbose)
+        for i in range(len(ydata)):
+            yerr.append(sigma)
 
-# fit data 
+# fit data
 
     try:
         out = optimize.leastsq(errfunc, pinit, args=(xdata, ydata, yerr), full_output=1)
     except:
-	message = 'ERROR -- KEPFIT.LEASTSQUARE: failed to fit data'
-	status = kepmsg.err(logfile,message,verbose)
+        message = 'ERROR -- KEPFIT.LEASTSQUARE: failed to fit data'
+        status = kepmsg.err(logfile,message,verbose)
         if functype == 'poly0':
-            out = [numpy.mean(ydata),sqrt(numpy.mean(ydata))]
+            out = [np.mean(ydata),math.sqrt(np.mean(ydata))]
 
 # define coefficients
 
     coeffs = []
     covar = []
-    if (functype == 'poly0' or functype == 'poly1con' or 
-	functype == 'sineCompareBinPSF'):
-	coeffs.append(out[0])
-	covar.append(out[1])
+    if (functype == 'poly0' or functype == 'poly1con' or
+        functype == 'sineCompareBinPSF'):
+        coeffs.append(out[0])
+        covar.append(out[1])
     else:
-	coeffs = out[0]
-	covar = out[1]
+        coeffs = out[0]
+        covar = out[1]
 
 # calculate 1-sigma error on coefficients
 
     errors = []
-    if (covar == None): 
-	message = 'WARNING -- KEPFIT.leastsquare: NULL covariance matrix'
-#	kepmsg.log(logfile,message,verbose)
+    if (covar is None):
+        message = 'WARNING -- KEPFIT.leastsquare: NULL covariance matrix'
+#       kepmsg.log(logfile,message,verbose)
     for i in range(len(coeffs)):
-	if (covar != None and len(coeffs) > 1):
-	    errors.append(sqrt(abs(covar[i][i])))
-	else:
-	    errors.append(coeffs[i])
+        if (covar is not None and len(coeffs) > 1):
+            errors.append(math.sqrt(abs(covar[i][i])))
+        else:
+            errors.append(coeffs[i])
 
 # generate fit points for rms calculation
 
     if (len(coeffs) > 1):
-	fit = fitfunc(coeffs,xdata)
+        fit = fitfunc(coeffs,xdata)
     else:
-	fit = numpy.zeros(len(xdata))
-	for i in range(len(fit)):
-	    fit[i] = coeffs[0]
+        fit = np.zeros(len(xdata))
+        for i in range(len(fit)):
+            fit[i] = coeffs[0]
     sigma, status = kepstat.rms(ydata,fit,logfile,verbose)
 
 # generate fit points for plotting
 
     dx = xdata[len(xdata)-1] - xdata[0]
-    plotx = linspace(xdata.min(),xdata.max(),10000)
+    plotx = np.linspace(xdata.min(),xdata.max(),10000)
     ploty = fitfunc(coeffs,plotx)
     if (len(coeffs) == 1):
-	ploty = []
-	for i in range(len(plotx)):
-	    ploty.append(coeffs[0])
-	ploty = numpy.array(ploty)
+        ploty = []
+        for i in range(len(plotx)):
+            ploty.append(coeffs[0])
+        ploty = np.array(ploty)
 
 # reduced chi^2 calculation
 
     chi2 = 0
     dof = len(ydata) - len(coeffs)
     for i in range(len(ydata)):
-	chi2 += (ydata[i] - fit[i])**2 / yerr[i]
+        chi2 += (ydata[i] - fit[i])**2 / yerr[i]
     chi2 /= dof
 
     return coeffs, errors, covar, sigma, chi2, dof, fit, plotx, ploty, status
@@ -158,44 +154,39 @@ def lsqclip(functype,pinit,x,y,yerr,rej_lo,rej_hi,niter,logfile,verbose):
 # error catching
 
     if (len(x) == 0):
-	status = kepmsg.exit('ERROR -- KEPFIT.LSQCLIP: x data array is empty')
+        status = kepmsg.exit('ERROR -- KEPFIT.LSQCLIP: x data array is empty')
     if (len(y) == 0):
-	status = kepmsg.exit('ERROR -- KEPFIT.LSQCLIP: y data array is empty')
+        status = kepmsg.exit('ERROR -- KEPFIT.LSQCLIP: y data array is empty')
     if (len(x) < len(pinit)):
-	kepmsg.warn(logfile,'WARNING -- KEPFIT.LSQCLIP: no degrees of freedom')
-        
+        kepmsg.warn(logfile,'WARNING -- KEPFIT.LSQCLIP: no degrees of freedom')
+
 
 # sigma-clipping iterations
 
     while (iiter < niter and len(x) > len(pinit) and iterstatus > 0):
-	iterstatus = 0
-	tmpx = []
-	tmpy = []
-	tmpyerr = []
-	npts.append(len(x))
-	coeffs,errors,covar,sigma,chi2,dof,fit,plotx,ploty,status = \
-	    leastsquare(functype,pinit,x,y,yerr,logfile,verbose)
-	pinit = coeffs
+        iterstatus = 0
+        tmpx = []
+        tmpy = []
+        tmpyerr = []
+        npts.append(len(x))
+        coeffs,errors,covar,sigma,chi2,dof,fit,plotx,ploty,status = \
+            leastsquare(functype,pinit,x,y,yerr,logfile,verbose)
+        pinit = coeffs
 
 # point-by-point sigma-clipping test
 
-	for ix in range(npts[iiter]):
-	    if (y[ix] - fit[ix] < rej_hi * sigma and
-		fit[ix] - y[ix] < rej_lo * sigma):
-		tmpx.append(x[ix])
-		tmpy.append(y[ix])
-		if (yerr != None): tmpyerr.append(yerr[ix])
-	    else:
-		iterstatus = 1
-	x = scipy.array(tmpx)
-	y = scipy.array(tmpy)
-	if (yerr != None): yerr = scipy.array(tmpyerr)
-	iiter += 1
-
-# fudge scalar models
-
-#    for i in range(len(plotx)):
-	
+        for ix in range(npts[iiter]):
+            if (y[ix] - fit[ix] < rej_hi * sigma and
+                fit[ix] - y[ix] < rej_lo * sigma):
+                tmpx.append(x[ix])
+                tmpy.append(y[ix])
+                if (yerr is not None): tmpyerr.append(yerr[ix])
+            else:
+                iterstatus = 1
+        x = np.array(tmpx)
+        y = np.array(tmpy)
+        if (yerr is not None): yerr = np.array(tmpyerr)
+        iiter += 1
 
 # coeffs = best fit coefficients
 # covar = covariance matrix
@@ -216,9 +207,6 @@ def poly(x,y,order,rej_lo,rej_hi,niter):
 # rej_hi = upper rejection threshold (units=sugma)
 # niter = number of sigma-clipping iterations
 
-    import math
-    from pylab import polyfit, polyval
-
     npts = []
     iiter = 0
     iterstatus = 1
@@ -226,32 +214,32 @@ def poly(x,y,order,rej_lo,rej_hi,niter):
 # sigma-clipping iterations
 
     while (iiter < niter and iterstatus > 0):
-	iterstatus = 0
-	tmpx = []
-	tmpy = []
-	npts.append(len(x))
-	coeffs = polyfit(x,y,order)
-	fit = polyval(coeffs,x)
+        iterstatus = 0
+        tmpx = []
+        tmpy = []
+        npts.append(len(x))
+        coeffs = np.polyfit(x,y,order)
+        fit = np.polyval(coeffs,x)
 
 # calculate sigma of fit
 
-	sig = 0
-	for ix in range(npts[iiter]):
-	    sig = sig + (y[ix] - fit[ix])**2
-	sig = math.sqrt(sig / (npts[iiter] - 1))
+        sig = 0
+        for ix in range(npts[iiter]):
+            sig = sig + (y[ix] - fit[ix])**2
+        sig = math.sqrt(sig / (npts[iiter] - 1))
 
 # point-by-point sigma-clipping test
 
-	for ix in range(npts[iiter]):
-	    if (y[ix] - fit[ix] < rej_hi * sig and
-		fit[ix] - y[ix] < rej_lo * sig):
-		tmpx.append(x[ix])
-		tmpy.append(y[ix])
-	    else:
-		iterstatus = 1
-	x = tmpx
-	y = tmpy
-	iiter += 1
+        for ix in range(npts[iiter]):
+            if (y[ix] - fit[ix] < rej_hi * sig and
+                fit[ix] - y[ix] < rej_lo * sig):
+                tmpx.append(x[ix])
+                tmpy.append(y[ix])
+            else:
+                iterstatus = 1
+        x = tmpx
+        y = tmpy
+        iiter += 1
 
 # coeffs = best fit coefficients
 # iiter = number of sigma clipping iteration before convergence
@@ -262,14 +250,14 @@ def poly(x,y,order,rej_lo,rej_hi,niter):
 # Fit single PRF model to Kepler pixel mask data
 # -----------------------------------------------------------
 
-def fitPRF(flux,ydim,xdim,column,row,prfn,crval1p,crval2p,cdelt1p,cdelt2p,interpolation,
-           tolerance,guess,type,verbose):
+def fitPRF(flux,ydim,xdim,column,row,prfn,crval1p,crval2p,cdelt1p,cdelt2p,
+           interpolation,tolerance,guess,type,verbose):
 
 # construct input summed image
 
     status = 0
     if status == 0:
-        imgflux = empty((ydim,xdim))
+        imgflux = np.empty((ydim,xdim))
         n = 0
         for i in range(ydim):
             for j in range(xdim):
@@ -279,10 +267,10 @@ def fitPRF(flux,ydim,xdim,column,row,prfn,crval1p,crval2p,cdelt1p,cdelt2p,interp
 # interpolate the calibrated PRF shape to the target position
 
     if status == 0:
-        prf = zeros(shape(prfn[0]),dtype='float32')
-        prfWeight = zeros((5),dtype='float32')
+        prf = np.zeros(shape(prfn[0]),dtype='float32')
+        prfWeight = np.zeros((5),dtype='float32')
         for i in xrange(5):
-            prfWeight[i] = sqrt((column - crval1p[i])**2 + (row - crval2p[i])**2)
+            prfWeight[i] = math.sqrt((column - crval1p[i])**2 + (row - crval2p[i])**2)
             if prfWeight[i] == 0.0:
                 prfWeight[i] = 1.0e6
             prf = prf + prfn[i] / prfWeight[i]
@@ -318,14 +306,14 @@ def fitPRF(flux,ydim,xdim,column,row,prfn,crval1p,crval2p,cdelt1p,cdelt2p,interp
             guess.insert(0,guess[0])
             [fy,fx,y,x] = fmin_powell(kepfunc.kepler_prf_1d,guess,args=args,xtol=tolerance,
                                   ftol=1.0,disp=False)
-            f = (fx + fy) / 2 
+            f = (fx + fy) / 2.0
 
 # calculate best-fit model
 
     if status == 0:
         prfMod = shift(prf,[y,x],order=1,mode='constant')
         prfMod = prfMod[prfY0:prfY0+prfDimY,prfX0:prfX0+prfDimX]
-        prfFit = rebin2D(prfMod,[numpy.shape(imgflux)[0],numpy.shape(imgflux)[1]],
+        prfFit = rebin2D(prfMod,[np.shape(imgflux)[0],np.shape(imgflux)[1]],
                                   interpolation,True,False)
         prfFit = prfFit * f / cdelt1p[0] / cdelt2p[0]
 
@@ -347,7 +335,7 @@ def fitMultiPRF(flux,ydim,xdim,column,row,prfn,crval1p,crval2p,cdelt1p,cdelt2p,i
 
     status = 0
     if status == 0:
-        imgflux = empty((ydim,xdim))
+        imgflux = np.empty((ydim,xdim))
         n = 0
         for i in xrange(ydim):
             for j in xrange(xdim):
@@ -357,10 +345,10 @@ def fitMultiPRF(flux,ydim,xdim,column,row,prfn,crval1p,crval2p,cdelt1p,cdelt2p,i
 # interpolate the calibrated PRF shape to the target position
 
     if status == 0:
-        prf = zeros(shape(prfn[0]),dtype='float32')
-        prfWeight = zeros((5),dtype='float32')
+        prf = np.zeros(shape(prfn[0]),dtype='float32')
+        prfWeight = np.zeros((5),dtype='float32')
         for i in xrange(5):
-            prfWeight[i] = sqrt((column - crval1p[i])**2 + (row - crval2p[i])**2)
+            prfWeight[i] = math.sqrt((column - crval1p[i])**2 + (row - crval2p[i])**2)
             if prfWeight[i] == 0.0:
                 prfWeight[i] = 1.0e6
             prf = prf + prfn[i] / prfWeight[i]
@@ -399,7 +387,7 @@ def fitMultiPRF(flux,ydim,xdim,column,row,prfn,crval1p,crval2p,cdelt1p,cdelt2p,i
             y = rows.strip().split(',')
             x = columns.strip().split(',')
             for i in xrange(len(f)):
-                f[i] = float(f[i]) * numpy.nanmax(flux)
+                f[i] = float(f[i]) * np.nanmax(flux)
         except:
             f = fluxes
             y = rows
@@ -429,7 +417,7 @@ def fitMultiPRF(flux,ydim,xdim,column,row,prfn,crval1p,crval2p,cdelt1p,cdelt2p,i
                 message = 'ERROR -- KEPFIT:FITMULTIPRF: Guesses for rows, columns and '
                 message += 'fluxes must have the same number of sources'
                 status = kepmsg.err(logfile,message,verbose)
-        
+
 # fit input image with model
 
     if status == 0:
@@ -444,31 +432,31 @@ def fitMultiPRF(flux,ydim,xdim,column,row,prfn,crval1p,crval2p,cdelt1p,cdelt2p,i
                                   ftol=ftol,disp=False)
             f.append(ans[0])
             y.append(ans[1])
-            x.append(ans[2]) 
+            x.append(ans[2])
         elif type == '1D' and nsrc == 1:
             guess.insert(0,guess[0])
             ans = fmin_powell(kepfunc.kepler_prf_1d,guess,args=args,xtol=tolerance,
                                   ftol=ftol,disp=False)
             f.append((ans[0] + ans[1]) / 2)
             y.append(ans[2])
-            x.append(ans[3]) 
+            x.append(ans[3])
         else:
             ans = fmin_powell(kepfunc.kepler_multi_prf_2d,guess,args=args,xtol=tolerance,
                               ftol=ftol,disp=False)
             for i in xrange(nsrc):
                 f.append(ans[i])
                 y.append(ans[nsrc+i])
-                x.append(ans[nsrc*2+i]) 
+                x.append(ans[nsrc*2+i])
 
 # calculate best-fit model
 
     if status == 0:
-        prfMod = numpy.zeros((prfDimY+1,prfDimX+1))
+        prfMod = np.zeros((prfDimY+1,prfDimX+1))
         for i in xrange(nsrc):
             prfTmp = shift(prf,[y[i],x[i]],order=1,mode='constant')
             prfTmp = prfTmp[prfY0:prfY0+prfDimY,prfX0:prfX0+prfDimX]
             prfMod = prfMod + prfTmp * f[i]
-        prfFit = rebin2D(prfMod,[numpy.shape(imgflux)[0],numpy.shape(imgflux)[1]],
+        prfFit = rebin2D(prfMod,[np.shape(imgflux)[0],np.shape(imgflux)[1]],
                          interpolation,True,False) / cdelt1p[0] / cdelt2p[0]
 
 # calculate residual between data and model
@@ -496,7 +484,7 @@ def fitBackMultiPRF(flux,ydim,xdim,column,row,prfn,crval1p,crval2p,cdelt1p,cdelt
 
     status = 0
     if status == 0:
-        imgflux = empty((ydim,xdim))
+        imgflux = np.empty((ydim,xdim))
         n = 0
         for i in xrange(ydim):
             for j in xrange(xdim):
@@ -506,10 +494,10 @@ def fitBackMultiPRF(flux,ydim,xdim,column,row,prfn,crval1p,crval2p,cdelt1p,cdelt
 # interpolate the calibrated PRF shape to the target position
 
     if status == 0:
-        prf = zeros(shape(prfn[0]),dtype='float32')
-        prfWeight = zeros((5),dtype='float32')
+        prf = np.zeros(shape(prfn[0]),dtype='float32')
+        prfWeight = np.zeros((5),dtype='float32')
         for i in xrange(5):
-            prfWeight[i] = sqrt((column - crval1p[i])**2 + (row - crval2p[i])**2)
+            prfWeight[i] = math.sqrt((column - crval1p[i])**2 + (row - crval2p[i])**2)
             if prfWeight[i] == 0.0:
                 prfWeight[i] = 1.0e6
             prf = prf + prfn[i] / prfWeight[i]
@@ -548,7 +536,7 @@ def fitBackMultiPRF(flux,ydim,xdim,column,row,prfn,crval1p,crval2p,cdelt1p,cdelt
             y = rows.strip().split(',')
             x = columns.strip().split(',')
             for i in xrange(len(f)):
-                f[i] = float(f[i]) * numpy.nanmax(flux)
+                f[i] = float(f[i]) * np.nanmax(flux)
         except:
             f = fluxes
             y = rows
@@ -581,7 +569,7 @@ def fitBackMultiPRF(flux,ydim,xdim,column,row,prfn,crval1p,crval2p,cdelt1p,cdelt
                 message = 'ERROR -- KEPFIT:FITMULTIPRF: Guesses for rows, columns and '
                 message += 'fluxes must have the same number of sources'
                 status = kepmsg.err(logfile,message,verbose)
-        
+
 # fit input image with model
 
     if status == 0:
@@ -596,21 +584,21 @@ def fitBackMultiPRF(flux,ydim,xdim,column,row,prfn,crval1p,crval2p,cdelt1p,cdelt
         for i in xrange(nsrc):
             f.append(ans[i])
             y.append(ans[nsrc+i])
-            x.append(ans[nsrc*2+i]) 
+            x.append(ans[nsrc*2+i])
             b = ans[nsrc*3]
 
 # calculate best-fit model
 
     if status == 0:
-        prfMod = numpy.zeros((prfDimY+1,prfDimX+1))
+        prfMod = np.zeros((prfDimY+1,prfDimX+1))
         for i in xrange(nsrc):
             prfTmp = shift(prf,[y[i],x[i]],order=1,mode='constant')
             prfTmp = prfTmp[prfY0:prfY0+prfDimY,prfX0:prfX0+prfDimX]
             prfMod = prfMod + prfTmp * f[i]
-        prfFit = rebin2D(prfMod,[numpy.shape(imgflux)[0],numpy.shape(imgflux)[1]],
+        prfFit = rebin2D(prfMod,[np.shape(imgflux)[0],np.shape(imgflux)[1]],
                          interpolation,True,False) / cdelt1p[0] / cdelt2p[0]
         prfFit = prfFit + b
-        
+
 # calculate residual between data and model
 
     if status == 0:
@@ -636,7 +624,7 @@ def fitFocusMultiPRF(flux,ydim,xdim,column,row,prfn,crval1p,crval2p,cdelt1p,cdel
 
     status = 0
     if status == 0:
-        imgflux = empty((ydim,xdim))
+        imgflux = np.empty((ydim,xdim))
         n = 0
         for i in xrange(ydim):
             for j in xrange(xdim):
@@ -646,10 +634,10 @@ def fitFocusMultiPRF(flux,ydim,xdim,column,row,prfn,crval1p,crval2p,cdelt1p,cdel
 # interpolate the calibrated PRF shape to the target position
 
     if status == 0:
-        prf = zeros(shape(prfn[0]),dtype='float32')
-        prfWeight = zeros((5),dtype='float32')
+        prf = np.zeros(shape(prfn[0]),dtype='float32')
+        prfWeight = np.zeros((5),dtype='float32')
         for i in xrange(5):
-            prfWeight[i] = sqrt((column - crval1p[i])**2 + (row - crval2p[i])**2)
+            prfWeight[i] = math.sqrt((column - crval1p[i])**2 + (row - crval2p[i])**2)
             if prfWeight[i] == 0.0:
                 prfWeight[i] = 1.0e6
             prf = prf + prfn[i] / prfWeight[i]
@@ -688,7 +676,7 @@ def fitFocusMultiPRF(flux,ydim,xdim,column,row,prfn,crval1p,crval2p,cdelt1p,cdel
             y = rows.strip().split(',')
             x = columns.strip().split(',')
             for i in xrange(len(f)):
-                f[i] = float(f[i]) * numpy.nanmax(flux)
+                f[i] = float(f[i]) * np.nanmax(flux)
         except:
             f = fluxes
             y = rows
@@ -723,7 +711,7 @@ def fitFocusMultiPRF(flux,ydim,xdim,column,row,prfn,crval1p,crval2p,cdelt1p,cdel
                 message = 'ERROR -- KEPFIT:FITMULTIPRF: Guesses for rows, columns and '
                 message += 'fluxes must have the same number of sources'
                 status = kepmsg.err(logfile,message,verbose)
-        
+
 # fit input image with model
 
     if status == 0:
@@ -737,7 +725,7 @@ def fitFocusMultiPRF(flux,ydim,xdim,column,row,prfn,crval1p,crval2p,cdelt1p,cdel
         for i in xrange(nsrc):
             f.append(ans[i])
             y.append(ans[nsrc+i])
-            x.append(ans[nsrc*2+i]) 
+            x.append(ans[nsrc*2+i])
         b = ans[nsrc*3]
         w = ans[nsrc*3+1]
         print ans
@@ -754,14 +742,14 @@ def fitFocusMultiPRF(flux,ydim,xdim,column,row,prfn,crval1p,crval2p,cdelt1p,cdel
         if int(prfDimY) % 2 == 0: DY = 1.0
         if int(prfDimX) % 2 == 0: DX = 1.0
         print w, prfDimY, prfDimX
-        prfMod = zeros((prfDimY+DY,prfDimX+DX))
+        prfMod = np.zeros((prfDimY+DY,prfDimX+DX))
         for i in range(nsrc):
             prfTmp = shift(prf,[y[i]/w,x[i]/w],order=1,mode='constant')
             prfMod = prfMod + prfTmp[prfY0:prfY0+prfDimY,prfX0:prfX0+prfDimX] * f[i]
         prfFit = rebin2D(prfMod,[shape(imgflux)[0],shape(imgflux)[1]],interpolation,True,False)
         prfFit = prfFit / cdelt1p[0] / cdelt2p[0] / w / w
         prfFit = prfFit + b
-        
+
 # calculate residual between data and model
 
     if status == 0:
@@ -788,7 +776,7 @@ def test(flux,ydim,xdim,column,row,prfn,crval1p,crval2p,cdelt1p,cdelt2p,interpol
 
     status = 0
     if status == 0:
-        imgflux = empty((ydim,xdim))
+        imgflux = np.empty((ydim,xdim))
         n = 0
         for i in xrange(ydim):
             for j in xrange(xdim):
@@ -798,10 +786,10 @@ def test(flux,ydim,xdim,column,row,prfn,crval1p,crval2p,cdelt1p,cdelt2p,interpol
 # interpolate the calibrated PRF shape to the target position
 
     if status == 0:
-        prf = zeros(shape(prfn[0]),dtype='float32')
-        prfWeight = zeros((5),dtype='float32')
+        prf = np.zeros(shape(prfn[0]),dtype='float32')
+        prfWeight = np.zeros((5),dtype='float32')
         for i in xrange(5):
-            prfWeight[i] = sqrt((column - crval1p[i])**2 + (row - crval2p[i])**2)
+            prfWeight[i] = math.sqrt((column - crval1p[i])**2 + (row - crval2p[i])**2)
             if prfWeight[i] == 0.0:
                 prfWeight[i] = 1.0e6
             prf = prf + prfn[i] / prfWeight[i]
@@ -840,7 +828,7 @@ def test(flux,ydim,xdim,column,row,prfn,crval1p,crval2p,cdelt1p,cdelt2p,interpol
             y = rows.strip().split(',')
             x = columns.strip().split(',')
             for i in xrange(len(f)):
-                f[i] = float(f[i]) * numpy.nanmax(flux)
+                f[i] = float(f[i]) * np.nanmax(flux)
         except:
             f = fluxes
             y = rows
@@ -870,7 +858,7 @@ def test(flux,ydim,xdim,column,row,prfn,crval1p,crval2p,cdelt1p,cdelt2p,interpol
                 message = 'ERROR -- KEPFIT:FITMULTIPRF: Guesses for rows, columns and '
                 message += 'fluxes must have the same number of sources'
                 status = kepmsg.err(logfile,message,verbose)
-        
+
 # fit input image with model
 
     if status == 0:
@@ -885,31 +873,31 @@ def test(flux,ydim,xdim,column,row,prfn,crval1p,crval2p,cdelt1p,cdelt2p,interpol
                                   ftol=ftol,disp=False)
             f.append(ans[0])
             y.append(ans[1])
-            x.append(ans[2]) 
+            x.append(ans[2])
         elif type == '1D' and nsrc == 1:
             guess.insert(0,guess[0])
             ans = fmin_powell(kepfunc.kepler_prf_1d,guess,args=args,xtol=tolerance,
                                   ftol=ftol,disp=False)
             f.append((ans[0] + ans[1]) / 2)
             y.append(ans[2])
-            x.append(ans[3]) 
+            x.append(ans[3])
         else:
             ans = fmin_powell(kepfunc.kepler_multi_prf_2d,guess,args=args,xtol=tolerance,
                               ftol=ftol,disp=False)
             for i in xrange(nsrc):
                 f.append(ans[i])
                 y.append(ans[nsrc+i])
-                x.append(ans[nsrc*2+i]) 
+                x.append(ans[nsrc*2+i])
 
 # calculate best-fit model
 
     if status == 0:
-        prfMod = numpy.zeros((prfDimY+1,prfDimX+1))
+        prfMod = np.zeros((prfDimY+1,prfDimX+1))
         for i in xrange(nsrc):
             prfTmp = shift(prf,[y[i],x[i]],order=1,mode='constant')
             prfTmp = prfTmp[prfY0:prfY0+prfDimY,prfX0:prfX0+prfDimX]
             prfMod = prfMod + prfTmp * f[i]
-        prfFit = rebin2D(prfMod,[numpy.shape(imgflux)[0],numpy.shape(imgflux)[1]],
+        prfFit = rebin2D(prfMod,[np.shape(imgflux)[0],np.shape(imgflux)[1]],
                          interpolation,True,False) / cdelt1p[0] / cdelt2p[0]
 
 # calculate residual between data and model
@@ -925,5 +913,3 @@ def test(flux,ydim,xdim,column,row,prfn,crval1p,crval2p,cdelt1p,cdelt2p,interpol
             x[i] = x[i] * cdelt2p[0] + datCenX
 
     return f, y, x, prfMod, prfFit, prfRes
-
-

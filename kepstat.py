@@ -1,11 +1,9 @@
-#!/usr/bin/env python
-
 import kepmsg
 import numpy, scipy, math, random
 from math import *
 from scipy import stats, linalg
 from scipy.linalg import pinv
-from numpy import * 
+from numpy import *
 
 # -----------------------------------------------------------
 # calculate sum of array
@@ -20,7 +18,7 @@ def sumerr(a):
 
     work = 0.0
     for item in a:
-	work += item**2
+        work += item**2
     err = sqrt(work)
     return err
 
@@ -30,7 +28,7 @@ def sumerr(a):
 def mean(list):
 
     try:
-        mean = scipy.stats.nanmean(list)
+        mean = nanmean(list)
     except:
         total = 0.0
         for item in list:
@@ -45,7 +43,7 @@ def mean_err(list):
 
     total = 0.0
     for item in list:
-	total = total + item**2
+        total = total + item**2
     err = sqrt(total) / len(list)
     return err
 
@@ -57,15 +55,15 @@ def median(list,logfile):
     list.sort()
     n = len(list)
     if (n == 0):
-	message = 'ERROR -- KEPSTAT.MEDIAN: Supplied list is empty'
-	status = kepmsg.err(logfile,message)
-	median = None
+        message = 'ERROR -- KEPSTAT.MEDIAN: Supplied list is empty'
+        status = kepmsg.err(logfile,message)
+        median = None
     elif (n < 3):
-	median = mean(list)
+        median = mean(list)
     else:
-	median = list[n/2]
+        median = list[n/2]
     return median
-	
+
 # -----------------------------------------------------------
 # minimum of array
 
@@ -73,7 +71,7 @@ def min(array):
 
     minm = array[0]
     for i in range(1,len(array)):
-	if (array[i] < minm): minm = array[i]
+        if (array[i] < minm): minm = array[i]
     return minm
 
 # -----------------------------------------------------------
@@ -83,7 +81,7 @@ def max(array):
 
     maxm = array[0]
     for i in range(1,len(array)):
-	if (array[i] > maxm): maxm = array[i]
+        if (array[i] > maxm): maxm = array[i]
     return maxm
 
 # -----------------------------------------------------------
@@ -93,7 +91,7 @@ def mine(array,error):
 
     minm = array[0] - error[0]
     for i in range(1,len(array)):
-	if (array[i] - error[i] < minm): minm = array[i] - error[i]
+        if (array[i] - error[i] < minm): minm = array[i] - error[i]
     return minm
 
 # -----------------------------------------------------------
@@ -103,7 +101,7 @@ def maxe(array,error):
 
     maxm = array[0] + error[0]
     for i in range(1,len(array)):
-	if (array[i] + error[i] > maxm): maxm = array[i] + error[i]
+        if (array[i] + error[i] > maxm): maxm = array[i] + error[i]
     return maxm
 
 # -----------------------------------------------------------
@@ -114,13 +112,13 @@ def rms(array1,array2,logfile,verbose):
     sigma = 0
     status = 0
     if (len(array1) != len(array2)):
-	message  = 'ERROR -- KEPSTAT.RMS: Arrays have unequal sizes - '
-	message += 'Array1 = ' + str(len(array1)) + ', array2 = ' + str(len(array2))
-	status = kepmsg.err(logfile,message,verbose)
+        message  = 'ERROR -- KEPSTAT.RMS: Arrays have unequal sizes - '
+        message += 'Array1 = ' + str(len(array1)) + ', array2 = ' + str(len(array2))
+        status = kepmsg.err(logfile,message,verbose)
     if (status == 0):
-	for i in range(len(array1)):
-	    sigma += (array1[i] - array2[i])**2
-	sigma = math.sqrt(sigma / len(array1))
+        for i in range(len(array1)):
+            sigma += (array1[i] - array2[i])**2
+        sigma = math.sqrt(sigma / len(array1))
     return sigma, status
 
 # -----------------------------------------------------------
@@ -132,8 +130,8 @@ def rms2d(array1,array2):
     n = 0
     array3 = (array1 - array2)**2
     for a in array3:
-	sigma += a
-	n += 1
+        sigma += a
+        n += 1
     sigma /= n
     return sigma
 
@@ -145,7 +143,7 @@ def stdev(array):
     sigma = 0.0
     average = mean(array)
     for i in range(len(array)):
-	sigma += (array[i] - average)**2
+        sigma += (array[i] - average)**2
     sigma = math.sqrt(sigma / len(array))
     return average, sigma
 
@@ -168,7 +166,7 @@ def removeinfinlc(x, cols):
     for j in range(len(cols)):
         work = []
         datatype = cols[j].dtype
-	for i in range(len(x)):
+        for i in range(len(x)):
             if numpy.isfinite(x[i]):
                 work.append(cols[j][i])
         cols[j] = numpy.array(work,dtype=datatype)
@@ -178,7 +176,7 @@ def removeinfinlc(x, cols):
 # filter on data within time ranges
 
 def filterOnRange(intime,tstart,tstop):
-    
+
     status = 0
     outlist = []
     for i in range(len(intime)):
@@ -188,7 +186,7 @@ def filterOnRange(intime,tstart,tstop):
                     outlist.append(i)
                 elif i > outlist[-1]:
                     outlist.append(i)
-                    
+
     return outlist, status
 
 #------------------------------------------------------------------
@@ -259,7 +257,7 @@ def inv_normal_cummulative_function(p):
 # bit map decoding
 
 def bitInBitmap(bitmap,bit):
-    
+
     flag = False
     for i in range(10,-1,-1):
         if (bitmap - 2**i >= 0):
@@ -276,21 +274,21 @@ def bitInBitmap(bitmap,bit):
 
 def princomp(A):
 
- """ performs principal components analysis 
+ """ performs principal components analysis
      (PCA) on the n-by-p data matrix A
-     Rows of A correspond to observations, columns to variables. 
+     Rows of A correspond to observations, columns to variables.
 
- Returns :  
+ Returns :
   coeff :
-    is a p-by-p matrix, each column containing coefficients 
+    is a p-by-p matrix, each column containing coefficients
     for one principal component.
-  score : 
-    the principal component scores; that is, the representation 
-    of A in the principal component space. Rows of SCORE 
+  score :
+    the principal component scores; that is, the representation
+    of A in the principal component space. Rows of SCORE
     correspond to observations, columns to components.
 
-  latent : 
-    a vector containing the eigenvalues 
+  latent :
+    a vector containing the eigenvalues
     of the covariance matrix of A.
  """
 
@@ -398,7 +396,7 @@ def running_frac_std(time,flux,wid,sig=None):
     for i in range(len(time)):
         valsinwid = flux[logical_and(time < time[i] + hwid, time > time[i] - hwid)]
         if sig is None:
-            runstd[i] = std(valsinwid) / mean(valsinwid) 
+            runstd[i] = std(valsinwid) / mean(valsinwid)
         else:
             runstd[i] = std(sig_clip(valsinwid,sig)) / mean(valsinwid)
 

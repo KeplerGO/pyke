@@ -1,12 +1,11 @@
-
-import numpy, sys, time, pyfits, pylab, math, re
-from pyfits import *
-from pylab import *
-from matplotlib import *
+import sys, time, math, re
+import numpy as np
+from astropy.io import fits as pyfits
+from matplotlib import pyplot as plt
 from math import *
 import kepio, kepmsg, kepkey, kepstat, kepfourier
 
-def kepwindow(infile,outfile,fcol,fmax,nfreq,plot,clobber,verbose,logfile,status, cmdLine=False): 
+def kepwindow(infile,outfile,fcol,fmax,nfreq,plot,clobber,verbose,logfile,status, cmdLine=False):
 
 ## startup parameters
 
@@ -20,7 +19,7 @@ def kepwindow(infile,outfile,fcol,fmax,nfreq,plot,clobber,verbose,logfile,status
     fcolor = '#ffff00'
     falpha = 0.2
 
-## log the call 
+## log the call
 
     hashline = '----------------------------------------------------------------------------'
     kepmsg.log(logfile,hashline,verbose)
@@ -53,7 +52,7 @@ def kepwindow(infile,outfile,fcol,fmax,nfreq,plot,clobber,verbose,logfile,status
 ## clobber output file
 
     if clobber: status = kepio.clobber(outfile,logfile,verbose)
-    if kepio.fileexists(outfile): 
+    if kepio.fileexists(outfile):
         message = 'ERROR -- KEPWINDOW: ' + outfile + ' exists. Use clobber=yes'
         status = kepmsg.err(logfile,message,verbose)
 
@@ -78,11 +77,11 @@ def kepwindow(infile,outfile,fcol,fmax,nfreq,plot,clobber,verbose,logfile,status
 ## read table columns
 
     if status == 0:
-	try:
+        try:
             barytime = instr[1].data.field('barytime')
-	except:
+        except:
             barytime, status = kepio.readfitscol(infile,instr[1].data,'time',logfile,verbose)
-	signal, status = kepio.readfitscol(infile,instr[1].data,fcol,logfile,verbose)
+        signal, status = kepio.readfitscol(infile,instr[1].data,fcol,logfile,verbose)
 
 ## remove infinite data from time series
 
@@ -95,7 +94,7 @@ def kepwindow(infile,outfile,fcol,fmax,nfreq,plot,clobber,verbose,logfile,status
 ## reset signal data to zero
 
     if status == 0:
-        signal = ones(len(outcols[1]))
+        signal = np.ones(len(outcols[1]))
 
 ## frequency steps
 
@@ -107,7 +106,7 @@ def kepwindow(infile,outfile,fcol,fmax,nfreq,plot,clobber,verbose,logfile,status
     if status == 0:
         fr, power = kepfourier.ft(barytime,signal,0.0,fmax,deltaf,True)
         power[0] = 1.0
-        
+
 ## mirror window function around ordinate
 
     if status == 0:
@@ -118,18 +117,19 @@ def kepwindow(infile,outfile,fcol,fmax,nfreq,plot,clobber,verbose,logfile,status
         for i in range(len(fr)):
             work1.append(fr[i])
             work2.append(power[i])
-        fr = array(work1,dtype='float32')
-        power = array(work2,dtype='float32')
+        fr = np.array(work1,dtype='float32')
+        power = np.array(work2,dtype='float32')
 
 ## write output file
 
     if status == 0:
-        col1 = Column(name='FREQUENCY',format='E',unit='days',array=fr)
-        col2 = Column(name='POWER',format='E',array=power)
-        cols = ColDefs([col1,col2])
-        instr.append(new_table(cols))
-        instr[-1].header.update('EXTNAME','WINDOW FUNCTION','extension name')
-        
+        col1 = pyfits.Column(name='FREQUENCY', format='E', unit='days',
+                             array=fr)
+        col2 = pyfits.Column(name='POWER', format='E', array=power)
+        cols = pyfits.ColDefs([col1,col2])
+        instr.append(pyfits.BinTableHDU.from_columns(cols))
+        instr[-1].header['EXTNAME'] = ('WINDOW FUNCTION','extension name')
+
 ## comment keyword in output file
 
     if status == 0:
@@ -139,7 +139,7 @@ def kepwindow(infile,outfile,fcol,fmax,nfreq,plot,clobber,verbose,logfile,status
 ## close input file
 
     if status == 0:
-        status = kepio.closefits(instr,logfile,verbose)	    
+        status = kepio.closefits(instr,logfile,verbose)
 
 ## data limits
 
@@ -147,96 +147,75 @@ def kepwindow(infile,outfile,fcol,fmax,nfreq,plot,clobber,verbose,logfile,status
         nrm = len(str(int(power.max())))-1
         power = power / 10**nrm
         ylab = 'Power (x10$^%d$)' % nrm
-	xmin = fr.min()
-	xmax = fr.max()
-	ymin = power.min()
-	ymax = power.max()
-	xr = xmax - xmin
-	yr = ymax - ymin
-        fr = insert(fr,[0],fr[0])
-        fr = append(fr,fr[-1])
-        power = insert(power,[0],0.0) 
-        power = append(power,0.0)
+        xmin = fr.min()
+        xmax = fr.max()
+        ymin = power.min()
+        ymax = power.max()
+        xr = xmax - xmin
+        yr = ymax - ymin
+        fr = np.insert(fr,[0],fr[0])
+        fr = np.append(fr,fr[-1])
+        power = np.insert(power,[0],0.0)
+        power = np.append(power,0.0)
 
 ## plot power spectrum
 
     if status == 0 and plot:
-        try:
-            params = {'backend': 'png',
-                      'axes.linewidth': 2.5,
-                      'axes.labelsize': labelsize,
-                      'axes.font': 'sans-serif',
-                      'axes.fontweight' : 'bold',
-                      'text.fontsize': 12,
-                      'legend.fontsize': 12,
-                      'xtick.labelsize': ticksize,
-                      'ytick.labelsize': ticksize}
-            rcParams.update(params)
-        except:
-            print 'ERROR -- KEPWINDOW: install latex for scientific plotting'
-            status = 1
-    if status == 0 and plot:
-        pylab.figure(1,figsize=[xsize,ysize])
-        pylab.axes([0.06,0.113,0.93,0.86])
-        pylab.plot(fr,power,color=lcolor,linestyle='-',linewidth=lwidth)
-        fill(fr,power,color=fcolor,linewidth=0.0,alpha=falpha)
-        xlim(xmin-xr*0.01,xmax+xr*0.01)
+        plt.figure(1,figsize=[xsize,ysize])
+        plt.axes([0.06,0.113,0.93,0.86])
+        plt.plot(fr,power,color=lcolor,linestyle='-',linewidth=lwidth)
+        plt.fill(fr,power,color=fcolor,linewidth=0.0,alpha=falpha)
+        plt.xlim(xmin-xr*0.01,xmax+xr*0.01)
         if ymin-yr*0.01 <= 0.0:
-            ylim(1.0e-10,ymax+yr*0.01)
+            plt.ylim(1.0e-10,ymax+yr*0.01)
         else:
-            ylim(ymin-yr*0.01,ymax+yr*0.01)
-        xlabel(r'Frequency (d$^{-1}$)', {'color' : 'k'})
-        ylabel('Power', {'color' : 'k'})
+            plt.ylim(ymin-yr*0.01,ymax+yr*0.01)
+        plt.xlabel(r'Frequency (d$^{-1}$)', {'color' : 'k'})
+        plt.ylabel('Power', {'color' : 'k'})
 
 # render plot
 
-        if cmdLine: 
-            pylab.show()
-        else: 
-            pylab.ion()
-            pylab.plot([])
-            pylab.ioff()
-		
+        plt.ion()
+        plt.show()
 ## end time
 
     if (status == 0):
-	    message = 'KEPWINDOW completed at'
+        message = 'KEPWINDOW completed at'
     else:
-	    message = '\nKEPWINDOW aborted at'
+        message = '\nKEPWINDOW aborted at'
     kepmsg.clock(message,logfile,verbose)
 
 ## main
 if '--shell' in sys.argv:
     import argparse
-    
-    parser = argparse.ArgumentParser(description='Calculate and store the window function for a Kepler time series')
-    parser.add_argument('--shell', action='store_true', help='Are we running from the shell?')
+
+    parser = argparse.ArgumentParser(description=("Calculate and store the "
+                                                  "window function for a "
+                                                  "Kepler time series"))
+    parser.add_argument('--shell', action='store_true',
+                        help='Are we running from the shell?')
     parser.add_argument('infile', help='Name of input file', type=str)
-
-    parser.add_argument('outfile', help='Name of FITS file to output', type=str)
-
-    parser.add_argument('--datacol', default='SAP_FLUX', help='Name of data column', type=str, dest='fcol')
-
-    parser.add_argument('--fmax', default=1.0, help='Minimum search frequency [1/day]', type=float)
-    parser.add_argument('--nfreq', default=100, help='Number of frequency intervals', type=int)
-
-
+    parser.add_argument('outfile', help='Name of FITS file to output',
+                        type=str)
+    parser.add_argument('--datacol', default='SAP_FLUX',
+                        help='Name of data column', type=str,
+                        dest='fcol')
+    parser.add_argument('--fmax', default=1.0, help='Minimum search frequency [1/day]',
+                        type=float)
+    parser.add_argument('--nfreq', default=100,
+                        help='Number of frequency intervals', type=int)
     parser.add_argument('--plot', action='store_true', help='Plot result?')
-
     parser.add_argument('--clobber', action='store_true', help='Overwrite output file?')
     parser.add_argument('--verbose', action='store_true', help='Write to a log file?')
-    parser.add_argument('--logfile', '-l', help='Name of ascii log file', default='kepcotrend.log', dest='logfile', type=str)
-    parser.add_argument('--status', '-e', help='Exit status (0=good)', default=0, dest='status', type=int)
-
-
+    parser.add_argument('--logfile', '-l', help='Name of ascii log file',
+                        default='kepwindow.log', dest='logfile', type=str)
+    parser.add_argument('--status', '-e', help='Exit status (0=good)',
+                        default=0, dest='status', type=int)
     args = parser.parse_args()
-    
     cmdLine=True
-
-    kepwindow(args.infile,args.outfile,args.fcol,args.fmax,args.nfreq,args.plot,args.clobber,args.verbose, 
-        args.logfile,args.status, cmdLine)
-    
-
+    kepwindow(args.infile, args.outfile, args.fcol, args.fmax, args.nfreq,
+              args.plot, args.clobber, args.verbose, args.logfile,
+              args.status, cmdLine)
 else:
     from pyraf import iraf
     parfile = iraf.osfn("kepler$kepwindow.par")

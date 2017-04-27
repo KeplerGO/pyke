@@ -11,14 +11,14 @@ def log(file,message,verbose):
 
 # print to shell
 
-	print (message)
+        print(message)
 
 # print to log file
 
-	if (file):
-	    output = open(file,'a')
-	    output.write(message+'\n')
-	    output.close()
+        if (file):
+            output = open(file,'a')
+            output.write(message+'\n')
+            output.close()
 
 # -----------------------------------------------------------
 # write error message to log file and shell
@@ -48,7 +48,7 @@ def abort(message,file,verbose):
     if verbose:
         log(file,message,True)
     else:
-        print message
+        print(message)
         sys.exit(2)
 
 # -----------------------------------------------------------
@@ -64,8 +64,8 @@ def exit(message):
 def clock(text,file,verbose):
 
     if (verbose):
-	message = text + ': ' + time.asctime(time.localtime())
-	log(file,message,verbose)
+        message = text + ': ' + time.asctime(time.localtime())
+        log(file,message,verbose)
 
 # -----------------------------------------------------------
 # write message to log file
@@ -85,8 +85,8 @@ def test(file):
     newlog = string.join(file.split(),"")
     if (len(newlog) == 0): newlog = 'kepler.log'
     if (newlog != file):
-	file = newlog
-	message = 'WARNING: logfile renamed to '+file+'\n\n'
-	log(False,message,True)
+        file = newlog
+        message = 'WARNING: logfile renamed to '+file+'\n\n'
+        log(False,message,True)
 
     return file
