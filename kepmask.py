@@ -318,7 +318,7 @@ def clicker2(event):
                         plotimage(cmdLine)
                 except:
                     txt = 'ERROR -- KEPMASK: Cannot open or read mask file ' + maskfile
-                    kepmsg.err(logfile,txt,True)
+                    kepmsg.err('kepmask.log',txt,True)
     return
 
 # -----------------------------------------------------------
@@ -436,7 +436,7 @@ if '--shell' in sys.argv:
         type=str, choices=['linear','logarithmic','squareroot'])
     parser.add_argument('--cmap', default='PuBu', help='image colormap', type=str)
     parser.add_argument('--verbose', action='store_true', help='Write to a log file?')
-    parser.add_argument('--logfile', '-l', help='Name of ascii log file', default='kepcotrend.log', dest='logfile', type=str)
+    parser.add_argument('--logfile', '-l', help='Name of ascii log file', default='kepmask.log', dest='logfile', type=str)
     parser.add_argument('--status', '-e', help='Exit status (0=good)', default=0, dest='status', type=int)
 
     args = parser.parse_args()
