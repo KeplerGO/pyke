@@ -142,6 +142,7 @@ def keprange(infile, rinfile, outfile, column, clobber, verbose, logfile,
 # plot new light curve
 
     if status == 0:
+        plt.rcParams['figure.dpi'] = 80
         plt.figure(figsize=[xsize,ysize])
         plt.clf()
         plotlc(cmdLine)
