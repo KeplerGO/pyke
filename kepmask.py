@@ -142,7 +142,8 @@ def kepmask(infile,mfile,pfile,tabrow,imin,imax,iscale,cmap,verbose,logfile,stat
 # plot style
 
     if status == 0:
-        plt.figure(figsize=[10,7])
+        plt.rcParams['figure.dpi'] = 80
+        plt.figure(figsize=[10, 7])
         plotimage(cmdLine)
 
 # -----------------------------------------------------------
