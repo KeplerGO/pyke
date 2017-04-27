@@ -104,7 +104,7 @@ if '--shell' in sys.argv:
     parser.add_argument('keyname', help='Snippet of keyword name', type=str)
     parser.add_argument('--clobber', action='store_true', help='Overwrite output file?')
     parser.add_argument('--verbose', action='store_true', help='Write to a log file?')
-    parser.add_argument('--logfile', '-l', help='Name of ascii log file', default='kepcotrend.log', dest='logfile', type=str)
+    parser.add_argument('--logfile', '-l', help='Name of ascii log file', default='kephead.log', dest='logfile', type=str)
     parser.add_argument('--status', '-e', help='Exit status (0=good)', default=0, dest='status', type=int)
     args = parser.parse_args()
     kephead(args.infile, args.outfile, args.keyname, args.clobber, args.verbose, args.logfile,args.status)

@@ -265,7 +265,7 @@ if '--shell' in sys.argv:
     parser.add_argument('--ylabel', default='e$^-$ s$^{-1}$', help='Plot axis label', type=str)
     parser.add_argument('--plottype', default='fast', help='plot type', type=str, choices=['fast','pretty'])
     parser.add_argument('--verbose', action='store_true', help='Write to a log file?')
-    parser.add_argument('--logfile', '-l', help='Name of ascii log file', default='kepcotrend.log', dest='logfile', type=str)
+    parser.add_argument('--logfile', '-l', help='Name of ascii log file', default='kepdraw.log', dest='logfile', type=str)
     parser.add_argument('--status', '-e', help='Exit status (0=good)', default=0, dest='status', type=int)
 
 
