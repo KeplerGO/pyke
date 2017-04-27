@@ -35,6 +35,7 @@ hidetask pyexecute
 hidetask nopyraf
 
 # PyKEP tasks
+pyexecute("kepler$keparith.py",verbose=no)
 pyexecute("kepler$kepbls.py",verbose=no)
 pyexecute("kepler$kepclip.py",verbose=no)
 pyexecute("kepler$kepconvert.py",verbose=no)
@@ -97,7 +98,7 @@ print("AGREEMENT.")
 print(" ")
 print("     +----------PyKE: Kepler Data Reduction and Analysis----------+")
 print("     +------------------------------------------------------------+")
-print("     |                  Version 2.6.2, Sep 10, 2014               |")
+print("     |                  Version 2.7.0, Apr 26, 2017               |")
 print("     |                      Requires PyRAF 2.1                    |")
 print("     |            Bug reports: keplergo@mail.arc.nasa.gov         |")
 print("     |                                                            |")
