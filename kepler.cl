@@ -67,7 +67,6 @@ pyexecute("kepler$keptransit.py",verbose=no)
 pyexecute("kepler$keptrial.py",verbose=no)
 pyexecute("kepler$keptrim.py",verbose=no)
 pyexecute("kepler$kepwindow.py",verbose=no)
-pyexecute("kepler$keparith.py",verbose=no)
 package kepler
 
 print(" ")
