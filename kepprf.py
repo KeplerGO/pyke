@@ -12,8 +12,92 @@ from scipy.ndimage import interpolation
 # -----------------------------------------------------------
 # core code
 
-def kepprf(infile,plotfile,rownum,columns,rows,fluxes,border,background,focus,prfdir,xtol,ftol,
-           imscale,colmap,labcol,apercol,plot,verbose,logfile,status,cmdLine=False):
+def kepprf(infile, plotfile, rownum, columns, rows, fluxes, border,
+           background, focus, prfdir, xtol, ftol, imscale, labcol,
+           apercol, plot, verbose, logfile):
+    """
+    Fit a PSF model to a specific image within a Target Pixel File.
+
+    Fit a PSF model, combined with spacecraft jitter and pixel scale
+    drift (the Pixel Response Function; PRF) to a single observation of Kepler
+    target pixels.
+
+    Parameters
+    ----------
+    infile : str
+        The name of a MAST standard format FITS file containing Kepler Target
+        Pixel data within the first data extension.
+    plotfile : str
+        Name of an optional output plot file containing the results of kepprf.
+        An example is provided in Figure 1. Typically this is a PNG format
+        file. If no file is required, plotfile can be 'None' or blank, in
+        which case the plot will be generated but the plot will not be saved
+        to a file. Any existing file with this name will be automatically
+        overwritten.
+    rownum : int
+        The row number in the input file data table containing the pixels to
+        plot. If the chosen observation has a non-zero quality flag set or the
+        pixel set contains only NULLs then the task will halt with an error
+        message.
+    columns : float
+        A starting guess for the CCD column position(s) of the source(s) that
+        are to be fit. The model is unlikely to converge if the guess is too
+        far away from the correct location. A rule of thumb is to provide a
+        guess within 1 CCD pixel of the true position. If more than one source
+        is being modeled then the column positions of each are separated by a
+        comma. The same number of sources in the columns, rows and fluxes
+        field is a requirement of this task.
+    rows : float
+        A starting guess for the CCD row position(s) of the source(s) that are
+        to be fit. The model is unlikely to converge if the guess is too far
+        away from the correct location. A rule of thumb is to provide a guess
+        within 1 CCD pixel of the true position. If more than one source is
+        being modeled then the row positions of each are separated by a comma.
+        The same number of sources in the columns, rows and fluxes field is a
+        requirement of this task.
+    fluxes : float
+        A starting guess for the flux(es) of the source(s) that are to be fit.
+        Fit convergence is not particularly reliant on the accuracy of these
+        guesses, but the fit will converge faster the more accurate the guess.
+        If more than one source is being modeled then the row positions of
+        each are separated by a comma. The same number of sources in the
+        columns, rows and fluxes field is a requirement of this task.
+    border : int (optional)
+        If a background is included in the fit then it is modeled as a
+        two-dimensional polynomial. This parameter is the polynomial order. A
+        zero-order polynomial is generally recommended.
+    background : boolean (optional)
+        Whether to include a background component in the model. If `True` then
+        the background will be represented by a two-dimensional polynomial of
+        order `border`. This functionality is somewhat experimental, with one
+        eye upon potential background gradients across large masks or on those
+        detectors more prone to pattern noise. Generally it is recommended to
+        set background as `False`.
+    focus : boolean (optional)
+        Whether to incude pixel scale and focus rotation with the fit
+        parameters of the model. This is also an experimental function. This
+        approach does not attempt to deal with inter- or intra-pixel
+        variations. The recommended use is currently to set focus as `False`.
+    xtol : float
+        The dimensionless, relative model parameter convergence criterion for
+        the fit algorithm.
+    ftol : float
+        The dimensionless, relative model residual convergence criterion for
+        the fit algorithm.
+    imscale : str
+        kepprf can plot images with three choices of image scales. The choice
+        is made using this argument.
+        The options are:
+            * linear
+            * logarithmic
+            * squareroot
+    plot : boolean (optional)
+        Plot fit results to the screen?
+    verbose : boolean (optional)
+        Print informative messages and warnings to the shell and logfile?
+    logfile : string (optional)
+        Name of the logfile containing error and warning messages.
+    """
 
 # input arguments
 
@@ -63,9 +147,6 @@ def kepprf(infile,plotfile,rownum,columns,rows,fluxes,border,background,focus,pr
     kepmsg.clock('KEPPRF started at',logfile,verbose)
 
 # reference color map
-
-    if colmap == 'browse':
-        status = plt.cmap_plot(cmdLine)
 
 # construct inital guess vector for fit
 
@@ -536,69 +617,3 @@ def plotimage(imgflux_pl,zminfl,zmaxfl,plmode,row,column,xdim,ydim,winx,winy,tla
                fontsize=36,fontweight=500,color=labcol,transform=ax.transAxes)
 
     return
-
-# -----------------------------------------------------------
-# these are the choices for the image colormap
-
-def cmap_plot(cmdLine):
-
-    plt.figure(figsize=[5,10])
-    a=outer(ones(10),arange(0,1,0.01))
-    plt.subplots_adjust(top=0.99,bottom=0.00,left=0.01,right=0.8)
-    maps=[m for m in cm.datad if not m.endswith("_r")]
-    maps.sort()
-    l=len(maps)+1
-    for i, m in enumerate(maps):
-        print m
-        subplot(l,1,i+1)
-        plt.setp(plt.gca(),xticklabels=[],xticks=[],yticklabels=[],yticks=[])
-        plt.imshow(a,aspect='auto',cmap=get_cmap(m),origin="lower")
-        plt.text(100.85,0.5,m,fontsize=10)
-
-# render plot
-
-    plt.show(block=True)
-
-    status = 1
-    return status
-
-# -----------------------------------------------------------
-# main
-
-if '--shell' in sys.argv:
-    import argparse
-
-    parser = argparse.ArgumentParser(description='Fitting PRF model to Target Pixel image')
-    parser.add_argument('--shell', action='store_true', help='Are we running from the shell?')
-
-    parser.add_argument('infile', help='Name of input target pixel file', type=str)
-    parser.add_argument('plotfile', help='Name of output PNG plot file', type=str)
-    parser.add_argument('--rownum', '-r', default=2200, help='Row number of image stored in infile', dest='rownum', type=int)
-    parser.add_argument('--columns', help='Column number of each source to be fit', type=str)
-    parser.add_argument('--rows', help='Row number of each source to be fit', type=str)
-    parser.add_argument('--fluxes', help='Relative flux of each source to be fit', type=str)
-    parser.add_argument('--border', '-b', help='Order of background polynmial fit', default=1, dest='border', type=int)
-    parser.add_argument('--background', action='store_true', help='Fit background?', default=False)
-    parser.add_argument('--focus', action='store_true', help='Fit focus changes?', default=False)
-    parser.add_argument('--prfdir', help='Folder containing Point Response Function FITS files', type=str)
-    parser.add_argument('--xtol', '-x', default=1.0e-4, help='Fit parameter tolerance', dest='xtol', type=float)
-    parser.add_argument('--ftol', '-f', default=1.0, help='Fit minimization tolerance', dest='ftol', type=float)
-    parser.add_argument('--imscale', '-i', help='Type of image intensity scale', default='linear', dest='imscale', type=str,choices=['linear','logarithmic','squareroot'])
-    parser.add_argument('--colmap', '-c', help='Image colormap', default='YlOrBr', dest='cmap', type=str,choices=['Accent','Blues','BrBG','BuGn','BuPu','Dark2','GnBu','Greens','Greys','OrRd','Oranges','PRGn','Paired','Pastel1','Pastel2','PiYG','PuBu','PuBuGn','PuOr','PuRd','Purples','RdBu','RdGy','RdPu','RdYlBu','RdYlGn','Reds','Set1','Set2','Set3','Spectral','YlGn','YlGnBu','YlOrBr','YlOrRd','afmhot','autumn','binary','bone','brg','bwr','cool','copper','flag','gist_earth','gist_gray','gist_heat','gist_ncar','gist_rainbow','gist_yarg','gnuplot','gnuplot2','gray','hot','hsv','jet','ocean','pink','prism','rainbow','seismic','spectral','spring','summer','terrain','winter','browse'])
-    parser.add_argument('--labcol', help='Label color', default='#ffffff', type=str)
-    parser.add_argument('--apercol', help='Aperture color', default='#ffffff', type=str)
-    parser.add_argument('--plot', action='store_true', help='Plot fit results?', default=False)
-    parser.add_argument('--verbose', action='store_true', help='Write to a log file?')
-    parser.add_argument('--logfile', '-l', default='kepprfphot.log', help='Name of ascii log file', dest='logfile', type=str)
-    parser.add_argument('--status', '-e', help='Exit status (0=good)', default=0, dest='status', type=int)
-
-    args = parser.parse_args()
-    cmdLine=True
-    kepprf(args.infile,args.plotfile,args.rownum,args.columns,args.rows,args.fluxes,args.border,
-           args.background,args.focus,args.prfdir,args.xtol,args.ftol,args.imscale,args.cmap,
-           args.labcol,args.apercol,args.plot,args.verbose,args.logfile,args.status,cmdLine)
-
-else:
-    from pyraf import iraf
-    parfile = iraf.osfn("kepler$kepprf.par")
-    t = iraf.IrafTaskFactory(taskname="kepprf", value=parfile, function=kepprf)
