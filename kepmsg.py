@@ -1,38 +1,17 @@
-#!/usr/bin/env python
-
 import sys, time, string
 
-# -----------------------------------------------------------
-# write message to log file and shell
-
-def log(file,message,verbose):
-
-    if (verbose):
-
-# print to shell
-
+def log(filename, message, verbose):
+    """write message to log file and shell."""
+    if verbose:
         print(message)
-
-# print to log file
-
-        if (file):
-            output = open(file,'a')
-            output.write(message+'\n')
+        if filename:
+            output = open(filename, 'a')
+            output.write(message + '\n')
             output.close()
 
-# -----------------------------------------------------------
-# write error message to log file and shell
-
-def err(file,message,verbose):
-
+def err(filename, message, verbose):
     if verbose:
-        log(file,message,verbose)
-    else:
-        pass
-    return 1
-
-# -----------------------------------------------------------
-# write warning message to log file and shell
+        log(filename, message, verbose)
 
 def warn(file,message):
 
