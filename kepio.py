@@ -1,148 +1,97 @@
-#!/usr/bin/env python
-import kepmsg, kepkey
-import sys, tempfile, os, shutil, glob, warnings
+"""
+This module contains utility functions for i/o operations.
+"""
+
 import numpy as np
+import os
+import glob
+import tempfile
+import shutil
+import kepmsg
+import kepkey
 from astropy.io import fits as pyfits
 
-# -----------------------------------------------------------
-# delete a file
-
-def delete(file,logfile,verbose):
-
-    status = 0
+def delete(filename, logfile, verbose):
     try:
-        os.remove(file)
+        os.remove(filename)
     except:
-        message = 'ERROR -- KEPIO.DELETE: could not delete ' + file
-        status = kepmsg.err(logfile,message,verbose)
-    return status
+        message = 'ERROR -- KEPIO.DELETE: could not delete ' + filename
+        kepmsg.err(logfile, message, verbose)
+        raise
 
-# -----------------------------------------------------------
-# clobber a file
-
-def clobber(file,logfile,verbose):
-
-    status = 0
-    if (os.path.isfile(file)):
+def clobber(filename, logfile, verbose):
+    if (os.path.isfile(filename)):
         try:
-            status = delete(file,logfile,verbose)
+            delete(filename, logfile, verbose)
         except:
-            message = 'ERROR -- KEPIO.CLOBBER: could not clobber ' + file
-            status = kepmsg.err(logfile,message,verbose)
-    return status
+            message = 'ERROR -- KEPIO.CLOBBER: could not clobber ' + filename
+            kepmsg.err(logfile, message, verbose)
+            raise
 
-# -----------------------------------------------------------
-# open ASCII file
-
-def openascii(file,type,logfile,verbose):
-
-    status = 0
+def openascii(filename, mode, logfile, verbose):
     try:
-        content = open(file,type)
+        content = open(filename, mode)
     except:
-        message = 'ERROR -- KEPIO.OPENASCII: cannot open ASCII file ' + file
-        status = kepmsg.err(logfile,message,verbose)
+        message = ('ERROR -- KEPIO.OPENASCII: cannot open ASCII file ' +
+                    filename)
+        kepmsg.err(logfile, message, verbose)
+        raise
+    return content
 
-    return content, status
-
-# -----------------------------------------------------------
-# close ASCII file
-
-def closeascii(file,logfile,verbose):
-
-    status = 0
+def closeascii(file_,logfile,verbose):
     try:
-        file.close()
+        file_.close()
     except:
-        message = 'ERROR - KEPIO.CLOSEASCII: cannot close ASCII file ' + str(file)
-        status = kepmsg.err(logfile,message,verbose)
-    return status
+        message = ('ERROR - KEPIO.CLOSEASCII: cannot close ASCII file ' +
+                   str(file_))
+        kepmsg.err(logfile,message,verbose)
 
-# -----------------------------------------------------------
-# split FITS filename and HDU number
-
-def splitfits(file,logfile,verbose):
-
-    status = 0
-    file = file.strip()
-    if ('+' in file):
-        component = file.split('+')
+def splitfits(fitsfile, logfile, verbose):
+    fitsfile = fitsfile.strip()
+    if '+' in fitsfile:
+        component = fitsfile.split('+')
         filename = str(component[0])
         hdu = int(component[1])
-    elif ('[' in file):
-        file = file.strip(']')
-        component = file.split('[')
+    elif '[' in fitsfile:
+        fitsfile = fitsfile.strip(']')
+        component = fitsfile.split('[')
         filename = str(component[0])
         hdu = int(component[1])
     else:
-        message = 'ERROR -- KEPIO.SPLITFITS: cannot determine HDU number from name' + file
-        status = kepmsg.err(logfile,message,verbose)
-    return filename, hdu, status
+        message = ('ERROR -- KEPIO.SPLITFITS: cannot determine HDU number '
+                   'from name' + fitsfile)
+        status = kepmsg.err(logfile, message, verbose)
+    return filename, hdu
 
-# -----------------------------------------------------------
-# open HDU structure
-
-def openfits(file,mode,logfile,verbose):
-
-    status = 0
+def closefits(fitsfile, logfile, verbose):
     try:
-        struct = pyfits.open(file,mode=mode)
-    except:
-        message = 'ERROR -- KEPIO.OPENFITS: cannot open ' + file + ' as a FITS file'
-        status = kepmsg.err(logfile,message,verbose)
-        struct = None
-    return struct, status
-
-# -----------------------------------------------------------
-# close HDU structure
-
-def closefits(struct,logfile,verbose):
-
-    status = 0
-    try:
-        struct.close()
+        fitsfile.close()
     except:
         message = 'ERROR -- KEPIO.CLOSEFITS: cannot close HDU structure'
-        status = kepmsg.err(logfile,message,verbose)
-    return status
+        kepmsg.err(logfile, message, verbose)
+        raise
 
-# -----------------------------------------------------------
-# read FITS table HDU
-
-def readfitstab(file,hdu,logfile,verbose):
-
-    status = 0
+def readfitstab(filename, hdu, logfile, verbose):
     try:
-        with warnings.catch_warnings():
-            warnings.simplefilter('ignore')
-            table = hdu.data
+        table = hdu.data
     except:
-        message = 'ERROR -- KEPIO.READFITSTAB: could not extract table from ' + file
-        status = kepmsg.err(logfile,message,verbose)
-        table = None
-    return table, status
+        message = ('ERROR -- KEPIO.READFITSTAB: could not extract table '
+                   'from ' + filename)
+        kepmsg.err(logfile, message, verbose)
+        raise
+    return table
 
-# -----------------------------------------------------------
-# read FITS table column
-
-def readfitscol(file,table,column,logfile,verbose):
-
-    status = 0
+def readfitscol(filename, table, column, logfile, verbose):
     try:
         data = table.field(column)
     except:
-        message  = 'ERROR -- KEPIO.READFITSCOL: could not extract ' + column
-        message += ' data from ' + file
-        status = kepmsg.err(logfile,message,verbose)
-        data = None
-    return data, status
+        message  = ('ERROR -- KEPIO.READFITSCOL: could not extract '
+                    + column + 'data from ' + filename)
+        kepmsg.err(logfile, message, verbose)
+        raise
+    return data
 
-# -----------------------------------------------------------
-# read TIME column
-
-def readtimecol(file,table,logfile,verbose):
-
-    status = 0
+def readtimecol(filename, table, logfile, verbose):
     try:
         data = table.field('TIME')
     except:
@@ -150,288 +99,247 @@ def readtimecol(file,table,logfile,verbose):
             data = table.field('barytime')
             if data[0] < 2.4e6 and data[0] > 1.0e4: data += 2.4e6
         except:
-            message  = 'ERROR -- KEPIO.READTIMECOL: could not extract'
-            message += ' time data from ' + file
-            status = kepmsg.err(logfile,message,verbose)
-            data = None
-    return data, status
+            message  = ('ERROR -- KEPIO.READTIMECOL: could not extract '
+                        + 'time data from ' + filename)
+            kepmsg.err(logfile, message, verbose)
+            raise
+    return data
 
-# -----------------------------------------------------------
-# read FITS SAP column
-
-def readsapcol(file,table,logfile,verbose):
-
-    status = 0
+def readsapcol(filename,table,logfile,verbose):
     try:
         data = table.field('SAP_FLUX')
     except:
         try:
             data = table.field('ap_raw_flux')
         except:
-            message  = 'ERROR -- KEPIO.READSAPCOL: could not extract SAP flux'
-            message += ' time series data from ' + file
-            status = kepmsg.err(logfile,message,verbose)
-            data = None
-    return data, status
+            message  = ('ERROR -- KEPIO.READSAPCOL: could not extract SAP flux'
+                        'time series data from ' + filename)
+            kepmsg.err(logfile, message, verbose)
+            raise
+    return data
 
-# -----------------------------------------------------------
-# read FITS SAP error column
-
-def readsaperrcol(file,table,logfile,verbose):
-
-    status = 0
+def readsaperrcol(filename, table, logfile, verbose):
+    """read FITS SAP error column"""
     try:
         data = table.field('SAP_FLUX_ERR')
     except:
         try:
             data = table.field('ap_raw_err')
         except:
-            message  = 'ERROR -- KEPIO.READSAPERRCOL: could not extract SAP flux error'
-            message += ' time series data from ' + file
-            status = kepmsg.err(logfile,message,verbose)
-            data = None
-    return data, status
+            message  = ('ERROR -- KEPIO.READSAPERRCOL: could not extract SAP '
+                        'flux error time series data from ' + filename)
+            kepmsg.err(logfile, message, verbose)
+            raise
+    return data
 
-# -----------------------------------------------------------
-# read FITS PDC column
-
-def readpdccol(file,table,logfile,verbose):
-
-    status = 0
+def readpdccol(filename, table, logfile, verbose):
+    """read FITS PDC column"""
     try:
         data = table.field('PDCSAP_FLUX')
     except:
         try:
             data = table.field('ap_corr_flux')
         except:
-            message  = 'ERROR -- KEPIO.READPDCCOL: could not extract PDCSAP flux'
-            message += ' time series data from ' + file
-            status = kepmsg.err(logfile,message,verbose)
-            data = None
+            message  = ('ERROR -- KEPIO.READPDCCOL: could not extract PDCSAP '
+                        'flux time series data from ' + filename)
+            kepmsg.err(logfile, message, verbose)
+            raise
     return data, status
 
-# -----------------------------------------------------------
-# read FITS PDC error column
-
-def readpdcerrcol(file,table,logfile,verbose):
-
-    status = 0
+def readpdcerrcol(filename, table, logfile, verbose):
+    """read FITS PDC error column"""
     try:
         data = table.field('PDCSAP_FLUX_ERR')
     except:
         try:
             data = table.field('ap_corr_err')
         except:
-            message  = 'ERROR -- KEPIO.READPDCERRCOL: could not extract PDC flux error'
-            message += ' time series data from ' + file
-            status = kepmsg.err(logfile,message,verbose)
-            data = None
-    return data, status
+            message  = ('ERROR -- KEPIO.READPDCERRCOL: could not extract PDC '
+                        'flux error time series data from ' + filename)
+            kepmsg.err(logfile, message, verbose)
+            raise
+    return data
 
-# -----------------------------------------------------------
-# read FITS CBV column
-
-def readcbvcol(file,table,logfile,verbose):
-
-    status = 0
+def readcbvcol(filename, table, logfile, verbose):
+    """read FITS CBV column"""
     try:
         data = table.field('CBVSAP_FLUX')
     except:
-        message  = 'ERROR -- KEPIO.READCBVCOL: could not extract CBVSAP flux'
-        message += ' time series data from ' + file
-        status = kepmsg.err(logfile,message,verbose)
-        data = None
-    return data, status
+        message  = ('ERROR -- KEPIO.READCBVCOL: could not extract CBVSAP flux '
+                    'time series data from ' + filename)
+        kepmsg.err(logfile, message, verbose)
+        raise
+    return data
 
-# -----------------------------------------------------------
-# read quality column
-
-def readsapqualcol(file,table,logfile,verbose):
-
-    status = 0
+def readsapqualcol(filename, table, logfile, verbose):
+    """read quality column"""
     try:
         data = table.field('SAP_QUALITY')
     except:
-        message  = 'ERROR -- KEPIO.READSAPQUALCOL: could not extract SAP quality'
-        message += ' time series data from ' + file
-        status = kepmsg.err(logfile,message,verbose)
-        data, status = None
-    return data, status
+        message  = ('ERROR -- KEPIO.READSAPQUALCOL: could not extract SAP '
+                    'quality time series data from ' + filename)
+        kepmsg.err(logfile, message, verbose)
+        raise
+    return data
 
-# -----------------------------------------------------------
-# read all columns within Kepler FITS light curve table
 
 def readlctable(infile,instr,logfile,verbose):
+    """read all columns within Kepler FITS light curve table"""
 
-    status = 0
     table = instr.data
-    barytime, status = readfitscol(infile,table,'barytime',logfile,verbose)
-    timcorr, status = readfitscol(infile,table,'timcorr',logfile,verbose)
-    cadence_number, status = readfitscol(infile,table,'cadence_number',logfile,verbose)
-    ap_cent_row, status = readfitscol(infile,table,'ap_cent_row',logfile,verbose)
-    ap_cent_r_err, status = readfitscol(infile,table,'ap_cent_r_err',logfile,verbose)
-    ap_cent_col, status = readfitscol(infile,table,'ap_cent_col',logfile,verbose)
-    ap_cent_c_err, status = readfitscol(infile,table,'ap_cent_c_err',logfile,verbose)
-    ap_raw_flux, status = readfitscol(infile,table,'ap_raw_flux',logfile,verbose)
-    ap_raw_err, status = readfitscol(infile,table,'ap_raw_err',logfile,verbose)
-    ap_corr_flux, status = readfitscol(infile,table,'ap_corr_flux',logfile,verbose)
-    ap_corr_err, status = readfitscol(infile,table,'ap_corr_err',logfile,verbose)
-    ap_ins_flux, status = readfitscol(infile,table,'ap_ins_flux',logfile,verbose)
-    ap_ins_err, status = readfitscol(infile,table,'ap_ins_err',logfile,verbose)
-    dia_raw_flux, status = readfitscol(infile,table,'dia_raw_flux',logfile,verbose)
-    dia_raw_err, status = readfitscol(infile,table,'dia_raw_err',logfile,verbose)
-    dia_corr_flux, status = readfitscol(infile,table,'dia_corr_flux',logfile,verbose)
-    dia_corr_err, status = readfitscol(infile,table,'dia_corr_err',logfile,verbose)
-    dia_ins_flux, status = readfitscol(infile,table,'dia_ins_flux',logfile,verbose)
-    dia_ins_err, status = readfitscol(infile,table,'dia_ins_err',logfile,verbose)
+    barytime        = readfitscol(infile, table, 'barytime', logfile, verbose)
+    timcorr         = readfitscol(infile, table, 'timcorr', logfile, verbose)
+    cadence_number  = readfitscol(infile, table, 'cadence_number', logfile,
+                                  verbose)
+    ap_cent_row     = readfitscol(infile, table, 'ap_cent_row', logfile,
+                                  verbose)
+    ap_cent_r_err   = readfitscol(infile, table, 'ap_cent_r_err', logfile,
+                                  verbose)
+    ap_cent_col     = readfitscol(infile, table, 'ap_cent_col', logfile,
+                                  verbose)
+    ap_cent_c_err   = readfitscol(infile, table, 'ap_cent_c_err', logfile,
+                                  verbose)
+    ap_raw_flux     = readfitscol(infile, table, 'ap_raw_flux', logfile,
+                                  verbose)
+    ap_raw_err      = readfitscol(infile, table, 'ap_raw_err', logfile,
+                                  verbose)
+    ap_corr_flux    = readfitscol(infile, table, 'ap_corr_flux', logfile,
+                                  verbose)
+    ap_corr_err     = readfitscol(infile, table, 'ap_corr_err', logfile,
+                                  verbose)
+    ap_ins_flux     = readfitscol(infile, table, 'ap_ins_flux', logfile,
+                                  verbose)
+    ap_ins_err      = readfitscol(infile, table, 'ap_ins_err', logfile,
+                                  verbose)
+    dia_raw_flux    = readfitscol(infile, table, 'dia_raw_flux', logfile,
+                                  verbose)
+    dia_raw_err     = readfitscol(infile, table, 'dia_raw_err', logfile,
+                                  verbose)
+    dia_corr_flux   = readfitscol(infile, table, 'dia_corr_flux', logfile,
+                                  verbose)
+    dia_corr_err    = readfitscol(infile, table, 'dia_corr_err', logfile,
+                                  verbose)
+    dia_ins_flux    = readfitscol(infile, table, 'dia_ins_flux', logfile,
+                                  verbose)
+    dia_ins_err     = readfitscol(infile, table, 'dia_ins_err', logfile,
+                                  verbose)
 
-    return [barytime, timcorr, cadence_number, ap_cent_row, ap_cent_r_err, \
-                ap_cent_col, ap_cent_c_err, ap_raw_flux, ap_raw_err, ap_corr_flux, \
-                ap_corr_err, ap_ins_flux, ap_ins_err, dia_raw_flux, dia_raw_err, \
-                dia_corr_flux, dia_corr_err, dia_ins_flux, dia_ins_err], status
+    return [barytime, timcorr, cadence_number, ap_cent_row, ap_cent_r_err,
+            ap_cent_col, ap_cent_c_err, ap_raw_flux, ap_raw_err, ap_corr_flux,
+            ap_corr_err, ap_ins_flux, ap_ins_err, dia_raw_flux, dia_raw_err,
+            dia_corr_flux, dia_corr_err, dia_ins_flux, dia_ins_err]
 
-# -----------------------------------------------------------
-# append two table HDUs
-
-def tabappend(hdu1,hdu2,logfile,verbose):
-
-    status = 0
+def tabappend(hdu1, hdu2, logfile, verbose):
+    """append two table HDUs"""
     nrows1 = hdu1.data.shape[0]
     nrows2 = hdu2.data.shape[0]
     nrows = nrows1 + nrows2
-    out = pyfits.new_table(hdu1.columns,nrows=nrows)
+    out = pyfits.BinTableHDU.from_columns(hdu1.columns, nrows=nrows)
     for name in hdu1.columns.names:
         try:
             out.data.field(name)[nrows1:] = hdu2.data.field(name)
         except:
-            message  = 'WARNING -- KEPIO.TABAPPEND: could not append column '
-            message += str(name)
-            status = kepmsg.warn(logfile,message,verbose)
+            errmsg  = ('WARNING -- KEPIO.TABAPPEND: could not append '
+                       'column ' + str(name))
+            kepmsg.warn(logfile, errmsg, verbose)
 
-    return out, status
+    return out
 
-# -----------------------------------------------------------
-# read image from HDU structure
-
-def readimage(struct,hdu,logfile,verbose):
-
-    status = 0
+def readimage(image, hdu, logfile,verbose):
+    """ read image from HDU structure"""
     try:
-        imagedata = struct[hdu].data
+        imagedata = image[hdu].data
     except:
-        message = 'ERROR -- KEPIO.READIMAGE: cannot read image data from HDU ' + str(hdu)
-        status = kepmsg.err(logfile,message,verbose)
-    return imagedata, status
+        errmsg = ('ERROR -- KEPIO.READIMAGE: cannot read image data from HDU '
+                   + str(hdu))
+        kepmsg.err(logfile, errmsg, verbose)
+        raise
+    return imagedata
 
-# -----------------------------------------------------------
-# write image to HDU structure
-
-def writeimage(struct,hdu,imagedata,logfile,verbose):
-
-    status = 0
+def writeimage(image, hdu, imagedata, logfile, verbose):
+    """write image to HDU structure"""
     try:
-        struct[hdu].data = imagedata
+        image[hdu].data = imagedata
     except:
-        message = 'ERROR -- KEPIO.WRITEIMAGE: Cannot write image data to HDU ' + str(hdu)
-        status = kepmsg.err(logfile,message,verbose)
-    return struct, status
+        errmsg = ('ERROR -- KEPIO.WRITEIMAGE: Cannot write image data to HDU '
+                   + str(hdu))
+        kepmsg.err(logfile, errmsg, verbose)
+        raise
+    return image
 
-# -----------------------------------------------------------
-# write new FITS file
+def writefits(hdu, filename, clobber, logfile, verbose):
+    """write new FITS file"""
 
-def writefits(hdu,filename,clobber,logfile,verbose):
-
-    status = 0
-    if (os.path.isfile(filename) and clobber):
-        delete(filename,logfile,verbose)
+    if os.path.isfile(filename) and clobber:
+        delete(filename, logfile, verbose)
     try:
         hdu.writeto(filename)
     except:
-        message = 'ERROR -- KEPIO.WRITEFITS: Cannot create FITS file ' + filename
-        status = kepmsg.err(logfile,message,verbose)
-    return status
+        errmsg = ('ERROR -- KEPIO.WRITEFITS: Cannot create FITS file '
+                  + filename)
+        kepmsg.err(logfile, errmsg, verbose)
+        raise
 
-# -----------------------------------------------------------
-# create a temporary file name
-
-def tmpfile(path,suffix,logfile,verbose):
-
-    status = 0
+def tmpfile(path, suffix, logfile, verbose):
+    """create a temporary file name"""
     try:
         tempfile.tempdir = path
-        file = tempfile.mktemp() + suffix
+        tmpfile = tempfile.mktemp() + suffix
     except:
-        message = 'ERROR -- KEPIO.TMPFILE: Cannot create temporary file name'
-        status = kepmsg.err(logfile,message,verbose)
-    return file, status
-
-# -----------------------------------------------------------
-# create symbolic link
+        message = ('ERROR -- KEPIO.TMPFILE: Cannot create temporary file name')
+        kepmsg.err(logfile,message,verbose)
+        raise
+    return tmpfile
 
 def symlink(infile,linkfile,clobber,logfile,verbose):
+    """create symbolic link"""
 
-# delete file if one of the same name already exists
-
-    status = 0
-    if (os.path.exists(linkfile) and not clobber):
-        message = 'ERROR: KEPIO.SYMLINK -- file ' + linkfile + ' exists, use clobber'
+    if os.path.exists(linkfile) and not clobber:
+        message = ('ERROR: KEPIO.SYMLINK -- file ' + linkfile + ' exists, use '
+                   'clobber')
         status = kepmsg.err(logfile,message,verbose)
-    if (status == 0 and clobber):
+    if clobber:
         try:
             os.remove(linkfile)
         except:
-            status = 0
-
-# create symbolic link
-
-    if (status == 0):
-        try:
-            os.symlink(infile,linkfile)
-        except:
-            message  = 'ERROR: KEPIO.SYMLINK -- could not create symbolic link from '
-            message += infile + ' to ' + linkfile
-            status = kepmsg.err(logfile,message,verbose)
-    return status
-
-# -----------------------------------------------------------
-# check that a file exists
-
-def fileexists(file):
-
-    status = True
-    if not os.path.isfile(file):
-        status = False
-    return status
-
-# -----------------------------------------------------------
-# move file
-def move(file1,file2,logfile,verbose):
-
-    status = 0
-    message = 'KEPIO.MOVE -- moved ' + file1 + ' to ' + file2
+            pass
     try:
-        shutil.move(file1,file2)
-        kepmsg.log(logfile,message,verbose)
+        os.symlink(infile,linkfile)
     except:
-        message = 'ERROR -- KEPIO.MOVE: Could not move ' + file1 + ' to ' + file2
-        status = kepmsg.err(logfile,message,verbose)
+        errmsg  = ('ERROR: KEPIO.SYMLINK -- could not create symbolic link '
+                    'from ' + infile + ' to ' + linkfile)
+        kepmsg.err(logfile, message, verbose)
+        raise
 
-    return status
+def fileexists(file_):
+    """check that a file exists"""
+    if not os.path.isfile(file_):
+        return False
+    return True
 
-# -----------------------------------------------------------
-# copy file
-def copy(file1,file2,logfile,verbose):
-
-    status = 0
-    message = 'KEPIO.COPY -- copied ' + file1 + ' to ' + file2
+def move(file1, file2, logfile, verbose):
+    """move file"""
     try:
-        shutil.copy2(file1,file2)
-        kepmsg.log(logfile,message,verbose)
+        shutil.move(file1, file2)
+        message = 'KEPIO.MOVE -- moved ' + file1 + ' to ' + file2
+        kepmsg.log(logfile, message, verbose)
     except:
-        message = 'ERROR -- KEPIO.COPY: could not copy ' + file1 + ' to ' + file2
-        status = kepmsg.err(logfile,message,verbose)
+        errmsg = ('ERROR -- KEPIO.MOVE: Could not move ' + file1 + ' to '
+                  + file2)
+        kepmsg.err(logfile, errmsg, verbose)
+        raise
 
-    return status
+def copy(file1, file2, logfile, verbose):
+    """copy file"""
+    try:
+        shutil.copy2(file1, file2)
+        message = 'KEPIO.COPY -- copied ' + file1 + ' to ' + file2
+        kepmsg.log(logfile, message, verbose)
+    except:
+        errmsg = ('ERROR -- KEPIO.COPY: could not copy ' + file1 +
+                  ' to ' + file2)
+        kepmsg.err(logfile, errmsg, verbose)
+        raise
 
 # -----------------------------------------------------------
 # create a list from a file, string or wildcard
@@ -729,132 +637,150 @@ def filterNaN(instr,datacol,outfile,logfile,verbose):
 # -----------------------------------------------------------
 # read target pixel data file
 
-def readTPF(infile,colname,logfile,verbose):
+def readTPF(infile, colname, logfile, verbose):
+    """ Read a Target Pixel File (TPF).
 
-    status = 0
-    tpf = pyfits.open(infile,mode='readonly',memmap=True)
-    if status == 0:
+    Parameters
+    ----------
+    infile : str
+        target pixel file name.
+    colname : str
+        name of the column to be read.
+    logfile : str
+    verbose : bool
+    """
+
+    try:
+        tpf = pyfits.open(infile, mode='readonly', memmap=True)
+    except:
+        errmsg = ('ERROR -- KEPIO.OPENFITS: cannot open ' +
+                  infile + ' as a FITS file')
+        kepmsg.err(logfile, errmsg, verbose)
+        raise
+    try:
+        naxis2 = tpf['TARGETTABLES'].header['NAXIS2']
+    except:
+        errmsg = ('ERROR -- KEPIO.READTPF: No NAXIS2 keyword in ' + infile +
+                  '[TARGETTABLES]')
+        kepmsg.err(logfile, errmsg, verbose)
+        raise
+    try:
+        kepid = tpf[0].header['KEPLERID']
+        kepid = str(kepid)
+    except:
+        errmsg = ('ERROR -- KEPIO.READTPF: No KEPLERID keyword in ' + infile +
+                  '[0]')
+        kepmsg.err(logfile, errmsg, verbose)
+        raise
+    try:
+        channel = tpf[0].header['CHANNEL']
+        channel = str(channel)
+    except:
+        errmsg = ('ERROR -- KEPIO.READTPF: No CHANNEL keyword in ' + infile +
+                  '[0]')
+        kepmsg.err(logfile, errmsg, verbose)
+        raise
+    try:
+        skygroup = tpf[0].header['SKYGROUP']
+        skygroup = str(skygroup)
+    except:
+        skygroup = '0'
+    try:
+        module = tpf[0].header['MODULE']
+        module = str(module)
+    except:
+        errmsg = ('ERROR -- KEPIO.READTPF: No MODULE keyword in ' + infile +
+                  '[0]')
+        kepmsg.err(logfile, errmsg, verbose)
+        raise
+    try:
+        output = tpf[0].header['OUTPUT']
+        output = str(output)
+    except:
+        errmsg = ('ERROR -- KEPIO.READTPF: No OUTPUT keyword in ' + infile +
+                  '[0]')
+        kepmsg.err(logfile, errmsg, verbose)
+        raise
+    try:
+        quarter = tpf[0].header['QUARTER']
+        quarter = str(quarter)
+    except:
         try:
-            naxis2 = tpf['TARGETTABLES'].header['NAXIS2']
-        except:
-            txt = 'ERROR -- KEPIO.READTPF: No NAXIS2 keyword in ' + infile + '[TARGETTABLES]'
-            status = kepmsg.err(logfile,txt,verbose)
-    if status == 0:
-        try:
-            kepid = tpf[0].header['KEPLERID']
-            kepid = str(kepid)
-        except:
-            txt = 'ERROR -- KEPIO.READTPF: No KEPLERID keyword in ' + infile + '[0]'
-            status = kepmsg.err(logfile,txt,verbose)
-    if status == 0:
-        try:
-            channel = tpf[0].header['CHANNEL']
-            channel = str(channel)
-        except:
-            txt = 'ERROR -- KEPIO.READTPF: No CHANNEL keyword in ' + infile + '[0]'
-            status = kepmsg.err(logfile,txt,verbose)
-    if status == 0:
-        try:
-            skygroup = tpf[0].header['SKYGROUP']
-            skygroup = str(skygroup)
-        except:
-            skygroup = '0'
-    if status == 0:
-        try:
-            module = tpf[0].header['MODULE']
-            module = str(module)
-        except:
-            txt = 'ERROR -- KEPIO.READTPF: No MODULE keyword in ' + infile + '[0]'
-            status = kepmsg.err(logfile,txt,verbose)
-    if status == 0:
-        try:
-            output = tpf[0].header['OUTPUT']
-            output = str(output)
-        except:
-            txt = 'ERROR -- KEPIO.READTPF: No OUTPUT keyword in ' + infile + '[0]'
-            status = kepmsg.err(logfile,txt,verbose)
-    if status == 0:
-        try:
-            quarter = tpf[0].header['QUARTER']
+            quarter = tpf[0].header['CAMPAIGN']
             quarter = str(quarter)
         except:
-            try:
-                quarter = tpf[0].header['CAMPAIGN']
-                quarter = str(quarter)
-            except:
-                txt = 'ERROR -- KEPIO.READTPF: No QUARTER or CAMPAIGN keyword in ' + infile + '[0]'
-                status = kepmsg.err(logfile,txt,verbose)
-    if status == 0:
-        try:
-            season = tpf[0].header['SEASON']
-            season = str(season)
-        except:
-            season = '0'
-    if status == 0:
-        try:
-            ra = tpf[0].header['RA_OBJ']
-            ra = str(ra)
-        except:
-            txt = 'ERROR -- KEPIO.READTPF: No RA_OBJ keyword in ' + infile + '[0]'
-            status = kepmsg.err(logfile,txt,verbose)
-    if status == 0:
-        try:
-            dec = tpf[0].header['DEC_OBJ']
-            dec = str(dec)
-        except:
-            txt = 'ERROR -- KEPIO.READTPF: No DEC_OBJ keyword in ' + infile + '[0]'
-            status = kepmsg.err(logfile,txt,verbose)
-    if status == 0:
-        try:
-            kepmag = tpf[0].header['KEPMAG']
-            kepmag = str(float(kepmag))
-        except:
-            kepmag = ''
-    if status == 0:
-        try:
-            tdim5 = tpf['TARGETTABLES'].header['TDIM5']
-            xdim = int(tdim5.strip().strip('(').strip(')').split(',')[0])
-            ydim = int(tdim5.strip().strip('(').strip(')').split(',')[1])
-        except:
-            txt = 'ERROR -- KEPIO.READTPF: Cannot read TDIM5 keyword in ' + infile + '[TARGETTABLES]'
-            status = kepmsg.err(logfile,txt,verbose)
-    if status == 0:
-        try:
-            crv5p1 = tpf['TARGETTABLES'].header['1CRV5P']
-            column = crv5p1
-        except:
-            txt = 'ERROR -- KEPIO.READTPF: Cannot read 1CRV5P keyword in ' + infile + '[TARGETTABLES]'
-            status = kepmsg.err(logfile,txt,verbose)
-    if status == 0:
-        try:
-            crv5p2 = tpf['TARGETTABLES'].header['2CRV5P']
-            row = crv5p2
-        except:
-            txt = 'ERROR -- KEPIO.READTPF: Cannot read 2CRV5P keyword in ' + infile + '[TARGETTABLES]'
-            status = kepmsg.err(logfile,txt,verbose)
+            errmsg = ('ERROR -- KEPIO.READTPF: No QUARTER or CAMPAIGN ' +
+                      'keyword in ' + infile + '[0]')
+            status = kepmsg.err(logfile, errmsg, verbose)
+    try:
+        season = tpf[0].header['SEASON']
+        season = str(season)
+    except:
+        season = '0'
+    try:
+        ra = tpf[0].header['RA_OBJ']
+        ra = str(ra)
+    except:
+        errmsg = ('ERROR -- KEPIO.READTPF: No RA_OBJ keyword in ' + infile +
+                  '[0]')
+        status = kepmsg.err(logfile, errmsg, verbose)
+    try:
+        dec = tpf[0].header['DEC_OBJ']
+        dec = str(dec)
+    except:
+        errmsg = ('ERROR -- KEPIO.READTPF: No DEC_OBJ keyword in ' + infile +
+                  '[0]')
+        status = kepmsg.err(logfile,errmsg,verbose)
+    try:
+        kepmag = tpf[0].header['KEPMAG']
+        kepmag = str(float(kepmag))
+    except:
+        kepmag = ''
+    try:
+        tdim5 = tpf['TARGETTABLES'].header['TDIM5']
+        xdim = int(tdim5.strip().strip('(').strip(')').split(',')[0])
+        ydim = int(tdim5.strip().strip('(').strip(')').split(',')[1])
+    except:
+        errmsg = ('ERROR -- KEPIO.READTPF: Cannot read TDIM5 keyword in ' +
+                  infile + '[TARGETTABLES]')
+        status = kepmsg.err(logfile,errmsg,verbose)
+    try:
+        crv5p1 = tpf['TARGETTABLES'].header['1CRV5P']
+        column = crv5p1
+    except:
+        errmsg = ('ERROR -- KEPIO.READTPF: Cannot read 1CRV5P keyword in ' +
+                  infile + '[TARGETTABLES]')
+        status = kepmsg.err(logfile, errmsg, verbose)
+    try:
+        crv5p2 = tpf['TARGETTABLES'].header['2CRV5P']
+        row = crv5p2
+    except:
+        errmsg = ('ERROR -- KEPIO.READTPF: Cannot read 2CRV5P keyword in ' +
+                  infile + '[TARGETTABLES]')
+        status = kepmsg.err(logfile, errmsg, verbose)
 
 # read and close TPF data pixel image
 
-    if status == 0:
-        try:
-            pixels = tpf['TARGETTABLES'].data.field(colname)[:]
-        except:
-            pixels = None
-            txt = '\nWARNING -- KEPIO.READTPF: Cannot read ' + colname + ' column in ' + infile + '[TARGETTABLES]'
-            status = kepmsg.err(logfile,txt,verbose)
-    if status == 0:
-        status = closefits(tpf,logfile,verbose)
+    try:
+        pixels = tpf['TARGETTABLES'].data.field(colname)[:]
+    except:
+        errmsg = ('\nERROR -- KEPIO.READTPF: Cannot read ' + colname +
+                  ' column in ' + infile + '[TARGETTABLES]')
+        kepmsg.err(logfile, errmsg, verbose)
+        raise
+
+    closefits(tpf, logfile, verbose)
 
 # for STSCI_PYTHON v2.12 - convert 3D data array to 2D
 
-    if status == 0 and len(np.shape(pixels)) == 3:
+    if len(np.shape(pixels)) == 3:
         isize = np.shape(pixels)[0]
         jsize = np.shape(pixels)[1]
         ksize = np.shape(pixels)[2]
-        pixels = np.reshape(pixels,(isize,jsize*ksize))
+        pixels = np.reshape(pixels, (isize, jsize * ksize))
 
     return kepid, channel, skygroup, module, output, quarter, season, \
-        ra, dec, column, row, kepmag, xdim, ydim, pixels, status
+           ra, dec, column, row, kepmag, xdim, ydim, pixels
 
 # -----------------------------------------------------------
 # read target pixel mask data
@@ -947,7 +873,7 @@ def readPRFimage(infile,hdu,logfile,verbose):
 
     if status == 0:
         crpix1p, crpix2p, crval1p, crval2p, cdelt1p, cdelt2p, status = \
-            kepkey.getWCSp(infile,prf[hdu],logfile,verbose)     
+            kepkey.getWCSp(infile,prf[hdu],logfile,verbose)
 
 # close input file
 
