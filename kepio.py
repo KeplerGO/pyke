@@ -341,102 +341,87 @@ def copy(file1, file2, logfile, verbose):
         kepmsg.err(logfile, errmsg, verbose)
         raise
 
-# -----------------------------------------------------------
-# create a list from a file, string or wildcard
-
 def parselist(inlist,logfile,verbose):
+    """reate a list from a file, string or wildcard"""
 
-# test input name list
-    status = 0
     inlist.strip()
-    if (len(inlist) == 0 or inlist.count(' ') > 0):
-        message = 'ERROR -- KEPIO.PARSELIST: list not specified'
-        status = kepmsg.err(logfile,message,verbose)
+    if len(inlist) == 0 or inlist.count(' ') > 0:
+        errmsg = 'ERROR -- KEPIO.PARSELIST: list not specified'
+        kepmsg.err(logfile, errmsg, verbose)
+        raise
 
-# test @filelist exists
-
-    if (inlist[0] == '@'):
+    if inlist[0] == '@':
         infile = inlist.lstrip('@')
         if not os.path.isfile(infile):
-            message = 'ERROR -- KEPIO.PARSELIST: input list '+infile+' does not exist'
-            status = kepmsg.err(logfile,message,verbose)
-
-# parse wildcard and comma-separated lists
+            errmsg = ('ERROR -- KEPIO.PARSELIST: input list ' + infile +
+                      'doest not exist')
+            kepmsg.err(logfile,message,verbose)
+            raise
 
     outlist = []
-    if (status == 0 and inlist[0] == '@'):
+    if inlist[0] == '@':
         line = ' '
         infile = open(inlist.lstrip('@'))
         while line:
             line = infile.readline()
-            if (len(line.strip()) > 0):
+            if len(line.strip()) > 0:
                 outlist.append(line.rstrip('\r\n'))
-    elif (status == 0 and inlist[0] != '@' and inlist.count('*') == 0):
-        if (inlist.count(',') == 0):
+    elif inlist[0] != '@' and inlist.count('*') == 0:
+        if inlist.count(',') == 0:
             outlist.append(inlist)
         else:
-            list = inlist.split(',')
-            for listitem in list:
+            list_ = inlist.split(',')
+            for listitem in list_:
                 outlist.append(listitem)
-    elif (status == 0 and inlist[0] != '@' and inlist.count('*') > 0):
+    elif inlist[0] != '@' and inlist.count('*') > 0:
         outlist = glob.glob(inlist)
-    if (status == 0 and len(outlist) == 0):
-        message = 'ERROR -- KEPIO.PARSELIST: raw input image list is empty'
-        status = kepmsg.err(logfile,message,verbose)
+    if len(outlist) == 0:
+        errmsg = 'ERROR -- KEPIO.PARSELIST: raw input image list is empty'
+        kepmsg.err(logfile, errmsg, verbose)
+        raise
 
-    return outlist, status
+    return outlist
 
-# -----------------------------------------------------------
-# create a directory
 
-def createdir(path,logfile,verbose):
-
-    status = 0
+def createdir(path, logfile, verbose):
+    """create a directory"""
     path = path.strip()
-    message = 'KEPIO.CREATEDIR -- Created directory ' + path
-    if (path[-1] != '/'): path += '/'
-    if (not os.path.exists(path)):
+    if path[-1] != '/':
+        path += '/'
+    if not os.path.exists(path):
         try:
             os.mkdir(path)
-            kepmsg.log(logfile,message,verbose)
+            message = 'KEPIO.CREATEDIR -- Created directory ' + path
+            kepmsg.log(logfile, message, verbose)
         except:
-            message  = 'ERROR -- KEPIO.CREATEDIR: Could not create '
-            message += 'directory ' + path
-            status = kepmsg.err(logfile,message,verbose)
+            errmsg = ('ERROR -- KEPIO.CREATEDIR: Could not create directory '
+                      + path)
+            kepmsg.err(logfile, message, verbose)
+            raise
     else:
         message = 'KEPIO.CREATEDIR -- ' + path + ' directory exists'
-        kepmsg.log(logfile,message,verbose)
-
-    return status
-
-# -----------------------------------------------------------
-# create a directory tree
+        kepmsg.log(logfile, message, verbose)
 
 def createtree(path,logfile,verbose):
-    status = 0
+    """create a directory tree"""
     path = path.strip()
-    message = 'KEPIO.CREATETREE -- Created directory tree ' + path
-    if (path[-1] != '/'):
+    if path[-1] != '/':
         path += '/'
-    if (not os.path.exists(path)):
+    if not os.path.exists(path):
         try:
             os.makedirs(path)
+            message = 'KEPIO.CREATETREE -- Created directory tree ' + path
             kepmsg.log(logfile,message,verbose)
         except:
-            message  = 'ERROR -- KEPIO.CREATETREE: Could not create '
-            message += 'directory tree ' + path
-            status = kepmsg.err(logfile,message,verbose)
+            errmsg = ('ERROR -- KEPIO.CREATETREE: Could not create directory '
+                      'tree ' + path)
+            kepmsg.err(logfile, errmsg, verbose)
     else:
         message = 'KEPIO.CREATETREE -- ' + path + ' directory exists'
-        kepmsg.log(logfile,message,verbose)
-
-    return status
-
-# -----------------------------------------------------------
-# number of HDU within a FITS structure
+        kepmsg.log(logfile, message, verbose)
 
 def HDUnum(struct):
-
+    """number of HDU within a FITS structure"""
     ValidHDU = True
     nhdu = 0
     while ValidHDU:
@@ -445,38 +430,39 @@ def HDUnum(struct):
             nhdu += 1
         except:
             ValidHDU = False
-
     return nhdu
 
-# -----------------------------------------------------------
-# read time ranges from ascii file
+    """why not just len(struct.header[0])?"""
 
 def timeranges(ranges,logfile,verbose):
+    """read time ranges from ascii file"""
 
-    status = 0; tstart = []; tstop = []
+    tstart = []
+    tstop = []
     if '@' in ranges:
         try:
-            lines, status = openascii(ranges[1:],'r',logfile,verbose)
+            lines = openascii(ranges[1:], 'r', logfile, verbose)
         except:
-            txt = 'ERROR -- KEPIO.TIMERANGES: cannot open file ' + ranges[1:]
-            status = kepmsg.err(logfile,txt,verbose)
-            return tstart, tstop, status
+            errmsg = ('ERROR -- KEPIO.TIMERANGES: cannot open file '
+                      + ranges[1:])
+            kepmsg.err(logfile, txt, verbose)
+            raise
         for line in lines:
             line = line.strip().split(',')
             if len(line) == 2:
                 try:
-                    float(line[0])
-                    float(line[1])
                     tstart.append(float(line[0]))
                     tstop.append(float(line[1]))
-                    if tstart[-1] == 0.0 and tstop[-1] == 0.0: tstop[-1] = 1.0e8
+                    if tstart[-1] == 0.0 and tstop[-1] == 0.0:
+                        tstop[-1] = 1.0e8
                 except:
                     continue
-        status = closeascii(lines,logfile,verbose)
-        if len(tstart) == 0 or len(tstop) == 0 or len(tstart) != len(tstop) or status > 0:
-            txt = 'ERROR -- KEPIO.TIMERANGES: cannot understand content of ' + ranges[1:]
-            status = kepmsg.err(logfile,txt,verbose)
-            return tstart, tstop, status
+        closeascii(lines, logfile, verbose)
+        if len(tstart) == 0 or len(tstop) == 0 or len(tstart) != len(tstop):
+            errmsg = ('ERROR -- KEPIO.TIMERANGES: cannot understand content of '
+                      + ranges[1:])
+            kepmsg.err(logfile, errmsg, verbose)
+            raise
     else:
         try:
             ranges = ranges.strip().split(';')
@@ -485,100 +471,90 @@ def timeranges(ranges,logfile,verbose):
                 tstop.append(float(ranges[i].strip().split(',')[1]))
                 if tstart[-1] == 0.0 and tstop[-1] == 0.0: tstop[-1] = 1.0e8
         except:
-            tstart = []; tstop = []
-        if len(tstart) == 0 or len(tstop) == 0 or len(tstart) != len(tstop) or status > 0:
-            txt = 'ERROR -- KEPIO.TIMERANGES: cannot understand time ranges provided'
-            status = kepmsg.err(logfile,txt,verbose)
-            return tstart, tstop, status
+            tstart = []
+            tstop = []
+        if len(tstart) == 0 or len(tstop) == 0 or len(tstart) != len(tstop):
+            errmsg = ('ERROR -- KEPIO.TIMERANGES: cannot understand time '
+                      'ranges provided')
+            kepmsg.err(logfile, errmsg, verbose)
+            raise
 
-    return tstart, tstop, status
+    return tstart, tstop
 
-## -----------------------------------------------------------
-## manual calculation of median cadence within a time series
 
 def cadence(instr,infile,logfile,verbose,status):
-
+    """manual calculation of median cadence within a time series"""
     try:
         intime = instr[1].data.field('barytime')
     except:
-        intime, status = kepio.readfitscol(infile,instr[1].data,'time',logfile,verbose)
+        intime = readfitscol(infile, instr[1].data, 'time', logfile, verbose)
     dt = []
-    for i in range(1,len(intime)):
+    for i in range(1, len(intime)):
         if np.isfinite(intime[i]) and np.isfinite(intime[i-1]):
             dt.append(intime[i] - intime[i-1])
-    dt = np.array(dt,dtype='float32')
+    dt = np.array(dt, dtype='float32')
     cadnce = np.median(dt) * 86400.0
 
-    return intime[0], intime[-1], len(intime), cadnce, status
+    return intime[0], intime[-1], len(intime), cadnce
 
-# -----------------------------------------------------------
-# read time keywords
+def timekeys(instr, filename, logfile, verbose):
+    """read time keywords"""
+    tstart = 0.0
+    tstop = 0.0
+    cadence = 0.0
 
-def timekeys(instr,file,logfile,verbose,status):
-
-    tstart = 0.0; tstop = 0.0; cadence = 0.0
-
-# BJDREFI
-
+    # BJDREFI
     try:
         bjdrefi = instr[1].header['BJDREFI']
     except:
         bjdrefi = 0.0
 
-# BJDREFF
-
+    # BJDREFF
     try:
         bjdreff = instr[1].header['BJDREFF']
     except:
         bjdreff = 0.0
     bjdref = bjdrefi + bjdreff
 
-# TSTART
-
+    # TSTART
     try:
         tstart = instr[1].header['TSTART']
     except:
         try:
-            tstart = instr[1].header['STARTBJD']
-            tstart += 2.4e6
+            tstart = instr[1].header['STARTBJD'] + 2.4e6
         except:
             try:
-                tstart = instr[0].header['LC_START']
-                tstart += 2400000.5
+                tstart = instr[0].header['LC_START'] + 2400000.5
             except:
                 try:
-                    tstart = instr[1].header['LC_START']
-                    tstart += 2400000.5
+                    tstart = instr[1].header['LC_START'] + 2400000.5
                 except:
-                    message  = 'ERROR -- KEPIO.TIMEKEYS: Cannot find TSTART, STARTBJD or '
-                    message += 'LC_START in ' + file
-                    status = kepmsg.err(logfile,message,verbose)
+                    errmsg = ('ERROR -- KEPIO.TIMEKEYS: Cannot find TSTART, '
+                              'STARTBJD or LC_START in ' + filename)
+                    kepmsg.err(logfile, errmsg, verbose)
+                    raise
     tstart += bjdref
 
-# TSTOP
-
+    # TSTOP
     try:
         tstop = instr[1].header['TSTOP']
     except:
         try:
-            tstop = instr[1].header['ENDBJD']
-            tstop += 2.4e6
+            tstop = instr[1].header['ENDBJD'] + 2.4e6
         except:
             try:
-                tstop = instr[0].header['LC_END']
-                tstop += 2400000.5
+                tstop = instr[0].header['LC_END'] + 2400000.5
             except:
                 try:
-                    tstop = instr[1].header['LC_END']
-                    tstop += 2400000.5
+                    tstop = instr[1].header['LC_END'] + 2400000.5
                 except:
-                    message  = 'ERROR -- KEPIO.TIMEKEYS: Cannot find TSTOP, STOPBJD or '
-                    message += 'LC_STOP in ' + file
-                    status = kepmsg.err(logfile,message,verbose)
+                    errmsg = ('ERROR -- KEPIO.TIMEKEYS: Cannot find TSTOP, '
+                              'STOPBJD or LC_STOP in ' + filename)
+                    kepmsg.err(logfile, errmsg, verbose)
+                    raise
     tstop += bjdref
 
-# OBSMODE
-
+    # OBSMODE
     cadence = 1.0
     try:
         obsmode = instr[0].header['OBSMODE']
@@ -586,24 +562,19 @@ def timekeys(instr,file,logfile,verbose,status):
         try:
             obsmode = instr[1].header['DATATYPE']
         except:
-            message  = 'ERROR -- KEPIO.TIMEKEYS: cannot find keyword OBSMODE '
-            message += 'or DATATYPE in ' + file
-            status = kepmsg.err(logfile,message,verbose)
-    if status == 0:
-        if 'short' in obsmode: # and bjdref == 0.0:
-            cadence = 54.1782
-        elif 'long' in obsmode: # and bjdref == 0.0:
-            cadence = 1625.35
+            errmsg = ('ERROR -- KEPIO.TIMEKEYS: cannot find keyword OBSMODE '
+                      'or DATATYPE in ' + filename)
+            kepmsg.err(logfile, errmsg, verbose)
+            raise
+    if 'short' in obsmode:
+        cadence = 54.1782
+    elif 'long' in obsmode:
+        cadence = 1625.35
 
-    return tstart, tstop, bjdref, cadence, status
+    return tstart, tstop, bjdref, cadence
 
-
-# -----------------------------------------------------------
-# filter input data table
-
-def filterNaN(instr,datacol,outfile,logfile,verbose):
-
-    status = 0
+def filterNaN(instr, datacol, outfile, logfile, verbose):
+    """filter input data table"""
     try:
         nanclean = instr[1].header['NANCLEAN']
     except:
@@ -614,28 +585,24 @@ def filterNaN(instr,datacol,outfile,logfile,verbose):
         try:
             instr[1].data.field(datacol)
         except:
-            msg = 'ERROR -- KEPIO.FILTERNAN: cannot find column ' + datacol + ' in the infile'
-            status = kepmsg.err(logfile,msg,verbose)
-
-        if status == 0:
-            try:
-                for i in range(len(instr[1].data.field(0))):
-                    if str(instr[1].data.field(timecol)[i]) != '-inf' and \
-                            str(instr[1].data.field(datacol)[i]) != '-inf':
-                        instr[1].data[naxis2] = instr[1].data[i]
-                        naxis2 += 1
-                instr[1].data = instr[1].data[:naxis2]
-                comment = 'NaN cadences removed from data'
-                status = kepkey.new('NANCLEAN',True,comment,instr[1],outfile,logfile,verbose)
-            except:
-                msg = 'ERROR -- KEPIO.FILTERNAN: Failed to filter NaNs from '+ outfile
-                status = kepmsg.err(logfile,msg,verbose)
-
-    return instr, status
-
-
-# -----------------------------------------------------------
-# read target pixel data file
+            msg = ('ERROR -- KEPIO.FILTERNAN: cannot find column ' + datacol +
+                   ' in the infile')
+            status = kepmsg.err(logfile, msg, verbose)
+        try:
+            for i in range(len(instr[1].data.field(0))):
+                if (str(instr[1].data.field(timecol)[i]) != '-inf' and
+                    str(instr[1].data.field(datacol)[i]) != '-inf'):
+                    instr[1].data[naxis2] = instr[1].data[i]
+                    naxis2 += 1
+            instr[1].data = instr[1].data[:naxis2]
+            comment = 'NaN cadences removed from data'
+            kepkey.new('NANCLEAN', True, comment, instr[1], outfile, logfile,
+                       verbose)
+        except:
+            errmsg = ('ERROR -- KEPIO.FILTERNAN: Failed to filter NaNs from '
+                      + outfile)
+            kepmsg.err(logfile, errmsg, verbose)
+    return instr
 
 def readTPF(infile, colname, logfile, verbose):
     """ Read a Target Pixel File (TPF).
@@ -759,7 +726,7 @@ def readTPF(infile, colname, logfile, verbose):
                   infile + '[TARGETTABLES]')
         status = kepmsg.err(logfile, errmsg, verbose)
 
-# read and close TPF data pixel image
+    # read and close TPF data pixel image
 
     try:
         pixels = tpf['TARGETTABLES'].data.field(colname)[:]
@@ -771,7 +738,7 @@ def readTPF(infile, colname, logfile, verbose):
 
     closefits(tpf, logfile, verbose)
 
-# for STSCI_PYTHON v2.12 - convert 3D data array to 2D
+    # for STSCI_PYTHON v2.12 - convert 3D data array to 2D
 
     if len(np.shape(pixels)) == 3:
         isize = np.shape(pixels)[0]
@@ -779,105 +746,87 @@ def readTPF(infile, colname, logfile, verbose):
         ksize = np.shape(pixels)[2]
         pixels = np.reshape(pixels, (isize, jsize * ksize))
 
-    return kepid, channel, skygroup, module, output, quarter, season, \
-           ra, dec, column, row, kepmag, xdim, ydim, pixels
+    return (kepid, channel, skygroup, module, output, quarter, season,
+            ra, dec, column, row, kepmag, xdim, ydim, pixels)
 
-# -----------------------------------------------------------
-# read target pixel mask data
 
 def readMaskDefinition(infile,logfile,verbose):
+    """read target pixel mask data"""
 
-    status = 0
+    # open input file
+    inf = openfits(infile, 'readonly', logfile, verbose)
 
-# open input file
+    # read bitmap image
+    try:
+        img = inf['APERTURE'].data
+    except:
+        txt = ('WARNING -- KEPIO.READMASKDEFINITION: Cannot read mask '
+               'defintion in ' + infile + '[APERTURE]')
+        kepwarn.err(txt, logfile)
+        raise
+    try:
+        naxis1 = inf['APERTURE'].header['NAXIS1']
+    except:
+        txt = ('WARNING -- KEPIO.READMASKDEFINITION: Cannot read NAXIS1 '
+               'keyword in ' + infile + '[APERTURE]')
+        kepwarn.err(txt, logfile)
+        raise
+    try:
+        naxis2 = inf['APERTURE'].header['NAXIS2']
+    except:
+        txt = ('WARNING -- KEPIO.READMASKDEFINITION: Cannot read NAXIS2 '
+               'keyword in ' + infile + '[APERTURE]')
+        kepwarn.err(txt, logfile)
+        raise
 
-    inf, status = openfits(infile,'readonly',logfile,verbose)
+    # read WCS keywords
+    crpix1p, crpix2p, crval1p, crval2p, cdelt1p, cdelt2p = kepkey.getWCSp(
+            infile, inf['APERTURE'], logfile, verbose
+                                                                         )
+    pixelcoord1 = np.zeros((naxis1, naxis2))
+    pixelcoord2 = np.zeros((naxis1, naxis2))
+    for j in range(naxis2):
+        for i in range(naxis1):
+            pixelcoord1[i, j] = kepkey.wcs(i, crpix1p, crval1p, cdelt1p)
+            pixelcoord2[i, j] = kepkey.wcs(j, crpix2p, crval2p, cdelt2p)
 
-# read bitmap image
+    # close input file
+    closefits(inf,logfile,verbose)
+    return img, pixelcoord1, pixelcoord2
 
-    if status == 0:
-        try:
-            img = inf['APERTURE'].data
-        except:
-            txt = 'WARNING -- KEPIO.READMASKDEFINITION: Cannot read mask defintion in ' + infile + '[APERTURE]'
-            kepwarn.err(txt,logfile)
-            status = 1
-    if status == 0:
-        try:
-            naxis1 = inf['APERTURE'].header['NAXIS1']
-        except:
-            txt = 'WARNING -- KEPIO.READMASKDEFINITION: Cannot read NAXIS1 keyword in ' + infile + '[APERTURE]'
-            kepwarn.err(txt,logfile)
-            status = 1
-    if status == 0:
-        try:
-            naxis2 = inf['APERTURE'].header['NAXIS2']
-        except:
-            txt = 'WARNING -- KEPIO.READMASKDEFINITION: Cannot read NAXIS2 keyword in ' + infile + '[APERTURE]'
-            kepwarn.err(txt,logfile)
-            status = 1
 
-# read WCS keywords
+def readPRFimage(infile, hdu, logfile, verbose):
+    """read pixel response file"""
 
-    if status == 0:
-        crpix1p, crpix2p, crval1p, crval2p, cdelt1p, cdelt2p, status = \
-            kepkey.getWCSp(infile,inf['APERTURE'],logfile,verbose)
-    if status == 0:
-        pixelcoord1 = np.zeros((naxis1,naxis2))
-        pixelcoord2 = np.zeros((naxis1,naxis2))
-        for j in range(naxis2):
-            for i in range(naxis1):
-                pixelcoord1[i,j] = kepkey.wcs(i,crpix1p,crval1p,cdelt1p)
-                pixelcoord2[i,j] = kepkey.wcs(j,crpix2p,crval2p,cdelt2p)
+    prf = openfits(infile, 'readonly', logfile, verbose)
 
-# close input file
+    # read bitmap image
+    try:
+        img = prf[hdu].data
+    except:
+        txt = ('ERROR -- KEPIO.READPRFIMAGE: Cannot read PRF image in '
+               + infile + '[' + str(hdu) + ']')
+        kepmsg.err(logfile, txt, verbose)
+        raise
+    try:
+        naxis1 = prf[hdu].header['NAXIS1']
+    except:
+        txt = ('ERROR -- KEPIO.READPRFIMAGE: Cannot read NAXIS1 keyword in '
+               + infile + '[' + str(hdu) + ']')
+        kepmsg.err(logfile, txt, verbose)
+        raise
+    try:
+        naxis2 = prf[hdu].header['NAXIS2']
+    except:
+        txt = ('ERROR -- KEPIO.READPRFIMAGE: Cannot read NAXIS2 keyword in '
+               + infile + '[' + str(hdu) + ']')
+        kepmsg.err(logfile, txt, verbose)
+        raise
 
-    if status == 0:
-        status = closefits(inf,logfile,verbose)
+    # read WCS keywords
+    crpix1p, crpix2p, crval1p, crval2p, cdelt1p, cdelt2p = kepkey.getWCSp(
+            infile, prf[hdu], logfile, verbose
+                                                                         )
 
-    return img, pixelcoord1, pixelcoord2, status
-
-# -----------------------------------------------------------
-# read pixel response file
-
-def readPRFimage(infile,hdu,logfile,verbose):
-
-    status = 0
-
-# open input file
-
-    prf, status = openfits(infile,'readonly',logfile,verbose)
-
-# read bitmap image
-
-    if status == 0:
-        try:
-            img = prf[hdu].data
-        except:
-            txt = 'ERROR -- KEPIO.READPRFIMAGE: Cannot read PRF image in ' + infile + '[' + str(hdu) + ']'
-            status = kepmsg.err(logfile,txt,verbose)
-    if status == 0:
-        try:
-            naxis1 = prf[hdu].header['NAXIS1']
-        except:
-            txt = 'ERROR -- KEPIO.READPRFIMAGE: Cannot read NAXIS1 keyword in ' + infile + '[' + str(hdu) + ']'
-            status = kepmsg.err(logfile,txt,verbose)
-    if status == 0:
-        try:
-            naxis2 = prf[hdu].header['NAXIS2']
-        except:
-            txt = 'ERROR -- KEPIO.READPRFIMAGE: Cannot read NAXIS2 keyword in ' + infile + '[' + str(hdu) + ']'
-            status = kepmsg.err(logfile,txt,verbose)
-
-# read WCS keywords
-
-    if status == 0:
-        crpix1p, crpix2p, crval1p, crval2p, cdelt1p, cdelt2p, status = \
-            kepkey.getWCSp(infile,prf[hdu],logfile,verbose)
-
-# close input file
-
-    if status == 0:
-        status = closefits(prf,logfile,verbose)
-
-    return img, crpix1p, crpix2p, crval1p, crval2p, cdelt1p, cdelt2p, status
+    closefits(prf,logfile,verbose)
+    return img, crpix1p, crpix2p, crval1p, crval2p, cdelt1p, cdelt2p
