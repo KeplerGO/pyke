@@ -1,12 +1,16 @@
+from . import kepio
+from . import kepmsg
+from . import kepplot
 import numpy as np
 import math
 import os
-import kepio
-import kepmsg
-import kepplot
 from matplotlib import pyplot as plt
 from astropy.io import fits as pyfits
 from copy import copy
+
+
+__all__ = ['kepmask']
+
 
 """ global variables """
 

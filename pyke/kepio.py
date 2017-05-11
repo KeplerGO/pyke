@@ -2,13 +2,13 @@
 This module contains utility functions for i/o operations.
 """
 
+from . import kepmsg
+from . import kepkey
 import numpy as np
 import os
 import glob
 import tempfile
 import shutil
-import kepmsg
-import kepkey
 from astropy.io import fits as pyfits
 
 def delete(filename, logfile, verbose):

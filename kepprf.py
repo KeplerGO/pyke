@@ -2,15 +2,12 @@ import numpy as np
 from matplotlib import pyplot as plt
 from matplotlib import ticker
 from astropy.io import fits as pyfits
-import kepio, kepmsg, kepkey, kepplot, kepfit, keparray, kepfunc, kepstat
+import kepio, kepmsg, kepplot, kepfunc, kepstat
 import sys, time, re, math, glob
 from scipy import interpolate, optimize, ndimage, stats
 from scipy.optimize import fmin_powell
 from scipy.interpolate import RectBivariateSpline
 from scipy.ndimage import interpolation
-
-# -----------------------------------------------------------
-# core code
 
 def kepprf(infile, plotfile, rownum, columns, rows, fluxes, border,
            background, focus, prfdir, xtol, ftol, imscale, labcol,

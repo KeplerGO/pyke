@@ -1,66 +1,52 @@
-#!/usr/bin/env python
-import kepmsg, kepstat
-import numpy, scipy
-import scipy.stats
-from numpy import *
+from . import kepmsg
+from . import kepstat
+import numpy as np
 from matplotlib import pyplot as plt
 
-# -----------------------------------------------------------
-# shape the window, enforce absolute scaling, rotate the labels
-
 def location(shape):
+    """shape the window, enforce absolute scaling, rotate the labels"""
 
-# position first axes inside the plotting window
-
+    # position first axes inside the plotting window
     ax = plt.axes(shape)
-# force tick labels to be absolute rather than relative
+    # force tick labels to be absolute rather than relative
     plt.gca().xaxis.set_major_formatter(plt.ScalarFormatter(useOffset=False))
     plt.gca().yaxis.set_major_formatter(plt.ScalarFormatter(useOffset=False))
     ax.yaxis.set_major_locator(plt.MaxNLocator(5))
-# rotate y labels by 90 deg
+    # rotate y labels by 90 deg
     labels = ax.get_yticklabels()
     plt.setp(labels, 'rotation', 90)
 
     return ax
 
-# -----------------------------------------------------------
-# plot a 1d distribution
-
 def plot1d(x,y,cadence,lcolor,lwidth,fcolor,falpha,underfill):
+    """plot a 1d distribution"""
 
-# pad first and last points in case a fill is required
+    # pad first and last points in case a fill is required
+    x = np.insert(x, [0], [x[0]])
+    x = np.append(x, [x[-1]])
+    y = np.insert(y, [0], [-1.0e10])
+    y = np.append(y, -1.0e10)
 
-    x = insert(x,[0],[x[0]])
-    x = append(x,[x[-1]])
-    y = insert(y,[0],[-1.0e10])
-    y = append(y,-1.0e10)
-
-# plot data so that data gaps are not spanned by a line
-
-    ltime = array([],dtype='float64')
-    ldata = array([],dtype='float32')
+    # plot data so that data gaps are not spanned by a line
+    ltime = np.array([], dtype='float64')
+    ldata = np.array([], dtype='float32')
     for i in range(1,len(x)-1):
         if (x[i] - x[i-1]) < 2.0 * cadence / 86400:
-            ltime = append(ltime,x[i])
-            ldata = append(ldata,y[i])
+            ltime = np.append(ltime, x[i])
+            ldata = np.append(ldata, y[i])
         else:
-            plt.plot(ltime,ldata,color=lcolor,linestyle='-',linewidth=lwidth)
-            ltime = array([],dtype='float64')
-            ldata = array([],dtype='float32')
-    plt.plot(ltime,ldata,color=lcolor,linestyle='-',linewidth=lwidth)
+            plt.plot(ltime, ldata, color=lcolor, linestyle='-',
+                     linewidth=lwidth)
+            ltime = np.array([],dtype='float64')
+            ldata = np.array([],dtype='float32')
+    plt.plot(ltime, ldata, color=lcolor, linestyle='-', linewidth=lwidth)
 
-# plot the fill color below data time series, with no data gaps
-
+    # plot the fill color below data time series, with no data gaps
     if underfill:
-        plt.fill(x,y,fc=fcolor,linewidth=0.0,alpha=falpha)
+        plt.fill(x, y, fc=fcolor, linewidth=0.0, alpha=falpha)
 
-        return
-
-# -----------------------------------------------------------
-# determine data limits
-
-def RangeOfPlot(x,y,pad,origin):
-
+def RangeOfPlot(x, y, pad, origin):
+    """determine data limits"""
     xmin = x.min()
     xmax = x.max()
     ymin = y.min()
@@ -75,53 +61,47 @@ def RangeOfPlot(x,y,pad,origin):
         else:
             plt.ylim(ymin - yr * pad, ymax + yr * pad)
 
-    return
 
-# -----------------------------------------------------------
-# clean up x-axis of plot
+def cleanx(time, logfile, verbose):
+    """clean up x-axis of plot"""
 
-def cleanx(time,logfile,verbose):
-
-    status = 0
     try:
         time0 = float(int(time[0] / 100) * 100.0)
-        if time0 < 2.4e6: time0 += 2.4e6
+        if time0 < 2.4e6:
+            time0 += 2.4e6
         timeout = time - time0
-        label = 'BJD $-$ %d' % time0
+        label = "BJD $-$ {}".format(time0)
     except:
-        txt = 'ERROR -- KEPPLOT.CLEANX: cannot calculate plot scaling in x dimension'
-        status = kepmsg.err(logfile,txt,verbose)
+        txt = ("ERROR -- KEPPLOT.CLEANX: cannot calculate plot scaling in " +
+               "x dimension")
+        kepmsg.err(logfile, txt, verbose)
         label = ''
+        raise
 
-    return timeout, label, status
+    return timeout, label
 
-# -----------------------------------------------------------
-# clean up y-axis of plot
-
-def cleany(signal,cadence,logfile,verbose):
-
-    status = 0
+def cleany(signal, cadence, logfile, verbose):
+    """# clean up y-axis of plot"""
     try:
         signal /= cadence
-        nrm = math.ceil(math.log10(numpy.nanmax(signal))) - 1.0
-        signal = signal / 10**nrm
+        nrm = math.ceil(math.log10(np.nanmax(signal))) - 1.0
+        signal = signal / 10 ** nrm
         if nrm == 0:
             label = 'Flux (e$^-$ s$^{-1}$)'
         else:
-            label = 'Flux (10$^{%d}$ e$^-$ s$^{-1}$)' % nrm
+            label = "Flux (10$^{0}$ e$^-$ s$^{-1}$)".format(nrm)
     except:
-        txt = 'ERROR -- KEPPLOT.CLEANY: cannot calculate plot scaling in y dimension'
-        status = kepmsg.err(logfile,txt,verbose)
+        txt = "ERROR -- KEPPLOT.CLEANY: cannot calculate plot scaling in " +
+              "y dimension"
+        kepmsg.err(logfile, txt, verbose)
         label = ''
 
-    return signal, label, status
+    return signal, label
 
-# -----------------------------------------------------------
-# plot limits
 
-def limits(x,y,logfile,verbose):
+def limits(x, y, logfile, verbose):
+    """plot limits"""
 
-    status = 0
     try:
         xmin = x.min()
         xmax = x.max()
@@ -129,15 +109,16 @@ def limits(x,y,logfile,verbose):
         ymax = y.max()
         xr = xmax - xmin
         yr = ymax - ymin
-        x = insert(x,[0],[x[0]])
+        x = insert(x, [0], [x[0]])
         x = append(x,[x[-1]])
-        y = insert(y,[0],[0.0])
-        y = append(y,0.0)
+        y = insert(y, [0], [0.0])
+        y = append(y, 0.0)
     except:
         txt = 'ERROR -- KEPPLOT.LIMITS: cannot calculate plot limits'
-        status = kepmsg.err(logfile,txt,verbose)
+        kepmsg.err(logfile,txt,verbose)
+        raise
 
-    return x, y, xmin,  xmax, xr, ymin, ymax, yr, status
+    return x, y, xmin,  xmax, xr, ymin, ymax, yr
 
 # -----------------------------------------------------------
 # plot labels
