@@ -9,3 +9,4 @@ from .kepmask import *
 from .kepmsg import *
 from .kepkey import *
 from .kepplot import *
+from .kepstat import *
