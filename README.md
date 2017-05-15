@@ -1,4 +1,4 @@
-# PyKE
+# PyKE [![Build Status](https://travis-ci.org/KeplerGO/PyKE.svg?branch=dev)](https://travis-ci.org/KeplerGO/PyKE)
 ***A suite of Python/PyRAF tools to analyze Kepler data.***
 
 For more information and documentation,
