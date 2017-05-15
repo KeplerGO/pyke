@@ -166,25 +166,23 @@ def keppixseries(infile,outfile,plotfile,plottype,filter,function,cutoff,clobber
     if status == 0 and filter:
         for i in range(ydim):
             for j in range(xdim):
-                ave, sigma  = kepstat.stdev(pixseries[i,j,:len(filtfunc)])
-                padded = np.append(kepstat.randarray(np.ones(len(filtfunc)) * ave, \
-                                                            np.ones(len(filtfunc)) * sigma), pixseries[i,j,:])
-                ave, sigma  = kepstat.stdev(pixseries[i,j,-len(filtfunc):])
-                padded = np.append(padded, kepstat.randarray(np.ones(len(filtfunc)) * ave, \
-                                                                    np.ones(len(filtfunc)) * sigma))
+                ave, sigma = (np.mean(pixseries[i,j,:len(filtfunc)]),
+                              np.std(pixseries[i,j,:len(filtfunc)]))
+                padded = np.append(kepstat.randarray(np.ones(len(filtfunc)) * ave,
+                        np.ones(len(filtfunc)) * sigma), pixseries[i,j,:])
+                ave, sigma = (np.mean(pixseries[i,j,-len(filtfunc):]),
+                              np.std(pixseries[i,j,-len(filtfunc):]))
+                padded = np.append(padded,
+                        kepstat.randarray(np.ones(len(filtfunc)) * ave,
+                                np.ones(len(filtfunc)) * sigma))
 
 # convolve data
-
                 if status == 0:
                     convolved = np.convolve(padded,filtfunc,'same')
-
 # remove padding from the output array
-
                 if status == 0:
                     outdata = convolved[len(filtfunc):-len(filtfunc)]
-
 # subtract low frequencies
-
                 if status == 0:
                     outmedian = np.median(outdata)
                     pixseries[i,j,:] = pixseries[i,j,:] - outdata + outmedian

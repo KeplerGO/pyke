@@ -109,10 +109,10 @@ def kepstitch(infiles,outfile,clobber,verbose,logfile,status):
 # maxmimum and minimum times in file sample
 
     if status == 0:
-        lc_start = kepstat.min(lct)
-        lc_end = kepstat.max(lct)
-        startbjd = kepstat.min(bjd)
-        endbjd = kepstat.max(bjd)
+        lc_start = np.min(lct)
+        lc_end = np.max(lct)
+        startbjd = np.min(bjd)
+        endbjd = np.max(bjd)
         status = kepkey.change('LC_START', lc_start, outstr[1], outfile,
                                logfile, verbose)
         status = kepkey.change('LC_END', lc_end, outstr[1], outfile, logfile,

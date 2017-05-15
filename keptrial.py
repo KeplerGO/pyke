@@ -168,7 +168,7 @@ def keptrial(infile,outfile,datacol,errcol,fmin,fmax,nfreq,method,
             if n[i] > 0 and not gotbin:
                 f2 = bins[i+1]
                 gotbin = True
-        powave, powstdev = kepstat.stdev(pmax)
+        powave, powstdev = np.mean(pmax), np.std(pmax)
 
 # print result
 

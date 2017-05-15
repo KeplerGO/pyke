@@ -106,7 +106,7 @@ def kepdetrend(infile,outfile,datacol,errcol,ranges1,npoly1,nsig1,niter1,
         time1 = []; data1 = []; err1 = []
         t1start, t1stop, status = kepio.timeranges(ranges1,logfile,verbose)
     if status == 0:
-        cadencelis1, status = kepstat.filterOnRange(intime,t1start,t1stop)
+        cadencelis1 = kepstat.filterOnRange(intime,t1start,t1stop)
     if status == 0:
         for i in range(len(cadencelis1)):
             time1.append(intime[cadencelis1[i]])
@@ -147,7 +147,7 @@ def kepdetrend(infile,outfile,datacol,errcol,ranges1,npoly1,nsig1,niter1,
     if status == 0:
         time2 = []; data2 = []; err2 = []
         t2start, t2stop, status = kepio.timeranges(ranges2,logfile,verbose)
-        cadencelis2, status = kepstat.filterOnRange(intime,t2start,t2stop)
+        cadencelis2 = kepstat.filterOnRange(intime,t2start,t2stop)
         for i in range(len(cadencelis2)):
             time2.append(intime[cadencelis2[i]])
             data2.append(indata[cadencelis2[i]])

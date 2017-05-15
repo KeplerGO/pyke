@@ -115,7 +115,7 @@ def kepstddev(infile,outfile,datacol,timescale,clobber,verbose,logfile,status,cm
 # calculate RMS STDDEV
 
     if status == 0:
-        rms, status = kepstat.rms(cdpp,np.zeros(len(stddev)),logfile,verbose)
+        rms = kepstat.rms(cdpp, np.zeros(len(stddev)), logfile, verbose)
         rmscdpp = np.ones((len(cdpp)),dtype='float32') * rms
         print '   RMS %.1fhr CDPP = %d ppm\n' % (timescale, rms)
 

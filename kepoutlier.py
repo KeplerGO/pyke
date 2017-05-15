@@ -127,7 +127,7 @@ def kepoutlier(infile,outfile,datacol,nsig,stepsize,npoly,niter,
 
     if status == 0:
         t1, t2, status = kepio.timeranges(ranges,logfile,verbose)
-        cadencelis, status = kepstat.filterOnRange(intime,t1,t2)
+        cadencelis = kepstat.filterOnRange(intime, t1, t2)
 
 # find limits of each time step
 

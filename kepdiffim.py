@@ -170,26 +170,23 @@ def kepdiffim(infile,outfile,plotfile,imscale,colmap,filter,function,cutoff,
 # pad time series at both ends with noise model
 
     if status == 0 and filter:
-        for i in range(ydim*xdim):
-            ave, sigma  = kepstat.stdev(pixseries[i,:len(filtfunc)])
-            padded = np.append(kepstat.randarray(np.ones(len(filtfunc)) * ave, \
-                                                        np.ones(len(filtfunc)) * sigma), pixseries[i,:])
-            ave, sigma  = kepstat.stdev(pixseries[i,-len(filtfunc):])
-            padded = np.append(padded, kepstat.randarray(np.ones(len(filtfunc)) * ave, \
-                                                                np.ones(len(filtfunc)) * sigma))
+        for i in range(ydim * xdim):
+            ave, sigma  = (np.mean(pixseries[i, :len(filtfunc)]),
+                           np.std(pixseries[i, :len(filtfunc)]))
+            padded = np.append(kepstat.randarray(np.ones(len(filtfunc)) * ave,
+                    np.ones(len(filtfunc)) * sigma), pixseries[i,:])
+            ave, sigma  = (np.mean(pixseries[i,-len(filtfunc):]),
+                           np.std(pixseries[i,-len(filtfunc):]))
+            padded = np.append(padded, kepstat.randarray(np.ones(len(filtfunc))
+                    * ave, np.ones(len(filtfunc)) * sigma))
 
 # convolve data
-
             if status == 0:
                 convolved = np.convolve(padded,filtfunc,'same')
-
 # remove padding from the output array
-
             if status == 0:
                 outdata = convolved[len(filtfunc):-len(filtfunc)]
-
 # subtract low frequencies
-
             if status == 0:
                 outmedian = np.median(outdata)
                 pixseries[i,:] = pixseries[i,:] - outdata + outmedian

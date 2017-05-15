@@ -261,11 +261,11 @@ def kepextract(infile,maskfile,outfile,subback,clobber,verbose,logfile,status):
                     work3 = np.append(work3,flux_bkg[i,j])
                     work4 = np.append(work4,flux_bkg_err[i,j])
                     work5 = np.append(work5,raw_cnts[i,j])
-            sap_flux = np.append(sap_flux,kepstat.sum(work1))
-            sap_flux_err = np.append(sap_flux_err,kepstat.sumerr(work2))
-            sap_bkg = np.append(sap_bkg,kepstat.sum(work3))
-            sap_bkg_err = np.append(sap_bkg_err,kepstat.sumerr(work4))
-            raw_flux = np.append(raw_flux,kepstat.sum(work5))
+            sap_flux = np.append(sap_flux,np.sum(work1))
+            sap_flux_err = np.append(sap_flux_err, math.sqrt(np.sum(work2 * work2)))
+            sap_bkg = np.append(sap_bkg,np.sum(work3))
+            sap_bkg_err = np.append(sap_bkg_err, math.sqrt(np.sum(work4 * work4)))
+            raw_flux = np.append(raw_flux,np.sum(work5))
 
 # construct new table moment data
 
@@ -291,12 +291,12 @@ def kepextract(infile,maskfile,outfile,subback,clobber,verbose,logfile,status):
                     yfe[k] = apery[j] * flux_err[i,j]
                     f[k] = flux[i,j]
                     fe[k] = flux_err[i,j]
-            xfsum = kepstat.sum(xf)
-            yfsum = kepstat.sum(yf)
-            fsum = kepstat.sum(f)
-            xfsume = math.sqrt(kepstat.sum(xfe * xfe) / naper)
-            yfsume = math.sqrt(kepstat.sum(yfe * yfe) / naper)
-            fsume = math.sqrt(kepstat.sum(fe * fe) / naper)
+            xfsum = np.sum(xf)
+            yfsum = np.sum(yf)
+            fsum = np.sum(f)
+            xfsume = math.sqrt(np.sum(xfe * xfe) / naper)
+            yfsume = math.sqrt(np.sum(yfe * yfe) / naper)
+            fsume = math.sqrt(np.sum(fe * fe) / naper)
             mom_centr1[i] = xfsum / fsum
             mom_centr2[i] = yfsum / fsum
             mom_centr1_err[i] = math.sqrt((xfsume / xfsum)**2 + ((fsume / fsum)**2))

@@ -194,7 +194,7 @@ def borders(maskimg, xdim, ydim, pixcoord1, pixcoord2, bit, lcolor, lstyle, lwid
                 y = np.array([pixcoord2[j, i], pixcoord2[j, i]]) - 0.5
                 plt.plot(x, y, color=lcolor, linestyle=lstyle, linewidth=lwidth)
             if (kepstat.bitInBitmap(maskimg[i, j], bit) and not
-                kepstat.bitInBitmap(maskimg[i, j - 1], bit):
+                kepstat.bitInBitmap(maskimg[i, j - 1], bit)):
                 x = np.array([pixcoord1[j, i], pixcoord1[j, i]]) - 0.5
                 y = np.array([pixcoord2[j, i - 1], pixcoord2[j, i]]) + 0.5
                 plt.plot(x, y, color=lcolor, linestyle=lstyle, linewidth=lwidth)

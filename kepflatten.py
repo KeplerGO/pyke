@@ -130,7 +130,7 @@ def kepflatten(infile,outfile,datacol,errcol,nsig,stepsize,winsize,npoly,
 
     if status == 0:
         t1, t2, status = kepio.timeranges(ranges,logfile,verbose)
-        cadencelis, status = kepstat.filterOnRange(intime,t1,t2)
+        cadencelis = kepstat.filterOnRange(intime,t1,t2)
 
 # find limits of each time step
 

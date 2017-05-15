@@ -87,7 +87,7 @@ def kepimages(infile,outfix,imtype,ranges,clobber,verbose,logfile,status):
         tim = array([]); dat = array([]); err = array([])
         tstart, tstop, status = kepio.timeranges(ranges,logfile,verbose)
     if status == 0:
-        cadencelis, status = kepstat.filterOnRange(time,tstart,tstop)
+        cadencelis = kepstat.filterOnRange(time, tstart, tstop)
 
 # provide name for each output file and clobber if file exists
 

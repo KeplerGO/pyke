@@ -62,7 +62,7 @@ def leastsquare(functype,pinit,xdata,ydata,yerr,logfile,verbose):
             fit = np.zeros(len(xdata))
             for i in range(len(fit)):
                 fit[i] = coeffs[0]
-        sigma, status = kepstat.rms(ydata,fit,logfile,verbose)
+        sigma = kepstat.rms(ydata, fit, logfile, verbose)
         for i in range(len(ydata)):
             yerr.append(sigma)
 
@@ -108,7 +108,7 @@ def leastsquare(functype,pinit,xdata,ydata,yerr,logfile,verbose):
         fit = np.zeros(len(xdata))
         for i in range(len(fit)):
             fit[i] = coeffs[0]
-    sigma, status = kepstat.rms(ydata,fit,logfile,verbose)
+    sigma = kepstat.rms(ydata, fit, logfile, verbose)
 
 # generate fit points for plotting
 

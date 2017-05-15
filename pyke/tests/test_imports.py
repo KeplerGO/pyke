@@ -1,5 +1,5 @@
 def test_import():
-    from .kepio       import *
-    from .kepmask     import *
-    from .kepmsg      import *
-    from .kepkey      import *
+    from ..           import kepio
+    from ..           import kepmask
+    from ..      import kepmsg
+    from ..      import kepkey

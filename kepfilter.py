@@ -139,47 +139,39 @@ def kepfilter(infile,outfile,datacol,function,cutoff,passband,plot,plotlab,
 ## pad time series at both ends with noise model
 
     if status == 0:
-        ave, sigma  = kepstat.stdev(indata[:len(filtfunc)])
+        ave, sigma = (np.mean(indata[:len(filtfunc)]),
+                      np.std(indata[:len(filtfunc)]))
         padded = np.append(kepstat.randarray(np.ones(len(filtfunc)) * ave,
-                                          np.ones(len(filtfunc)) * sigma), indata)
-        ave, sigma  = kepstat.stdev(indata[-len(filtfunc):])
-        padded = np.append(padded, kepstat.randarray(np.ones(len(filtfunc)) * ave,
-                                                  np.ones(len(filtfunc)) * sigma))
+                np.ones(len(filtfunc)) * sigma), indata)
+        ave, sigma = (np.mean(indata[-len(filtfunc):]),
+                      np.std(indata[-len(filtfunc):]))
+        padded = np.append(padded,
+                kepstat.randarray(np.ones(len(filtfunc)) * ave,
+                        np.ones(len(filtfunc)) * sigma))
 
 ## convolve data
-
     if status == 0:
         convolved = np.convolve(padded,filtfunc,'same')
-
 ## remove padding from the output array
-
     if status == 0:
         if function == 'boxcar':
             outdata = convolved[len(filtfunc):-len(filtfunc)]
         else:
             outdata = convolved[len(filtfunc):-len(filtfunc)]
-
 ## subtract low frequencies
-
     if status == 0 and passband == 'high':
         outmedian = np.median(outdata)
         outdata = indata - outdata + outmedian
-
 ## comment keyword in output file
-
     if status == 0:
         status = kepkey.history(call,instr[0],outfile,logfile,verbose)
-
 ## clean up x-axis unit
-
     if status == 0:
         intime0 = float(int(tstart / 100) * 100.0)
         if intime0 < 2.4e6: intime0 += 2.4e6
         ptime = intime - intime0
         xlab = 'BJD $-$ %d' % intime0
-
 ## clean up y-axis units
-
     if status == 0:
         pout = indata * 1.0
         pout2 = outdata * 1.0
