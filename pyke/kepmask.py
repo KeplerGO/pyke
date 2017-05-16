@@ -454,8 +454,6 @@ def kepmask_main():
                         help='Write to a log file?')
     parser.add_argument('--logfile', '-l', help='Name of ascii log file',
                         default='kepmask.log', dest='logfile', type=str)
-    parser.add_argument('--status', '-e', help='Exit status (0=good)',
-                        default=0, dest='status', type=int)
     args = parser.parse_args()
     kepmask(args.infile, args.maskfile, args.plotfile, args.nframe, args.imin,
             args.imax, args.iscale, args.cmap, args.verbose, args.logfile)
