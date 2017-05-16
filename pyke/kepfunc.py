@@ -1,8 +1,7 @@
+from .keparray import rebin2D
 import math
 import numpy as np
 import sys
-import keparray
-from keparray import rebin2D
 from math import modf, cos, sin, radians, exp
 from scipy import ndimage, interpolate
 from scipy.ndimage import interpolation
@@ -117,8 +116,8 @@ def smooth(x, window_len=10, window='hanning'):
         return x
 
     if not window in ['flat', 'hanning', 'hamming', 'bartlett', 'blackman']:
-        raise ValueError("Window is one of 'flat', 'hanning', 'hamming',
-                          'bartlett', 'blackman'")
+        raise ValueError("Window is one of 'flat', 'hanning', 'hamming', "
+                         "'bartlett', 'blackman'")
 
     s = np.r_[2 * x[0] - x[window_len:1:-1], x, 2 * x[-1] - x[-1:-window_len:-1]]
     if window == 'flat': #moving average
@@ -453,7 +452,7 @@ def PRFwithFocusAndBackground(params,*args):
     return PRFres
 
 def PRFwithFocus(params, *args):
-"""PRF model with variable focus"""
+    """PRF model with variable focus"""
 
     # arguments
     DATx = args[0]

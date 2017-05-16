@@ -5,3 +5,5 @@ def test_import():
     from .. import kepkey
     from .. import kepplot
     from .. import kepstat
+    from .. import kepfunc
+    from .. import keparray
