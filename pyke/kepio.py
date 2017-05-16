@@ -58,9 +58,9 @@ def splitfits(fitsfile, logfile, verbose):
         filename = str(component[0])
         hdu = int(component[1])
     else:
-        message = ('ERROR -- KEPIO.SPLITFITS: cannot determine HDU number '
+        errmsg = ('ERROR -- KEPIO.SPLITFITS: cannot determine HDU number '
                    'from name' + fitsfile)
-        status = kepmsg.err(logfile, message, verbose)
+        kepmsg.err(logfile, errmsg, verbose)
     return filename, hdu
 
 def closefits(fitsfile, logfile, verbose):
@@ -144,7 +144,7 @@ def readpdccol(filename, table, logfile, verbose):
                         'flux time series data from ' + filename)
             kepmsg.err(logfile, message, verbose)
             raise
-    return data, status
+    return data
 
 def readpdcerrcol(filename, table, logfile, verbose):
     """read FITS PDC error column"""
@@ -295,9 +295,10 @@ def symlink(infile,linkfile,clobber,logfile,verbose):
     """create symbolic link"""
 
     if os.path.exists(linkfile) and not clobber:
-        message = ('ERROR: KEPIO.SYMLINK -- file ' + linkfile + ' exists, use '
-                   'clobber')
-        status = kepmsg.err(logfile,message,verbose)
+        errmsg = ('ERROR: KEPIO.SYMLINK -- file ' + linkfile + ' exists, use '
+                  'clobber')
+        kepmsg.err(logfile, errmsg, verbose)
+        raise
     if clobber:
         try:
             os.remove(linkfile)
@@ -481,8 +482,7 @@ def timeranges(ranges,logfile,verbose):
 
     return tstart, tstop
 
-
-def cadence(instr,infile,logfile,verbose,status):
+def cadence(instr, infile, logfile, verbose):
     """manual calculation of median cadence within a time series"""
     try:
         intime = instr[1].data.field('barytime')
@@ -585,9 +585,10 @@ def filterNaN(instr, datacol, outfile, logfile, verbose):
         try:
             instr[1].data.field(datacol)
         except:
-            msg = ('ERROR -- KEPIO.FILTERNAN: cannot find column ' + datacol +
-                   ' in the infile')
-            status = kepmsg.err(logfile, msg, verbose)
+            msg = "ERROR -- KEPIO.FILTERNAN: cannot find column {}"
+                  "in the infile".format(datacol)
+            kepmsg.err(logfile, msg, verbose)
+            raise
         try:
             for i in range(len(instr[1].data.field(0))):
                 if (str(instr[1].data.field(timecol)[i]) != '-inf' and
@@ -602,6 +603,7 @@ def filterNaN(instr, datacol, outfile, logfile, verbose):
             errmsg = ('ERROR -- KEPIO.FILTERNAN: Failed to filter NaNs from '
                       + outfile)
             kepmsg.err(logfile, errmsg, verbose)
+            raise
     return instr
 
 def readTPF(infile, colname, logfile, verbose):
@@ -678,7 +680,8 @@ def readTPF(infile, colname, logfile, verbose):
         except:
             errmsg = ('ERROR -- KEPIO.READTPF: No QUARTER or CAMPAIGN ' +
                       'keyword in ' + infile + '[0]')
-            status = kepmsg.err(logfile, errmsg, verbose)
+            kepmsg.err(logfile, errmsg, verbose)
+            raise
     try:
         season = tpf[0].header['SEASON']
         season = str(season)
@@ -690,14 +693,16 @@ def readTPF(infile, colname, logfile, verbose):
     except:
         errmsg = ('ERROR -- KEPIO.READTPF: No RA_OBJ keyword in ' + infile +
                   '[0]')
-        status = kepmsg.err(logfile, errmsg, verbose)
+        kepmsg.err(logfile, errmsg, verbose)
+        raise
     try:
         dec = tpf[0].header['DEC_OBJ']
         dec = str(dec)
     except:
         errmsg = ('ERROR -- KEPIO.READTPF: No DEC_OBJ keyword in ' + infile +
                   '[0]')
-        status = kepmsg.err(logfile,errmsg,verbose)
+        kepmsg.err(logfile, errmsg, verbose)
+        raise
     try:
         kepmag = tpf[0].header['KEPMAG']
         kepmag = str(float(kepmag))
@@ -710,29 +715,30 @@ def readTPF(infile, colname, logfile, verbose):
     except:
         errmsg = ('ERROR -- KEPIO.READTPF: Cannot read TDIM5 keyword in ' +
                   infile + '[TARGETTABLES]')
-        status = kepmsg.err(logfile,errmsg,verbose)
+        kepmsg.err(logfile, errmsg, verbose)
+        raise
     try:
         crv5p1 = tpf['TARGETTABLES'].header['1CRV5P']
         column = crv5p1
     except:
         errmsg = ('ERROR -- KEPIO.READTPF: Cannot read 1CRV5P keyword in ' +
                   infile + '[TARGETTABLES]')
-        status = kepmsg.err(logfile, errmsg, verbose)
+        kepmsg.err(logfile, errmsg, verbose)
+        raise
     try:
         crv5p2 = tpf['TARGETTABLES'].header['2CRV5P']
         row = crv5p2
     except:
         errmsg = ('ERROR -- KEPIO.READTPF: Cannot read 2CRV5P keyword in ' +
                   infile + '[TARGETTABLES]')
-        status = kepmsg.err(logfile, errmsg, verbose)
-
+        kepmsg.err(logfile, errmsg, verbose)
+        raise
     # read and close TPF data pixel image
-
     try:
         pixels = tpf['TARGETTABLES'].data.field(colname)[:]
     except:
-        errmsg = ('\nERROR -- KEPIO.READTPF: Cannot read ' + colname +
-                  ' column in ' + infile + '[TARGETTABLES]')
+        errmsg = "\nERROR -- KEPIO.READTPF: Cannot read {0} "
+                 "column in {1} '[TARGETTABLES]'".format(colname, infile)
         kepmsg.err(logfile, errmsg, verbose)
         raise
 
@@ -781,17 +787,15 @@ def readMaskDefinition(infile,logfile,verbose):
 
     # read WCS keywords
     crpix1p, crpix2p, crval1p, crval2p, cdelt1p, cdelt2p = kepkey.getWCSp(
-            infile, inf['APERTURE'], logfile, verbose
-                                                                         )
+            infile, inf['APERTURE'], logfile, verbose)
     pixelcoord1 = np.zeros((naxis1, naxis2))
     pixelcoord2 = np.zeros((naxis1, naxis2))
     for j in range(naxis2):
         for i in range(naxis1):
             pixelcoord1[i, j] = kepkey.wcs(i, crpix1p, crval1p, cdelt1p)
             pixelcoord2[i, j] = kepkey.wcs(j, crpix2p, crval2p, cdelt2p)
-
     # close input file
-    closefits(inf,logfile,verbose)
+    closefits(inf, logfile, verbose)
     return img, pixelcoord1, pixelcoord2
 
 
