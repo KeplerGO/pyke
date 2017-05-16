@@ -737,8 +737,8 @@ def readTPF(infile, colname, logfile, verbose):
     try:
         pixels = tpf['TARGETTABLES'].data.field(colname)[:]
     except:
-        errmsg = "\nERROR -- KEPIO.READTPF: Cannot read {0} "
-                 "column in {1} '[TARGETTABLES]'".format(colname, infile)
+        errmsg = ("\nERROR -- KEPIO.READTPF: Cannot read {0} "
+                  "column in {1} '[TARGETTABLES]'".format(colname, infile))
         kepmsg.err(logfile, errmsg, verbose)
         raise
 
