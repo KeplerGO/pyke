@@ -9,11 +9,6 @@ from astropy.io import fits as pyfits
 from copy import copy
 
 
-__all__ = ['kepmask']
-
-
-""" global variables """
-
 infile = False; aperfile = False; maskfile = 'mask.txt'
 plotfile = 'kepmask.png'; pxdim = 0; pydim = 0; pimg = None; mask = []
 zscale = False; xmin = 0.0; xmax = 1000.0; ymin = 0.0; ymax = 1000.0
@@ -22,6 +17,10 @@ season = ''; quarter = -1; skygroup = ''; channel = ''; module = ''
 output = ''; column = ''; row = ''; colmap='jet'; aid = None; bid = None
 cid = None; did = None; eid = None; fid = None; pkepmag = None; pkepid = None
 pra = None; pdec = None
+
+
+__all__ = ['kepmask']
+
 
 def kepmask(infile, nframe, maskfile='mask.txt', plotfile='kepmask.png',
             imin=False, imax=False, iscale=False, cmap='jet', verbose=True,
@@ -41,6 +40,7 @@ def kepmask(infile, nframe, maskfile='mask.txt', plotfile='kepmask.png',
         containing a standard mask definition image in the second data
         extension.
     nframe : int
+        Cadence number.
     maskfile : str
         The name of an ASCII mask definition file. This is either the name of
         a file to be plotted, a file to be created, or a file to be edited.
@@ -57,9 +57,9 @@ def kepmask(infile, nframe, maskfile='mask.txt', plotfile='kepmask.png',
         brightest 10% of pixels in the image.
     iscale : str (optional)
         Type of intensity scaling for the image display.
-            * linear
-            * logarithmic
-            * squareroot
+        * linear
+        * logarithmic
+        * squareroot
     cmap : str (optional)
         Color intensity scheme for the image display.
     verbose : bool
