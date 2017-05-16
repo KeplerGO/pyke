@@ -585,8 +585,8 @@ def filterNaN(instr, datacol, outfile, logfile, verbose):
         try:
             instr[1].data.field(datacol)
         except:
-            msg = "ERROR -- KEPIO.FILTERNAN: cannot find column {}"
-                  "in the infile".format(datacol)
+            msg = ("ERROR -- KEPIO.FILTERNAN: cannot find column {}"
+                   "in the infile".format(datacol))
             kepmsg.err(logfile, msg, verbose)
             raise
         try:
