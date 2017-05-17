@@ -12,9 +12,10 @@ from scipy.optimize import fmin_powell
 from scipy.interpolate import RectBivariateSpline
 from scipy.ndimage import interpolation
 
-def kepprf(infile, plotfile, rownum, columns, rows, fluxes, border,
-           background, focus, prfdir, xtol, ftol, imscale, cmap,
-           apercol, plot, verbose, logfile):
+def kepprf(infile, plotfile, rownum, columns, rows, fluxes, prfdir,
+           background=False, border=1, focus=True, xtol=1e-4, ftol=1.,
+           plot=False, imscale='linear', cmap='YlOrBr', apercol='#ffffff',
+           verbose=True, logfile='kepprf.log'):
     """
     Fit a PSF model to a specific image within a Target Pixel File.
 
@@ -110,7 +111,7 @@ def kepprf(infile, plotfile, rownum, columns, rows, fluxes, border,
             'border=' + str(border) + ' background=' + str(background) +
             ' focus=' + str(focs) + ' prfdir=' + prfdir + ' xtol='+str(xtol) +
             ' ftol=' + str(xtol) + ' imscale=' + imscale + ' colmap=' + colmap +
-            'labcol=' + labcol + 'apercol=' + apercol + 'verbose='+chatter+
+            'apercol=' + apercol + 'verbose='+chatter+
             'logfile='+logfile)
 
     kepmsg.log(logfile, call + '\n', verbose)
@@ -384,7 +385,7 @@ def kepprf(infile, plotfile, rownum, columns, rows, fluxes, border,
     kepmsg.log(logfile, "Contamination fraction in aperture = {0}%"
             .format(Contamination * 100.0),True)
 
-    # constuct model PRF in detector coordinates
+    # construct model PRF in detector coordinates
     PRFfit = PRFall + 0.0
     if background and bterms == 1:
         PRFfit = PRFall + b
@@ -423,61 +424,60 @@ def kepprf(infile, plotfile, rownum, columns, rows, fluxes, border,
     plt.figure(figsize=[12, 10])
     plt.clf()
     plotimage(imgdat_pl, zminfl, zmaxfl, 1, row, column, xdim, ydim, 0.07,
-              0.53, 'observation', colmap, labcol)
+              0.53, 'observation', colmap)
     plotimage(imgprf_pl, zminpr, zmaxpr, 2, row, column, xdim, ydim, 0.44,
-              0.53, 'model', colmap, labcol)
+              0.53, 'model', colmap)
     kepplot.borders(maskimg, xdim, ydim, pixcoord1, pixcoord2, 1, apercol,
                     '--', 0.5)
     kepplot.borders(maskimg, xdim, ydim, pixcoord1, pixcoord2, 2, apercol,
                     '-', 3.0)
     plotimage(imgfit_pl, zminfl, zmaxfl, 3, row, column, xdim, ydim, 0.07,
-              0.08, 'fit', colmap, labcol)
+              0.08, 'fit', colmap)
     plotimage(imgres_pl, zminfl, zmaxfl, 4, row, column, xdim, ydim, 0.44,
-              0.08, 'residual', colmap, labcol)
+              0.08, 'residual', colmap)
 
-# plot data color bar
-
+    # plot data color bar
     barwin = plt.axes([0.84,0.08,0.06,0.9])
     if imscale == 'linear':
-        brange = np.arange(zminfl,zmaxfl,(zmaxfl-zminfl)/1000)
+        brange = np.arange(zminfl, zmaxfl, (zmaxfl - zminfl) / 1000)
     elif imscale == 'logarithmic':
-        brange = np.arange(10.0**zminfl,10.0**zmaxfl,(10.0**zmaxfl-10.0**zminfl)/1000)
+        brange = np.arange(10.0 ** zminfl, 10.0 ** zmaxfl,
+                           (10.0 ** zmaxfl - 10.0**zminfl) / 1000)
     elif imscale == 'squareroot':
-        brange = np.arange(zminfl**2,zmaxfl**2,(zmaxfl**2-zminfl**2)/1000)
+        brange = np.arange(zminfl**2, zmaxfl ** 2,
+                           (zmaxfl**2 - zminfl**2) / 1000)
     if imscale == 'linear':
-        barimg = np.resize(brange,(1000,1))
+        barimg = np.resize(brange, (1000, 1))
     elif imscale == 'logarithmic':
-        barimg = np.log10(np.resize(brange,(1000,1)))
+        barimg = np.log10(np.resize(brange, (1000, 1)))
     elif imscale == 'squareroot':
-        barimg = np.sqrt(np.resize(brange,(1000,1)))
+        barimg = np.sqrt(np.resize(brange, (1000, 1)))
     try:
-        nrm = len(str(int(np.nanmax(brange))))-1
+        nrm = len(str(int(np.nanmax(brange)))) - 1
     except:
         nrm = 0
-    brange = brange / 10**nrm
-    plt.imshow(barimg,aspect='auto',interpolation='nearest',origin='lower',
-                 vmin=np.nanmin(barimg),vmax=np.nanmax(barimg),
-                 extent=(0.0,1.0,brange[0],brange[-1]),cmap=colmap)
+    brange = brange / 10 ** nrm
+    plt.imshow(barimg, aspect='auto', interpolation='nearest', origin='lower',
+                 vmin=np.nanmin(barimg), vmax=np.nanmax(barimg),
+                 extent=(0.0, 1.0, brange[0], brange[-1]), cmap=colmap)
     barwin.yaxis.tick_right()
     barwin.yaxis.set_label_position('right')
     barwin.yaxis.set_major_locator(plt.MaxNLocator(7))
     plt.gca().yaxis.set_major_formatter(plt.ScalarFormatter(useOffset=False))
     plt.gca().set_autoscale_on(False)
-    plt.setp(plt.gca(),xticklabels=[],xticks=[])
-    plt.ylabel('Flux (10$^%d$ e$^-$ s$^{-1}$)' % nrm)
+    plt.setp(plt.gca(), xticklabels=[], xticks=[])
+    plt.ylabel('Flux (10$^{0}$ e$^-$ s$^{-1}$)'.format(nrm))
     plt.setp(barwin.get_yticklabels(), 'rotation', 90)
     barwin.yaxis.set_major_formatter(ticker.FormatStrFormatter('%.1f'))
 
-# render plot
-
-    if status == 0 and len(plotfile) > 0 and plotfile.lower() != 'none':
+    # render plot
+    if len(plotfile) > 0 and plotfile.lower() != 'none':
         plt.savefig(plotfile)
-    if status == 0 and plot:
+    if plot:
         plt.ion()
         plt.show()
 
-# stop time
-
+    # stop time
     kepmsg.clock('\nKEPPRF ended at',logfile,verbose)
 
     return
@@ -485,7 +485,7 @@ def kepprf(infile, plotfile, rownum, columns, rows, fluxes, border,
 # -----------------------------------------------------------
 # plot channel image
 
-def plotimage(imgflux_pl,zminfl,zmaxfl,plmode,row,column,xdim,ydim,winx,winy,tlabel,colmap,labcol):
+def plotimage(imgflux_pl,zminfl,zmaxfl,plmode,row,column,xdim,ydim,winx,winy,tlabel,colmap):
 
 # pixel limits of the subimage
 
@@ -522,36 +522,45 @@ def plotimage(imgflux_pl,zminfl,zmaxfl,plmode,row,column,xdim,ydim,winx,winy,tla
     if plmode == 1 or plmode == 3:
         plt.ylabel('Pixel Row Number', {'color' : 'k'})
     plt.text(0.05, 0.93,tlabel,horizontalalignment='left',verticalalignment='center',
-               fontsize=36,fontweight=500,color=labcol,transform=ax.transAxes)
+               fontsize=36,fontweight=500,transform=ax.transAxes)
 
     return
 
 def kepprf_main():
     import argparse
 
-    parser = argparse.ArgumentParser(description='Fitting PRF model to Target Pixel image')
-
-    parser.add_argument('infile', help='Name of input target pixel file', type=str)
-    parser.add_argument('plotfile', help='Name of output PNG plot file', type=str)
-    parser.add_argument('--rownum', '-r', default=2200, help='Row number of image stored in infile', dest='rownum', type=int)
-    parser.add_argument('--columns', help='Column number of each source to be fit', type=str)
-    parser.add_argument('--rows', help='Row number of each source to be fit', type=str)
-    parser.add_argument('--fluxes', help='Relative flux of each source to be fit', type=str)
-    parser.add_argument('--border', '-b', help='Order of background polynmial fit', default=1, dest='border', type=int)
-    parser.add_argument('--background', action='store_true', help='Fit background?', default=False)
+    parser = argparse.ArgumentParser(description=("Fitting PRF model to "
+                                                  "Target Pixel image"))
+    parser.add_argument('infile', help='Name of input target pixel file',
+                        type=str)
+    parser.add_argument('plotfile', help='Name of output PNG plot file',
+                        type=str)
+    parser.add_argument('--rownum', '-r', help='Row number of image stored in infile',
+                        type=int)
+    parser.add_argument('--columns',
+                        help=("Initial guesses for the center of each source "
+                              "on the x-axis"), type=list)
+    parser.add_argument('--rows',
+                        help=("Initial guesses for the center of each source "
+                              "on the x-axis"), type=list)
+    parser.add_argument('--fluxes', help='Relative flux of each source to be fit',
+                        type=str)
+    parser.add_argument('--background', action='store_true',
+                        help='Fit background?')
+    parser.add_argument('--border', help='Order of background polynmial fit',
+                    default=1, type=int)
     parser.add_argument('--focus', action='store_true', help='Fit focus changes?', default=False)
     parser.add_argument('--prfdir', help='Folder containing Point Response Function FITS files', type=str)
     parser.add_argument('--xtol', '-x', default=1.0e-4, help='Fit parameter tolerance', dest='xtol', type=float)
     parser.add_argument('--ftol', '-f', default=1.0, help='Fit minimization tolerance', dest='ftol', type=float)
-    parser.add_argument('--imscale', '-i', help='Type of image intensity scale', default='linear', dest='imscale', type=str,choices=['linear','logarithmic','squareroot'])
-    parser.add_argument('--colmap', '-c', help='Image colormap', default='YlOrBr', dest='cmap', type=str,choices=['Accent','Blues','BrBG','BuGn','BuPu','Dark2','GnBu','Greens','Greys','OrRd','Oranges','PRGn','Paired','Pastel1','Pastel2','PiYG','PuBu','PuBuGn','PuOr','PuRd','Purples','RdBu','RdGy','RdPu','RdYlBu','RdYlGn','Reds','Set1','Set2','Set3','Spectral','YlGn','YlGnBu','YlOrBr','YlOrRd','afmhot','autumn','binary','bone','brg','bwr','cool','copper','flag','gist_earth','gist_gray','gist_heat','gist_ncar','gist_rainbow','gist_yarg','gnuplot','gnuplot2','gray','hot','hsv','jet','ocean','pink','prism','rainbow','seismic','spectral','spring','summer','terrain','winter','browse'])
-    parser.add_argument('--labcol', help='Label color', default='#ffffff', type=str)
-    parser.add_argument('--apercol', help='Aperture color', default='#ffffff', type=str)
     parser.add_argument('--plot', action='store_true', help='Plot fit results?', default=False)
+    parser.add_argument('--imscale', '-i', help='Type of image intensity scale', default='linear', type=str, choices=['linear','logarithmic','squareroot'])
+    parser.add_argument('--colmap', '-c', help='Image colormap', default='YlOrBr', dest='cmap', type=str)
+    parser.add_argument('--apercol', help='Aperture color', default='#ffffff', type=str)
     parser.add_argument('--verbose', action='store_true', help='Write to a log file?')
     parser.add_argument('--logfile', '-l', default='kepprfphot.log', help='Name of ascii log file', dest='logfile', type=str)
     parser.add_argument('--status', '-e', help='Exit status (0=good)', default=0, dest='status', type=int)
     args = parser.parse_args()
     kepprf(args.infile,args.plotfile,args.rownum,args.columns,args.rows,args.fluxes,args.border,
            args.background,args.focus,args.prfdir,args.xtol,args.ftol,args.imscale,args.cmap,
-           args.labcol,args.apercol,args.plot,args.verbose,args.logfile,args.status,cmdLine)
+           args.apercol,args.plot,args.verbose,args.logfile,args.status,cmdLine)
