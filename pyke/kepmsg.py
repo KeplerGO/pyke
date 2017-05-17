@@ -35,15 +35,3 @@ def clock(text, filename, verbose):
     if (verbose):
         message = text + ': ' + time.asctime(time.localtime())
         log(filename, message,verbose)
-
-def test(filename):
-    """test the logfile name is good"""
-    newlog = string.join(filename.split(), "")
-    if len(newlog) == 0:
-        newlog = 'kepler.log'
-    if newlog != filename:
-        filename = newlog
-        message = 'WARNING: logfile renamed to ' + filename + '\n\n'
-        log(False, message, True)
-
-    return filename

@@ -41,7 +41,7 @@ def kepprf(infile, plotfile, rownum, columns, rows, fluxes, prfdir,
         plot. If the chosen observation has a non-zero quality flag set or the
         pixel set contains only NULLs then the task will halt with an error
         message.
-    columns : float
+    columns : list
         A starting guess for the CCD column position(s) of the source(s) that
         are to be fit. The model is unlikely to converge if the guess is too
         far away from the correct location. A rule of thumb is to provide a
@@ -49,7 +49,7 @@ def kepprf(infile, plotfile, rownum, columns, rows, fluxes, prfdir,
         is being modeled then the column positions of each are separated by a
         comma. The same number of sources in the columns, rows and fluxes
         field is a requirement of this task.
-    rows : float
+    rows : list
         A starting guess for the CCD row position(s) of the source(s) that are
         to be fit. The model is unlikely to converge if the guess is too far
         away from the correct location. A rule of thumb is to provide a guess
@@ -57,7 +57,7 @@ def kepprf(infile, plotfile, rownum, columns, rows, fluxes, prfdir,
         being modeled then the row positions of each are separated by a comma.
         The same number of sources in the columns, rows and fluxes field is a
         requirement of this task.
-    fluxes : float
+    fluxes : list
         A starting guess for the flux(es) of the source(s) that are to be fit.
         Fit convergence is not particularly reliant on the accuracy of these
         guesses, but the fit will converge faster the more accurate the guess.
@@ -107,18 +107,15 @@ def kepprf(infile, plotfile, rownum, columns, rows, fluxes, prfdir,
     kepmsg.log(logfile, hashline, verbose)
     call = ('KEPPRF -- '
             'infile=' + infile + ' plotfile=' + plotfile +
-            ' rownum=' + str(rownum) + ' columns=' + columns +
-            ' rows=' + rows + ' fluxes=' + fluxes + ' prfdir=' + prfdir +
+            ' rownum=' + str(rownum) + ' columns=' + str(columns) +
+            ' rows=' + str(rows) + ' fluxes=' + str(fluxes) + ' prfdir=' + prfdir +
             ' background=' + str(background) + 'border=' + str(border) +
-            ' focus=' + str(focs) + + ' xtol='+str(xtol) +
+            ' focus=' + str(focus) + ' xtol='+str(xtol) +
             ' ftol=' + str(xtol) + 'plot=' + str(plot) + ' imscale=' +
             imscale + ' cmap=' + cmap + ' apercol=' + apercol + 'verbose=' +
             str(verbose) + 'logfile=' + logfile)
 
     kepmsg.log(logfile, call + '\n', verbose)
-
-    # test log file
-    logfile = kepmsg.test(logfile)
 
     # start time
     kepmsg.clock('KEPPRF started at',logfile,verbose)
@@ -172,7 +169,7 @@ def kepprf(infile, plotfile, rownum, columns, rows, fluxes, prfdir,
 
     # read mask defintion data from TPF file
 
-    maskimg, pixcoord1, pixcoord2, status = kepio.readMaskDefinition(infile,logfile,verbose)
+    maskimg, pixcoord1, pixcoord2 = kepio.readMaskDefinition(infile, logfile, verbose)
     npix = np.size(np.nonzero(maskimg)[0])
 
     # print target data
@@ -545,7 +542,7 @@ def kepprf_main():
                               "on the x-axis"), type=list)
     parser.add_argument('--fluxes',
                         help='Relative flux of each source to be fit',
-                        type=str)
+                        type=list)
     parser.add_argument('--background', action='store_true',
                         help='Fit background?')
     parser.add_argument('--border', help='Order of background polynmial fit',

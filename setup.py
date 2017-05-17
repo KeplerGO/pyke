@@ -11,7 +11,8 @@ if "publish" in sys.argv[-1]:
 exec(open('pyke/version.py').read())
 
 entry_points = {'console_scripts': [
-        'kepmask = pyke.kepmask:kepmask_main'
+        'kepmask = pyke.kepmask:kepmask_main',
+        'kepprf  = pyke.kepprf:kepprf_main'
 ]}
 
 setup(name='pyke',

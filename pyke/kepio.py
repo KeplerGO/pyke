@@ -1,7 +1,6 @@
 """
 This module contains utility functions for i/o operations.
 """
-
 from . import kepmsg
 from . import kepkey
 import numpy as np
@@ -756,11 +755,12 @@ def readTPF(infile, colname, logfile, verbose):
             ra, dec, column, row, kepmag, xdim, ydim, pixels)
 
 
-def readMaskDefinition(infile,logfile,verbose):
+def readMaskDefinition(infile, logfile, verbose):
     """read target pixel mask data"""
 
     # open input file
-    inf = openfits(infile, 'readonly', logfile, verbose)
+    inf = pyfits.open(infile, 'readonly')
+    print(inf)
 
     # read bitmap image
     try:
@@ -785,9 +785,11 @@ def readMaskDefinition(infile,logfile,verbose):
         kepwarn.err(txt, logfile)
         raise
 
+    print(img, naxis1, naxis2)
     # read WCS keywords
     crpix1p, crpix2p, crval1p, crval2p, cdelt1p, cdelt2p = kepkey.getWCSp(
             infile, inf['APERTURE'], logfile, verbose)
+
     pixelcoord1 = np.zeros((naxis1, naxis2))
     pixelcoord2 = np.zeros((naxis1, naxis2))
     for j in range(naxis2):
@@ -802,7 +804,7 @@ def readMaskDefinition(infile,logfile,verbose):
 def readPRFimage(infile, hdu, logfile, verbose):
     """read pixel response file"""
 
-    prf = openfits(infile, 'readonly', logfile, verbose)
+    prf = pyfits.open(infile, 'readonly')
 
     # read bitmap image
     try:
