@@ -16,7 +16,7 @@ API Documentation
 .. toctree::
     :maxdepth: 2
 
-    kepmask
+    api
 
 
 Indices and tables

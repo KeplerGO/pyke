@@ -17,7 +17,7 @@ from scipy.ndimage import interpolation
 __all__ = ['kepprf']
 
 
-def kepprf(infile, plotfile, rownum, columns, rows, fluxes, prfdir,
+def kepprf(infile, plotfile, cadencenum, columns, rows, fluxes, prfdir,
            background=False, border=1, focus=False, xtol=1e-4, ftol=1.,
            plot=False, imscale='linear', cmap='YlOrBr', apercol='#ffffff',
            verbose=True, logfile='kepprf.log'):
@@ -40,8 +40,8 @@ def kepprf(infile, plotfile, rownum, columns, rows, fluxes, prfdir,
         which case the plot will be generated but the plot will not be saved
         to a file. Any existing file with this name will be automatically
         overwritten.
-    rownum : int
-        The row number in the input file data table containing the pixels to
+    cadencenum : int
+        The cadence number in the input file data containing the pixels to
         plot. If the chosen observation has a non-zero quality flag set or the
         pixel set contains only NULLs then the task will halt with an error
         message.
@@ -68,18 +68,18 @@ def kepprf(infile, plotfile, rownum, columns, rows, fluxes, prfdir,
         If more than one source is being modeled then the row positions of
         each are separated by a comma. The same number of sources in the
         columns, rows and fluxes field is a requirement of this task.
-    border : int (optional)
+    border : int
         If a background is included in the fit then it is modeled as a
         two-dimensional polynomial. This parameter is the polynomial order. A
         zero-order polynomial is generally recommended.
-    background : boolean (optional)
+    background : boolean
         Whether to include a background component in the model. If `True` then
         the background will be represented by a two-dimensional polynomial of
         order `border`. This functionality is somewhat experimental, with one
         eye upon potential background gradients across large masks or on those
         detectors more prone to pattern noise. Generally it is recommended to
         set background as `False`.
-    focus : boolean (optional)
+    focus : boolean
         Whether to incude pixel scale and focus rotation with the fit
         parameters of the model. This is also an experimental function. This
         approach does not attempt to deal with inter- or intra-pixel
@@ -97,7 +97,8 @@ def kepprf(infile, plotfile, rownum, columns, rows, fluxes, prfdir,
             * linear
             * logarithmic
             * squareroot
-    cmap : colormap
+    cmap : str
+        matplotlib's color map
     plot : boolean
         Plot fit results to the screen?
     verbose : boolean
@@ -105,10 +106,10 @@ def kepprf(infile, plotfile, rownum, columns, rows, fluxes, prfdir,
     logfile : string
         Name of the logfile containing error and warning messages.
 
-    Example
-    -------
+    Examples
+    --------
 
-    kepprf kplr008256049-2010174085026_lpd-targ.fits prf.png --rownum 1000
+    kepprf kplr008256049-2010174085026_lpd-targ.fits prf.png --cadencenum 1000
     --columns 830 831 --rows 242 241 --fluxes 1.0 0.1
     --prfdir ../kplr2011265_prf/ --plot
 
@@ -145,7 +146,7 @@ def kepprf(infile, plotfile, rownum, columns, rows, fluxes, prfdir,
     kepmsg.log(logfile, hashline, verbose)
     call = ('KEPPRF -- '
             'infile=' + infile + ' plotfile=' + plotfile +
-            ' rownum=' + str(rownum) + ' columns=' + str(columns) +
+            ' cadencenum=' + str(cadencenum) + ' columns=' + str(columns) +
             ' rows=' + str(rows) + ' fluxes=' + str(fluxes) + ' prfdir=' + prfdir +
             ' background=' + str(background) + 'border=' + str(border) +
             ' focus=' + str(focus) + ' xtol=' + str(xtol) +
@@ -214,7 +215,7 @@ def kepprf(infile, plotfile, rownum, columns, rows, fluxes, prfdir,
     if verbose:
         print('')
         print('      KepID: {}'.format(kepid))
-        print('        BJD: {}'.format(barytime[rownum-1] + 2454833.0))
+        print('        BJD: {}'.format(barytime[cadencenum-1] + 2454833.0))
         print(' RA (J2000): {}'.format(ra))
         print('Dec (J2000): {}'.format(dec))
         print('     KepMag: {}'.format(kepmag))
@@ -226,16 +227,16 @@ def kepprf(infile, plotfile, rownum, columns, rows, fluxes, prfdir,
         print('')
 
     # is this a good row with finite timestamp and pixels?
-    if (not np.isfinite(barytime[rownum-1])
-        or np.nansum(fluxpixels[rownum-1,:]) == np.nan):
+    if (not np.isfinite(barytime[cadencenum-1])
+        or np.nansum(fluxpixels[cadencenum-1,:]) == np.nan):
         errmsg = ("ERROR -- KEPFIELD: Row {0} is a bad quality timestamp"
-                  .format(rownum))
+                  .format(cadencenum))
         kepmsg.err(logfile, errmsg, verbose)
         raise
 
     # construct input pixel image
-    flux = fluxpixels[rownum-1,:]
-    ferr = errpixels[rownum-1,:]
+    flux = fluxpixels[cadencenum-1,:]
+    ferr = errpixels[cadencenum-1,:]
     DATx = np.arange(column,column + xdim)
     DATy = np.arange(row, row + ydim)
 
@@ -569,8 +570,8 @@ def kepprf_main():
                         type=str)
     parser.add_argument('plotfile', help='Name of output PNG plot file',
                         type=str)
-    parser.add_argument('--rownum',
-                        help='Row number of image stored in infile',
+    parser.add_argument('--cadencenum',
+                        help='Cadence number of image stored in infile',
                         type=int)
     parser.add_argument('--columns',
                         help=("Initial guesses for the center of each source "
@@ -613,7 +614,7 @@ def kepprf_main():
                         help='Name of ascii log file', type=str)
     args = parser.parse_args()
 
-    kepprf(args.infile, args.plotfile, args.rownum, args.columns, args.rows,
+    kepprf(args.infile, args.plotfile, args.cadencenum, args.columns, args.rows,
            args.fluxes, args.prfdir, args.background, args.border, args.focus,
            args.xtol, args.ftol, args.plot, args.imscale, args.cmap,
            args.apercol, args.verbose, args.logfile)

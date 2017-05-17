@@ -1,28 +1,20 @@
 """
-Name: keptransit.py
 Written by: Tom Barclay
-Date released: ??
 
-Changelog:
-1.0 released
-
-__svnid__ = "$Id$"
-__url__ = "$URL$"
-
-This code is intended to fit a transit model to a Kepler light curve. We assume that the data has been cleaned
-in some way to remove instrumental signals and stellar variability.
+This code is intended to fit a transit model to a Kepler light curve.
+We assume that the data has been cleaned in some way to remove instrumental
+signals and stellar variability.
 
 Reference:
 The transit model a Mandel and Agol model
 <http://adsabs.harvard.edu/abs/2002ApJ...580L.171M>.
 
-This code calls a a module called lightcurve
+This code calls a module called lightcurve
 This code was created by Ian Crossfield <http://www.astro.ucla.edu/~ianc/>
 and Susanne Aigraine.
 
 The lighcurve module has been modified by TSB in order to sample the model
 on a finer grid than the original data.
-
 """
 
 import lightcurve as tmod
@@ -33,9 +25,8 @@ from scipy.optimize import leastsq, fmin
 import sys
 import kepio, kepmsg, kepkey, kepfit, kepstat
 
-np.seterr(all="ignore")
 
-def cutBadData(date,flux,err,removeflaggeddata,qualflag):
+def cutBadData(date, flux, err, removeflaggeddata, qualflag):
     """
     this function finds cadences with bad data in and removes them
     returning only cadences which contain good data
@@ -43,8 +34,8 @@ def cutBadData(date,flux,err,removeflaggeddata,qualflag):
     mask = np.logical_and(np.logical_and(np.isfinite(date),
                           np.isfinite(flux)), flux != 0.0)
     if removeflaggeddata:
-        quality = np.where(qualflag == 0,True,False)
-        finmask = np.logical_and(mask,quality)
+        quality = np.where(qualflag == 0, True, False)
+        finmask = np.logical_and(mask, quality)
     else:
         finmask = mask
 
@@ -53,56 +44,14 @@ def cutBadData(date,flux,err,removeflaggeddata,qualflag):
     err2 = err[finmask]
     bad_data = finmask
 
-    return date2,flux2,err2,bad_data
+    return date2, flux2, err2, bad_data
 
-def get_chi2(obs,model,error):
-    chi2 = (obs - model)**2 / error**2
-
-    return chi2
+def get_chi2(obs, model, error):
+    return (obs - model)**2 / error**2
 
 def fit_tmod(params, LDparams, time, flux, error, fixed_dict, guess_params):
     period_d, rprs, T0, Ecc, ars, inc, omega, sec, fluxoffset = params
 
-    #fix things and stop params going crazy
-    #here!
-    if fixed_dict['period'] == True:
-        period_d = guess_params[0]
-    if fixed_dict['rprs'] == True:
-        rprs = guess_params[1]
-    if fixed_dict['T0'] == True:
-        T0 = guess_params[2]
-    if fixed_dict['Ecc'] == True:
-        Ecc = guess_params[3]
-    if fixed_dict['ars'] == True:
-        ars = guess_params[4]
-    if fixed_dict['inc'] == True:
-        inc = guess_params[5]
-    if fixed_dict['omega'] == True:
-        inc = guess_params[6]
-    if fixed_dict['sec'] == True:
-        inc = guess_params[7]
-
-    if fixed_dict['fluxoffset'] == False:
-        flux = flux + fluxoffset
-
-    if inc > np.pi / 2.:
-        return 10**(12.)
-
-    if omega > np.pi * 2.:
-        return 10**(12.)
-
-    mod_output = tmod.lightcurve(time, period_d, rprs, T0, Ecc, ars, inc,
-                                 omega, LDparams, sec)
-    model = mod_output
-    chi2 = get_chi2(flux, model, error)
-
-    return chi2
-
-def fit_tmod2(params,LDparams,time,flux,error,fixed_dict,guess_params):
-    period_d,rprs,T0, Ecc,ars, inc, omega, sec, fluxoffset = params
-
-    #fix things and stop params going crazy
-    #here!
     if fixed_dict['period'] == True:
         period_d = guess_params[0]
     if fixed_dict['rprs'] == True:
@@ -119,22 +68,46 @@ def fit_tmod2(params,LDparams,time,flux,error,fixed_dict,guess_params):
         omega = guess_params[6]
     if fixed_dict['sec'] == True:
         sec = guess_params[7]
-
     if fixed_dict['fluxoffset'] == False:
         flux = flux + fluxoffset
-
     if inc > np.pi / 2.:
         return 10**(12.)
-
     if omega > np.pi * 2.:
         return 10**(12.)
 
-    mod_output = tmod.lightcurve(time,period_d,rprs,T0,Ecc,ars, inc, omega, LDparams, sec)
-    model = mod_output
+    mod_output = tmod.lightcurve(time, period_d, rprs, T0, Ecc, ars, inc,
+                                 omega, LDparams, sec)
+    return get_chi2(flux, mod_output, error)
 
-    chi2 = get_chi2(flux,model,error)
+def fit_tmod2(params,LDparams,time,flux,error,fixed_dict,guess_params):
+    period_d, rprs, T0, Ecc, ars, inc, omega, sec, fluxoffset = params
 
-    return np.sum(chi2)
+    if fixed_dict['period'] == True:
+        period_d = guess_params[0]
+    if fixed_dict['rprs'] == True:
+        rprs = guess_params[1]
+    if fixed_dict['T0'] == True:
+        T0 = guess_params[2]
+    if fixed_dict['Ecc'] == True:
+        Ecc = guess_params[3]
+    if fixed_dict['ars'] == True:
+        ars = guess_params[4]
+    if fixed_dict['inc'] == True:
+        inc = guess_params[5]
+    if fixed_dict['omega'] == True:
+        omega = guess_params[6]
+    if fixed_dict['sec'] == True:
+        sec = guess_params[7]
+    if fixed_dict['fluxoffset'] == False:
+        flux = flux + fluxoffset
+    if inc > np.pi / 2.:
+        return 10**(12.)
+    if omega > np.pi * 2.:
+        return 10**(12.)
+
+    mod_output = tmod.lightcurve(time, period_d, rprs, T0, Ecc, ars, inc,
+                                 omega, LDparams, sec)
+    return np.sum(get_chi2(flux, mod_output, error))
 
 def fix_params(fixperiod,fixrprs,fixT0,
     fixEcc,fixars,fixinc,fixomega,fixsec, fixfluxoffset):
@@ -412,6 +385,10 @@ def keptransit(inputfile, outputfile, datacol, errorcol, periodini_d,
             fit_output = fmin(fit_tmod2,guess_params,
                               args=(LDparams,intime,indata,inerr,fixed_dict,guess_params),
                               full_output=True,ftol=ftol,xtol=ftol)
+        elif fitter == 'basinhopping':
+            fit_output = basinhopping(git_tmod2, guess_params,
+                        args=(LDparams,intime,indata,inerr,fixed_dict,guess_params),
+                        full_output=True,ftol=ftol,xtol=ftol)
 
     if status == 0:
         if fixed_dict['period'] == True:
@@ -489,7 +466,7 @@ def keptransit(inputfile, outputfile, datacol, errorcol, periodini_d,
     if plot and status == 0:
         do_plot(intime,modelfit,indata,inerr,newperiod,newT0,cmdLine)
 
-if '--shell' in sys.argv:
+def keptransit_main():
     import argparse
     parser = argparse.ArgumentParser(description='Fit a exoplanet transit model to the light curve')
     parser.add_argument('--shell', action='store_true', help='Are we running from the shell?')
@@ -536,7 +513,6 @@ if '--shell' in sys.argv:
     parser.add_argument('--logfile', '-l', help='Name of ascii log file', default='keptransit.log', dest='logfile', type=str)
     parser.add_argument('--status', '-e', help='Exit status (0=good)', default=0, dest='status', type=int)
 
-    cmdLine=True
     args = parser.parse_args()
     keptransit(args.inputfile, args.outputfile, args.datacol, args.errorcol,
                args.periodini_d, args.rprsini, args.T0ini,
@@ -547,9 +523,3 @@ if '--shell' in sys.argv:
                args.fitter, args.norm,
                args.clobber, args.plot, args.verbose, args.logfile, args.status,
                cmdLine)
-else:
-    from pyraf import iraf
-
-    parfile = iraf.osfn("kepler$keptransit.par")
-    t = iraf.IrafTaskFactory(taskname="keptransit", value=parfile, function=keptransit)
-
