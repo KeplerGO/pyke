@@ -760,7 +760,6 @@ def readMaskDefinition(infile, logfile, verbose):
 
     # open input file
     inf = pyfits.open(infile, 'readonly')
-    print(inf)
 
     # read bitmap image
     try:
@@ -785,7 +784,6 @@ def readMaskDefinition(infile, logfile, verbose):
         kepwarn.err(txt, logfile)
         raise
 
-    print(img, naxis1, naxis2)
     # read WCS keywords
     crpix1p, crpix2p, crval1p, crval2p, cdelt1p, cdelt2p = kepkey.getWCSp(
             infile, inf['APERTURE'], logfile, verbose)

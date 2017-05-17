@@ -13,6 +13,10 @@ from scipy.optimize import fmin_powell
 from scipy.interpolate import RectBivariateSpline
 from scipy.ndimage import interpolation
 
+
+__all__ = ['kepprf']
+
+
 def kepprf(infile, plotfile, rownum, columns, rows, fluxes, prfdir,
            background=False, border=1, focus=False, xtol=1e-4, ftol=1.,
            plot=False, imscale='linear', cmap='YlOrBr', apercol='#ffffff',
@@ -100,6 +104,40 @@ def kepprf(infile, plotfile, rownum, columns, rows, fluxes, prfdir,
         Print informative messages and warnings to the shell and logfile?
     logfile : string
         Name of the logfile containing error and warning messages.
+
+    Example
+    -------
+
+    kepprf kplr008256049-2010174085026_lpd-targ.fits prf.png --rownum 1000
+    --columns 830 831 --rows 242 241 --fluxes 1.0 0.1
+    --prfdir ../kplr2011265_prf/ --plot
+
+          KepID: 8256049
+            BJD: 2455296.903574196
+     RA (J2000): 298.67861
+    Dec (J2000): 44.1755
+         KepMag: 15.654
+       SkyGroup: 53
+         Season: 3
+        Channel: 81
+         Module: 24
+         Output: 1
+
+    Convergence time = 0.15390515327453613s
+
+    Flux = 3978.040625752744 e-/s X = 829.8259431097927 pix Y = 242.3810334478628 pix
+    Flux = 4734.069273790539 e-/s X = 830.990805551025 pix Y = 240.97340366638306 pix
+
+                    Total flux in mask = 10747.293440638587 e-/s
+                   Target flux in mask = 3793.041929468528 e-/s
+                Total flux in aperture = 6365.551487630484 e-/s
+               Target flux in aperture = 3110.924803570053 e-/s
+      Target flux fraction in aperture = 78.2024392468689%
+    Contamination fraction in aperture = 51.12874650978488%
+
+           Residual flux = -0.5748827605745994 e-/s
+    Pearson's chi^2 test = 296.12077907844986 for 13 dof
+              Chi^2 test = 19803.55879917441 for 13 dof
     """
     # log the call
 
@@ -110,10 +148,10 @@ def kepprf(infile, plotfile, rownum, columns, rows, fluxes, prfdir,
             ' rownum=' + str(rownum) + ' columns=' + str(columns) +
             ' rows=' + str(rows) + ' fluxes=' + str(fluxes) + ' prfdir=' + prfdir +
             ' background=' + str(background) + 'border=' + str(border) +
-            ' focus=' + str(focus) + ' xtol='+str(xtol) +
-            ' ftol=' + str(xtol) + 'plot=' + str(plot) + ' imscale=' +
-            imscale + ' cmap=' + cmap + ' apercol=' + apercol + 'verbose=' +
-            str(verbose) + 'logfile=' + logfile)
+            ' focus=' + str(focus) + ' xtol=' + str(xtol) +
+            ' ftol=' + str(xtol) + ' plot=' + str(plot) + ' imscale=' +
+            imscale + ' cmap=' + cmap + ' apercol=' + apercol + ' verbose=' +
+            str(verbose) + ' logfile=' + logfile)
 
     kepmsg.log(logfile, call + '\n', verbose)
 
@@ -198,8 +236,8 @@ def kepprf(infile, plotfile, rownum, columns, rows, fluxes, prfdir,
     # construct input pixel image
     flux = fluxpixels[rownum-1,:]
     ferr = errpixels[rownum-1,:]
-    DATx = np.arange(column,column+xdim)
-    DATy = np.arange(row,row+ydim)
+    DATx = np.arange(column,column + xdim)
+    DATy = np.arange(row, row + ydim)
 
     # image scale and intensity limits of pixel data
     n = 0
@@ -207,8 +245,8 @@ def kepprf(infile, plotfile, rownum, columns, rows, fluxes, prfdir,
     ERRimg = np.empty((ydim, xdim))
     for i in range(ydim):
         for j in range(xdim):
-            DATimg[i,j] = flux[n]
-            ERRimg[i,j] = ferr[n]
+            DATimg[i, j] = flux[n]
+            ERRimg[i, j] = ferr[n]
             n += 1
 
     # determine suitable PRF calibration file
@@ -244,7 +282,7 @@ def kepprf(infile, plotfile, rownum, columns, rows, fluxes, prfdir,
     # interpolate the calibrated PRF shape to the target position
     prf = np.zeros(np.shape(prfn[0]), dtype='float32')
     prfWeight = np.zeros(5, dtype='float32')
-    for i in xrange(5):
+    for i in range(5):
         prfWeight[i] = math.sqrt((column - crval1p[i])**2 + (row - crval2p[i])**2)
         if prfWeight[i] == 0.0:
             prfWeight[i] = 1.0e-6
@@ -305,51 +343,52 @@ def kepprf(infile, plotfile, rownum, columns, rows, fluxes, prfdir,
         PRFy0 = 0
         PRFx0 = 0
         # rotate the PRF model around its center
-        if focus:
-            angle = ans[-1]
-            prf = interpolation.rotate(prf, -angle, reshape=False,
-                                       mode='nearest')
-        # iterate through the sources in the best fit PSF model
-        for i in range(nsrc):
-            flux.append(ans[i])
-            OBJx.append(ans[nsrc + i])
-            OBJy.append(ans[nsrc * 2 + i])
-            # calculate best-fit model
-            y = (OBJy[i] - np.mean(DATy)) / cdelt1p[0]
-            x = (OBJx[i] - np.mean(DATx)) / cdelt2p[0]
-            prfTmp = interpolation.shift(prf, [y, x], order=3, mode='constant')
-            prfTmp = prfTmp[PRFy0:PRFy0 + prfDimY, PRFx0:PRFx0 + prfDimX]
-            PRFmod = PRFmod + prfTmp * flux[i]
-            wx = 1.0
-            wy = 1.0
-            angle = 0
-            b = 0.0
-            # write out best fit parameters
-            if verbose:
-                txt = ("Flux = {0} e-/s X = {1} pix Y = {2} pix"
-                       .format(flux[i], OBJx[i], OBJy[i]))
-                kepmsg.log(logfile, txt, True)
-        if verbose and background:
-            bterms = border + 1
-            if bterms == 1:
-                b = ans[nsrc * 3]
-            else:
-                bcoeff = np.array([ans[nsrc*3:nsrc*3+bterms],
-                                   ans[nsrc*3+bterms:nsrc*3+bterms*2]])
-                bkg = kepfunc.polyval2d(xx, yy, bcoeff)
-                b = np.nanmean(bkg.reshape(bkg.size))
-            txt = "\n   Mean background = {0} e-/s".format(b)
+    if focus:
+        angle = ans[-1]
+        prf = interpolation.rotate(prf, -angle, reshape=False,
+                                   mode='nearest')
+    # iterate through the sources in the best fit PSF model
+    for i in range(nsrc):
+        flux.append(ans[i])
+        OBJx.append(ans[nsrc + i])
+        OBJy.append(ans[nsrc * 2 + i])
+        # calculate best-fit model
+        y = (OBJy[i] - np.mean(DATy)) / cdelt1p[0]
+        x = (OBJx[i] - np.mean(DATx)) / cdelt2p[0]
+        prfTmp = interpolation.shift(prf, [y, x], order=3, mode='constant')
+        prfTmp = prfTmp[PRFy0:PRFy0 + prfDimY, PRFx0:PRFx0 + prfDimX]
+        PRFmod = PRFmod + prfTmp * flux[i]
+        wx = 1.0
+        wy = 1.0
+        angle = 0
+        b = 0.0
+        # write out best fit parameters
+        if verbose:
+            txt = ("Flux = {0} e-/s X = {1} pix Y = {2} pix"
+                   .format(flux[i], OBJx[i], OBJy[i]))
             kepmsg.log(logfile, txt, True)
-        if focus:
-            wx = ans[-3]
-            wy = ans[-2]
-            angle = ans[-1]
-        if verbose and focus:
-            if not background: kepmsg.log(logfile, '', True)
-            kepmsg.log(logfile, " X/Y focus factors = {0}/{1}".format(wx, wy),
-                       True)
-            kepmsg.log(logfile, "PRF rotation angle = {0} deg".format(angle),
-                       True)
+    if verbose and background:
+        bterms = border + 1
+        if bterms == 1:
+            b = ans[nsrc * 3]
+        else:
+            bcoeff = np.array([ans[nsrc*3:nsrc*3+bterms],
+                               ans[nsrc*3+bterms:nsrc*3+bterms*2]])
+            bkg = kepfunc.polyval2d(xx, yy, bcoeff)
+            b = np.nanmean(bkg.reshape(bkg.size))
+        txt = "\n   Mean background = {0} e-/s".format(b)
+        kepmsg.log(logfile, txt, True)
+    if focus:
+        wx = ans[-3]
+        wy = ans[-2]
+        angle = ans[-1]
+    if verbose and focus:
+        if not background:
+            kepmsg.log(logfile, '', True)
+        kepmsg.log(logfile, " X/Y focus factors = {0}/{1}".format(wx, wy),
+                   True)
+        kepmsg.log(logfile, "PRF rotation angle = {0} deg".format(angle),
+                   True)
     # measure flux fraction and contamination
     PRFall = kepfunc.PRF2DET(flux, OBJx, OBJy, DATx, DATy, wx, wy, angle,
                              splineInterpolation)
@@ -378,9 +417,9 @@ def kepprf(infile, plotfile, rownum, columns, rows, fluxes, prfdir,
             .format(FluxInAperAll), True)
     kepmsg.log(logfile, "           Target flux in aperture = {0} e-/s"
             .format(FluxInAperOne),True)
-    kepmsg.log(logfile, "  Target flux fraction in aperture = {0}%"
+    kepmsg.log(logfile, "  Target flux fraction in aperture = {0} %"
             .format(FluxFraction * 100.0),True)
-    kepmsg.log(logfile, "Contamination fraction in aperture = {0}%"
+    kepmsg.log(logfile, "Contamination fraction in aperture = {0} %"
             .format(Contamination * 100.0),True)
 
     # construct model PRF in detector coordinates
@@ -456,15 +495,15 @@ def kepprf(infile, plotfile, rownum, columns, rows, fluxes, prfdir,
         nrm = 0
     brange = brange / 10 ** nrm
     plt.imshow(barimg, aspect='auto', interpolation='nearest', origin='lower',
-                 vmin=np.nanmin(barimg), vmax=np.nanmax(barimg),
-                 extent=(0.0, 1.0, brange[0], brange[-1]), cmap=cmap)
+               vmin=np.nanmin(barimg), vmax=np.nanmax(barimg),
+               extent=(0.0, 1.0, brange[0], brange[-1]), cmap=cmap)
     barwin.yaxis.tick_right()
     barwin.yaxis.set_label_position('right')
     barwin.yaxis.set_major_locator(plt.MaxNLocator(7))
     plt.gca().yaxis.set_major_formatter(plt.ScalarFormatter(useOffset=False))
     plt.gca().set_autoscale_on(False)
     plt.setp(plt.gca(), xticklabels=[], xticks=[])
-    plt.ylabel('Flux (10$^{0}$ e$^-$ s$^{-1}$)'.format(nrm))
+    plt.ylabel('Flux (10$^{%d}$ e$^-$ s$^{-1}$)' % nrm)
     plt.setp(barwin.get_yticklabels(), 'rotation', 90)
     barwin.yaxis.set_major_formatter(ticker.FormatStrFormatter('%.1f'))
 
@@ -476,14 +515,13 @@ def kepprf(infile, plotfile, rownum, columns, rows, fluxes, prfdir,
         plt.show()
 
     # stop time
-    kepmsg.clock('\nKEPPRF ended at',logfile,verbose)
-
-    return
+    kepmsg.clock('\nKEPPRF ended at', logfile, verbose)
 
 # -----------------------------------------------------------
 # plot channel image
 
-def plotimage(imgflux_pl,zminfl,zmaxfl,plmode,row,column,xdim,ydim,winx,winy,tlabel,cmap):
+def plotimage(imgflux_pl, zminfl, zmaxfl, plmode, row, column,
+              xdim, ydim, winx, winy, tlabel, cmap):
 
 # pixel limits of the subimage
 
@@ -536,13 +574,15 @@ def kepprf_main():
                         type=int)
     parser.add_argument('--columns',
                         help=("Initial guesses for the center of each source "
-                              "on the x-axis"), type=list)
+                              "on the x-axis"),
+                        nargs='+', type=float)
     parser.add_argument('--rows',
                         help=("Initial guesses for the center of each source "
-                              "on the x-axis"), type=list)
+                              "on the x-axis"),
+                        nargs='+', type=float)
     parser.add_argument('--fluxes',
                         help='Relative flux of each source to be fit',
-                        type=list)
+                        nargs='+', type=float)
     parser.add_argument('--background', action='store_true',
                         help='Fit background?')
     parser.add_argument('--border', help='Order of background polynmial fit',

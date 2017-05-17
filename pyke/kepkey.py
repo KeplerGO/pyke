@@ -13,6 +13,7 @@ def get(filename, hdu, keyword, logfile, verbose):
                    + keyword + ' in file ' + filename)
         kepmsg.err(logfile, message, verbose)
         raise
+    return value
 
 
 def delete(keyword, hdu, filename, logfile, verbose):
@@ -97,8 +98,13 @@ def cadence(struct, filename, logfile, verbose):
 
 def getWCSp(filename, struct, logfile, verbose):
     """get physical WCS keywords"""
-    crpix1p = 0.0; crpix2p = 0.0; crval1p = 0.0; crval2p = 0.0; cdelt1p = 0.0;
+    crpix1p = 0.0
+    crpix2p = 0.0
+    crval1p = 0.0
+    crval2p = 0.0
+    cdelt1p = 0.0
     cdelt2p = 0.0
+
     try:
         crpix1p = get(filename, struct, 'CRPIX1P', logfile, verbose)
     except:
