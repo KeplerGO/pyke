@@ -12,3 +12,4 @@ from .kepplot  import *
 from .kepstat  import *
 from .kepfunc  import *
 from .keparray import *
+from .kepprf   import *

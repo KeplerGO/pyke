@@ -7,3 +7,4 @@ def test_import():
     from .. import kepstat
     from .. import kepfunc
     from .. import keparray
+    from .. import kepprf
