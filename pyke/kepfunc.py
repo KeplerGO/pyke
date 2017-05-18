@@ -8,73 +8,67 @@ from scipy.ndimage import interpolation
 from scipy.ndimage.interpolation import shift, rotate
 from scipy.interpolate import RectBivariateSpline, interp2d
 
-def poly0():
-    return lambda p, x: p[0] + 0.0 * x
+def poly0(p, x):
+    return p[0] + 0.0 * x
 
-def poly1():
-    return lambda p, x: p[0] + p[1] * x
+def poly1(p, x):
+    return p[0] + p[1] * x
 
-def poly2():
-    return lambda p, x: p[0] + p[1] * x + p[2] * x * x
+def poly2(p, x):
+    return p[0] + p[1] * x + p[2] * x * x
 
-def poly3():
-    return lambda p, x: p[0] + p[1] * x + p[2] * x**2 + p[3] * x**3
+def poly3(p, x):
+    return p[0] + p[1] * x + p[2] * x ** 2 + p[3] * x ** 3
 
-def poly4():
-    return lambda p, x: (p[0] + p[1] * x + p[2] * x**2 + p[3] * x**3 +
-                         p[4] * x**4)
+def poly4(p, x):
+    return p[0] + p[1] * x + p[2] * x ** 2 + p[3] * x ** 3 + p[4] * x ** 4
 
-def poly5():
-    return lambda p, x: (p[0] + p[1] * x + p[2] * x**2 + p[3] * x**3 +
-                         p[4] * x**4 + p[5] * x**5)
+def poly5(p, x):
+    return (p[0] + p[1] * x + p[2] * x ** 2 + p[3] * x ** 3 + p[4] * x ** 4
+            + p[5] * x**5)
 
-def poly6():
-    return lambda p, x: (p[0] + p[1] * x + p[2] * x**2 + p[3] * x**3 +
-                         p[4] * x**4 + p[5] * x**5 + p[6] * x**6)
+def poly6(p, x):
+    return (p[0] + p[1] * x + p[2] * x ** 2 + p[3] * x ** 3 + p[4] * x ** 4
+            + p[5] * x ** 5 + p[6] * x ** 6)
 
-def poly7():
-    return lambda p, x: (p[0] + p[1] * x + p[2] * x**2 + p[3] * x**3 +
-                         p[4] * x**4 + p[5] * x**5 + p[6] * x**6 + p[7] * x**7)
+def poly7(p, x):
+    return (p[0] + p[1] * x + p[2] * x ** 2 + p[3] * x ** 3 + p[4] * x ** 4
+            + p[5] * x ** 5 + p[6] * x ** 6 + p[7] * x ** 7)
 
-def poly8():
-    return lambda p, x: (p[0] + p[1] * x + p[2] * x**2 + p[3] * x**3 +
-                         p[4] * x**4 + p[5] * x**5 + p[6] * x**6 +
-                         p[7] * x**7 + p[8] * x**8)
+def poly8(p, x):
+    return (p[0] + p[1] * x + p[2] * x ** 2 + p[3] * x ** 3 + p[4] * x ** 4
+            + p[5] * x ** 5 + p[6] * x ** 6 + p[7] * x ** 7 + p[8] * x ** 8)
 
-def poly9():
-    return lambda p, x: (p[0] + p[1] * x + p[2] * x**2 + p[3] * x**3 +
-                         p[4] * x**4 + p[5] * x**5 + p[6] * x**6 +
-                         p[7] * x**7 + p[8] * x**8 + p[9] * x**9)
+def poly9(p, x):
+    return (p[0] + p[1] * x + p[2] * x ** 2 + p[3] * x ** 3 + p[4] * x ** 4
+            + p[5] * x ** 5 + p[6] * x ** 6 + p[7] * x ** 7 + p[8] * x ** 8
+            + p[9] * x**9)
 
-def poly10():
-    return lambda p, x: (p[0] + p[1] * x + p[2] * x**2 + p[3] * x**3 +
-                         p[4] * x**4 + p[5] * x**5 + p[6] * x**6 +
-                         p[7] * x**7 + p[8] * x**8 + p[9] * x**9 +
-                         p[10] * x**10)
+def poly10(p, x):
+    return (p[0] + p[1] * x + p[2] * x ** 2 + p[3] * x ** 3 + p[4] * x ** 4
+            + p[5] * x ** 5 + p[6] * x ** 6 + p[7] * x ** 7 + p[8] * x ** 8
+            + p[9] * x ** 9 + p[10] * x ** 10)
 
-def poly1con():
-    return lambda p, x: p[0] + x
+def poly1con(p, x):
+    return p[0] + x
 
-def gauss():
-    return lambda p, x: p[0] * scipy.exp(-(x - p[1])**2 / (2.0 * p[2]**2))
+def gauss(p, x):
+    return p[0] * scipy.exp(-(x - p[1]) ** 2 / (2.0 * p[2] ** 2))
 
-def gauss0():
-    return lambda p, x: p[0] * scipy.exp(-x**2 / (2.0 * p[1]**2))
+def gauss0(p, x):
+    return p[0] * scipy.exp(-x**2 / (2.0 * p[1] ** 2))
 
-def congauss():
-    return lambda p, x: p[0] + p[1] * scipy.exp(-(x - p[2])**2 / (2.0 * p[3]**2))
+def congauss(p, x):
+    return p[0] + p[1] * scipy.exp(-(x - p[2]) ** 2 / (2.0 * p[3] ** 2))
 
-def moffat0():
-    return lambda p, x: p[0] / (1.0 + (x / p[1])**2)**p[2]
+def moffat0(p, x):
+    return p[0] / (1.0 + (x / p[1]) ** 2) ** p[2]
 
-def conmoffat():
-    return lambda p, x: p[0] + p[1] / (1.0 + ((x - p[2]) / p[3])**2)**p[4]
+def conmoffat(p, x):
+    return p[0] + p[1] / (1.0 + ((x - p[2]) / p[3]) ** 2) ** p[4]
 
-def sine():
-    return lambda p, x: p[0] * scipy.sin(2.0 * 3.14129 * x / p[1] - p[2])
-
-def powerlaw():
-    return lambda p, x: p[0] + p[1] * x
+def sine(p, x):
+    return p[0] * scipy.sin(2.0 * np.pi * x / p[1] - p[2])
 
 def smooth(x, window_len=10, window='hanning'):
     """Smooth the data using a window with requested size.
@@ -123,9 +117,9 @@ def smooth(x, window_len=10, window='hanning'):
     if window == 'flat': #moving average
         w = np.ones(window_len,'d')
     else:
-        w = eval("numpy.{0}(window_len)".format(window))
+        w = eval("np.{0}(window_len)".format(window))
 
-    y = numpy.convolve(w / w.sum(), s, mode='same')
+    y = np.convolve(w / w.sum(), s, mode='same')
 
     return y[window_len-1:-window_len+1]
 

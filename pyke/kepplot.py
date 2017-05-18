@@ -75,8 +75,6 @@ def cleanx(time, logfile, verbose):
         txt = ("ERROR -- KEPPLOT.CLEANX: cannot calculate plot scaling in "
                "x dimension")
         kepmsg.err(logfile, txt, verbose)
-        label = ''
-        raise
 
     return timeout, label
 
@@ -116,7 +114,6 @@ def limits(x, y, logfile, verbose):
     except:
         txt = 'ERROR -- KEPPLOT.LIMITS: cannot calculate plot limits'
         kepmsg.err(logfile, txt, verbose)
-        raise
 
     return x, y, xmin,  xmax, xr, ymin, ymax, yr
 

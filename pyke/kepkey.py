@@ -12,7 +12,6 @@ def get(filename, hdu, keyword, logfile, verbose):
         message = ('ERROR -- KEPKEY.GET: Cannot read keyword '
                    + keyword + ' in file ' + filename)
         kepmsg.err(logfile, message, verbose)
-        raise
     return value
 
 
@@ -24,7 +23,6 @@ def delete(keyword, hdu, filename, logfile, verbose):
         message = ('ERROR -- KEPKEY.DELETE: Cannot delete keyword '
                    + keyword + ' in ' + filename)
         kepmsg.err(logfile, message, verbose)
-        raise
 
 
 def new(keyword, value, comment, hdu, filename, logfile, verbose):
@@ -35,7 +33,6 @@ def new(keyword, value, comment, hdu, filename, logfile, verbose):
         message = ('ERROR -- KEPKEY.NEW: Cannot create keyword '
                    + keyword + ' in ' + filename)
         kepmsg.err(logfile, message, verbose)
-        raise
 
 def comment(txt, hdu, filename, logfile, verbose):
     """add comment keyword"""
@@ -45,7 +42,6 @@ def comment(txt, hdu, filename, logfile, verbose):
         message = ('ERROR -- KEPKEY.COMMENT: Cannot create comment keyword'
                    + ' in ' + filename)
         kepmsg.err(logfile, message, verbose)
-        raise
 
 def history(txt, hdu, filename, logfile, verbose):
     """add history keyword"""
@@ -55,7 +51,6 @@ def history(txt, hdu, filename, logfile, verbose):
         message = ('ERROR -- KEPKEY.HISTORY: Cannot create history keyword'
                     + ' in ' + filename)
         kepmsg.err(logfile, message, verbose)
-        raise
 
 def change(keyword, value, hdu, filename, logfile, verbose):
     """change existing keyword value"""
@@ -65,7 +60,6 @@ def change(keyword, value, hdu, filename, logfile, verbose):
         message = ('ERROR -- KEPKEY.CHANGE: Cannot update keyword '
                    + keyword + ' in ' + filename)
         kepmsg.err(logfile, message, verbose)
-        raise
 
 
 def cadence(struct, filename, logfile, verbose):
@@ -76,21 +70,18 @@ def cadence(struct, filename, logfile, verbose):
         txt = ('ERROR -- KEPKEY.CADENCE: Cannot read keyword INT_TIME in file '
                + filename + '[1]')
         kepmsg.err(logfile, message, verbose)
-        raise
     try:
         readtime = get(filename, struct, 'READTIME', logfile, verbose)
     except:
         txt = ('ERROR -- KEPKEY.CADENCE: Cannot read keyword READTIME in file '
                + filename + '[1]')
         kepmsg.err(logfile, message, verbose)
-        raise
     try:
         num_frm = get(filename, struct, 'NUM_FRM', logfile, verbose)
     except:
         txt = ('ERROR -- KEPKEY.CADENCE: Cannot read keyword NUM_FRM in file '
                 + filename + '[1]')
         kepmsg.err(logfile, message, verbose)
-        raise
 
     cadence = (float(int_time) + float(readtime)) * float(num_frm)
     return cadence
@@ -111,42 +102,36 @@ def getWCSp(filename, struct, logfile, verbose):
         txt = ('WARNING -- KEPKEY.GETWCSP: Cannot read keyword CRPIX1P in '
                'file ' + filename)
         kepmsg.warn(logfile, txt)
-        raise
     try:
         crpix2p = get(filename, struct, 'CRPIX2P', logfile, verbose)
     except:
         txt = ('WARNING -- KEPKEY.GETWCSP: Cannot read keyword CRPIX2P in file '
                + filename)
         kepmsg.warn(logfile, txt)
-        raise
     try:
         crval1p = get(filename, struct,'CRVAL1P', logfile, verbose)
     except:
         txt = ('WARNING -- KEPKEY.GETWCSP: Cannot read keyword CRVAL1P in file '
                + filename)
         kepmsg.warn(logfile, txt)
-        raise
     try:
         crval2p = get(filename, struct,'CRVAL2P',logfile,verbose)
     except:
         txt = ('WARNING -- KEPKEY.GETWCSP: Cannot read keyword CRVAL2P in file '
                + filename)
         kepmsg.warn(logfile, txt)
-        raise
     try:
         cdelt1p = get(filename, struct, 'CDELT1P', logfile, verbose)
     except:
         txt = ('WARNING -- KEPKEY.GETWCSP: Cannot read keyword CDELT1P in file '
                + filename)
         kepmsg.warn(logfile, txt)
-        raise
     try:
         cdelt2p = get(filename, struct, 'CDELT2P', logfile, verbose)
     except:
         txt = ('WARNING -- KEPKEY.GETWCSP: Cannot read keyword CDELT2P in file '
                + filename)
         kepmsg.warn(logfile, txt)
-        raise
 
     return crpix1p, crpix2p, crval1p, crval2p, cdelt1p, cdelt2p
 
@@ -163,75 +148,64 @@ def getWCSs(file,struct,logfile,verbose):
         txt = ('WARNING -- KEPKEY.GETWCSS: Cannot read keyword CRPIX1 in file '
                + filename)
         kepmsg.warn(logfile, txt)
-        raise
     try:
         crpix2 = get(filename, struct, 'CRPIX2', logfile, verbose)
     except:
         txt = ('WARNING -- KEPKEY.GETWCSS: Cannot read keyword CRPIX2 in file '
                + filename)
         kepmsg.warn(logfile, txt)
-        raise
     try:
         crval1 = get(filename, struct, 'CRVAL1', logfile, verbose)
     except:
         txt = ('WARNING -- KEPKEY.GETWCSS: Cannot read keyword CRVAL1 in file '
                + filename)
         kepmsg.warn(logfile, txt)
-        raise
     try:
         crval2 = get(filename, struct, 'CRVAL2', logfile, verbose)
     except:
         txt = ('WARNING -- KEPKEY.GETWCSS: Cannot read keyword CRVAL2 in file '
                + filename)
         kepmsg.warn(logfile, txt)
-        raise
     try:
         cdelt1 = get(filename, struct, 'CDELT1', logfile, verbose)
     except:
         txt = ('WARNING -- KEPKEY.GETWCSS: Cannot read keyword CDELT1 in file '
                + filename)
         kepmsg.warn(logfile, txt)
-        raise
     try:
         cdelt2 = get(filename, struct, 'CDELT2', logfile, verbose)
     except:
         txt = ('WARNING -- KEPKEY.GETWCSS: Cannot read keyword CDELT2 in file '
                + filename)
         kepmsg.warn(logfile, txt)
-        raise
     try:
         pc1_1 = get(filename, struct, 'PC1_1', logfile, verbose)
     except:
         txt = ('WARNING -- KEPKEY.GETWCSS: Cannot read keyword PC1_1 in file '
                + filename)
         kepmsg.warn(logfile, txt)
-        raise
     try:
         pc1_2 = get(filename, struct, 'PC1_2', logfile, verbose)
     except:
         txt = ('WARNING -- KEPKEY.GETWCSS: Cannot read keyword PC1_2 in file '
                + filename)
         kepmsg.warn(logfile, txt)
-        raise
     try:
         pc2_1 = get(filename, struct, 'PC2_1', logfile, verbose)
     except:
         txt = ('WARNING -- KEPKEY.GETWCSS: Cannot read keyword PC2_1 in file '
                 + filename)
         kepmsg.warn(logfile, txt)
-        raise
     try:
         pc2_2 = get(filename, struct, 'PC2_2', logfile, verbose)
     except:
         txt = ('WARNING -- KEPKEY.GETWCSS: Cannot read keyword PC2_2 in file '
                + filename)
         kepmsg.warn(logfile, txt)
-        raise
     try:
         pc = np.array([[pc1_1, pc1_2], [pc2_1, pc2_2]])
         pc = np.linalg.inv(pc)
     except:
-        pass
 
     return crpix1, crpix2, crval1, crval2, cdelt1, cdelt2, pc,
 

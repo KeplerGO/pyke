@@ -16,7 +16,6 @@ def rms(array1, array2, logfile, verbose):
                     "array1 = {0}, array2 = {1}".format(len(array1),
                                                         len(arra2)))
         kepmsg.err(logfile, message, verbose)
-        raise
 
     return math.sqrt(np.mean((array1 - array2) ** 2))
 
@@ -182,17 +181,14 @@ def savitzky_golay(y, window_size, order, deriv=0):
         message = ("ERROR -- KEPSTAT.SAVITZKY_GOLAY: window_size and order "
                    "must be of type int")
         kepmsg.err(None, message, True)
-        raise
     if window_size % 2 != 1 or window_size < 1:
         message = ("ERROR -- KEPSTAT.SAVITZKY_GOLAY: window_size size must be "
                    "a positive odd number")
         kepmsg.err(None, message, True)
-        raise
     if window_size < order + 2:
         message = ("ERROR -- KEPSTAT.SAVITZKY_GOLAY: window_size is too small "
                    "for the polynomials order")
         kepmsg.err(None, message, True)
-        raise
 
     # precompute fit coefficients
     order_range = range(order + 1)

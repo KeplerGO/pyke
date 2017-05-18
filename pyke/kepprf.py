@@ -171,7 +171,6 @@ def kepprf(infile, plotfile, frameno, columns, rows, fluxes, prfdir,
         errmsg = ("ERROR -- KEPFIT:FITMULTIPRF: Guesses for rows, columns and "
                   "fluxes must have the same number of sources")
         kepmsg.err(logfile, errmsg, verbose)
-        raise
 
     guess = list(f) + list(x) + list(y)
 
@@ -191,7 +190,6 @@ def kepprf(infile, plotfile, frameno, columns, rows, fluxes, prfdir,
     except:
         errmsg = "ERROR -- KEPPRF: is {} a Target Pixel File? ".format(infile)
         kepmsg.err(logfile, errmsg, verbose)
-        raise
     kepid, channel, skygroup, module, output, quarter, season, \
         ra, dec, column, row, kepmag, xdim, ydim, tcorr = \
         kepio.readTPF(infile, 'TIMECORR', logfile, verbose)
@@ -234,7 +232,6 @@ def kepprf(infile, plotfile, frameno, columns, rows, fluxes, prfdir,
         errmsg = ("ERROR -- KEPFIELD: Row {0} is a bad quality timestamp"
                   .format(frameno))
         kepmsg.err(logfile, errmsg, verbose)
-        raise
 
     # construct input pixel image
     flux = fluxpixels[frameno-1,:]
@@ -263,7 +260,6 @@ def kepprf(infile, plotfile, frameno, columns, rows, fluxes, prfdir,
     except:
         errmsg = "ERROR -- KEPPRF: No PRF file found in {0}".format(prfdir)
         kepmsg.err(logfile, errmsg, verbose)
-        raise
 
     # read PRF images
     prfn = [0,0,0,0,0]
@@ -514,6 +510,7 @@ def kepprf(infile, plotfile, frameno, columns, rows, fluxes, prfdir,
     if len(plotfile) > 0 and plotfile.lower() != 'none':
         plt.savefig(plotfile)
     if plot:
+        plt.draw()
         plt.show()
 
     # stop time

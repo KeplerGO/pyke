@@ -16,7 +16,6 @@ def delete(filename, logfile, verbose):
     except:
         message = 'ERROR -- KEPIO.DELETE: could not delete ' + filename
         kepmsg.err(logfile, message, verbose)
-        raise
 
 def clobber(filename, logfile, verbose):
     if (os.path.isfile(filename)):
@@ -25,7 +24,6 @@ def clobber(filename, logfile, verbose):
         except:
             message = 'ERROR -- KEPIO.CLOBBER: could not clobber ' + filename
             kepmsg.err(logfile, message, verbose)
-            raise
 
 def openascii(filename, mode, logfile, verbose):
     try:
@@ -34,7 +32,6 @@ def openascii(filename, mode, logfile, verbose):
         message = ('ERROR -- KEPIO.OPENASCII: cannot open ASCII file ' +
                     filename)
         kepmsg.err(logfile, message, verbose)
-        raise
     return content
 
 def closeascii(file_,logfile,verbose):
@@ -68,7 +65,6 @@ def closefits(fitsfile, logfile, verbose):
     except:
         message = 'ERROR -- KEPIO.CLOSEFITS: cannot close HDU structure'
         kepmsg.err(logfile, message, verbose)
-        raise
 
 def readfitstab(filename, hdu, logfile, verbose):
     try:
@@ -77,7 +73,6 @@ def readfitstab(filename, hdu, logfile, verbose):
         message = ('ERROR -- KEPIO.READFITSTAB: could not extract table '
                    'from ' + filename)
         kepmsg.err(logfile, message, verbose)
-        raise
     return table
 
 def readfitscol(filename, table, column, logfile, verbose):
@@ -87,7 +82,6 @@ def readfitscol(filename, table, column, logfile, verbose):
         message  = ('ERROR -- KEPIO.READFITSCOL: could not extract '
                     + column + 'data from ' + filename)
         kepmsg.err(logfile, message, verbose)
-        raise
     return data
 
 def readtimecol(filename, table, logfile, verbose):
@@ -101,7 +95,6 @@ def readtimecol(filename, table, logfile, verbose):
             message  = ('ERROR -- KEPIO.READTIMECOL: could not extract '
                         + 'time data from ' + filename)
             kepmsg.err(logfile, message, verbose)
-            raise
     return data
 
 def readsapcol(filename,table,logfile,verbose):
@@ -114,7 +107,6 @@ def readsapcol(filename,table,logfile,verbose):
             message  = ('ERROR -- KEPIO.READSAPCOL: could not extract SAP flux'
                         'time series data from ' + filename)
             kepmsg.err(logfile, message, verbose)
-            raise
     return data
 
 def readsaperrcol(filename, table, logfile, verbose):
@@ -128,7 +120,6 @@ def readsaperrcol(filename, table, logfile, verbose):
             message  = ('ERROR -- KEPIO.READSAPERRCOL: could not extract SAP '
                         'flux error time series data from ' + filename)
             kepmsg.err(logfile, message, verbose)
-            raise
     return data
 
 def readpdccol(filename, table, logfile, verbose):
@@ -142,7 +133,6 @@ def readpdccol(filename, table, logfile, verbose):
             message  = ('ERROR -- KEPIO.READPDCCOL: could not extract PDCSAP '
                         'flux time series data from ' + filename)
             kepmsg.err(logfile, message, verbose)
-            raise
     return data
 
 def readpdcerrcol(filename, table, logfile, verbose):
@@ -156,7 +146,6 @@ def readpdcerrcol(filename, table, logfile, verbose):
             message  = ('ERROR -- KEPIO.READPDCERRCOL: could not extract PDC '
                         'flux error time series data from ' + filename)
             kepmsg.err(logfile, message, verbose)
-            raise
     return data
 
 def readcbvcol(filename, table, logfile, verbose):
@@ -167,7 +156,6 @@ def readcbvcol(filename, table, logfile, verbose):
         message  = ('ERROR -- KEPIO.READCBVCOL: could not extract CBVSAP flux '
                     'time series data from ' + filename)
         kepmsg.err(logfile, message, verbose)
-        raise
     return data
 
 def readsapqualcol(filename, table, logfile, verbose):
@@ -178,7 +166,6 @@ def readsapqualcol(filename, table, logfile, verbose):
         message  = ('ERROR -- KEPIO.READSAPQUALCOL: could not extract SAP '
                     'quality time series data from ' + filename)
         kepmsg.err(logfile, message, verbose)
-        raise
     return data
 
 
@@ -252,7 +239,6 @@ def readimage(image, hdu, logfile,verbose):
         errmsg = ('ERROR -- KEPIO.READIMAGE: cannot read image data from HDU '
                    + str(hdu))
         kepmsg.err(logfile, errmsg, verbose)
-        raise
     return imagedata
 
 def writeimage(image, hdu, imagedata, logfile, verbose):
@@ -263,7 +249,6 @@ def writeimage(image, hdu, imagedata, logfile, verbose):
         errmsg = ('ERROR -- KEPIO.WRITEIMAGE: Cannot write image data to HDU '
                    + str(hdu))
         kepmsg.err(logfile, errmsg, verbose)
-        raise
     return image
 
 def writefits(hdu, filename, clobber, logfile, verbose):
@@ -277,7 +262,6 @@ def writefits(hdu, filename, clobber, logfile, verbose):
         errmsg = ('ERROR -- KEPIO.WRITEFITS: Cannot create FITS file '
                   + filename)
         kepmsg.err(logfile, errmsg, verbose)
-        raise
 
 def tmpfile(path, suffix, logfile, verbose):
     """create a temporary file name"""
@@ -287,7 +271,6 @@ def tmpfile(path, suffix, logfile, verbose):
     except:
         message = ('ERROR -- KEPIO.TMPFILE: Cannot create temporary file name')
         kepmsg.err(logfile,message,verbose)
-        raise
     return tmpfile
 
 def symlink(infile,linkfile,clobber,logfile,verbose):
@@ -297,7 +280,6 @@ def symlink(infile,linkfile,clobber,logfile,verbose):
         errmsg = ('ERROR: KEPIO.SYMLINK -- file ' + linkfile + ' exists, use '
                   'clobber')
         kepmsg.err(logfile, errmsg, verbose)
-        raise
     if clobber:
         try:
             os.remove(linkfile)
@@ -309,7 +291,6 @@ def symlink(infile,linkfile,clobber,logfile,verbose):
         errmsg  = ('ERROR: KEPIO.SYMLINK -- could not create symbolic link '
                     'from ' + infile + ' to ' + linkfile)
         kepmsg.err(logfile, message, verbose)
-        raise
 
 def fileexists(file_):
     """check that a file exists"""
@@ -327,7 +308,6 @@ def move(file1, file2, logfile, verbose):
         errmsg = ('ERROR -- KEPIO.MOVE: Could not move ' + file1 + ' to '
                   + file2)
         kepmsg.err(logfile, errmsg, verbose)
-        raise
 
 def copy(file1, file2, logfile, verbose):
     """copy file"""
@@ -339,16 +319,14 @@ def copy(file1, file2, logfile, verbose):
         errmsg = ('ERROR -- KEPIO.COPY: could not copy ' + file1 +
                   ' to ' + file2)
         kepmsg.err(logfile, errmsg, verbose)
-        raise
 
-def parselist(inlist,logfile,verbose):
+def parselist(inlist, logfile, verbose):
     """reate a list from a file, string or wildcard"""
 
     inlist.strip()
     if len(inlist) == 0 or inlist.count(' ') > 0:
         errmsg = 'ERROR -- KEPIO.PARSELIST: list not specified'
         kepmsg.err(logfile, errmsg, verbose)
-        raise
 
     if inlist[0] == '@':
         infile = inlist.lstrip('@')
@@ -356,7 +334,6 @@ def parselist(inlist,logfile,verbose):
             errmsg = ('ERROR -- KEPIO.PARSELIST: input list ' + infile +
                       'doest not exist')
             kepmsg.err(logfile,message,verbose)
-            raise
 
     outlist = []
     if inlist[0] == '@':
@@ -378,7 +355,6 @@ def parselist(inlist,logfile,verbose):
     if len(outlist) == 0:
         errmsg = 'ERROR -- KEPIO.PARSELIST: raw input image list is empty'
         kepmsg.err(logfile, errmsg, verbose)
-        raise
 
     return outlist
 
@@ -397,7 +373,6 @@ def createdir(path, logfile, verbose):
             errmsg = ('ERROR -- KEPIO.CREATEDIR: Could not create directory '
                       + path)
             kepmsg.err(logfile, message, verbose)
-            raise
     else:
         message = 'KEPIO.CREATEDIR -- ' + path + ' directory exists'
         kepmsg.log(logfile, message, verbose)
@@ -446,7 +421,6 @@ def timeranges(ranges,logfile,verbose):
             errmsg = ('ERROR -- KEPIO.TIMERANGES: cannot open file '
                       + ranges[1:])
             kepmsg.err(logfile, txt, verbose)
-            raise
         for line in lines:
             line = line.strip().split(',')
             if len(line) == 2:
@@ -462,7 +436,6 @@ def timeranges(ranges,logfile,verbose):
             errmsg = ('ERROR -- KEPIO.TIMERANGES: cannot understand content of '
                       + ranges[1:])
             kepmsg.err(logfile, errmsg, verbose)
-            raise
     else:
         try:
             ranges = ranges.strip().split(';')
@@ -477,7 +450,6 @@ def timeranges(ranges,logfile,verbose):
             errmsg = ('ERROR -- KEPIO.TIMERANGES: cannot understand time '
                       'ranges provided')
             kepmsg.err(logfile, errmsg, verbose)
-            raise
 
     return tstart, tstop
 
@@ -531,7 +503,6 @@ def timekeys(instr, filename, logfile, verbose):
                     errmsg = ('ERROR -- KEPIO.TIMEKEYS: Cannot find TSTART, '
                               'STARTBJD or LC_START in ' + filename)
                     kepmsg.err(logfile, errmsg, verbose)
-                    raise
     tstart += bjdref
 
     # TSTOP
@@ -550,7 +521,6 @@ def timekeys(instr, filename, logfile, verbose):
                     errmsg = ('ERROR -- KEPIO.TIMEKEYS: Cannot find TSTOP, '
                               'STOPBJD or LC_STOP in ' + filename)
                     kepmsg.err(logfile, errmsg, verbose)
-                    raise
     tstop += bjdref
 
     # OBSMODE
@@ -564,7 +534,6 @@ def timekeys(instr, filename, logfile, verbose):
             errmsg = ('ERROR -- KEPIO.TIMEKEYS: cannot find keyword OBSMODE '
                       'or DATATYPE in ' + filename)
             kepmsg.err(logfile, errmsg, verbose)
-            raise
     if 'short' in obsmode:
         cadence = 54.1782
     elif 'long' in obsmode:
@@ -587,7 +556,6 @@ def filterNaN(instr, datacol, outfile, logfile, verbose):
             msg = ("ERROR -- KEPIO.FILTERNAN: cannot find column {}"
                    "in the infile".format(datacol))
             kepmsg.err(logfile, msg, verbose)
-            raise
         try:
             for i in range(len(instr[1].data.field(0))):
                 if (str(instr[1].data.field(timecol)[i]) != '-inf' and
@@ -602,7 +570,6 @@ def filterNaN(instr, datacol, outfile, logfile, verbose):
             errmsg = ('ERROR -- KEPIO.FILTERNAN: Failed to filter NaNs from '
                       + outfile)
             kepmsg.err(logfile, errmsg, verbose)
-            raise
     return instr
 
 def readTPF(infile, colname, logfile, verbose):
@@ -624,14 +591,12 @@ def readTPF(infile, colname, logfile, verbose):
         errmsg = ('ERROR -- KEPIO.OPENFITS: cannot open ' +
                   infile + ' as a FITS file')
         kepmsg.err(logfile, errmsg, verbose)
-        raise
     try:
         naxis2 = tpf['TARGETTABLES'].header['NAXIS2']
     except:
         errmsg = ('ERROR -- KEPIO.READTPF: No NAXIS2 keyword in ' + infile +
                   '[TARGETTABLES]')
         kepmsg.err(logfile, errmsg, verbose)
-        raise
     try:
         kepid = tpf[0].header['KEPLERID']
         kepid = str(kepid)
@@ -639,7 +604,6 @@ def readTPF(infile, colname, logfile, verbose):
         errmsg = ('ERROR -- KEPIO.READTPF: No KEPLERID keyword in ' + infile +
                   '[0]')
         kepmsg.err(logfile, errmsg, verbose)
-        raise
     try:
         channel = tpf[0].header['CHANNEL']
         channel = str(channel)
@@ -647,7 +611,6 @@ def readTPF(infile, colname, logfile, verbose):
         errmsg = ('ERROR -- KEPIO.READTPF: No CHANNEL keyword in ' + infile +
                   '[0]')
         kepmsg.err(logfile, errmsg, verbose)
-        raise
     try:
         skygroup = tpf[0].header['SKYGROUP']
         skygroup = str(skygroup)
@@ -660,7 +623,6 @@ def readTPF(infile, colname, logfile, verbose):
         errmsg = ('ERROR -- KEPIO.READTPF: No MODULE keyword in ' + infile +
                   '[0]')
         kepmsg.err(logfile, errmsg, verbose)
-        raise
     try:
         output = tpf[0].header['OUTPUT']
         output = str(output)
@@ -668,7 +630,6 @@ def readTPF(infile, colname, logfile, verbose):
         errmsg = ('ERROR -- KEPIO.READTPF: No OUTPUT keyword in ' + infile +
                   '[0]')
         kepmsg.err(logfile, errmsg, verbose)
-        raise
     try:
         quarter = tpf[0].header['QUARTER']
         quarter = str(quarter)
@@ -680,7 +641,6 @@ def readTPF(infile, colname, logfile, verbose):
             errmsg = ('ERROR -- KEPIO.READTPF: No QUARTER or CAMPAIGN ' +
                       'keyword in ' + infile + '[0]')
             kepmsg.err(logfile, errmsg, verbose)
-            raise
     try:
         season = tpf[0].header['SEASON']
         season = str(season)
@@ -693,7 +653,6 @@ def readTPF(infile, colname, logfile, verbose):
         errmsg = ('ERROR -- KEPIO.READTPF: No RA_OBJ keyword in ' + infile +
                   '[0]')
         kepmsg.err(logfile, errmsg, verbose)
-        raise
     try:
         dec = tpf[0].header['DEC_OBJ']
         dec = str(dec)
@@ -701,7 +660,6 @@ def readTPF(infile, colname, logfile, verbose):
         errmsg = ('ERROR -- KEPIO.READTPF: No DEC_OBJ keyword in ' + infile +
                   '[0]')
         kepmsg.err(logfile, errmsg, verbose)
-        raise
     try:
         kepmag = tpf[0].header['KEPMAG']
         kepmag = str(float(kepmag))
@@ -715,7 +673,6 @@ def readTPF(infile, colname, logfile, verbose):
         errmsg = ('ERROR -- KEPIO.READTPF: Cannot read TDIM5 keyword in ' +
                   infile + '[TARGETTABLES]')
         kepmsg.err(logfile, errmsg, verbose)
-        raise
     try:
         crv5p1 = tpf['TARGETTABLES'].header['1CRV5P']
         column = crv5p1
@@ -723,7 +680,6 @@ def readTPF(infile, colname, logfile, verbose):
         errmsg = ('ERROR -- KEPIO.READTPF: Cannot read 1CRV5P keyword in ' +
                   infile + '[TARGETTABLES]')
         kepmsg.err(logfile, errmsg, verbose)
-        raise
     try:
         crv5p2 = tpf['TARGETTABLES'].header['2CRV5P']
         row = crv5p2
@@ -731,7 +687,6 @@ def readTPF(infile, colname, logfile, verbose):
         errmsg = ('ERROR -- KEPIO.READTPF: Cannot read 2CRV5P keyword in ' +
                   infile + '[TARGETTABLES]')
         kepmsg.err(logfile, errmsg, verbose)
-        raise
     # read and close TPF data pixel image
     try:
         pixels = tpf['TARGETTABLES'].data.field(colname)[:]
@@ -739,7 +694,6 @@ def readTPF(infile, colname, logfile, verbose):
         errmsg = ("\nERROR -- KEPIO.READTPF: Cannot read {0} "
                   "column in {1} '[TARGETTABLES]'".format(colname, infile))
         kepmsg.err(logfile, errmsg, verbose)
-        raise
 
     closefits(tpf, logfile, verbose)
 
@@ -768,21 +722,18 @@ def readMaskDefinition(infile, logfile, verbose):
         txt = ('WARNING -- KEPIO.READMASKDEFINITION: Cannot read mask '
                'defintion in ' + infile + '[APERTURE]')
         kepwarn.err(txt, logfile)
-        raise
     try:
         naxis1 = inf['APERTURE'].header['NAXIS1']
     except:
         txt = ('WARNING -- KEPIO.READMASKDEFINITION: Cannot read NAXIS1 '
                'keyword in ' + infile + '[APERTURE]')
         kepwarn.err(txt, logfile)
-        raise
     try:
         naxis2 = inf['APERTURE'].header['NAXIS2']
     except:
         txt = ('WARNING -- KEPIO.READMASKDEFINITION: Cannot read NAXIS2 '
                'keyword in ' + infile + '[APERTURE]')
         kepwarn.err(txt, logfile)
-        raise
 
     # read WCS keywords
     crpix1p, crpix2p, crval1p, crval2p, cdelt1p, cdelt2p = kepkey.getWCSp(
@@ -811,21 +762,18 @@ def readPRFimage(infile, hdu, logfile, verbose):
         txt = ('ERROR -- KEPIO.READPRFIMAGE: Cannot read PRF image in '
                + infile + '[' + str(hdu) + ']')
         kepmsg.err(logfile, txt, verbose)
-        raise
     try:
         naxis1 = prf[hdu].header['NAXIS1']
     except:
         txt = ('ERROR -- KEPIO.READPRFIMAGE: Cannot read NAXIS1 keyword in '
                + infile + '[' + str(hdu) + ']')
         kepmsg.err(logfile, txt, verbose)
-        raise
     try:
         naxis2 = prf[hdu].header['NAXIS2']
     except:
         txt = ('ERROR -- KEPIO.READPRFIMAGE: Cannot read NAXIS2 keyword in '
                + infile + '[' + str(hdu) + ']')
         kepmsg.err(logfile, txt, verbose)
-        raise
 
     # read WCS keywords
     crpix1p, crpix2p, crval1p, crval2p, cdelt1p, cdelt2p = kepkey.getWCSp(

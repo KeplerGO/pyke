@@ -66,6 +66,11 @@ def kepmask(infile, frameno, maskfile='mask.txt', plotfile='kepmask.png',
         Print informative messages and warnings to the shell and logfile?
     logfile : str
         Name of the logfile containing error and warning messages.
+
+    Notes
+    -----
+    IMPORTANT: use the left-button of your mouse/keypad to select pixels.
+    No need to press 'x' key anymore.
     """
 
     global pimg, zscale, zmin, zmax, xmin, xmax, ymin, ymax, quarter
@@ -76,6 +81,8 @@ def kepmask(infile, frameno, maskfile='mask.txt', plotfile='kepmask.png',
     # input arguments
     zmin = imin; zmax = imax; zscale = iscale; colmap = cmap
     mfile = maskfile; pfile = plotfile
+
+    print(pfile)
 
     # log the call
     hashline = '----------------------------------------------------------------------------'
@@ -102,7 +109,6 @@ def kepmask(infile, frameno, maskfile='mask.txt', plotfile='kepmask.png',
         errmsg = ('ERROR -- KEPIO.OPENFITS: cannot open ' +
                   infile + ' as a FITS file')
         kepmsg.err(logfile, errmsg, verbose)
-        raise
 
     try:
         naxis2 = tpf['TARGETTABLES'].header['NAXIS2']
@@ -110,7 +116,6 @@ def kepmask(infile, frameno, maskfile='mask.txt', plotfile='kepmask.png',
         errmsg = ('ERROR -- KEPMASK: No NAXIS2 keyword in ' + infile +
                   '[TARGETTABLES]')
         kepmsg.err(logfile, errmsg, verbose)
-        raise
 
     if frameno > naxis2:
         errmsg = ('ERROR -- KEPMASK: frameno is too large. There are ' +
@@ -306,6 +311,7 @@ def clicker1(event):
         if event.button == 1:
             if (event.x > 601 and event.x < 801 and
                 event.y > 492 and event.y < 522):
+                print("Masked pixels cleared!")
                 plt.disconnect(aid)
                 plt.disconnect(bid)
                 plt.disconnect(cid)
@@ -328,6 +334,7 @@ def clicker2(event):
         if event.button == 1:
             if (event.x > 601 and event.x < 801 and
                 event.y > 422 and event.y < 482):
+                print("Mask definition loaded successfully!")
                 plt.disconnect(aid)
                 plt.disconnect(bid)
                 plt.disconnect(cid)
@@ -379,7 +386,7 @@ def clicker3(event):
                 out = open(mfile, 'a')
                 out.write(masktxt[:-1] + '\n')
                 out.close()
-                print('Wrote custom aperture definition file ' + mfile)
+                print('Wrote custom aperture definition to {0}'.format(mfile))
     return
 
 # -----------------------------------------------------------
@@ -392,7 +399,7 @@ def clicker4(event):
             if (event.x > 601 and event.x < 801 and
                 event.y > 285 and event.y < 347):
                 plt.savefig(pfile)
-                print('Wrote plot hardcopy file ' + pfile)
+                print('Wrote plot hardcopy file {0}'.format(pfile))
     return
 
 # -----------------------------------------------------------
@@ -439,7 +446,7 @@ def kepmask_main():
     parser.add_argument('--maskfile', default='maskfile.txt',
                          help='name of ASCII custom aperture definition file',
                          type=str)
-    parser.add_argument('--plotfile', default='',
+    parser.add_argument('--plotfile', default='kepmask.png',
                         help='name of output PNG plot file', type=str)
     parser.add_argument('--imin', default=None,
                         help='minimum of image intensity scale [e-]')
