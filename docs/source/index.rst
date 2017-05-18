@@ -10,6 +10,22 @@ Welcome to PyKE!
    :maxdepth: 2
    :caption: Contents:
 
+PyKE is a set of data analysis tools, maintained by the K2 Guest Observer
+Office, for the Kepler and K2 Missions.
+
+Installation
+============
+
+The easiest way to install PyKE is through ``pip``::
+
+    pip install pyke
+
+Or if you would like to experiment our development version::
+
+    git clone https://github.com/KeplerGO/PyKE.git
+    cd PyKE
+    pip install -e .
+
 API Documentation
 =================
 
@@ -23,5 +39,10 @@ Indices and tables
 ==================
 
 * :ref:`genindex`
-* :ref:`modindex`
 * :ref:`search`
+
+Acknowledgment
+--------------
+
+PyKE was primarily developed by Martin Still and Tom Barclay.
+Check out the previous project webpage: https://keplerscience.arc.nasa.gov/PyKE.shtml

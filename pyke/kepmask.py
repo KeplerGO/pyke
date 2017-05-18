@@ -47,20 +47,20 @@ def kepmask(infile, nframe, maskfile='mask.txt', plotfile='kepmask.png',
     plotfile : str
         The name of a PNG plot file containing a record of the mask defined or
         uploaded by this task.
-    imin : float (optional)
+    imin : float
         Minimum intensity value (in electrons per cadence) for the image
         display. The default minimum intensity level is the median of the
         faintest 10% of pixels in the image.
-    imax : float (optional)
+    imax : float
         Maximum intensity value (in electrons per cadence) for the image
         display. The default maximum intensity level is the median of the
         brightest 10% of pixels in the image.
-    iscale : str (optional)
+    iscale : str
         Type of intensity scaling for the image display.
         * linear
         * logarithmic
         * squareroot
-    cmap : str (optional)
+    cmap : str
         Color intensity scheme for the image display.
     verbose : bool
         Print informative messages and warnings to the shell and logfile?

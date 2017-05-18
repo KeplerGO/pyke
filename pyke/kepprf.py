@@ -106,12 +106,14 @@ def kepprf(infile, plotfile, frameno, columns, rows, fluxes, prfdir,
 
     Examples
     --------
-    Using the command line tool ``kepprf``, one can fit the PRF as follows
+    Using the command line tool ``kepprf``, one can fit the PRF to a given
+    frame in a target pixel file as follows
 
-    .. code-block:: python
+    .. code-block:: bash
 
-        kepprf kplr008256049-2010174085026_lpd-targ.fits prf.png --frameno 1000
-        --columns 830 831 --rows 242 241 --fluxes 1.0 0.1 --prfdir ../kplr2011265_prf/ --plot
+        $ kepprf kplr008256049-2010174085026_lpd-targ.fits prf.png --frameno 1000
+          --columns 830 831 --rows 242 241 --fluxes 1.0 0.1 --prfdir ../kplr2011265_prf/
+          --plot --verbose
 
               KepID: 8256049
                 BJD: 2455296.903574196
@@ -146,7 +148,7 @@ def kepprf(infile, plotfile, frameno, columns, rows, fluxes, prfdir,
     kepmsg.log(logfile, hashline, verbose)
     call = ('KEPPRF -- '
             'infile=' + infile + ' plotfile=' + plotfile +
-            ' frameno=' + str(cadencenum) + ' columns=' + str(columns) +
+            ' frameno=' + str(frameno) + ' columns=' + str(columns) +
             ' rows=' + str(rows) + ' fluxes=' + str(fluxes) + ' prfdir=' + prfdir +
             ' background=' + str(background) + 'border=' + str(border) +
             ' focus=' + str(focus) + ' xtol=' + str(xtol) +
@@ -512,7 +514,6 @@ def kepprf(infile, plotfile, frameno, columns, rows, fluxes, prfdir,
     if len(plotfile) > 0 and plotfile.lower() != 'none':
         plt.savefig(plotfile)
     if plot:
-        plt.ion()
         plt.show()
 
     # stop time
