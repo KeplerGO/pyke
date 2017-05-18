@@ -82,8 +82,6 @@ def kepmask(infile, frameno, maskfile='mask.txt', plotfile='kepmask.png',
     zmin = imin; zmax = imax; zscale = iscale; colmap = cmap
     mfile = maskfile; pfile = plotfile
 
-    print(pfile)
-
     # log the call
     hashline = '----------------------------------------------------------------------------'
     kepmsg.log(logfile, hashline, verbose)
