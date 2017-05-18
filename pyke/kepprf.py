@@ -17,13 +17,11 @@ from scipy.ndimage import interpolation
 __all__ = ['kepprf']
 
 
-def kepprf(infile, plotfile, cadencenum, columns, rows, fluxes, prfdir,
+def kepprf(infile, plotfile, frameno, columns, rows, fluxes, prfdir,
            background=False, border=1, focus=False, xtol=1e-4, ftol=1.,
            plot=False, imscale='linear', cmap='YlOrBr', apercol='#ffffff',
            verbose=True, logfile='kepprf.log'):
     """
-    Fit a PSF model to a specific image within a Target Pixel File.
-
     Fit a PSF model, combined with spacecraft jitter and pixel scale
     drift (the Pixel Response Function; PRF) to a single observation of Kepler
     target pixels.
@@ -40,7 +38,7 @@ def kepprf(infile, plotfile, cadencenum, columns, rows, fluxes, prfdir,
         which case the plot will be generated but the plot will not be saved
         to a file. Any existing file with this name will be automatically
         overwritten.
-    cadencenum : int
+    frameno : int
         The cadence number in the input file data containing the pixels to
         plot. If the chosen observation has a non-zero quality flag set or the
         pixel set contains only NULLs then the task will halt with an error
@@ -94,9 +92,9 @@ def kepprf(infile, plotfile, cadencenum, columns, rows, fluxes, prfdir,
         kepprf can plot images with three choices of image scales. The choice
         is made using this argument.
         The options are:
-            * linear
-            * logarithmic
-            * squareroot
+        * linear
+        * logarithmic
+        * squareroot
     cmap : str
         matplotlib's color map
     plot : boolean
@@ -108,37 +106,39 @@ def kepprf(infile, plotfile, cadencenum, columns, rows, fluxes, prfdir,
 
     Examples
     --------
+    Using the command line tool ``kepprf``, one can fit the PRF as follows
 
-    kepprf kplr008256049-2010174085026_lpd-targ.fits prf.png --cadencenum 1000
-    --columns 830 831 --rows 242 241 --fluxes 1.0 0.1
-    --prfdir ../kplr2011265_prf/ --plot
+    .. code-block:: python
 
-          KepID: 8256049
-            BJD: 2455296.903574196
-     RA (J2000): 298.67861
-    Dec (J2000): 44.1755
-         KepMag: 15.654
-       SkyGroup: 53
-         Season: 3
-        Channel: 81
-         Module: 24
-         Output: 1
+        kepprf kplr008256049-2010174085026_lpd-targ.fits prf.png --frameno 1000
+        --columns 830 831 --rows 242 241 --fluxes 1.0 0.1 --prfdir ../kplr2011265_prf/ --plot
 
-    Convergence time = 0.15390515327453613s
+              KepID: 8256049
+                BJD: 2455296.903574196
+         RA (J2000): 298.67861
+        Dec (J2000): 44.1755
+             KepMag: 15.654
+           SkyGroup: 53
+             Season: 3
+            Channel: 81
+             Module: 24
+             Output: 1
 
-    Flux = 3978.040625752744 e-/s X = 829.8259431097927 pix Y = 242.3810334478628 pix
-    Flux = 4734.069273790539 e-/s X = 830.990805551025 pix Y = 240.97340366638306 pix
+        Convergence time = 0.15390515327453613s
 
-                    Total flux in mask = 10747.293440638587 e-/s
-                   Target flux in mask = 3793.041929468528 e-/s
-                Total flux in aperture = 6365.551487630484 e-/s
-               Target flux in aperture = 3110.924803570053 e-/s
-      Target flux fraction in aperture = 78.2024392468689%
-    Contamination fraction in aperture = 51.12874650978488%
+        Flux = 3978.040625752744 e-/s X = 829.8259431097927 pix Y = 242.3810334478628 pix
+        Flux = 4734.069273790539 e-/s X = 830.990805551025 pix Y = 240.97340366638306 pix
 
-           Residual flux = -0.5748827605745994 e-/s
-    Pearson's chi^2 test = 296.12077907844986 for 13 dof
-              Chi^2 test = 19803.55879917441 for 13 dof
+                        Total flux in mask = 10747.293440638587 e-/s
+                       Target flux in mask = 3793.041929468528 e-/s
+                    Total flux in aperture = 6365.551487630484 e-/s
+                   Target flux in aperture = 3110.924803570053 e-/s
+          Target flux fraction in aperture = 78.2024392468689 %
+        Contamination fraction in aperture = 51.12874650978488 %
+
+               Residual flux = -0.5748827605745994 e-/s
+        Pearsons chi^2 test = 296.12077907844986 for 13 dof
+                 Chi^2 test = 19803.55879917441 for 13 dof
     """
     # log the call
 
@@ -146,7 +146,7 @@ def kepprf(infile, plotfile, cadencenum, columns, rows, fluxes, prfdir,
     kepmsg.log(logfile, hashline, verbose)
     call = ('KEPPRF -- '
             'infile=' + infile + ' plotfile=' + plotfile +
-            ' cadencenum=' + str(cadencenum) + ' columns=' + str(columns) +
+            ' frameno=' + str(cadencenum) + ' columns=' + str(columns) +
             ' rows=' + str(rows) + ' fluxes=' + str(fluxes) + ' prfdir=' + prfdir +
             ' background=' + str(background) + 'border=' + str(border) +
             ' focus=' + str(focus) + ' xtol=' + str(xtol) +
@@ -215,7 +215,7 @@ def kepprf(infile, plotfile, cadencenum, columns, rows, fluxes, prfdir,
     if verbose:
         print('')
         print('      KepID: {}'.format(kepid))
-        print('        BJD: {}'.format(barytime[cadencenum-1] + 2454833.0))
+        print('        BJD: {}'.format(barytime[frameno-1] + 2454833.0))
         print(' RA (J2000): {}'.format(ra))
         print('Dec (J2000): {}'.format(dec))
         print('     KepMag: {}'.format(kepmag))
@@ -227,16 +227,16 @@ def kepprf(infile, plotfile, cadencenum, columns, rows, fluxes, prfdir,
         print('')
 
     # is this a good row with finite timestamp and pixels?
-    if (not np.isfinite(barytime[cadencenum-1])
-        or np.nansum(fluxpixels[cadencenum-1,:]) == np.nan):
+    if (not np.isfinite(barytime[frameno-1])
+        or np.nansum(fluxpixels[frameno-1,:]) == np.nan):
         errmsg = ("ERROR -- KEPFIELD: Row {0} is a bad quality timestamp"
-                  .format(cadencenum))
+                  .format(frameno))
         kepmsg.err(logfile, errmsg, verbose)
         raise
 
     # construct input pixel image
-    flux = fluxpixels[cadencenum-1,:]
-    ferr = errpixels[cadencenum-1,:]
+    flux = fluxpixels[frameno-1,:]
+    ferr = errpixels[frameno-1,:]
     DATx = np.arange(column,column + xdim)
     DATy = np.arange(row, row + ydim)
 
@@ -570,7 +570,7 @@ def kepprf_main():
                         type=str)
     parser.add_argument('plotfile', help='Name of output PNG plot file',
                         type=str)
-    parser.add_argument('--cadencenum',
+    parser.add_argument('--frameno',
                         help='Cadence number of image stored in infile',
                         type=int)
     parser.add_argument('--columns',
@@ -614,7 +614,7 @@ def kepprf_main():
                         help='Name of ascii log file', type=str)
     args = parser.parse_args()
 
-    kepprf(args.infile, args.plotfile, args.cadencenum, args.columns, args.rows,
+    kepprf(args.infile, args.plotfile, args.frameno, args.columns, args.rows,
            args.fluxes, args.prfdir, args.background, args.border, args.focus,
            args.xtol, args.ftol, args.plot, args.imscale, args.cmap,
            args.apercol, args.verbose, args.logfile)
