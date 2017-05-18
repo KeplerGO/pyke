@@ -348,7 +348,7 @@ def PRF(params, *args):
         PRFres = 1.0e300
     return PRFres
 
-def PRFwithBackground(params,*args):
+def PRFwithBackground(params, *args):
     """
     PRF model with variable background
     """
@@ -394,7 +394,7 @@ def PRFwithBackground(params,*args):
 
     return PRFres
 
-def PRFwithFocusAndBackground(params,*args):
+def PRFwithFocusAndBackground(params, *args):
     """PRF model with variable focus and background"""
     DATx = args[0]
     DATy = args[1]
