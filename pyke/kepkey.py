@@ -206,8 +206,9 @@ def getWCSs(file,struct,logfile,verbose):
         pc = np.array([[pc1_1, pc1_2], [pc2_1, pc2_2]])
         pc = np.linalg.inv(pc)
     except:
+        pass
 
-    return crpix1, crpix2, crval1, crval2, cdelt1, cdelt2, pc,
+    return crpix1, crpix2, crval1, crval2, cdelt1, cdelt2, pc
 
 
 def wcs(i, crpix, crval, cdelt):
