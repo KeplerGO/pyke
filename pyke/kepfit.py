@@ -170,7 +170,7 @@ def fitPRF(flux, ydim, xdim, column, row, prfn, crval1p, crval2p, cdelt1p,
             n += 1
 
     # interpolate the calibrated PRF shape to the target position
-    prf = np.zeros(shape(prfn[0]), dtype='float32')
+    prf = np.zeros(np.shape(prfn[0]), dtype='float32')
     prfWeight = np.zeros((5), dtype='float32')
     for i in range(5):
         prfWeight[i] = math.sqrt((column - crval1p[i]) ** 2
@@ -181,16 +181,16 @@ def fitPRF(flux, ydim, xdim, column, row, prfn, crval1p, crval2p, cdelt1p,
         prf = prf / nansum(prf)
 
     # dimensions of data image
-    datDimY = shape(imgflux)[0]
-    datDimX = shape(imgflux)[1]
+    datDimY = np.shape(imgflux)[0]
+    datDimX = np.shape(imgflux)[1]
 
     # dimensions of data image if it had PRF-sized pixels
     prfDimY = datDimY / cdelt1p[0]
     prfDimX = datDimX / cdelt2p[0]
 
     # location of the data image centered on the PRF image (in PRF pixel units)
-    prfY0 = (shape(prf)[0] - prfDimY) / 2
-    prfX0 = (shape(prf)[1] - prfDimX) / 2
+    prfY0 = (np.shape(prf)[0] - prfDimY) / 2
+    prfX0 = (np.shape(prf)[1] - prfDimX) / 2
 
     # fit input image with model
     args = (imgflux, prf, cdelt1p[0], cdelt2p[0], prfDimY, prfDimX, prfY0,
@@ -230,7 +230,7 @@ def fitMultiPRF(flux, ydim, xdim, column, row, prfn, crval1p, crval2p,
             n += 1
 
     # interpolate the calibrated PRF shape to the target position
-    prf = np.zeros(shape(prfn[0]), dtype='float32')
+    prf = np.zeros(np.shape(prfn[0]), dtype='float32')
     prfWeight = np.zeros((5), dtype='float32')
     for i in range(5):
         prfWeight[i] = math.sqrt((column - crval1p[i]) ** 2
@@ -241,8 +241,8 @@ def fitMultiPRF(flux, ydim, xdim, column, row, prfn, crval1p, crval2p,
         prf = prf / nansum(prf)
 
     # dimensions of data image
-    datDimY = shape(imgflux)[0]
-    datDimX = shape(imgflux)[1]
+    datDimY = np.shape(imgflux)[0]
+    datDimX = np.shape(imgflux)[1]
 
     # dimensions of data image if it had PRF-sized pixels
     prfDimY = datDimY / cdelt1p[0]
@@ -253,8 +253,8 @@ def fitMultiPRF(flux, ydim, xdim, column, row, prfn, crval1p, crval2p,
     datCenX = column + float(datDimX) / 2 - 0.5
 
     # location of the data image centered on the PRF image (in PRF pixel units)
-    prfY0 = (shape(prf)[0] - prfDimY) / 2
-    prfX0 = (shape(prf)[1] - prfDimX) / 2
+    prfY0 = (np.shape(prf)[0] - prfDimY) / 2
+    prfX0 = (np.shape(prf)[1] - prfDimX) / 2
 
     # initial guess for fit parameters
     guess = []
@@ -321,7 +321,7 @@ def fitBackMultiPRF(flux, ydim, xdim, column, row, prfn, crval1p, crval2p,
     imgflux = np.asarray(flux).reshape(ydim, xdim)
 
     # interpolate the calibrated PRF shape to the target position
-    prf = np.zeros(shape(prfn[0]), dtype='float32')
+    prf = np.zeros(np.shape(prfn[0]), dtype='float32')
     prfWeight = np.zeros((5), dtype='float32')
     for i in range(5):
         prfWeight[i] = math.sqrt((column - crval1p[i])**2
@@ -332,8 +332,8 @@ def fitBackMultiPRF(flux, ydim, xdim, column, row, prfn, crval1p, crval2p,
         prf = prf / np.nansum(prf)
 
     # dimensions of data image
-    datDimY = shape(imgflux)[0]
-    datDimX = shape(imgflux)[1]
+    datDimY = np.shape(imgflux)[0]
+    datDimX = np.shape(imgflux)[1]
 
     # dimensions of data image if it had PRF-sized pixels
     prfDimY = datDimY / cdelt1p[0]
@@ -344,8 +344,8 @@ def fitBackMultiPRF(flux, ydim, xdim, column, row, prfn, crval1p, crval2p,
     datCenX = column + float(datDimX) / 2 - 0.5
 
     # location of the data image centered on the PRF image (in PRF pixel units)
-    prfY0 = (shape(prf)[0] - prfDimY) / 2
-    prfX0 = (shape(prf)[1] - prfDimX) / 2
+    prfY0 = (np.shape(prf)[0] - prfDimY) / 2
+    prfX0 = (np.shape(prf)[1] - prfDimX) / 2
 
     # initial guess for fit parameters
     guess = []
@@ -405,7 +405,7 @@ def fitFocusMultiPRF(flux, ydim, xdim, column, row, prfn, crval1p, crval2p,
     imgflux = np.asarray(flux).reshape(ydim, xdim)
     # interpolate the calibrated PRF shape to the target position
 
-    prf = np.zeros(shape(prfn[0]), dtype='float32')
+    prf = np.zeros(np.shape(prfn[0]), dtype='float32')
     prfWeight = np.zeros((5), dtype='float32')
     for i in range(5):
         prfWeight[i] = math.sqrt((column - crval1p[i]) ** 2
@@ -416,8 +416,8 @@ def fitFocusMultiPRF(flux, ydim, xdim, column, row, prfn, crval1p, crval2p,
         prf = prf / nansum(prf)
 
     # dimensions of data image
-    datDimY = shape(imgflux)[0]
-    datDimX = shape(imgflux)[1]
+    datDimY = np.shape(imgflux)[0]
+    datDimX = np.shape(imgflux)[1]
 
     # center of the data image (in CCD pixel units)
     datCenY = row + float(datDimY) / 2 - 0.5
@@ -461,8 +461,8 @@ def fitFocusMultiPRF(flux, ydim, xdim, column, row, prfn, crval1p, crval2p,
     # calculate best-fit model
     prfDimY = datDimY / cdelt1p[0] / w
     prfDimX = datDimX / cdelt2p[0] / w
-    prfY0 = (shape(prf)[0] - prfDimY) / 2
-    prfX0 = (shape(prf)[1] - prfDimX) / 2
+    prfY0 = (np.shape(prf)[0] - prfDimY) / 2
+    prfX0 = (np.shape(prf)[1] - prfDimX) / 2
     DY, DX = 0.0, 0.0
     if int(prfDimY) % 2 == 0:
         DY = 1.0
@@ -474,7 +474,7 @@ def fitFocusMultiPRF(flux, ydim, xdim, column, row, prfn, crval1p, crval2p,
         prfTmp = shift(prf, [y[i] / w, x[i] / w], order=1, mode='constant')
         prfMod = (prfMod + prfTmp[prfY0:prfY0 + prfDimY,
                                   prfX0:prfX0 + prfDimX] * f[i])
-    prfFit = rebin2D(prfMod, [shape(imgflux)[0], shape(imgflux)[1]],
+    prfFit = rebin2D(prfMod, [np.shape(imgflux)[0], np.shape(imgflux)[1]],
                      interpolation, True, False)
     prfFit = prfFit / cdelt1p[0] / cdelt2p[0] / w / w
     prfFit = prfFit + b
