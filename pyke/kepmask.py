@@ -22,9 +22,9 @@ pra = None; pdec = None
 __all__ = ['kepmask']
 
 
-def kepmask(infile, nframe, maskfile='mask.txt', plotfile='kepmask.png',
-            imin=False, imax=False, iscale=False, cmap='jet', verbose=True,
-            logfile='kepmask.log'):
+def kepmask(infile, frameno, maskfile='mask.txt', plotfile='kepmask.png',
+            imin=None, imax=None, iscale='logarithmic', cmap='bone',
+            verbose=True, logfile='kepmask.log'):
     """
     kepmask plots, creates or edits custom target masks for target pixel
     files. The product from this task is a target mask definition file which
@@ -39,19 +39,19 @@ def kepmask(infile, nframe, maskfile='mask.txt', plotfile='kepmask.png',
         The name of a target pixel file from the MAST Kepler archive,
         containing a standard mask definition image in the second data
         extension.
-    nframe : int
-        Cadence number.
+    frameno : int
+        Frame number in the target pixel file.
     maskfile : str
         The name of an ASCII mask definition file. This is either the name of
         a file to be plotted, a file to be created, or a file to be edited.
     plotfile : str
         The name of a PNG plot file containing a record of the mask defined or
         uploaded by this task.
-    imin : float
+    imin : float or None
         Minimum intensity value (in electrons per cadence) for the image
         display. The default minimum intensity level is the median of the
         faintest 10% of pixels in the image.
-    imax : float
+    imax : float or None
         Maximum intensity value (in electrons per cadence) for the image
         display. The default maximum intensity level is the median of the
         brightest 10% of pixels in the image.
@@ -73,26 +73,29 @@ def kepmask(infile, nframe, maskfile='mask.txt', plotfile='kepmask.png',
     global module, output, row, column, mfile, pfile
     global pkepid, pkepmag, pra, pdec, colmap
 
-# input arguments
-
+    # input arguments
     zmin = imin; zmax = imax; zscale = iscale; colmap = cmap
     mfile = maskfile; pfile = plotfile
 
-# log the call
-
+    # log the call
     hashline = '----------------------------------------------------------------------------'
     kepmsg.log(logfile, hashline, verbose)
     call = ('KEPMASK -- '
-            'infile=' + infile + ' ' + 'maskfile =' + mfile + ' '
-            'plotfile =' + pfile + ' ' + 'nframe =' + str(nframe) + ' '
-            'imin =' + str(imin) +' ' + 'imax =' + str(imax) + ' '
-            'iscale =' + str(iscale)+' ' + 'cmap =' + str(cmap) + ' '
-            'verbose=' + str(verbose) + ' ' + 'logfile=' + logfile)
+            'infile=' + infile +
+            ' maskfile=' + mfile +
+            ' plotfile=' + pfile +
+            ' frameno=' + str(frameno) +
+            ' imin=' + str(imin) +
+            ' imax=' + str(imax) +
+            ' iscale=' + str(iscale) +
+            ' cmap=' + str(cmap) +
+            ' verbose=' + str(verbose) +
+            ' logfile=' + logfile)
 
     kepmsg.log(logfile, call + '\n', verbose)
     kepmsg.clock('KEPMASK started at', logfile, verbose)
 
-# open TPF FITS file and check whether or not nframe exists
+# open TPF FITS file and check whether or not frameno exists
     try:
         tpf = pyfits.open(infile, mode='readonly')
     except:
@@ -109,8 +112,8 @@ def kepmask(infile, nframe, maskfile='mask.txt', plotfile='kepmask.png',
         kepmsg.err(logfile, errmsg, verbose)
         raise
 
-    if nframe > naxis2:
-        errmsg = ('ERROR -- KEPMASK: nframe is too large. There are ' +
+    if frameno > naxis2:
+        errmsg = ('ERROR -- KEPMASK: frameno is too large. There are ' +
                   str(naxis2) + ' rows in the table.')
         kepmsg.err(logfile, errmsg, verbose)
 
@@ -120,8 +123,8 @@ def kepmask(infile, nframe, maskfile='mask.txt', plotfile='kepmask.png',
 
     kepid, channel, skygroup, module, output, quarter, season, \
     ra, dec, column, row, kepmag, xdim, ydim, pixels = \
-        kepio.readTPF(infile,'FLUX',logfile,verbose)
-    img = pixels[nframe]
+        kepio.readTPF(infile, 'FLUX', logfile, verbose)
+    img = pixels[frameno]
     pkepid = copy(kepid)
     pra = copy(ra)
     pdec = copy(dec)
@@ -154,13 +157,13 @@ def kepmask(infile, nframe, maskfile='mask.txt', plotfile='kepmask.png',
 # intensity scale
 
     pimg, imin, imax = kepplot.intScale1D(pimg, zscale)
-    if zmin and zmax and 'log' in zscale:
+    if zmin and zmax and zscale=='logarithm':
         zmin = math.log10(zmin)
         zmax = math.log10(zmax)
-    elif zmin and zmax and 'sq' in zscale:
+    elif zmin and zmax and zscale=='squareroot':
         zmin = math.sqrt(zmin)
         zmax = math.sqrt(zmax)
-    elif zmin and zmax and 'li' in zscale:
+    elif zmin and zmax and zscale=='linear':
         zmin *= 1.0
         zmax *= 1.0
     else:
@@ -188,7 +191,7 @@ def plotimage():
 
 # print image and source location data on plot
 
-    plt.ion()
+    plt.draw()
     plt.clf()
     plt.axes([0.73, 0.09, 0.25, 0.4])
     plt.text(0.1, 1.0,'      KepID: {}'.format(pkepid, fontsize=12))
@@ -287,10 +290,10 @@ def plotimage():
         x = [m - 0.5, m + 0.5, m + 0.5, m - 0.5, m - 0.5]
         y = [n - 0.5, n - 0.5, n + 0.5, n + 0.5, n - 0.5]
         plt.fill(x, y, sqcol, alpha=alpha, ec=sqcol)
-    fid = plt.connect('key_press_event', clicker6)
+    fid = plt.connect('button_press_event', clicker6)
 
 # render plot
-    plt.ion()
+    plt.draw()
     plt.show()
 # -----------------------------------------------------------
 # clear all pixels from pixel mask
@@ -400,7 +403,7 @@ def clicker6(event):
     global mask, aid, bid, cid, did, eid, fid
 
     if event.inaxes:
-        if event.key == 'x':
+        if event.button == 1:
             if (event.x > 75 and event.x < 580 and
                 event.y > 53 and event.y < 550):
                 if colmap in ['Greys', 'binary', 'bone', 'gist_gray',
@@ -431,29 +434,27 @@ def kepmask_main():
                    )
     parser.add_argument('infile', help='name of input target pixel FITS file',
                         type=str)
-    parser.add_argument('maskfile', default='maskfile.txt',
+    parser.add_argument('frameno', help='The number of the frame to plot',
+                        type=int)
+    parser.add_argument('--maskfile', default='maskfile.txt',
                          help='name of ASCII custom aperture definition file',
                          type=str)
     parser.add_argument('--plotfile', default='',
                         help='name of output PNG plot file', type=str)
-    parser.add_argument('--nframe', default=2177,
-                        help='The number of the frame to plot', type=int)
-    parser.add_argument('--imin', default=1.5e5,
-                        help='minimum of image intensity scale [e-]',
-                        type=float)
-    parser.add_argument('--imax', default=5.0e5,
-                        help='maximum of image intensity scale [e-]',
-                        type=float)
+    parser.add_argument('--imin', default=None,
+                        help='minimum of image intensity scale [e-]')
+    parser.add_argument('--imax', default=None,
+                        help='maximum of image intensity scale [e-]')
     parser.add_argument('--iscale', default='logarithmic',
                         help='type of image intensity scale',
                         type=str,
                         choices=['linear','logarithmic','squareroot'])
-    parser.add_argument('--cmap', default='PuBu', help='image colormap',
+    parser.add_argument('--cmap', default='bone', help='image colormap',
                         type=str)
     parser.add_argument('--verbose', action='store_true',
                         help='Write to a log file?')
     parser.add_argument('--logfile', '-l', help='Name of ascii log file',
                         default='kepmask.log', dest='logfile', type=str)
     args = parser.parse_args()
-    kepmask(args.infile, args.maskfile, args.plotfile, args.nframe, args.imin,
+    kepmask(args.infile, args.frameno, args.maskfile, args.plotfile, args.imin,
             args.imax, args.iscale, args.cmap, args.verbose, args.logfile)
