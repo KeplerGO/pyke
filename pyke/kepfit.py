@@ -1,11 +1,15 @@
-import kepmsg, kepstat, kepfunc, keparray
-import math, sys
+from . import kepmsg
+from . import kepstat
+from . import kepfunc
+from . import keparray
+from .keparray import rebin2D
+import math
+import sys
 import numpy as np
 from scipy import optimize, ndimage
 from scipy.optimize import fmin_powell, fmin_tnc, fmin, leastsq
 from scipy.ndimage import interpolation
 from scipy.ndimage.interpolation import shift
-from keparray import rebin2D
 
 
 def leastsquares(fitfunc, pinit, xdata, ydata, yerr, logfile, verbose):

@@ -8,3 +8,4 @@ def test_import():
     from .. import kepfunc
     from .. import keparray
     from .. import kepprf
+    from .. import kepfit
