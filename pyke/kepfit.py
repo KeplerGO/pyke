@@ -90,8 +90,8 @@ def lsqclip(fit_func, pinit, x, y, yerr, rej_lo, rej_hi, niter, logfile,
         tmpy = []
         tmpyerr = []
         npts.append(len(x))
-        coeffs,errors,covar,sigma,chi2,dof,fit,plotx,ploty,status = \
-            leastsquares(fit_func,pinit,x,y,yerr,logfile,verbose)
+        coeffs, errors, covar, sigma, chi2, dof, fit, plotx, ploty = \
+            leastsquares(fit_func, pinit, x, y, yerr, logfile, verbose)
         pinit = coeffs
 
         # point-by-point sigma-clipping test

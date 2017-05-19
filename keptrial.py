@@ -136,8 +136,8 @@ def keptrial(infile,outfile,datacol,errcol,fmin,fmax,nfreq,method,
             pinit = np.array([float(i),freq[-1],deltaf])
             if i > 3:
                 n = np.array(n,dtype='float32')
-                coeffs, errors, covar, sigma, chi2, dof, fit, plotx, ploty, status = \
-                    kepfit.leastsquare('gauss',pinit,x[1:],n,None,logfile,verbose)
+                coeffs, errors, covar, sigma, chi2, dof, fit, plotx, ploty = \
+                    kepfit.leastsquares(kepfunc.gauss, pinit, x[1:], n, None, logfile, verbose)
                 fitfunc = kepfunc.gauss()
                 f = np.arange(fmin,fmax,(fmax-fmin)/100)
                 fit = fitfunc(coeffs,f)
