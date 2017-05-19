@@ -458,9 +458,9 @@ def kepfold(infile, outfile, period, phasezero, bindata, binmethod, threshold,
             instr[-1].header['NITER'] = (niter,
                                          'max number of sigma-clipping iterations')
 
-        # history keyword in output file
-        kepkey.history(call, instr[0], outfile, logfile, verbose)
-        instr.writeto(outfile)
+    # history keyword in output file
+    kepkey.history(call, instr[0], outfile, logfile, verbose)
+    instr.writeto(outfile)
 
     # clean up x-axis unit
     ptime1, ptime2 = np.array([], 'float32'), np.array([], 'float32')
