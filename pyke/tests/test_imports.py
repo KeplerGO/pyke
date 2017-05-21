@@ -9,3 +9,4 @@ def test_import():
     from .. import keparray
     from .. import kepprf
     from .. import kepfit
+    from .. import kepfold

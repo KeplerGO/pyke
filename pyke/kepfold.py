@@ -1,10 +1,13 @@
-import sys
+from . import kepio
+from . import kepmsg
+from . import kepkey
+from . import kepstat
+from . import kepfit
 import numpy as np
 from copy import copy
 from scipy import stats
 from astropy.io import fits as pyfits
 from matplotlib import pyplot as plt
-import kepio, kepmsg, kepkey, kepstat, kepfit
 
 def kepfold(infile, outfile, period, phasezero, bindata, binmethod, threshold,
             niter, nbins, rejqual, plottype, clobber=True, verbose=True,
@@ -31,7 +34,6 @@ def kepfold(infile, outfile, period, phasezero, bindata, binmethod, threshold,
 
     Parameters
     ----------
-
     inile : str
         The name of a MAST standard format FITS file containing a Kepler light
         curve within the first data extension.
@@ -60,7 +62,7 @@ def kepfold(infile, outfile, period, phasezero, bindata, binmethod, threshold,
         accepting the sigclip result.
     nbins : int
         The number of phase bins to calculate.
-    quality : bool
+    rejqual : bool
         If `True`, timestamps with quality issues recorded as a finite quality
         flag in the input file will be thrown away before folding the data.
     plottype : str
@@ -86,36 +88,28 @@ def kepfold(infile, outfile, period, phasezero, bindata, binmethod, threshold,
 
     # startup parameters
     labelsize, ticksize, xsize, ysize = 32, 18, 18, 10
-    lcolor = '#0000ff'; lwidth = 2.0; fcolor = '#ffff00'; falpha = 0.2
+    lcolor, fcolor = '#0000ff', '#ffff00'
+    lwidth, falpha = 2.0, 0.2
 
     # log the call
     hashline = '----------------------------------------------------------------------------'
-    kepmsg.log(logfile,hashline,verbose)
-    call = 'KEPFOLD -- '
-    call += 'infile='+infile+' '
-    call += 'outfile='+outfile+' '
-    call += 'period='+str(period)+' '
-    call += 'phasezero='+str(phasezero)+' '
-    binit = 'n'
-    if (bindata):
-        binit = 'y'
-    call += 'bindata='+binit+' '
-    call += 'binmethod='+binmethod+' '
-    call += 'threshold='+str(threshold)+' '
-    call += 'niter='+str(niter)+' '
-    call += 'nbins='+str(nbins)+' '
-    qflag = 'n'
-    if (rejqual): qflag = 'y'
-    call += 'rejqual='+qflag+ ' '
-    call += 'plottype='+plottype+ ' '
-    call += 'plotlab='+plotlab+ ' '
-    overwrite = 'n'
-    if (clobber): overwrite = 'y'
-    call += 'clobber='+overwrite+ ' '
-    chatter = 'n'
-    if (verbose): chatter = 'y'
-    call += 'verbose='+chatter+' '
-    call += 'logfile='+logfile
+    kepmsg.log(logfile, hashline, verbose)
+    call = ('KEPFOLD -- '
+            'infile=' + infile +
+            ' outfile=' + outfile +
+            ' period=' + str(period) +
+            ' phasezero=' + str(phasezero) +
+            ' bindata=' + str(bindata) +
+            ' binmethod=' + binmethod +
+            ' threshold=' + str(threshold) +
+            ' niter=' + str(niter) +
+            ' nbins=' + str(nbins) +
+            ' rejqual=' + str(rejqual) +
+            ' plottype=' + plottype +
+            ' clobber=' + str(clobber) +
+            ' verbose=' + str(verbose) +
+            ' logfile=' + logfile)
+
     kepmsg.log(logfile, call+'\n', verbose)
 
     # start time
@@ -129,10 +123,10 @@ def kepfold(infile, outfile, period, phasezero, bindata, binmethod, threshold,
         kepio.clobber(outfile, logfile, verbose)
     if kepio.fileexists(outfile):
         message = 'ERROR -- KEPFOLD: ' + outfile + ' exists. Use --clobber'
-        kepmsg.err(logfile,message,verbose)
+        kepmsg.err(logfile, message, verbose)
 
     # open input file
-    instr = kepio.openfits(infile,'readonly', logfile, verbose)
+    instr = kepio.openfits(infile, 'readonly', logfile, verbose)
     tstart, tstop, bjdref, cadence = kepio.timekeys(instr, infile, logfile,
                                                     verbose)
     try:
@@ -196,7 +190,8 @@ def kepfold(infile, outfile, period, phasezero, bindata, binmethod, threshold,
     except:
         deterr = np.zeros(len(table.field(0)))
         if 'det' in plottype:
-            txt = 'ERROR -- KEPFOLD: DETSAP_FLUX_ERR column is not populated. Use kepflatten'
+            txt = ("ERROR -- KEPFOLD: DETSAP_FLUX_ERR column is not populated."
+                   " Use kepflatten.")
             kepmsg.err(logfile, txt, verbose)
     try:
         quality = instr[1].data.field('SAP_QUALITY')
@@ -507,9 +502,9 @@ def kepfold(infile, outfile, period, phasezero, bindata, binmethod, threshold,
     pout1 = pout1 / 10**nrm
     pout2 = pout2 / 10**nrm
     if nrm == 0:
-        ylab = plotlab
+        ylab = 'e$^-$ s$^{-1}$'
     else:
-        ylab = "10$^{0}$ {1}".format(nrm, plotlab)
+        ylab = "10$^{0}$ {1}".format(nrm, 'e$^-$ s$^{-1}$')
 
     # data limits
     xmin = ptime1.min()
@@ -558,42 +553,48 @@ def kepfold(infile, outfile, period, phasezero, bindata, binmethod, threshold,
         plt.ion()
         plt.show()
     # close input file
-    kepio.closefits(instr,logfile,verbose)
+    kepio.closefits(instr, logfile, verbose)
 
     # stop time
-    kepmsg.clock('KEPFOLD ended at: ',logfile,verbose)
+    kepmsg.clock('KEPFOLD ended at: ', logfile, verbose)
 
-# main
-if '--shell' in sys.argv:
+def kepfold_main():
     import argparse
 
-    parser = argparse.ArgumentParser(description='Low bandpass or high bandpass signal filtering')
-
-    parser.add_argument('--shell', action='store_true', help='Are we running from the shell?')
-
-    parser.add_argument('infile', help='Name of input file', type=str)
-    parser.add_argument('outfile', help='Name of FITS file to output', type=str)
-    parser.add_argument('--period', help='Period to fold data upon [days]', type=float)
-    parser.add_argument('--bjd0', help='time of zero phase for the folded period [BJD]', type=float)
-    parser.add_argument('--bindata', action='store_true', help='Bin output data?')
+    parser = argparse.ArgumentParser(description=("Low bandpass or high"
+                                                  "bandpass signal filtering"))
+    parser.add_argument('infile', help='Name of FITS input file', type=str)
+    parser.add_argument('outfile', help='Name of FITS file to output',
+                        type=str)
+    parser.add_argument('--period', help='Period to fold data upon [days]',
+                        type=float)
+    parser.add_argument('--bjd0',
+                        help='time of zero phase for the folded period [BJD]',
+                        type=float)
+    parser.add_argument('--bindata', action='store_true',
+                        help='Bin output data?')
     parser.add_argument('--binmethod', default='mean', help='Binning method',
                         type=str, choices=['mean','median','sigclip'])
     parser.add_argument('--threshold', default=1.0,
                         help='Sigma clipping threshold [sigma]', type=float)
     parser.add_argument('--niter', default=5,
-                        help='Number of sigma clipping iterations before giving up', type=int)
-    parser.add_argument('--nbins', default=1000, help='Number of period bins', type=int)
-    parser.add_argument('--quality', action='store_true', help='Reject bad quality timestamps?')
+                        help='Maximum number of sigma clipping iterations',
+                        type=int)
+    parser.add_argument('--nbins', default=1000, help='Number of period bins',
+                        type=int)
+    parser.add_argument('--quality', action='store_true',
+                        help='Reject bad quality timestamps?')
     parser.add_argument('--plottype', default='sap', help='plot type',
-                        type=str, choices=['sap','pdc','cbv','det','none'])
-    parser.add_argument('--plotlab', default='e$^-$ s$^{-1}$', help='Plot axis label', type=str)
-    parser.add_argument('--clobber', action='store_true', help='Overwrite output file?')
-    parser.add_argument('--verbose', action='store_true', help='Write to a log file?')
+                        type=str, choices=['sap', 'pdc', 'cbv', 'det','None'])
+    parser.add_argument('--clobber', action='store_true',
+                        help='Overwrite output file?')
+    parser.add_argument('--verbose', action='store_true',
+                        help='Write to a log file?')
     parser.add_argument('--logfile', '-l', help='Name of ascii log file',
                         default='kepfold.log', dest='logfile', type=str)
-
     args = parser.parse_args()
 
-    kepfold(args.infile,args.outfile,args.period,args.bjd0,args.bindata,args.binmethod,args.threshold,
-            args.niter,args.nbins,args.quality,args.plottype,args.plotlab,args.clobber,args.verbose,
-            args.logfile)
+    kepfold(args.infile, args.outfile, args.period, args.bjd0, args.bindata,
+            args.binmethod, args.threshold, args.niter, args.nbins,
+            args.quality, args.plottype, args.plotlab, args.clobber,
+            args.verbose, args.logfile)
