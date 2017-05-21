@@ -136,7 +136,7 @@ def getWCSp(filename, struct, logfile, verbose):
     return crpix1p, crpix2p, crval1p, crval2p, cdelt1p, cdelt2p
 
 
-def getWCSs(file,struct,logfile,verbose):
+def getWCSs(filename, struct, logfile, verbose):
     """# get physical WCS keywords"""
 
     crpix1 = 0.0; crpix2 = 0.0; crval1 = 0.0; crval2 = 0.0; cdelt1 = 0.0;

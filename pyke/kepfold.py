@@ -9,8 +9,9 @@ from scipy import stats
 from astropy.io import fits as pyfits
 from matplotlib import pyplot as plt
 
-def kepfold(infile, outfile, period, phasezero, bindata, binmethod, threshold,
-            niter, nbins, rejqual, plottype, clobber=True, verbose=True,
+def kepfold(infile, outfile, period, bjd0, bindata=True,
+            binmethod='median', threshold=1.0, niter=5, nbins=1000,
+            rejqual=True, plottype='sap', clobber=True, verbose=True,
             logfile="kepfold.log"):
     """
     Phase-fold light curve data on linear ephemeris.
@@ -98,7 +99,7 @@ def kepfold(infile, outfile, period, phasezero, bindata, binmethod, threshold,
             'infile=' + infile +
             ' outfile=' + outfile +
             ' period=' + str(period) +
-            ' phasezero=' + str(phasezero) +
+            ' bjd0=' + str(bjd0) +
             ' bindata=' + str(bindata) +
             ' binmethod=' + binmethod +
             ' threshold=' + str(threshold) +
@@ -115,9 +116,6 @@ def kepfold(infile, outfile, period, phasezero, bindata, binmethod, threshold,
     # start time
     kepmsg.clock('KEPFOLD started at', logfile, verbose)
 
-    # test log file
-    logfile = kepmsg.test(logfile)
-
     # clobber output file
     if clobber:
         kepio.clobber(outfile, logfile, verbose)
@@ -126,7 +124,7 @@ def kepfold(infile, outfile, period, phasezero, bindata, binmethod, threshold,
         kepmsg.err(logfile, message, verbose)
 
     # open input file
-    instr = kepio.openfits(infile, 'readonly', logfile, verbose)
+    instr = pyfits.open(infile, 'readonly')
     tstart, tstop, bjdref, cadence = kepio.timekeys(instr, infile, logfile,
                                                     verbose)
     try:
@@ -136,7 +134,7 @@ def kepfold(infile, outfile, period, phasezero, bindata, binmethod, threshold,
         cadenom = cadence
 
     # fudge non-compliant FITS keywords with no values
-    instr = kepkey.emptykeys(instr,file,logfile,verbose)
+    instr = kepkey.emptykeys(instr, infile, logfile, verbose)
 
     # input data
     table = instr[1].data
@@ -251,11 +249,11 @@ def kepfold(infile, outfile, period, phasezero, bindata, binmethod, threshold,
     deterr = np.array(work9, dtype='float32') / cadenom
 
     # calculate phase
-    if phasezero < bjdref:
-        phasezero += bjdref
-    date1 = (barytime1 + bjdref - phasezero)
+    if bjd0 < bjdref:
+        bjd0 += bjdref
+    date1 = (barytime1 + bjdref - bjd0)
     phase1 = (date1 / period) - np.floor(date1/period)
-    date2 = (barytime + bjdref - phasezero)
+    date2 = (barytime + bjdref - bjd0)
     phase2 = (date2 / period) - np.floor(date2/period)
     phase2 = np.array(phase2, 'float32')
 
@@ -400,7 +398,7 @@ def kepfold(infile, outfile, period, phasezero, bindata, binmethod, threshold,
         else:
             instr[1].header.cards[incards[i].keyword].comment = incards[i].comment
     instr[1].header['PERIOD'] = (period, 'period defining the phase [d]')
-    instr[1].header['BJD0'] = (phasezero, 'time of phase zero [BJD]')
+    instr[1].header['BJD0'] = (bjd0, 'time of phase zero [BJD]')
 
     # write new phased data extension for output file
     if bindata:
@@ -444,7 +442,7 @@ def kepfold(infile, outfile, period, phasezero, bindata, binmethod, threshold,
         instr[-1].header.cards['TUNIT6'].comment = 'column units: electrons per second'
         instr[-1].header['EXTNAME']    = ('FOLDED', 'extension name')
         instr[-1].header['PERIOD']     = (period, 'period defining the phase [d]')
-        instr[-1].header['BJD0']       = (phasezero, 'time of phase zero [BJD]')
+        instr[-1].header['BJD0']       = (bjd0, 'time of phase zero [BJD]')
         instr[-1].header['BINMETHD']   = (binmethod, 'phase binning method')
 
         if binmethod =='sigclip':
@@ -550,7 +548,7 @@ def kepfold(infile, outfile, period, phasezero, bindata, binmethod, threshold,
         else:
             plt.ylim(1.0e-10,ymax+yr*0.01)
         plt.grid()
-        plt.ion()
+        #plt.ion()
         plt.show()
     # close input file
     kepio.closefits(instr, logfile, verbose)
@@ -566,9 +564,9 @@ def kepfold_main():
     parser.add_argument('infile', help='Name of FITS input file', type=str)
     parser.add_argument('outfile', help='Name of FITS file to output',
                         type=str)
-    parser.add_argument('--period', help='Period to fold data upon [days]',
+    parser.add_argument('period', help='Period to fold data upon [days]',
                         type=float)
-    parser.add_argument('--bjd0',
+    parser.add_argument('bjd0',
                         help='time of zero phase for the folded period [BJD]',
                         type=float)
     parser.add_argument('--bindata', action='store_true',
@@ -587,7 +585,7 @@ def kepfold_main():
     parser.add_argument('--plottype', default='sap', help='plot type',
                         type=str, choices=['sap', 'pdc', 'cbv', 'det','None'])
     parser.add_argument('--clobber', action='store_true',
-                        help='Overwrite output file?')
+                        help='Overwrite output file?', default=True)
     parser.add_argument('--verbose', action='store_true',
                         help='Write to a log file?')
     parser.add_argument('--logfile', '-l', help='Name of ascii log file',
@@ -596,5 +594,5 @@ def kepfold_main():
 
     kepfold(args.infile, args.outfile, args.period, args.bjd0, args.bindata,
             args.binmethod, args.threshold, args.niter, args.nbins,
-            args.quality, args.plottype, args.plotlab, args.clobber,
-            args.verbose, args.logfile)
+            args.quality, args.plottype, args.clobber, args.verbose,
+            args.logfile)

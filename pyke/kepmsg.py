@@ -1,4 +1,5 @@
-import sys, time, string
+import sys
+import time
 
 def log(filename, message, verbose):
     """write message to log file and shell."""
@@ -12,7 +13,7 @@ def log(filename, message, verbose):
 def err(filename, message, verbose):
     if verbose:
         log(filename, message, verbose)
-    raise
+    raise Exception(message)
 
 def warn(filename, message):
     log(filename, message, True)
