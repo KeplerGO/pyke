@@ -1,13 +1,16 @@
+import re
 import numpy as np
 from astropy.io import fits as pyfits
 from matplotlib import pyplot as plt
+from tqdm import tqdm
 from . import kepio
 from . import kepmsg
 from . import kepkey
 from . import kepfunc
 
-def kepsmooth(infile, outfile, datacol, function, fscale, plot,
-              clobber, verbose, logfile):
+def kepsmooth(infile, outfile, datacol='SAP_FLUX', function='flat',
+              fscale=1.0, plot=True, clobber=True, verbose=True,
+              logfile='kepsmooth.log'):
     """
     kepsmooth -- Smooth Kepler light curve data by convolution with a choice
     of analytical functions. The smoothed data is copied to a new FITS file
@@ -50,6 +53,12 @@ def kepsmooth(infile, outfile, datacol, function, fscale, plot,
         Print informative messages and warnings to the shell and logfile?
     logfile : str
          Name of the logfile containing error and warning messages.
+
+    Examples
+    --------
+    .. code-block:: bash
+
+        $ kepsmooth kplr005110407-2009259160929_llc.fits kepsmooth.fits
     """
 
     ## startup parameters
@@ -79,9 +88,6 @@ def kepsmooth(infile, outfile, datacol, function, fscale, plot,
 
     ## start time
     kepmsg.clock('KEPSMOOTH started at', logfile, verbose)
-
-    ## test log file
-    logfile = kepmsg.test(logfile)
 
     ## clobber output file
     if clobber:
@@ -119,7 +125,7 @@ def kepsmooth(infile, outfile, datacol, function, fscale, plot,
         nanclean = instr[1].header['NANCLEAN']
     except:
         naxis2 = 0
-        for i in range(len(table.field(0))):
+        for i in tqdm(range(len(table.field(0)))):
             if (np.isfinite(barytime[i]) and np.isfinite(flux[i])
                 and flux[i] != 0.0):
                 table[naxis2] = table[i]
@@ -148,17 +154,18 @@ def kepsmooth(infile, outfile, datacol, function, fscale, plot,
 
     ## clean up x-axis unit
     intime0 = float(int(tstart / 100) * 100.0)
-    if intime0 < 2.4e6: intime0 += 2.4e6
+    if intime0 < 2.4e6:
+        intime0 += 2.4e6
     ptime = intime - intime0
-    xlab = 'BJD $-$ %d' % intime0
+    xlab = 'BJD $-$ {0}'.format(intime0)
 
     ## clean up y-axis units
     pout = indata * 1.0
     pout2 = outdata * 1.0
-    nrm = len(str(int(np.nanmax(pout))))-1
-    pout = pout / 10**nrm
-    pout2 = pout2 / 10**nrm
-    ylab = '10$^%d$ %s' % (nrm, re.sub('_', '-', plotlab))
+    nrm = len(str(int(np.nanmax(pout)))) - 1
+    pout = pout / 10 ** nrm
+    pout2 = pout2 / 10 ** nrm
+    ylab = '10$^{0}$ {1}'.format(nrm, 'e$^-$ s$^{-1}$')
 
     ## data limits
     xmin = np.nanmin(ptime)
@@ -220,7 +227,7 @@ def kepsmooth(infile, outfile, datacol, function, fscale, plot,
     ## end time
     kepmsg.clock('KEPSMOOTH completed at', logfile, verbose)
 
-def kepsmooth_main()
+def kepsmooth_main():
     import argparse
     parser = argparse.ArgumentParser(description=('Smooth Kepler light curve '
                                                   'data by convolution'))
