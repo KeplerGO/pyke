@@ -8,6 +8,49 @@ from . import kepfunc
 
 def kepsmooth(infile, outfile, datacol, function, fscale, plot,
               clobber, verbose, logfile):
+    """
+    kepsmooth -- Smooth Kepler light curve data by convolution with a choice
+    of analytical functions. The smoothed data is copied to a new FITS file
+    with the same structure as the input file.
+
+    Parameters
+    ----------
+    infile : str
+        The name of a MAST standard format FITS file containing Kepler light
+        curve data within the first data extension.
+    outfile : str
+        The name of the output FITS file. The output file is identical in
+        format to the input file. The data to be smoothed will be overwritten
+        in the output file by its convolved version.
+    datacol : str
+        The name of the data column in the input FITS file to be smoothed, e.g.
+        ``SAP_FLUX``, ``PDCSAP_FLUX``, ``MOM_CENTR1`` etc. A full list of
+        archived data columns is provided in the Kepler Archive Manual.
+    function : str
+        The form of the smoothing function. A flat function is a moving
+        average. The options are:
+
+            * flat
+
+            * hanning
+
+            * hamming
+
+            * bartlett
+
+            * blackman
+
+    fscale : float
+        The width of the convolution function in units of days.
+    plot : bool
+        Plot the original light curve and the result of the smoothing?
+    clobber : bool
+        Overwrite the output file?
+    verbose : bool
+        Print informative messages and warnings to the shell and logfile?
+    logfile : str
+         Name of the logfile containing error and warning messages.
+    """
 
     ## startup parameters
     labelsize = 24
@@ -140,7 +183,7 @@ def kepsmooth(infile, outfile, datacol, function, fscale, plot,
 
         # position axes inside the plotting window
         ax = plt.subplot(111)
-        plt.subplots_adjust(0.06,0.1,0.93,0.88)
+        plt.subplots_adjust(0.06, 0.1, 0.93, 0.88)
 
         # force tick labels to be absolute rather than relative
         plt.gca().xaxis.set_major_formatter(plt.ScalarFormatter(useOffset=False))
@@ -156,9 +199,9 @@ def kepsmooth(infile, outfile, datacol, function, fscale, plot,
                  linewidth=lwidth*4.0)
         plt.xlabel(xlab, {'color' : 'k'})
         plt.ylabel(ylab, {'color' : 'k'})
-        plt.xlim(xmin-xr*0.01, xmax+xr*0.01)
+        plt.xlim(xmin - xr * 0.01, xmax + xr * 0.01)
         if ymin >= 0.0:
-            plt.ylim(ymin-yr*0.01, ymax+yr*0.01)
+            plt.ylim(ymin - yr * 0.01, ymax + yr * 0.01)
         else:
             plt.ylim(1.0e-10, ymax+yr*0.01)
         plt.grid()
@@ -172,11 +215,10 @@ def kepsmooth(infile, outfile, datacol, function, fscale, plot,
     instr.writeto(outfile)
 
     ## close input file
-    kepio.closefits(instr,logfile,verbose)
+    kepio.closefits(instr, logfile, verbose)
 
     ## end time
-    message = 'KEPSMOOTH completed at'
-    kepmsg.clock(message, logfile, verbose)
+    kepmsg.clock('KEPSMOOTH completed at', logfile, verbose)
 
 def kepsmooth_main()
     import argparse
@@ -192,8 +234,8 @@ def kepsmooth_main()
                         choices=['flat', 'hanning', 'hamming', 'bartlett',
                                  'blackman'])
     parser.add_argument('--fscale', default=1.0,
-                        help='Characteristic width of smoothing function [days]',
-                        type=float)
+                        help=('Characteristic width of smoothing function'
+                              ' [days]'), type=float)
     parser.add_argument('--plot', action='store_true', default=True,
                         help='Plot result?')
     parser.add_argument('--clobber', action='store_true', default=True,
