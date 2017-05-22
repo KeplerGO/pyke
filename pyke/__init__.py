@@ -15,3 +15,4 @@ from .keparray import *
 from .kepprf   import *
 from .kepfit   import *
 from .kepfold  import *
+from .kepclip  import *

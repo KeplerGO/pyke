@@ -5,3 +5,5 @@ Modules/API
 
     kepmask
     kepprf
+    kepfold
+    kepclip

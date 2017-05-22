@@ -1,16 +1,50 @@
+from . import kepio
+from . import kepmsg
+from . import kepkey
 import numpy as np
-import sys
 from astropy.io import fits as pyfits
 from matplotlib import pyplot as plt
-import kepio, kepmsg, kepkey, kepstat
 
-def kepclip(infile, outfile, ranges, plot, plotcol, clobber, verbose, logfile,
-            status):
+def kepclip(infile, outfile, ranges, plot=True, datacol='SAP_FLUX',
+            clobber=True, verbose=True, logfile='kepclip.log'):
+    """
+    Remove unwanted time ranges from Kepler time series data.
+
+    Parameters
+    ----------
+    infile: str
+         The name of a MAST standard format FITS file containing a Kepler light
+         curve within the first data extension.
+    outfile: str
+         The name of the output FITS file with unwanted data removed.
+    ranges: str
+       Time ranges are supplied as comma-separated pairs of Barycentric Julian
+       Dates (BJDs). Multiple ranges are separated by a semi-colon. An example
+       containing two time ranges is:
+       ``'2455012.48517,2455014.50072;2455022.63487,2455025.08231'``
+    plot: bool
+        Plot the output data?
+    datacol: str
+        Types of photometry stored in the input file.
+    clobber: bool
+        Overwrite the output file?
+    verbose: bool
+        Print informative messages and warnings to the shell and logfile?
+    logfile: str
+        Name of the logfile containing error and warning messages.
+
+    Examples
+    --------
+    .. code-block:: bash
+
+        $ kepclip kplr002436324-2009259160929_llc.fits kepclip.fits
+          2455012.48517,2455060.50072
+    """
 
     labelsize = 32
-    ticksize = 24
-    xsize = 18
-    ysize = 10
+    ticksize = 14
+    xsize = 14
+    ysize = 8
     lcolor = '#0000ff'
     lwidth = 1.0
     fcolor = '#ffff00'
@@ -18,26 +52,17 @@ def kepclip(infile, outfile, ranges, plot, plotcol, clobber, verbose, logfile,
 
     # log the call
     hashline = '----------------------------------------------------------------------------'
-    kepmsg.log(logfile,hashline,verbose)
-    call = 'KEPCLIP -- '
-    call += 'infile='+infile+' '
-    call += 'outfile='+outfile+' '
-    call += 'ranges='+ranges + ' '
-    plotit = 'n'
-    if plot:
-        plotit = 'y'
-    call += 'plot='+plotit+ ' '
-    call += 'plotcol='+plotcol+ ' '
-    overwrite = 'n'
-    if clobber:
-        overwrite = 'y'
-    call += 'clobber='+overwrite+ ' '
-    chatter = 'n'
-    if verbose:
-        chatter = 'y'
-    call += 'verbose='+chatter+' '
-    call += 'logfile='+logfile
-    kepmsg.log(logfile,call+'\n',verbose)
+    kepmsg.log(logfile, hashline, verbose)
+    call = ('KEPCLIP -- '
+            + 'infile={}'.format(infile)
+            + ' outfile={}'.format(outfile)
+            + ' ranges={}'.format(ranges)
+            + ' plot={}'.format(plot)
+            + ' datacol={}'.format(datacol)
+            + ' clobber={}'.format(clobber)
+            + ' verbose={}'.format(verbose)
+            + ' logfile={}'.format(logfile))
+    kepmsg.log(logfile, call+'\n', verbose)
 
     # start time
     kepmsg.clock('KEPCLIP started at',logfile,verbose)
@@ -54,7 +79,7 @@ def kepclip(infile, outfile, ranges, plot, plotcol, clobber, verbose, logfile,
     t1, t2 = kepio.timeranges(ranges, logfile, verbose)
 
     # open input file
-    instr = kepio.openfits(infile, 'readonly', logfile, verbose)
+    instr = pyfits.open(infile, 'readonly')
     tstart, tstop, bjdref, cadence = kepio.timekeys(instr, infile, logfile,
                                                     verbose)
     try:
@@ -64,16 +89,16 @@ def kepclip(infile, outfile, ranges, plot, plotcol, clobber, verbose, logfile,
         cadenom = cadence
 
     # fudge non-compliant FITS keywords with no values
-    instr = kepkey.emptykeys(instr,file,logfile,verbose)
+    instr = kepkey.emptykeys(instr, infile, logfile, verbose)
 
     # input data
     table = instr[1].data
 
     # read time and flux columns
     barytime = kepio.readtimecol(infile, table, logfile, verbose)
-    flux = kepio.readfitscol(infile, table, plotcol, logfile, verbose)
+    flux = kepio.readfitscol(infile, table, datacol, logfile, verbose)
     barytime = barytime + bjdref
-    if 'flux' in plotcol.lower():
+    if 'flux' in datacol.lower():
         flux = flux / cadenom
 
     # filter input data table
@@ -103,7 +128,7 @@ def kepclip(infile, outfile, ranges, plot, plotcol, clobber, verbose, logfile,
     instr.writeto(outfile)
 
     # clean up x-axis unit
-    barytime0 = (tstart // 100) * 100.0)
+    barytime0 = (tstart // 100) * 100.0
     barytime = work1 - barytime0
     xlab = 'BJD $-$ {}'.format(barytime0)
 
@@ -170,7 +195,6 @@ def kepclip(infile, outfile, ranges, plot, plotcol, clobber, verbose, logfile,
 
     # render plot
     if plot:
-        #plt.ion()
         plt.show()
 
     # close input file
@@ -179,7 +203,6 @@ def kepclip(infile, outfile, ranges, plot, plotcol, clobber, verbose, logfile,
     # end time
     message = 'KEPCLIP completed at'
     kepmsg.clock(message, logfile, verbose)
-
 
 def kepclip_main():
     import argparse
@@ -193,14 +216,14 @@ def kepclip_main():
                         type=str)
     parser.add_argument('--plot', action='store_true', help='Plot result?',
                         default=True)
-    parser.add_argument('--plotcol', help='Data column to plot',
+    parser.add_argument('--datacol', help='Data column to plot',
                         default='SAP_FLUX', type=str)
     parser.add_argument('--clobber', action='store_true', default=True,
                         help='Overwrite output file?')
-    parser.add_argument('--verbose', action='store_true', default=True
+    parser.add_argument('--verbose', action='store_true', default=True,
                         help='Write to a log file?')
     parser.add_argument('--logfile', '-l', help='Name of ascii log file',
                         default='kepclip.log', dest='logfile', type=str)
     args = parser.parse_args()
-    kepclip(args.infile, args.outfile, args.ranges, args.plot, args.plotcol,
+    kepclip(args.infile, args.outfile, args.ranges, args.plot, args.datacol,
             args.clobber, args.verbose, args.logfile)

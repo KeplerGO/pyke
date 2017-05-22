@@ -10,3 +10,4 @@ def test_import():
     from .. import kepprf
     from .. import kepfit
     from .. import kepfold
+    from .. import kepclip
