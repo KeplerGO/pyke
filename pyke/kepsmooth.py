@@ -1,4 +1,3 @@
-import re
 import numpy as np
 from astropy.io import fits as pyfits
 from matplotlib import pyplot as plt
