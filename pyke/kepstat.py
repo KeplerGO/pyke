@@ -14,7 +14,7 @@ def rms(array1, array2, logfile, verbose):
     if len(array1) != len(array2):
         message  = ("ERROR -- KEPSTAT.RMS: Arrays have unequal sizes - "
                     "array1 = {0}, array2 = {1}".format(len(array1),
-                                                        len(arra2)))
+                                                        len(array2)))
         kepmsg.err(logfile, message, verbose)
 
     return math.sqrt(np.mean((array1 - array2) ** 2))
