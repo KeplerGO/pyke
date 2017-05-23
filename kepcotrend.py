@@ -14,7 +14,6 @@ Changelog:
 __svnid__ = "$Id: kepcotrend.py 6165 2014-03-26 21:16:27Z mstill $"
 __url__ = "$URL: svn+ssh://mstill@murzim.amn.nasa.gov/data-repo/trunk/data/flight/go/PyKE/kepler/kepcotrend.py $"
 
-import sys
 import matplotlib.pyplot as plt
 import numpy as np
 import math
@@ -918,14 +917,8 @@ if '--shell' in sys.argv:
                         default='kepcotrend.log', dest='logfile', type=str)
     parser.add_argument('--status', '-e', help='Exit status (0=good)',
                         default=0, dest='status', type=int)
-    cmdLine=True
     args = parser.parse_args()
     kepcotrendsc(args.infile,args.outfile,args.cbvfile,args.listbv,
                  args.fitmethod, args.fitpower, args.iterate, args.sigma,
                  args.maskfile, args.scinterp, args.plot, args.clobber,
-                 args.verbose, args.logfile, args.status, cmdLine)
-
-else:
-    from pyraf import iraf
-    parfile = iraf.osfn("kepler$kepcotrend.par")
-    t = iraf.IrafTaskFactory(taskname="kepcotrend", value=parfile, function=kepcotrendsc)
+                 args.verbose, args.logfile)
