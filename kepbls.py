@@ -1,13 +1,17 @@
-import sys, time, math, re
+import math
 import numpy as np
 from copy import copy
 from scipy import stats
 from astropy.io import fits as pyfits
 from matplotlib import pyplot as plt
-import kepio, kepmsg, kepkey
+from . import kepio
+from . import kepmsg
+from . import kepkey
 
-def kepbls(infile, outfile, datacol, errcol, minper, maxper, mindur, maxdur,
-           nsearch, nbins, plot, clobber, verbose, logfile):
+def kepbls(infile, outfile, datacol='DETSAP_FLUX', errcol='DETSAP_FLUX_ERR',
+           minper=1.0, maxper=30, mindur=0.5, maxdur=12, nsearch=1000,
+           nbins=1000, plot=True, clobber=True, verbose=True,
+           logfile='kepbls.log'):
     """
     kepbls -- Perform Box-Least Square searches for periodic exoplanet transits
 
@@ -37,13 +41,13 @@ def kepbls(infile, outfile, datacol, errcol, minper, maxper, mindur, maxdur,
         The column name containing data stored within FITS extension 1 of
         infile. This data will be searched for outliers. Typically this name
         is DETSAP_FLUX (Detrended Simple Aperture Photometry fluxes). This
-        version of the data is computed by the task kepflatten. Other flux
-        data will be accepted - SAP_FLUX (Simple Aperture Photometry),
-        PDCSAP_FLUX (Pre-search Data Conditioning fluxes) or CBVSAP_FLUX
-        (SAP_FLUX corrected for systematic artifacts by the PyKE tool
-        kepcotrend). However neither of these three options are recommended
-        because the flux data contain either astrophysical variability,
-        systematic variability, or both.
+        version of the data is computed by the task ``pyke.kepflatten``.
+        Other flux data will be accepted - SAP_FLUX (Simple Aperture
+        Photometry), PDCSAP_FLUX (Pre-search Data Conditioning fluxes) or
+        CBVSAP_FLUX (SAP_FLUX corrected for systematic artifacts by the PyKE
+        tool kepcotrend). However neither of these three options are
+        recommended because the flux data contain either astrophysical
+        variability, systematic variability, or both.
     errcol : str
         The column name containing photometric 1-σ errors stored within
         extension 1 of infile. Typically this name is DETSAP_FLUX_ERR.
@@ -80,7 +84,7 @@ def kepbls(infile, outfile, datacol, errcol, minper, maxper, mindur, maxdur,
     verbose : bool
         Print informative messages and warnings to the shell and logfile?
     logfile : str
-        Name of the logfile containing error and warning messages. 
+        Name of the logfile containing error and warning messages.
     """
     # startup parameters
     labelsize = 32
@@ -133,23 +137,19 @@ def kepbls(infile, outfile, datacol, errcol, minper, maxper, mindur, maxdur,
     instr = pyfits.open(infile, 'readonly')
     tstart, tstop, bjdref, cadence = kepio.timekeys(instr, infile, logfile,
                                                     verbose)
-
     # fudge non-compliant FITS keywords with no values
     instr = kepkey.emptykeys(instr, infile, logfile, verbose)
-
     # read table structure
     table = kepio.readfitstab(infile,instr[1],logfile,verbose)
-
     # filter input data table
     work1 = np.array([table.field('time'), table.field(datacol),
                       table.field(errcol)])
     work1 = np.rot90(work1, 3)
     work1 = work1[~np.isnan(work1).any(1)]
-
     # read table columns
-    intime = work1[:,2] + bjdref
-    indata = work1[:,1]
-    inerr = work1[:,0]
+    intime = work1[:, 2] + bjdref
+    indata = work1[:, 1]
+    inerr = work1[:, 0]
 
     # test whether the period range is sensible
     tr = intime[-1] - intime[0]
@@ -250,10 +250,10 @@ def kepbls(infile, outfile, datacol, errcol, minper, maxper, mindur, maxdur,
     ymax = pout.max()
     xr = xmax - xmin
     yr = ymax - ymin
-    ptime = np.insert(ptime,[0],[ptime[0]])
-    ptime = np.append(ptime,[ptime[-1]])
-    pout = np.insert(pout,[0],[0.0])
-    pout = np.append(pout,0.0)
+    ptime = np.insert(ptime, [0], [ptime[0]])
+    ptime = np.append(ptime, [ptime[-1]])
+    pout = np.insert(pout, [0], [0.0])
+    pout = np.append(pout, 0.0)
 
     # plot light curve
     if plot:
@@ -268,16 +268,17 @@ def kepbls(infile, outfile, datacol, errcol, minper, maxper, mindur, maxdur,
         # rotate y labels by 90 deg
         labels = ax.get_yticklabels()
         plt.setp(labels, 'rotation', 90)
-        plt.plot(ptime[1:-1],pout[1:-1],color=lcolor,linestyle='-',linewidth=lwidth)
-        plt.fill(ptime,pout,color=fcolor,linewidth=0.0,alpha=falpha)
+        plt.plot(ptime[1:-1], pout[1:-1], color=lcolor, linestyle='-',
+                 linewidth=lwidth)
+        plt.fill(ptime, pout, color=fcolor, linewidth=0.0, alpha=falpha)
         plt.xlabel(xlab, {'color' : 'k'})
         plt.ylabel(ylab, {'color' : 'k'})
         plt.grid()
-        plt.xlim(xmin-xr*0.01,xmax+xr*0.01)
+        plt.xlim(xmin-xr*0.01, xmax+xr*0.01)
         if ymin >= 0.0:
-            plt.ylim(ymin-yr*0.01,ymax+yr*0.01)
+            plt.ylim(ymin-yr*0.01, ymax+yr*0.01)
         else:
-            plt.ylim(1.0e-10,ymax+yr*0.01)
+            plt.ylim(1.0e-10, ymax+yr*0.01)
 
         # render plot
         plt.show()
@@ -303,11 +304,11 @@ def kepbls(infile, outfile, datacol, errcol, minper, maxper, mindur, maxdur,
     instr[-1].header.cards['TUNIT1'].comment = 'column units: days'
     instr[-1].header.cards['TUNIT2'].comment = 'column units: BJD - 2454833'
     instr[-1].header.cards['TUNIT3'].comment = 'column units: hours'
-    instr[-1].header['EXTNAME' ] = ('BLS','extension name')
-    instr[-1].header['PERIOD'  ] = (trialPeriods[bestTrial],'most significant trial period [d]')
-    instr[-1].header['BJD0'    ] = (BJD0[bestTrial] + 2454833.0,'time of mid-transit [BJD]')
-    instr[-1].header['TRANSDUR'] = (transitDuration[bestTrial],'transit duration [hours]')
-    instr[-1].header['SIGNRES' ] = (srMax[bestTrial] * bestSr,'maximum signal residue')
+    instr[-1].header['EXTNAME' ] = ('BLS', 'extension name')
+    instr[-1].header['PERIOD'  ] = (trialPeriods[bestTrial], 'most significant trial period [d]')
+    instr[-1].header['BJD0'    ] = (BJD0[bestTrial] + 2454833.0, 'time of mid-transit [BJD]')
+    instr[-1].header['TRANSDUR'] = (transitDuration[bestTrial], 'transit duration [hours]')
+    instr[-1].header['SIGNRES' ] = (srMax[bestTrial] * bestSr, 'maximum signal residue')
     # history keyword in output file
     kepkey.history(call, instr[0], outfile, logfile, verbose)
     instr.writeto(outfile)
@@ -322,7 +323,6 @@ def kepbls(infile, outfile, datacol, errcol, minper, maxper, mindur, maxdur,
     # end time
     kepmsg.clock('KEPBLS completed at', logfile, verbose)
 
-# main
 def kepbls_main():
     import argparse
     parser = argparse.ArgumentParser(
@@ -357,5 +357,6 @@ def kepbls_main():
     parser.add_argument('--logfile', '-l', help='Name of ascii log file',
                         default='kepbls.log', dest='logfile', type=str)
     args = parser.parse_args()
-    kepbls(args.infile,args.outfile,args.datacol,args.errcol,args.minper,args.maxper,args.mindur,
-           args.maxdur,args.nsearch,args.nbins,args.plot,args.clobber,args.verbose,args.logfile)
+    kepbls(args.infile, args.outfile, args.datacol, args.errcol, args.minper,
+           args.maxper, args.mindur, args.maxdur, args.nsearch, args.nbins,
+           args.plot, args.clobber, args.verbose, args.logfile)
