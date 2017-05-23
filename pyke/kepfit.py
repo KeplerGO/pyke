@@ -72,7 +72,6 @@ def lsqclip(fit_func, pinit, x, y, yerr, rej_lo, rej_hi, niter, logfile,
     npts = []
     iiter = 0
     iterstatus = 1
-    status = 0
 
     # error catching
     if len(x) == 0:

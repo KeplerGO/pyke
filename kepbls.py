@@ -113,7 +113,7 @@ def kepbls(infile, outfile, datacol='DETSAP_FLUX', errcol='DETSAP_FLUX_ERR',
             + ' plot= {}'.format(plot)
             + ' clobber= {}'.format(clobber)
             + ' verbose= {}'.format(verbose)
-            + ' logfile= {}'.format(logfile)
+            + ' logfile= {}'.format(logfile))
 
     kepmsg.log(logfile,call+'\n',verbose)
 
