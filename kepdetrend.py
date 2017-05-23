@@ -1,16 +1,20 @@
-import sys, time, math, re
 import numpy as np
 from astropy.io import fits as pyfits
 from matplotlib import pyplot as plt
-import kepio, kepmsg, kepkey, kepfit, kepstat
 from . import kepfunc
+from . import kepio
+from . import kepmsg
+from . import kepkey
+from . import kepfit
+from . import kepstat
 
 def kepdetrend(infile, outfile, datacol, errcol, ranges1, npoly1, nsig1,
                niter1, ranges2, npoly2, nsig2, niter2, popnans, plot,
                clobber, verbose, logfile):
+    """
+    """
 
     # startup parameters
-    status = 0
     labelsize = 24
     ticksize = 16
     xsize = 16
