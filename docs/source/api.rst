@@ -7,3 +7,5 @@ Modules/API
     kepprf
     kepfold
     kepclip
+    kepsmooth
+    kepflatten
