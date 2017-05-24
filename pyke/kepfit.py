@@ -14,7 +14,10 @@ from scipy.ndimage.interpolation import shift
 
 def leastsquares(fitfunc, pinit, xdata, ydata, yerr, logfile, verbose):
     """linear least square polynomial fit using scipy"""
+    errfunc = lambda p, x, y, err: (y - fitfunc(p, x)) / err
 
+    if yerr is None:
+        yerr = np.ones(len(ydata))
     # fit data
     try:
         out = optimize.leastsq(errfunc, pinit, args=(xdata, ydata, yerr),
@@ -22,7 +25,6 @@ def leastsquares(fitfunc, pinit, xdata, ydata, yerr, logfile, verbose):
     except:
         message = 'ERROR -- KEPFIT.LEASTSQUARES: failed to fit data'
         kepmsg.err(logfile, message, verbose)
-        raise
 
     coeffs = out[0]
     covar = out[1]
