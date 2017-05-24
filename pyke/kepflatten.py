@@ -83,16 +83,18 @@ def kepflatten(infile, outfile, datacol='PDCSAP_FLUX',
         Time ranges are supplied as comma-separated pairs of Barycentric Julian
         Dates (BJDs). Multiple ranges are separated by a semi-colon. An example
         containing two time ranges is:
-        ``2455012.48517,2455014.50072;2455022.63487,2455025.08231``
+
+        ``2455012.48517,2455014.50072;2455022.63487,2455025.08231``.
+
         If the user wants to correct the entire time series then providing
         ranges = '0,0' will tell the task to operate on the whole time series.
     plot : bool
         Plot the data, fit, outliers and result?
     clobber : bool
         Overwrite the output file?
-    verbose = bool
+    verbose : bool
         Print informative messages and warnings to the shell and logfile?
-    logfile = str
+    logfile : str
         Name of the logfile containing error and warning messages.
 
     Examples

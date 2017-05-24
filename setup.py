@@ -16,7 +16,8 @@ entry_points = {'console_scripts': [
         'kepfold = pyke.kepfold:kepfold_main',
         'kepclip = pyke.kepclip:kepclip_main',
         'kepsmooth = pyke.kepsmooth:kepsmooth_main',
-        'kepflatten = pyke.kepflatten:kepflatten_main'
+        'kepflatten = pyke.kepflatten:kepflatten_main',
+        'kepbls = pyke.kepbls:kepbls_main'
 ]}
 
 setup(name='pyke',
