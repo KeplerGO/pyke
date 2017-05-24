@@ -107,22 +107,22 @@ def kepflatten(infile, outfile, datacol='PDCSAP_FLUX',
 
     # log the call
     hashline = '----------------------------------------------------------------------------'
-    kepmsg.log(logfile,hashline,verbose)
+    kepmsg.log(logfile, hashline, verbose)
     call = ('KEPFLATTEN -- '
-            + ' infile= {}'.format(infile)
-            + ' outfile= {}'.format(outfile)
-            + ' datacol= {}'.format(datacol)
-            + ' errcol= {}'.format(errcol)
-            + ' nsig= {}'.format(nsig)
-            + ' stepsize= {}'.format(stepsize)
-            + ' winsize= {}'.format(winsize)
-            + ' npoly= {}'.format(npoly)
-            + ' niter= {}'.format(niter)
-            + ' ranges= {}'.format(ranges)
-            + ' plot= {}'.format(plot)
-            + ' clobber= {}'.format(clobber)
-            + ' verbose= {}'.format(verbose)
-            + ' logfile= {}'.format(logfile))
+            + ' infile={}'.format(infile)
+            + ' outfile={}'.format(outfile)
+            + ' datacol={}'.format(datacol)
+            + ' errcol={}'.format(errcol)
+            + ' nsig={}'.format(nsig)
+            + ' stepsize={}'.format(stepsize)
+            + ' winsize={}'.format(winsize)
+            + ' npoly={}'.format(npoly)
+            + ' niter={}'.format(niter)
+            + ' ranges={}'.format(ranges)
+            + ' plot={}'.format(plot)
+            + ' clobber={}'.format(clobber)
+            + ' verbose={}'.format(verbose)
+            + ' logfile={}'.format(logfile))
     kepmsg.log(logfile, call+'\n', verbose)
 
     # start time
@@ -347,7 +347,6 @@ def kepflatten(infile, outfile, datacol='PDCSAP_FLUX',
         # render plot
         plt.savefig(re.sub('.fits', '.png', outfile))
         plt.show()
-
     # add NaNs back into data
     n = 0
     work1 = np.array([], dtype='float32')
