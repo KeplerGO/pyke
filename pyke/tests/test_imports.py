@@ -12,3 +12,4 @@ def test_import():
     from .. import kepfold
     from .. import kepclip
     from .. import kepsmooth
+    from .. import kepflatten
