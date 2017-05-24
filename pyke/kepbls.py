@@ -4,6 +4,7 @@ from copy import copy
 from scipy import stats
 from astropy.io import fits as pyfits
 from matplotlib import pyplot as plt
+from tqdm import tqdm
 from . import kepio
 from . import kepmsg
 from . import kepkey
@@ -198,8 +199,8 @@ def kepbls(infile, outfile, datacol='DETSAP_FLUX', errcol='DETSAP_FLUX_ERR',
         for i in range(nbins):
             elements = np.nonzero(phsort[:,2] == float(i))[0]
             work4[i] = np.mean(phsort[elements, 1])
-            work5[i] = math.sqrt(np.sum(np.power(phsort[elements,0], 2))
-                       / len(elements))
+            work5[i] = (math.sqrt(np.sum(np.power(phsort[elements,0], 2))
+                        / len(elements)))
 
         # extend the work arrays beyond nbins by wrapping
         work4 = np.append(work4, work4[:duration2])
@@ -231,8 +232,8 @@ def kepbls(infile, outfile, datacol='DETSAP_FLUX', errcol='DETSAP_FLUX_ERR',
     bestTrial = np.nonzero(srMax == bestSr)[0][0]
     srMax /= bestSr
     transitDuration *= trialPeriods / 24.0
-    BJD0 = np.array(transitPhase * trialPeriods / nbins,dtype='float64')
-           + intime[0] - 2454833.0
+    BJD0 = (np.array(transitPhase * trialPeriods / nbins,dtype='float64')
+            + intime[0] - 2454833.0)
     print('\n')
 
     # clean up x-axis unit
