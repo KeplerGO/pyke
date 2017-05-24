@@ -23,7 +23,7 @@ def leastsquares(fitfunc, pinit, xdata, ydata, yerr, logfile, verbose):
         out = optimize.leastsq(errfunc, pinit, args=(xdata, ydata, yerr),
                                full_output=1)
     except:
-        message = 'ERROR -- KEPFIT.LEASTSQUARES: failed to fit data'
+        errmsg = 'ERROR -- KEPFIT.LEASTSQUARES: failed to fit data'
         kepmsg.err(logfile, message, verbose)
 
     coeffs = out[0]
@@ -31,8 +31,8 @@ def leastsquares(fitfunc, pinit, xdata, ydata, yerr, logfile, verbose):
 
     # calculate 1-sigma error on coefficients
     if covar is None:
-        message = 'WARNING -- KEPFIT.leastsquares: NULL covariance matrix'
-        kepmsg.log(logfile, message, verbose)
+        errmsg = 'ERROR -- KEPFIT.leastsquares: NULL covariance matrix'
+        kepmsg.err(logfile, errmsg, verbose)
     else:
         if len(coeffs) > 1:
             errors = np.sqrt(np.diag(covar))

@@ -1,8 +1,9 @@
 import re
-from astropy.io import fits as pyfits
-from copy import copy
 import numpy as np
 import matplotlib.pyplot as plt
+from copy import copy
+from astropy.io import fits as pyfits
+from tqdm import tqdm
 from . import kepio
 from . import kepmsg
 from . import kepkey
@@ -269,7 +270,7 @@ def kepflatten(infile, outfile, datacol='PDCSAP_FLUX',
     masterfit = indata * 0.0
     mastersigma = np.zeros(len(masterfit))
     functype = getattr(kepfunc, 'poly' + str(npoly))
-    for i in range(len(cstep1)):
+    for i in tqdm(range(len(cstep1))):
         timeSeries = intime[cstep1[i]:cstep2[i]+1] - intime[cstep1[i]]
         dataSeries = indata[cstep1[i]:cstep2[i]+1]
         fitTimeSeries = np.array([], dtype='float32')
@@ -289,9 +290,6 @@ def kepflatten(infile, outfile, datacol='PDCSAP_FLUX',
                 for j in range(len(coeffs)):
                     fitarray[cstep1[i]:cstep2[i]+1, i] += coeffs[j] * timeSeries ** j
         except:
-            for j in range(cstep1[i], cstep2[i]+1):
-                fitarray[cstep1[i]:cstep2[i]+1, i] = 0.0
-                sigarray[cstep1[i]:cstep2[i]+1, i] = 1.0e-10
             message  = ('WARNING -- KEPFLATTEN: could not fit range '
                         + str(intime[cstep1[i]]) + '-' + str(intime[cstep2[i]]))
             kepmsg.warn(None, message)
