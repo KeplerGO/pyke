@@ -94,6 +94,14 @@ def kepflatten(infile, outfile, datacol='PDCSAP_FLUX',
         Print informative messages and warnings to the shell and logfile?
     logfile = str
         Name of the logfile containing error and warning messages.
+
+    Examples
+    --------
+    .. code-block:: bash
+
+        $ kepflatten kplr012557548-2011177032512_llc.fits kepflatten.fits --nsig 3
+          --stepsize 1.0 --winsize 3.0 --npoly 3 --niter 10 --clobber --plot
+          --verbose
     """
     # startup parameters
     labelsize = 32
