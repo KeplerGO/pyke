@@ -409,7 +409,7 @@ def HDUnum(struct):
 
     """why not just len(struct.header[0])?"""
 
-def timeranges(ranges,logfile,verbose):
+def timeranges(ranges, logfile, verbose):
     """read time ranges from ascii file"""
 
     tstart = []

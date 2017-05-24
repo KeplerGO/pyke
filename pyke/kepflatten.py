@@ -10,8 +10,12 @@ from . import kepfit
 from . import kepstat
 from . import kepfunc
 
-def kepflatten(infile, outfile, datacol, errcol, nsig, stepsize, winsize,
-               npoly, niter, ranges, plot, clobber, verbose, logfile):
+__all__ = ['kepflatten']
+
+def kepflatten(infile, outfile, datacol='PDCSAP_FLUX',
+               errcol='PDCSAP_FLUX_ERR', nsig=3., stepsize=0.5, winsize=5.0,
+               npoly=3, niter=1, ranges='0,0', plot=True, clobber=True,
+               verbose=True, logfile='kepflatten.log'):
     """
     kepflatten -- Remove low frequency variability from time-series, preserve
     transits and flares
@@ -79,7 +83,7 @@ def kepflatten(infile, outfile, datacol, errcol, nsig, stepsize, winsize,
         Time ranges are supplied as comma-separated pairs of Barycentric Julian
         Dates (BJDs). Multiple ranges are separated by a semi-colon. An example
         containing two time ranges is:
-        ``'2455012.48517,2455014.50072;2455022.63487,2455025.08231'.``
+        ``2455012.48517,2455014.50072;2455022.63487,2455025.08231``
         If the user wants to correct the entire time series then providing
         ranges = '0,0' will tell the task to operate on the whole time series.
     plot : bool
@@ -175,9 +179,9 @@ def kepflatten(infile, outfile, datacol, errcol, nsig, stepsize, winsize,
     work1 = work1[~np.isnan(work1).any(1)]
 
     # read table columns
-    intime = work1[:,2] + bjdref
-    indata = work1[:,1]
-    inerr = work1[:,0]
+    intime = work1[:, 2] + bjdref
+    indata = work1[:, 1]
+    inerr = work1[:, 0]
     if len(intime) == 0:
          message = 'ERROR -- KEPFLATTEN: one of the input arrays is all NaN'
          kepmsg.err(logfile, message, verbose)
@@ -195,14 +199,14 @@ def kepflatten(infile, outfile, datacol, errcol, nsig, stepsize, winsize,
         work += stepsize
 
     # find cadence limits of each time step
-    cstep1 = []; cstep2 = []
+    cstep1, cstep2 = [], []
     for n in range(len(tstep1)):
         for i in range(len(intime)-1):
             if intime[i] <= tstep1[n] and intime[i+1] > tstep1[n]:
-                for j in range(i,len(intime)-1):
+                for j in range(i, len(intime)-1):
                     if intime[j] < tstep2[n] and intime[j+1] >= tstep2[n]:
                         cstep1.append(i)
-                        cstep2.append(j+1)
+                        cstep2.append(j + 1)
 
     # comment keyword in output file
     kepkey.history(call, instr[0], outfile, logfile, verbose)
@@ -214,7 +218,7 @@ def kepflatten(infile, outfile, datacol, errcol, nsig, stepsize, winsize,
     # clean up y-axis units
     pout = copy(indata)
     nrm = len(str(int(pout.max()))) - 1
-    pout = pout / 10**nrm
+    pout = pout / 10 ** nrm
     ylab = '10$^{}$'.format(nrm) + 'e$^-$ s$^{-1}$'
 
     # data limits
@@ -302,7 +306,7 @@ def kepflatten(infile, outfile, datacol, errcol, nsig, stepsize, winsize,
     rejtime = np.array(rejtime, dtype='float64')
     rejdata = np.array(rejdata, dtype='float32')
     if plot:
-        plt.plot(rejtime - intime0, rejdata / 10**nrm, 'ro')
+        plt.plot(rejtime - intime0, rejdata / 10 ** nrm, 'ro')
     # new data for output file
     outdata = indata / masterfit
     outerr = inerr / masterfit
@@ -365,14 +369,14 @@ def kepflatten(infile, outfile, datacol, errcol, nsig, stepsize, winsize,
             work2 = np.append(work2, np.nan)
 
     # history keyword in output file
-    status = kepkey.history(call,instr[0],outfile,logfile,verbose)
+    kepkey.history(call, instr[0], outfile, logfile, verbose)
 
     # write output file
     try:
         col1 = pyfits.Column(name='DETSAP_FLUX',format='E13.7',array=work1)
         col2 = pyfits.Column(name='DETSAP_FLUX_ERR',format='E13.7',array=work2)
         cols = instr[1].data.columns + col1 + col2
-        instr[1] = pyfits.BinTableHDU.from_columns(cols,header=instr[1].header)
+        instr[1] = pyfits.BinTableHDU.from_columns(cols, header=instr[1].header)
         instr.writeto(outfile)
     except ValueError:
         try:
@@ -382,10 +386,10 @@ def kepflatten(infile, outfile, datacol, errcol, nsig, stepsize, winsize,
         except:
             message = ('ERROR -- KEPFLATTEN: cannot add DETSAP_FLUX data to '
                        'FITS file')
-            status = kepmsg.err(logfile, message, verbose)
+            kepmsg.err(logfile, message, verbose)
 
     # close input file
-    kepio.closefits(instr,logfile,verbose)
+    kepio.closefits(instr, logfile, verbose)
     ## end time
     kepmsg.clock('KEPFLATTEN completed at', logfile, verbose)
 
