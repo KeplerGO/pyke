@@ -512,32 +512,23 @@ def kepprf(infile, plotfile, frameno, columns, rows, fluxes, prfdir,
     if plot:
         plt.draw()
         plt.show()
-
     # stop time
     kepmsg.clock('\nKEPPRF ended at', logfile, verbose)
 
-# -----------------------------------------------------------
 # plot channel image
-
 def plotimage(imgflux_pl, zminfl, zmaxfl, plmode, row, column,
               xdim, ydim, winx, winy, tlabel, cmap):
-
-# pixel limits of the subimage
-
+    # pixel limits of the subimage
     ymin = row
     ymax = ymin + ydim
     xmin = column
     xmax = xmin + xdim
-
-# plot limits for flux image
-
+    # plot limits for flux image
     ymin = float(ymin) - 0.5
     ymax = float(ymax) - 0.5
     xmin = float(xmin) - 0.5
     xmax = float(xmax) - 0.5
-
-# plot the image window
-
+    # plot the image window
     ax = plt.axes([winx,winy,0.37,0.45])
     plt.imshow(imgflux_pl,aspect='auto',interpolation='nearest',origin='lower',
            vmin=zminfl,vmax=zmaxfl,extent=(xmin,xmax,ymin,ymax),cmap=cmap)
