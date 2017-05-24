@@ -1,10 +1,11 @@
-import sys, time, re
+import time
+import re
 import numpy as np
 from astropy.io import fits as pyfits
 import kepio, kepmsg, kepkey
 
 
-def kepconvert(infile,outfile,conversion,columns,baddata,clobber,verbose,logfile,status):
+def kepconvert(infile, outfile, conversion, columns,baddata,clobber,verbose,logfile,status):
 # startup parameters
     status = 0
 

@@ -1,412 +1,354 @@
 import math
-import multiprocessing, itertools
-from matplotlib import pyplot as plt
+import multiprocessing
+import itertools
 import numpy as np
+import glob
+import sys
+import time
+import re
+from matplotlib import pyplot as plt
 from astropy.io import fits as pyfits
-import kepio, kepmsg, kepkey, kepplot, kepfit, keparray, kepfunc
-import sys, time, re, math, glob
 from scipy.optimize import fmin_powell
 from scipy.interpolate import RectBivariateSpline
+from . import kepio
+from . import kepmsg
+from . import kepkey
+from . import kepplot
+from . import kepfit
+from . import kepfunc
 
-# -----------------------------------------------------------
-# core code
 
-def kepprfphot(infile,outroot,columns,rows,fluxes,border,background,focus,prfdir,ranges,
-               tolerance,ftolerance,qualflags,plot,clobber,verbose,logfile,status,cmdLine=False):
-
-# input arguments
-
-    status = 0
-    np.seterr(all="ignore")
+def kepprfphot(infile, outroot, columns, rows, fluxes, border, background,
+               focus, prfdir, ranges, xtol, ftol, qualflags, plot=True,
+               clobber=True, verbose=True, logfile='kepprfphot.log'):
 
 # log the call
-
     hashline = '----------------------------------------------------------------------------'
     kepmsg.log(logfile,hashline,verbose)
-    call = 'KEPPRFPHOT -- '
-    call += 'infile='+infile+' '
-    call += 'outroot='+outroot+' '
-    call += 'columns='+columns+' '
-    call += 'rows='+rows+' '
-    call += 'fluxes='+fluxes+' '
-    call += 'border='+str(border)+' '
-    bground = 'n'
-    if (background): bground = 'y'
-    call += 'background='+bground+' '
-    focs = 'n'
-    if (focus): focs = 'y'
-    call += 'focus='+focs+' '
-    call += 'prfdir='+prfdir+' '
-    call += 'ranges='+ranges+' '
-    call += 'xtol='+str(tolerance)+' '
-    call += 'ftol='+str(ftolerance)+' '
-    quality = 'n'
-    if (qualflags): quality = 'y'
-    call += 'qualflags='+quality+' '
-    plotit = 'n'
-    if (plot): plotit = 'y'
-    call += 'plot='+plotit+' '
-    overwrite = 'n'
-    if (clobber): overwrite = 'y'
-    call += 'clobber='+overwrite+ ' '
-    chatter = 'n'
-    if (verbose): chatter = 'y'
-    call += 'verbose='+chatter+' '
-    call += 'logfile='+logfile
-    kepmsg.log(logfile,call+'\n',verbose)
+    call = ('KEPPRFPHOT -- '
+            ' infile={}'.format(infile)
+            ' outroot={}'.format(outroot)
+            ' columns={}'.format(columns)
+            ' rows={}'.format(rows)
+            ' fluxes={}'.format(fluxes)
+            ' border={}'.format(border)
+            ' background={}'.format(background)
+            ' focus={}'.format(focs)
+            ' prfdir={}'.format(prfdir)
+            ' ranges={}'.format(ranges)
+            ' xtol={}'.format(xtol)
+            ' ftol={}'.format(ftol)
+            ' qualflags={}'.format(qualflags)
+            ' plot={}'.format(plot)
+            ' clobber={}'.format(clobber)
+            ' verbose={}'.format(verbose)
+            ' logfile={}'.format(logfile)
+    kepmsg.log(logfile, call+'\n', verbose)
 
-# test log file
-
-    logfile = kepmsg.test(logfile)
-
-# start time
-
+    # start time
     kepmsg.clock('KEPPRFPHOT started at',logfile,verbose)
 
-# number of sources
+    # number of sources
+    work = fluxes.strip()
+    work = re.sub(' ',',',work)
+    work = re.sub(';',',',work)
+    nsrc = len(work.split(','))
 
-    if status == 0:
-        work = fluxes.strip()
-        work = re.sub(' ',',',work)
-        work = re.sub(';',',',work)
-        nsrc = len(work.split(','))
-
-# construct inital guess vector for fit
-
-    if status == 0:
-        guess = []
-        try:
-            f = fluxes.strip().split(',')
-            x = columns.strip().split(',')
-            y = rows.strip().split(',')
-            for i in xrange(len(f)):
-                f[i] = float(f[i])
-        except:
-            f = fluxes
-            x = columns
-            y = rows
-        nsrc = len(f)
-        for i in xrange(nsrc):
-            try:
-                guess.append(float(f[i]))
-            except:
-                message = 'ERROR -- KEPPRF: Fluxes must be floating point numbers'
-                status = kepmsg.err(logfile,message,verbose)
-        if status == 0:
-            if len(x) != nsrc or len(y) != nsrc:
-                message = 'ERROR -- KEPFIT:FITMULTIPRF: Guesses for rows, columns and '
-                message += 'fluxes must have the same number of sources'
-                status = kepmsg.err(logfile,message,verbose)
-        if status == 0:
-            for i in xrange(nsrc):
-                try:
-                    guess.append(float(x[i]))
-                except:
-                    message = 'ERROR -- KEPPRF: Columns must be floating point numbers'
-                    status = kepmsg.err(logfile,message,verbose)
-        if status == 0:
-            for i in xrange(nsrc):
-                try:
-                    guess.append(float(y[i]))
-                except:
-                    message = 'ERROR -- KEPPRF: Rows must be floating point numbers'
-                    status = kepmsg.err(logfile,message,verbose)
-        if status == 0 and background:
-            if border == 0:
-                guess.append(0.0)
-            else:
-                for i in range((border+1)*2):
-                    guess.append(0.0)
-        if status == 0 and focus:
-            guess.append(1.0); guess.append(1.0); guess.append(0.0)
-
-# clobber output file
-
+    # construct inital guess vector for fit
+    guess = []
+    try:
+        f = fluxes.strip().split(',')
+        x = columns.strip().split(',')
+        y = rows.strip().split(',')
+        for i in range(len(f)):
+            f[i] = float(f[i])
+    except:
+        f = fluxes
+        x = columns
+        y = rows
+    nsrc = len(f)
     for i in range(nsrc):
-        outfile = '%s_%d.fits' % (outroot, i)
-        if clobber: status = kepio.clobber(outfile,logfile,verbose)
-        if kepio.fileexists(outfile):
-            message = 'ERROR -- KEPPRFPHOT: ' + outfile + ' exists. Use --clobber'
-            status = kepmsg.err(logfile,message,verbose)
-
-# open TPF FITS file
-
-    if status == 0:
         try:
-            kepid, channel, skygroup, module, output, quarter, season, \
-                ra, dec, column, row, kepmag, xdim, ydim, barytime, status = \
-                kepio.readTPF(infile,'TIME',logfile,verbose)
+            guess.append(float(f[i]))
         except:
-            message = 'ERROR -- KEPPRFPHOT: is %s a Target Pixel File? ' % infile
-            status = kepmsg.err(logfile,message,verbose)
-    if status == 0:
-        kepid, channel, skygroup, module, output, quarter, season, \
-            ra, dec, column, row, kepmag, xdim, ydim, tcorr, status = \
-            kepio.readTPF(infile,'TIMECORR',logfile,verbose)
-    if status == 0:
-        kepid, channel, skygroup, module, output, quarter, season, \
-            ra, dec, column, row, kepmag, xdim, ydim, cadno, status = \
-            kepio.readTPF(infile,'CADENCENO',logfile,verbose)
-    if status == 0:
-        kepid, channel, skygroup, module, output, quarter, season, \
-            ra, dec, column, row, kepmag, xdim, ydim, fluxpixels, status = \
-            kepio.readTPF(infile,'FLUX',logfile,verbose)
-    if status == 0:
-        kepid, channel, skygroup, module, output, quarter, season, \
-            ra, dec, column, row, kepmag, xdim, ydim, errpixels, status = \
-            kepio.readTPF(infile,'FLUX_ERR',logfile,verbose)
-    if status == 0:
-        kepid, channel, skygroup, module, output, quarter, season, \
-            ra, dec, column, row, kepmag, xdim, ydim, poscorr1, status = \
-            kepio.readTPF(infile,'POS_CORR1',logfile,verbose)
-        if status != 0:
-            poscorr1 = np.zeros((len(barytime)),dtype='float32')
-            poscorr1[:] = np.nan
-            status = 0
-    if status == 0:
-        kepid, channel, skygroup, module, output, quarter, season, \
-            ra, dec, column, row, kepmag, xdim, ydim, poscorr2, status = \
-            kepio.readTPF(infile,'POS_CORR2',logfile,verbose)
-        if status != 0:
-            poscorr2 = np.zeros((len(barytime)),dtype='float32')
-            poscorr2[:] = np.nan
-            status = 0
-    if status == 0:
-        kepid, channel, skygroup, module, output, quarter, season, \
-            ra, dec, column, row, kepmag, xdim, ydim, qual, status = \
-            kepio.readTPF(infile,'QUALITY',logfile,verbose)
-    if status == 0:
-        struct, status = kepio.openfits(infile,'readonly',logfile,verbose)
-    if status == 0:
-        tstart, tstop, bjdref, cadence, status = kepio.timekeys(struct,infile,logfile,verbose,status)
-
-# input file keywords and mask map
-
-    if status == 0:
-        cards0 = struct[0].header.cards
-        cards1 = struct[1].header.cards
-        cards2 = struct[2].header.cards
-        maskmap = np.copy(struct[2].data)
-        npix = np.size(np.nonzero(maskmap)[0])
-
-# print target data
-
-    if status == 0 and verbose:
-        print ''
-        print '      KepID:  %s' % kepid
-        print ' RA (J2000):  %s' % ra
-        print 'Dec (J2000): %s' % dec
-        print '     KepMag:  %s' % kepmag
-        print '   SkyGroup:    %2s' % skygroup
-        print '     Season:    %2s' % str(season)
-        print '    Channel:    %2s' % channel
-        print '     Module:    %2s' % module
-        print '     Output:     %1s' % output
-        print ''
-
-# determine suitable PRF calibration file
-
-    if status == 0:
-        if int(module) < 10:
-            prefix = 'kplr0'
+            message = 'ERROR -- KEPPRF: Fluxes must be floating point numbers'
+            kepmsg.err(logfile,message,verbose)
+    if len(x) != nsrc or len(y) != nsrc:
+        message = 'ERROR -- KEPFIT:FITMULTIPRF: Guesses for rows, columns and '
+        message += 'fluxes must have the same number of sources'
+        kepmsg.err(logfile,message,verbose)
+    for i in range(nsrc):
+        try:
+            guess.append(float(x[i]))
+        except:
+            message = 'ERROR -- KEPPRF: Columns must be floating point numbers'
+            kepmsg.err(logfile,message,verbose)
+    for i in range(nsrc):
+        try:
+            guess.append(float(y[i]))
+        except:
+            message = 'ERROR -- KEPPRF: Rows must be floating point numbers'
+            kepmsg.err(logfile,message,verbose)
+    if background:
+        if border == 0:
+            guess.append(0.0)
         else:
-            prefix = 'kplr'
-        prfglob = prfdir + '/' + prefix + str(module) + '.' + str(output) + '*' + '_prf.fits'
+            for i in range((border + 1) * 2):
+                guess.append(0.0)
+    if focus:
+        guess.append(1.0); guess.append(1.0); guess.append(0.0)
+
+    # clobber output file
+    for i in range(nsrc):
+        outfile = '{0}_{1}.fits'.format(outroot, i)
+        if clobber:
+            kepio.clobber(outfile, logfile, verbose)
+        if kepio.fileexists(outfile):
+            errmsg = 'ERROR -- KEPPRFPHOT: {} exists. Use --clobber'.format(outfile)
+            kepmsg.err(logfile, errmsg, verbose)
+
+    # open TPF FITS file
+    try:
+        kepid, channel, skygroup, module, output, quarter, season, \
+            ra, dec, column, row, kepmag, xdim, ydim, barytime = \
+            kepio.readTPF(infile, 'TIME', logfile, verbose)
+    except:
+        message = 'ERROR -- KEPPRFPHOT: is %s a Target Pixel File? ' % infile
+        kepmsg.err(logfile,message,verbose)
+    kepid, channel, skygroup, module, output, quarter, season, \
+        ra, dec, column, row, kepmag, xdim, ydim, tcorr = \
+        kepio.readTPF(infile,'TIMECORR', logfile, verbose)
+    kepid, channel, skygroup, module, output, quarter, season, \
+        ra, dec, column, row, kepmag, xdim, ydim, cadno = \
+        kepio.readTPF(infile,'CADENCENO',logfile, verbose)
+    kepid, channel, skygroup, module, output, quarter, season, \
+        ra, dec, column, row, kepmag, xdim, ydim, fluxpixels = \
+        kepio.readTPF(infile,'FLUX', logfile, verbose)
+    kepid, channel, skygroup, module, output, quarter, season, \
+        ra, dec, column, row, kepmag, xdim, ydim, errpixels = \
+        kepio.readTPF(infile,'FLUX_ERR', logfile, verbose)
+    try:
+        kepid, channel, skygroup, module, output, quarter, season, \
+            ra, dec, column, row, kepmag, xdim, ydim, poscorr1 = \
+            kepio.readTPF(infile, 'POS_CORR1', logfile, verbose)
+    except:
+        poscorr1 = np.zeros((len(barytime)), dtype='float32')
+        poscorr1[:] = np.nan
+    try:
+        kepid, channel, skygroup, module, output, quarter, season, \
+            ra, dec, column, row, kepmag, xdim, ydim, poscorr2 = \
+            kepio.readTPF(infile, 'POS_CORR2', logfile, verbose)
+    except:
+        poscorr2 = np.zeros((len(barytime)), dtype='float32')
+        poscorr2[:] = np.nan
+    kepid, channel, skygroup, module, output, quarter, season, \
+        ra, dec, column, row, kepmag, xdim, ydim, qual = \
+        kepio.readTPF(infile,'QUALITY',logfile,verbose)
+    struct = kepio.openfits(infile, 'readonly', logfile, verbose)
+    tstart, tstop, bjdref, cadence = kepio.timekeys(struct, infile, logfile, verbose)
+
+    # input file keywords and mask map
+    cards0 = struct[0].header.cards
+    cards1 = struct[1].header.cards
+    cards2 = struct[2].header.cards
+    maskmap = np.copy(struct[2].data)
+    npix = np.size(np.nonzero(maskmap)[0])
+
+    # print target data
+    if verbose:
+        print('')
+        print('      KepID: {}'.format(kepid))
+        print(' RA (J2000): {}'.format(ra))
+        print('Dec (J2000): {}'.format(dec))
+        print('     KepMag: {}'.format(kepmag))
+        print('   SkyGroup: {}'.format(skygroup))
+        print('     Season: {}'.format(season))
+        print('    Channel: {}'.format(channel))
+        print('     Module: {}'.format(module))
+        print('     Output: {}'.format(output))
+        print('')
+
+    # determine suitable PRF calibration file
+    if int(module) < 10:
+        prefix = 'kplr0'
+    else:
+        prefix = 'kplr'
+    prfglob = prfdir + '/' + prefix + str(module) + '.' + str(output) + '*' + '_prf.fits'
+    try:
+        prffile = glob.glob(prfglob)[0]
+    except:
+        message = 'ERROR -- KEPPRFPHOT: No PRF file found in ' + prfdir
+        kepmsg.err(logfile, message, verbose)
+
+    # read PRF images
+    prfn = [0, 0, 0, 0, 0]
+    crpix1p = np.zeros(5, dtype='float32')
+    crpix2p = np.zeros(5, dtype='float32')
+    crval1p = np.zeros(5, dtype='float32')
+    crval2p = np.zeros(5, dtype='float32')
+    cdelt1p = np.zeros(5, dtype='float32')
+    cdelt2p = np.zeros(5, dtype='float32')
+    for i in range(5):
+        prfn[i], crpix1p[i], crpix2p[i], crval1p[i], crval2p[i], cdelt1p[i], cdelt2p[i] \
+            = kepio.readPRFimage(prffile, i+1, logfile, verbose)
+    PRFx = np.arange(0.5, np.shape(prfn[0])[1] + 0.5)
+    PRFy = np.arange(0.5, np.shape(prfn[0])[0] + 0.5)
+    PRFx = (PRFx - np.size(PRFx) / 2) * cdelt1p[0]
+    PRFy = (PRFy - np.size(PRFy) / 2) * cdelt2p[0]
+
+    # interpolate the calibrated PRF shape to the target position
+    prf = np.zeros(np.shape(prfn[0]), dtype='float32')
+    prfWeight = np.zeros(5, dtype='float32')
+    for i in range(5):
+        prfWeight[i] = math.sqrt((column - crval1p[i]) ** 2 + (row - crval2p[i]) ** 2)
+        if prfWeight[i] == 0.0:
+            prfWeight[i] = 1.0e6
+        prf = prf + prfn[i] / prfWeight[i]
+    prf = prf / np.nansum(prf)
+    prf = prf / cdelt1p[0] / cdelt2p[0]
+
+    # location of the data image centered on the PRF image (in PRF pixel units)
+    prfDimY = ydim / cdelt1p[0]
+    prfDimX = xdim / cdelt2p[0]
+    PRFy0 = (np.shape(prf)[0] - prfDimY) / 2
+    PRFx0 = (np.shape(prf)[1] - prfDimX) / 2
+    # construct input pixel image
+    DATx = np.arange(column, column + xdim)
+    DATy = np.arange(row, row + ydim)
+    # interpolation function over the PRF
+    splineInterpolation = RectBivariateSpline(PRFx, PRFy, prf, kx=3, ky=3)
+    # construct mesh for background model
+    bx = np.arange(1., float(xdim+1))
+    by = np.arange(1., float(ydim+1))
+    xx, yy = np.meshgrid(np.linspace(bx.min(), bx.max(), xdim),
+                         np.linspace(by.min(), by.max(), ydim))
+    # Get time ranges for new photometry, flag good data
+    barytime += bjdref
+    tstart,tstop,status = kepio.timeranges(ranges,logfile,verbose)
+    incl = np.zeros((len(barytime)),dtype='int')
+    for rownum in range(len(barytime)):
+        for winnum in range(len(tstart)):
+            if (barytime[rownum] >= tstart[winnum]
+                and barytime[rownum] <= tstop[winnum]
+                and (qual[rownum] == 0 or qualflags)
+                and np.isfinite(barytime[rownum])
+                and np.isfinite(np.nansum(fluxpixels[rownum, :]))):
+                incl[rownum] = 1
+    if not np.in1d(1,incl):
+        message = 'ERROR -- KEPPRFPHOT: No legal data within the range ' + ranges
+        kepmsg.err(logfile, message, verbose)
+    # filter out bad data
+    n = 0
+    nincl = (incl == 1).sum()
+    tim = np.zeros((nincl), 'float64')
+    tco = np.zeros((nincl), 'float32')
+    cad = np.zeros((nincl), 'float32')
+    flu = np.zeros((nincl, len(fluxpixels[0])), 'float32')
+    fer = np.zeros((nincl, len(fluxpixels[0])), 'float32')
+    pc1 = np.zeros((nincl), 'float32')
+    pc2 = np.zeros((nincl), 'float32')
+    qua = np.zeros((nincl), 'float32')
+    for rownum in range(len(barytime)):
+        if incl[rownum] == 1:
+            tim[n] = barytime[rownum]
+            tco[n] = tcorr[rownum]
+            cad[n] = cadno[rownum]
+            flu[n,:] = fluxpixels[rownum]
+            fer[n,:] = errpixels[rownum]
+            pc1[n] = poscorr1[rownum]
+            pc2[n] = poscorr2[rownum]
+            qua[n] = qual[rownum]
+            n += 1
+    barytime = tim * 1.0
+    tcorr = tco * 1.0
+    cadno = cad * 1.0
+    fluxpixels = flu * 1.0
+    errpixels = fer * 1.0
+    poscorr1 = pc1 * 1.0
+    poscorr2 = pc2 * 1.0
+    qual = qua * 1.0
+
+    # initialize plot arrays
+    t = np.array([], dtype='float64')
+    fl, dx, dy, bg, fx, fy, fa, rs, ch = [], [], [], [], [], [], [], [], [], []
+    for i in range(nsrc):
+        fl.append(np.array([], dtype='float32'))
+        dx.append(np.array([], dtype='float32'))
+        dy.append(np.array([], dtype='float32'))
+    # Preparing fit data message
+    progress = np.arange(nincl)
+    if verbose:
+        txt  = 'Preparing...'
+        sys.stdout.write(txt)
+        sys.stdout.flush()
+    # single processor version
+    oldtime = 0.0
+    for rownum in range(np.min([80, len(barytime)])):
         try:
-            prffile = glob.glob(prfglob)[0]
+            if barytime[rownum] - oldtime > 0.5:
+                ftol = 1.0e-10; xtol = 1.0e-10
         except:
-            message = 'ERROR -- KEPPRFPHOT: No PRF file found in ' + prfdir
-            status = kepmsg.err(logfile,message,verbose)
-
-# read PRF images
-
-    if status == 0:
-        prfn = [0,0,0,0,0]
-        crpix1p = np.zeros((5),dtype='float32')
-        crpix2p = np.zeros((5),dtype='float32')
-        crval1p = np.zeros((5),dtype='float32')
-        crval2p = np.zeros((5),dtype='float32')
-        cdelt1p = np.zeros((5),dtype='float32')
-        cdelt2p = np.zeros((5),dtype='float32')
-        for i in range(5):
-            prfn[i], crpix1p[i], crpix2p[i], crval1p[i], crval2p[i], cdelt1p[i], cdelt2p[i], status \
-                = kepio.readPRFimage(prffile,i+1,logfile,verbose)
-        PRFx = np.arange(0.5,np.shape(prfn[0])[1]+0.5)
-        PRFy = np.arange(0.5,np.shape(prfn[0])[0]+0.5)
-        PRFx = (PRFx - np.size(PRFx) / 2) * cdelt1p[0]
-        PRFy = (PRFy - np.size(PRFy) / 2) * cdelt2p[0]
-
-# interpolate the calibrated PRF shape to the target position
-
-    if status == 0:
-        prf = np.zeros(np.shape(prfn[0]),dtype='float32')
-        prfWeight = np.zeros((5),dtype='float32')
-        for i in xrange(5):
-            prfWeight[i] = math.sqrt((column - crval1p[i])**2 + (row - crval2p[i])**2)
-            if prfWeight[i] == 0.0:
-                prfWeight[i] = 1.0e6
-            prf = prf + prfn[i] / prfWeight[i]
-        prf = prf / np.nansum(prf)
-        prf = prf / cdelt1p[0] / cdelt2p[0]
-
-# location of the data image centered on the PRF image (in PRF pixel units)
-
-    if status == 0:
-        prfDimY = ydim / cdelt1p[0]
-        prfDimX = xdim / cdelt2p[0]
-        PRFy0 = (np.shape(prf)[0] - prfDimY) / 2
-        PRFx0 = (np.shape(prf)[1] - prfDimX) / 2
-
-# construct input pixel image
-
-    if status == 0:
-        DATx = np.arange(column,column+xdim)
-        DATy = np.arange(row,row+ydim)
-
-# interpolation function over the PRF
-
-    if status == 0:
-        splineInterpolation = RectBivariateSpline(PRFx,PRFy,prf,kx=3,ky=3)
-
-# construct mesh for background model
-
-    if status == 0:
-        bx = np.arange(1.,float(xdim+1))
-        by = np.arange(1.,float(ydim+1))
-        xx, yy = np.meshgrid(np.linspace(bx.min(), bx.max(), xdim),
-                                np.linspace(by.min(), by.max(), ydim))
-
-# Get time ranges for new photometry, flag good data
-
-    if status == 0:
-        barytime += bjdref
-        tstart,tstop,status = kepio.timeranges(ranges,logfile,verbose)
-        incl = np.zeros((len(barytime)),dtype='int')
-        for rownum in xrange(len(barytime)):
-            for winnum in xrange(len(tstart)):
-                if barytime[rownum] >= tstart[winnum] and \
-                        barytime[rownum] <= tstop[winnum] and \
-                        (qual[rownum] == 0 or qualflags) and \
-                        np.isfinite(barytime[rownum]) and \
-                        np.isfinite(np.nansum(fluxpixels[rownum,:])):
-                    incl[rownum] = 1
-        if not np.in1d(1,incl):
-            message = 'ERROR -- KEPPRFPHOT: No legal data within the range ' + ranges
-            status = kepmsg.err(logfile,message,verbose)
-
-# filter out bad data
-
-    if status == 0:
-        n = 0
-        nincl = (incl == 1).sum()
-        tim = np.zeros((nincl),'float64')
-        tco = np.zeros((nincl),'float32')
-        cad = np.zeros((nincl),'float32')
-        flu = np.zeros((nincl,len(fluxpixels[0])),'float32')
-        fer = np.zeros((nincl,len(fluxpixels[0])),'float32')
-        pc1 = np.zeros((nincl),'float32')
-        pc2 = np.zeros((nincl),'float32')
-        qua = np.zeros((nincl),'float32')
-        for rownum in xrange(len(barytime)):
-            if incl[rownum] == 1:
-                tim[n] = barytime[rownum]
-                tco[n] = tcorr[rownum]
-                cad[n] = cadno[rownum]
-                flu[n,:] = fluxpixels[rownum]
-                fer[n,:] = errpixels[rownum]
-                pc1[n] = poscorr1[rownum]
-                pc2[n] = poscorr2[rownum]
-                qua[n] = qual[rownum]
-                n += 1
-        barytime = tim * 1.0
-        tcorr = tco * 1.0
-        cadno = cad * 1.0
-        fluxpixels = flu * 1.0
-        errpixels = fer * 1.0
-        poscorr1 = pc1 * 1.0
-        poscorr2 = pc2 * 1.0
-        qual = qua * 1.0
-
-# initialize plot arrays
-
-    if status == 0:
-        t = np.array([],dtype='float64')
-        fl = []; dx = []; dy = []; bg = []; fx = []; fy = []; fa = []; rs = []; ch = []
-        for i in range(nsrc):
-            fl.append(np.array([],dtype='float32'))
-            dx.append(np.array([],dtype='float32'))
-            dy.append(np.array([],dtype='float32'))
-
-# Preparing fit data message
-
-    if status == 0:
-        progress = np.arange(nincl)
-        if verbose:
-            txt  = 'Preparing...'
-            sys.stdout.write(txt)
-            sys.stdout.flush()
-
-# single processor version
-
-    if status == 0:# and not cmdLine:
-        oldtime = 0.0
-        for rownum in xrange(np.min([80,len(barytime)])):
+            pass
+        args = (fluxpixels[rownum, :], errpixels[rownum, :], DATx, DATy, nsrc,
+                border, xx, yy, PRFx, PRFy, splineInterpolation, guess, ftol,
+                xtol, focus, background, rownum, 80, float(x[i]),
+                float(y[i]), False)
+        guess = PRFfits(args)
+        ftol = ftol
+        xtol = xtol
+        oldtime = barytime[rownum]
+    # Fit the time series: multi-processing
+    anslist = []
+    cad1 = 0
+    cad2 = 50
+    for i in range(int(nincl/50) + 1):
+        try:
+            fluxp = fluxpixels[cad1:cad2, :]
+            errp = errpixels[cad1:cad2, :]
+            progress = np.arange(cad1, cad2)
+        except:
+            fluxp = fluxpixels[cad1:nincl, :]
+            errp = errpixels[cad1:nincl, :]
+            progress = np.arange(cad1, nincl)
+        try:
+            args = itertools.izip(fluxp, errp, itertools.repeat(DATx),
+                                  itertools.repeat(DATy),
+                                  itertools.repeat(nsrc),
+                                  itertools.repeat(border),
+                                  itertools.repeat(xx),
+                                  itertools.repeat(yy),
+                                  itertools.repeat(PRFx),
+                                  itertools.repeat(PRFy),
+                                  itertools.repeat(splineInterpolation),
+                                  itertools.repeat(guess),
+                                  itertools.repeat(ftol),
+                                  itertools.repeat(xtol),
+                                  itertools.repeat(focus),
+                                  itertools.repeat(background), progress,
+                                  itertools.repeat(np.arange(cad1,nincl)[-1]),
+                                  itertools.repeat(float(x[0])),
+                                  itertools.repeat(float(y[0])),
+                                  itertools.repeat(True))
+            p = multiprocessing.Pool()
+            model = [0.0]
+            model = p.imap(PRFfits, args, chunksize=1)
+            p.close()
+            p.join()
+            cad1 += 50; cad2 += 50
+            ans = array([array(item) for item in zip(*model)])
             try:
-                if barytime[rownum] - oldtime > 0.5:
-                    ftol = 1.0e-10; xtol = 1.0e-10
+                anslist = np.concatenate((anslist, ans.transpose()), axis=0)
             except:
-                pass
-            args = (fluxpixels[rownum,:],errpixels[rownum,:],DATx,DATy,nsrc,border,xx,yy,PRFx,PRFy,splineInterpolation,
-                    guess,ftol,xtol,focus,background,rownum,80,float(x[i]),float(y[i]),False)
-            guess = PRFfits(args)
-            ftol = ftolerance; xtol = tolerance; oldtime = barytime[rownum]
+                anslist = ans.transpose()
+            guess = anslist[-1]
+            ans = anslist.transpose()
+        except:
+            pass
 
-# Fit the time series: multi-processing
-
-    if status == 0 and cmdLine:
-        anslist = []
-        cad1 = 0; cad2 = 50
-        for i in range(int(nincl/50) + 1):
-            try:
-                fluxp = fluxpixels[cad1:cad2,:]
-                errp = errpixels[cad1:cad2,:]
-                progress = np.arange(cad1,cad2)
-            except:
-                fluxp = fluxpixels[cad1:nincl,:]
-                errp = errpixels[cad1:nincl,:]
-                progress = np.arange(cad1,nincl)
-            try:
-                args = itertools.izip(fluxp,errp,itertools.repeat(DATx),itertools.repeat(DATy),
-                                      itertools.repeat(nsrc),itertools.repeat(border),itertools.repeat(xx),
-                                      itertools.repeat(yy),itertools.repeat(PRFx),itertools.repeat(PRFy),
-                                      itertools.repeat(splineInterpolation),itertools.repeat(guess),
-                                      itertools.repeat(ftolerance),itertools.repeat(tolerance),
-                                      itertools.repeat(focus),itertools.repeat(background),progress,
-                                      itertools.repeat(np.arange(cad1,nincl)[-1]),
-                                      itertools.repeat(float(x[0])),
-                                      itertools.repeat(float(y[0])),itertools.repeat(True))
-                p = multiprocessing.Pool()
-                model = [0.0]
-                model = p.imap(PRFfits,args,chunksize=1)
-                p.close()
-                p.join()
-                cad1 += 50; cad2 += 50
-                ans = array([array(item) for item in zip(*model)])
-                try:
-                    anslist = np.concatenate((anslist,ans.transpose()),axis=0)
-                except:
-                    anslist = ans.transpose()
-                guess = anslist[-1]
-                ans = anslist.transpose()
-            except:
-                pass
-
-# single processor version
-
-    if status == 0 and not cmdLine:
+    # single processor version
+    """if status == 0 and not cmdLine:
         oldtime = 0.0; ans = []
-#        for rownum in xrange(1,10):
-        for rownum in xrange(nincl):
+        for rownum in range(nincl):
             proctime = time.time()
             try:
                 if barytime[rownum] - oldtime > 0.5:
@@ -417,8 +359,8 @@ def kepprfphot(infile,outroot,columns,rows,fluxes,border,background,focus,prfdir
                     guess,ftol,xtol,focus,background,rownum,nincl,float(x[0]),float(y[0]),True)
             guess = PRFfits(args)
             ans.append(guess)
-            ftol = ftolerance; xtol = tolerance; oldtime = barytime[rownum]
-        ans = np.array(ans).transpose()
+            ftol = ftol; xtol = xtol; oldtime = barytime[rownum]
+        ans = np.array(ans).transpose()"""
 
 # unpack the best fit parameters
 
@@ -1117,8 +1059,8 @@ if '--shell' in sys.argv:
     parser.add_argument('--focus', action='store_true', help='Fit focus changes?', default=False)
     parser.add_argument('--prfdir', default='/Volumes/data/Kepler/PRF', help='Folder containing Point Response Function FITS files', dest='prfdir', type=str)
     parser.add_argument('--ranges', default='0,0', help='Time ranges to fit', dest='ranges', type=str)
-    parser.add_argument('--xtol', default=1.0e-4, help='Fit parameter tolerance', dest='tolerance', type=float)
-    parser.add_argument('--ftol', default=1.0e-2, help='Fit minimization tolerance', dest='ftolerance', type=float)
+    parser.add_argument('--xtol', default=1.0e-4, help='Fit parameter xtol', dest='xtol', type=float)
+    parser.add_argument('--ftol', default=1.0e-2, help='Fit minimization tolerance', dest='ftol', type=float)
     parser.add_argument('--qualflags', action='store_true', help='Fit data that have quality flags?', default=False)
     parser.add_argument('--plot', action='store_true', help='Plot fit results?', default=False)
     parser.add_argument('--clobber', action='store_true', help='Overwrite output file?', default=False)
@@ -1129,11 +1071,6 @@ if '--shell' in sys.argv:
     args = parser.parse_args()
     cmdLine=True
     kepprfphot(args.infile,args.outroot,args.columns,args.rows,args.fluxes,args.border,
-               args.background,args.focus,args.prfdir,args.ranges,args.tolerance,
-               args.ftolerance,args.qualflags,args.plot,args.clobber,args.verbose,
-               args.logfile,args.status,cmdLine)
-
-else:
-    from pyraf import iraf
-    parfile = iraf.osfn("kepler$kepprfphot.par")
-    t = iraf.IrafTaskFactory(taskname="kepprfphot", value=parfile, function=kepprfphot)
+               args.background,args.focus,args.prfdir,args.ranges,args.xtol,
+               args.ftol,args.qualflags,args.plot,args.clobber,args.verbose,
+               args.logfile)

@@ -199,7 +199,7 @@ def kepbls(infile, outfile, datacol='DETSAP_FLUX', errcol='DETSAP_FLUX_ERR',
         for i in range(nbins):
             elements = np.nonzero(phsort[:,2] == float(i))[0]
             work4[i] = np.mean(phsort[elements, 1])
-            work5[i] = (math.sqrt(np.sum(np.power(phsort[elements,0], 2))
+            work5[i] = (math.sqrt(np.sum(np.power(phsort[elements, 0], 2))
                         / len(elements)))
 
         # extend the work arrays beyond nbins by wrapping
