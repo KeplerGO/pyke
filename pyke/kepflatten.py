@@ -142,7 +142,7 @@ def kepflatten(infile, outfile, datacol='PDCSAP_FLUX',
         kepmsg.err(logfile, errmsg, verbose)
 
     # open input file
-    instr = kepio.openfits(infile, 'readonly', logfile, verbose)
+    instr = pyfits.open(infile, 'readonly')
     tstart, tstop, bjdref, cadence = kepio.timekeys(instr, infile, logfile,
                                                     verbose)
     try:
@@ -423,11 +423,11 @@ def kepflatten_main():
                         help='Time ranges of regions to filter',
                         type=str)
     parser.add_argument('--plot', action='store_true', help='Plot result?',
-                        default=False)
+                        default=True)
     parser.add_argument('--clobber', action='store_true',
-                        help='Overwrite output file?')
+                        help='Overwrite output file?', default=True)
     parser.add_argument('--verbose', action='store_true',
-                        help='Write to a log file?')
+                        help='Write to a log file?', default=True)
     parser.add_argument('--logfile', '-l', help='Name of ascii log file',
                         default='kepflatten.log', dest='logfile', type=str)
     args = parser.parse_args()
