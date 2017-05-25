@@ -1,28 +1,16 @@
-"""
-Name: kepcotrend.py
-Written by: Tom Barclay
-Date released: July 27 2011
-
-Changelog:
-1.0 released
-1.0.1 caught not having a new version of numpy with the in1d function and changed the simplex algorithm so that it fits the first two BV then fits
-                the rest of them, now much more stable (Sep 5 2011)
-2.0 code will now work on short cadence data by interpolating the basis vectors down to short cadence, several interpolation methods are available
-3.0 made it possible to run from the command line if there are arguements given to the call to kepcotrend
-"""
-
-__svnid__ = "$Id: kepcotrend.py 6165 2014-03-26 21:16:27Z mstill $"
-__url__ = "$URL: svn+ssh://mstill@murzim.amn.nasa.gov/data-repo/trunk/data/flight/go/PyKE/kepler/kepcotrend.py $"
-
-import matplotlib.pyplot as plt
 import numpy as np
 import math
+import matplotlib.pyplot as plt
 from matplotlib.cbook import is_numlike
 from scipy.optimize import leastsq
 from scipy.optimize import fmin as effmin
 from scipy.interpolate import interp1d
 from astropy.io import fits as pyfits
-import kepmsg, kepio, kepkey
+from . import kepmsg
+from . import kepio
+from . import kepkey
+
+__all__ = ['kepcotrend']
 
 def cutBadData(cad,date,flux,err):
     """
@@ -30,19 +18,19 @@ def cutBadData(cad,date,flux,err):
     returning only cadences which contain good data
     """
     date2 = date[np.logical_and(np.logical_and(np.isfinite(date),
-    np.isfinite(flux)),flux != 0.0)]
+                 np.isfinite(flux)),flux != 0.0)]
     cad2 = cad[np.logical_and(np.logical_and(np.isfinite(date),
-    np.isfinite(flux)),flux != 0.0)]
+               np.isfinite(flux)),flux != 0.0)]
     flux2 = flux[np.logical_and(np.logical_and(np.isfinite(date),
-    np.isfinite(flux)),flux != 0.0)]
+                 np.isfinite(flux)),flux != 0.0)]
     err2 = err[np.logical_and(np.logical_and(np.isfinite(date),
-    np.isfinite(flux)),flux != 0.0)]
+               np.isfinite(flux)),flux != 0.0)]
     bad_data = np.logical_and(np.logical_and(np.isfinite(date),
-    np.isfinite(flux)),flux != 0.0)
+                              np.isfinite(flux)),flux != 0.0)
 
-    return cad2,date2,flux2,err2,bad_data
+    return cad2, date2, flux2, err2, bad_data
 
-def putInNans(bad_data,flux):
+def putInNans(bad_data, flux):
     """
     Function finds the cadences where the data has been removed using
     cutBadData() and puts data back in. The flux data put back in is nan.
@@ -59,16 +47,16 @@ def putInNans(bad_data,flux):
             newflux[i] = np.nan
     return newflux
 
-def get_pcomp_list_newformat(bvdat,pcomplist,newcad,short,scinterp):
+def get_pcomp_list_newformat(bvdat, pcomplist, newcad, short, scinterp):
     """
     Finds cotrending basis vectors which have been requested to be
     used by the user and adds them to an array.
     """
     status = False
-    pcomp = np.zeros((len(pcomplist),len(newcad)))
+    pcomp = np.zeros((len(pcomplist), len(newcad)))
     for i in range(len(np.array(pcomplist))):
         j = int(np.array(pcomplist)[i])
-        dat = bvdat.field('VECTOR_%s' %j)[np.isnan(bvdat.field('CADENCENO')) == False]
+        dat = bvdat.field('VECTOR_{}'.format(j))[np.isnan(bvdat.field('CADENCENO')) == False]
         bvcadfull = bvdat.field('CADENCENO')[np.isnan(bvdat.field('CADENCENO')) == False]
         #try:
         if short:
@@ -78,11 +66,13 @@ def get_pcomp_list_newformat(bvdat,pcomplist,newcad,short,scinterp):
             #funny things happen why I use interp1d for linear interpolation
             #so I have opted to use the numpy interp function for linear
             if scinterp == 'linear':
-                intpl = np.interp(newcad,bv_cad,bv_data,left=bv_data[0],right=bv_data[-1])
+                intpl = np.interp(newcad, bv_cad, bv_data, left=bv_data[0],
+                                  right=bv_data[-1])
                 pcomp[i] = intpl
             else:
-                intpl = interp1d(bv_cad,bv_data,kind=scinterp,bounds_error=False,fill_value=None)
-                pcomp[i] = np.where(np.isnan(intpl(newcad)),0,intpl(newcad))
+                intpl = interp1d(bv_cad, bv_data, kind=scinterp,
+                                 bounds_error=False, fill_value=None)
+                pcomp[i] = np.where(np.isnan(intpl(newcad)), 0,intpl(newcad))
                 mid_pt = np.floor(np.median(np.arange(len(pcomp[i]))))
                 p_len = len(pcomp[i])
                 lower = [np.logical_and(arange(p_len) < mid_pt,pcomp[i] == 0)]
@@ -90,10 +80,10 @@ def get_pcomp_list_newformat(bvdat,pcomplist,newcad,short,scinterp):
                 pcomp[i][lower] = bv_data[0]
                 pcomp[i][upper] = bv_data[-1]
         else:
-            pcomp[i] = dat[np.in1d(bvdat.field('CADENCENO'),newcad)]
+            pcomp[i] = dat[np.in1d(bvdat.field('CADENCENO'), newcad)]
     return pcomp,status
 
-def make_sc_lc(obs_cad,bv_cad,flux):
+def make_sc_lc(obs_cad, bv_cad, flux):
     """
     make short cadence data look like long cadence data
     """
@@ -103,7 +93,7 @@ def make_sc_lc(obs_cad,bv_cad,flux):
         newflux[i] = obs_cad[mask]
     return newflux
 
-def near_intpl(xout,xin,yin):
+def near_intpl(xout, xin, yin):
     """
     Interpolate the curve defined by (xin, yin) at points xout. The array
     xin must be monotonically increasing. The output has the same data type as
