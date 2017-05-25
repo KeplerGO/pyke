@@ -109,22 +109,22 @@ def near_intpl(xout, xin, yin):
 
     lenxin = len(xin)
     i1 = searchsorted(xin, xout)
-    i1[ i1==0 ] = 1
-    i1[ i1==lenxin ] = lenxin-1
-    x0 = xin[i1-1]
+    i1[i1 == 0] = 1
+    i1[i1 == lenxin] = lenxin - 1
+    x0 = xin[i1 - 1]
     x1 = xin[i1]
-    y0 = yin[i1-1]
+    y0 = yin[i1 - 1]
     y1 = yin[i1]
 
     return np.where(abs(xout - x0) < abs(xout - x1), y0, y1)
 
 
-def get_pcomp_list(pcompdata,pcomplist,newcad):
-    pcomp = np.zeros((len(pcomplist),len(newcad)))
+def get_pcomp_list(pcompdata,pcomplist, newcad):
+    pcomp = np.zeros((len(pcomplist), len(newcad)))
     for i in range(len(np.array(pcomplist))):
-        j = int(np.array(pcomplist)[i])-1
-        dat = pcompdata[...,j+2]
-        pcomp[i] = dat[np.in1d(pcompdata[...,1],newcad)]
+        j = int(np.array(pcomplist)[i]) - 1
+        dat = pcompdata[..., j + 2]
+        pcomp[i] = dat[np.in1d(pcompdata[..., 1], newcad)]
     return pcomp
 
 
@@ -159,101 +159,85 @@ def do_lsq_uhat(pcomps,cad,flux,orthog=True):
 
     return coeffs
 
-def do_lsq_nlin(pcomps,cad,flux):
+def do_lsq_nlin(pcomps, cad, flux):
     """
     does a linear least squares fit of the basis vectors to the light curve
     using the 'lst_sq' method - this performs a Levenberg-Marquart least
     squares fit. The initial guess is an array of zeros
     """
 
-    guess = np.append(np.array([1.]),np.zeros(len(pcomps)-1))
-    t = leastsq(fitfunct,guess, args=(pcomps,cad,flux),full_output=0)
-    return -np.array(t[0])
+    guess = np.append(np.array([1.]), np.zeros(len(pcomps) - 1))
+    t = leastsq(fitfunct, guess, args=(pcomps, cad, flux), full_output=0)
+    return - np.array(t[0])
 
-def do_lsq_fmin(pcomps,cad,flux):
+def do_lsq_fmin(pcomps, cad, flux):
     """
     performs a simplex fit of the basis vectors to the light curve.
     Initial guess is an array with 1. as the first element and zero as the
     value of all other elements in the array
     """
 
-    guess = np.append(np.array([1.]),np.zeros(len(pcomps)-1))
-    t = effmin(fitfunct_fmin,guess,args=(pcomps,cad,flux))
+    guess = np.append(np.array([1.]), np.zeros(len(pcomps) - 1))
+    t = effmin(fitfunct_fmin, guess, args=(pcomps, cad, flux))
     return -np.array(t)
 
-def do_lsq_fmin_pow(pcomps,cad,flux,order):
+def do_lsq_fmin_pow(pcomps, cad, flux, order):
     """
     performs a simplex fit of the basis vectors to the light curve.
     Initial guess is an array with 1. as the first element and zero as the
     value of all other elements in the array
     """
 
-    guess = np.array([1,0])
-    initial = effmin(fitfunct_fmin_pow,guess,args=(pcomps[0:2],cad,flux,order))
-    #guess = np.append(np.array([1.]),zeros(len(pcomps)-1))
-    guess = np.append(initial,np.zeros(len(pcomps)-2))
-    t = effmin(fitfunct_fmin_pow,guess,args=(pcomps,cad,flux,order))
-    return -np.array(t)
+    guess = np.array([1, 0])
+    initial = effmin(fitfunct_fmin_pow, guess, args=(pcomps[0:2], cad, flux,
+                                                     order))
+    guess = np.append(initial, np.zeros(len(pcomps) - 2))
+    t = effmin(fitfunct_fmin_pow, guess, args=(pcomps, cad, flux, order))
+    return - np.array(t)
 
-def fitfunct_fmin(scale,pcomp,date,zeroflux):
-    """
-    the function called by the simplex fitting alogirthm
-    """
-
+def fitfunct_fmin(scale, pcomp, date, zeroflux):
     outflux = np.copy(zeroflux)
     for i in range(np.shape(pcomp)[0]):
-        outflux -= scale[i]*pcomp[i]
+        outflux -= scale[i] * pcomp[i]
     sumsq = sum(abs(np.array(outflux)))
-    #sumsq = sum(array(outflux)**2)
     return sumsq
 
-def fitfunct_fmin_pow(scale,pcomp,date,zeroflux,order):
-    """
-    the function called by the simplex fitting alogirthm
-    """
-
+def fitfunct_fmin_pow(scale, pcomp, date, zeroflux, order):
     outflux = np.copy(zeroflux)
     for i in range(np.shape(pcomp)[0]):
-        outflux -= scale[i]*pcomp[i]
-    sumsq = sum(power(abs(np.array(outflux)),order))
-    #sumsq = sum(array(outflux)**2)
+        outflux -= scale[i] * pcomp[i]
+    sumsq = sum(power(abs(np.array(outflux)), order))
     return sumsq
 
-def fitfunct(scale,pcomp,date,zeroflux):
-    """
-    the function called by the least squares fitting algorithm
-    """
-
+def fitfunct(scale, pcomp, date, zeroflux):
     outflux = np.copy(zeroflux)
     for i in range(np.shape(pcomp)[0]):
-        outflux -= scale[i]*pcomp[i]
+        outflux -= scale[i] * pcomp[i]
     return outflux
 
-def get_newflux(oldflux,pcomps,s):
+def get_newflux(oldflux, pcomps, s):
     """
     uses the coefficients found by the fitting of the basis vectors to the
     light curve to correct the flux in the light curve
     Each basis vector is multiplid by a coefficient and then subtracted from
     the light curve
     """
-
     newflux = np.copy(oldflux)
     for i in range(len(s)):
-        newflux += s[i]*pcomps[i]
+        newflux += s[i] * pcomps[i]
     return newflux
 
-def get_pcompsum(pcomps,s):
+def get_pcompsum(pcomps, s):
     """
     calculates the sum of basis vectors which are to be subtracted from the
     light curve to produce the corrected data.
     """
-
     pcompsum = 0.
     for i in range(len(s)):
-        pcompsum += s[i]*pcomps[i]
+        pcompsum += s[i] * pcomps[i]
     return pcompsum
 
-def chi2_gtf(obs,expect,err,dof):
+def chi2_gtf(obs, expect, err, dof):
     """
     calculates a chi squared of the model fit to the data
     """
@@ -263,19 +247,19 @@ def chi2_gtf(obs,expect,err,dof):
     expect  = expect
     err = err
     for i in range(len(obs)):
-        chisqu += ((1.0/(err[i]))*((obs[i] - expect[i])))**2
-    chisqu = chisqu * (1.0/float(dof))
+        chisqu += ((1.0/(err[i])) * ((obs[i] - expect[i])))**2
+    chisqu = chisqu * (1.0 / float(dof))
     return chisqu
 
-def rms(O,E):
+def rms(O, E):
     """
     calculates a root mean square of the model fit to the data
     """
 
-    rms = math.sqrt(np.sum((O-E)**2)/len(O))
+    rms = math.sqrt(np.sum((O - E) ** 2) / len(O))
     return rms
 
-def do_lst_iter(bvs,cad,flux,nsigma,niter,method,order):
+def do_lst_iter(bvs, cad, flux, nsigma, niter, method, order):
     """
     performs an iterative fit of the basis vectors to the light curve
     after each fit outliers further than nsigma from the fit are removed and the fit recalculated.
@@ -287,19 +271,19 @@ def do_lst_iter(bvs,cad,flux,nsigma,niter,method,order):
     lcnew = np.copy(cad)
     bvsnew = np.copy(bvs)
     if method == 'matrix':
-        t = do_lsq_uhat(bvsnew,lcnew,fluxnew,False)
+        t = do_lsq_uhat(bvsnew, lcnew, fluxnew, False)
     elif method == 'lst_sq':
-        t = do_lsq_nlin(bvsnew,lcnew,fluxnew)
+        t = do_lsq_nlin(bvsnew, lcnew, fluxnew)
     elif method == 'simplex':
-        t = do_lsq_fmin_pow(bvsnew,lcnew,fluxnew,order)
+        t = do_lsq_fmin_pow(bvsnew, lcnew, fluxnew, order)
     elif method == 'simplex_abs':
-        t = do_lsq_fmin_pow(bvsnew,lcnew,fluxnew)
+        t = do_lsq_fmin_pow(bvsnew, lcnew, fluxnew)
     elif method == 'llsq':
-        t = do_lsq_uhat(bvsnew,lcnew,fluxnew,False)
-    bvsum = get_pcompsum(bvsnew,t)
+        t = do_lsq_uhat(bvsnew, lcnew, fluxnew, False)
+    bvsum = get_pcompsum(bvsnew, t)
     while (iiter < niter):
         iiter += 1
-        matchrange = 1.4826 * nsigma*MAD_model(subtract(fluxnew,bvsum))
+        matchrange = 1.4826 * nsigma * MAD_model(subtract(fluxnew, bvsum))
         mask = abs(fluxnew - bvsum) < matchrange
         fluxnew = fluxnew[mask]
         lcnew = lcnew[mask]
@@ -307,37 +291,35 @@ def do_lst_iter(bvs,cad,flux,nsigma,niter,method,order):
             bvsnew = np.copy(bvsnew2)
         except:
             pass
-        bvsnew2 = newpcompsarray(bvsnew,mask)
-        #print shape(bvsnew),shape(bvsnew2),shape(mask[mask])
+        bvsnew2 = newpcompsarray(bvsnew, mask)
         for i in range(np.shape(bvsnew)[0]):
             bvsnew2[i] = bvsnew[i][mask]
         if method == 'matrix':
-            t = do_lsq_uhat(bvsnew2,lcnew,fluxnew,False)
+            t = do_lsq_uhat(bvsnew2, lcnew, fluxnew, False)
         elif method == 'lst_sq':
-            t = do_lsq_nlin(bvsnew2,lcnew,fluxnew)
+            t = do_lsq_nlin(bvsnew2, lcnew, fluxnew)
         elif method == 'simplex':
-            t = do_lsq_fmin_pow(bvsnew2,lcnew,fluxnew,order)
+            t = do_lsq_fmin_pow(bvsnew2, lcnew, fluxnew, order)
         elif method == 'simplex_abs':
-            t = do_lsq_fmin_pow(bvsnew2,lcnew,fluxnew)
-        bvsum = get_pcompsum(bvsnew2,t)
+            t = do_lsq_fmin_pow(bvsnew2, lcnew, fluxnew)
+        bvsum = get_pcompsum(bvsnew2, t)
 
-    return t,mask
+    return t, mask
 
-def newpcompsarray(pcomp,mask):
-    pcompnew = np.zeros((np.shape(pcomp)[0],len(mask[mask])))
+def newpcompsarray(pcomp, mask):
+    pcompnew = np.zeros((np.shape(pcomp)[0], len(mask[mask])))
     return pcompnew
 
 
-def MAD_model(xx,minSd=1E-16):
+def MAD_model(xx, minSd=1E-16):
   """Median Absolute Deviation"""
-
   absdev=abs(xx)
-  mad=np.median(absdev,0)
-  mad=maximum(mad,np.multiply(np.ones(mad.shape,np.float32),(minSd/1.48)))
+  mad=np.median(absdev, 0)
+  mad=maximum(mad, np.multiply(np.ones(mad.shape, np.float32), (minSd / 1.48)))
   return mad
 
 
-def make_outfile(fitsfile,outfile,flux_new,bvsum,version):
+def make_outfile(fitsfile, outfile, flux_new, bvsum, version):
     """
     creates a fits file identical to the input fits file save from
     containing two extra columns - CBVSAP_MODL and CBVSAP_FLUX which are the
@@ -350,47 +332,47 @@ def make_outfile(fitsfile,outfile,flux_new,bvsum,version):
         flux_new = flux_new * 1625.3514 #convert to e-/cadence
     elif version == 2:
         unit = 'e-/s'
-    col1 = pyfits.Column(name='CBVSAP_MODL', format='E13.7   ',unit=unit,
+    col1 = pyfits.Column(name='CBVSAP_MODL', format='E13.7   ', unit=unit,
                          array=bvsum)
-    col2 = pyfits.Column(name='CBVSAP_FLUX',format='E13.7   ', unit=unit,
+    col2 = pyfits.Column(name='CBVSAP_FLUX', format='E13.7   ', unit=unit,
                          array=flux_new)
     cols = fitsfile[1].columns + col1 + col2
     fitsfile[1] = pyfits.BinTableHDU.from_columns(cols,
                                                   header=fitsfile[1].header)
     fitsfile.writeto(outfile)
 
-def do_plot(date,flux_old,flux_new,bvsum,cad,bad_data,cad_nans,version, cmdLine=False):
-    plt.figure(figsize=[15,8])
+def do_plot(date, flux_old, flux_new, bvsum, cad, bad_data, cad_nans, version):
+    plt.figure(figsize=[15, 8])
     plt.clf()
 
     if version == 1:
         barytime0 = float(int(date[0] / 100) * 100.0)
         date_sub = date - barytime0
-        xlab = r'BJD $-$ %d' %(barytime0+2400000.)
+        xlab = r'BJD $-$ {}'.format(barytime0+2400000.)
     elif version == 2:
-        barytime0 = float(int((date[0]+54833.) / 100) * 100.0)
-        date_sub = date+54833. - barytime0
-        xlab = r'BJD $-$ %d' %(barytime0+2400000.)
+        barytime0 = float(int((date[0] + 54833.) / 100) * 100.0)
+        date_sub = date + 54833. - barytime0
+        xlab = r'BJD $-$ {}'.format(barytime0+2400000.)
 
     try:
-        nrm1 = len(str(int(flux_old.max())))-1
+        nrm1 = len(str(int(flux_old.max()))) - 1
     except:
         nrm1 = 0
-    flux_old_sub = flux_old / 10**nrm1
-    bvsum_sub = bvsum / 10**nrm1
+    flux_old_sub = flux_old / 10 ** nrm1
+    bvsum_sub = bvsum / 10 ** nrm1
     ylab1 = r'10$^%d$ e$^-$ s$^{-1}$' % nrm1
 
     try:
-        nrm2 = len(str(int(flux_new.max())))-1
+        nrm2 = len(str(int(flux_new.max()))) - 1
     except:
         nrm2 = 0
-    flux_new_sub = flux_new / 10**nrm2
+    flux_new_sub = flux_new / 10 ** nrm2
     ylab2 = r'10$^%d$ e$^-$ s$^{-1}$' % nrm2
 
     xmin = min(date_sub)
     xmax = max(date_sub)
-    ymin1 = min(min(flux_old_sub),min(bvsum_sub))
-    ymax1 = max(max(flux_old_sub),max(bvsum_sub))
+    ymin1 = min(min(flux_old_sub), min(bvsum_sub))
+    ymax1 = max(max(flux_old_sub), max(bvsum_sub))
     ymin2 = min(flux_new_sub)
     ymax2 = max(flux_new_sub)
     xr = xmax - xmin
@@ -402,404 +384,465 @@ def do_plot(date,flux_old,flux_new,bvsum,cad,bad_data,cad_nans,version, cmdLine=
     blocks = split_on_nans(bad_data,cad_nans)
     for i in range(len(blocks)):
         if i == 0:
-            block = [blocks[0],blocks[i]]
+            block = [blocks[0], blocks[i]]
         else:
-            block = [blocks[i-1],blocks[i]]
-        mask = np.logical_and(cad >= block[0],cad <= block[1])
+            block = [blocks[i - 1], blocks[i]]
+        mask = np.logical_and(cad >= block[0], cad <= block[1])
         plot_x = date_sub[mask]
         plot_y = flux_old_sub[mask]
         if np.nan in plot_y:
-                break
-        plt.plot(plot_x,plot_y,color='#0000ff',linestyle='-',linewidth=1.0)
+            break
+        plt.plot(plot_x, plot_y, color='#0000ff', linestyle='-', linewidth=1.0)
         plot_y = bvsum_sub[mask]
-        plt.plot(plot_x,plot_y,color='red',linestyle='-',
-        linewidth=2.0)
-    date2 = np.insert(date_sub,[0],[date_sub[0]])
-    date2 = np.append(date2,[date_sub[-1]])
-    flux2 = np.insert(flux_old_sub,[0],[0.0])
-    flux2 = np.append(flux2,[0.0])
-    plt.fill(date2,flux2,fc='#FFFACD',linewidth=0.0)
-    plt.xlim(xmin-xr*0.01,xmax+xr*0.01)
-    if ymin1-yr1*0.01 <= 0.0:
-        plt.ylim(1.0e-10,ymax1+yr1*0.01)
+        plt.plot(plot_x, plot_y, color='red', linestyle='-', linewidth=2.0)
+    date2 = np.insert(date_sub, [0], [date_sub[0]])
+    date2 = np.append(date2, [date_sub[-1]])
+    flux2 = np.insert(flux_old_sub,[0], [0.0])
+    flux2 = np.append(flux2, [0.0])
+    plt.fill(date2, flux2, fc='#FFFACD', linewidth=0.0)
+    plt.xlim(xmin - xr * 0.01, xmax + xr * 0.01)
+    if ymin1 - yr1 * 0.01 <= 0.0:
+        plt.ylim(1.0e-10, ymax1 + yr1 * 0.01)
     else:
-        plt.ylim(ymin1-yr1*0.01,ymax1+yr1*0.01)
+        plt.ylim(ymin1 - yr1 * 0.01, ymax1 + yr1 * 0.01)
     plt.xlabel(xlab, {'color' : 'k'})
     plt.ylabel(ylab1, {'color' : 'k'})
-    #plt.ion()
     plt.grid()
 
-    ax2 = plt.subplot(212,sharex=ax1)
-
+    ax2 = plt.subplot(212, sharex=ax1)
     for i in range(len(blocks)):
         if i == 0:
-            block = [blocks[0],blocks[i]]
+            block = [blocks[0], blocks[i]]
         else:
-            block = [blocks[i-1],blocks[i]]
-        mask = np.logical_and(cad >= block[0],cad <= block[1])
+            block = [blocks[i - 1], blocks[i]]
+        mask = np.logical_and(cad >= block[0], cad <= block[1])
         plot_x = date_sub[mask]
         plot_y = flux_new_sub[mask]
         if np.nan in plot_y:
             break
-        plt.plot(plot_x,plot_y,color='#0000ff',linestyle='-',linewidth=1.0)
+        plt.plot(plot_x, plot_y, color='#0000ff', linestyle='-', linewidth=1.0)
         plot_y = bvsum_sub[mask]
 
-    date2 = np.insert(date_sub,[0],[date_sub[0]])
-    date2 = np.append(date2,[date_sub[-1]])
-    flux2 = np.insert(flux_new_sub,[0],[0.0])
-    flux2 = np.append(flux2,[0.0])
-    plt.fill(date2,flux2,fc='#FFFACD',linewidth=0.0)
-    plt.xlim(xmin-xr*0.01,xmax+xr*0.01)
+    date2 = np.insert(date_sub, [0], [date_sub[0]])
+    date2 = np.append(date2, [date_sub[-1]])
+    flux2 = np.insert(flux_new_sub, [0], [0.0])
+    flux2 = np.append(flux2, [0.0])
+    plt.fill(date2, flux2, fc='#FFFACD', linewidth=0.0)
+    plt.xlim(xmin - xr * 0.01, xmax + xr * 0.01)
 
     if ymin2-yr2*0.01 <= 0.0:
-        plt.ylim(1.0e-10,ymax2+yr2*0.01)
+        plt.ylim(1.0e-10, ymax2 + yr2 * 0.01)
     else:
-        plt.ylim(ymin2-yr2*0.01,ymax2+yr2*0.01)
+        plt.ylim(ymin2 - yr2 * 0.01, ymax2 + yr2 * 0.01)
 
     plt.xlabel(xlab, {'color' : 'k'})
     plt.ylabel(ylab2, {'color' : 'k'})
     plt.grid()
-    plt.subplots_adjust(0.1,0.1,0.94,0.94,0.0,0.0)
+    plt.subplots_adjust(0.1, 0.1, 0.94, 0.94, 0.0, 0.0)
     plt.gca().xaxis.set_major_formatter(plt.ScalarFormatter(useOffset=False))
     plt.gca().yaxis.set_major_formatter(plt.ScalarFormatter(useOffset=False))
 
-# render plot
+    # render plot
     plt.ion()
     plt.show()
 
-def split_on_nans(bad_data,cad):
+def split_on_nans(bad_data, cad):
     blocks = []
     time_of_nans = cad[bad_data == False]
     if bad_data[0] == True:
         blocks.append(cad[0])
     for i in range(1,len(time_of_nans)):
-        if time_of_nans[i] - time_of_nans[i-1] > 1:
+        if time_of_nans[i] - time_of_nans[i - 1] > 1:
             blocks.append(time_of_nans[i])
         if bad_data[-1] == True:
             blocks.append(cad[-1])
     return blocks
 
-def kepcotrendsc(infile,outfile,bvfile,listbv,fitmethod,fitpower,iterate,
-                 sigma,maskfile,scinterp,plot,clobber,verbose,logfile,
-                 status,cmdLine=False):
+def kepcotrend(infile, outfile, bvfile, listbv, fitmethod, fitpower,
+                 iterate, sigma, maskfile, scinterp,
+                 plot=True, clobber=True, verbose=True,
+                 logfile='kepcotrend.log'):
     """
-    Setup the kepcotrend environment
+    kepcotrend -- Remove systematic trends Kepler light curves using
+    cotrending basis vectors. The cotrending basis vectors files can be found
+    here: http://archive.stsci.edu/kepler/cbv.html
 
-    infile:
-    the input file in the FITS format obtained from MAST
+    Simple Aperture Photometry (SAP) data often contain systematic trends
+    associated with the spacecraft, detector and environment rather than the
+    target. See the the Kepler data release notes for descriptions of
+    systematics and the cadences that they affect. Within the Kepler pipeline
+    these contaminants are treated during Pre-search Data Conditioning (PDC)
+    and cleaned data are provided in the light curve files archived at MAST
+    within the column PDCSAP_FLUX. The Kepler pipeline attempts to remove
+    systematics with a combination of data detrending and cotrending against
+    engineering telemetry from the spacecraft such as detector temperatures.
+    These processes are imperfect but tackled in the spirit of correcting as
+    many targets as possible with enough accuracy for the mission to meet
+    exoplanet detection specifications.
 
-    outfile:
-    The output will be a fits file in the same style as the input file but
-    with two additional columns: CBVSAP_MODL and CBVSAP_FLUX. The first of
-    these is the best fitting linear combination of basis vectors. The second
-    is the new flux with the basis vector sum subtracted. This is the new flux
-    value.
+    The imperfections in the method are most apparent in variable stars, those
+    stars that are of most interest for stellar astrophysics. The PDC
+    correction can occasionally hamper data analysis or, at worst, destroy
+    astrophysical signal from the target. While data filtering (``kepoutlier``,
+    ``kepfilter``) and data detrending with analytical functions
+    (``kepdetrend``) often provide some mitigation for data artifacts, these
+    methods require assumptions and often result in lossy data. An alternative
+    viable approach is to identify the photometric variability common to all of
+    the stars neighboring the target and subtract those trends from the target.
+    In principle, the correct choice, weighting and subtraction of these common
+    trends will leave behind a corrected flux time series which better
+    represents statistically the true signal from the target.
 
-    plot:
-    either True or False if you want to see a plot of the light curve
-    The top plot shows the original light curve in blue and the sum of basis
-    vectors in red
-    The bottom plot has had the basis vector sum subracted
+    While GOs, KASC members and archive users wait for the Kepler project to
+    release quarters of data, they do not have access to all the light curve
+    data neighboring their targets and so cannot take the ensemble approach
+    themselves without help. To mitigate this problem the Kepler Science Office
+    have made available ancillary data which describes the systematic trends
+    present in the ensemble flux data for each CCD channel. These data are
+    known as the Cotrending Basis Vectors (CBVs). More details on the method
+    used to generate these basis vectors will be provided in the Kepler Data
+    Processing Handbook soon, but until that time, a summary of the method is
+    given here. To create the initial basis set, that is the flux time series'
+    that are used to make the cotrending basis vectors:
 
-    bvfile:
-    the name of the FITS file containing the basis vectors
+    The time series photometry of each star on a specific detector channel is
+    normalized by its own median flux. One (unity) is subtracted from each time
+    series so that the median value of the light curve is zero.
+    The time series is divided by the root-mean square of the photometry.
+    The correlation between each time series on the CCD channel is calculated
+    using the median and root-mean square normalized flux.
+    The median absolute correlation is then calculated for each star.
+    All stars on the channel are sorted into ascending order of correlation.
+    The 50 percent most correlated stars are selected.
+    The median normalized fluxes only (as opposed to the root-mean square
+    normalized fluxes) are now used for the rest of the process Singular Value
+    Decomposition is applied to the matrix of correlated sources to create
+    orthonormal basis vectors from the U matrix, sorted by their singular
+    values.
 
-    listbv:
-    the basis vectors to fit to the data
+    The archived cotrending basis vectors are a reduced-rank representation of
+    the full set of basis vectors and consist of the 16 leading columns.
 
-    fitmethod:
-    fit using either the 'llsq' or the 'simplex' method. 'llsq' is usually the
-    correct one to use because as the basis vectors are orthogonal. Simplex
-    gives you option of using a different merit function - ie. you can
-    minimise the least absolute residual instead of the least squares which
-    weights outliers less
+    To correct a SAP light curve, ``Fsap``, for systematic features,
+    ``kepcotrend`` employs the cotrending basis vectors ``CBVi``. The task
+    finds the coefficients ``Ai`` which minimize
 
-    fitpower:
-    if using a simplex you can chose your own power in the metir function
-    - i.e. the merit function minimises abs(Obs - Mod)^P. P=2 is least
-    squares, P = 1 minimises least absolutes
+                    Fcbv = Fsap - Σi Ai * CBVi
 
-    iterate:
-    should the program fit the basis vectors to the light curve data then
-    remove data points further than 'sigma' from the fit and then refit
+    The corrected light curve, Fcbv, can be tailored to the needs of the user
+    and their scientific objective. The user decides which combination of basis
+    vectors best removes systematics from their specific Kepler SAP light
+    curve. In principle the user can choose any combination of cotrending basis
+    vectors to fit to the data. However, experience suggests that most choices
+    will be to decide how many sequential basis vectors to include in the fit,
+    starting with first vector. For example a user is much more likely to
+    choose a vector combination 1, 2, 3, 4, 5, 6 etc over e.g. a combination 1,
+    2, 5, 7, 8, 10, 12. The user should always include at least the first two
+    basis vectors. The number of basis vectors used is directly related to the
+    scientific aims of the user and the light curve being analyzed and
+    experimental iteration towards a target-specific optimal basis set is
+    recommended. Occasionally kepcotrend over-fits the data and removes real
+    astrophysical signal. This is particularly prevalent if too many basis
+    vectors are used. A good rule of thumb is to start with two basis vectors
+    and increase the number until there is no improvement, or signals which are
+    thought to be astrophysical start to become distorted.
 
-    maskfile:
-    this is the name of a mask file which can be used to define regions of the
-    flux time series to exclude from the fit. The easiest way to create this
-    is by using keprange from the PyKE set of tools. You can also make this
-    yourself with two BJDs on each line in the file specifying the beginning
-    and ending date of the region to exclude.
+    The user is given a choice of fitting algorithm to use. For most purposes
+    the linear least squares method is both the fastest and the most accurate
+    because it gives the exact solution to the least squares problem. However
+    we have found a few situations where the best solution, scientifically,
+    comes from using the simplex fitting algorithm which performs something
+    other than a least squares fit. Performing a least absolute residuals fit
+    (fitpower=1.0), for example, is more robust to outliers.
 
-    scinterp:
-    the basis vectors are only calculated for long cadence data, therefore if
-    you want to use short cadence data you have to interpolate the basis
-    vectors. There are several methods to do this, the best of these probably
-    being nearest which picks the value of the nearest long cadence data
-    point.
-    The options available are None|linear|nearest|zero|slinear|quadratic|cubic
-    If you are using short cadence data don't choose none
+    There are instances when the fit performs sub-optimally due to the presence
+    of certain events in the light curve. For this reason we have included two
+    options which can be used individually or simultaneously to improve the fit
+    - iterative fitting and data masking. Iterative fitting performs the fit
+    and rejects data points that are greater than a specified distance from the
+    optimal fit before re-fitting. The lower threshold for data clipping is
+    provided by the user as the number of σ from the best fit. The clipping
+    threshold is more accurately defined as the number of Median Absolute
+    Deviations (MADs) multiplied by 1.4826. The distribution of MAD will be
+    identical to the distribution of standard deviation if the distribution is
+    Gaussian. We use MAD because in highly non-Gaussian distributions MAD is
+    more robust to outliers than standard deviation.
+
+    The code will print out the coefficients fit to each basis vector, the
+    root-mean square of the fit and the chi-squared value of the fit. The rms
+    and the chi-squared value include only the data points included in the fit
+    so if an iterative fit is performed these clipped values are not included
+    in this calculation.
+
+    infile : str
+        the input file in the FITS format obtained from MAST
+    outfile : str
+        the output will be a fits file in the same style as the input file but
+        with two additional columns: CBVSAP_MODL and CBVSAP_FLUX. The first of
+        these is the best fitting linear combination of basis vectors.
+        The second is the new flux with the basis vector sum subtracted. This
+        is the new flux value.
+    bvfile : str
+        the name of the FITS file containing the basis vectors
+    listbv : list of integers
+        the basis vectors to fit to the data
+    fitmethod : str
+        fit using either the 'llsq' or the 'simplex' method. 'llsq' is usually
+        the correct one to use because as the basis vectors are orthogonal.
+        Simplex gives you option of using a different merit function - ie. you
+        can minimise the least absolute residual instead of the least squares
+        which weights outliers less
+    fitpower : float
+        if using a simplex you can chose your own power in the metir function
+        - i.e. the merit function minimises abs(Obs - Mod)^P. P=2 is least
+        squares, P = 1 minimises least absolutes
+    iterate : bool
+        should the program fit the basis vectors to the light curve data then
+        remove data points further than 'sigma' from the fit and then refit
+    maskfile : str
+        this is the name of a mask file which can be used to define regions of
+        the flux time series to exclude from the fit. The easiest way to create
+        this is by using ``keprange`` from the PyKE set of tools. You can also
+        make this yourself with two BJDs on each line in the file specifying
+        the beginning and ending date of the region to exclude.
+    scinterp : str
+        the basis vectors are only calculated for long cadence data, therefore if
+        you want to use short cadence data you have to interpolate the basis
+        vectors. There are several methods to do this, the best of these probably
+        being nearest which picks the value of the nearest long cadence data
+        point.
+        The options available are None|linear|nearest|zero|slinear|quadratic|cubic
+        If you are using short cadence data don't choose none
+    plot : bool
+        Plot the data and result?
+    clobber : bool
+        Overwrite the output file?
+    verbose : bool
+        Print informative messages and warnings to the shell and logfile?
+    logfile : str
+        Name of the logfile containing error and warning messages.
     """
     # log the call
     hashline = '----------------------------------------------------------------------------'
-    kepmsg.log(logfile,hashline,verbose)
-    call = 'KEPCOTREND -- '
-    call += 'infile='+infile+' '
-    call += 'outfile='+outfile+' '
-    call += 'bvfile='+bvfile+' '
-#       call += 'numpcomp= '+str(numpcomp)+' '
-    call += 'listbv= '+str(listbv)+' '
-    call += 'fitmethod=' +str(fitmethod)+ ' '
-    call += 'fitpower=' + str(fitpower)+ ' '
-    iterateit = 'n'
-    if (iterate): iterateit = 'y'
-    call += 'iterate='+iterateit+ ' '
-    call += 'sigma_clip='+str(sigma)+' '
-    call += 'mask_file='+maskfile+' '
-    call += 'scinterp=' + str(scinterp)+ ' '
-    plotit = 'n'
-    if (plot): plotit = 'y'
-    call += 'plot='+plotit+ ' '
-    overwrite = 'n'
-    if (clobber): overwrite = 'y'
-    call += 'clobber='+overwrite+ ' '
-    chatter = 'n'
-    if (verbose): chatter = 'y'
-    call += 'verbose='+chatter+' '
-    call += 'logfile='+logfile
+    kepmsg.log(logfile, hashline, verbose)
+    call = ('KEPCOTREND -- '
+            + ' infile='.format(infile)
+            + ' outfile='.format(outfile)
+            + ' bvfile='.format(bvfile)
+            + ' listbv= '.format(listbv)
+            + ' fitmethod='.format(fitmethod)
+            + ' fitpower='.format(fitpower)
+            + ' iterate='.format(iterate)
+            + ' sigma_clip='.format(sigma)
+            + ' mask_file='.format(maskfile)
+            + ' scinterp='.format(scinterp)
+            + ' plot='.format(plot)
+            + ' clobber='.format(clobber)
+            + ' verbose='.format(verbose)
+            + ' logfile='.format(logfile))
     kepmsg.log(logfile,call+'\n',verbose)
 
     # start time
-    kepmsg.clock('KEPCOTREND started at',logfile,verbose)
-
-    # test log file
-    logfile = kepmsg.test(logfile)
+    kepmsg.clock('KEPCOTREND started at', logfile, verbose)
 
     # clobber output file
     if clobber:
-        status = kepio.clobber(outfile,logfile,verbose)
+        kepio.clobber(outfile,logfile,verbose)
     if kepio.fileexists(outfile):
-        message = 'ERROR -- KEPCOTREND: ' + outfile + ' exists. Use --clobber'
-        status = kepmsg.err(logfile,message,verbose)
+        errmsg = 'ERROR -- KEPCOTREND: ' + outfile + ' exists. Use --clobber'
+        kepmsg.err(logfile, errmsg, verbose)
 
     # open input file
-    if status == 0:
-        instr, status = kepio.openfits(infile,'readonly',logfile,verbose)
-        tstart, tstop, bjdref, cadence, status = kepio.timekeys(instr,infile,
-                logfile,verbose,status)
+    instr, status = kepio.openfits(infile, 'readonly', logfile, verbose)
+    tstart, tstop, bjdref, cadence = kepio.timekeys(instr, infile, logfile,
+                                                    verbose)
 
     # fudge non-compliant FITS keywords with no values
-    if status == 0:
-        instr = kepkey.emptykeys(instr,file,logfile,verbose)
+    instr = kepkey.emptykeys(instr, infile, logfile, verbose)
 
-    if status == 0:
-        if not kepio.fileexists(bvfile):
-            message = 'ERROR -- KEPCOTREND: ' + bvfile + ' does not exist.'
-            status = kepmsg.err(logfile,message,verbose)
+    if not kepio.fileexists(bvfile):
+        message = 'ERROR -- KEPCOTREND: ' + bvfile + ' does not exist.'
+        status = kepmsg.err(logfile,message,verbose)
 
-        #lsq_sq - nonlinear least squares fitting and simplex_abs have been
-        #removed from the options in PyRAF but they are still in the code!
-    if status == 0:
-        if fitmethod not in ['llsq','matrix','lst_sq','simplex_abs','simplex']:
-            message = 'Fit method must either: llsq, matrix, lst_sq or simplex'
-            status = kepmsg.err(logfile,message,verbose)
+    #lsq_sq - nonlinear least squares fitting and simplex_abs have been
+    #removed from the options in PyRAF but they are still in the code!
+    if fitmethod not in ['llsq','matrix','lst_sq','simplex_abs','simplex']:
+        errmsg = 'Fit method must either: llsq, matrix, lst_sq or simplex'
+        kepmsg.err(logfile, errmsg, verbose)
 
-    if status == 0:
-        if not is_numlike(fitpower) and fitpower is not None:
-            message = 'Fit power must be an real number or None'
-            status = kepmsg.err(logfile,message,verbose)
+    if not is_numlike(fitpower) and fitpower is not None:
+        message = 'Fit power must be an real number or None'
+        kepmsg.err(logfile, message, verbose)
 
-
-
-    if status == 0:
-        if fitpower is None:
-            fitpower = 1.
+    if fitpower is None:
+        fitpower = 1.
 
     # input data
-    if status == 0:
-        short = False
-        try:
-            test = str(instr[0].header['FILEVER'])
-            version = 2
-        except KeyError:
-            version = 1
+    short = False
+    try:
+        test = str(instr[0].header['FILEVER'])
+        version = 2
+    except KeyError:
+        version = 1
 
-        table = instr[1].data
-        if version == 1:
-            if str(instr[1].header['DATATYPE']) == 'long cadence':
-                #print 'Light curve was taken in Lond Cadence mode!'
-                quarter = str(instr[1].header['QUARTER'])
-                module = str(instr[1].header['MODULE'])
-                output = str(instr[1].header['OUTPUT'])
-                channel = str(instr[1].header['CHANNEL'])
+    table = instr[1].data
+    if version == 1:
+        if str(instr[1].header['DATATYPE']) == 'long cadence':
+            quarter = str(instr[1].header['QUARTER'])
+            module = str(instr[1].header['MODULE'])
+            output = str(instr[1].header['OUTPUT'])
+            channel = str(instr[1].header['CHANNEL'])
+            lc_cad_o = table.field('cadence_number')
+            lc_date_o = table.field('barytime')
+            lc_flux_o = table.field('ap_raw_flux') / 1625.3468 #convert to e-/s
+            lc_err_o = table.field('ap_raw_err') / 1625.3468 #convert to e-/s
+        elif str(instr[1].header['DATATYPE']) == 'short cadence':
+            short = True
+            quarter = str(instr[1].header['QUARTER'])
+            module = str(instr[1].header['MODULE'])
+            output = str(instr[1].header['OUTPUT'])
+            channel = str(instr[1].header['CHANNEL'])
+            lc_cad_o = table.field('cadence_number')
+            lc_date_o = table.field('barytime')
+            lc_flux_o = table.field('ap_raw_flux') / 54.178 #convert to e-/s
+            lc_err_o = table.field('ap_raw_err') / 54.178 #convert to e-/s
 
-                lc_cad_o = table.field('cadence_number')
-                lc_date_o = table.field('barytime')
-                lc_flux_o = table.field('ap_raw_flux') / 1625.3468 #convert to e-/s
-                lc_err_o = table.field('ap_raw_err') / 1625.3468 #convert to e-/s
-            elif str(instr[1].header['DATATYPE']) == 'short cadence':
-                short = True
-                #print 'Light curve was taken in Short Cadence mode!'
-                quarter = str(instr[1].header['QUARTER'])
-                module = str(instr[1].header['MODULE'])
-                output = str(instr[1].header['OUTPUT'])
-                channel = str(instr[1].header['CHANNEL'])
+    elif version >= 2:
+        if str(instr[0].header['OBSMODE']) == 'long cadence':
+            quarter = str(instr[0].header['QUARTER'])
+            module = str(instr[0].header['MODULE'])
+            output = str(instr[0].header['OUTPUT'])
+            channel = str(instr[0].header['CHANNEL'])
+            lc_cad_o = table.field('CADENCENO')
+            lc_date_o = table.field('TIME')
+            lc_flux_o = table.field('SAP_FLUX')
+            lc_err_o = table.field('SAP_FLUX_ERR')
+        elif str(instr[0].header['OBSMODE']) == 'short cadence':
+            short = True
+            quarter = str(instr[0].header['QUARTER'])
+            module = str(instr[0].header['MODULE'])
+            output = str(instr[0].header['OUTPUT'])
+            channel = str(instr[0].header['CHANNEL'])
+            lc_cad_o = table.field('CADENCENO')
+            lc_date_o = table.field('TIME')
+            lc_flux_o = table.field('SAP_FLUX')
+            lc_err_o = table.field('SAP_FLUX_ERR')
 
-                lc_cad_o = table.field('cadence_number')
-                lc_date_o = table.field('barytime')
-                lc_flux_o = table.field('ap_raw_flux') / 54.178 #convert to e-/s
-                lc_err_o = table.field('ap_raw_err') / 54.178 #convert to e-/s
+    if str(quarter) == str(4) and version == 1:
+        lc_cad_o = lc_cad_o[lc_cad_o >= 11914]
+        lc_date_o = lc_date_o[lc_cad_o >= 11914]
+        lc_flux_o = lc_flux_o[lc_cad_o >= 11914]
+        lc_err_o = lc_err_o[lc_cad_o >= 11914]
 
-        elif version >= 2:
-            if str(instr[0].header['OBSMODE']) == 'long cadence':
-                #print 'Light curve was taken in Long Cadence mode!'
+    if short and scinterp == 'None':
+        errmsg = ('You cannot select None as the interpolation method '
+                  'because you are using short cadence data and '
+                  'therefore must use some form of interpolation. I '
+                  'reccommend nearest if you are unsure.')
+        kepmsg.err(logfile, errmsg, verbose)
 
-                quarter = str(instr[0].header['QUARTER'])
-                module = str(instr[0].header['MODULE'])
-                output = str(instr[0].header['OUTPUT'])
-                channel = str(instr[0].header['CHANNEL'])
+    bvfiledata = pyfits.open(bvfile)
+    bvdata = bvfiledata['MODOUT_{0}_{1}'.format(module, output)].data
 
-                lc_cad_o = table.field('CADENCENO')
-                lc_date_o = table.field('TIME')
-                lc_flux_o = table.field('SAP_FLUX')
-                lc_err_o = table.field('SAP_FLUX_ERR')
-            elif str(instr[0].header['OBSMODE']) == 'short cadence':
-                #print 'Light curve was taken in Short Cadence mode!'
-                short = True
-                quarter = str(instr[0].header['QUARTER'])
-                module = str(instr[0].header['MODULE'])
-                output = str(instr[0].header['OUTPUT'])
-                channel = str(instr[0].header['CHANNEL'])
+    if int(bvfiledata[0].header['QUARTER']) != int(quarter):
+        errmsg = ('CBV file and light curve file are from different '
+                  'quarters. CBV file is from Q{0} and light curve is '
+                  'from Q{1}'.format(int(bvfiledata[0].header['QUARTER']),
+                                     int(quarter)))
+        kepmsg.err(logfile, errmsg, verbose)
 
-                lc_cad_o = table.field('CADENCENO')
-                lc_date_o = table.field('TIME')
-                lc_flux_o = table.field('SAP_FLUX')
-                lc_err_o = table.field('SAP_FLUX_ERR')
+    if int(quarter) == 4 and int(module) == 3:
+        errmsg = ('Approximately twenty days into Q4 Module 3 failed. '
+                  'As a result, Q4 light curves contain these 20 day '
+                  'of data. However, we do not calculate CBVs for '
+                  'this section of data.')
+        status = kepmsg.err(logfile, errmsg, verbose)
 
+    #cut out infinites and zero flux columns
+    lc_cad, lc_date, lc_flux, lc_err, bad_data = cutBadData(lc_cad_o,
+                                      lc_date_o, lc_flux_o, lc_err_o)
+    #get a list of basis vectors to use from the list given
+    #accept different seperators
+    listbv = listbv.strip()
+    if listbv[1] in [' ', ',', ':', ';', '|', ', ']:
+        separator = str(listbv)[1]
+    else:
+        message = ('You must separate your basis vector numbers to use '
+                   'with \' \' \',\' \':\' \';\' or \'|\' and the '
+                   'first basis vector to use must be between 1 and 9')
+        kepmsg.err(logfile, message, verbose)
 
-        if str(quarter) == str(4) and version == 1:
-            lc_cad_o = lc_cad_o[lc_cad_o >= 11914]
-            lc_date_o = lc_date_o[lc_cad_o >= 11914]
-            lc_flux_o = lc_flux_o[lc_cad_o >= 11914]
-            lc_err_o = lc_err_o[lc_cad_o >= 11914]
-
-        if short and scinterp == 'None':
-            message = ('You cannot select None as the interpolation method ' +
-                       'because you are using short cadence data and ' +
-                       'therefore must use some form of interpolation. I ' +
-                       'reccommend nearest if you are unsure.')
-            status = kepmsg.err(logfile,message,verbose)
-
-        bvfiledata = pyfits.open(bvfile)
-        bvdata = bvfiledata['MODOUT_%s_%s' %(module,output)].data
-
-        if int(bvfiledata[0].header['QUARTER']) != int(quarter):
-            message = ('CBV file and light curve file are from different ' +
-                       'quarters. CBV file is from Q%s and light curve is ' +
-                       'from Q%s' %(int(bvfiledata[0].header['QUARTER']),
-                                   int(quarter)))
-            status = kepmsg.err(logfile,message,verbose)
-
-    if status == 0:
-        if int(quarter) == 4 and int(module) == 3:
-            message = ('Approximately twenty days into Q4 Module 3 failed. ' +
-                       'As a result, Q4 light curves contain these 20 day ' +
-                       'of data. However, we do not calculate CBVs for ' +
-                       'this section of data.')
-            status = kepmsg.err(logfile,message,verbose)
-
-    if status == 0:
-        #cut out infinites and zero flux columns
-        lc_cad,lc_date,lc_flux,lc_err,bad_data = cutBadData(lc_cad_o,
-                lc_date_o,lc_flux_o,lc_err_o)
-        #get a list of basis vectors to use from the list given
-        #accept different seperators
-        listbv = listbv.strip()
-        if listbv[1] in [' ',',',':',';','|',', ']:
-            separator = str(listbv)[1]
-        else:
-            message = ('You must separate your basis vector numbers to use ' +
-                       'with \' \' \',\' \':\' \';\' or \'|\' and the '
-                       'first basis vector to use must be between 1 and 9')
-            status = kepmsg.err(logfile,message,verbose)
-
-
-    if status == 0:
-        bvlist = np.fromstring(listbv,dtype=int,sep=separator)
-        if bvlist[0] == 0:
-            message = 'Must use at least one basis vector'
-            status = kepmsg.err(logfile,message,verbose)
-    if status == 0:
-        if short:
-            bvdata.field('CADENCENO')[:] = ((((bvdata.field('CADENCENO')[:] +
+    bvlist = np.fromstring(listbv,dtype=int,sep=separator)
+    if bvlist[0] == 0:
+        errmsg = 'Must use at least one basis vector'
+        kepmsg.err(logfile, errmsg, verbose)
+    if short:
+        bvdata.field('CADENCENO')[:] = ((((bvdata.field('CADENCENO')[:] +
                                         (7.5/15.) )* 30.) - 11540.).round())
-        bvectors,in1derror = get_pcomp_list_newformat(bvdata, bvlist, lc_cad,
-                                                      short, scinterp)
-        if in1derror:
-            message = ('It seems that you have an old version of numpy ' +
-                       'which does not have the in1d function included. ' +
-                       'Please update your version of numpy to a version ' +
-                       '1.4.0 or later')
-            status = kepmsg.err(logfile,message,verbose)
-    if status == 0:
+    bvectors, in1derror = get_pcomp_list_newformat(bvdata, bvlist, lc_cad,
+                                                   short, scinterp)
+    if in1derror:
+        message = ('It seems that you have an old version of numpy '
+                   'which does not have the in1d function included. '
+                   'Please update your version of numpy to a version '
+                   '1.4.0 or later')
+        kepmsg.err(logfile, message, verbose)
+    medflux = np.median(lc_flux)
+    n_flux = (lc_flux /medflux)-1
+    n_err = np.sqrt(lc_err * lc_err / (medflux * medflux))
 
-        medflux = np.median(lc_flux)
-        n_flux = (lc_flux /medflux)-1
-        n_err = np.sqrt(lc_err * lc_err / (medflux * medflux))
+    if maskfile != '':
+        domasking = True
+        if not kepio.fileexists(maskfile):
+            errmsg = 'Maskfile {} does not exist'.format(maskfile)
+            kepmsg.err(logfile, errmsg, verbose)
+    else:
+        domasking = False
 
-        if maskfile != '':
-            domasking = True
-            if not kepio.fileexists(maskfile):
-                message = 'Maskfile %s does not exist' %maskfile
-                status = kepmsg.err(logfile,message,verbose)
-        else:
-            domasking = False
+    if domasking:
+        lc_date_masked = np.copy(lc_date)
+        n_flux_masked = np.copy(n_flux)
+        lc_cad_masked = np.copy(lc_cad)
+        n_err_masked = np.copy(n_err)
+        maskdata = atleast_2d(genfromtxt(maskfile, delimiter=','))
+        mask = np.zeros(len(lc_date_masked)) == 0.
+        for maskrange in maskdata:
+            if version == 1:
+                start = maskrange[0] - 2400000.0
+                end = maskrange[1] - 2400000.0
+            elif version == 2:
+                start = maskrange[0] - 2454833.
+                end = maskrange[1] - 2454833.
+            masknew = logical_xor(lc_date < start, lc_date > end)
+            mask = np.logical_and(mask,masknew)
+        lc_date_masked = lc_date_masked[mask]
+        n_flux_masked = n_flux_masked[mask]
+        lc_cad_masked = lc_cad_masked[mask]
+        n_err_masked = n_err_masked[mask]
+    else:
+        lc_date_masked = np.copy(lc_date)
+        n_flux_masked = np.copy(n_flux)
+        lc_cad_masked = np.copy(lc_cad)
+        n_err_masked = np.copy(n_err)
 
-    if status == 0:
-        if domasking:
-            lc_date_masked = np.copy(lc_date)
-            n_flux_masked = np.copy(n_flux)
-            lc_cad_masked = np.copy(lc_cad)
-            n_err_masked = np.copy(n_err)
-            maskdata = atleast_2d(genfromtxt(maskfile,delimiter=','))
-            #make a mask of True values incase there are not regions in maskfile to exclude.
-            mask = np.zeros(len(lc_date_masked)) == 0.
-            for maskrange in maskdata:
-                if version == 1:
-                    start = maskrange[0] - 2400000.0
-                    end = maskrange[1] - 2400000.0
-                elif version == 2:
-                    start = maskrange[0] - 2454833.
-                    end = maskrange[1] - 2454833.
-                masknew = logical_xor(lc_date < start,lc_date > end)
-                mask = np.logical_and(mask,masknew)
-            lc_date_masked = lc_date_masked[mask]
-            n_flux_masked = n_flux_masked[mask]
-            lc_cad_masked = lc_cad_masked[mask]
-            n_err_masked = n_err_masked[mask]
-        else:
-            lc_date_masked = np.copy(lc_date)
-            n_flux_masked = np.copy(n_flux)
-            lc_cad_masked = np.copy(lc_cad)
-            n_err_masked = np.copy(n_err)
+    bvectors_masked,hasin1d = get_pcomp_list_newformat(bvdata,bvlist,
+                                                       lc_cad_masked,
+                                                       short,scinterp)
 
-        bvectors_masked,hasin1d = get_pcomp_list_newformat(bvdata,bvlist,
-                                                           lc_cad_masked,
-                                                           short,scinterp)
-
-        if iterate and sigma is None:
-            message = 'If fitting iteratively you must specify a clipping range'
-            status = kepmsg.err(logfile,message,verbose)
+    if iterate and sigma is None:
+        errmsg = 'If fitting iteratively you must specify a clipping range'
+        kepmsg.err(logfile, errmsg, verbose)
 
     if status == 0:
         #uses Pvals = yhat * U_transpose
-        if (iterate):
-            coeffs,fittedmask = do_lst_iter(bvectors_masked,lc_cad_masked,
+        if iterate:
+            coeffs, fittedmask = do_lst_iter(bvectors_masked, lc_cad_masked,
                     n_flux_masked,sigma,50.,fitmethod,fitpower)
         else:
             if fitmethod == 'matrix' and domasking:
                 coeffs = do_lsq_uhat(bvectors_masked,lc_cad_masked,
                                      n_flux_masked,False)
-            if fitmethod == 'llsq' and domasking:
+            elif fitmethod == 'llsq' and domasking:
                 coeffs = do_lsq_uhat(bvectors_masked,lc_cad_masked,
                                      n_flux_masked,False)
             elif fitmethod == 'lst_sq':
@@ -815,7 +858,7 @@ def kepcotrendsc(infile,outfile,bvfile,listbv,fitmethod,fitpower,iterate,
                 coeffs = do_lsq_uhat(bvectors_masked,lc_cad_masked,
                                      n_flux_masked)
 
-        flux_after = (get_newflux(n_flux,bvectors,coeffs) +1) * medflux
+        flux_after = (get_newflux(n_flux,bvectors,coeffs) + 1) * medflux
         flux_after_masked = ((get_newflux(n_flux_masked, bvectors_masked,
                                           coeffs) + 1) * medflux)
         bvsum = get_pcompsum(bvectors, coeffs)
@@ -823,49 +866,42 @@ def kepcotrendsc(infile,outfile,bvfile,listbv,fitmethod,fitpower,iterate,
         bvsum_nans = putInNans(bad_data, bvsum)
         flux_after_nans = putInNans(bad_data, flux_after)
 
-        if plot and status == 0:
+        if plot:
             newmedflux = np.median(flux_after + 1)
-            bvsum_un_norm = newmedflux*(1-bvsum)
+            bvsum_un_norm = newmedflux * (1 - bvsum)
             do_plot(lc_date, lc_flux, flux_after, bvsum_un_norm, lc_cad,
-                    bad_data, lc_cad_o, version, cmdLine)
+                    bad_data, lc_cad_o, version)
 
-    if status == 0:
-        make_outfile(instr,outfile,flux_after_nans,bvsum_nans,version)
+    make_outfile(instr,outfile,flux_after_nans,bvsum_nans,version)
 
     # close input file
-    if status == 0:
-        status = kepio.closefits(instr,logfile,verbose)
+    status = kepio.closefits(instr, logfile, verbose)
 
-        #print some results to screen:
-        print '      -----      '
-        if iterate:
-            flux_fit = n_flux_masked[fittedmask]
-            sum_fit = bvsum_masked[fittedmask]
-            err_fit = n_err_masked[fittedmask]
-        else:
-            flux_fit = n_flux_masked
-            sum_fit = bvsum_masked
-            err_fit = n_err_masked
+    #print some results to screen:
+    print('      -----      ')
+    if iterate:
+        flux_fit = n_flux_masked[fittedmask]
+        sum_fit = bvsum_masked[fittedmask]
+        err_fit = n_err_masked[fittedmask]
+    else:
+        flux_fit = n_flux_masked
+        sum_fit = bvsum_masked
+        err_fit = n_err_masked
 
-        print 'reduced chi2: ' + str(chi2_gtf(flux_fit,sum_fit,err_fit,len(flux_fit)-len(coeffs)))
-        print 'rms: ' + str(medflux*rms(flux_fit,sum_fit))
+    print('reduced chi2: {}'.format(chi2_gtf(flux_fit, sum_fit, err_fit,
+                                             len(flux_fit) - len(coeffs))))
+    print('rms: {}'.format(medflux*rms(flux_fit, sum_fit)))
 
-        for i in range(len(coeffs)):
-            print 'Coefficient of CBV #%s: %s' %(i+1,coeffs[i])
-        print '      -----      '
+    for i in range(len(coeffs)):
+        print('Coefficient of CBV #{0}: {1}'.format(i + 1, coeffs[i]))
+    print('      -----      ')
 
     # end time
-    if status == 0:
-        message = 'KEPCOTREND completed at'
-    else:
-        message = '\nKEPCOTTREND aborted at'
-    kepmsg.clock(message,logfile,verbose)
+    kepmsg.clock('KEPCOTREND completed at', logfile, verbose)
 
-    return
+def kepcotrend_main():
 
-if '--shell' in sys.argv:
     import argparse
-
     parser = argparse.ArgumentParser(description=('Remove systematic ' +
                                                   'trends in photometry ' +
                                                   'using cotrending basis ' +
@@ -893,10 +929,11 @@ if '--shell' in sys.argv:
     parser.add_argument('--maskfile', '-q',
                         help='Name of file containing a mask', default='',
                         dest='maskfile', type=str)
-    parser.add_argument('--scinterp', '-w',
+    parser.add_argument('--scinterp',
                         help='Short cadence interpolation method',
-                        default='None', dest='scinterp', type=str,
-                        choices=['linear','nearest','slinear','quadratic','cubic'])
+                        default='None', type=str,
+                        choices=['linear', 'nearest', 'slinear', 'quadratic',
+                                 'cubic'])
     parser.add_argument('--plot', '-p', action='store_true',
                         help='Plot result?', dest='plot')
     parser.add_argument('--clobber', action='store_true',
@@ -905,10 +942,8 @@ if '--shell' in sys.argv:
                         help='Write to a log file?')
     parser.add_argument('--logfile', '-l', help='Name of ascii log file',
                         default='kepcotrend.log', dest='logfile', type=str)
-    parser.add_argument('--status', '-e', help='Exit status (0=good)',
-                        default=0, dest='status', type=int)
     args = parser.parse_args()
-    kepcotrendsc(args.infile,args.outfile,args.cbvfile,args.listbv,
-                 args.fitmethod, args.fitpower, args.iterate, args.sigma,
-                 args.maskfile, args.scinterp, args.plot, args.clobber,
-                 args.verbose, args.logfile)
+    kepcotrend(args.infile, args.outfile, args.cbvfile, args.listbv,
+               args.fitmethod, args.fitpower, args.iterate, args.sigma,
+               args.maskfile, args.scinterp, args.plot, args.clobber,
+               args.verbose, args.logfile)
