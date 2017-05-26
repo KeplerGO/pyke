@@ -902,9 +902,9 @@ def kepcotrend(infile, outfile, bvfile, listbv, fitmethod, fitpower,
 def kepcotrend_main():
 
     import argparse
-    parser = argparse.ArgumentParser(description=('Remove systematic ' +
-                                                  'trends in photometry ' +
-                                                  'using cotrending basis ' +
+    parser = argparse.ArgumentParser(description=('Remove systematic '
+                                                  'trends in photometry '
+                                                  'using cotrending basis '
                                                   'vectors'))
     parser.add_argument('--shell', action='store_true',
                         help='Are we running from the shell?')
@@ -941,7 +941,7 @@ def kepcotrend_main():
     parser.add_argument('--verbose', action='store_true',
                         help='Write to a log file?')
     parser.add_argument('--logfile', '-l', help='Name of ascii log file',
-                        default='kepcotrend.log', dest='logfile', type=str)
+                        default='kepcotrend.log', type=str)
     args = parser.parse_args()
     kepcotrend(args.infile, args.outfile, args.cbvfile, args.listbv,
                args.fitmethod, args.fitpower, args.iterate, args.sigma,

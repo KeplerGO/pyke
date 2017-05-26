@@ -8,10 +8,75 @@ from . import kepkey
 from . import kepfit
 from . import kepstat
 
+__all__ = ['kepdetrend']
+
 def kepdetrend(infile, outfile, datacol, errcol, ranges1, npoly1, nsig1,
                niter1, ranges2, npoly2, nsig2, niter2, popnans, plot,
                clobber, verbose, logfile):
     """
+    kepdetrend -- Detrend aperture photometry data
+
+    Simple Aperture Photometry (SAP) data can contain a series of systematic
+    trends associated with the spacecraft, detector and environment rather than
+    the target. Within the Kepler pipeline these contaminants are treated
+    during Pre-search Data Conditioning (PDC) and cleaned data are provided in
+    the archived files as the PDCSAP_FLUX data. See the Kepler Data
+    Characteristics Handbook for more precise descriptions of systematics. The
+    Kepler pipeline attempts to remove systematics with a combination of data
+    detrending and cotrending against weighted cotrending basis vectors derived
+    from the time series structure most-common to all neighbors of the
+    scientific target. These processes are imperfect but tackled within the
+    pipeline in the spirit of correcting as many targets as possible with
+    enough accuracy for the mission to meet exoplanet detection specifications.
+    This approach is, however, not optimized for individual targets. Users of
+    the Kepler archive may well find that individually-tailored detrending and
+    cotrending yields corrected light curves more suited to their science. The
+    purpose of kepdetrend is to provide a detrending algorithm that can be
+    tailored for individual targets. We stress that an absolute correction is
+    often impossible for Kepler data. We also recommend the use of kepcotrend
+    instead of kepdetrend for systematic removal in most Kepler targets.
+
+    The current version of this task asks the user to define data ranges that
+    are free of a systematic feature that needs to be removed and can be
+    well-characterized by a single polynomial function. This function is what
+    the task attempts to correct data to. The user then defines a data range
+    that needs correcting and fits this with a second polynomial. The
+    correction is the subtraction of one polynomial from the other in the data
+    range to be detrended. The examples plotted below show the piecemeal
+    correction of three systematic features within a Q2 light curve. These
+    three corrections are provided in the task examples below.
+
+    infile : str
+        The name of a MAST standard format FITS file containing a Kepler light
+        curve within the first data extension.
+    outfile : str
+        The name of the output FITS file. outfile will be an amended version of
+        infile with specified time ranges detrended by subtraction of a
+        polynomial fit.
+    datacol : str
+        The column name containing data stored within extension 1 of infile.
+        This data will be detrended. Typically this name is SAP_FLUX (Simple
+        Aperture Photometry fluxes), but any data column within extension 1 of
+        the FITS file can be corrected.
+    errcol : str
+        The uncertainty data coupled to datacol. Typically this column is
+        called ``SAP_FLUX_ERR``. If no errors are associated with datacol then
+        use ``errcol=None``.
+    ranges1, ranges2 : list, list
+        Time ranges are supplied as comma-separated pairs of Barycentric Julian
+        Dates (BJDs). Multiple ranges are separated by a semi-colon. An example
+        containing two time ranges is:
+            ``'2455012.48517,2455014.50072;2455022.63487,2455025.08231'``
+    npoly1, npoly2 : int
+        The polynomial order for the function that fits the data ranges to be
+        detrended.
+    nsig1, nsig2 : float, float
+        The data to be detrended is fit by a polynomial using an iterative
+        scheme. After a best fit is found, those data points deviating from the
+        fit by more than this specified amount are rejected and the remaining
+        data are fit again, etc, until there are no further rejections. This
+        threshold is in units of the standard deviation of the data about the
+        best fit function.
     """
 
     # startup parameters
@@ -28,23 +93,23 @@ def kepdetrend(infile, outfile, datacol, errcol, ranges1, npoly1, nsig1,
     hashline = '----------------------------------------------------------------------------'
     kepmsg.log(logfile, hashline, verbose)
     call = ('KEPDETREND -- '
-            + 'infile= {}'.format(infile)
-            + 'outfile= {}'.format(outfile)
-            + 'datacol= {}'.format(datacol)
-            + 'errcol= {}'.format(errcol)
-            + 'ranges1= {}'.format(ranges1)
-            + 'npoly1= {}'.format(npoly1)
-            + 'nsig1= {}'.format(nsig1)
-            + 'niter1= {}'.format(niter1)
-            + 'ranges2= {}'.format(ranges2)
-            + 'npoly2= {}'.format(npoly2)
-            + 'nsig2= {}'.format(nsig2)
-            + 'niter2= {}'.format(niter2)
-            + 'popnans= {}'.format(popnans)
-            + 'plot= {}'.format(plot)
-            + 'clobber= {}'.format(clobber)
-            + 'verbose= {}'.format(verbose)
-            + 'logfile= {}'.format(logfile))
+            + 'infile={}'.format(infile)
+            + 'outfile={}'.format(outfile)
+            + 'datacol={}'.format(datacol)
+            + 'errcol={}'.format(errcol)
+            + 'ranges1={}'.format(ranges1)
+            + 'npoly1={}'.format(npoly1)
+            + 'nsig1={}'.format(nsig1)
+            + 'niter1={}'.format(niter1)
+            + 'ranges2={}'.format(ranges2)
+            + 'npoly2={}'.format(npoly2)
+            + 'nsig2={}'.format(nsig2)
+            + 'niter2={}'.format(niter2)
+            + 'popnans={}'.format(popnans)
+            + 'plot={}'.format(plot)
+            + 'clobber={}'.format(clobber)
+            + 'verbose={}'.format(verbose)
+            + 'logfile={}'.format(logfile))
 
     kepmsg.log(logfile, call+'\n', verbose)
     # start time
@@ -58,7 +123,7 @@ def kepdetrend(infile, outfile, datacol, errcol, ranges1, npoly1, nsig1,
         status = kepmsg.err(logfile, message, verbose)
 
     # open input file
-    instr, status = kepio.openfits(infile,'readonly',logfile,verbose)
+    instr = pyfits.open(infile, 'readonly')
     tstart, tstop, bjdref, cadence = kepio.timekeys(instr, infile,
                                                     logfile, verbose)
 
@@ -73,12 +138,12 @@ def kepdetrend(infile, outfile, datacol, errcol, ranges1, npoly1, nsig1,
     work1 = work1[~np.isnan(work1).any(1)]
 
     # read table columns
-    intime = work1[:,2] + bjdref
-    indata = work1[:,1]
-    inerr = work1[:,0]
+    intime = work1[:, 2] + bjdref
+    indata = work1[:, 1]
+    inerr = work1[:, 0]
 
     # time ranges for region 1 (region to be corrected)
-    time1 = []; data1 = []; err1 = []
+    time1, data1, err1 = [], [], []
     t1start, t1stop = kepio.timeranges(ranges1, logfile, verbose)
     cadencelis1 = kepstat.filterOnRange(intime, t1start, t1stop)
     for i in range(len(cadencelis1)):
@@ -217,7 +282,7 @@ def kepdetrend(infile, outfile, datacol, errcol, ranges1, npoly1, nsig1,
             plt.ylabel(ylab, {'color' : 'k'})
         plt.grid()
         # plot detrended data
-        ax = plt.axes([0.06,0.073,0.93,0.45])
+        ax = plt.axes([0.06, 0.073, 0.93, 0.45])
 
         # force tick labels to be absolute rather than relative
         plt.gca().xaxis.set_major_formatter(plt.ScalarFormatter(useOffset=False))
@@ -265,30 +330,39 @@ def kepdetrend_main():
     parser = argparse.ArgumentParser(
             description=('Detrend systematic features from Simple Aperture '
                          'Photometry (SAP) data'))
-    parser.add_argument('--shell', action='store_true', help='Are we running from the shell?')
     parser.add_argument('infile', help='Name of input file', type=str)
-    parser.add_argument('outfile', help='Name of FITS file to output', type=str)
-
-    parser.add_argument('--datacol', default='SAP_FLUX', help='Name of data column', type=str)
-    parser.add_argument('--errcol', default='SAP_FLUX_ERR', help='Name of data error column', type=str)
-
+    parser.add_argument('outfile', help='Name of FITS file to output',
+                        type=str)
+    parser.add_argument('--datacol', default='SAP_FLUX',
+                        help='Name of data column', type=str)
+    parser.add_argument('--errcol', default='SAP_FLUX_ERR',
+                        help='Name of data error column', type=str)
     parser.add_argument('--ranges1', help='Time ranges of region 1', type=str)
-    parser.add_argument('--npoly1', help='Polynomial order for region 1', type=int)
-    parser.add_argument('--nsig1', help='Sigma clipping threshold for region 1', type=int)
-    parser.add_argument('--niter1', help='Maximum number of clipping iterations for region 1', type=int)
-
+    parser.add_argument('--npoly1', help='Polynomial order for region 1',
+                        type=int)
+    parser.add_argument('--nsig1',
+                        help='Sigma clipping threshold for region 1', type=int)
+    parser.add_argument('--niter1',
+                        help='Maximum number of clipping iterations for region 1',
+                        type=int)
     parser.add_argument('--ranges2', help='Time ranges of region 2', type=str)
-    parser.add_argument('--npoly2', help='Polynomial order for region 2', type=int)
-    parser.add_argument('--nsig2', help='Sigma clipping threshold for region 2', type=int)
-    parser.add_argument('--niter2', help='Maximum number of clipping iterations for region 2', type=int)
-
-    parser.add_argument('--popnans', action='store_true', help='Keep cadences with no flux value?')
-    parser.add_argument('--plot', action='store_true', help='Plot result?')
-
-
-    parser.add_argument('--clobber', action='store_true', help='Overwrite output file?')
-    parser.add_argument('--verbose', action='store_true', help='Write to a log file?')
-    parser.add_argument('--logfile', '-l', help='Name of ascii log file', default='kepdetrend.log', dest='logfile', type=str)
+    parser.add_argument('--npoly2', help='Polynomial order for region 2',
+                        type=int)
+    parser.add_argument('--nsig2', help='Sigma clipping threshold for region 2',
+                        type=int)
+    parser.add_argument('--niter2',
+                        help='Maximum number of clipping iterations for region 2',
+                        type=int)
+    parser.add_argument('--popnans', action='store_true', default=True,
+                        help='Keep cadences with no flux value?')
+    parser.add_argument('--plot', action='store_true', default=True,
+                        help='Plot result?')
+    parser.add_argument('--clobber', action='store_true', default=True,
+                        help='Overwrite output file?')
+    parser.add_argument('--verbose', action='store_true', default=True,
+                        help='Write to a log file?')
+    parser.add_argument('--logfile', help='Name of ascii log file',
+                        default='kepdetrend.log', dest='logfile', type=str)
     args = parser.parse_args()
     kepdetrend(args.infile, args.outfile, args.datacol, args.errcol,
                args.ranges1, args.npoly1, args.nsig1, args.niter1,
