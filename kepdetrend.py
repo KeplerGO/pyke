@@ -67,6 +67,9 @@ def kepdetrend(infile, outfile, datacol, errcol, ranges1, npoly1, nsig1,
         Dates (BJDs). Multiple ranges are separated by a semi-colon. An example
         containing two time ranges is:
             ``'2455012.48517,2455014.50072;2455022.63487,2455025.08231'``
+        Data within the range ``ranges1`` will be detrended by subtracting the
+        difference between the best fit to data in that range and the best fit
+        function in the range ``ranges2`` extrapolated into ranges1.
     npoly1, npoly2 : int
         The polynomial order for the function that fits the data ranges to be
         detrended.
@@ -77,6 +80,23 @@ def kepdetrend(infile, outfile, datacol, errcol, ranges1, npoly1, nsig1,
         data are fit again, etc, until there are no further rejections. This
         threshold is in units of the standard deviation of the data about the
         best fit function.
+    niter1, niter2 : int, int
+        The polynomial fit over the data to be detrended will be iterated until
+        there are no further outlier rejections or the number of iterations
+        exceeds niter1 (niter2).
+    popnans : bool
+        Keep NaN flux values (times without a flux measurement) in the output
+        FITS file. If set to no, any rows in the input FITS file containing
+        NaNs will no be in the output file.
+    plot : boolean
+        Plot the data, the fits and the correction?
+    clobber : bool
+        Overwrite the output file? if clobber = no and an existing file has the
+        same name as outfile then the task will stop with an error.
+    verbose : bool
+        Print informative messages and warnings to the shell and logfile?
+    logfile : str
+        Name of the logfile containing error and warning messages.
     """
 
     # startup parameters
