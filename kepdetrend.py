@@ -10,9 +10,10 @@ from . import kepstat
 
 __all__ = ['kepdetrend']
 
-def kepdetrend(infile, outfile, datacol, errcol, ranges1, npoly1, nsig1,
-               niter1, ranges2, npoly2, nsig2, niter2, popnans, plot,
-               clobber, verbose, logfile):
+def kepdetrend(infile, outfile, ranges1, ranges2, npoly1, npoly2, nsig1, nsig2,
+               niter1, niter2, datacol='SAP_FLUX', errcol='SAP_FLUX_ERR',
+               popnans=True, plot=True, clobber=True, verbose=True,
+               logfile='kepdetrend.log'):
     """
     kepdetrend -- Detrend aperture photometry data
 
@@ -91,8 +92,8 @@ def kepdetrend(infile, outfile, datacol, errcol, ranges1, npoly1, nsig1,
     plot : boolean
         Plot the data, the fits and the correction?
     clobber : bool
-        Overwrite the output file? if clobber = no and an existing file has the
-        same name as outfile then the task will stop with an error.
+        Overwrite the output file? if clobber is False and an existing file has
+        the same name as outfile then the task will stop with an error.
     verbose : bool
         Print informative messages and warnings to the shell and logfile?
     logfile : str
@@ -226,7 +227,7 @@ def kepdetrend(infile, outfile, datacol, errcol, ranges1, npoly1, nsig1,
                        niter2, logfile, verbose)
     fit2 = indata * 0.0
     for i in range(len(coeffs)):
-        fit2 += coeffs[i] * (intime - t0)**i
+        fit2 += coeffs[i] * (intime - t0) ** i
     for i in range(len(intime)):
         if i not in cadencelis1:
             fit2[i] = 0.0
