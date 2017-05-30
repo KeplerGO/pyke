@@ -1,16 +1,19 @@
-import sys, time, math, re
+import re
+import numpy as np
 from astropy.io import fits as pyfits
 from matplotlib import pyplot as plt
-import numpy as np
-import kepio, kepmsg, kepkey, kepfit, kepstat, kepfourier, keplab
+from . import kepio
+from . import kepmsg
+from . import kepkey
+from . import kepstat
+from . import kepfourier
+from . import keplab
 
 def kepdynamic(infile, outfile, fcol, pmin, pmax, nfreq, deltat, nslice,
                plot, plotscale, cmap, clobber, verbose, logfile, status,
                cmdLine=False):
 
-# startup parameters
-
-    status = 0
+    # startup parameters
     labelsize = 24
     ticksize = 16
     xsize = 12
@@ -19,46 +22,31 @@ def kepdynamic(infile, outfile, fcol, pmin, pmax, nfreq, deltat, nslice,
     lwidth = 1.0
     fcolor = '#ffff00'
     falpha = 0.2
-    np.seterr(all="ignore")
 
-# log the call
+    # log the call
+    hashline = '--------------------------------------------------------------'
+    kepmsg.log(logfile, hashline, verbose)
+    call = ('KEPDYNAMIC -- '
+            + ' infile={}'.format(infile)
+            + ' outfile={}'.format(outfile)
+            + ' fcol={}'.format(fcol)
+            + ' pmin={}'.format(pmin)
+            + ' pmax={}'.format(pmax)
+            + ' nfreq={}'.format(nfreq)
+            + ' deltat={}'.format(deltat)
+            + ' nslice={}'.format(nslice)
+            + ' plot={}'.format(plot)
+            + ' plotscale={}'.format(plotscale)
+            + ' cmap={}'.format(cmap)
+            + ' clobber={}'.format(clobber)
+            + ' verbose={}'.format(verbose)
+            + ' logfile={}'.format(logfile))
+    kepmsg.log(logfile, call+'\n', verbose)
 
-    hashline = '----------------------------------------------------------------------------'
-    kepmsg.log(logfile,hashline,verbose)
-    call = 'KEPDYNAMIC -- '
-    call += 'infile='+infile+' '
-    call += 'outfile='+outfile+' '
-    call += 'fcol='+fcol+' '
-    call += 'pmin='+str(pmin)+' '
-    call += 'pmax='+str(pmax)+' '
-    call += 'nfreq='+str(nfreq)+' '
-    call += 'deltat='+str(deltat)+' '
-    call += 'nslice='+str(nslice)+' '
-    plotit = 'n'
-    if (plot): plotit = 'y'
-    call += 'plot='+plotit+ ' '
-    call += 'plotscale='+plotscale+ ' '
-    call += 'cmap='+str(cmap)+' '
-    overwrite = 'n'
-    if (clobber): overwrite = 'y'
-    call += 'clobber='+overwrite+ ' '
-    chatter = 'n'
-    if (verbose): chatter = 'y'
-    call += 'verbose='+chatter+' '
-    call += 'logfile='+logfile
-    kepmsg.log(logfile,call+'\n',verbose)
+    # start time
+    kepmsg.clock('Start time is', logfile, verbose)
 
-# start time
-
-    kepmsg.clock('Start time is',logfile,verbose)
-
-# test log file
-
-    logfile = kepmsg.test(logfile)
-
-# error checking
-
-    if status == 0 and pmin >= pmax:
+    if pmin >= pmax:
         message = 'ERROR -- KEPDYNAMIC: PMIN must be less than PMAX'
         status = kepmsg.err(logfile,message,verbose)
 
