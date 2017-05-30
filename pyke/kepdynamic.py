@@ -2,6 +2,7 @@ import re
 import numpy as np
 from astropy.io import fits as pyfits
 from matplotlib import pyplot as plt
+from tqdm import tqdm
 from . import kepio
 from . import kepmsg
 from . import kepkey
@@ -62,7 +63,7 @@ def kepdynamic(infile, outfile, fcol='SAP_FLUX', pmin=0.1, pmax=10., nfreq=100,
         kepmsg.err(logfile, errmsg, verbose)
 
     # open input file
-    instr = kepio.openfits(infile, 'readonly', logfile, verbose)
+    instr = pyfits.open(infile, 'readonly')
     tstart, tstop, bjdref, cadence = kepio.timekeys(instr, infile, logfile,
                                                     verbose)
     try:
@@ -105,7 +106,7 @@ def kepdynamic(infile, outfile, fcol='SAP_FLUX', pmin=0.1, pmax=10., nfreq=100,
 
     # loop through time slices
     dynam = []
-    for i in range(nslice):
+    for i in tqdm(range(nslice)):
         x, y = [], []
         for j in range(len(barytime)):
             if (barytime[j] >= t1[i] and barytime[j] <= t2[i]):
@@ -223,6 +224,6 @@ def kepdynamic_main():
     parser.add_argument('--logfile', '-l', help='Name of ascii log file',
                         default='kepdynamic.log', dest='logfile', type=str)
     args = parser.parse_args()
-    kepynamic(args.infile, args.outfile, args.fcol, args.pmin, args.pmax,
-              args.nfreq, args.deltat, args.nslice, args.plot, args.plotscale,
-              args.cmap, args.clobber, args.verbose, args.logfile)
+    kepdynamic(args.infile, args.outfile, args.fcol, args.pmin, args.pmax,
+               args.nfreq, args.deltat, args.nslice, args.plot, args.plotscale,
+               args.cmap, args.clobber, args.verbose, args.logfile)

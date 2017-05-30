@@ -12,7 +12,7 @@ exec(open('pyke/version.py').read())
 
 entry_points = {'console_scripts': [
         'kepmask = pyke.kepmask:kepmask_main',
-        'kepprf  = pyke.kepprf:kepprf_main',
+        'kepprf = pyke.kepprf:kepprf_main',
         'kepfold = pyke.kepfold:kepfold_main',
         'kepclip = pyke.kepclip:kepclip_main',
         'kepsmooth = pyke.kepsmooth:kepsmooth_main',
