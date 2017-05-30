@@ -13,3 +13,4 @@ def test_import():
     from .. import kepclip
     from .. import kepsmooth
     from .. import kepflatten
+    from .. import kepdynamic

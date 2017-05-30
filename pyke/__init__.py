@@ -18,3 +18,4 @@ from .kepfold    import *
 from .kepclip    import *
 from .kepsmooth  import *
 from .kepflatten import *
+from .kepdynamic import *

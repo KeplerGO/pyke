@@ -7,11 +7,14 @@ from . import kepmsg
 from . import kepkey
 from . import kepstat
 from . import kepfourier
-from . import keplab
 
-def kepdynamic(infile, outfile, fcol, pmin, pmax, nfreq, deltat, nslice,
-               plot, plotscale, cmap, clobber, verbose, logfile, status,
-               cmdLine=False):
+
+__all__ = ['kepdynamic']
+
+
+def kepdynamic(infile, outfile, fcol='SAP_FLUX', pmin=0.1, pmax=10., nfreq=100,
+               deltat=10., nslice=10, plot=True, plotscale='log', cmap='PuBu',
+               clobber=True, verbose=True, logfile='kepdynamic.log'):
 
     # startup parameters
     labelsize = 24
@@ -205,7 +208,7 @@ def kepdynamic_main():
                         help='Number of frequency intervals', type=int)
     parser.add_argument('--deltat', default=10.,
                         help='Length of time slice [days]', type=float)
-    parser.add_argument('--nslice', default=10.,
+    parser.add_argument('--nslice', default=10,
                         help='Number of time slices', type=int)
     parser.add_argument('--plot', action='store_true', help='Plot result?')
     parser.add_argument('--plotscale', default='log',
@@ -213,9 +216,9 @@ def kepdynamic_main():
                         choices=['linear', 'log', 'squareroot', 'loglog'])
     parser.add_argument('--cmap', default='PuBu', help='image colormap',
                         type=str)
-    parser.add_argument('--clobber', action='store_true',
+    parser.add_argument('--clobber', action='store_true', default=True,
                         help='Overwrite output file?')
-    parser.add_argument('--verbose', action='store_true',
+    parser.add_argument('--verbose', action='store_true', default=True,
                         help='Write to a log file?')
     parser.add_argument('--logfile', '-l', help='Name of ascii log file',
                         default='kepdynamic.log', dest='logfile', type=str)
