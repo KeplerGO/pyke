@@ -16,6 +16,47 @@ __all__ = ['kepdynamic']
 def kepdynamic(infile, outfile, fcol='SAP_FLUX', pmin=0.1, pmax=10., nfreq=100,
                deltat=10., nslice=10, plot=True, plotscale='log', cmap='PuBu',
                clobber=True, verbose=True, logfile='kepdynamic.log'):
+    """
+    kepdynamic -- Construct a dynamic (time-dependent) power spectrum from
+    Kepler time series data
+
+    infile : str
+        The name of a MAST standard format FITS file containing a Kepler light
+        curve within the first data extension.
+    outfile : string
+        The name of the output FITS file with a new image extension containing
+        the dynamic power spectrum.
+    fcol : str
+        The name of the FITS table column in extension 1 of infile upon which
+        the sequence power spectra will be calculated.
+    pmin : float
+        The minimum of the period range over which the power spectra will be
+        calculated. The unit is day.
+    pmax : float
+        The maximum of the period range over which the power spectra will be
+        calculated. The unit is day.
+    nfreq : int
+        The number of uniform frequency steps between 1/pmax and 1/pmin over
+        which the power spectra will be calculated.
+    deltat : float
+        The uniform length of each time slice from which a power spectrum will
+        be calculated. Units are days.
+    nslice : int
+        The number of time slices from which power spectra are calculated.
+        These will be distributed uniformly across the input time series. If
+        nslice is small there may be data gaps in the dynamic power spectrum.
+        If nslice is large, the time slices will overlap. Both cases are valid.
+    plot : boolean
+        Plot the output Fourier spectrum?
+    cmap : str
+        A matplotlib colormap scheme.
+    clobber : bool
+        Overwrite the output file?
+    verbose : boolean
+        Print informative messages and warnings to the shell and logfile?
+    logfile : str
+        Name of the logfile containing error and warning messages.
+    """
 
     # startup parameters
     labelsize = 24
