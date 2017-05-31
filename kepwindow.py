@@ -141,14 +141,11 @@ def kepwindow(infile, outfile, fcol='SAP_FLUX', fmax=1.0, nfreq=100, plot=True,
 def kepwindow_main():
     import argparse
 
-    parser = argparse.ArgumentParser(description=("Calculate and store the "
-                                                  "window function for a "
-                                                  "Kepler time series"))
-    parser.add_argument('--shell', action='store_true',
-                        help='Are we running from the shell?')
+    parser = argparse.ArgumentParser(
+            description=("Calculate and store the window function for a"
+                         " Kepler time series"))
     parser.add_argument('infile', help='Name of input file', type=str)
-    parser.add_argument('outfile', help='Name of FITS file to output',
-                        type=str)
+    parser.add_argument('outfile', help='Name of output file', type=str)
     parser.add_argument('--datacol', default='SAP_FLUX',
                         help='Name of data column', type=str,
                         dest='fcol')
@@ -156,19 +153,14 @@ def kepwindow_main():
                         type=float)
     parser.add_argument('--nfreq', default=100,
                         help='Number of frequency intervals', type=int)
-    parser.add_argument('--plot', action='store_true', help='Plot result?')
-    parser.add_argument('--clobber', action='store_true', help='Overwrite output file?')
-    parser.add_argument('--verbose', action='store_true', help='Write to a log file?')
+    parser.add_argument('--plot', action='store_true', default=True,
+                        help='Plot result?')
+    parser.add_argument('--clobber', action='store_true', default=True,
+                        help='Overwrite output file?')
+    parser.add_argument('--verbose', action='store_true', default=True,
+                        help='Write to a log file?')
     parser.add_argument('--logfile', '-l', help='Name of ascii log file',
                         default='kepwindow.log', dest='logfile', type=str)
-    parser.add_argument('--status', '-e', help='Exit status (0=good)',
-                        default=0, dest='status', type=int)
     args = parser.parse_args()
-    cmdLine=True
     kepwindow(args.infile, args.outfile, args.fcol, args.fmax, args.nfreq,
-              args.plot, args.clobber, args.verbose, args.logfile,
-              args.status, cmdLine)
-else:
-    from pyraf import iraf
-    parfile = iraf.osfn("kepler$kepwindow.par")
-    t = iraf.IrafTaskFactory(taskname="kepwindow", value=parfile, function=kepwindow)
+              args.plot, args.clobber, args.verbose, args.logfile)
