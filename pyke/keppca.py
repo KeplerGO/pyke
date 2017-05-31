@@ -211,9 +211,9 @@ def keppca(infile, maskfile, outfile, components, plotpca, nreps, clobber,
 
     # Read in the data to various arrays
     for i in range(nrows):
-        if(qual[i] < 10000 and np.isfinite(barytime[i])
-           and np.isfinite(fluxpixels[i, int(ydim * xdim / 2 + 0.5)])
-           and np.isfinite(fluxpixels[i, 1 + int(ydim * xdim / 2 + 0.5)]):
+        if (qual[i] < 10000 and np.isfinite(barytime[i])
+            and np.isfinite(fluxpixels[i, int(ydim * xdim / 2 + 0.5)])
+            and np.isfinite(fluxpixels[i, 1 + int(ydim * xdim / 2 + 0.5)])):
             ntim += 1
             time = np.append(time, barytime[i])
             timecorr = np.append(timecorr, tcorr[i])
