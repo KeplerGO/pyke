@@ -22,3 +22,4 @@ from .kepdynamic import *
 from .kepstddev  import *
 from .kepwindow  import *
 from .keptrim    import *
+from .keppca     import *

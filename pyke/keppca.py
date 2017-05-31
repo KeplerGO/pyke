@@ -41,21 +41,21 @@ def keppca(infile, maskfile, outfile, components, plotpca, nreps, clobber,
     hashline = '--------------------------------------------------------------'
     kepmsg.log(logfile, hashline, verbose)
     call = ('KEPPCA -- '
-            'infile={}'.format(infile)
-            'maskfile={}'.format(maskfile)
-            'outfile={}'.format(outfile)
-            'components={}'.format(components)
-            'plotpca={}'.format(plotpca)
-            'nreps={}'.format(nreps)
-            'clobber={}'.format(clobber)
-            'verbose={}'.format(verbose)
-            'logfile={}'.format(logfile))
+            + ' infile={}'.format(infile)
+            + ' maskfile={}'.format(maskfile)
+            + ' outfile={}'.format(outfile)
+            + ' components={}'.format(components)
+            + ' plotpca={}'.format(plotpca)
+            + ' nreps={}'.format(nreps)
+            + ' clobber={}'.format(clobber)
+            + ' verbose={}'.format(verbose)
+            + ' logfile={}'.format(logfile))
     kepmsg.log(logfile, call + '\n', verbose)
 
     kepmsg.clock('KEPPCA started at',logfile,verbose)
 
     # clobber output file
-    if clobber: status = kepio.clobber(outfile,logfile,verbose)
+    if clobber: status = kepio.clobber(outfile, logfile, verbose)
     if kepio.fileexists(outfile):
         errmsg = ('ERROR -- KEPPCA: {} exists. Use clobber=True'
                   .format(outfile))
@@ -117,9 +117,9 @@ def keppca(infile, maskfile, outfile, components, plotpca, nreps, clobber,
 
     # read mask definition file if it has been supplied
     if 'aper' not in maskfile.lower() and maskfile.lower() != 'all':
-        maskx = np.array([],'int')
-        masky = np.array([],'int')
-        lines, status = kepio.openascii(maskfile,'r',logfile,verbose)
+        maskx = np.array([], 'int')
+        masky = np.array([], 'int')
+        lines, status = kepio.openascii(maskfile, 'r', logfile, verbose)
         for line in lines:
             line = line.strip().split('|')
             if len(line) == 6:
@@ -128,11 +128,11 @@ def keppca(infile, maskfile, outfile, components, plotpca, nreps, clobber,
                 line = line[5].split(';')
                 for items in line:
                     try:
-                        masky = np.append(masky,y0 + int(items.split(',')[0]))
-                        maskx = np.append(maskx,x0 + int(items.split(',')[1]))
+                        masky = np.append(masky, y0 + int(items.split(',')[0]))
+                        maskx = np.append(maskx, x0 + int(items.split(',')[1]))
                     except:
                         continue
-        status = kepio.closeascii(lines,logfile,verbose)
+        status = kepio.closeascii(lines, logfile, verbose)
         if len(maskx) == 0 or len(masky) == 0:
             errmsg = 'ERROR -- KEPPCA: {} contains no pixels.'.format(maskfile)
             kepmsg.err(logfile, errmsg, verbose)
@@ -159,9 +159,9 @@ def keppca(infile, maskfile, outfile, components, plotpca, nreps, clobber,
 
     # ...or use all pixels
     if maskfile.lower() == 'all':
-        npix = xdimorig*ydimorig
-        aperb = np.array([],'int')
-        aperb = np.r_[0:npix]
+        npix = xdimorig * ydimorig
+        aperb = np.array([], 'int')
+        aperb = np.r_[0: npix]
 
     # legal mask defined?
     if len(aperb) == 0:
@@ -178,7 +178,7 @@ def keppca(infile, maskfile, outfile, components, plotpca, nreps, clobber,
         except:
             work2 = work1.strip().split('-')
             try:
-                for work3 in range(int(work2[0]),int(work2[1]) + 1):
+                for work3 in range(int(work2[0]), int(work2[1]) + 1):
                     pcaout.append(work3)
             except:
                 errmsg = ('ERROR -- KEPPCA: cannot understand principal '
@@ -191,23 +191,23 @@ def keppca(infile, maskfile, outfile, components, plotpca, nreps, clobber,
 
     # Initialize arrays and variables, and apply pixel mask to the data
     ntim = 0
-    time = np.array([],dtype='float64')
-    timecorr = np.array([],dtype='float32')
-    cadenceno = np.array([],dtype='int')
-    pixseries = np.array([],dtype='float32')
-    errseries = np.array([],dtype='float32')
-    bkgseries = np.array([],dtype='float32')
-    berseries = np.array([],dtype='float32')
-    quality = np.array([],dtype='float32')
-    pos_corr1 = np.array([],dtype='float32')
-    pos_corr2 = np.array([],dtype='float32')
-    nrows = np.size(fluxpixels,0)
+    time = np.array([], dtype='float64')
+    timecorr = np.array([], dtype='float32')
+    cadenceno = np.array([], dtype='int')
+    pixseries = np.array([], dtype='float32')
+    errseries = np.array([], dtype='float32')
+    bkgseries = np.array([], dtype='float32')
+    berseries = np.array([], dtype='float32')
+    quality = np.array([], dtype='float32')
+    pos_corr1 = np.array([], dtype='float32')
+    pos_corr2 = np.array([], dtype='float32')
+    nrows = np.size(fluxpixels, 0)
 
     # Apply the pixel mask so we are left with only the desired pixels
-    pixseriesb = fluxpixels[:,aperb]
-    errseriesb = errpixels[:,aperb]
-    bkgseriesb = flux_bkg[:,aperb]
-    berseriesb = flux_bkg_err[:,aperb]
+    pixseriesb = fluxpixels[:, aperb]
+    errseriesb = errpixels[:, aperb]
+    bkgseriesb = flux_bkg[:, aperb]
+    berseriesb = flux_bkg_err[:, aperb]
 
     # Read in the data to various arrays
     for i in range(nrows):
@@ -237,7 +237,7 @@ def keppca(infile, maskfile, outfile, components, plotpca, nreps, clobber,
 
     # Figure out which pixels are undefined/nan and remove them.
     # Keep track for adding back in later
-    nanpixels = np.array([],dtype='int')
+    nanpixels = np.array([], dtype='int')
     i = 0
     while (i < npix):
         if np.isnan(pixseries[0, i]):
@@ -254,14 +254,17 @@ def keppca(infile, maskfile, outfile, components, plotpca, nreps, clobber,
     pixMean = np.average(pixseries, axis=0, weights=weightseries)
     pixStd  = np.std(pixseries, axis=0)
 
-    # Normalize the input by subtracting the mean and divising by the standard deviation.
+    # Normalize the input by subtracting the mean and divising by the standard
+    # deviation.
     # This makes it a correlation-based PCA, which is what we want.
     pixseriesnorm = (pixseries - pixMean) / pixStd
 
-    # Number of principal components to compute. Setting it equal to the number of pixels
+    # Number of principal components to compute. Setting it equal to the number
+    # of pixels
     nvecin = npix
 
-    # Run PCA using the MDP Whitening PCA, which produces normalized PCA components (zero mean and unit variance)
+    # Run PCA using the MDP Whitening PCA, which produces normalized PCA
+    # components (zero mean and unit variance)
     pcan = mdp.nodes.WhiteningNode(svd=True)
     pcar = pcan.execute(pixseriesnorm)
     eigvec = pcan.get_recmatrix()
@@ -277,9 +280,9 @@ def keppca(infile, maskfile, outfile, components, plotpca, nreps, clobber,
     eigvec = eigvec.reshape(nvecin, ydim, xdim)
 
     # Calculate sum of all pixels to display as raw lightcurve and other quantities
-    pixseriessum = np.sum(pixseries,axis=1)
+    pixseriessum = np.sum(pixseries, axis=1)
     # Number of components to remove
-    nrem=len(pcarem)
+    nrem = len(pcarem)
     # Number of pcas to plot - currently set to plot all components, but could set
     # nplot = nrem to just plot as many components as is being removed
     nplot = npix
@@ -299,11 +302,13 @@ def keppca(infile, maskfile, outfile, components, plotpca, nreps, clobber,
         myfit = opt.fmin(f, x0, maxiter=50000, maxfun=50000, disp=False)
         x0 = myfit
 
-    # Now that coefficients for all components have been found, subtract them to produce a calibrated time-series,
-    # and then divide by the robust mean to produce a normalized time series as well
+    # Now that coefficients for all components have been found, subtract them
+    # to produce a calibrated time-series,
+    # and then divide by the robust mean to produce a normalized time series
+    # as well
     c = myfit
     fluxcor = pixseriessum
-    for k in range(0,nrem):
+    for k in range(0, nrem):
         fluxcor = fluxcor - c[k] * model[:, pcarem[k]]
         normfluxcor = fluxcor / np.mean(reject_outliers(fluxcor, 2))
 
@@ -362,7 +367,7 @@ def keppca(infile, maskfile, outfile, components, plotpca, nreps, clobber,
                     maskmap[i, j] = 1
                     for k in range(len(maskx)):
                         if aperx[-1] == maskx[k] and apery[-1] == masky[k]:
-                            maskmap[i,j] = 3
+                            maskmap[i, j] = 3
 
     # construct output primary extension
     hdu0 = pyfits.PrimaryHDU()
@@ -456,7 +461,8 @@ def keppca(infile, maskfile, outfile, components, plotpca, nreps, clobber,
     hdu1.header['TUNIT8'] = ('e-/s', 'column units: electrons per second')
     hdu1.header['TTYPE9'] = ('PDCSAP_FLUX_ERR', 'column title: PDC flux error')
     hdu1.header['TFORM9'] = ('E', 'column format: float32')
-    hdu1.header['TUNIT9'] = ('e-/s', 'column units: electrons per second (1-sigma)')
+    hdu1.header['TUNIT9'] = ('e-/s',
+                             'column units: electrons per second (1-sigma)')
     hdu1.header['TTYPE10'] = ('SAP_QUALITY',
                               'column title: aperture photometry quality flag')
     hdu1.header['TFORM10'] = ('J', 'column format: signed integer32')
@@ -542,7 +548,7 @@ def keppca(infile, maskfile, outfile, components, plotpca, nreps, clobber,
     hdu3.header['TUNIT1'] = ('BJD - 2454833',
                              'column units: barycenter corrected JD')
     hdu3.header['TDISP1'] = ('D12.7', 'column display format')
-    for i in range(len(pcar[0,:])):
+    for i in range(len(pcar[0, :])):
         hdu3.header['TTYPE' + str(i + 2)] = ("PC" + str(i + 1),
                                              "column title: principal "
                                              "component number " + str(i + 1))
@@ -562,91 +568,95 @@ def keppca(infile, maskfile, outfile, components, plotpca, nreps, clobber,
             # First plot of every pagewith flux image,
             # flux and calibrated time series
             if (k % (npp - 1) == 0):
-                plt.figure(figsize=[10,16])
-                plt.subplot2grid((npp,6),(0,0), colspan=2)
-                plt.imshow(np.log10(np.flipud(pixMean.reshape(ydim,xdim))-min(pixMean)+1),
+                plt.figure(figsize=[10, 16])
+                plt.subplot2grid((npp,6), (0, 0), colspan=2)
+                plt.imshow(np.log10(np.flipud(pixMean.reshape(ydim,xdim)) - min(pixMean) + 1),
                            interpolation="nearest",cmap='RdYlBu')
                 plt.xticks([])
                 plt.yticks([])
-                ax1 = plt.subplot2grid((npp,6),(0,2), colspan=4)
+                ax1 = plt.subplot2grid((npp, 6), (0, 2), colspan=4)
                 px = np.copy(time) + bjdref
                 py = np.copy(pixseriessum)
-                px, xlab, status = kepplot.cleanx(px,logfile,verbose)
-                py, ylab, status = kepplot.cleany(py,1.0,logfile,verbose)
-                kepplot.RangeOfPlot(px,py,0.01,False)
-                kepplot.plot1d(px,py,cadence,lcolor,lwidth,fcolor,falpha,True)
+                px, xlab, status = kepplot.cleanx(px, logfile, verbose)
+                py, ylab, status = kepplot.cleany(py, 1.0, logfile, verbose)
+                kepplot.RangeOfPlot(px, py, 0.01, False)
+                kepplot.plot1d(px, py, cadence, lcolor, lwidth, fcolor, falpha,
+                               True)
                 py = np.copy(fluxcor)
-                py, ylab, status = kepplot.cleany(py,1.0,logfile,verbose)
-                plt.plot(px,py,marker='.',color='r',linestyle='',markersize=1.0)
-                kepplot.labels('',re.sub('\)','',re.sub('Flux \(','',ylab)),'k',18)
+                py, ylab = kepplot.cleany(py, 1.0, logfile, verbose)
+                plt.plot(px, py, marker='.', color='r', linestyle='',
+                         markersize=1.0)
+                kepplot.labels('', re.sub('\)', '', re.sub('Flux \(','', ylab)),
+                               'k', 18)
                 plt.grid()
                 plt.setp(ax1.get_xticklabels(), visible=False)
 
             # plot principal components
-            plt.subplot2grid((npp,6),(l,0), colspan=2)
-            plt.imshow(eigvec[k],interpolation="nearest",cmap='RdYlBu')
-            plt.xlim(-0.5,xdim-0.5)
-            plt.ylim(-0.5,ydim-0.5)
+            plt.subplot2grid((npp, 6), (l, 0), colspan=2)
+            plt.imshow(eigvec[k], interpolation="nearest", cmap='RdYlBu')
+            plt.xlim(-0.5, xdim-0.5)
+            plt.ylim(-0.5, ydim-0.5)
             plt.xticks([])
             plt.yticks([])
 
             # The last plot on the page that should have the xlabel
             if (k % (npp - 1) == npp - 2 or k == nvecin - 1):
-                plt.subplot2grid((npp,6),(l,2), colspan=4)
-                py = np.copy(model[:,k])
-                kepplot.RangeOfPlot(px,py,0.01,False)
-                kepplot.plot1d(px,py,cadence,'r',lwidth,'g',falpha,True)
-                kepplot.labels(xlab,'PC ' + str(k+1),'k',18)
+                plt.subplot2grid((npp, 6), (l, 2), colspan=4)
+                py = np.copy(model[:, k])
+                kepplot.RangeOfPlot(px, py, 0.01, False)
+                kepplot.plot1d(px, py, cadence, 'r', lwidth, 'g', falpha, True)
+                kepplot.labels(xlab, 'PC ' + str(k + 1), 'k', 18)
                 plt.grid()
                 plt.tight_layout()
                 l = 1
-                plt.savefig(re.sub('.png','_%d.png' % repcnt,repname))
+                plt.savefig(re.sub('.png', '_%d.png' % repcnt,repname))
                 repcnt += 1
             # The other plots on the page that should have no xlabel
             else:
-                ax2 = plt.subplot2grid((npp,6),(l,2), colspan=4)
-                py = np.copy(model[:,k])
-                kepplot.RangeOfPlot(px,py,0.01,False)
-                kepplot.plot1d(px,py,cadence,'r',lwidth,'g',falpha,True)
-                kepplot.labels('','PC ' + str(k+1),'k',18)
+                ax2 = plt.subplot2grid((npp, 6), (l, 2), colspan=4)
+                py = np.copy(model[:, k])
+                kepplot.RangeOfPlot(px, py, 0.01, False)
+                kepplot.plot1d(px, py, cadence, 'r', lwidth, 'g', falpha, True)
+                kepplot.labels('', 'PC ' + str(k+1), 'k', 18)
                 plt.grid()
                 plt.setp(ax2.get_xticklabels(), visible=False)
                 plt.tight_layout()
                 l=l+1
-        plt.savefig(re.sub('.png','_%d.png' % repcnt,repname))
+        plt.savefig(re.sub('.png', '_%d.png' % repcnt, repname))
 
     # plot style and size
     if plotpca:
         plt.figure(figsize=[xsize, ysize])
         plt.clf()
         # plot aperture photometry and PCA corrected data
-        ax = kepplot.location([0.06,0.54,0.93,0.43])
+        ax = kepplot.location([0.06, 0.54, 0.93, 0.43])
         px = np.copy(time) + bjdref
         py = np.copy(pixseriessum)
-        px, xlab, status = kepplot.cleanx(px,logfile,verbose)
-        py, ylab, status = kepplot.cleany(py,1.0,logfile,verbose)
-        kepplot.RangeOfPlot(px,py,0.01,False)
-        kepplot.plot1d(px,py,cadence,lcolor,lwidth,fcolor,falpha,True)
+        px, xlab, status = kepplot.cleanx(px, logfile, verbose)
+        py, ylab, status = kepplot.cleany(py, 1.0, logfile, verbose)
+        kepplot.RangeOfPlot(px, py, 0.01, False)
+        kepplot.plot1d(px, py, cadence, lcolor, lwidth, fcolor, falpha, True)
         py = np.copy(fluxcor)
-        py, ylab, status = kepplot.cleany(py,1.0,logfile,verbose)
-        kepplot.plot1d(px,py,cadence,'r',2,fcolor,0.0,True)
-        plt.setp(plt.gca(),xticklabels=[])
-        kepplot.labels('',ylab,'k',24)
+        py, ylab, status = kepplot.cleany(py, 1.0, logfile, verbose)
+        kepplot.plot1d(px, py, cadence, 'r', 2, fcolor, 0.0, True)
+        plt.setp(plt.gca(), xticklabels=[])
+        kepplot.labels('', ylab, 'k', 24)
         plt.grid()
         # plot aperture photometry and PCA corrected data
-        ax = kepplot.location([0.06,0.09,0.93,0.43])
-        yr = np.array([],'float32')
-        npc = min([6,nrem])
-        for i in range(npc-1,-1,-1):
-            py = pcar[:,i] * c[i]
-            py, ylab, status = kepplot.cleany(py,1.0,logfile,verbose)
+        ax = kepplot.location([0.06, 0.09, 0.93, 0.43])
+        yr = np.array([], 'float32')
+        npc = min([6, nrem])
+        for i in range(npc - 1, -1, -1):
+            py = pcar[:, i] * c[i]
+            py, ylab = kepplot.cleany(py, 1.0, logfile, verbose)
             cl = float(i) / (float(npc))
-            kepplot.plot1d(px,py,cadence,[1.0-cl,0.0,cl],2,fcolor,0.0,True)
-            yr = np.append(yr,py)
+            kepplot.plot1d(px, py, cadence, [1.0 - cl, 0.0, cl], 2, fcolor,
+                           0.0, True)
+            yr = np.append(yr, py)
         y1 = max(yr)
         y2 = -min(yr)
-        kepplot.RangeOfPlot(px,np.array([-y1,y1,-y2,y2]),0.01,False)
-        kepplot.labels(xlab,'Principal Components','k',24)
+        kepplot.RangeOfPlot(px, np.array([-y1, y1, -y2, y2]), 0.01, False)
+        kepplot.labels(xlab, 'Principal Components', 'k', 24)
         plt.grid()
         # save plot to file
         plt.savefig(repname)
@@ -656,21 +666,18 @@ def keppca(infile, maskfile, outfile, components, plotpca, nreps, clobber,
     # stop time
     kepmsg.clock('KEPPCA ended at', logfile, verbose)
 
-# -----------------------------------------------------------
-# Outlier rejection for computing robust mean later
 
 def reject_outliers(data, m):
+    """Outlier rejection for computing robust mean"""
     return data[np.abs(data - np.mean(data)) < m * np.std(data)]
 
-# -----------------------------------------------------------
-# Mean absolute deviation function used for fitting the PCA components to the data and subtracting them out
-# Could replace with whateve minimization function you want
 
 def mad(data):
+    """
+    Mean absolute deviation function used for fitting the PCA components to
+    the data and subtracting them out
+    """
     return np.mean(np.absolute(data - np.mean(data)))
-
-# -----------------------------------------------------------
-# main
 
 def keppca_main():
     import argparse
@@ -696,13 +703,6 @@ def keppca_main():
                         help='Write to a log file?')
     parser.add_argument('--logfile', '-l', help='Name of ascii log file',
                         default='keppca.log', dest='logfile', type=str)
-    parser.add_argument('--status', '-e', help='Exit status (0=good)',
-                        default=0, dest='status', type=int)
     args = parser.parse_args()
-    cmdLine = True
-    keppca(args.infile,args.maskfile,args.outfile,args.components,args.plotpca,
-           args.nmaps,args.clobber,args.verbose,args.logfile,args.status,cmdLine)
-else:
-    from pyraf import iraf
-    parfile = iraf.osfn("kepler$keppca.par")
-    t = iraf.IrafTaskFactory(taskname="keppca", value=parfile, function=keppca)
+    keppca(args.infile, args.maskfile, args.outfile, args.components,
+           args.plotpca, args.nmaps, args.clobber, args.verbose, args.logfile)
