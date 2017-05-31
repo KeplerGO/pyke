@@ -20,3 +20,4 @@ from .kepsmooth  import *
 from .kepflatten import *
 from .kepdynamic import *
 from .kepstddev  import *
+from .kepwindow  import *

@@ -15,3 +15,4 @@ def test_import():
     from .. import kepflatten
     from .. import kepdynamic
     from .. import kepstddev
+    from .. import kepwindow

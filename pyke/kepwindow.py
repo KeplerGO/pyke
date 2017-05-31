@@ -10,6 +10,39 @@ from . import kepfourier
 
 def kepwindow(infile, outfile, fcol='SAP_FLUX', fmax=1.0, nfreq=100, plot=True,
               clobber=True, verbose=True, logfile='kepwindow.log'):
+    """
+    kepwindow -- Calculate and store the window function for a Kepler time series
+
+    Parameters
+    ----------
+    infile : str
+        The name of a MAST standard format FITS file containing a Kepler light
+        curve within the first data extension.
+    outfile : str
+        The name of the output FITS file with a new extension containing the
+        window function.
+    fcol : str
+        The name of the FITS table column in extension 1 of infile with which
+        the window function should be coupled to. While the window function
+        ostensibly requires the timing information, this particular piece of
+        information is required so that the task can search the fcol array for
+        bad data such as instances of NaN. These will be rejected before the
+        window function is calculated.
+    fmax : float
+        The maximum frequency on which the window function will be calculated.
+        The unit is 1/day.
+    nfreq : int
+        The number of uniform frequency steps between 0 and fmax over which the
+        window function will be calculated.
+    plot : bool
+        Plot the output window function?
+    clobber : bool
+        Overwrite the output file?
+    verbose : bool
+        Print informative messages and warnings to the shell and logfile?
+    logfile : str
+        Name of the logfile containing error and warning messages.
+    """
 
     ## startup parameters
     labelsize = 24
@@ -140,7 +173,6 @@ def kepwindow(infile, outfile, fcol='SAP_FLUX', fmax=1.0, nfreq=100, plot=True,
 
 def kepwindow_main():
     import argparse
-
     parser = argparse.ArgumentParser(
             description=("Calculate and store the window function for a"
                          " Kepler time series"))

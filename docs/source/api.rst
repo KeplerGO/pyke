@@ -11,3 +11,4 @@ Modules/API
     kepflatten
     kepdynamic
     kepstddev
+    kepwindow
