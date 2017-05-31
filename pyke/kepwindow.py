@@ -11,7 +11,16 @@ from . import kepfourier
 def kepwindow(infile, outfile, fcol='SAP_FLUX', fmax=1.0, nfreq=100, plot=True,
               clobber=True, verbose=True, logfile='kepwindow.log'):
     """
-    kepwindow -- Calculate and store the window function for a Kepler time series
+    kepwindow -- Calculate and store the window function for a Kepler time
+    series
+
+    Kepler time stamps are not perfectly uniform. There are gaps in the data due
+    to operational pauses and issues, and timestamps are corrected to the
+    barycenter of the solar system. The size of the barycenter correction is
+    time-dependent. kepwindow calculates a discrete window function for a
+    user-provided Kepler time series. The result is stored in a new FITS file
+    that is a direct copy of the input file but with an additional table
+    extension containing the window function.
 
     Parameters
     ----------
@@ -58,15 +67,15 @@ def kepwindow(infile, outfile, fcol='SAP_FLUX', fmax=1.0, nfreq=100, plot=True,
     hashline = '--------------------------------------------------------------'
     kepmsg.log(logfile, hashline, verbose)
     call = ('KEPWINDOW -- '
-            'infile={}'.format(infile)
-            'outfile={}'.format(outfile)
-            'fcol={}'.format(fcol)
-            'fmax={}'.format(fmax)
-            'nfreq={}'.format(nfreq)
-            'plot='.format(plot)
-            'clobber={}'.format(clobber)
-            'verbose={}'.format(verbose)
-            'logfile={}'.format(logfile))
+            + ' infile={}'.format(infile)
+            + ' outfile={}'.format(outfile)
+            + ' fcol={}'.format(fcol)
+            + ' fmax={}'.format(fmax)
+            + ' nfreq={}'.format(nfreq)
+            + ' plot='.format(plot)
+            + ' clobber={}'.format(clobber)
+            + ' verbose={}'.format(verbose)
+            + ' logfile={}'.format(logfile))
     kepmsg.log(logfile, call+'\n', verbose)
 
     ## start time
