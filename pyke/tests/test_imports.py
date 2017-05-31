@@ -16,3 +16,4 @@ def test_import():
     from .. import kepdynamic
     from .. import kepstddev
     from .. import kepwindow
+    from .. import keptrim
