@@ -28,6 +28,17 @@ Publication Date: 08/2012
 
 *This package was mostly developed by Tom Barclay ([@mrtommyb](http://www.github.com/mrtommyb)) and Martin Still.*
 
+## Dependencies
+```
+numpy
+scipy
+astropy
+tqdm
+matplotlib
+```
+
+``mdp`` (for ``keppca``)
+
 ## Support
 Users are welcome to open [issues](https://github.com/KeplerGO/PyKE/issues) involving any aspects of this software.
 
