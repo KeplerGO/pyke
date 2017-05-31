@@ -1,15 +1,17 @@
-import sys, time, math, re
 import numpy as np
 from astropy.io import fits as pyfits
 from matplotlib import pyplot as plt
 from math import *
-import kepio, kepmsg, kepkey, kepstat, kepfourier
+from . import kepio
+from . import kepmsg
+from . import kepkey
+from . import kepstat
+from . import kepfourier
 
-def kepwindow(infile,outfile,fcol,fmax,nfreq,plot,clobber,verbose,logfile,status, cmdLine=False):
+def kepwindow(infile, outfile, fcol='SAP_FLUX', fmax=1.0, nfreq=100, plot=True,
+              clobber=True, verbose=True, logfile='kepwindow.log'):
 
-## startup parameters
-
-    status = 0
+    ## startup parameters
     labelsize = 24
     ticksize = 16
     xsize = 18
@@ -19,174 +21,124 @@ def kepwindow(infile,outfile,fcol,fmax,nfreq,plot,clobber,verbose,logfile,status
     fcolor = '#ffff00'
     falpha = 0.2
 
-## log the call
+    ## log the call
+    hashline = '--------------------------------------------------------------'
+    kepmsg.log(logfile, hashline, verbose)
+    call = ('KEPWINDOW -- '
+            'infile={}'.format(infile)
+            'outfile={}'.format(outfile)
+            'fcol={}'.format(fcol)
+            'fmax={}'.format(fmax)
+            'nfreq={}'.format(nfreq)
+            'plot='.format(plot)
+            'clobber={}'.format(clobber)
+            'verbose={}'.format(verbose)
+            'logfile={}'.format(logfile))
+    kepmsg.log(logfile, call+'\n', verbose)
 
-    hashline = '----------------------------------------------------------------------------'
-    kepmsg.log(logfile,hashline,verbose)
-    call = 'KEPWINDOW -- '
-    call += 'infile='+infile+' '
-    call += 'outfile='+outfile+' '
-    call += 'fcol='+fcol+' '
-    call += 'fmax='+str(fmax)+' '
-    call += 'nfreq='+str(nfreq)+' '
-    plotit = 'n'
-    if (plot): plotit = 'y'
-    call += 'plot='+plotit+ ' '
-    overwrite = 'n'
-    if (clobber): overwrite = 'y'
-    call += 'clobber='+overwrite+ ' '
-    chatter = 'n'
-    if (verbose): chatter = 'y'
-    call += 'verbose='+chatter+' '
-    call += 'logfile='+logfile
-    kepmsg.log(logfile,call+'\n',verbose)
-
-## start time
-
-    kepmsg.clock('KEPWINDOW started at',logfile,verbose)
-
-## test log file
-
-    logfile = kepmsg.test(logfile)
-
-## clobber output file
-
-    if clobber: status = kepio.clobber(outfile,logfile,verbose)
+    ## start time
+    kepmsg.clock('KEPWINDOW started at', logfile, verbose)
+    ## clobber output file
+    if clobber:
+        kepio.clobber(outfile, logfile, verbose)
     if kepio.fileexists(outfile):
-        message = 'ERROR -- KEPWINDOW: ' + outfile + ' exists. Use clobber=yes'
-        status = kepmsg.err(logfile,message,verbose)
+        errmsg = ('ERROR -- KEPWINDOW: {} exists. Use clobber=True'
+                  .format(outfile))
+        kepmsg.err(logfile, errmsg, verbose)
 
-## open input file
+    ## open input file
+    instr, status = kepio.openfits(infile, 'readonly', logfile, verbose)
+    tstart, tstop, bjdref, cadence = kepio.timekeys(instr, infile, logfile,
+                                                    verbose)
+    try:
+        work = instr[0].header['FILEVER']
+        cadenom = 1.0
+    except:
+        cadenom = cadence
 
-    if status == 0:
-        instr, status = kepio.openfits(infile,'readonly',logfile,verbose)
-    if status == 0:
-        tstart, tstop, bjdref, cadence, status = kepio.timekeys(instr,infile,logfile,verbose,status)
-    if status == 0:
-        try:
-            work = instr[0].header['FILEVER']
-            cadenom = 1.0
-        except:
-            cadenom = cadence
+    ## fudge non-compliant FITS keywords with no values
+    instr = kepkey.emptykeys(instr,file,logfile,verbose)
 
-## fudge non-compliant FITS keywords with no values
+    ## read table columns
+    try:
+        barytime = instr[1].data.field('barytime')
+    except:
+        barytime = kepio.readfitscol(infile, instr[1].data, 'time', logfile,
+                                     verbose)
+    signal = kepio.readfitscol(infile, instr[1].data, fcol, logfile, verbose)
 
-    if status == 0:
-        instr = kepkey.emptykeys(instr,file,logfile,verbose)
+    ## remove infinite data from time series
+    incols = [barytime, signal]
+    outcols = kepstat.removeinfinlc(signal, incols)
+    barytime = outcols[0]
+    signal = outcols[1]
 
-## read table columns
+    ## reset signal data to zero
+    signal = np.ones(len(outcols[1]))
+    ## frequency steps
+    deltaf = fmax / nfreq
+    ## loop through frequency steps; determine FT power
+    fr, power = kepfourier.ft(barytime, signal, 0.0, fmax, deltaf, True)
+    power[0] = 1.0
 
-    if status == 0:
-        try:
-            barytime = instr[1].data.field('barytime')
-        except:
-            barytime, status = kepio.readfitscol(infile,instr[1].data,'time',logfile,verbose)
-        signal, status = kepio.readfitscol(infile,instr[1].data,fcol,logfile,verbose)
+    ## mirror window function around ordinate
+    work1 = []; work2 = []
+    for i in range(len(fr)-1, 0, -1):
+        work1.append(-fr[i])
+        work2.append(power[i])
+    for i in range(len(fr)):
+        work1.append(fr[i])
+        work2.append(power[i])
+    fr = np.array(work1, dtype='float32')
+    power = np.array(work2, dtype='float32')
 
-## remove infinite data from time series
+    ## write output file
+    col1 = pyfits.Column(name='FREQUENCY', format='E', unit='days', array=fr)
+    col2 = pyfits.Column(name='POWER', format='E', array=power)
+    cols = pyfits.ColDefs([col1, col2])
+    instr.append(pyfits.BinTableHDU.from_columns(cols))
+    instr[-1].header['EXTNAME'] = ('WINDOW FUNCTION', 'extension name')
 
-    if status == 0:
-        incols = [barytime, signal]
-        outcols = kepstat.removeinfinlc(signal, incols)
-        barytime = outcols[0]
-        signal = outcols[1]
+    ## comment keyword in output file
+    kepkey.comment(call, instr[0], outfile, logfile, verbose)
+    instr.writeto(outfile)
 
-## reset signal data to zero
+    ## close input file
+    kepio.closefits(instr, logfile, verbose)
 
-    if status == 0:
-        signal = np.ones(len(outcols[1]))
+    ## data limits
+    nrm = len(str(int(power.max()))) - 1
+    power = power / 10 ** nrm
+    ylab = 'Power (x10$^%d$)' % nrm
+    xmin = fr.min()
+    xmax = fr.max()
+    ymin = power.min()
+    ymax = power.max()
+    xr = xmax - xmin
+    yr = ymax - ymin
+    fr = np.insert(fr, [0], fr[0])
+    fr = np.append(fr, fr[-1])
+    power = np.insert(power, [0], 0.0)
+    power = np.append(power, 0.0)
 
-## frequency steps
-
-    if status == 0:
-        deltaf = fmax / nfreq
-
-## loop through frequency steps; determine FT power
-
-    if status == 0:
-        fr, power = kepfourier.ft(barytime,signal,0.0,fmax,deltaf,True)
-        power[0] = 1.0
-
-## mirror window function around ordinate
-
-    if status == 0:
-        work1 = []; work2 = []
-        for i in range(len(fr)-1, 0, -1):
-            work1.append(-fr[i])
-            work2.append(power[i])
-        for i in range(len(fr)):
-            work1.append(fr[i])
-            work2.append(power[i])
-        fr = np.array(work1,dtype='float32')
-        power = np.array(work2,dtype='float32')
-
-## write output file
-
-    if status == 0:
-        col1 = pyfits.Column(name='FREQUENCY', format='E', unit='days',
-                             array=fr)
-        col2 = pyfits.Column(name='POWER', format='E', array=power)
-        cols = pyfits.ColDefs([col1,col2])
-        instr.append(pyfits.BinTableHDU.from_columns(cols))
-        instr[-1].header['EXTNAME'] = ('WINDOW FUNCTION','extension name')
-
-## comment keyword in output file
-
-    if status == 0:
-        status = kepkey.comment(call,instr[0],outfile,logfile,verbose)
-        instr.writeto(outfile)
-
-## close input file
-
-    if status == 0:
-        status = kepio.closefits(instr,logfile,verbose)
-
-## data limits
-
-    if status == 0:
-        nrm = len(str(int(power.max())))-1
-        power = power / 10**nrm
-        ylab = 'Power (x10$^%d$)' % nrm
-        xmin = fr.min()
-        xmax = fr.max()
-        ymin = power.min()
-        ymax = power.max()
-        xr = xmax - xmin
-        yr = ymax - ymin
-        fr = np.insert(fr,[0],fr[0])
-        fr = np.append(fr,fr[-1])
-        power = np.insert(power,[0],0.0)
-        power = np.append(power,0.0)
-
-## plot power spectrum
-
-    if status == 0 and plot:
-        plt.figure(1,figsize=[xsize,ysize])
-        plt.axes([0.06,0.113,0.93,0.86])
-        plt.plot(fr,power,color=lcolor,linestyle='-',linewidth=lwidth)
-        plt.fill(fr,power,color=fcolor,linewidth=0.0,alpha=falpha)
-        plt.xlim(xmin-xr*0.01,xmax+xr*0.01)
-        if ymin-yr*0.01 <= 0.0:
-            plt.ylim(1.0e-10,ymax+yr*0.01)
+    ## plot power spectrum
+    if plot:
+        plt.figure(1, figsize=[xsize, ysize])
+        plt.axes([0.06, 0.113, 0.93, 0.86])
+        plt.plot(fr, power, color=lcolor, linestyle='-', linewidth=lwidth)
+        plt.fill(fr, power, color=fcolor, linewidth=0.0, alpha=falpha)
+        plt.xlim(xmin - xr * 0.01, xmax+xr*0.01)
+        if ymin - yr * 0.01 <= 0.0:
+            plt.ylim(1.0e-10, ymax + yr * 0.01)
         else:
-            plt.ylim(ymin-yr*0.01,ymax+yr*0.01)
+            plt.ylim(ymin - yr * 0.01, ymax + yr * 0.01)
         plt.xlabel(r'Frequency (d$^{-1}$)', {'color' : 'k'})
         plt.ylabel('Power', {'color' : 'k'})
 
-# render plot
-
-        plt.ion()
         plt.show()
-## end time
+    kepmsg.clock('KEPWINDOW completed at', logfile, verbose)
 
-    if (status == 0):
-        message = 'KEPWINDOW completed at'
-    else:
-        message = '\nKEPWINDOW aborted at'
-    kepmsg.clock(message,logfile,verbose)
-
-## main
-if '--shell' in sys.argv:
+def kepwindow_main():
     import argparse
 
     parser = argparse.ArgumentParser(description=("Calculate and store the "
