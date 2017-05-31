@@ -3,7 +3,9 @@ import sys
 import numpy as np
 from astropy.io import fits as pyfits
 from matplotlib import pyplot as plt
-import kepio, kepmsg, kepkey, kepstat
+from . import kepio
+from . import kepmsg
+from . import kepkey
 
 def keptrim(infile, outfile, column, row, imsize, kepid=None, clobber=True,
             verbose=True, logfile='keptrim.log'):
