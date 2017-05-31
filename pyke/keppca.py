@@ -8,24 +8,12 @@ from . import kepio
 from . import kepkey
 from . import kepplot
 import random
+import mdp
 
+__all__ = ['keppca']
 
 def keppca(infile, maskfile, outfile, components, plotpca, nreps, clobber,
            verbose, logfile):
-
-    try:
-        import mdp
-    except:
-        msg = ("ERROR -- KEPPCA: this task has an external python dependency "
-               "to MDP, a Modular toolkit for Data Processing "
-               "(http://mdp-toolkit.sourceforge.net). In order to take "
-               "advantage of this PCA task, the user must first install "
-               "MDP with their current python distribution. Note carefully "
-               "that you may have more than python installation on your "
-               "machine, and ensure that MDP is installed with the same "
-               "version of python that the PyKE tools employ. Installation "
-               "instructions for MDP can be found at the URL provided above.")
-        kepmsg.err(None, msg, True)
 
     # startup parameters
     labelsize = 32
@@ -52,10 +40,11 @@ def keppca(infile, maskfile, outfile, components, plotpca, nreps, clobber,
             + ' logfile={}'.format(logfile))
     kepmsg.log(logfile, call + '\n', verbose)
 
-    kepmsg.clock('KEPPCA started at',logfile,verbose)
+    kepmsg.clock('KEPPCA started at', logfile, verbose)
 
     # clobber output file
-    if clobber: status = kepio.clobber(outfile, logfile, verbose)
+    if clobber:
+        kepio.clobber(outfile, logfile, verbose)
     if kepio.fileexists(outfile):
         errmsg = ('ERROR -- KEPPCA: {} exists. Use clobber=True'
                   .format(outfile))
@@ -119,7 +108,7 @@ def keppca(infile, maskfile, outfile, components, plotpca, nreps, clobber,
     if 'aper' not in maskfile.lower() and maskfile.lower() != 'all':
         maskx = np.array([], 'int')
         masky = np.array([], 'int')
-        lines, status = kepio.openascii(maskfile, 'r', logfile, verbose)
+        lines = kepio.openascii(maskfile, 'r', logfile, verbose)
         for line in lines:
             line = line.strip().split('|')
             if len(line) == 6:
@@ -132,7 +121,7 @@ def keppca(infile, maskfile, outfile, components, plotpca, nreps, clobber,
                         maskx = np.append(maskx, x0 + int(items.split(',')[1]))
                     except:
                         continue
-        status = kepio.closeascii(lines, logfile, verbose)
+        kepio.closeascii(lines, logfile, verbose)
         if len(maskx) == 0 or len(masky) == 0:
             errmsg = 'ERROR -- KEPPCA: {} contains no pixels.'.format(maskfile)
             kepmsg.err(logfile, errmsg, verbose)
@@ -271,14 +260,13 @@ def keppca(infile, maskfile, outfile, components, plotpca, nreps, clobber,
     model = pcar
 
     # Re-insert nan columns as zeros
-    for i in range(0,len(nanpixels)):
+    for i in range(0, len(nanpixels)):
         nanpixels[i] = nanpixels[i] - i
     eigvec = np.insert(eigvec, nanpixels, 0, 1)
     pixMean = np.insert(pixMean, nanpixels, 0, 0)
 
     #  Make output eigenvectors (correlation images) into xpix by ypix images
     eigvec = eigvec.reshape(nvecin, ydim, xdim)
-
     # Calculate sum of all pixels to display as raw lightcurve and other quantities
     pixseriessum = np.sum(pixseries, axis=1)
     # Number of components to remove
@@ -295,7 +283,7 @@ def keppca(infile, maskfile, outfile, components, plotpca, nreps, clobber,
             for k in range(0, len(x)):
                 fluxcor = fluxcor - x[k]*model[:, pcarem[k]]
             return mad(fluxcor)
-        if k==0:
+        if k == 0:
             x0 = np.array([-1.0])
         else:
             x0 = np.append(x0, 1.0)
@@ -310,7 +298,8 @@ def keppca(infile, maskfile, outfile, components, plotpca, nreps, clobber,
     fluxcor = pixseriessum
     for k in range(0, nrem):
         fluxcor = fluxcor - c[k] * model[:, pcarem[k]]
-        normfluxcor = fluxcor / np.mean(reject_outliers(fluxcor, 2))
+
+    normfluxcor = fluxcor / np.mean(reject_outliers(fluxcor, 2))
 
     # input file data
     cards0 = instr[0].header.cards
@@ -577,8 +566,8 @@ def keppca(infile, maskfile, outfile, components, plotpca, nreps, clobber,
                 ax1 = plt.subplot2grid((npp, 6), (0, 2), colspan=4)
                 px = np.copy(time) + bjdref
                 py = np.copy(pixseriessum)
-                px, xlab, status = kepplot.cleanx(px, logfile, verbose)
-                py, ylab, status = kepplot.cleany(py, 1.0, logfile, verbose)
+                px, xlab = kepplot.cleanx(px, logfile, verbose)
+                py, ylab = kepplot.cleany(py, 1.0, logfile, verbose)
                 kepplot.RangeOfPlot(px, py, 0.01, False)
                 kepplot.plot1d(px, py, cadence, lcolor, lwidth, fcolor, falpha,
                                True)
@@ -632,12 +621,12 @@ def keppca(infile, maskfile, outfile, components, plotpca, nreps, clobber,
         ax = kepplot.location([0.06, 0.54, 0.93, 0.43])
         px = np.copy(time) + bjdref
         py = np.copy(pixseriessum)
-        px, xlab, status = kepplot.cleanx(px, logfile, verbose)
-        py, ylab, status = kepplot.cleany(py, 1.0, logfile, verbose)
+        px, xlab = kepplot.cleanx(px, logfile, verbose)
+        py, ylab = kepplot.cleany(py, 1.0, logfile, verbose)
         kepplot.RangeOfPlot(px, py, 0.01, False)
         kepplot.plot1d(px, py, cadence, lcolor, lwidth, fcolor, falpha, True)
         py = np.copy(fluxcor)
-        py, ylab, status = kepplot.cleany(py, 1.0, logfile, verbose)
+        py, ylab = kepplot.cleany(py, 1.0, logfile, verbose)
         kepplot.plot1d(px, py, cadence, 'r', 2, fcolor, 0.0, True)
         plt.setp(plt.gca(), xticklabels=[])
         kepplot.labels('', ylab, 'k', 24)
