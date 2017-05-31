@@ -1,3 +1,9 @@
+HAS_MDP = True
+try:
+    import mdp
+except:
+    HAS_MDP = False
+
 def test_import():
     from .. import kepio
     from .. import kepmask
@@ -17,4 +23,7 @@ def test_import():
     from .. import kepstddev
     from .. import kepwindow
     from .. import keptrim
+
+@pytest.mark.skipif(not HAS_MDP)
+def test_import_keppca():
     from .. import keppca
