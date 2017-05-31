@@ -65,14 +65,14 @@ def kepstddev(infile, outfile, datacol='PDCSAP_FLUX', timescale=6.5,
     # log the call
     hashline = '--------------------------------------------------------------'
     kepmsg.log(logfile, hashline, verbose)
-    call = 'KEPSTDDEV -- '
-           'infile={}'.format(infile)
-           'outfile={}'.format(outfile)
-           'datacol={}'.format(datacol)
-           'timescale={}'.format(timescale)
-           'clobber={}'.format(clobber)
-           'verbose={}'.format(verbose)
-           'logfile={}'.format(logfile)
+    call = ('KEPSTDDEV -- '
+            + ' infile={}'.format(infile)
+            + ' outfile={}'.format(outfile)
+            + ' datacol={}'.format(datacol)
+            + ' timescale={}'.format(timescale)
+            + ' clobber={}'.format(clobber)
+            + ' verbose={}'.format(verbose)
+            + ' logfile={}'.format(logfile))
     kepmsg.log(logfile, call+'\n', verbose)
 
     # start time
