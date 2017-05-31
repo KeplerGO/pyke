@@ -18,8 +18,9 @@ After that, run the following commands on a terminal of your preference:
 
 ## Acknowledgement
 If you find this code useful in your research, please consider [citing](http://adsabs.harvard.edu/abs/2012ascl.soft08004S):
-Title:	PyKE: Reduction and analysis of Kepler Simple Aperture Photometry data
+
 ```
+Title:	PyKE: Reduction and analysis of Kepler Simple Aperture Photometry data
 Authors:          Still, Martin; Barclay, Tom
 Publication:      Astrophysics Source Code Library, record ascl:1208.004
 Publication Date: 08/2012
