@@ -319,7 +319,7 @@ def keptrim_main():
                         type=str)
     parser.add_argument('outfile', help='Name of output target pixel file',
                         type=str)
-    parser.add_argument('--kepid', type=int
+    parser.add_argument('--kepid', type=int,
                         help='Kepler ID number from the Kepler Input Catalog')
     parser.add_argument('--column', help='CCD column number of the target',
                         type=int)
