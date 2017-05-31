@@ -1,4 +1,4 @@
-kepsmooth
-=========
+kepdynamic
+==========
 
 .. autofunction:: pyke.kepdynamic.kepdynamic

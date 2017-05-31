@@ -14,3 +14,4 @@ def test_import():
     from .. import kepsmooth
     from .. import kepflatten
     from .. import kepdynamic
+    from .. import kepstddev

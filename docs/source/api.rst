@@ -10,3 +10,4 @@ Modules/API
     kepsmooth
     kepflatten
     kepdynamic
+    kepstddev
