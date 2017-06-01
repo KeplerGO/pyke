@@ -92,7 +92,6 @@ def cleany(signal, cadence, logfile, verbose):
         txt = ("ERROR -- KEPPLOT.CLEANY: cannot calculate plot scaling in "
                "y dimension")
         kepmsg.err(logfile, txt, verbose)
-        label = ''
 
     return signal, label
 
