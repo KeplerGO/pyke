@@ -33,11 +33,10 @@ Publication Date: 08/2012
 numpy
 scipy
 astropy
-tqdm
 matplotlib
+tqdm
+mdp
 ```
-
-``mdp`` (for ``keppca``)
 
 ## Support
 Users are welcome to open [issues](https://github.com/KeplerGO/PyKE/issues) involving any aspects of this software.
