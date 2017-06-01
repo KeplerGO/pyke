@@ -228,7 +228,7 @@ def keppca(infile, maskfile, outfile, components, plotpca, nreps, clobber,
     # Keep track for adding back in later
     nanpixels = np.array([], dtype='int')
     i = 0
-    while (i < npix):
+    while i < npix:
         if np.isnan(pixseries[0, i]):
             nanpixels = np.append(nanpixels, i)
             npix = npix - 1
@@ -658,7 +658,11 @@ def keppca(infile, maskfile, outfile, components, plotpca, nreps, clobber,
 
 def reject_outliers(data, m):
     """Outlier rejection for computing robust mean"""
-    return data[np.abs(data - np.mean(data)) < m * np.std(data)]
+    try:
+        return data[np.abs(data - np.mean(data)) < m * np.std(data)]
+    except:
+        print("Warning: Could not reject outliers.")
+        return data
 
 
 def mad(data):
