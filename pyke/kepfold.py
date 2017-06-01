@@ -524,44 +524,46 @@ def kepfold(infile, outfile, period, bjd0, bindata=True,
     ymax = pout1[np.isfinite(pout1)].max()
     xr = xmax - xmin
     yr = ymax - ymin
-    ptime1 = np.insert(ptime1,[0],[ptime1[0]])
-    ptime1 = np.append(ptime1,[ptime1[-1]])
-    pout1 = np.insert(pout1,[0],[0.0])
-    pout1 = np.append(pout1,0.0)
+    ptime1 = np.insert(ptime1, [0], [ptime1[0]])
+    ptime1 = np.append(ptime1, [ptime1[-1]])
+    pout1 = np.insert(pout1, [0], [0.0])
+    pout1 = np.append(pout1, 0.0)
     if bindata:
-        ptime2 = np.insert(ptime2,[0],ptime2[0] - 1.0 / nbins)
-        ptime2 = np.insert(ptime2,[0],ptime2[0])
-        ptime2 = np.append(ptime2,[ptime2[-1] + 1.0 / nbins, ptime2[-1] + 1.0 / nbins])
-        pout2 = np.insert(pout2,[0],[pout2[-1]])
-        pout2 = np.insert(pout2,[0],[0.0])
-        pout2 = np.append(pout2,[pout2[2],0.0])
+        ptime2 = np.insert(ptime2, [0], ptime2[0] - 1.0 / nbins)
+        ptime2 = np.insert(ptime2, [0], ptime2[0])
+        ptime2 = np.append(ptime2, [ptime2[-1] + 1.0 / nbins, ptime2[-1] + 1.0 / nbins])
+        pout2 = np.insert(pout2, [0], [pout2[-1]])
+        pout2 = np.insert(pout2, [0], [0.0])
+        pout2 = np.append(pout2, [pout2[2],0.0])
 
     # plot new light curve
     if plottype != 'none':
-        plt.figure(figsize=[17,7])
+        plt.figure(figsize=[17, 7])
         plt.clf()
-        ax = plt.axes([0.06,0.11,0.93,0.86])
+        ax = plt.axes([0.06, 0.11, 0.93, 0.86])
         plt.gca().xaxis.set_major_formatter(plt.ScalarFormatter(useOffset=False))
         plt.gca().yaxis.set_major_formatter(plt.ScalarFormatter(useOffset=False))
         labels = ax.get_yticklabels()
         plt.setp(labels, 'rotation', 90)
         if bindata:
-            plt.fill(ptime2,pout2,color=fcolor,linewidth=0.0,alpha=falpha)
+            plt.fill(ptime2, pout2, color=fcolor, linewidth=0.0, alpha=falpha)
         else:
             if 'det' in plottype:
-                plt.fill(ptime1,pout1,color=fcolor,linewidth=0.0,alpha=falpha)
-        plt.plot(ptime1,pout1,color=lcolor,linestyle='',linewidth=lwidth,marker='.')
+                plt.fill(ptime1, pout1, color=fcolor, linewidth=0.0,
+                         alpha=falpha)
+        plt.plot(ptime1, pout1, color=lcolor, linestyle='', linewidth=lwidth,
+                 marker='.')
         if bindata:
-            plt.plot(ptime2[1:-1],pout2[1:-1],color='r',linestyle='-',linewidth=lwidth,marker='')
+            plt.plot(ptime2[1:-1], pout2[1:-1], color='r', linestyle='-',
+                     linewidth=lwidth, marker='')
         plt.xlabel(xlab, {'color' : 'k'})
         plt.ylabel(ylab, {'color' : 'k'})
-        plt.xlim(-0.49999,1.49999)
+        plt.xlim(-0.49999, 1.49999)
         if ymin >= 0.0:
-            plt.ylim(ymin-yr*0.01,ymax+yr*0.01)
+            plt.ylim(ymin - yr * 0.01, ymax + yr * 0.01)
         else:
-            plt.ylim(1.0e-10,ymax+yr*0.01)
+            plt.ylim(1.0e-10, ymax + yr * 0.01)
         plt.grid()
-        #plt.ion()
         plt.show()
     # close input file
     kepio.closefits(instr, logfile, verbose)
@@ -571,7 +573,6 @@ def kepfold(infile, outfile, period, bjd0, bindata=True,
 
 def kepfold_main():
     import argparse
-
     parser = argparse.ArgumentParser(description=("Low bandpass or high"
                                                   "bandpass signal filtering"))
     parser.add_argument('infile', help='Name of FITS input file', type=str)
