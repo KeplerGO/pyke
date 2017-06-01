@@ -2,70 +2,51 @@ import time
 import re
 import numpy as np
 from astropy.io import fits as pyfits
-import kepio, kepmsg, kepkey
+from . import kepio
+from . import kepmsg
+from . import kepkey
 
 
-def kepconvert(infile, outfile, conversion, columns,baddata,clobber,verbose,logfile,status):
-# startup parameters
-    status = 0
+def kepconvert(infile, outfile, conversion, columns, baddata, clobber, verbose, logfile):
+    hashline = '--------------------------------------------------------------'
+    kepmsg.log(logfile, hashline, verbose)
+    call = ('KEPCONVERT -- '
+            + ' infile={}'+infile+' '
+            + ' outfile={}'+outfile+' '
+            + ' conversion={}'+conversion+' '
+            + ' columns={}'.format(columns)
+            + ' baddata={}'.format(baddata)
+            + ' clobber={}'.format(clobber)
+            + ' verbose={}'.format(verbose)
+            + ' logfile={}'.format(logfile))
+    kepmsg.log(logfile, call+'\n', verbose)
 
-# log the call
-
-    hashline = '----------------------------------------------------------------------------'
-    kepmsg.log(logfile,hashline,verbose)
-    call = 'KEPCONVERT -- '
-    call += 'infile='+infile+' '
-    call += 'outfile='+outfile+' '
-    call += 'conversion='+conversion+' '
-    call += 'columns='+columns+ ' '
-    writebad = 'n'
-    if (baddata): writebad = 'y'
-    call += 'baddata='+writebad+ ' '
-    overwrite = 'n'
-    if (clobber): overwrite = 'y'
-    call += 'clobber='+overwrite+ ' '
-    chatter = 'n'
-    if (verbose): chatter = 'y'
-    call += 'verbose='+chatter+' '
-    call += 'logfile='+logfile
-    kepmsg.log(logfile,call+'\n',verbose)
-
-# start time
-
+    # start time
     kepmsg.clock('KEPCONVERT started at',logfile,verbose)
+    # data columns
+    colnames = columns.strip().split(',')
+    ncol = len(colnames)
+    if ncol < 1:
+        errmsg = 'ERROR -- KEPCONVERT: no data columns specified'
+        kepmsg.err(logfile, errmsg, verbose)
 
-# test log file
-
-    logfile = kepmsg.test(logfile)
-
-# data columns
-
-    if status == 0:
-        colnames = columns.strip().split(',')
-        ncol = len(colnames)
-        if ncol < 1:
-            message = 'ERROR -- KEPCONVERT: no data columns specified'
-            status = kepmsg.err(logfile,message,verbose)
-
-# input file exists
-
-    if status == 0 and not kepio.fileexists(infile):
-        message = 'ERROR -- KEPCONVERT: input file '+infile+' does not exist'
+    # input file exists
+    if not kepio.fileexists(infile):
+        message = 'ERROR -- KEPCONVERT: input file {} does not exist'.format(infile)
         status = kepmsg.err(logfile,message,verbose)
 
-# clobber output file
+    # clobber output file
+    if clobber:
+        kepio.clobber(outfile,logfile,verbose)
+    if kepio.fileexists(outfile):
+        message = ('ERROR -- KEPCONVERT: {} exists. Use --clobber'
+                   .format(outfile))
+        kepmsg.err(logfile, message, verbose)
 
-    if status == 0:
-        if clobber: status = kepio.clobber(outfile,logfile,verbose)
-        if kepio.fileexists(outfile):
-            message = 'ERROR -- KEPCONVERT: ' + outfile + ' exists. Use clobber=yes'
-            status = kepmsg.err(logfile,message,verbose)
-
-# open FITS input file
-
-    if status == 0 and conversion == 'fits2asc':
-        instr, status = kepio.openfits(infile,'readonly',logfile,verbose)
-        tstart, tstop, bjdref, cadence, status = kepio.timekeys(instr,infile,logfile,verbose,status)
+    # open FITS input file
+    if conversion == 'fits2asc':
+        instr = kepio.openfits(infile, 'readonly', logfile, verbose)
+        tstart, tstop, bjdref, cadence = kepio.timekeys(instr, infile, logfile, verbose)
 
 # read FITS table data
 
