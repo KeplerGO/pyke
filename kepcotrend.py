@@ -1,5 +1,5 @@
-import numpy as np
 import math
+import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.cbook import is_numlike
 from scipy.optimize import leastsq
@@ -52,7 +52,6 @@ def get_pcomp_list_newformat(bvdat, pcomplist, newcad, short, scinterp):
     Finds cotrending basis vectors which have been requested to be
     used by the user and adds them to an array.
     """
-    status = False
     pcomp = np.zeros((len(pcomplist), len(newcad)))
     for i in range(len(np.array(pcomplist))):
         j = int(np.array(pcomplist)[i])
@@ -81,7 +80,7 @@ def get_pcomp_list_newformat(bvdat, pcomplist, newcad, short, scinterp):
                 pcomp[i][upper] = bv_data[-1]
         else:
             pcomp[i] = dat[np.in1d(bvdat.field('CADENCENO'), newcad)]
-    return pcomp,status
+    return pcomp
 
 def make_sc_lc(obs_cad, bv_cad, flux):
     """
@@ -458,10 +457,9 @@ def split_on_nans(bad_data, cad):
             blocks.append(cad[-1])
     return blocks
 
-def kepcotrend(infile, outfile, bvfile, listbv, fitmethod, fitpower,
-                 iterate, sigma, maskfile, scinterp,
-                 plot=True, clobber=True, verbose=True,
-                 logfile='kepcotrend.log'):
+def kepcotrend(infile, outfile, bvfile, listbv, fitmethod='llsq', fitpower=1,
+               iterate=True, sigma=None, maskfile='', scinterp=None, plot=True,
+               clobber=True, verbose=True, logfile='kepcotrend.log'):
     """
     kepcotrend -- Remove systematic trends Kepler light curves using
     cotrending basis vectors. The cotrending basis vectors files can be found
@@ -656,14 +654,12 @@ def kepcotrend(infile, outfile, bvfile, listbv, fitmethod, fitpower,
     instr, status = kepio.openfits(infile, 'readonly', logfile, verbose)
     tstart, tstop, bjdref, cadence = kepio.timekeys(instr, infile, logfile,
                                                     verbose)
-
     # fudge non-compliant FITS keywords with no values
     instr = kepkey.emptykeys(instr, infile, logfile, verbose)
 
     if not kepio.fileexists(bvfile):
         message = 'ERROR -- KEPCOTREND: ' + bvfile + ' does not exist.'
-        status = kepmsg.err(logfile,message,verbose)
-
+        kepmsg.err(logfile, message, verbose)
     #lsq_sq - nonlinear least squares fitting and simplex_abs have been
     #removed from the options in PyRAF but they are still in the code!
     if fitmethod not in ['llsq','matrix','lst_sq','simplex_abs','simplex']:
@@ -734,7 +730,7 @@ def kepcotrend(infile, outfile, bvfile, listbv, fitmethod, fitpower,
         lc_flux_o = lc_flux_o[lc_cad_o >= 11914]
         lc_err_o = lc_err_o[lc_cad_o >= 11914]
 
-    if short and scinterp == 'None':
+    if short and scinterp == None:
         errmsg = ('You cannot select None as the interpolation method '
                   'because you are using short cadence data and '
                   'therefore must use some form of interpolation. I '
@@ -756,7 +752,7 @@ def kepcotrend(infile, outfile, bvfile, listbv, fitmethod, fitpower,
                   'As a result, Q4 light curves contain these 20 day '
                   'of data. However, we do not calculate CBVs for '
                   'this section of data.')
-        status = kepmsg.err(logfile, errmsg, verbose)
+        kepmsg.err(logfile, errmsg, verbose)
 
     #cut out infinites and zero flux columns
     lc_cad, lc_date, lc_flux, lc_err, bad_data = cutBadData(lc_cad_o,
@@ -833,44 +829,44 @@ def kepcotrend(infile, outfile, bvfile, listbv, fitmethod, fitpower,
         errmsg = 'If fitting iteratively you must specify a clipping range'
         kepmsg.err(logfile, errmsg, verbose)
 
-    if status == 0:
-        #uses Pvals = yhat * U_transpose
-        if iterate:
-            coeffs, fittedmask = do_lst_iter(bvectors_masked, lc_cad_masked,
-                    n_flux_masked,sigma,50.,fitmethod,fitpower)
+    #uses Pvals = yhat * U_transpose
+    if iterate:
+        coeffs, fittedmask = do_lst_iter(bvectors_masked, lc_cad_masked,
+                                         n_flux_masked, sigma, 50., fitmethod,
+                                         fitpower)
+    else:
+        if fitmethod == 'matrix' and domasking:
+            coeffs = do_lsq_uhat(bvectors_masked, lc_cad_masked,
+                                 n_flux_masked, False)
+        elif fitmethod == 'llsq' and domasking:
+            coeffs = do_lsq_uhat(bvectors_masked, lc_cad_masked,
+                                 n_flux_masked, False)
+        elif fitmethod == 'lst_sq':
+            coeffs = do_lsq_nlin(bvectors_masked, lc_cad_masked,
+                                 n_flux_masked)
+        elif fitmethod == 'simplex_abs':
+            coeffs = do_lsq_fmin(bvectors_masked, lc_cad_masked,
+                                 n_flux_masked)
+        elif fitmethod == 'simplex':
+            coeffs = do_lsq_fmin_pow(bvectors_masked,lc_cad_masked,
+                                     n_flux_masked,fitpower)
         else:
-            if fitmethod == 'matrix' and domasking:
-                coeffs = do_lsq_uhat(bvectors_masked,lc_cad_masked,
-                                     n_flux_masked,False)
-            elif fitmethod == 'llsq' and domasking:
-                coeffs = do_lsq_uhat(bvectors_masked,lc_cad_masked,
-                                     n_flux_masked,False)
-            elif fitmethod == 'lst_sq':
-                coeffs = do_lsq_nlin(bvectors_masked,lc_cad_masked,
-                                     n_flux_masked)
-            elif fitmethod == 'simplex_abs':
-                coeffs = do_lsq_fmin(bvectors_masked,lc_cad_masked,
-                                     n_flux_masked)
-            elif fitmethod == 'simplex':
-                coeffs = do_lsq_fmin_pow(bvectors_masked,lc_cad_masked,
-                                         n_flux_masked,fitpower)
-            else:
-                coeffs = do_lsq_uhat(bvectors_masked,lc_cad_masked,
-                                     n_flux_masked)
+            coeffs = do_lsq_uhat(bvectors_masked,lc_cad_masked,
+                                 n_flux_masked)
 
-        flux_after = (get_newflux(n_flux,bvectors,coeffs) + 1) * medflux
-        flux_after_masked = ((get_newflux(n_flux_masked, bvectors_masked,
-                                          coeffs) + 1) * medflux)
-        bvsum = get_pcompsum(bvectors, coeffs)
-        bvsum_masked = get_pcompsum(bvectors_masked, coeffs)
-        bvsum_nans = putInNans(bad_data, bvsum)
-        flux_after_nans = putInNans(bad_data, flux_after)
+    flux_after = (get_newflux(n_flux,bvectors,coeffs) + 1) * medflux
+    flux_after_masked = ((get_newflux(n_flux_masked, bvectors_masked,
+                                      coeffs) + 1) * medflux)
+    bvsum = get_pcompsum(bvectors, coeffs)
+    bvsum_masked = get_pcompsum(bvectors_masked, coeffs)
+    bvsum_nans = putInNans(bad_data, bvsum)
+    flux_after_nans = putInNans(bad_data, flux_after)
 
-        if plot:
-            newmedflux = np.median(flux_after + 1)
-            bvsum_un_norm = newmedflux * (1 - bvsum)
-            do_plot(lc_date, lc_flux, flux_after, bvsum_un_norm, lc_cad,
-                    bad_data, lc_cad_o, version)
+    if plot:
+        newmedflux = np.median(flux_after + 1)
+        bvsum_un_norm = newmedflux * (1 - bvsum)
+        do_plot(lc_date, lc_flux, flux_after, bvsum_un_norm, lc_cad,
+                bad_data, lc_cad_o, version)
 
     make_outfile(instr,outfile,flux_after_nans,bvsum_nans,version)
 
@@ -900,7 +896,6 @@ def kepcotrend(infile, outfile, bvfile, listbv, fitmethod, fitpower,
     kepmsg.clock('KEPCOTREND completed at', logfile, verbose)
 
 def kepcotrend_main():
-
     import argparse
     parser = argparse.ArgumentParser(description=('Remove systematic '
                                                   'trends in photometry '
@@ -913,19 +908,19 @@ def kepcotrend_main():
                         type=str)
     parser.add_argument('cbvfile', help='Name of file containing the CBVs',
                         type=str)
-    parser.add_argument('--vectors', dest='listbv', help='The CBVs to use',
+    parser.add_argument('vectors', dest='listbv', help='The CBVs to use',
                         type=str)
     parser.add_argument('--method', '-m', help='Fitting method',
                         default='llsq', dest='fitmethod', type=str,
                         choices=['llsq', 'simplex', 'lst_sq'])
     parser.add_argument('--fitpower', '-f',
                         help='The index of the merit function (simplex only)',
-                        default=1, type=float, dest='fitpower')
-    parser.add_argument('--iterate', action='store_true',
+                        default=1, type=float)
+    parser.add_argument('--iterate', action='store_true', default=True,
                         help='Fit iteratively ', dest='iterate')
     parser.add_argument('--sigmaclip', '-s',
                         help='Sigma clip value when iteratively fitting',
-                        default=False, dest='sigma', type=float)
+                        default=None, dest='sigma')
     parser.add_argument('--maskfile', '-q',
                         help='Name of file containing a mask', default='',
                         dest='maskfile', type=str)
