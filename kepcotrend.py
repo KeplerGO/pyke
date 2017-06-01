@@ -10,9 +10,11 @@ from . import kepmsg
 from . import kepio
 from . import kepkey
 
+
 __all__ = ['kepcotrend']
 
-def cutBadData(cad,date,flux,err):
+
+def cut_bad_data(cad, date, flux, err):
     """
     this function finds cadences with bad data in and removes them
     returning only cadences which contain good data
@@ -30,10 +32,10 @@ def cutBadData(cad,date,flux,err):
 
     return cad2, date2, flux2, err2, bad_data
 
-def putInNans(bad_data, flux):
+def put_in_nans(bad_data, flux):
     """
     Function finds the cadences where the data has been removed using
-    cutBadData() and puts data back in. The flux data put back in is nan.
+    cut_bad_data() and puts data back in. The flux data put back in is nan.
     This function is used when writing data to a FITS files.
     bad_data == True means the datapoint is good!!
     """
@@ -88,7 +90,8 @@ def make_sc_lc(obs_cad, bv_cad, flux):
     """
     newflux = np.zeros(len(bv_cad))
     for i in range(len(bv_cad)):
-        mask = np.logical_and(obs_cad > bv_cad[i] - 15,obs_cad < bv_cad[i] + 15)
+        mask = np.logical_and(obs_cad > bv_cad[i] - 15,
+                              obs_cad < bv_cad[i] + 15)
         newflux[i] = obs_cad[mask]
     return newflux
 
@@ -117,8 +120,7 @@ def near_intpl(xout, xin, yin):
 
     return np.where(abs(xout - x0) < abs(xout - x1), y0, y1)
 
-
-def get_pcomp_list(pcompdata,pcomplist, newcad):
+def get_pcomp_list(pcompdata, pcomplist, newcad):
     pcomp = np.zeros((len(pcomplist), len(newcad)))
     for i in range(len(np.array(pcomplist))):
         j = int(np.array(pcomplist)[i]) - 1
@@ -126,8 +128,7 @@ def get_pcomp_list(pcompdata,pcomplist, newcad):
         pcomp[i] = dat[np.in1d(pcompdata[..., 1], newcad)]
     return pcomp
 
-
-def do_lsq_uhat(pcomps,cad,flux,orthog=True):
+def do_lsq_uhat(pcomps, cad, flux, orthog=True):
     """
     does a linear least squares fit of the basis vectors to the light curve
     using the 'matrix' method - U(transpose) * y = coeffs
@@ -145,16 +146,8 @@ def do_lsq_uhat(pcomps,cad,flux,orthog=True):
 
     U_hat = np.matrix(pcomps).transpose()
     y_hat = np.matrix(flux).transpose()
-
     U_trans = U_hat.transpose()
-
-    if orthog == True:
-        coeffs = np.linalg.inv(U_trans * U_hat) * U_trans * y_hat
-
-    elif orthog == False:
-        coeffs = np.linalg.inv(U_trans * U_hat) * U_trans * y_hat
-
-    coeffs = np.array(0. - coeffs)
+    coeffs = - np.linalg.inv(U_trans * U_hat) * U_trans * y_hat
 
     return coeffs
 
@@ -755,7 +748,7 @@ def kepcotrend(infile, outfile, bvfile, listbv, fitmethod='llsq', fitpower=1,
         kepmsg.err(logfile, errmsg, verbose)
 
     #cut out infinites and zero flux columns
-    lc_cad, lc_date, lc_flux, lc_err, bad_data = cutBadData(lc_cad_o,
+    lc_cad, lc_date, lc_flux, lc_err, bad_data = cut_bad_data(lc_cad_o,
                                       lc_date_o, lc_flux_o, lc_err_o)
     #get a list of basis vectors to use from the list given
     #accept different seperators
@@ -859,8 +852,8 @@ def kepcotrend(infile, outfile, bvfile, listbv, fitmethod='llsq', fitpower=1,
                                       coeffs) + 1) * medflux)
     bvsum = get_pcompsum(bvectors, coeffs)
     bvsum_masked = get_pcompsum(bvectors_masked, coeffs)
-    bvsum_nans = putInNans(bad_data, bvsum)
-    flux_after_nans = putInNans(bad_data, flux_after)
+    bvsum_nans = put_in_nans(bad_data, bvsum)
+    flux_after_nans = put_in_nans(bad_data, flux_after)
 
     if plot:
         newmedflux = np.median(flux_after + 1)
