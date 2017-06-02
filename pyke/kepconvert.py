@@ -2,6 +2,7 @@ import time
 import re
 import numpy as np
 from astropy.io import fits as pyfits
+from tqdm import tqdm
 from . import kepio
 from . import kepmsg
 from . import kepkey
@@ -45,6 +46,11 @@ def kepconvert(infile, outfile, conversion, columns, baddata, clobber=True,
         Print informative messages and warnings to the shell and logfile?
     logfile : str
         Name of the logfile containing error and warning messages.
+
+    Examples
+    --------
+    $ kepconvert kplr002436324-2009259160929_llc.fits kepconvert.txt fits2asc
+    --columns TIME,SAP_FLUX,SAP_FLUX_ERR,SAP_QUALITY --verbose
     """
 
     hashline = '--------------------------------------------------------------'
@@ -89,7 +95,7 @@ def kepconvert(infile, outfile, conversion, columns, baddata, clobber=True,
         table = kepio.readfitstab(infile, instr[1], logfile, verbose)
         # check columns exist in FITS file
         work = []
-        for colname in colnames:
+        for colname in tqdm(colnames):
             try:
                 if colname.lower() == 'time':
                     work.append(table.field(colname) + bjdref)
@@ -120,7 +126,7 @@ def kepconvert(infile, outfile, conversion, columns, baddata, clobber=True,
         for i in range(ncol):
             work.append([])
         nline = 0
-        for line in table:
+        for line in tqdm(table):
             line = line.strip()
             line = re.sub('\s+', ',', line)
             line = re.sub('\|', ',', line)
@@ -160,7 +166,7 @@ def kepconvert(infile, outfile, conversion, columns, baddata, clobber=True,
                 if lc_end > 2.4e6:
                     lc_end -= 2.4e6
                 dts = []
-                for j in range(1,len(work[i])):
+                for j in range(1, len(work[i])):
                    dts.append(work[i][j] - work[i][j-1])
                 dts = np.array(dts, dtype='float32')
                 cadence = np.median(dts)
@@ -341,7 +347,7 @@ def kepconvert_main():
                         help='Output rows which have been flagged as questionable')
     parser.add_argument('--clobber', action='store_true', default=True,
                         help='Overwrite output file?')
-    parser.add_argument('--verbose', action='store_true',
+    parser.add_argument('--verbose', action='store_true', default=True,
                         help='Write to a log file?')
     parser.add_argument('--logfile', '-l', help='Name of ascii log file',
                         default='kepconvert.log', dest='logfile', type=str)
