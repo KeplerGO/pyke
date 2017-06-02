@@ -19,3 +19,4 @@ def test_import():
     from .. import keptrim
     from .. import keppca
     from .. import kepconvert
+    from .. import kepfilter
