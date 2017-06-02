@@ -15,12 +15,9 @@ mask = []; aid = None; bid = None; cid = None; did = None; eid = None; fid = Non
 clobb = True; outf = ''; verb = True; logf = ''; rinf = ''
 cmdLine = False
 
-def keprange(infile, rinfile, outfile, column, clobber, verbose, logfile,
-             status, cLine=False):
+def keprange(infile, rinfile, outfile, column, clobber, verbose, logfile):
 
-# startup parameters
-
-    status = 0
+    # startup parameters
     global instr, cadence, barytime0, nrm, barytime, flux
     global xmin, xmax, ymin, ymax, xr, yr, xlab, ylab
     global clobb, outf, verb, logf, rinf, col, bjdref, cade, cmdLine
@@ -29,184 +26,141 @@ def keprange(infile, rinfile, outfile, column, clobber, verbose, logfile,
 
     if rinfile.lower() == 'none':
         rinfile = ''
-    hashline = '----------------------------------------------------------------------------'
-    kepmsg.log(logfile,hashline,verbose)
-    call = 'KEPRANGE -- '
-    call += 'infile='+infile+' '
-    call += 'rinfile='+rinfile+' '
-    call += 'outfile='+outfile+' '
-    call += 'column='+column+' '
-    overwrite = 'n'
-    if (clobber): overwrite = 'y'
-    call += 'clobber='+overwrite+ ' '
-    chatter = 'n'
-    if (verbose): chatter = 'y'
-    call += 'verbose='+chatter+' '
-    call += 'logfile='+logfile
-    kepmsg.log(logfile,call+'\n',verbose)
+    hashline = '--------------------------------------------------------------'
+    kepmsg.log(logfile, hashline, verbose)
+    call = ('KEPRANGE -- '
+            + ' infile={}'.format(infile)
+            + ' rinfile={}'.format(rinfile)
+            + ' outfile={}'+outfile+' '
+            + ' column={}'+column+' '
+            + ' clobber={}'+overwrite+ ' '
+            + ' verbose={}'+chatter+' '
+            + ' logfile={}'+logfile)
+    kepmsg.log(logfile, call+'\n', verbose)
     clobb = clobber
     outf = outfile
     verb = verbose
     logf = logfile
     rinf = rinfile
-    cmdLine = cLine
 
-# start time
+    # start time
+    kepmsg.clock('KEPRANGE started at: ', logfile, verbose)
 
-    kepmsg.clock('KEPRANGE started at: ',logfile,verbose)
-
-# test log file
-
-    logfile = kepmsg.test(logfile)
-
-# clobber output file
-
-    if clobber: status = kepio.clobber(outfile,logfile,verbose)
+    # clobber output file
+    if clobber:
+        kepio.clobber(outfile, logfile, verbose)
     if kepio.fileexists(outfile):
-        message = 'ERROR -- KEPRANGE: ' + outfile + ' exists. Use --clobber'
-        status = kepmsg.err(logfile,message,verbose)
+        errmsg = 'ERROR -- KEPRANGE: {} exists. Use --clobber'.format(outfile)
+        kepmsg.err(logfile, errmsg, verbose)
 
-## open input file
-
-    if status == 0:
-        instr, status = kepio.openfits(infile,'readonly',logfile,verbose)
-    if status == 0:
-        tstart, tstop, bjdref, cadence, status = kepio.timekeys(instr,
-                                                                infile,
-                                                                logfile,
-                                                                verbose,
-                                                                status)
-    if status == 0:
-        try:
-            work = instr[0].header['FILEVER']
-            cadenom = 1.0
-        except:
-            cadenom = cadence
+    ## open input file
+    instr = pyfits.open(infile, 'readonly')
+    tstart, tstop, bjdref, cadence = kepio.timekeys(instr, infile,
+                                                    logfile, verbose)
+    try:
+        work = instr[0].header['FILEVER']
+        cadenom = 1.0
+    except:
+        cadenom = cadence
     cade = cadenom
 
-# fudge non-compliant FITS keywords with no values
+    # fudge non-compliant FITS keywords with no values
+    instr = kepkey.emptykeys(instr, infile, logfile, verbose)
+    # input data
+    table = instr[1].data
 
-    if status == 0:
-        instr = kepkey.emptykeys(instr, infile, logfile, verbose)
-
-# input data
-
-    if status == 0:
-        table = instr[1].data
-
-# filter out NaNs
-
+    # filter out NaNs
     work1 = []; work2 = []
     col = column
-    if status == 0:
-        barytime, status = kepio.readtimecol(infile, table, logfile, verbose)
-    if status == 0:
-        try:
-            flux = instr[1].data.field(col)
-        except:
-            message = 'ERROR -- KEPRANGE: no column named ' + col + ' in table ' +  infile + '[1]'
-            status = kepmsg.err(file,message,verbose)
-    if status == 0:
-        for i in range(len(barytime)):
-            if (np.isfinite(barytime[i]) and np.isfinite(flux[i]) and flux[i] != 0.0):
-                work1.append(barytime[i] + bjdref)
-                work2.append(flux[i])
-        barytime = np.array(work1, dtype=np.float64)
-        flux = np.array(work2, dtype=np.float32) / cadenom
+    barytime = kepio.readtimecol(infile, table, logfile, verbose)
+    try:
+        flux = instr[1].data.field(col)
+    except:
+        errmsg = ('ERROR -- KEPRANGE: no column named {} in table {} [1]'
+                  .format(col, infile))
+        kepmsg.err(infile, message, verbose)
+    for i in range(len(barytime)):
+        if (np.isfinite(barytime[i]) and np.isfinite(flux[i])
+            and flux[i] != 0.0):
+            work1.append(barytime[i] + bjdref)
+            work2.append(flux[i])
+    barytime = np.array(work1, dtype=np.float64)
+    flux = np.array(work2, dtype=np.float32) / cadenom
 
-# clean up x-axis unit
+    # clean up x-axis unit
+    barytime0 = float(int(tstart / 100) * 100.0)
+    barytime = barytime - barytime0
+    xlab = 'BJD $-$ {}'.format(barytime0)
 
-    if status == 0:
-        barytime0 = float(int(tstart / 100) * 100.0)
-        barytime = barytime - barytime0
-        xlab = 'BJD $-$ %d' % barytime0
+    # clean up y-axis units
+    nrm = len(str(int(flux.max()))) - 1
+    flux = flux / 10 ** nrm
+    ylab = '10$^%d$ e$^-$ s$^{-1}$' % nrm
 
-# clean up y-axis units
+    # data limits
+    xmin = barytime.min()
+    xmax = barytime.max()
+    ymin = flux.min()
+    ymax = flux.max()
+    xr = xmax - xmin
+    yr = ymax - ymin
+    flux[0] = 0.0
+    flux[-1] = 0.0
 
-    if status == 0:
-        nrm = len(str(int(flux.max())))-1
-        flux = flux / 10**nrm
-        ylab = '10$^%d$ e$^-$ s$^{-1}$' % nrm
-
-# data limits
-
-        xmin = barytime.min()
-        xmax = barytime.max()
-        ymin = flux.min()
-        ymax = flux.max()
-        xr = xmax - xmin
-        yr = ymax - ymin
-        flux[0] = 0.0
-        flux[-1] = 0.0
-
-# plot new light curve
-
-    if status == 0:
-        plt.rcParams['figure.dpi'] = 80
-        plt.figure(figsize=[xsize,ysize])
-        plt.clf()
-        plotlc(cmdLine)
-
-    #if status == 0:
-    #    status = kepio.closefits(instr, logfile, verbose)
+    # plot new light curve
+    plt.rcParams['figure.dpi'] = 80
+    plt.figure(figsize=[xsize,ysize])
+    plt.clf()
+    plotlc()
 
 
-# -----------------------------------------------------------
-# plot light curve and tool
-
-def plotlc(cmdLine):
-
+def plotlc():
     global aid, bid, cid, did, eid, fid, mask
 
-# load button
-
+    # load button
     plt.ion()
     plt.clf()
-    plt.axes([0.06,0.02,0.22,0.1])
-    plt.text(0.5,0.5,'LOAD',fontsize=24,weight='heavy',
+    plt.axes([0.06, 0.02, 0.22, 0.1])
+    plt.text(0.5, 0.5, 'LOAD', fontsize=24, weight='heavy',
              horizontalalignment='center', verticalalignment='center')
-    plt.setp(plt.gca(),xticklabels=[],xticks=[],yticklabels=[],yticks=[])
-    plt.fill([0.0,1.0,1.0,0.0,0.0],[0.0,0.0,1.0,1.0,0.0],'#ffffee')
-    plt.xlim(0.0,1.0)
-    plt.ylim(0.0,1.0)
-    aid = plt.connect('button_press_event',clicker1)
+    plt.setp(plt.gca(), xticklabels=[], xticks=[], yticklabels=[], yticks=[])
+    plt.fill([0.0, 1.0, 1.0, 0.0, 0.0], [0.0, 0.0, 1.0, 1.0, 0.0], '#ffffee')
+    plt.xlim(0.0, 1.0)
+    plt.ylim(0.0, 1.0)
+    aid = plt.connect('button_press_event', clicker1)
 
-# save button
+    # save button
+    plt.axes([0.2933, 0.02, 0.22, 0.1])
+    plt.text(0.5, 0.5, 'SAVE', fontsize=24, weight='heavy',
+             horizontalalignment='center', verticalalignment='center')
+    plt.setp(plt.gca(), xticklabels=[], xticks=[], yticklabels=[], yticks=[])
+    plt.fill([0.0, 1.0, 1.0, 0.0, 0.0], [0.0, 0.0, 1.0, 1.0, 0.0], '#ffffee')
+    plt.xlim(0.0, 1.0)
+    plt.ylim(0.0, 1.0)
+    bid = plt.connect('button_press_event', clicker2)
 
-    plt.axes([0.2933,0.02,0.22,0.1])
-    plt.text(0.5,0.5,'SAVE',fontsize=24,weight='heavy',
-             horizontalalignment='center',verticalalignment='center')
-    plt.setp(plt.gca(),xticklabels=[],xticks=[],yticklabels=[],yticks=[])
-    plt.fill([0.0,1.0,1.0,0.0,0.0],[0.0,0.0,1.0,1.0,0.0],'#ffffee')
-    plt.xlim(0.0,1.0)
-    plt.ylim(0.0,1.0)
-    bid = plt.connect('button_press_event',clicker2)
+    # clear button
+    plt.axes([0.5266, 0.02, 0.22, 0.1])
+    plt.text(0.5, 0.5, 'CLEAR', fontsize=24, weight='heavy',
+             horizontalalignment='center', verticalalignment='center')
+    plt.setp(plt.gca(), xticklabels=[], xticks=[], yticklabels=[], yticks=[])
+    plt.fill([0.0, 1.0, 1.0, 0.0, 0.0], [0.0, 0.0, 1.0, 1.0, 0.0], '#ffffee')
+    plt.xlim(0.0, 1.0)
+    plt.ylim(0.0, 1.0)
+    cid = plt.connect('button_press_event', clicker3)
 
-# clear button
+    # print button
+    plt.axes([0.76, 0.02, 0.22, 0.1])
+    plt.text(0.5, 0.5, 'PRINT', fontsize=24, weight='heavy',
+             horizontalalignment='center', verticalalignment='center')
+    plt.setp(plt.gca(), xticklabels=[], xticks=[], yticklabels=[], yticks=[])
+    plt.fill([0.0, 1.0, 1.0, 0.0, 0.0], [0.0, 0.0, 1.0, 1.0, 0.0], '#ffffee')
+    plt.xlim(0.0, 1.0)
+    plt.ylim(0.0, 1.0)
+    did = plt.connect('button_press_event', clicker4)
 
-    plt.axes([0.5266,0.02,0.22,0.1])
-    plt.text(0.5,0.5,'CLEAR',fontsize=24,weight='heavy',
-             horizontalalignment='center',verticalalignment='center')
-    plt.setp(plt.gca(),xticklabels=[],xticks=[],yticklabels=[],yticks=[])
-    plt.fill([0.0,1.0,1.0,0.0,0.0],[0.0,0.0,1.0,1.0,0.0],'#ffffee')
-    plt.xlim(0.0,1.0)
-    plt.ylim(0.0,1.0)
-    cid = plt.connect('button_press_event',clicker3)
-
-# print button
-
-    plt.axes([0.76,0.02,0.22,0.1])
-    plt.text(0.5,0.5,'PRINT',fontsize=24,weight='heavy',
-             horizontalalignment='center',verticalalignment='center')
-    plt.setp(plt.gca(),xticklabels=[],xticks=[],yticklabels=[],yticks=[])
-    plt.fill([0.0,1.0,1.0,0.0,0.0],[0.0,0.0,1.0,1.0,0.0],'#ffffee')
-    plt.xlim(0.0,1.0)
-    plt.ylim(0.0,1.0)
-    did = plt.connect('button_press_event',clicker4)
-
-# light curve
-
-    plt.axes([0.06,0.213,0.92,0.77])
+    # light curve
+    plt.axes([0.06, 0.213, 0.92, 0.77])
     plt.gca().xaxis.set_major_formatter(plt.ScalarFormatter(useOffset=False))
     plt.gca().yaxis.set_major_formatter(plt.ScalarFormatter(useOffset=False))
     ltime = []; ldata = []
@@ -223,43 +177,35 @@ def plotlc(cmdLine):
             ltime = []; ldata = []
     ltime = np.array(ltime, dtype=np.float64) - barytime0
     ldata = np.array(ldata, dtype=np.float64) / 10**nrm
-    plt.plot(ltime,ldata,color=lcolor,linestyle='-',linewidth=lwidth)
-    plt.fill(barytime,flux,fc=fcolor,linewidth=0.0,alpha=falpha)
+    plt.plot(ltime, ldata, color=lcolor, linestyle='-', linewidth=lwidth)
+    plt.fill(barytime, flux, fc=fcolor, linewidth=0.0, alpha=falpha)
     plt.xlabel(xlab, {'color' : 'k'})
     plt.ylabel(ylab, {'color' : 'k'})
     plt.grid()
 
-# plt.plot masks
-
+    # plt.plot masks
     for i in range(len(mask)):
         t = float(mask[i])
-        plt.plot([t,t],[ymin,ymax],color='g',linestyle='-',linewidth=0.5)
+        plt.plot([t, t], [ymin, ymax], color='g', linestyle='-', linewidth=0.5)
     nt = 0
-    for i in range(int(len(mask)/2)):
+    for i in range(int(len(mask) / 2)):
         t1 = float(mask[nt])
-        t2 = float(mask[nt+1])
+        t2 = float(mask[nt + 1])
         nt += 2
-        plt.fill([t1,t1,t2,t2,t1],[ymin,ymax,ymax,ymin,ymin],
-                 fc='g',linewidth=0.0,alpha=0.5)
-# plot ranges
-
-    plt.xlim(xmin-xr*0.01,xmax+xr*0.01)
-    if ymin-yr*0.01 <= 0.0:
-        plt.ylim(1.0e-10,ymax+yr*0.01)
+        plt.fill([t1, t1, t2, t2, t1], [ymin, ymax, ymax, ymin, ymin],
+                 fc='g', linewidth=0.0, alpha=0.5)
+    # plot ranges
+    plt.xlim(xmin - xr * 0.01, xmax + xr * 0.01)
+    if ymin - yr * 0.01 <= 0.0:
+        plt.ylim(1.0e-10, ymax + yr * 0.01)
     else:
-        plt.ylim(ymin-yr*0.01,ymax+yr*0.01)
+        plt.ylim(ymin - yr * 0.01, ymax + yr * 0.01)
 
-# ranges
+    # ranges
+    eid = plt.connect('key_press_event' ,clicker6)
 
-    eid = plt.connect('key_press_event',clicker6)
-
-# render plot
-
-    plt.ion()
+    # render plot
     plt.show()
-
-# -----------------------------------------------------------
-# load mask from ascii file
 
 def clicker1(event):
 
@@ -271,7 +217,7 @@ def clicker1(event):
                 event.y > 12 and event.y < 68):
                 if kepio.fileexists(rinf):
                     mask = []
-                    lines, status = kepio.openascii(rinf,'r',logf,verb)
+                    lines = kepio.openascii(rinf, 'r', logf, verb)
                     for line in lines:
                         line = line.strip().split(',')
                         try:
@@ -286,7 +232,7 @@ def clicker1(event):
                         except:
                             message = 'ERROR -- KEPRANGE: ascii format of ranges '
                             message += 'file not recognized.'
-                            status = kepmsg.err(logf,message,False)
+                            kepmsg.err(logf, message, False)
                     plt.disconnect(aid)
                     plt.disconnect(bid)
                     plt.disconnect(cid)
@@ -448,12 +394,9 @@ def clicker6(event):
             plt.close()
             return
 
-# main
-if '--shell' in sys.argv:
+def keprange_main():
     import argparse
     parser = argparse.ArgumentParser(description='Interactively define and store time ranges via a GUI')
-    parser.add_argument('--shell', action='store_true',
-                        help='Are we running from the shell?')
     parser.add_argument('infile', help='Name of input file', type=str)
     parser.add_argument('--rinfile', default='',
                         help='Name of input ASCII time ranges file', type=str)
@@ -468,13 +411,7 @@ if '--shell' in sys.argv:
                         help='Write to a log file?')
     parser.add_argument('--logfile', '-l', help='Name of ascii log file',
                         default='keprange.log', dest='logfile', type=str)
-    parser.add_argument('--status', '-e', help='Exit status (0=good)',
-                        default=0, dest='status', type=int)
     args = parser.parse_args()
     cmdLine=True
     keprange(args.infile, args.rinfile, args.outfile, args.column,
-             args.clobber, args.verbose, args.logfile, args.status, cmdLine)
-else:
-    from pyraf import iraf
-    parfile = iraf.osfn("kepler$keprange.par")
-    t = iraf.IrafTaskFactory(taskname="keprange", value=parfile, function=keprange)
+             args.clobber, args.verbose, args.logfile)
