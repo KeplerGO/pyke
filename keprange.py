@@ -412,6 +412,5 @@ def keprange_main():
     parser.add_argument('--logfile', '-l', help='Name of ascii log file',
                         default='keprange.log', dest='logfile', type=str)
     args = parser.parse_args()
-    cmdLine=True
     keprange(args.infile, args.rinfile, args.outfile, args.column,
              args.clobber, args.verbose, args.logfile)
