@@ -18,3 +18,4 @@ def test_import():
     from .. import kepwindow
     from .. import keptrim
     from .. import keppca
+    from .. import kepconvert
