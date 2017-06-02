@@ -7,13 +7,43 @@ from . import kepmsg
 from . import kepkey
 
 
-def kepconvert(infile, outfile, conversion, columns, baddata, clobber, verbose, logfile):
+def kepconvert(infile, outfile, conversion, columns, baddata, clobber=True,
+               verbose=True, logfile='kepconvert.log'):
+    """
+    Parameters
+    ----------
+    infile : str
+        The name of an input file, e.g. a MAST standard format FITS file
+        containing a Kepler light curve within the first data extension,
+        or an ASCII table.
+    outfile : str
+        The name of the output file, e.g. a FITS structure or ASCII table.
+    conversion : str
+        Define the type of file conversion.
+        * fits2asc
+        * asc2fits
+
+columns = string
+A comma-delimited list of data column names or descriptors.
+
+baddata = boolean (optional)
+If yes, all the rows from the input FITS file are output to an ascii file. If no then only rows with SAP_QUALITY equal to zero will but output. This option is only applicable if conversion = fits2asc.
+
+clobber = boolean (optional)
+Overwrite the output file? if clobber = no and an existing file has the same name as outfile then the task will stop with an error.
+
+verbose = boolean (optional)
+Print informative messages and warnings to the shell and logfile?
+
+logfile = string (optional)
+Name of the logfile containing error and warning messages.
+    """
     hashline = '--------------------------------------------------------------'
     kepmsg.log(logfile, hashline, verbose)
     call = ('KEPCONVERT -- '
-            + ' infile={}'+infile+' '
-            + ' outfile={}'+outfile+' '
-            + ' conversion={}'+conversion+' '
+            + ' infile={}'.format(infile)
+            + ' outfile={}'.format(outfile)
+            + ' conversion={}'.format(conversion)
             + ' columns={}'.format(columns)
             + ' baddata={}'.format(baddata)
             + ' clobber={}'.format(clobber)
@@ -22,7 +52,7 @@ def kepconvert(infile, outfile, conversion, columns, baddata, clobber, verbose, 
     kepmsg.log(logfile, call+'\n', verbose)
 
     # start time
-    kepmsg.clock('KEPCONVERT started at',logfile,verbose)
+    kepmsg.clock('KEPCONVERT started at', logfile, verbose)
     # data columns
     colnames = columns.strip().split(',')
     ncol = len(colnames)
