@@ -77,7 +77,7 @@ def kepfilter(infile, outfile, passband, datacol='SAP_FLUX', function='boxcar',
             + ' plot='.format(plotit)
             + ' clobber={}'.format(clobber)
             + ' verbose={}'.format(verbose)
-            + ' logfile={}'.format(logfile)
+            + ' logfile={}'.format(logfile))
     kepmsg.log(logfile, call+'\n', verbose)
     ## start time
     kepmsg.clock('KEPFILTER started at',logfile,verbose)
