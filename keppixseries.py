@@ -1,104 +1,75 @@
 from astropy.io import fits as pyfits
 from matplotlib import pyplot as plt
 import numpy as np
-import kepio, kepmsg, kepkey, kepplot, kepstat, kepfunc
-import sys, time, re, math
+from . import kepio, kepmsg, kepkey, kepplot, kepstat, kepfunc
+import math
 
-# -----------------------------------------------------------
-# core code
+def keppixseries(infile, outfile, plotfile, plottype, filter, function, cutoff,
+                 clobber, verbose, logfile)
 
-def keppixseries(infile,outfile,plotfile,plottype,filter,function,cutoff,clobber,verbose,logfile,status, cmdLine=False):
-
-# input arguments
-    status = 0
-
-# log the call
-
-    hashline = '----------------------------------------------------------------------------'
-    kepmsg.log(logfile,hashline,verbose)
+    # log the call
+    hashline = '--------------------------------------------------------------'
+    kepmsg.log(logfile, hashline, verbose)
     call = 'KEPPIXSERIES -- '
-    call += 'infile='+infile+' '
-    call += 'outfile='+outfile+' '
-    call += 'plotfile='+plotfile+' '
-    call += 'plottype='+plottype+' '
-    filt = 'n'
-    if (filter): filt = 'y'
-    call += 'filter='+filt+ ' '
-    call += 'function='+function+' '
-    call += 'cutoff='+str(cutoff)+' '
-    overwrite = 'n'
-    if (clobber): overwrite = 'y'
-    call += 'clobber='+overwrite+ ' '
-    chatter = 'n'
-    if (verbose): chatter = 'y'
-    call += 'verbose='+chatter+' '
-    call += 'logfile='+logfile
-    kepmsg.log(logfile,call+'\n',verbose)
+            'infile='+infile
+            'outfile='+outfile
+            'plotfile='+plotfile
+            'plottype='+plottype
+            'filter='+filt+ ' '
+            'function='+function+' '
+            'cutoff='+str(cutoff)+' '
+            'clobber='+overwrite+ ' '
+            'verbose='+chatter+' '
+            'logfile='+logfile
+    kepmsg.log(logfile, call+'\n', verbose)
 
-# start time
+    # start time
+    kepmsg.clock('KEPPIXSERIES started at', logfile, verbose)
 
-    kepmsg.clock('KEPPIXSERIES started at',logfile,verbose)
-
-# test log file
-
-    logfile = kepmsg.test(logfile)
-
-# clobber output file
-
-    if clobber: status = kepio.clobber(outfile,logfile,verbose)
+    # clobber output file
+    if clobber:
+        kepio.clobber(outfile, logfile, verbose)
     if kepio.fileexists(outfile):
         message = 'ERROR -- KEPPIXSERIES: ' + outfile + ' exists. Use --clobber'
-        status = kepmsg.err(logfile,message,verbose)
+        kepmsg.err(logfile, message, verbose)
 
-# open TPF FITS file
+    # open TPF FITS file
+    kepid, channel, skygroup, module, output, quarter, season, \
+        ra, dec, column, row, kepmag, xdim, ydim, barytime, status = \
+        kepio.readTPF(infile,'TIME',logfile,verbose)
+    kepid, channel, skygroup, module, output, quarter, season, \
+        ra, dec, column, row, kepmag, xdim, ydim, tcorr, status = \
+        kepio.readTPF(infile,'TIMECORR',logfile,verbose)
+    kepid, channel, skygroup, module, output, quarter, season, \
+        ra, dec, column, row, kepmag, xdim, ydim, cadno, status = \
+        kepio.readTPF(infile,'CADENCENO',logfile,verbose)
+    kepid, channel, skygroup, module, output, quarter, season, \
+        ra, dec, column, row, kepmag, xdim, ydim, fluxpixels, status = \
+        kepio.readTPF(infile,'FLUX',logfile,verbose)
+    kepid, channel, skygroup, module, output, quarter, season, \
+        ra, dec, column, row, kepmag, xdim, ydim, errpixels, status = \
+        kepio.readTPF(infile,'FLUX_ERR',logfile,verbose)
+    kepid, channel, skygroup, module, output, quarter, season, \
+        ra, dec, column, row, kepmag, xdim, ydim, qual, status = \
+        kepio.readTPF(infile,'QUALITY',logfile,verbose)
 
-    if status == 0:
-        kepid, channel, skygroup, module, output, quarter, season, \
-            ra, dec, column, row, kepmag, xdim, ydim, barytime, status = \
-            kepio.readTPF(infile,'TIME',logfile,verbose)
-    if status == 0:
-        kepid, channel, skygroup, module, output, quarter, season, \
-            ra, dec, column, row, kepmag, xdim, ydim, tcorr, status = \
-            kepio.readTPF(infile,'TIMECORR',logfile,verbose)
-    if status == 0:
-        kepid, channel, skygroup, module, output, quarter, season, \
-            ra, dec, column, row, kepmag, xdim, ydim, cadno, status = \
-            kepio.readTPF(infile,'CADENCENO',logfile,verbose)
-    if status == 0:
-        kepid, channel, skygroup, module, output, quarter, season, \
-            ra, dec, column, row, kepmag, xdim, ydim, fluxpixels, status = \
-            kepio.readTPF(infile,'FLUX',logfile,verbose)
-    if status == 0:
-        kepid, channel, skygroup, module, output, quarter, season, \
-            ra, dec, column, row, kepmag, xdim, ydim, errpixels, status = \
-            kepio.readTPF(infile,'FLUX_ERR',logfile,verbose)
-    if status == 0:
-        kepid, channel, skygroup, module, output, quarter, season, \
-            ra, dec, column, row, kepmag, xdim, ydim, qual, status = \
-            kepio.readTPF(infile,'QUALITY',logfile,verbose)
+    # read mask defintion data from TPF file
+    maskimg, pixcoord1, pixcoord2 = kepio.readMaskDefinition(infile, logfile, verbose)
 
-# read mask defintion data from TPF file
+    # print target data
+    print ''
+    print '      KepID:  %s' % kepid
+    print ' RA (J2000):  %s' % ra
+    print 'Dec (J2000): %s' % dec
+    print '     KepMag:  %s' % kepmag
+    print '   SkyGroup:    %2s' % skygroup
+    print '     Season:    %2s' % str(season)
+    print '    Channel:    %2s' % channel
+    print '     Module:    %2s' % module
+    print '     Output:     %1s' % output
+    print ''
 
-    if status == 0:
-        maskimg, pixcoord1, pixcoord2, status = kepio.readMaskDefinition(infile,logfile,verbose)
-
-# print target data
-
-    if status == 0:
-        print ''
-        print '      KepID:  %s' % kepid
-        print ' RA (J2000):  %s' % ra
-        print 'Dec (J2000): %s' % dec
-        print '     KepMag:  %s' % kepmag
-        print '   SkyGroup:    %2s' % skygroup
-        print '     Season:    %2s' % str(season)
-        print '    Channel:    %2s' % channel
-        print '     Module:    %2s' % module
-        print '     Output:     %1s' % output
-        print ''
-
-# how many quality = 0 rows?
-
+    # how many quality = 0 rows?
     if status == 0:
         npts = 0
         nrows = len(fluxpixels)
@@ -466,7 +437,6 @@ def keppixseries(infile,outfile,plotfile,plottype,filter,function,cutoff,clobber
 
 # -----------------------------------------------------------
 # main
-if '--shell' in sys.argv:
     import argparse
     parser = argparse.ArgumentParser(description='Individual time series photometry for all pixels within a target mask')
     parser.add_argument('--shell', action='store_true', help='Are we running from the shell?')
