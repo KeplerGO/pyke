@@ -12,5 +12,6 @@ Modules/API
     kepdynamic
     kepstddev
     kepwindow
+    keppca
     kepconvert
     kepfilter

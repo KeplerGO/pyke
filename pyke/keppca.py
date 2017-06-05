@@ -12,8 +12,90 @@ import mdp
 
 __all__ = ['keppca']
 
-def keppca(infile, maskfile, outfile, components, plotpca, nreps, clobber,
+def keppca(infile, outfile, maskfile, components, plotpca, nreps, clobber,
            verbose, logfile):
+    """
+    keppca -- Perform principal component analysis upon a target pixel file
+
+    keppca provides a method to mitigate for motion-derived systematic
+    artifacts via Principle Component Analysis (PCA). This method was
+    demonstrated on Kepler light curves by Harrison et al. (2012). It provides
+    an alternative to cotrending data using basis vectors (kepcotrend) and
+    correlating aperture photometry struture with time-series centroid
+    measurements (kepsff). PCA will perhaps become a more widespread tool in
+    the K2 era where the magnitde of target motion across the detector over a
+    Kepler quarter is experienced by a K2 target over just 6-hours during its
+    regular sequence of thruster firings that counteract boresight roll motion
+    Pixel-level PCA employs only those pixels collected around a specific
+    target and separates photometric trends common to all pixels from trends
+    localized to individual targets or pixels in a series of principal
+    component curves.
+
+    The user has the option to choose the specific set of pixels to sample in
+    this analysis. Principal components are plotted by the tool and written out
+    to an output FITS file in an output extension called PRINCIPAL_COMPONENTS.
+    The extension contains a 2D table with one row per timestamp recorded in
+    the input file and one column for every principal component. Summing all
+    principal components together will reconstruct a normalized version of the
+    summed pixel within the chosen aperture. The user also has the choice of
+    which principal components to optimally-subtract from the aperture-derived
+    light curve in order to remove motion systematics from the time-series
+    data. The aperture light curve and the corrected light curve are written to
+    the LIGHTCURVE extension of the output file. The first populates the
+    SAP_FLUX data column and the second is written to a column called PCA_FLUX.
+    This output file can be used as input for other PyKE tasks and can be e.g.
+    inspected using kepdraw.
+
+    infile : str
+        The name of a standard format FITS file containing Kepler or K2 target
+        pixels within the first data extension.
+    outfile : str
+        Filename for the output light curves and principal components. This
+        product will be written to the same FITS format as archived light
+        curves. Aperture photometry will be stored in the SAP_FLUX column of
+        the first FITS extension called LIGHTCURVE. A version of this light
+        curve with principal components subtracted is stored in column PCA_FLUX
+        and a normalized version is stored in PCA_FLUX_NRM. The individual
+        principal components are stored within a new FITS extension called
+        PRINCIPAL_COMPONENTS.
+    maskfile : str
+        This string can be one of three options:
+
+        * 'ALL' tells the task to calculate principal components from all
+        pixels within the pixel mask stored in the input file.
+
+        * 'APER' tells the task to calculate principal components from only the
+        pixels within the photometric aperture stored in the input file (e.g.
+        only those pixels summed by the Kepler pipeline to produce the light
+        curve archived at MAST (note that no such light curves are currently
+        being created for the K2 mission)
+
+        * A filename describing the desired photometric aperture. Such a file
+        can be constructed using the kepmask or kepffi tools, or can be created
+        manually using the format described in the documentation for those
+        tools. Note that if an aperture provided is not stricly rectangular,
+        keppca will increase the size of the aperture so that it defines the
+        smallest possible rectangle that contains all of the specified pixels.
+    components : str
+        A list of the principal components to subtract from the aperture light
+        curve. The strings '1 2 3 4 5', 1,'2,3,4,5' and '1,2,3-5' yield the
+        same result.
+    plotpca : bool
+        If True, keppca will produce plots containing individual principal
+        components, correlation maps and light curves, both aperture and
+        PCA-corrected versions. The will be stored as hardcopies in PNG format.
+    nmaps : int
+        The number of correlation maps and principal components to plot as
+        output. This can be any positive integer up to the number of pixels
+        within the mask, although note that many hundreds of plots will likely
+        become prohibitive and is unlikely to be informative.
+    clobber : bool
+        Overwrite the output file?
+    verbose : bool
+        Print informative messages and warnings to the shell and logfile?
+    logfile : str
+        Name of the logfile containing error and warning message
+    """
 
     # startup parameters
     labelsize = 32
@@ -697,5 +779,5 @@ def keppca_main():
     parser.add_argument('--logfile', '-l', help='Name of ascii log file',
                         default='keppca.log', dest='logfile', type=str)
     args = parser.parse_args()
-    keppca(args.infile, args.maskfile, args.outfile, args.components,
+    keppca(args.infile, args.outfile, args.maskfile, args.components,
            args.plotpca, args.nmaps, args.clobber, args.verbose, args.logfile)
