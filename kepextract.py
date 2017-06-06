@@ -5,142 +5,128 @@ from scipy.optimize import leastsq
 from copy import copy
 import kepio, kepmsg, kepkey, kepstat, kepfunc
 
-# global variables
+def kepextract(infile, maskfile,outfile,subback,clobber,verbose,logfile,status):
 
-def kepextract(infile,maskfile,outfile,subback,clobber,verbose,logfile,status):
-
-# startup parameters
-
-    status = 0
+    # startup parameters
     np.seterr(all="ignore")
 
-# log the call
+    # log the call
+    hashline = '--------------------------------------------------------------'
+    kepmsg.log(logfile, hashline, verbose)
+    call = ('KEPEXTRACT -- '
+            + ' infile={}'.format(infile)
+            + ' maskfile={}'.format(maskfile)
+            + ' outfile={}'.format(outfile)
+            + ' background={}'.format(backgr)
+            + ' clobber={}'.format(overwrite)
+            + ' verbose={}'.format(chatter)
+            + ' logfile={}'.format(logfile)
+    kepmsg.log(logfile, call+'\n', verbose)
 
-    hashline = '----------------------------------------------------------------------------'
-    kepmsg.log(logfile,hashline,verbose)
-    call = 'KEPEXTRACT -- '
-    call += 'infile='+infile+' '
-    call += 'maskfile='+maskfile+' '
-    call += 'outfile='+outfile+' '
-    backgr = 'n'
-    if (subback): backgr = 'y'
-    call += 'background='+backgr+ ' '
-    overwrite = 'n'
-    if (clobber): overwrite = 'y'
-    call += 'clobber='+overwrite+ ' '
-    chatter = 'n'
-    if (verbose): chatter = 'y'
-    call += 'verbose='+chatter+' '
-    call += 'logfile='+logfile
-    kepmsg.log(logfile,call+'\n',verbose)
-
-# start time
-
+    # start time
     kepmsg.clock('KEPEXTRACT started at',logfile,verbose)
-
-# test log file
-
-    logfile = kepmsg.test(logfile)
-
-# clobber output file
-
-    if clobber: status = kepio.clobber(outfile,logfile,verbose)
+    # clobber output file
+    if clobber:
+        kepio.clobber(outfile, logfile, verbose)
     if kepio.fileexists(outfile):
-        message = 'ERROR -- KEPEXTRACT: ' + outfile + ' exists. Use --clobber'
-        status = kepmsg.err(logfile,message,verbose)
+        errmsg = ('ERROR -- KEPEXTRACT: {} exists. Use --clobber'
+                  .format(outfile))
+        kepmsg.err(logfile, errmsg, verbose)
 
-# open input file
+    # open input file
+    instr = pyfits.open(infile, mode='readonly', memmap=True)
+    tstart, tstop, bjdref, cadence = kepio.timekeys(instr, infile,
+                                                    logfile, verbose)
 
-    status = 0
-    instr = pyfits.open(infile,mode='readonly',memmap=True)
-    if status == 0:
-        tstart, tstop, bjdref, cadence, status = kepio.timekeys(instr,infile,logfile,verbose,status)
+    # fudge non-compliant FITS keywords with no values
+    instr = kepkey.emptykeys(instr, infile, logfile, verbose)
 
-# fudge non-compliant FITS keywords with no values
+    # input file data
+    cards0 = instr[0].header.cards
+    cards1 = instr[1].header.cards
+    cards2 = instr[2].header.cards
+    table = instr[1].data[:]
+    maskmap = copy(instr[2].data)
 
-    if status == 0:
-        instr = kepkey.emptykeys(instr,file,logfile,verbose)
+    # input table data
+    kepid, channel, skygroup, module, output, quarter, season, \
+    ra, dec, column, row, kepmag, xdim, ydim, time = \
+        kepio.readTPF(infile, 'TIME', logfile, verbose)
+    time = np.array(time, dtype='float64')
 
-# input file data
+    kepid, channel, skygroup, module, output, quarter, season, \
+    ra, dec, column, row, kepmag, xdim, ydim, timecorr = \
+        kepio.readTPF(infile, 'TIMECORR', logfile, verbose)
+    timecorr = np.array(timecorr, dtype='float32')
 
-    if status == 0:
-        cards0 = instr[0].header.cards
-        cards1 = instr[1].header.cards
-        cards2 = instr[2].header.cards
-        table = instr[1].data[:]
-        maskmap = copy(instr[2].data)
+    kepid, channel, skygroup, module, output, quarter, season, \
+    ra, dec, column, row, kepmag, xdim, ydim, cadenceno = \
+        kepio.readTPF(infile, 'CADENCENO', logfile, verbose)
+    cadenceno = np.array(cadenceno, dtype='int')
 
-# input table data
+    kepid, channel, skygroup, module, output, quarter, season, \
+    ra, dec, column, row, kepmag, xdim, ydim, raw_cnts = \
+        kepio.readTPF(infile, 'RAW_CNTS', logfile, verbose)
 
-    if status == 0:
-        kepid, channel, skygroup, module, output, quarter, season, \
-            ra, dec, column, row, kepmag, xdim, ydim, time, status = \
-            kepio.readTPF(infile,'TIME',logfile,verbose)
-        time = np.array(time,dtype='float64')
-    if status == 0:
-        kepid, channel, skygroup, module, output, quarter, season, \
-            ra, dec, column, row, kepmag, xdim, ydim, timecorr, status = \
-            kepio.readTPF(infile,'TIMECORR',logfile,verbose)
-        timecorr = np.array(timecorr,dtype='float32')
-    if status == 0:
-        kepid, channel, skygroup, module, output, quarter, season, \
-            ra, dec, column, row, kepmag, xdim, ydim, cadenceno, status = \
-            kepio.readTPF(infile,'CADENCENO',logfile,verbose)
-        cadenceno = np.array(cadenceno,dtype='int')
-    if status == 0:
-        kepid, channel, skygroup, module, output, quarter, season, \
-            ra, dec, column, row, kepmag, xdim, ydim, raw_cnts, status = \
-            kepio.readTPF(infile,'RAW_CNTS',logfile,verbose)
-    if status == 0:
-        kepid, channel, skygroup, module, output, quarter, season, \
-            ra, dec, column, row, kepmag, xdim, ydim, flux, status = \
-            kepio.readTPF(infile,'FLUX',logfile,verbose)
-    if status == 0:
-        kepid, channel, skygroup, module, output, quarter, season, \
-            ra, dec, column, row, kepmag, xdim, ydim, flux_err, status = \
-            kepio.readTPF(infile,'FLUX_ERR',logfile,verbose)
-    if status == 0:
-        kepid, channel, skygroup, module, output, quarter, season, \
-            ra, dec, column, row, kepmag, xdim, ydim, flux_bkg, status = \
-            kepio.readTPF(infile,'FLUX_BKG',logfile,verbose)
-    if status == 0:
-        kepid, channel, skygroup, module, output, quarter, season, \
-            ra, dec, column, row, kepmag, xdim, ydim, flux_bkg_err, status = \
-            kepio.readTPF(infile,'FLUX_BKG_ERR',logfile,verbose)
-    if status == 0:
-        kepid, channel, skygroup, module, output, quarter, season, \
-            ra, dec, column, row, kepmag, xdim, ydim, cosmic_rays, status = \
-            kepio.readTPF(infile,'COSMIC_RAYS',logfile,verbose)
-    if status == 0:
-        kepid, channel, skygroup, module, output, quarter, season, \
-            ra, dec, column, row, kepmag, xdim, ydim, quality, status = \
-            kepio.readTPF(infile,'QUALITY',logfile,verbose)
-        quality = np.array(quality,dtype='int')
-    if status == 0:
-        try:
-            pos_corr1 = np.array(table.field('POS_CORR1'),dtype='float64')  #  ---for FITS wave #2
-        except:
-            pos_corr1 = np.empty(len(time)); pos_corr1[:] = np.nan   # ---temporary before FITS wave #2
-        try:
-            pos_corr2 = np.array(table.field('POS_CORR2'),dtype='float64')  #  ---for FITS wave #2
-        except:
-            pos_corr2 = np.empty(len(time)); pos_corr2[:] = np.nan   # ---temporary before FITS wave #2
+    kepid, channel, skygroup, module, output, quarter, season, \
+    ra, dec, column, row, kepmag, xdim, ydim, flux = \
+        kepio.readTPF(infile, 'FLUX', logfile, verbose)
 
-# dummy columns for output file
+    kepid, channel, skygroup, module, output, quarter, season, \
+    ra, dec, column, row, kepmag, xdim, ydim, flux_err = \
+        kepio.readTPF(infile, 'FLUX_ERR', logfile, verbose)
 
-        psf_centr1 = np.empty(len(time)); psf_centr1[:] = np.nan
-        psf_centr1_err = np.empty(len(time)); psf_centr1_err[:] = np.nan
-        psf_centr2 = np.empty(len(time)); psf_centr2[:] = np.nan
-        psf_centr2_err = np.empty(len(time)); psf_centr2_err[:] = np.nan
-        mom_centr1_err = np.empty(len(time)); mom_centr1_err[:] = np.nan
-        mom_centr2_err = np.empty(len(time)); mom_centr2_err[:] = np.nan
+    kepid, channel, skygroup, module, output, quarter, season, \
+    ra, dec, column, row, kepmag, xdim, ydim, flux_bkg, status = \
+        kepio.readTPF(infile, 'FLUX_BKG', logfile, verbose)
 
-# read mask definition file
+    kepid, channel, skygroup, module, output, quarter, season, \
+    ra, dec, column, row, kepmag, xdim, ydim, flux_bkg_err = \
+        kepio.readTPF(infile, 'FLUX_BKG_ERR', logfile, verbose)
 
-    if status == 0 and 'aper' not in maskfile.lower() and maskfile.lower() != 'all':
-        maskx = np.array([],'int')
-        masky = np.array([],'int')
-        lines, status = kepio.openascii(maskfile,'r',logfile,verbose)
+    kepid, channel, skygroup, module, output, quarter, season, \
+    ra, dec, column, row, kepmag, xdim, ydim, cosmic_rays = \
+        kepio.readTPF(infile, 'COSMIC_RAYS', logfile, verbose)
+
+    kepid, channel, skygroup, module, output, quarter, season, \
+    ra, dec, column, row, kepmag, xdim, ydim, quality = \
+        kepio.readTPF(infile, 'QUALITY', logfile, verbose)
+    quality = np.array(quality, dtype='int')
+
+    try:
+        #  ---for FITS wave #2
+        pos_corr1 = np.array(table.field('POS_CORR1'), dtype='float64')
+    except:
+        pos_corr1 = np.empty(len(time))
+        # ---temporary before FITS wave #2
+        pos_corr1[:] = np.nan
+    try:
+        #  ---for FITS wave #2
+        pos_corr2 = np.array(table.field('POS_CORR2'), dtype='float64')
+    except:
+        pos_corr2 = np.empty(len(time))
+        # ---temporary before FITS wave #2
+        pos_corr2[:] = np.nan
+
+    # dummy columns for output file
+    psf_centr1 = np.empty(len(time))
+    psf_centr1[:] = np.nan
+    psf_centr1_err = np.empty(len(time))
+    psf_centr1_err[:] = np.nan
+    psf_centr2 = np.empty(len(time))
+    psf_centr2[:] = np.nan
+    psf_centr2_err = np.empty(len(time))
+    psf_centr2_err[:] = np.nan
+    mom_centr1_err = np.empty(len(time))
+    mom_centr1_err[:] = np.nan
+    mom_centr2_err = np.empty(len(time))
+    mom_centr2_err[:] = np.nan
+
+    # read mask definition file
+    if 'aper' not in maskfile.lower() and maskfile.lower() != 'all':
+        maskx = np.array([], 'int')
+        masky = np.array([], 'int')
+        lines = kepio.openascii(maskfile, 'r', logfile, verbose)
         for line in lines:
             line = line.strip().split('|')
             if len(line) == 6:
@@ -155,58 +141,53 @@ def kepextract(infile,maskfile,outfile,subback,clobber,verbose,logfile,status):
                         continue
         status = kepio.closeascii(lines,logfile,verbose)
         if len(maskx) == 0 or len(masky) == 0:
-            message = 'ERROR -- KEPEXTRACT: ' + maskfile + ' contains no pixels.'
-            status = kepmsg.err(logfile,message,verbose)
+            errmsg = 'ERROR -- KEPEXTRACT: {} contains no pixels.'.format(maskfile)
+            kepmsg.err(logfile, errmsg, verbose)
 
-# subimage physical WCS data
+    # subimage physical WCS data
+    crpix1p = cards2['CRPIX1P'].value
+    crpix2p = cards2['CRPIX2P'].value
+    crval1p = cards2['CRVAL1P'].value
+    crval2p = cards2['CRVAL2P'].value
+    cdelt1p = cards2['CDELT1P'].value
+    cdelt2p = cards2['CDELT2P'].value
 
-    if status == 0:
-        crpix1p = cards2['CRPIX1P'].value
-        crpix2p = cards2['CRPIX2P'].value
-        crval1p = cards2['CRVAL1P'].value
-        crval2p = cards2['CRVAL2P'].value
-        cdelt1p = cards2['CDELT1P'].value
-        cdelt2p = cards2['CDELT2P'].value
-
-# define new subimage bitmap...
-
-    if status == 0 and 'aper' not in maskfile.lower() and maskfile.lower() != 'all':
+    # define new subimage bitmap...
+    if 'aper' not in maskfile.lower() and maskfile.lower() != 'all':
         aperx = np.array([],'int')
         apery = np.array([],'int')
         aperb = np.array([],'int')
         for i in range(maskmap.shape[0]):
             for j in range(maskmap.shape[1]):
-                aperx = np.append(aperx,crval1p + (j + 1 - crpix1p) * cdelt1p)
-                apery = np.append(apery,crval2p + (i + 1 - crpix2p) * cdelt2p)
+                aperx = np.append(aperx, crval1p + (j + 1 - crpix1p) * cdelt1p)
+                apery = np.append(apery, crval2p + (i + 1 - crpix2p) * cdelt2p)
                 if maskmap[i,j] == 0:
-                    aperb = np.append(aperb,0)
+                    aperb = np.append(aperb, 0)
                 else:
-                    aperb = np.append(aperb,1)
-                    maskmap[i,j] = 1
+                    aperb = np.append(aperb, 1)
+                    maskmap[i, j] = 1
                     for k in range(len(maskx)):
                         if aperx[-1] == maskx[k] and apery[-1] == masky[k]:
                             aperb[-1] = 3
-                            maskmap[i,j] = 3
+                            maskmap[i, j] = 3
 
-# trap case where no aperture needs to be defined but pixel positions are still required for centroiding
-
-    if status == 0 and maskfile.lower() == 'all':
-        aperx = np.array([],'int')
-        apery = np.array([],'int')
+    # trap case where no aperture needs to be defined but pixel positions are still required for centroiding
+    if maskfile.lower() == 'all':
+        aperx = np.array([], 'int')
+        apery = np.array([], 'int')
         for i in range(maskmap.shape[0]):
             for j in range(maskmap.shape[1]):
                 aperx = np.append(aperx,crval1p + (j + 1 - crpix1p) * cdelt1p)
                 apery = np.append(apery,crval2p + (i + 1 - crpix2p) * cdelt2p)
 
-# ...or use old subimage bitmap
-
-    if status == 0 and 'aper' in maskfile.lower():
-        aperx = np.array([],'int')
-        apery = np.array([],'int')
-        aperb = np.array([],'int')
+    # ...or use old subimage bitmap
+    if 'aper' in maskfile.lower():
+        aperx = np.array([], 'int')
+        apery = np.array([], 'int')
+        aperb = np.array([], 'int')
         for i in range(maskmap.shape[0]):
             for j in range(maskmap.shape[1]):
-                aperb = np.append(aperb,maskmap[i,j])
+                aperb = np.append(aperb, maskmap[i, j])
                 aperx = np.append(aperx,crval1p + (j + 1 - crpix1p) * cdelt1p)
                 apery = np.append(apery,crval2p + (i + 1 - crpix2p) * cdelt2p)
 
