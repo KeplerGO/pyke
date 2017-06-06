@@ -12,8 +12,8 @@ import mdp
 
 __all__ = ['keppca']
 
-def keppca(infile, outfile, maskfile, components, plotpca, nreps, clobber,
-           verbose, logfile):
+def keppca(infile, outfile, maskfile='ALL', components='1-3', plotpca=True,
+           nmaps=10, clobber=True, verbose=True, logfile='keppca.log'):
     """
     keppca -- Perform principal component analysis upon a target pixel file
 
@@ -116,7 +116,7 @@ def keppca(infile, outfile, maskfile, components, plotpca, nreps, clobber,
             + ' outfile={}'.format(outfile)
             + ' components={}'.format(components)
             + ' plotpca={}'.format(plotpca)
-            + ' nreps={}'.format(nreps)
+            + ' nmaps={}'.format(nmaps)
             + ' clobber={}'.format(clobber)
             + ' verbose={}'.format(verbose)
             + ' logfile={}'.format(logfile))
@@ -635,7 +635,7 @@ def keppca(infile, outfile, maskfile, components, plotpca, nreps, clobber,
         npp = 7 # Number of plots per page
         l = 1
         repcnt = 1
-        for k in range(nreps):
+        for k in range(nmaps):
             # First plot of every pagewith flux image,
             # flux and calibrated time series
             if (k % (npp - 1) == 0):
@@ -762,12 +762,12 @@ def keppca_main():
                         help='Are we running from the shell?')
     parser.add_argument('infile', help='Name of input target pixel FITS file',
                         type=str)
-    parser.add_argument('maskfile', help='Name of mask defintion ASCII file',
-                        type=str)
     parser.add_argument('outfile', help='Name of output FITS file', type=str)
+    parser.add_argument('maskfile', help='Name of mask defintion ASCII file',
+                        default='ALL', type=str)
     parser.add_argument('--components', default='1-3',
                         help='Principal components to be removed', type=str)
-    parser.add_argument('--plotpca', action='store_true',
+    parser.add_argument('--plotpca', action='store_true', default=True,
                         help='Create PCA plots?')
     parser.add_argument('--nmaps', default=10,
                         help='Number of principal components to include in report',
