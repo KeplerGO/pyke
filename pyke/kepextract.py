@@ -69,6 +69,13 @@ def kepextract(infile, outfile, maskfile='ALL', bkg=False, clobber=True,
         the shell and a logfile.
     logfile : str
         Name of the logfile containing error and warning messages.
+
+    Examples
+    --------
+    .. code-block:: bash
+
+        $ kepextract kplr008256049-2010174085026_lpd-targ.fits outlc.fits
+        --maskfile ALL
     """
 
     # log the call
