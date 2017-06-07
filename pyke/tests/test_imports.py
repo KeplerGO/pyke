@@ -21,3 +21,4 @@ def test_import():
     from .. import kepconvert
     from .. import kepfilter
     from .. import kepextract
+    from .. import keptrial
