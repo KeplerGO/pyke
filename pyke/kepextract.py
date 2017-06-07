@@ -3,6 +3,7 @@ import numpy as np
 from astropy.io import fits as pyfits
 from scipy.optimize import leastsq
 from copy import copy
+from tqdm import tqdm
 from . import kepio, kepmsg, kepkey, kepstat, kepfunc
 
 
@@ -259,12 +260,10 @@ def kepextract(infile, outfile, maskfile='ALL', bkg=False, clobber=True,
                 apery = np.append(apery,crval2p + (i + 1 - crpix2p) * cdelt2p)
 
     # subtract median pixel value for background?
-    sky = np.array([], 'float32')
+    sky = np.zeros(len(time), 'float32')
     if bkg:
         for i in range(len(time)):
             sky = np.append(sky, np.median(flux[i, :]))
-    else:
-        sky[:] = 0.0
 
     # legal mask defined?
     if len(aperb) == 0:
@@ -280,14 +279,13 @@ def kepextract(infile, outfile, maskfile='ALL', bkg=False, clobber=True,
     sap_bkg = np.array([], 'float32')
     sap_bkg_err = np.array([], 'float32')
     raw_flux = np.array([],'float32')
-    for i in range(len(time)):
+    for i in tqdm(range(len(time))):
         work1 = np.array([], 'float64')
         work2 = np.array([], 'float64')
         work3 = np.array([], 'float64')
         work4 = np.array([], 'float64')
         work5 = np.array([], 'float64')
         for j in range(len(aperb)):
-            import pdb; pdb.set_trace()
             if aperb[j] == 3:
                 work1 = np.append(work1, flux[i, j] - sky[i])
                 work2 = np.append(work2, flux_err[i, j])
