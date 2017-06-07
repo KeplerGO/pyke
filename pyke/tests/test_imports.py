@@ -20,3 +20,4 @@ def test_import():
     from .. import keppca
     from .. import kepconvert
     from .. import kepfilter
+    from .. import kepextract

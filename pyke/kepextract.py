@@ -80,7 +80,7 @@ def kepextract(infile, outfile, maskfile='ALL', bkg=False, clobber=True,
             + ' background={}'.format(bkg)
             + ' clobber={}'.format(clobber)
             + ' verbose={}'.format(verbose)
-            + ' logfile={}'.format(logfile)
+            + ' logfile={}'.format(logfile))
     kepmsg.log(logfile, call+'\n', verbose)
 
     # start time
@@ -137,7 +137,7 @@ def kepextract(infile, outfile, maskfile='ALL', bkg=False, clobber=True,
         kepio.readTPF(infile, 'FLUX_ERR', logfile, verbose)
 
     kepid, channel, skygroup, module, output, quarter, season, \
-    ra, dec, column, row, kepmag, xdim, ydim, flux_bkg, status = \
+    ra, dec, column, row, kepmag, xdim, ydim, flux_bkg = \
         kepio.readTPF(infile, 'FLUX_BKG', logfile, verbose)
 
     kepid, channel, skygroup, module, output, quarter, season, \
@@ -199,7 +199,7 @@ def kepextract(infile, outfile, maskfile='ALL', bkg=False, clobber=True,
                         maskx = np.append(maskx,x0 + int(items.split(',')[1]))
                     except:
                         continue
-        status = kepio.closeascii(lines,logfile,verbose)
+        kepio.closeascii(lines, logfile, verbose)
         if len(maskx) == 0 or len(masky) == 0:
             errmsg = 'ERROR -- KEPEXTRACT: {} contains no pixels.'.format(maskfile)
             kepmsg.err(logfile, errmsg, verbose)
@@ -268,8 +268,8 @@ def kepextract(infile, outfile, maskfile='ALL', bkg=False, clobber=True,
 
     # legal mask defined?
     if len(aperb) == 0:
-        errmsg = 'ERROR -- KEPEXTRACT: no legal pixels within the subimage'
-                 ' are defined.'
+        errmsg = ('ERROR -- KEPEXTRACT: no legal pixels within the subimage'
+                  ' are defined.')
         kepmsg.err(logfile, errmsg, verbose)
 
     # construct new table flux data
@@ -287,7 +287,8 @@ def kepextract(infile, outfile, maskfile='ALL', bkg=False, clobber=True,
         work4 = np.array([], 'float64')
         work5 = np.array([], 'float64')
         for j in range(len(aperb)):
-            if (aperb[j] == 3):
+            import pdb; pdb.set_trace()
+            if aperb[j] == 3:
                 work1 = np.append(work1, flux[i, j] - sky[i])
                 work2 = np.append(work2, flux_err[i, j])
                 work3 = np.append(work3, flux_bkg[i, j])
@@ -299,7 +300,7 @@ def kepextract(infile, outfile, maskfile='ALL', bkg=False, clobber=True,
         sap_bkg_err = np.append(sap_bkg_err, math.sqrt(np.sum(work4 * work4)))
         raw_flux = np.append(raw_flux, np.sum(work5))
 
-# construct new table moment data
+    # construct new table moment data
     mom_centr1 = np.zeros(shape=(ntime))
     mom_centr2 = np.zeros(shape=(ntime))
     mom_centr1_err = np.zeros(shape=(ntime))
@@ -313,7 +314,7 @@ def kepextract(infile, outfile, maskfile='ALL', bkg=False, clobber=True,
         fe = np.zeros(shape=(naper))
         k = -1
         for j in range(len(aperb)):
-            if (aperb[j] == 3):
+            if aperb[j] == 3:
                 k += 1
                 xf[k] = aperx[j] * flux[i, j]
                 xfe[k] = aperx[j] * flux_err[i, j]
@@ -334,8 +335,7 @@ def kepextract(infile, outfile, maskfile='ALL', bkg=False, clobber=True,
     mom_centr1_err = mom_centr1_err * mom_centr1
     mom_centr2_err = mom_centr2_err * mom_centr2
 
-# construct new table PSF data
-
+    # construct new table PSF data
     psf_centr1 = np.zeros(shape=(ntime))
     psf_centr2 = np.zeros(shape=(ntime))
     psf_centr1_err = np.zeros(shape=(ntime))
@@ -548,7 +548,7 @@ def kepextract_main():
                         type=str)
     parser.add_argument('outfile', help='Name of output light curve FITS file',
                         type=str)
-    parser.add_argument('maskfile', help='Name of mask defintion ASCII file',
+    parser.add_argument('--maskfile', help='Name of mask defintion ASCII file',
                         type=str)
     parser.add_argument('--bkg', action='store_true', default=False,
                         help='Subtract background from data?')
