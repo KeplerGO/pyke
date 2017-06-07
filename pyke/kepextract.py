@@ -5,7 +5,12 @@ from scipy.optimize import leastsq
 from copy import copy
 from . import kepio, kepmsg, kepkey, kepstat, kepfunc
 
-def kepextract(infile, outfile, maskfile, bkg, clobber, verbose, logfile):
+
+__all__ = ['kepextract']
+
+
+def kepextract(infile, outfile, maskfile='ALL', bkg=False, clobber=True,
+               verbose=True, logfile='kepextract.log'):
     """
     kepextract -- create a light curve from a target pixel file by summing
     user-selected pixels
@@ -209,14 +214,14 @@ def kepextract(infile, outfile, maskfile, bkg, clobber, verbose, logfile):
 
     # define new subimage bitmap...
     if 'aper' not in maskfile.lower() and maskfile.lower() != 'all':
-        aperx = np.array([],'int')
-        apery = np.array([],'int')
-        aperb = np.array([],'int')
+        aperx = np.array([], 'int')
+        apery = np.array([], 'int')
+        aperb = np.array([], 'int')
         for i in range(maskmap.shape[0]):
             for j in range(maskmap.shape[1]):
                 aperx = np.append(aperx, crval1p + (j + 1 - crpix1p) * cdelt1p)
                 apery = np.append(apery, crval2p + (i + 1 - crpix2p) * cdelt2p)
-                if maskmap[i,j] == 0:
+                if maskmap[i, j] == 0:
                     aperb = np.append(aperb, 0)
                 else:
                     aperb = np.append(aperb, 1)

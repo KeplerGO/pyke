@@ -25,3 +25,4 @@ from .keptrim    import *
 from .keppca     import *
 from .kepconvert import *
 from .kepfilter  import *
+from .kepextract import *
