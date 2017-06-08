@@ -1,12 +1,15 @@
 import sys
 import numpy as np
 from astropy.io import fits as pyfits
+from tqdm import tqdm
 from . import kepio
 from . import kepmsg
 from . import kepkey
 from . import kepstat
 
+
 __all__ = ['kepimages']
+
 
 def kepimages(infile, prefix, imtype='FLUX', ranges='0,0', clobber=True,
               verbose=True, logfile='kepimages.log'):
@@ -14,6 +17,47 @@ def kepimages(infile, prefix, imtype='FLUX', ranges='0,0', clobber=True,
     kepimages -- create a series of separate FITS image files from a Target
     Pixel File
 
+    ``kepimages`` will create a series of FITS image files which copy the
+    images stored within a Target Pixel File (TPF). One FITS image file will be
+    created for each Kepler exposure. The user can request all images within a
+    TPF or a subset by supplying a series of Barycentric Julian Date ranges.
+    FITS keywords from the primary and first extensions of the TPF are
+    propagated into the output image files. The mid-time of each exposure
+    (MIDTIME), Barycentric time correction (BARYCORR), cadence number
+    (CADENCEN) and data quality flag (QUALITY) are exported to the FITS images
+    as keywords. The position of the target during each observation, relative
+    to the mid-time of the quarter, in both pixel column and row directions are
+    recorded in keywords POSCORR1 and POSCORR2. If a cosmic ray event was
+    recorded during an individual exposure then the keyword COSM_RAY is flagged
+    as true. The keywords TELAPSE, LIVETIME and EXPOSURE are overwritten and\
+    refer to the individual exposure times of each image.
+
+    The user can choose from six different images to extract:
+
+    * ``RAW_CNTS`` -- uncalibrated pixel count values
+
+    * ``FLUX`` -- calibrated pixel, background-subtracted, cosmic ray-removed
+    fluxes in units of e-/s
+
+    * ``FLUX_ERR`` -- 1-σ errors on the FLUX image, as propagated through the
+    pixel calibration
+
+    * ``FLUX_BKG`` -- the background that has been subtracted from the FLUX
+    image in units of e-/s
+
+    * ``FLUX_BKG_ERR`` -- 1-σ errors on the FLUX_BKG image, as propagated
+    through the pixel calibration
+
+    * ``COSMIC_RAYS`` -- the cosmic ray map that has been subtracted from the
+    FLUX image in units of e-/s
+
+    We recommend the tools ds9 and fv for the inspection of the FITS image
+    products. The intent of the kepimages tool is to convert the TPF content
+    into a form from which images can be imported into the array of public
+    photometry software available to the K2 and Kepler communities.
+
+    Parameters
+    ----------
     infile : str
         Filename for the input Target Pixel File.
     prefix : str
@@ -33,23 +77,28 @@ def kepimages(infile, prefix, imtype='FLUX', ranges='0,0', clobber=True,
         Print informative messages and warnings to the shell and logfile?
     logfile : str
         Name of the logfile containing error and warning messages.
+
+    Examples
+    --------
+    .. code-block: bash
+
+        $ kepimages ktwo202073445-c00_lpd-targ.fits ktwo202073445-c00 --verbose
     """
 
     # log the call
     hashline = '--------------------------------------------------------------'
     kepmsg.log(logfile, hashline, verbose)
     call = ('KEPIMAGES -- '
-            'infile={}'.format(infile)
-            'prefix={}'.format(outfix)
-            'imtype={}'.format(imtype)
-            'ranges={}'.format(ranges)
-            'clobber={}'.format(clobber)
-            'verbose={}'.format(verbose)
-            'logfile={}'.format(logfile))
+            + ' infile={}'.format(infile)
+            + ' prefix={}'.format(prefix)
+            + ' imtype={}'.format(imtype)
+            + ' ranges={}'.format(ranges)
+            + ' clobber={}'.format(clobber)
+            + ' verbose={}'.format(verbose)
+            + ' logfile={}'.format(logfile))
     kepmsg.log(logfile,call+'\n',verbose)
 
-
-    kepmsg.clock('KEPIMAGES started at',logfile,verbose)
+    kepmsg.clock('KEPIMAGES started at', logfile, verbose)
 
     # open input file
     print (' ')
@@ -59,7 +108,7 @@ def kepimages(infile, prefix, imtype='FLUX', ranges='0,0', clobber=True,
     cards2 = instr[2].header.cards
 
     # fudge non-compliant FITS keywords with no values
-    instr = kepkey.emptykeys(instr,file,logfile,verbose)
+    instr = kepkey.emptykeys(instr, infile, logfile, verbose)
 
     # ingest time series data
     time = instr[1].data.field('TIME')[:] + 2454833.0
@@ -103,12 +152,12 @@ def kepimages(infile, prefix, imtype='FLUX', ranges='0,0', clobber=True,
             kepio.clobber(outfile, logfile, verbose)
         if kepio.fileexists(outfile):
             errmsg = ('ERROR -- KEPIMAGES: {} exists. Use --clobber'
-                      .format(clobber))
+                      .format(outfile))
             kepmsg.err(logfile, errmsg, True)
 
     # construct output primary extension
     ncad = 0
-    for cadence in cadencelis:
+    for cadence in tqdm(cadencelis):
         outfile = prefix + '_BJD%.4f' % time[cadence] + '.fits'
         hdu0 = pyfits.PrimaryHDU()
         for i in range(len(cards0)):

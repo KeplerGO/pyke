@@ -17,3 +17,4 @@ Modules/API
     kepfilter
     kepextract
     kepstitch
+    kepimages
