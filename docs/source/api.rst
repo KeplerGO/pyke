@@ -15,3 +15,5 @@ Modules/API
     keppca
     kepconvert
     kepfilter
+    kepextract
+    kepstitch

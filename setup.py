@@ -25,7 +25,8 @@ entry_points = {'console_scripts': [
         'keppca = pyke.keppca:keppca_main',
         'kepconvert = pyke.kepconvert:kepconvert_main',
         'kepextract = pyke.kepextract:kepextract_main',
-        'keptrial = pyke.keptrial:keptrial_main'
+        'keptrial = pyke.keptrial:keptrial_main',
+        'kepstitch = pyke.kepstitch:kepstitch_main'
 ]}
 
 setup(name='pyke',

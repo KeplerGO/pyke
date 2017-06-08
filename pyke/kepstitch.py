@@ -1,7 +1,8 @@
+import numpy as np
 from astropy.io import fits as pyfits
 from . import kepio, kepmsg, kepkey, kepstat
 
-def kepstitch(infiles, outfile, clobber=False, verbose=False,
+def kepstitch(infiles, outfile='kepstitch.fits', clobber=False, verbose=False,
               logfile='kepstich.log'):
     """
     kepstitch -- Append short cadence months and/or long cadence quarters
@@ -16,12 +17,11 @@ def kepstitch(infiles, outfile, clobber=False, verbose=False,
 
     Parameters
     ----------
-    infiles : str
+    infiles : list of str
         A list of individual FITS files. Most commonly these will contain data
         from the same target obtained over different months or quarters. Short
-        cadence and long cadence data can be mixed within this list. The list
-        of files provided directly must be comma-separated. Alternatively an
-        ASCII file containing file names can parsed to this argument.
+        cadence and long cadence data can be mixed within this list.
+        Alternatively an ASCII file containing file names can parsed to this argument.
         The ASCII file must be formatted to have one FITS filename per line.
     outfile : str
         The name of the output FITS file with concatenated time series data.
@@ -32,6 +32,12 @@ def kepstitch(infiles, outfile, clobber=False, verbose=False,
         Print informative messages and warnings to the shell and logfile?
     logfile : str
         Name of the logfile containing error and warning messages.
+
+    Examples
+    --------
+    .. code-block:: bash
+
+        $ kepstitch kplr010544976-2009201121230_slc.fits kplr012557548-2011177032512_llc.fits --verbose
     """
 
     # startup parameters
@@ -41,30 +47,31 @@ def kepstitch(infiles, outfile, clobber=False, verbose=False,
     hashline = '--------------------------------------------------------------'
     kepmsg.log(logfile, hashline, verbose)
     call = ('KEPSTITCH -- '
-            'infiles={}'.format(infiles)
-            'outfile={}'.format(outfile)
-            'clobber={}'.format(overwrite)
-            'verbose={}'.format(chatter)
-            'logfile={}'.format(logfile))
+            + ' infiles={}'.format(infiles)
+            + ' outfile={}'.format(outfile)
+            + ' clobber={}'.format(clobber)
+            + ' verbose={}'.format(verbose)
+            + ' logfile={}'.format(logfile))
     kepmsg.log(logfile, call+'\n', verbose)
 
     # start time
     kepmsg.clock('KEPSTITCH started at', logfile, verbose)
     # parse input file list
-    infiles = kepio.parselist(infiles, logfile, verbose)
+    try:
+        infiles = kepio.parselist(infiles, logfile, verbose)
+    except AttributeError:
+        pass
 
     # clobber output file
     if clobber:
         kepio.clobber(outfile, logfile, verbose)
     if kepio.fileexists(outfile):
         errmsg = 'ERROR -- KEPSTITCH: {} exists. Use --clobber'.format(outfile)
-        kepmsg.err(logfile, message, verbose)
+        kepmsg.err(logfile, errmsg, verbose)
 
     # open output file
-    outstr = kepio.openfits(infiles[0], 'readonly', logfile, verbose)
+    outstr = pyfits.open(infiles[0], 'readonly')
     nrows1 = outstr[1].data.shape[0]
-    # fudge non-compliant FITS keywords with no values
-    outstr = kepkey.emptykeys(outstr,file,logfile,verbose)
     head0 = outstr[0].header
     head1 = outstr[1].header
 
@@ -76,13 +83,13 @@ def kepstitch(infiles, outfile, clobber=False, verbose=False,
         if nfiles > 0:
             nrows2 = instr[1].data.shape[0]
             nrows = nrows1 + nrows2
-            outtab = pyfits.BinTableHDU.from_columns(outstr[1].columns,nrows=nrows)
+            outtab = pyfits.BinTableHDU.from_columns(outstr[1].columns, nrows=nrows)
             for name in outstr[1].columns.names:
                 try:
                     outtab.data.field(name)[nrows1:]=instr[1].data.field(name)
                 except:
-                    message = 'ERROR -- KEPSTITCH: column ' + name + ' missing from some files.'
-                    kepmsg.warn(logfile,message)
+                    warnmsg = 'ERROR -- KEPSTITCH: column {} missing from some files.'.format(name)
+                    kepmsg.warn(logfile, warnmsg)
                     pass
             outstr[1] = outtab
             outstr[0].header = head0
@@ -91,20 +98,22 @@ def kepstitch(infiles, outfile, clobber=False, verbose=False,
 
         # start and stop times of data
         fitsvers = 1.0
-        lc_start, status = kepkey.get(infile,instr[1],'LC_START',logfile,verbose)
-        lc_end, status = kepkey.get(infile,instr[1],'LC_END',logfile,verbose)
+        lc_start = kepkey.get(infile,instr[1],'LC_START',logfile,verbose)
+        lc_end = kepkey.get(infile,instr[1],'LC_END',logfile,verbose)
         try:
             startbjd = instr[1].header['STARTBJD']
         except:
-            startbjd, status = kepkey.get(infile,instr[1],'TSTART',logfile,verbose)
+            startbjd = kepkey.get(infile,instr[1],'TSTART',logfile,verbose)
             fitsvers = 2.0
         try:
             endbjd = instr[1].header['ENDBJD']
         except:
-            endbjd, status = kepkey.get(infile,instr[1],'TSTOP',logfile,verbose)
+            endbjd = kepkey.get(infile,instr[1],'TSTOP',logfile,verbose)
             fitsvers = 2.0
-        lct.append(lc_start); lct.append(lc_end)
-        bjd.append(startbjd); bjd.append(endbjd)
+        lct.append(lc_start)
+        lct.append(lc_end)
+        bjd.append(startbjd)
+        bjd.append(endbjd)
 
         # close input files
         instr.close()
@@ -140,10 +149,10 @@ def kepstitch_main():
     parser = argparse.ArgumentParser(
     description=('Append multiple month short cadence and/or multiple quarter'
                  ' long cadence data'))
-    parser.add_argument('infiles', help='List of input files',
+    parser.add_argument('infiles', help='List of input files', nargs='+',
                         type=str)
-    parser.add_argument('outfile', help='Name of FITS file to output',
-                        type=str)
+    parser.add_argument('--outfile', help='Name of FITS file to output',
+                        default='kepstitch.fits', type=str)
     parser.add_argument('--clobber', action='store_true',
                         help='Overwrite output file?')
     parser.add_argument('--verbose', action='store_true',
