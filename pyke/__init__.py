@@ -27,3 +27,5 @@ from .kepconvert import *
 from .kepfilter  import *
 from .kepextract import *
 from .keptrial   import *
+from .kepimages  import *
+from .keptimefix import *

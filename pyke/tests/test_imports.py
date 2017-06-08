@@ -22,3 +22,5 @@ def test_import():
     from .. import kepfilter
     from .. import kepextract
     from .. import keptrial
+    from .. import kepimages
+    from .. import keptimefix
