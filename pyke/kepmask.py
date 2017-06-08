@@ -120,10 +120,9 @@ def kepmask(infile, frameno, maskfile='mask.txt', plotfile='kepmask.png',
                   str(naxis2) + ' rows in the table.')
         kepmsg.err(logfile, errmsg, verbose)
 
-    kepio.closefits(tpf, logfile, verbose)
+    tpf.close()
 
-# read TPF data pixel image
-
+    # read TPF data pixel image
     kepid, channel, skygroup, module, output, quarter, season, \
     ra, dec, column, row, kepmag, xdim, ydim, pixels = \
         kepio.readTPF(infile, 'FLUX', logfile, verbose)
@@ -136,8 +135,7 @@ def kepmask(infile, frameno, maskfile='mask.txt', plotfile='kepmask.png',
     pydim = copy(ydim)
     pimg = copy(img)
 
-# print target data
-
+    # print target data
     print('')
     print('      KepID:  {}'.format(kepid))
     print(' RA (J2000):  {}'.format(ra))
@@ -150,15 +148,13 @@ def kepmask(infile, frameno, maskfile='mask.txt', plotfile='kepmask.png',
     print('     Output:  {}'.format(output))
     print('')
 
-# subimage of channel for plot
-
+    # subimage of channel for plot
     ymin = copy(row)
     ymax = ymin + ydim
     xmin = copy(column)
     xmax = xmin + xdim
 
-# intensity scale
-
+    # intensity scale
     pimg, imin, imax = kepplot.intScale1D(pimg, zscale)
     if zmin and zmax and zscale=='logarithm':
         zmin = math.log10(zmin)
@@ -173,27 +169,23 @@ def kepmask(infile, frameno, maskfile='mask.txt', plotfile='kepmask.png',
         zmin = copy(imin)
         zmax = copy(imax)
 
-# plot limits
-
+    # plot limits
     ymin = float(ymin) - 0.5
     ymax = float(ymax) - 0.5
     xmin = float(xmin) - 0.5
     xmax = float(xmax) - 0.5
 
-# plot style
-
+    # plot style
     plt.rcParams['figure.dpi'] = 80
     plt.figure(figsize=[10, 7])
     plotimage()
 
 # plot channel image
-
 def plotimage():
 
     global aid, bid, cid, did, eid, fid
 
-# print image and source location data on plot
-
+    # print image and source location data on plot
     plt.draw()
     plt.clf()
     plt.axes([0.73, 0.09, 0.25, 0.4])
@@ -211,9 +203,7 @@ def plotimage():
     plt.setp(plt.gca(), xticklabels=[], xticks=[], yticklabels=[], yticks=[])
     plt.xlim(0.0, 1.0)
     plt.ylim(-0.05, 1.12)
-
-# clear button
-
+    # clear button
     plt.axes([0.73, 0.86, 0.25, 0.11])
     plt.text(0.5, 0.5, 'CLEAR', fontsize=24, weight='heavy',
              horizontalalignment='center', verticalalignment='center')
@@ -223,9 +213,7 @@ def plotimage():
     plt.xlim(0.0, 1.0)
     plt.ylim(0.0, 1.0)
     aid = plt.connect('button_press_event', clicker1)
-
-# load mask button
-
+    # load mask button
     plt.axes([0.73, 0.74, 0.25, 0.11])
     plt.text(0.5, 0.5, 'LOAD', fontsize=24, weight='heavy',
              horizontalalignment='center', verticalalignment='center')
@@ -234,9 +222,7 @@ def plotimage():
     plt.xlim(0.0, 1.0)
     plt.ylim(0.0, 1.0)
     bid = plt.connect('button_press_event', clicker2)
-
-# dump custom aperture to file button
-
+    # dump custom aperture to file button
     plt.axes([0.73, 0.62, 0.25, 0.11])
     plt.text(0.5, 0.5, 'DUMP', fontsize=24, weight='heavy',
              horizontalalignment='center', verticalalignment='center')
@@ -245,9 +231,7 @@ def plotimage():
     plt.xlim(0.0, 1.0)
     plt.ylim(0.0, 1.0)
     cid = plt.connect('button_press_event', clicker3)
-
-# print window to png file button
-
+    # print window to png file button
     plt.axes([0.73, 0.50, 0.25, 0.11])
     plt.text(0.5, 0.5, 'PRINT', fontsize=24, weight='heavy',
              horizontalalignment='center', verticalalignment='center')
@@ -256,20 +240,15 @@ def plotimage():
     plt.xlim(0.0, 1.0)
     plt.ylim(0.0, 1.0)
     did = plt.connect('button_press_event', clicker4)
-
-# set the image window location and size
-
+    # set the image window location and size
     ax = plt.axes([0.07, 0.09, 0.63, 0.88])
-
-# force tick labels to be absolute rather than relative
-
+    # force tick labels to be absolute rather than relative
     plt.gca().xaxis.set_major_formatter(plt.ScalarFormatter(useOffset=False))
     plt.gca().yaxis.set_major_formatter(plt.ScalarFormatter(useOffset=False))
     plt.subplots_adjust(0.06, 0.1, 0.93, 0.88)
     labels = ax.get_yticklabels()
     plt.setp(labels, 'rotation', 90)
-
-# plot the image window
+    # plot the image window
     imgsum = pimg.reshape((pydim, pxdim))
     plt.imshow(imgsum, aspect='auto', interpolation='nearest', origin='lower',
                extent=(xmin, xmax, ymin, ymax), cmap=colmap, vmin=zmin,
@@ -277,9 +256,7 @@ def plotimage():
     plt.gca().set_autoscale_on(False)
     plt.xlabel('Pixel Column Number', {'color' : 'k'})
     plt.ylabel('Pixel Row Number', {'color' : 'k'})
-
-# plot the mask
-
+    # plot the mask
     if colmap in ['Greys','binary','bone','gist_gray','gist_yarg',
                 'gray','pink','RdGy']:
         sqcol = 'g'
@@ -294,13 +271,12 @@ def plotimage():
         y = [n - 0.5, n - 0.5, n + 0.5, n + 0.5, n - 0.5]
         plt.fill(x, y, sqcol, alpha=alpha, ec=sqcol)
     fid = plt.connect('button_press_event', clicker6)
-
-# render plot
+    # render plot
     plt.draw()
     plt.show()
+
 # -----------------------------------------------------------
 # clear all pixels from pixel mask
-
 def clicker1(event):
 
     global mask, aid, bid, cid, did, eid, fid
@@ -323,7 +299,6 @@ def clicker1(event):
 
 # -----------------------------------------------------------
 # load mask from file
-
 def clicker2(event):
 
     global mask, aid, bid, cid, did, eid, fid, done
@@ -361,7 +336,6 @@ def clicker2(event):
 
 # -----------------------------------------------------------
 # dump custom aperture definition file
-
 def clicker3(event):
 
     global aid, bid, cid, did, eid, fid
@@ -389,7 +363,6 @@ def clicker3(event):
 
 # -----------------------------------------------------------
 # print plot to png with left-mouse click
-
 def clicker4(event):
 
     if event.inaxes:
@@ -402,7 +375,6 @@ def clicker4(event):
 
 # -----------------------------------------------------------
 # this function will be called with every click of the mouse
-
 def clicker6(event):
 
     global mask, aid, bid, cid, did, eid, fid

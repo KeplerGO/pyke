@@ -187,7 +187,7 @@ def kepdynamic(infile, outfile, fcol='SAP_FLUX', pmin=0.1, pmax=10., nfreq=100,
     kepkey.history(call,instr[0],outfile,logfile,verbose)
 
     # close input file
-    kepio.closefits(instr,logfile,verbose)
+    instr.close()
 
     # clean up x-axis unit
     time0 = float(int(barytime[0] / 100) * 100.0)

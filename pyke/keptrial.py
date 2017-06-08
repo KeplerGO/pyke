@@ -270,7 +270,7 @@ def keptrial(infile, outfile, datacol='SAP_FLUX', errcol='SAP_FLUX_ERR',
                        " file")
     instr.writeto(outfile)
     # close input file
-    kepio.closefits(instr, logfile, verbose)
+    instr.close()
     ## end time
     kepmsg.clock('KEPTRAIL completed at', logfile, verbose)
 

@@ -233,7 +233,7 @@ def kepstddev(infile, outfile, datacol='PDCSAP_FLUX', timescale=6.5,
     # comment keyword in output file
     kepkey.history(call,instr[0],outfile,logfile,verbose)
     # close FITS
-    kepio.closefits(instr,logfile,verbose)
+    instr.close()
 
     # end time
     kepmsg.clock('KEPSTDDEV completed at', logfile, verbose)

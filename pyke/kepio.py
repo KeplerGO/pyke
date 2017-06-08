@@ -59,13 +59,6 @@ def splitfits(fitsfile, logfile, verbose):
         kepmsg.err(logfile, errmsg, verbose)
     return filename, hdu
 
-def closefits(fitsfile, logfile, verbose):
-    try:
-        fitsfile.close()
-    except:
-        message = 'ERROR -- KEPIO.CLOSEFITS: cannot close HDU structure'
-        kepmsg.err(logfile, message, verbose)
-
 def readfitstab(filename, hdu, logfile, verbose):
     try:
         table = hdu.data

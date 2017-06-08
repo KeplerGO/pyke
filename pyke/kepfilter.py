@@ -223,7 +223,7 @@ def kepfilter(infile, outfile, passband, datacol='SAP_FLUX', function='boxcar',
         instr[1].data.field(datacol)[i] = outdata[i]
     instr.writeto(outfile)
     ## close input file
-    kepio.closefits(instr, logfile, verbose)
+    instr.close()
     ## end time
     kepmsg.clock('KEPFILTER completed at', logfile, verbose)
 

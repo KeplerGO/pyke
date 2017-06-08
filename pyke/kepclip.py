@@ -198,7 +198,7 @@ def kepclip(infile, outfile, ranges, datacol='SAP_FLUX', plot=False,
         plt.show()
 
     # close input file
-    kepio.closefits(instr,logfile,verbose)
+    instr.close()
 
     # end time
     message = 'KEPCLIP completed at'

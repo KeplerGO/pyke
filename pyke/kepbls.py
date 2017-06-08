@@ -314,7 +314,7 @@ def kepbls(infile, outfile, datacol='DETSAP_FLUX', errcol='DETSAP_FLUX_ERR',
     kepkey.history(call, instr[0], outfile, logfile, verbose)
     instr.writeto(outfile)
     # close input file
-    kepio.closefits(instr,logfile,verbose)
+    instr.close()
     # print best trial period results
     print('      Best trial period = {} days'.format(trialPeriods[bestTrial]))
     print('    Time of mid-transit = BJD {}'.format(BJD0[bestTrial] + 2454833.0))

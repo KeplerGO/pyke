@@ -629,7 +629,7 @@ def keppca(infile, outfile, maskfile='ALL', components='1-3', plotpca=False,
     # write output file
     outstr.writeto(outfile)
     # close input structure
-    kepio.closefits(instr,logfile,verbose)
+    instr.close()
     # Create PCA report
     if plotpca:
         npp = 7 # Number of plots per page

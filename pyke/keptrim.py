@@ -283,10 +283,8 @@ def keptrim(infile, outfile, column, row, imsize, kepid=None, clobber=False,
 
     # write output file
     outstr.writeto(outfile,checksum=True)
-
     # close input structure
-    kepio.closefits(instr,logfile,verbose)
-
+    instr.close()
     # end time
     kepmsg.clock('KEPTRIM finished at', logfile, verbose)
 

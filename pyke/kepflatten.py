@@ -398,7 +398,7 @@ def kepflatten(infile, outfile, datacol='PDCSAP_FLUX',
             kepmsg.err(logfile, message, verbose)
 
     # close input file
-    kepio.closefits(instr, logfile, verbose)
+    instr.close()
     ## end time
     kepmsg.clock('KEPFLATTEN completed at', logfile, verbose)
 

@@ -115,7 +115,7 @@ def kepconvert(infile, outfile, conversion, columns, baddata=True,
             for i in range(len(work)):
                 work[i] = work[i][qualcol]
         # close input file
-        kepio.closefits(instr, logfile, verbose)
+        instr.close()
         ## write output file
         np.savetxt(outfile,np.array(work).T)
     ## open and read ASCII input file

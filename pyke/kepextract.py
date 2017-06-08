@@ -539,7 +539,7 @@ def kepextract(infile, outfile, maskfile='ALL', bkg=False, clobber=False,
     # write output file
     outstr.writeto(outfile, checksum=True)
     # close input structure
-    kepio.closefits(instr, logfile, verbose)
+    instr.close()
     # end time
     kepmsg.clock('KEPEXTRACT finished at', logfile, verbose)
 

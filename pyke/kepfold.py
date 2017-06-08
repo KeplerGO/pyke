@@ -566,8 +566,7 @@ def kepfold(infile, outfile, period, bjd0, bindata=False,
         plt.grid()
         plt.show()
     # close input file
-    kepio.closefits(instr, logfile, verbose)
-
+    instr.close()
     # stop time
     kepmsg.clock('KEPFOLD ended at: ', logfile, verbose)
 

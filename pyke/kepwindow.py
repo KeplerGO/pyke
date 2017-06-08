@@ -146,7 +146,7 @@ def kepwindow(infile, outfile, fcol='SAP_FLUX', fmax=1.0, nfreq=100, plot=False,
     instr.writeto(outfile)
 
     ## close input file
-    kepio.closefits(instr, logfile, verbose)
+    instr.close()
 
     ## data limits
     nrm = len(str(int(power.max()))) - 1
