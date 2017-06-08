@@ -42,8 +42,8 @@ def keptimefix(infile, outfile, clobber, verbose, logfile):
     call = ('KEPTIMEFIX -- '
             + ' infile={}'.format(infile)
             + ' outfile={}'.format(outfile)
-            + ' clobber={}'.format(overwrite)
-            + ' verbose={}'.format(chatter)
+            + ' clobber={}'.format(clobber)
+            + ' verbose={}'.format(verbose)
             + ' logfile={}'.format(logfile))
     kepmsg.log(logfile, call+'\n', verbose)
 
@@ -63,53 +63,52 @@ def keptimefix(infile, outfile, clobber, verbose, logfile):
         errmsg = 'ERROR -- KEPTIMEFIX: this file is not a target pixel file'
         kepmsg.err(logfile, errmsg, verbose)
 
-    if status == 0:
-        header_ext1 = instr[1].header.cards
-        data_ext1 = instr[1].data
+    header_ext1 = instr[1].header.cards
+    data_ext1 = instr[1].data
 
-        fileversion = instr[0].header['FILEVER']
-        if float(fileversion) > 4.0:
-            errmsg = ('ERROR -- KEPTIMEFIX: no time fix needed for this file.'
-                      ' FILEVER > 4.0')
-            kepmsg.err(logfile, errmsg, verbose)
+    fileversion = instr[0].header['FILEVER']
+    if float(fileversion) > 4.0:
+        errmsg = ('ERROR -- KEPTIMEFIX: no time fix needed for this file.'
+                  ' FILEVER > 4.0')
+        kepmsg.err(logfile, errmsg, verbose)
 
-        quarter = instr[0].header['QUARTER']
-        if instr[0].header['OBSMODE'] == 'long cadence':
-            cadencetype = 'L'
-        elif instr[0].header['OBSMODE'] == 'short cadence':
-            cadencetype = 'S'
+    quarter = instr[0].header['QUARTER']
+    if instr[0].header['OBSMODE'] == 'long cadence':
+        cadencetype = 'L'
+    elif instr[0].header['OBSMODE'] == 'short cadence':
+        cadencetype = 'S'
 
-        TIME_wrong = data_ext1.field('TIME')
-        CADNUM = data_ext1.field('CADENCENO')
-        TIMECORR_old = data_ext1.field('TIMECORR')
+    TIME_wrong = data_ext1.field('TIME')
+    CADNUM = data_ext1.field('CADENCENO')
+    TIMECORR_old = data_ext1.field('TIMECORR')
 
-        ## update headers
-        ##TSTART, TSTART, EXPOSURE, TELAPSE, LIVETIME
-        ##DATE-OBS, DATE-END
-        if cadencetype == 'L':
-            offset = np.where(CADNUM <= 57139, 66.184, 67.184) / 86400.
-        elif cadencetype == 'S':
-            offset = np.where(CADNUM <= 1702663, 66.184, 67.184) / 86400.
+    ## update headers
+    ##TSTART, TSTART, EXPOSURE, TELAPSE, LIVETIME
+    ##DATE-OBS, DATE-END
+    if cadencetype == 'L':
+        offset = np.where(CADNUM <= 57139, 66.184, 67.184) / 86400.
+    elif cadencetype == 'S':
+        offset = np.where(CADNUM <= 1702663, 66.184, 67.184) / 86400.
 
-        TIME_right = TIME_wrong + offset
-        TIMECORR_new = TIMECORR_old + offset
-        instr[1].data['TIME'][:] = TIME_right
-        #we decided not to use the updated timecorr because
-        #it is different from the LC FITS files by ~1 ms.
-        instr[1].data['TIMECORR'][:] = np.nan * np.empty(len(TIMECORR_old))
-        #now to fix the header
-        tstart_right = instr[1].header['TSTART'] + offset[0]
-        tstop_right = instr[1].header['TSTOP'] + offset[-1]
-        telapse_right = tstop_right - tstart_right
-        instr[1].header['TSTART'] = tstart_right
-        instr[1].header['TSTOP'] = tstop_right
-        instr[1].header['TELAPSE'] = telapse_right
-        deadc = instr[1].header['DEADC']
-        instr[1].header['LIVETIME'] = telapse_right * deadc
-        #get the date-obs
-        dstart = instr[1].header['DATE-OBS']
-        dend = instr[1].header['DATE-END']
-        instr.writeto(outfile)
+    TIME_right = TIME_wrong + offset
+    TIMECORR_new = TIMECORR_old + offset
+    instr[1].data['TIME'][:] = TIME_right
+    #we decided not to use the updated timecorr because
+    #it is different from the LC FITS files by ~1 ms.
+    instr[1].data['TIMECORR'][:] = np.nan * np.empty(len(TIMECORR_old))
+    #now to fix the header
+    tstart_right = instr[1].header['TSTART'] + offset[0]
+    tstop_right = instr[1].header['TSTOP'] + offset[-1]
+    telapse_right = tstop_right - tstart_right
+    instr[1].header['TSTART'] = tstart_right
+    instr[1].header['TSTOP'] = tstop_right
+    instr[1].header['TELAPSE'] = telapse_right
+    deadc = instr[1].header['DEADC']
+    instr[1].header['LIVETIME'] = telapse_right * deadc
+    #get the date-obs
+    dstart = instr[1].header['DATE-OBS']
+    dend = instr[1].header['DATE-END']
+    instr.writeto(outfile)
     # end time
     kepmsg.clock('KEPTIMEFIX completed at', logfile, verbose)
 
@@ -130,6 +129,5 @@ def keptimefix_main():
     parser.add_argument('--logfile', help='Name of ascii log file',
                         default='keptimefix.log', type=str)
     args = parser.parse_args()
-
-    keptimefix(args.infile,args.outfile,args.clobber,args.verbose,
-        args.logfile,args.status,cmdLine)
+    keptimefix(args.infile, args.outfile, args.clobber, args.verbose,
+               args.logfile)

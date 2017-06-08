@@ -18,3 +18,4 @@ Modules/API
     kepextract
     kepstitch
     kepimages
+    keptimefix
