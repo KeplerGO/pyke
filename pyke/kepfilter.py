@@ -4,7 +4,7 @@ import numpy as np
 from . import kepio, kepmsg, kepkey, kepfunc, kepstat
 
 def kepfilter(infile, outfile, passband, datacol='SAP_FLUX', function='boxcar',
-              cutoff=1.0, plot=True, clobber=True, verbose=True,
+              cutoff=1.0, plot=False, clobber=False, verbose=False,
               logfile='kepfilter.log'):
     """
     kepfilter -- bandpass filtering of Kepler light curve data
@@ -245,11 +245,11 @@ def kepfilter_main():
                         type=float)
     parser.add_argument('--passband', help='low- or high-bandpass filter',
                         type=str, choices=['low','high'])
-    parser.add_argument('--plot', action='store_true', default=True,
+    parser.add_argument('--plot', action='store_true',
                         help='Plot result?')
-    parser.add_argument('--clobber', action='store_true', default=True,
+    parser.add_argument('--clobber', action='store_true',
                         help='Overwrite output file?')
-    parser.add_argument('--verbose', action='store_true', default=True,
+    parser.add_argument('--verbose', action='store_true',
                         help='Write to a log file?')
     parser.add_argument('--logfile', help='Name of ascii log file',
                         default='kepfilter.log', type=str)

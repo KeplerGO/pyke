@@ -11,7 +11,7 @@ from . import kepkey
 
 def kepbls(infile, outfile, datacol='DETSAP_FLUX', errcol='DETSAP_FLUX_ERR',
            minper=1.0, maxper=30, mindur=0.5, maxdur=12, nsearch=1000,
-           nbins=1000, plot=True, clobber=True, verbose=True,
+           nbins=1000, plot=False, clobber=False, verbose=False,
            logfile='kepbls.log'):
     """
     kepbls -- Perform Box-Least Square searches for periodic exoplanet transits
@@ -349,11 +349,11 @@ def kepbls_main():
     parser.add_argument('--nbins', default=1000,
                         help='Number of bins in the folded time series at any test period',
                         type=int)
-    parser.add_argument('--plot', action='store_true', default=True,
+    parser.add_argument('--plot', action='store_true',
                         help='Plot result?')
-    parser.add_argument('--clobber', action='store_true', default=True,
+    parser.add_argument('--clobber', action='store_true',
                         help='Overwrite output file?')
-    parser.add_argument('--verbose', action='store_true', default=True,
+    parser.add_argument('--verbose', action='store_true',
                         help='Write to a log file?')
     parser.add_argument('--logfile', '-l', help='Name of ascii log file',
                         default='kepbls.log', dest='logfile', type=str)

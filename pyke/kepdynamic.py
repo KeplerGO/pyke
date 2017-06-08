@@ -14,8 +14,8 @@ __all__ = ['kepdynamic']
 
 
 def kepdynamic(infile, outfile, fcol='SAP_FLUX', pmin=0.1, pmax=10., nfreq=100,
-               deltat=10., nslice=10, plot=True, plotscale='log', cmap='PuBu',
-               clobber=True, verbose=True, logfile='kepdynamic.log'):
+               deltat=10., nslice=10, plot=False, plotscale='log', cmap='PuBu',
+               clobber=False, verbose=False, logfile='kepdynamic.log'):
     """
     kepdynamic -- Construct a dynamic (time-dependent) power spectrum from
     Kepler time series data
@@ -258,9 +258,9 @@ def kepdynamic_main():
                         choices=['linear', 'log', 'squareroot', 'loglog'])
     parser.add_argument('--cmap', default='PuBu', help='image colormap',
                         type=str)
-    parser.add_argument('--clobber', action='store_true', default=True,
+    parser.add_argument('--clobber', action='store_true',
                         help='Overwrite output file?')
-    parser.add_argument('--verbose', action='store_true', default=True,
+    parser.add_argument('--verbose', action='store_true',
                         help='Write to a log file?')
     parser.add_argument('--logfile', '-l', help='Name of ascii log file',
                         default='kepdynamic.log', dest='logfile', type=str)

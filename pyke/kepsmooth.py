@@ -8,7 +8,7 @@ from . import kepkey
 from . import kepfunc
 
 def kepsmooth(infile, outfile, datacol='SAP_FLUX', function='flat',
-              fscale=1.0, plot=True, clobber=True, verbose=True,
+              fscale=1.0, plot=False, clobber=False, verbose=False,
               logfile='kepsmooth.log'):
     """
     kepsmooth -- Smooth Kepler light curve data by convolution with a choice
@@ -242,11 +242,10 @@ def kepsmooth_main():
     parser.add_argument('--fscale', default=1.0,
                         help=('Characteristic width of smoothing function'
                               ' [days]'), type=float)
-    parser.add_argument('--plot', action='store_true', default=True,
-                        help='Plot result?')
-    parser.add_argument('--clobber', action='store_true', default=True,
+    parser.add_argument('--plot', action='store_true', help='Plot result?')
+    parser.add_argument('--clobber', action='store_true',
                         help='Overwrite output file?')
-    parser.add_argument('--verbose', action='store_true', default=True,
+    parser.add_argument('--verbose', action='store_true',
                         help='Write to a log file?')
     parser.add_argument('--logfile', help='Name of ascii log file',
                         default='kepsmooth.log', dest='logfile', type=str)

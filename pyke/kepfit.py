@@ -4,7 +4,6 @@ from . import kepfunc
 from . import keparray
 from .keparray import rebin2D
 import math
-import sys
 import numpy as np
 from scipy import optimize, ndimage
 from scipy.optimize import fmin_powell, fmin_tnc, fmin, leastsq
@@ -24,7 +23,7 @@ def leastsquares(fitfunc, pinit, xdata, ydata, yerr, logfile, verbose):
                                full_output=1)
     except:
         errmsg = 'ERROR -- KEPFIT.LEASTSQUARES: failed to fit data'
-        kepmsg.err(logfile, message, verbose)
+        kepmsg.err(logfile, errmsg, verbose)
 
     coeffs = out[0]
     covar = out[1]

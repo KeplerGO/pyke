@@ -10,8 +10,8 @@ from . import kepio, kepmsg, kepkey, kepstat, kepfunc
 __all__ = ['kepextract']
 
 
-def kepextract(infile, outfile, maskfile='ALL', bkg=False, clobber=True,
-               verbose=True, logfile='kepextract.log'):
+def kepextract(infile, outfile, maskfile='ALL', bkg=False, clobber=False,
+               verbose=False, logfile='kepextract.log'):
     """
     kepextract -- create a light curve from a target pixel file by summing
     user-selected pixels
@@ -555,11 +555,11 @@ def kepextract_main():
                         type=str)
     parser.add_argument('--maskfile', help='Name of mask defintion ASCII file',
                         type=str)
-    parser.add_argument('--bkg', action='store_true', default=False,
+    parser.add_argument('--bkg', action='store_true',
                         help='Subtract background from data?')
-    parser.add_argument('--clobber', action='store_true', default=True,
+    parser.add_argument('--clobber', action='store_true',
                         help='Overwrite output file?')
-    parser.add_argument('--verbose', action='store_true', default=True,
+    parser.add_argument('--verbose', action='store_true',
                         help='Write to a log file?')
     parser.add_argument('--logfile', '-l', help='Name of ascii log file',
                         default='kepextract.log', type=str)

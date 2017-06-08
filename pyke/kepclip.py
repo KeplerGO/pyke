@@ -5,8 +5,8 @@ import numpy as np
 from astropy.io import fits as pyfits
 from matplotlib import pyplot as plt
 
-def kepclip(infile, outfile, ranges, plot=True, datacol='SAP_FLUX',
-            clobber=True, verbose=True, logfile='kepclip.log'):
+def kepclip(infile, outfile, ranges, datacol='SAP_FLUX', plot=False,
+            clobber=False, verbose=False, logfile='kepclip.log'):
     """
     Remove unwanted time ranges from Kepler time series data.
 
@@ -214,13 +214,12 @@ def kepclip_main():
     parser.add_argument('ranges',
                         help='List of time domain ranges to be excluded',
                         type=str)
-    parser.add_argument('--plot', action='store_true', help='Plot result?',
-                        default=True)
     parser.add_argument('--datacol', help='Data column to plot',
                         default='SAP_FLUX', type=str)
-    parser.add_argument('--clobber', action='store_true', default=True,
+    parser.add_argument('--plot', action='store_true', help='Plot result?')
+    parser.add_argument('--clobber', action='store_true',
                         help='Overwrite output file?')
-    parser.add_argument('--verbose', action='store_true', default=True,
+    parser.add_argument('--verbose', action='store_true',
                         help='Write to a log file?')
     parser.add_argument('--logfile', '-l', help='Name of ascii log file',
                         default='kepclip.log', dest='logfile', type=str)

@@ -12,8 +12,8 @@ import mdp
 
 __all__ = ['keppca']
 
-def keppca(infile, outfile, maskfile='ALL', components='1-3', plotpca=True,
-           nmaps=10, clobber=True, verbose=True, logfile='keppca.log'):
+def keppca(infile, outfile, maskfile='ALL', components='1-3', plotpca=False,
+           nmaps=10, clobber=False, verbose=False, logfile='keppca.log'):
     """
     keppca -- Perform principal component analysis upon a target pixel file
 
@@ -767,7 +767,7 @@ def keppca_main():
                         default='ALL', type=str)
     parser.add_argument('--components', default='1-3',
                         help='Principal components to be removed', type=str)
-    parser.add_argument('--plotpca', action='store_true', default=True,
+    parser.add_argument('--plotpca', action='store_true',
                         help='Create PCA plots?')
     parser.add_argument('--nmaps', default=10,
                         help='Number of principal components to include in report',

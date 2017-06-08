@@ -1,7 +1,7 @@
-import sys, time, math, re
+import numpy as np
 from astropy.io import fits as pyfits
 from matplotlib import pyplot as plt
-import numpy as np
+from tqdm import tqdm
 from . import kepio, kepmsg, kepkey, kepfit, kepfunc, kepstat, kepfourier
 
 
@@ -10,7 +10,7 @@ __all__ = ['keptrial']
 
 def keptrial(infile, outfile, datacol='SAP_FLUX', errcol='SAP_FLUX_ERR',
              fmin=0.1, fmax=50, nfreq=100, method='ft', ntrials=1000,
-             plot=True, clobber=True, verbose=True, logfile='keptrial.log'):
+             plot=False, clobber=False, verbose=False, logfile='keptrial.log'):
     """
     keptrial -- Calculate best period and error estimate from time series
 
@@ -106,8 +106,8 @@ def keptrial(infile, outfile, datacol='SAP_FLUX', errcol='SAP_FLUX_ERR',
             + ' method={}'.format(method)
             + ' ntrials={}'.format(ntrials)
             + ' plot={}'.format(plot)
-            + ' clobber={}'.format(overwrite)
-            + ' verbose={}'.format(chatter)
+            + ' clobber={}'.format(clobber)
+            + ' verbose={}'.format(verbose)
             + ' logfile={}'.format(logfile))
 
     kepmsg.log(logfile, call+'\n', verbose)
@@ -142,7 +142,7 @@ def keptrial(infile, outfile, datacol='SAP_FLUX', errcol='SAP_FLUX_ERR',
     # frequency steps and Monte Carlo iterations
     deltaf = (fmax - fmin) / nfreq
     freq, pmax, trial = [], [], []
-    for i in range(ntrials):
+    for i in tqdm(range(ntrials)):
         trial.append(i + 1)
         # adjust data within the error bars
         work1 = kepstat.randarray(signal, err)
@@ -293,14 +293,14 @@ def keptrial_main():
     parser.add_argument('--nfreq', default=100,
                         help='Number of frequency intervals', type=int)
     parser.add_argument('--method', default='ft',
-                        help='Frequency search method', type=int,
+                        help='Frequency search method', type=str,
                         choices=['ft'])
     parser.add_argument('--ntrials', default=1000,
                         help='Number of search trials', type=int)
     parser.add_argument('--plot', action='store_true', help='Plot result?')
-    parser.add_argument('--clobber', action='store_true', default=True,
+    parser.add_argument('--clobber', action='store_true',
                         help='Overwrite output file?')
-    parser.add_argument('--verbose', action='store_true', default=True,
+    parser.add_argument('--verbose', action='store_true',
                         help='Write to a log file?')
     parser.add_argument('--logfile', '-l', help='Name of ascii log file',
                         default='keptrial.log', type=str)

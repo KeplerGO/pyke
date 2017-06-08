@@ -24,7 +24,7 @@ __all__ = ['kepmask']
 
 def kepmask(infile, frameno, maskfile='mask.txt', plotfile='kepmask.png',
             imin=None, imax=None, iscale='logarithmic', cmap='bone',
-            verbose=True, logfile='kepmask.log'):
+            verbose=False, logfile='kepmask.log'):
     """
     kepmask plots, creates or edits custom target masks for target pixel
     files. The product from this task is a target mask definition file which

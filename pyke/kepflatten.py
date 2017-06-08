@@ -11,12 +11,14 @@ from . import kepfit
 from . import kepstat
 from . import kepfunc
 
+
 __all__ = ['kepflatten']
+
 
 def kepflatten(infile, outfile, datacol='PDCSAP_FLUX',
                errcol='PDCSAP_FLUX_ERR', nsig=3., stepsize=0.5, winsize=5.0,
-               npoly=3, niter=1, ranges='0,0', plot=True, clobber=True,
-               verbose=True, logfile='kepflatten.log'):
+               npoly=3, niter=1, ranges='0,0', plot=False, clobber=False,
+               verbose=False, logfile='kepflatten.log'):
     """
     kepflatten -- Remove low frequency variability from time-series, preserve
     transits and flares
@@ -429,12 +431,11 @@ def kepflatten_main():
     parser.add_argument('--ranges', default='0,0',
                         help='Time ranges of regions to filter',
                         type=str)
-    parser.add_argument('--plot', action='store_true', help='Plot result?',
-                        default=True)
+    parser.add_argument('--plot', action='store_true', help='Plot result?')
     parser.add_argument('--clobber', action='store_true',
-                        help='Overwrite output file?', default=True)
+                        help='Overwrite output file?')
     parser.add_argument('--verbose', action='store_true',
-                        help='Write to a log file?', default=True)
+                        help='Write to a log file?')
     parser.add_argument('--logfile', '-l', help='Name of ascii log file',
                         default='kepflatten.log', dest='logfile', type=str)
     args = parser.parse_args()

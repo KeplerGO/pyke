@@ -11,8 +11,8 @@ from . import kepkey
 __all__ = ['kepconvert']
 
 
-def kepconvert(infile, outfile, conversion, columns, baddata, clobber=True,
-               verbose=True, logfile='kepconvert.log'):
+def kepconvert(infile, outfile, conversion, columns, baddata=True,
+               clobber=False, verbose=False, logfile='kepconvert.log'):
     """
     kepconvert -- Convert Kepler FITS time series to or from a different file
     format
@@ -343,11 +343,11 @@ def kepconvert_main():
     parser.add_argument('--columns', '-c', default='TIME,SAP_FLUX,SAP_FLUX_ERR',
                         dest='columns', help='Comma-delimited list of data columns',
                         type=str)
-    parser.add_argument('--baddata', action='store_false', default=False,
+    parser.add_argument('--baddata', action='store_false',
                         help='Output rows which have been flagged as questionable')
-    parser.add_argument('--clobber', action='store_true', default=True,
+    parser.add_argument('--clobber', action='store_true',
                         help='Overwrite output file?')
-    parser.add_argument('--verbose', action='store_true', default=True,
+    parser.add_argument('--verbose', action='store_true',
                         help='Write to a log file?')
     parser.add_argument('--logfile', '-l', help='Name of ascii log file',
                         default='kepconvert.log', dest='logfile', type=str)

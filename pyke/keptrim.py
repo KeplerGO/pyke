@@ -7,8 +7,8 @@ from . import kepio
 from . import kepmsg
 from . import kepkey
 
-def keptrim(infile, outfile, column, row, imsize, kepid=None, clobber=True,
-            verbose=True, logfile='keptrim.log'):
+def keptrim(infile, outfile, column, row, imsize, kepid=None, clobber=False,
+            verbose=False, logfile='keptrim.log'):
     """
     keptrim -- create a series of subimages from a Target Pixel File
 
@@ -329,9 +329,9 @@ def keptrim_main():
     parser.add_argument('--imsize',
                         help=('Number of pixels to extract in both row and'
                               ' column dimensions'), type=int)
-    parser.add_argument('--clobber', action='store_true', default=True,
+    parser.add_argument('--clobber', action='store_true',
                         help='Overwrite output file?')
-    parser.add_argument('--verbose', action='store_true', default=True,
+    parser.add_argument('--verbose', action='store_true',
                         help='Write to a log file?')
     parser.add_argument('--logfile', '-l', help='Name of ascii log file',
                         default='keptrim.log', type=str)

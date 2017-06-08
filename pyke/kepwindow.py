@@ -8,8 +8,8 @@ from . import kepkey
 from . import kepstat
 from . import kepfourier
 
-def kepwindow(infile, outfile, fcol='SAP_FLUX', fmax=1.0, nfreq=100, plot=True,
-              clobber=True, verbose=True, logfile='kepwindow.log'):
+def kepwindow(infile, outfile, fcol='SAP_FLUX', fmax=1.0, nfreq=100, plot=False,
+              clobber=False, verbose=False, logfile='kepwindow.log'):
     """
     kepwindow -- Calculate and store the window function for a Kepler time
     series
@@ -190,15 +190,15 @@ def kepwindow_main():
     parser.add_argument('--datacol', default='SAP_FLUX',
                         help='Name of data column', type=str,
                         dest='fcol')
-    parser.add_argument('--fmax', default=1.0, help='Minimum search frequency [1/day]',
+    parser.add_argument('--fmax', default=1.0,
+                        help='Minimum search frequency [1/day]',
                         type=float)
     parser.add_argument('--nfreq', default=100,
                         help='Number of frequency intervals', type=int)
-    parser.add_argument('--plot', action='store_true', default=True,
-                        help='Plot result?')
-    parser.add_argument('--clobber', action='store_true', default=True,
+    parser.add_argument('--plot', action='store_true', help='Plot result?')
+    parser.add_argument('--clobber', action='store_true',
                         help='Overwrite output file?')
-    parser.add_argument('--verbose', action='store_true', default=True,
+    parser.add_argument('--verbose', action='store_true',
                         help='Write to a log file?')
     parser.add_argument('--logfile', '-l', help='Name of ascii log file',
                         default='kepwindow.log', dest='logfile', type=str)

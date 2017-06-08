@@ -14,7 +14,7 @@ __all__ = ['kepstddev']
 
 
 def kepstddev(infile, outfile, datacol='PDCSAP_FLUX', timescale=6.5,
-              clobber=True, verbose=True, logfile='kepstddev.log'):
+              clobber=False, verbose=False, logfile='kepstddev.log'):
     """
     kepstddev -- Calculate Combined Differential Photometric Precision for a
     time series light curve.
@@ -248,9 +248,9 @@ def kepstddev_main():
                         help='Name of data column to plot', type=str)
     parser.add_argument('--timescale', '-t', default=6.5,
                         help='CDPP timescale', type=float)
-    parser.add_argument('--clobber', action='store_true', default=True,
+    parser.add_argument('--clobber', action='store_true',
                         help='Overwrite output file?')
-    parser.add_argument('--verbose', action='store_true', default=True,
+    parser.add_argument('--verbose', action='store_true',
                         help='Write to a log file?')
     parser.add_argument('--logfile', '-l', help='Name of ascii log file',
                         default='kepstddev.log', type=str)

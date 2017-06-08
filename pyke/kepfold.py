@@ -9,9 +9,9 @@ from scipy import stats
 from astropy.io import fits as pyfits
 from matplotlib import pyplot as plt
 
-def kepfold(infile, outfile, period, bjd0, bindata=True,
+def kepfold(infile, outfile, period, bjd0, bindata=False,
             binmethod='median', threshold=1.0, niter=5, nbins=1000,
-            rejqual=True, plottype='sap', clobber=True, verbose=True,
+            rejqual=False, plottype='sap', clobber=False, verbose=False,
             logfile="kepfold.log"):
     """
     Phase-fold light curve data on linear ephemeris.
@@ -599,7 +599,7 @@ def kepfold_main():
     parser.add_argument('--plottype', default='sap', help='plot type',
                         type=str, choices=['sap', 'pdc', 'cbv', 'det','None'])
     parser.add_argument('--clobber', action='store_true',
-                        help='Overwrite output file?', default=True)
+                        help='Overwrite output file?')
     parser.add_argument('--verbose', action='store_true',
                         help='Write to a log file?')
     parser.add_argument('--logfile', '-l', help='Name of ascii log file',
