@@ -1,8 +1,8 @@
+from . import kepio, kepmsg, kepkey, kepfit, kepfunc, kepstat, kepfourier
 import numpy as np
 from astropy.io import fits as pyfits
 from matplotlib import pyplot as plt
 from tqdm import tqdm
-from . import kepio, kepmsg, kepkey, kepfit, kepfunc, kepstat, kepfourier
 
 
 __all__ = ['keptrial']

@@ -1,8 +1,4 @@
-from . import kepio
-from . import kepmsg
-from . import kepplot
-from . import kepfunc
-from . import kepstat
+from . import kepio, kepmsg, kepplot, kepfunc, kepstat
 import numpy as np
 from matplotlib import pyplot as plt
 from matplotlib import ticker

@@ -1,6 +1,4 @@
-from . import kepio
-from . import kepmsg
-from . import kepplot
+from . import kepio, kepmsg, kepplot
 import numpy as np
 import math
 import os

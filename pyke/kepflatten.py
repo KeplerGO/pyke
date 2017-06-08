@@ -4,12 +4,7 @@ import matplotlib.pyplot as plt
 from copy import copy
 from astropy.io import fits as pyfits
 from tqdm import tqdm
-from . import kepio
-from . import kepmsg
-from . import kepkey
-from . import kepfit
-from . import kepstat
-from . import kepfunc
+from . import kepio, kepmsg, kepkey, kepfit, kepstat, kepfunc
 
 
 __all__ = ['kepflatten']

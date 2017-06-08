@@ -1,5 +1,4 @@
-from . import kepmsg
-from . import kepio
+from . import kepmsg, kepio
 import numpy as np
 from astropy.io import fits as pyfits
 

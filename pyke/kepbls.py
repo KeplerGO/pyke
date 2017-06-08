@@ -1,3 +1,4 @@
+from . import kepio, kepmsg, kepkey
 import math
 import numpy as np
 from copy import copy
@@ -5,9 +6,6 @@ from scipy import stats
 from astropy.io import fits as pyfits
 from matplotlib import pyplot as plt
 from tqdm import tqdm
-from . import kepio
-from . import kepmsg
-from . import kepkey
 
 def kepbls(infile, outfile, datacol='DETSAP_FLUX', errcol='DETSAP_FLUX_ERR',
            minper=1.0, maxper=30, mindur=0.5, maxdur=12, nsearch=1000,

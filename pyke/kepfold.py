@@ -1,8 +1,4 @@
-from . import kepio
-from . import kepmsg
-from . import kepkey
-from . import kepstat
-from . import kepfit
+from . import kepio, kepmsg, kepkey, kepstat, kepfit
 import numpy as np
 from copy import copy
 from scipy import stats

@@ -1,8 +1,4 @@
-from . import kepmsg
-from . import kepstat
-from . import kepfunc
-from . import keparray
-from .keparray import rebin2D
+from . import kepmsg, kepstat, kepfunc, keparray
 import math
 import numpy as np
 from scipy import optimize, ndimage
@@ -211,8 +207,9 @@ def fitPRF(flux, ydim, xdim, column, row, prfn, crval1p, crval2p, cdelt1p,
     # calculate best-fit model
     prfMod = shift(prf, [y, x], order=1, mode='constant')
     prfMod = prfMod[prfY0:prfY0 + prfDimY, prfX0:prfX0 + prfDimX]
-    prfFit = rebin2D(prfMod, [np.shape(imgflux)[0], np.shape(imgflux)[1]],
-                     interpolation, True, False)
+    prfFit = keparray.rebin2D(prfMod, [np.shape(imgflux)[0],
+                              np.shape(imgflux)[1]], interpolation, True,
+                              False)
     prfFit = prfFit * f / cdelt1p[0] / cdelt2p[0]
 
     # calculate residual between data and model
@@ -304,8 +301,9 @@ def fitMultiPRF(flux, ydim, xdim, column, row, prfn, crval1p, crval2p,
         prfTmp = shift(prf, [y[i], x[i]], order=1, mode='constant')
         prfTmp = prfTmp[prfY0:prfY0 + prfDimY, prfX0:prfX0 + prfDimX]
         prfMod = prfMod + prfTmp * f[i]
-    prfFit = rebin2D(prfMod, [np.shape(imgflux)[0], np.shape(imgflux)[1]],
-                     interpolation, True, False) / cdelt1p[0] / cdelt2p[0]
+    prfFit = keparray.rebin2D(prfMod, [np.shape(imgflux)[0],
+                              np.shape(imgflux)[1]], interpolation, True,
+                              False) / cdelt1p[0] / cdelt2p[0]
 
     prfRes = imgflux - prfFit
 
@@ -384,8 +382,9 @@ def fitBackMultiPRF(flux, ydim, xdim, column, row, prfn, crval1p, crval2p,
         prfTmp = shift(prf, [y[i], x[i]], order=1, mode='constant')
         prfTmp = prfTmp[prfY0:prfY0 + prfDimY, prfX0:prfX0 + prfDimX]
         prfMod = prfMod + prfTmp * f[i]
-    prfFit = rebin2D(prfMod, [np.shape(imgflux)[0], np.shape(imgflux)[1]],
-                     interpolation, True, False) / cdelt1p[0] / cdelt2p[0]
+    prfFit = keparray.rebin2D(prfMod, [np.shape(imgflux)[0],
+                              np.shape(imgflux)[1]], interpolation, True,
+                              False) / cdelt1p[0] / cdelt2p[0]
     prfFit = prfFit + b
 
     # calculate residual between data and model
@@ -478,8 +477,9 @@ def fitFocusMultiPRF(flux, ydim, xdim, column, row, prfn, crval1p, crval2p,
         prfTmp = shift(prf, [y[i] / w, x[i] / w], order=1, mode='constant')
         prfMod = (prfMod + prfTmp[prfY0:prfY0 + prfDimY,
                                   prfX0:prfX0 + prfDimX] * f[i])
-    prfFit = rebin2D(prfMod, [np.shape(imgflux)[0], np.shape(imgflux)[1]],
-                     interpolation, True, False)
+    prfFit = keparray.rebin2D(prfMod, [np.shape(imgflux)[0],
+                              np.shape(imgflux)[1]], interpolation, True,
+                              False)
     prfFit = prfFit / cdelt1p[0] / cdelt2p[0] / w / w
     prfFit = prfFit + b
 

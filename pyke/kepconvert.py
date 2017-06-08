@@ -3,9 +3,7 @@ import re
 import numpy as np
 from astropy.io import fits as pyfits
 from tqdm import tqdm
-from . import kepio
-from . import kepmsg
-from . import kepkey
+from . import kepio, kepmsg, kepkey
 
 
 __all__ = ['kepconvert']

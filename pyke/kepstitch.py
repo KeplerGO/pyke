@@ -1,6 +1,6 @@
+from . import kepio, kepmsg, kepkey, kepstat
 import numpy as np
 from astropy.io import fits as pyfits
-from . import kepio, kepmsg, kepkey, kepstat
 
 def kepstitch(infiles, outfile='kepstitch.fits', clobber=False, verbose=False,
               logfile='kepstich.log'):

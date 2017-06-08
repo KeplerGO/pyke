@@ -1,5 +1,4 @@
-from . import kepmsg
-from . import kepstat
+from . import kepmsg, kepstat
 import math
 import numpy as np
 from matplotlib import pyplot as plt

@@ -2,10 +2,7 @@ import numpy as np
 from astropy.io import fits as pyfits
 from matplotlib import pyplot as plt
 from tqdm import tqdm
-from . import kepio
-from . import kepmsg
-from . import kepkey
-from . import kepfunc
+from . import kepio, kepmsg, kepkey, kepfunc
 
 def kepsmooth(infile, outfile, datacol='SAP_FLUX', function='flat',
               fscale=1.0, plot=False, clobber=False, verbose=False,

@@ -1,12 +1,9 @@
+from . import kepmsg, kepio, kepkey, kepplot
 import re
 import numpy as np
 from astropy.io import fits as pyfits
 from scipy import optimize as opt
 from matplotlib import pyplot as plt
-from . import kepmsg
-from . import kepio
-from . import kepkey
-from . import kepplot
 import random
 import mdp
 

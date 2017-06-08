@@ -1,12 +1,7 @@
+from . import kepio, kepmsg, kepkey, kepstat, kepfourier
 import numpy as np
 from astropy.io import fits as pyfits
 from matplotlib import pyplot as plt
-from math import *
-from . import kepio
-from . import kepmsg
-from . import kepkey
-from . import kepstat
-from . import kepfourier
 
 def kepwindow(infile, outfile, fcol='SAP_FLUX', fmax=1.0, nfreq=100, plot=False,
               clobber=False, verbose=False, logfile='kepwindow.log'):

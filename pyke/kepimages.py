@@ -2,10 +2,7 @@ import sys
 import numpy as np
 from astropy.io import fits as pyfits
 from tqdm import tqdm
-from . import kepio
-from . import kepmsg
-from . import kepkey
-from . import kepstat
+from . import kepio, kepmsg, kepkey, kepstat
 
 
 __all__ = ['kepimages']
