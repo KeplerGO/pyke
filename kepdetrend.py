@@ -12,7 +12,7 @@ __all__ = ['kepdetrend']
 
 def kepdetrend(infile, outfile, ranges1, ranges2, npoly1, npoly2, nsig1, nsig2,
                niter1, niter2, datacol='SAP_FLUX', errcol='SAP_FLUX_ERR',
-               popnans=True, plot=True, clobber=True, verbose=True,
+               popnans=False, plot=False, clobber=False, verbose=False,
                logfile='kepdetrend.log'):
     """
     kepdetrend -- Detrend aperture photometry data
@@ -139,9 +139,9 @@ def kepdetrend(infile, outfile, ranges1, ranges2, npoly1, npoly2, nsig1, nsig2,
     if clobber:
         kepio.clobber(outfile, logfile, verbose)
     if kepio.fileexists(outfile):
-        message = ('ERROR -- KEPDETREND: {} exists. Use clobber=True'
-                   .format(outfile))
-        status = kepmsg.err(logfile, message, verbose)
+        errmsg = ('ERROR -- KEPDETREND: {} exists. Use --clobber'
+                  .format(outfile))
+        kepmsg.err(logfile, errmsg, verbose)
 
     # open input file
     instr = pyfits.open(infile, 'readonly')
@@ -374,13 +374,13 @@ def kepdetrend_main():
     parser.add_argument('--niter2',
                         help='Maximum number of clipping iterations for region 2',
                         type=int)
-    parser.add_argument('--popnans', action='store_true', default=True,
+    parser.add_argument('--popnans', action='store_true',
                         help='Keep cadences with no flux value?')
-    parser.add_argument('--plot', action='store_true', default=True,
+    parser.add_argument('--plot', action='store_true',
                         help='Plot result?')
-    parser.add_argument('--clobber', action='store_true', default=True,
+    parser.add_argument('--clobber', action='store_true',
                         help='Overwrite output file?')
-    parser.add_argument('--verbose', action='store_true', default=True,
+    parser.add_argument('--verbose', action='store_true',
                         help='Write to a log file?')
     parser.add_argument('--logfile', help='Name of ascii log file',
                         default='kepdetrend.log', dest='logfile', type=str)

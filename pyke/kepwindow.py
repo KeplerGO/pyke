@@ -84,7 +84,7 @@ def kepwindow(infile, outfile, fcol='SAP_FLUX', fmax=1.0, nfreq=100, plot=False,
         kepmsg.err(logfile, errmsg, verbose)
 
     ## open input file
-    instr, status = kepio.openfits(infile, 'readonly', logfile, verbose)
+    instr = pyfits.open(infile)
     tstart, tstop, bjdref, cadence = kepio.timekeys(instr, infile, logfile,
                                                     verbose)
     try:

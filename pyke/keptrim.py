@@ -69,7 +69,7 @@ def keptrim(infile, outfile, column, row, imsize, kepid=None, clobber=False,
         kepio.clobber(outfile, logfile, verbose)
     if kepio.fileexists(outfile):
         errmsg = 'ERROR -- KEPTRIM: {} exists. Use --clobber'.format(outfile)
-        status = kepmsg.err(logfile, errmsg, verbose)
+        skepmsg.err(logfile, errmsg, verbose)
 
     # open input file
     instr = pyfits.open(infile, mode='readonly', memmap=True)

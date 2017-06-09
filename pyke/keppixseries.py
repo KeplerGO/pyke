@@ -1,11 +1,11 @@
+from . import kepio, kepmsg, kepkey, kepplot, kepstat, kepfunc
+import numpy as np
 from astropy.io import fits as pyfits
 from matplotlib import pyplot as plt
-import numpy as np
-from . import kepio, kepmsg, kepkey, kepplot, kepstat, kepfunc
 
 def keppixseries(infile, outfile, plotfile=None, plottype='global',
-                 filterlc=False, function='boxcar', cutoff=1.0,
-                 clobber=False, verbose=False, logfile='keppixseries.log')
+                 filterlc=False, function='boxcar', cutoff=1.0, clobber=False,
+                 verbose=False, logfile='keppixseries.log'):
     """
     keppixseries -- individual time series photometry for all pixels within a
     target mask
@@ -126,17 +126,17 @@ def keppixseries(infile, outfile, plotfile=None, plottype='global',
     maskimg, pixcoord1, pixcoord2 = kepio.readMaskDefinition(infile, logfile,
                                                              verbose)
     # print target data
-    print ''
-    print '      KepID:  {}'.format(kepid)
-    print ' RA (J2000):  {}'.format(ra)
-    print 'Dec (J2000): {}'.format(dec)
-    print '     KepMag:  {}'.format(kepmag)
-    print '   SkyGroup:    {}'.format(skygroup)
-    print '     Season:    {}'.format(season)
-    print '    Channel:    {}'.format(channel)
-    print '     Module:    {}'.format(module)
-    print '     Output:     {}'.format(output)
-    print ''
+    print('')
+    print('      KepID:  {}'.format(kepid))
+    print(' RA (J2000):  {}'.format(ra))
+    print('Dec (J2000): {}'.format(dec))
+    print('     KepMag:  {}'.format(kepmag))
+    print('   SkyGroup:    {}'.format(skygroup))
+    print('     Season:    {}'.format(season))
+    print('    Channel:    {}'.format(channel))
+    print('     Module:    {}'.format(module))
+    print('     Output:     {}'.format(output))
+    print('')
     # how many quality = 0 rows?
     npts = 0
     nrows = len(fluxpixels)
@@ -157,20 +157,19 @@ def keppixseries(infile, outfile, plotfile=None, plottype='global',
         for j in range(xdim):
             npts = 0
             for k in range(nrows):
-                if qual[k] == 0 and \
-                np.isfinite(barytime[k]) and \
-                np.isfinite(fluxpixels[k,int(ydim*xdim/2)]):
+                if (qual[k] == 0 and np.isfinite(barytime[k])
+                    and np.isfinite(fluxpixels[k, int(ydim*xdim/2)])):
                     time[npts] = barytime[k]
                     timecorr[npts] = tcorr[k]
                     cadenceno[npts] = cadno[k]
                     quality[npts] = qual[k]
-                    pixseries[i,j,npts] = fluxpixels[k,nptsx]
-                    errseries[i,j,npts] = errpixels[k,nptsx]
+                    pixseries[i, j, npts] = fluxpixels[k, nptsx]
+                    errseries[i, j, npts] = errpixels[k, nptsx]
                     npts += 1
             nptsx += 1
     # define data sampling
     if filterlc:
-        tpf = pyfits.open(infile, 'readonly')
+        tpf = pyfits.open(infile)
         cadence = kepkey.cadence(tpf[1], infile, logfile, verbose)
         tr = 1.0 / (cadence / 86400)
         timescale = 1.0 / (cutoff / tr)
@@ -194,20 +193,19 @@ def keppixseries(infile, outfile, plotfile=None, plottype='global',
         # pad time series at both ends with noise model
         for i in range(ydim):
             for j in range(xdim):
-                ave, sigma = (np.mean(pixseries[i,j,:len(filtfunc)]),
-                              np.std(pixseries[i,j,:len(filtfunc)]))
+                ave, sigma = (np.mean(pixseries[i, j, :len(filtfunc)]),
+                              np.std(pixseries[i, j, :len(filtfunc)]))
                 padded = np.append(kepstat.randarray(np.ones(len(filtfunc)) * ave,
-                        np.ones(len(filtfunc)) * sigma), pixseries[i,j,:])
-                ave, sigma = (np.mean(pixseries[i,j,-len(filtfunc):]),
-                              np.std(pixseries[i,j,-len(filtfunc):]))
+                                   np.ones(len(filtfunc)) * sigma), pixseries[i,j,:])
+                ave, sigma = (np.mean(pixseries[i, j, -len(filtfunc):]),
+                              np.std(pixseries[i, j, -len(filtfunc):]))
                 padded = np.append(padded,
-                        kepstat.randarray(np.ones(len(filtfunc)) * ave,
-                                np.ones(len(filtfunc)) * sigma))
-
+                                   kepstat.randarray(np.ones(len(filtfunc)) * ave,
+                                   np.ones(len(filtfunc)) * sigma))
                 # convolve data
                 convolved = np.convolve(padded, filtfunc, 'same')
                 # remove padding from the output array
-                outdata = convolved[len(filtfunc):-len(filtfunc)]
+                outdata = convolved[len(filtfunc): -len(filtfunc)]
                 # subtract low frequencies
                 outmedian = np.median(outdata)
                 pixseries[i, j, :] = pixseries[i, j, :] - outdata + outmedian
@@ -471,8 +469,8 @@ def keppixseries(infile, outfile, plotfile=None, plottype='global',
     plt.gca().yaxis.set_major_locator(plt.MaxNLocator(integer=True))
     labels = ax.get_yticklabels()
     plt.setp(labels, 'rotation', 90, fontsize=12)
-    plt.xlim(np.min(pixcoord1) - 0.5,np.max(pixcoord1) + 0.5)
-    plt.ylim(np.min(pixcoord2) - 0.5,np.max(pixcoord2) + 0.5)
+    plt.xlim(np.min(pixcoord1) - 0.5, np.max(pixcoord1) + 0.5)
+    plt.ylim(np.min(pixcoord2) - 0.5, np.max(pixcoord2) + 0.5)
     plt.xlabel('time', {'color' : 'k'})
     plt.ylabel('arbitrary flux', {'color' : 'k'})
     for i in range(ydim):
@@ -480,47 +478,51 @@ def keppixseries(infile, outfile, plotfile=None, plottype='global',
             tmin = np.amin(time)
             tmax = np.amax(time)
             try:
-                np.isfinite(np.amin(pixseries[i,j,:]))
-                np.isfinite(np.amin(pixseries[i,j,:]))
-                fmin = np.amin(pixseries[i,j,:])
-                fmax = np.amax(pixseries[i,j,:])
+                np.isfinite(np.amin(pixseries[i, j, :]))
+                np.isfinite(np.amin(pixseries[i, j, :]))
+                fmin = np.amin(pixseries[i, j, :])
+                fmax = np.amax(pixseries[i, j, :])
             except:
                 ugh = 1
             xmin = tmin - (tmax - tmin) / 40
             xmax = tmax + (tmax - tmin) / 40
             ymin = fmin - (fmax - fmin) / 20
             ymax = fmax + (fmax - fmin) / 20
-            if kepstat.bitInBitmap(maskimg[i,j],2):
-                plt.axes([0.06+float(j)*dx,0.05+i*dy,dx,dy],axisbg='lightslategray')
-            elif maskimg[i,j] == 0:
-                plt.axes([0.06+float(j)*dx,0.05+i*dy,dx,dy],axisbg='black')
+            if kepstat.bitInBitmap(maskimg[i, j], 2):
+                plt.axes([0.06 + float(j) * dx, 0.05 + i * dy, dx, dy],
+                         axisbg='lightslategray')
+            elif maskimg[i, j] == 0:
+                plt.axes([0.06 + float(j) * dx, 0.05 + i * dy, dx, dy],
+                         axisbg='black')
             else:
-                plt.axes([0.06+float(j)*dx,0.05+i*dy,dx,dy])
+                plt.axes([0.06 + float(j) * dx, 0.05 + i * dy, dx, dy])
             if j == int(xdim / 2) and i == 0:
-                plt.setp(plt.gca(),xticklabels=[],yticklabels=[])
+                plt.setp(plt.gca(), xticklabels=[], yticklabels=[])
             elif j == 0 and i == int(ydim / 2):
-                plt.setp(plt.gca(),xticklabels=[],yticklabels=[])
+                plt.setp(plt.gca(), xticklabels=[], yticklabels=[])
             else:
-                plt.setp(plt.gca(),xticklabels=[],yticklabels=[])
+                plt.setp(plt.gca(), xticklabels=[], yticklabels=[])
             ptime = time * 1.0
-            ptime = np.insert(ptime,[0],ptime[0])
-            ptime = np.append(ptime,ptime[-1])
-            pflux = pixseries[i,j,:] * 1.0
-            pflux = np.insert(pflux,[0],-1000.0)
-            pflux = np.append(pflux,-1000.0)
-            plt.plot(time,pixseries[i,j,:],color='#0000ff',linestyle='-',linewidth=0.5)
-            if not kepstat.bitInBitmap(maskimg[i,j],2):
-                plt.fill(ptime,pflux,fc='lightslategray',linewidth=0.0,alpha=1.0)
-            plt.fill(ptime,pflux,fc='#FFF380',linewidth=0.0,alpha=1.0)
+            ptime = np.insert(ptime, [0], ptime[0])
+            ptime = np.append(ptime, ptime[-1])
+            pflux = pixseries[i, j, :] * 1.0
+            pflux = np.insert(pflux, [0], -1000.0)
+            pflux = np.append(pflux, -1000.0)
+            plt.plot(time,pixseries[i, j, :], color='#0000ff', linestyle='-',
+                     linewidth=0.5)
+            if not kepstat.bitInBitmap(maskimg[i, j], 2):
+                plt.fill(ptime, pflux, fc='lightslategray', linewidth=0.0,
+                         alpha=1.0)
+            plt.fill(ptime, pflux, fc='#FFF380', linewidth=0.0,alpha=1.0)
             if 'loc' in plottype:
-                plt.xlim(xmin,xmax)
-                plt.ylim(ymin,ymax)
+                plt.xlim(xmin, xmax)
+                plt.ylim(ymin, ymax)
             if 'glob' in plottype:
-                plt.xlim(xmin,xmax)
-                plt.ylim(1.0e-10,np.nanmax(pixseries) * 1.05)
+                plt.xlim(xmin, xmax)
+                plt.ylim(1.0e-10, np.nanmax(pixseries) * 1.05)
             if 'full' in plottype:
-                plt.xlim(xmin,xmax)
-                plt.ylim(1.0e-10,ymax * 1.05)
+                plt.xlim(xmin, xmax)
+                plt.ylim(1.0e-10, ymax * 1.05)
 
     # render plot
     plt.show()

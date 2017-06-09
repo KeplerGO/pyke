@@ -27,3 +27,4 @@ def test_import():
     from .. import kepft
     from .. import kepoutlier
     from .. import kephead
+    from .. import keppixseries

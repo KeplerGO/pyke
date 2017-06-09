@@ -209,8 +209,8 @@ def kepstddev(infile, outfile, datacol='PDCSAP_FLUX', timescale=6.5,
     # add NaNs back into data
     n = 0
     work1 = np.array([],dtype='float32')
-    instr, status = kepio.openfits(infile,'readonly',logfile,verbose)
-    table, status = kepio.readfitstab(infile,instr[1],logfile,verbose)
+    instr = pyfits.open(infile)
+    table = kepio.readfitstab(infile, instr[1], logfile, verbose)
     for i in range(len(table.field(0))):
         if isfinite(table.field('time')[i]) and isfinite(table.field(datacol)[i]):
             work1 = np.append(work1,cdpp[n])
@@ -231,7 +231,7 @@ def kepstddev(infile, outfile, datacol='PDCSAP_FLUX', timescale=6.5,
     instr[1] = pyfits.new_table(cols, header=instr[1].header)
     instr.writeto(outfile)
     # comment keyword in output file
-    kepkey.history(call,instr[0],outfile,logfile,verbose)
+    kepkey.history(call, instr[0], outfile, logfile, verbose)
     # close FITS
     instr.close()
 

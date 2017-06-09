@@ -6,9 +6,7 @@ from scipy.optimize import leastsq
 from scipy.optimize import fmin as effmin
 from scipy.interpolate import interp1d
 from astropy.io import fits as pyfits
-from . import kepmsg
-from . import kepio
-from . import kepkey
+from . import kepmsg, kepio, kepkey
 
 
 __all__ = ['kepcotrend']
@@ -451,8 +449,9 @@ def split_on_nans(bad_data, cad):
     return blocks
 
 def kepcotrend(infile, outfile, bvfile, listbv, fitmethod='llsq', fitpower=1,
-               iterate=True, sigma=None, maskfile='', scinterp=None, plot=True,
-               clobber=True, verbose=True, logfile='kepcotrend.log'):
+               iterate=False, sigma=None, maskfile='', scinterp=None,
+               plot=False, clobber=False, verbose=False,
+               logfile='kepcotrend.log'):
     """
     kepcotrend -- Remove systematic trends Kepler light curves using
     cotrending basis vectors. The cotrending basis vectors files can be found
@@ -644,7 +643,7 @@ def kepcotrend(infile, outfile, bvfile, listbv, fitmethod='llsq', fitpower=1,
         kepmsg.err(logfile, errmsg, verbose)
 
     # open input file
-    instr, status = kepio.openfits(infile, 'readonly', logfile, verbose)
+    instr = pyfits.open(infile)
     tstart, tstop, bjdref, cadence = kepio.timekeys(instr, infile, logfile,
                                                     verbose)
     # fudge non-compliant FITS keywords with no values
@@ -861,11 +860,9 @@ def kepcotrend(infile, outfile, bvfile, listbv, fitmethod='llsq', fitpower=1,
         do_plot(lc_date, lc_flux, flux_after, bvsum_un_norm, lc_cad,
                 bad_data, lc_cad_o, version)
 
-    make_outfile(instr,outfile,flux_after_nans,bvsum_nans,version)
-
+    make_outfile(instr, outfile, flux_after_nans, bvsum_nans, version)
     # close input file
-    status = kepio.closefits(instr, logfile, verbose)
-
+    instr.close()
     #print some results to screen:
     print('      -----      ')
     if iterate:
@@ -909,7 +906,7 @@ def kepcotrend_main():
     parser.add_argument('--fitpower', '-f',
                         help='The index of the merit function (simplex only)',
                         default=1, type=float)
-    parser.add_argument('--iterate', action='store_true', default=True,
+    parser.add_argument('--iterate', action='store_true',
                         help='Fit iteratively ', dest='iterate')
     parser.add_argument('--sigmaclip', '-s',
                         help='Sigma clip value when iteratively fitting',

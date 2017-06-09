@@ -68,7 +68,7 @@ def kepsmooth(infile, outfile, datacol='SAP_FLUX', function='flat',
     falpha = 0.2
 
     ## log the call
-    hashline = '----------------------------------------------------------------------------'
+    hashline = '--------------------------------------------------------------'
     kepmsg.log(logfile,hashline,verbose)
     call = ('KEPSMOOTH -- '
             + ' infile={}'.format(infile)
@@ -89,9 +89,8 @@ def kepsmooth(infile, outfile, datacol='SAP_FLUX', function='flat',
     if clobber:
         kepio.clobber(outfile, logfile, verbose)
     if kepio.fileexists(outfile):
-        message = ('ERROR -- KEPSMOOTH: ' + outfile
-                   + ' exists. Use clobber=True')
-        status = kepmsg.err(logfile, message, verbose)
+        errmsg = 'ERROR -- KEPSMOOTH: {} exists. Use clobber=True'.format(oufile)
+        kepmsg.err(logfile, errmsg, verbose)
 
     ## open input file
     instr = pyfits.open(infile, 'readonly')
@@ -108,14 +107,11 @@ def kepsmooth(infile, outfile, datacol='SAP_FLUX', function='flat',
 
     ## fudge non-compliant FITS keywords with no values
     instr = kepkey.emptykeys(instr, infile, logfile, verbose)
-
     ## read table structure
     table = kepio.readfitstab(infile, instr[1], logfile, verbose)
-
     # read time and flux columns
     barytime = kepio.readtimecol(infile, table, logfile, verbose)
     flux = kepio.readfitscol(infile, instr[1].data, datacol, logfile, verbose)
-
     # filter input data table
     try:
         nanclean = instr[1].header['NANCLEAN']
@@ -144,17 +140,14 @@ def kepsmooth(infile, outfile, datacol='SAP_FLUX', function='flat',
 
     ## smooth data
     outdata = kepfunc.smooth(indata, fscale/(cadence/86400), function)
-
     ## comment keyword in output file
     kepkey.history(call, instr[0], outfile, logfile, verbose)
-
     ## clean up x-axis unit
     intime0 = float(int(tstart / 100) * 100.0)
     if intime0 < 2.4e6:
         intime0 += 2.4e6
     ptime = intime - intime0
     xlab = 'BJD $-$ {0}'.format(intime0)
-
     ## clean up y-axis units
     pout = indata * 1.0
     pout2 = outdata * 1.0
@@ -162,7 +155,6 @@ def kepsmooth(infile, outfile, datacol='SAP_FLUX', function='flat',
     pout = pout / 10 ** nrm
     pout2 = pout2 / 10 ** nrm
     ylab = '10$^{0}$ {1}'.format(nrm, 'e$^-$ s$^{-1}$')
-
     ## data limits
     xmin = np.nanmin(ptime)
     xmax = np.nanmax(ptime)
@@ -176,7 +168,6 @@ def kepsmooth(infile, outfile, datacol='SAP_FLUX', function='flat',
     pout =  np.append(pout, 0.0)
     pout2 = np.insert(pout2, [0], [0.0])
     pout2 = np.append(pout2, 0.0)
-
     ## plot light curve
     if plot:
         plt.figure(1, figsize=[xsize, ysize])
