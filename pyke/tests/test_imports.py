@@ -24,3 +24,4 @@ def test_import():
     from .. import keptrial
     from .. import kepimages
     from .. import keptimefix
+    from .. import kepft
