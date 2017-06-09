@@ -1,8 +1,7 @@
 """
 This module contains utility functions for i/o operations.
 """
-from . import kepmsg
-from .kepkey import new, getWCSp, wcs
+from . import kepmsg, kepkey
 import numpy as np
 import os
 import glob
@@ -16,7 +15,7 @@ __all__ = ['delete', 'clobber', 'openascii', 'closeascii', 'splitfits',
            'readsaperrcol', 'readpdccol', 'readpdcerrcol', 'readcbvcol',
            'readsapqualcol', 'readlctable', 'tabappend', 'readimage',
            'writeimage', 'writefits', 'tmpfile', 'symlink', 'fileexists',
-           'move', 'copy', 'parselist', 'createdir', 'createtree', 'HDUnum',
+           'move', 'copy', 'parselist', 'createdir', 'createtree',
            'timeranges', 'cadence', 'timekeys', 'filterNaN', 'readTPF',
            'readMaskDefinition', 'readPRFimage']
 
@@ -398,20 +397,6 @@ def createtree(path,logfile,verbose):
     else:
         message = 'KEPIO.CREATETREE -- ' + path + ' directory exists'
         kepmsg.log(logfile, message, verbose)
-
-def HDUnum(struct):
-    """number of HDU within a FITS structure"""
-    ValidHDU = True
-    nhdu = 0
-    while ValidHDU:
-        try:
-            struct[nhdu].header[0]
-            nhdu += 1
-        except:
-            ValidHDU = False
-    return nhdu
-
-    """why not just len(struct.header[0])?"""
 
 def timeranges(ranges, logfile, verbose):
     """read time ranges from ascii file"""

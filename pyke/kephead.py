@@ -61,7 +61,7 @@ def kephead(infile, outfile, keyname, clobber=False, verbose=False,
     # open input FITS file
     instr = pyfits.open(infile)
     # number of HDU in input file
-    nhdu = kepio.HDUnum(instr)
+    nhdu = kepkey.HDUnum(instr)
     # loop through each HDU in infile
     kepmsg.log(outfile, '', True)
     for hdu in range(nhdu):

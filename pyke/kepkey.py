@@ -1,5 +1,4 @@
 from . import kepmsg
-from .kepio import HDUnum
 import numpy as np
 from astropy.io import fits as pyfits
 
@@ -230,3 +229,17 @@ def emptykeys(struct, filename, logfile, verbose):
             if 'pyfits' in str(head) and 'Undefined' in str(head):
                 delete(keyword, struct[hdu], filename, logfile, verbose)
     return struct
+
+def HDUnum(struct):
+    """number of HDU within a FITS structure"""
+    ValidHDU = True
+    nhdu = 0
+    while ValidHDU:
+        try:
+            struct[nhdu].header[0]
+            nhdu += 1
+        except:
+            ValidHDU = False
+    return nhdu
+
+    """why not just len(struct.header[0])?"""

@@ -48,7 +48,7 @@ def kepbls(infile, outfile, datacol='DETSAP_FLUX', errcol='DETSAP_FLUX_ERR',
         recommended because the flux data contain either astrophysical
         variability, systematic variability, or both.
     errcol : str
-        The column name containing photometric 1-σ errors stored within
+        The column name containing photometric 1-sigma errors stored within
         extension 1 of infile. Typically this name is DETSAP_FLUX_ERR.
     minper : float
         The shortest trial period on which to search for transits.
