@@ -3,11 +3,80 @@ from astropy.io import fits as pyfits
 from matplotlib import pyplot as plt
 from . import kepio, kepmsg, kepkey, kepfit, kepstat
 
-def kepoutlier(infile, outfile, datacol, nsig, stepsize, npoly, niter,
-               operation, ranges, plot, plotfit, clobber=False, verbose=False, logfile='kepoutlier.log'):
+def kepoutlier(infile, outfile, datacol, nsig=3.0, stepsize=1.0, npoly=3,
+               niter=1, operation='remove', ranges='0,0', plot=False,
+               plotfit=False, clobber=False, verbose=False,
+               logfile='kepoutlier.log'):
     """
+    kepoutlier -- Remove or replace statistical outliers from time series data
+
+    kepoutlier identifies data outliers relative to piecemeal best-fit
+    polynomials. Outliers are either removed from the output time series or
+    replaced by a noise-treated value defined by the polynomial fit. Identified
+    outliers and the best fit functions are optionally plotted for inspection
+    purposes.
+
     Parameters
     ----------
+    infile : str
+        The name of a MAST standard format FITS file containing a Kepler light
+        curve within the first data extension.
+    outfile : str
+        The name of the output FITS file. outfile will be direct copy of infile
+        with either data outliers removed (i.e. the table will have fewer rows)
+        or the outliers will be corrected according to a best-fit function and
+        a noise model.
+    datacol : str
+        The column name containing data stored within extension 1 of infile.
+        This data will be searched for outliers. Typically this name is
+        SAP_FLUX (Simple Aperture Photometry fluxes) or PDCSAP_FLUX (Pre-search
+        Data Conditioning fluxes).
+    nsig : float
+        The sigma clipping threshold. Data deviating from a best fit function
+        by more than the threshold will be either removed or corrected
+        according to the user selection of operation.
+    stepsize : float
+        The data within datacol is unlikely to be well represented by a single
+        polynomial function. stepsize splits the data up into a series of time
+        blocks, each is fit independently by a separate function. The user can
+        provide an informed choice of stepsize after inspecting the data with
+        the kepdraw tool. Units are days.
+    npoly : int
+        The polynomial order of each best-fit function.
+    niter : int
+        If outliers are found in a particular data section, that data will be
+        removed temporarily and the time series fit again. This will be
+        iterated niter times before freezing upon the best available fit.
+    operation : str
+        * ``remove`` throws away outliers. The output data table will smaller
+        or equal in size to the input table.
+
+        * ``replace`` replaces outliers with a value that is consistent with
+        the best-fit polynomial function and a random component defined by the
+        rms of the data relative to the fit and calculated using the inverse
+        normal cumulative function and a random number generator.
+    ranges : str
+        The user can choose specific time ranges of data on which to work. This
+        could, for example, avoid removing known stellar flares from a dataset.
+        Time ranges are supplied as comma-separated pairs of Barycentric Julian
+        Dates (BJDs). Multiple ranges are separated by a semi-colon. An example
+        containing two time ranges is:
+
+            ``'2455012.48517,2455014.50072;2455022.63487,2455025.08231'``
+
+        If the user wants to correct the entire time series then providing
+        ``ranges = '0,0'`` will tell the task to operate on the whole time series.
+
+    plot : bool
+        Plot the data and outliers?
+    plotfit : bool
+        Overlay the polynomial fits upon the plot?
+    clobber : bool
+        Overwrite the output file?
+    verbose : bool
+        Print informative messages and warnings to the shell and logfile?
+    logfile : str
+        Name of the logfile containing error and warning messages.
     """
     # startup parameters
     labelsize = 24
@@ -36,7 +105,7 @@ def kepoutlier(infile, outfile, datacol, nsig, stepsize, npoly, niter,
             + ' plotfit={}'.format(plotfit)
             + ' clobber={}'.format(clobber)
             + ' verbose={}'.format(chatter)
-            + ' logfile={}'.format(logfile)
+            + ' logfile={}'.format(logfile))
     kepmsg.log(logfile, call+'\n', verbose)
     # start time
     kepmsg.clock('KEPOUTLIER started at', logfile, verbose)
@@ -49,7 +118,7 @@ def kepoutlier(infile, outfile, datacol, nsig, stepsize, npoly, niter,
         kepmsg.err(logfile, message, verbose)
 
     # open input file
-    instr = pyfits.open(infile, 'readonly')
+    instr = pyfits.open(infile)
     tstart, tstop, bjdref, cadence = kepio.timekeys(instr, infile, logfile,
                                                     verbose)
     try:
@@ -124,7 +193,6 @@ def kepoutlier(infile, outfile, datacol, nsig, stepsize, npoly, niter,
     cstep2.append(work2)
 
     outdata = indata * 1.0
-
     # comment keyword in output file
     kepkey.history(call, instr[0], outfile, logfile, verbose)
     # clean up x-axis unit
@@ -154,14 +222,11 @@ def kepoutlier(infile, outfile, datacol, nsig, stepsize, npoly, niter,
     if plot:
         plt.figure(figsize=[xsize,ysize])
         plt.clf()
-
         # plot data
         ax = plt.axes([0.06, 0.1, 0.93, 0.87])
-
         # force tick labels to be absolute rather than relative
         plt.gca().xaxis.set_major_formatter(plt.ScalarFormatter(useOffset=False))
         plt.gca().yaxis.set_major_formatter(plt.ScalarFormatter(useOffset=False))
-
         # rotate y labels by 90 deg
         labels = ax.get_yticklabels()
         plt.setp(labels, 'rotation', 90, fontsize=12)
@@ -170,7 +235,6 @@ def kepoutlier(infile, outfile, datacol, nsig, stepsize, npoly, niter,
         plt.xlabel(xlab, {'color' : 'k'})
         plt.ylabel(ylab, {'color' : 'k'})
         plt.grid()
-
     # loop over each time step, fit data, determine rms
     masterfit = indata * 0.0
     mastersigma = np.zeros(len(masterfit))
@@ -222,7 +286,7 @@ def kepoutlier(infile, outfile, datacol, nsig, stepsize, npoly, niter,
     instr[1].data = table[:naxis2]
     rejtime = np.array(rejtime, dtype='float64')
     rejdata = np.array(rejdata, dtype='float32')
-    plt.plot(rejtime - intime0, rejdata / 10**nrm, 'ro')
+    plt.plot(rejtime - intime0, rejdata / 10 ** nrm, 'ro')
 
     # plot ranges
     plt.xlim(xmin - xr * 0.01, xmax + xr * 0.01)
@@ -233,15 +297,12 @@ def kepoutlier(infile, outfile, datacol, nsig, stepsize, npoly, niter,
 
     # render plot
     plt.show()
-
     # write output file
     instr.writeto(outfile)
     # close input file
     kepio.closefits(instr, logfile, verbose)
-
     kepmsg.clock('KEPOUTLIER completed at', logfile, verbose)
 
-# main
 def kepoutiler_main():
     import argparse
     parser = argparse.ArgumentParser(
