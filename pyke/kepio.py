@@ -1,13 +1,25 @@
 """
 This module contains utility functions for i/o operations.
 """
-from . import kepmsg, kepkey
+from . import kepmsg
+from .kepkey import new, getWCSp, wcs
 import numpy as np
 import os
 import glob
 import tempfile
 import shutil
 from astropy.io import fits as pyfits
+
+
+__all__ = ['delete', 'clobber', 'openascii', 'closeascii', 'splitfits',
+           'readfitstab', 'readfitscol', 'readtimecol', 'readsapcol',
+           'readsaperrcol', 'readpdccol', 'readpdcerrcol', 'readcbvcol',
+           'readsapqualcol', 'readlctable', 'tabappend', 'readimage',
+           'writeimage', 'writefits', 'tmpfile', 'symlink', 'fileexists',
+           'move', 'copy', 'parselist', 'createdir', 'createtree', 'HDUnum',
+           'timeranges', 'cadence', 'timekeys', 'filterNaN', 'readTPF',
+           'readMaskDefinition', 'readPRFimage']
+
 
 def delete(filename, logfile, verbose):
     try:
@@ -39,7 +51,7 @@ def closeascii(file_,logfile,verbose):
     except:
         message = ('ERROR - KEPIO.CLOSEASCII: cannot close ASCII file ' +
                    str(file_))
-        kepmsg.err(logfile,message,verbose)
+        kepmsg.err(logfile, message, verbose)
 
 def splitfits(fitsfile, logfile, verbose):
     fitsfile = fitsfile.strip()

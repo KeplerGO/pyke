@@ -1,6 +1,11 @@
-from . import kepmsg, kepio
+from . import kepmsg
+from .kepio import HDUnum
 import numpy as np
 from astropy.io import fits as pyfits
+
+
+__all__ = ['get', 'delete', 'new', 'comment', 'history', 'change', 'cadence',
+           'getWCSp', 'getWCSs', 'wcs', 'emptykeys']
 
 
 def get(filename, hdu, keyword, logfile, verbose):
@@ -217,7 +222,7 @@ def wcs(i, crpix, crval, cdelt):
 
 def emptykeys(struct, filename, logfile, verbose):
     """remove empty keywords within a FITS file"""
-    nhdu = kepio.HDUnum(struct)
+    nhdu = HDUnum(struct)
 
     for hdu in range(nhdu):
         for keyword in struct[hdu].header.keys():
