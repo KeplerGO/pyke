@@ -1,8 +1,7 @@
-import sys, time
 import numpy as np
 from astropy.io import fits as pyfits
 from matplotlib import pyplot as plt
-import kepio, kepmsg, kepkey
+from . import kepio, kepmsg, kepkey
 
 # global variables
 
@@ -15,23 +14,51 @@ mask = []; aid = None; bid = None; cid = None; did = None; eid = None; fid = Non
 clobb = True; outf = ''; verb = True; logf = ''; rinf = ''
 cmdLine = False
 
-def keprange(infile, rinfile, outfile, column, clobber, verbose, logfile):
+def keprange(infile, outfile, column, rinfile=None, clobber=False, verbose=False,
+             logfile='keprange.log'):
+    """
+    keprange -- Define time ranges interactively for use with other PyKE tasks.
+
+    Parameters
+    ----------
+    infile : str
+        The name of a MAST standard format FITS file containing a Kepler light
+        curve within the first data extension.
+    outfile : str
+        The name of the output ASCII file storing time ranges for future use in
+        other PyKE tools.
+    rinfile : str
+        An existing ASCII file containing time ranges in Barycentric Julian
+        Date (BJD) can be uploaded into the task. This can be used as a basis
+        for a new set of time ranges. This argument is optional and is not
+        prompted for automatically. If no ascii file will be input then
+        rinfile=None will clear the argument buffer after a previous use.
+    column : str
+        The column name containing data stored within extension 1 of infile.
+        This data will be plotted against time so that the user can choose
+        appropriate time ranges.
+    clobber : bool
+        Overwrite the output file?
+    verbose : bool
+        Print informative messages and warnings to the shell and logfile?
+    logfile : str
+        Name of the logfile containing error and warning messages.
+    """
 
     # startup parameters
     global instr, cadence, barytime0, nrm, barytime, flux
     global xmin, xmax, ymin, ymax, xr, yr, xlab, ylab
     global clobb, outf, verb, logf, rinf, col, bjdref, cade, cmdLine
 
-# log the call
-
+    # log the call
     if rinfile.lower() == 'none':
         rinfile = ''
     hashline = '--------------------------------------------------------------'
     kepmsg.log(logfile, hashline, verbose)
     call = ('KEPRANGE -- '
             + ' infile={}'.format(infile)
+            + ' outfile={}'.format(outfile)
             + ' rinfile={}'.format(rinfile)
-            + ' outfile={}'+outfile+' '
             + ' column={}'+column+' '
             + ' clobber={}'+overwrite+ ' '
             + ' verbose={}'+chatter+' '
@@ -396,13 +423,14 @@ def clicker6(event):
 
 def keprange_main():
     import argparse
-    parser = argparse.ArgumentParser(description='Interactively define and store time ranges via a GUI')
+    parser = argparse.ArgumentParser(
+            description=('Interactively define and store time ranges via a GUI'))
     parser.add_argument('infile', help='Name of input file', type=str)
-    parser.add_argument('--rinfile', default='',
-                        help='Name of input ASCII time ranges file', type=str)
     parser.add_argument('--outfile', default='',
                         help='Name of output ASCII time ranges file',
                         type=str)
+    parser.add_argument('--rinfile', default=None,
+                        help='Name of input ASCII time ranges file')
     parser.add_argument('--column', default='SAP_FLUX',
                         help='Name of diagnostic FITS column', type=str)
     parser.add_argument('--clobber', action='store_true',
@@ -412,5 +440,5 @@ def keprange_main():
     parser.add_argument('--logfile', '-l', help='Name of ascii log file',
                         default='keprange.log', dest='logfile', type=str)
     args = parser.parse_args()
-    keprange(args.infile, args.rinfile, args.outfile, args.column,
+    keprange(args.infile, args.outfile, args.rinfile, args.column,
              args.clobber, args.verbose, args.logfile)
