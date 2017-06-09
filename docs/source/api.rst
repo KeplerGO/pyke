@@ -20,3 +20,4 @@ Modules/API
     kepimages
     keptimefix
     kepft
+    kepoutlier
