@@ -42,12 +42,12 @@ def kephead(infile, outfile, keyname, clobber=False, verbose=False,
     hashline = '--------------------------------------------------------------'
     kepmsg.log(logfile, hashline, verbose)
     call = ('KEPHEAD -- '
-            'infile={}'.format(infile)
-            'outfile={}'.format(outfile)
-            'keyname={}'.format(keyname)
-            'clobber={}'.format(overwrite)
-            'verbose={}'.format(chatter)
-            'logfile={}'.format(logfile)
+            + ' infile={}'.format(infile)
+            + ' outfile={}'.format(outfile)
+            + ' keyname={}'.format(keyname)
+            + ' clobber={}'.format(overwrite)
+            + ' verbose={}'.format(chatter)
+            + ' logfile={}'.format(logfile))
     kepmsg.log(logfile, call+'\n', verbose)
     # start time
     kepmsg.clock('KEPHEAD started at: ',logfile,verbose)

@@ -271,8 +271,8 @@ def kepoutlier(infile, outfile, datacol, nsig=3.0, stepsize=1.0, npoly=3,
     rejtime, rejdata = [], []
     naxis2 = 0
     for i in range(len(masterfit)):
-        if abs(indata[i] - masterfit[i]) > nsig * mastersigma[i]
-           and i in cadencelis:
+        if (abs(indata[i] - masterfit[i]) > nsig * mastersigma[i]
+            and i in cadencelis):
             rejtime.append(intime[i])
             rejdata.append(indata[i])
             if operation == 'replace':
