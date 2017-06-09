@@ -2,10 +2,10 @@ from astropy.io import fits as pyfits
 from matplotlib import pyplot as plt
 import numpy as np
 from . import kepio, kepmsg, kepkey, kepplot, kepstat, kepfunc
-import math
 
-def keppixseries(infile, outfile, plotfile, plottype, filterlc, function, cutoff,
-                 clobber, verbose, logfile)
+def keppixseries(infile, outfile, plotfile=None, plottype='global',
+                 filterlc=False, function='boxcar', cutoff=1.0,
+                 clobber=False, verbose=False, logfile='keppixseries.log')
     """
     keppixseries -- individual time series photometry for all pixels within a
     target mask
@@ -541,16 +541,16 @@ def keppixseries_main():
                         help='name of output PNG plot file', type=str)
     parser.add_argument('--plottype', default='global', help='Plotting type',
                         type=str, choices=['local','global','full'])
-    parser.add_argument('--filterlc', action='store_true', default=False,
+    parser.add_argument('--filterlc', action='store_true',
                         help='High-pass Filter data?')
     parser.add_argument('--function', default='boxcar', help='Type of filter',
                         type=str, choices=['boxcar','gauss','sinc'])
     parser.add_argument('--cutoff', default=1.0,
                         help='Characteristic frequency cutoff of filter [1/days]',
                         type=float)
-    parser.add_argument('--clobber', action='store_true', default=True,
+    parser.add_argument('--clobber', action='store_true',
                         help='Overwrite output file?')
-    parser.add_argument('--verbose', action='store_true', default=True,
+    parser.add_argument('--verbose', action='store_true',
                         help='Write to a log file?')
     parser.add_argument('--logfile', '-l', help='Name of ascii log file',
                         default='keppixseries.log', dest='logfile', type=str)

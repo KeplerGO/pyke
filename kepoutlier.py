@@ -1,13 +1,14 @@
 import numpy as np
-import sys, time, re
 from astropy.io import fits as pyfits
 from matplotlib import pyplot as plt
-from math import *
-import kepio, kepmsg, kepkey, kepfit, kepstat
+from . import kepio, kepmsg, kepkey, kepfit, kepstat
 
 def kepoutlier(infile, outfile, datacol, nsig, stepsize, npoly, niter,
-               operation, ranges, plot, plotfit, clobber, verbose, logfile):
-
+               operation, ranges, plot, plotfit, clobber=False, verbose=False, logfile='kepoutlier.log'):
+    """
+    Parameters
+    ----------
+    """
     # startup parameters
     labelsize = 24
     ticksize = 16

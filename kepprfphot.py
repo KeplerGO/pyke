@@ -10,12 +10,7 @@ from matplotlib import pyplot as plt
 from astropy.io import fits as pyfits
 from scipy.optimize import fmin_powell
 from scipy.interpolate import RectBivariateSpline
-from . import kepio
-from . import kepmsg
-from . import kepkey
-from . import kepplot
-from . import kepfit
-from . import kepfunc
+from . import kepio, kepmsg, kepkey, kepplot, kepfit, kepfunc
 
 
 def kepprfphot(infile, outroot, columns, rows, fluxes, border, background,
