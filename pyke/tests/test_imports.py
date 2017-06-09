@@ -25,3 +25,5 @@ def test_import():
     from .. import kepimages
     from .. import keptimefix
     from .. import kepft
+    from .. import kepoutlier
+    from .. import kephead

@@ -30,7 +30,8 @@ entry_points = {'console_scripts': [
         'kepimages = pyke.kepimages:kepimages_main',
         'keptimefix = pyke.keptimefix:keptimefix_main',
         'kepft = pyke.kepft:kepft_main',
-        'kepoutlier = pyke.kepoutlier:kepoutlier_main'
+        'kepoutlier = pyke.kepoutlier:kepoutlier_main',
+        'kephead = pyke.kephead:kephead_main'
 ]}
 
 setup(name='pyke',
