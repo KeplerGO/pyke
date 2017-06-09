@@ -19,3 +19,4 @@ Modules/API
     kepstitch
     kepimages
     keptimefix
+    kepft
