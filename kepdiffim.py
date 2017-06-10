@@ -1,94 +1,61 @@
 import numpy as np
 from matplotlib import pyplot as plt
 from astropy.io import fits as pyfits
-import kepio, kepmsg, kepkey, kepplot, kepstat
-import sys, time, re, math
+from . import kepio, kepmsg, kepkey, kepplot, kepstat
 
-# -----------------------------------------------------------
-# core code
 
-def kepdiffim(infile,outfile,plotfile,imscale,colmap,filter,function,cutoff,
-              clobber,verbose,logfile,status,cmdLine=False):
-# input arguments
-
-    status = 0
-    np.seterr(all="ignore")
-
+def kepdiffim(infile, outfile, plotfile, imscale, colmap, filterlc, function,
+              cutoff, clobber, verbose, logfile):
 # log the call
-
-    hashline = '----------------------------------------------------------------------------'
+    hashline = '--------------------------------------------------------------'
     kepmsg.log(logfile,hashline,verbose)
     call = 'KEPDIFFIM -- '
-    call += 'infile='+infile+' '
-    call += 'outfile='+outfile+' '
-    call += 'plotfile='+plotfile+' '
-    call += 'imscale='+imscale+' '
-    call += 'colmap='+colmap+' '
-    filt = 'n'
-    if (filter): filt = 'y'
-    call += 'filter='+filt+ ' '
-    call += 'function='+function+' '
-    call += 'cutoff='+str(cutoff)+' '
-    overwrite = 'n'
-    if (clobber): overwrite = 'y'
-    call += 'clobber='+overwrite+ ' '
-    chatter = 'n'
-    if (verbose): chatter = 'y'
-    call += 'verbose='+chatter+' '
-    call += 'logfile='+logfile
+            'infile='+infile+' '
+            'outfile='+outfile+' '
+            'plotfile='+plotfile+' '
+            'imscale='+imscale+' '
+            'colmap='+colmap+' '
+            'filterlc='+filt+ ' '
+            'function='+function+' '
+            'cutoff='+str(cutoff)+' '
+            'clobber='+overwrite+ ' '
+            'verbose='+chatter+' '
+            'logfile='+logfile
     kepmsg.log(logfile,call+'\n',verbose)
 
-# start time
-
+    # start time
     kepmsg.clock('KEPDIFFIM started at: ',logfile,verbose)
 
-# test log file
-
-    logfile = kepmsg.test(logfile)
-
-# clobber output file
-
-    if clobber: status = kepio.clobber(outfile,logfile,verbose)
+    # clobber output file
+    if clobber:
+        kepio.clobber(outfile, logfile, verbose)
     if kepio.fileexists(outfile):
-        message = 'ERROR -- KEPDIFFIM: ' + outfile + ' exists. Use --clobber'
-        status = kepmsg.err(logfile,message,verbose)
+        errmsg = 'ERROR -- KEPDIFFIM: {} exists. Use --clobber'.format(outfile)
+        kepmsg.err(logfile, errmsg, verbose)
 
-# reference color map
+    # open TPF FITS file
+    kepid, channel, skygroup, module, output, quarter, season, \
+        ra, dec, column, row, kepmag, xdim, ydim, barytime = \
+        kepio.readTPF(infile, 'TIME', logfile, verbose)
+    kepid, channel, skygroup, module, output, quarter, season, \
+        ra, dec, column, row, kepmag, xdim, ydim, tcorr = \
+        kepio.readTPF(infile, 'TIMECORR', logfile, verbose)
+    kepid, channel, skygroup, module, output, quarter, season, \
+        ra, dec, column, row, kepmag, xdim, ydim, cadno = \
+        kepio.readTPF(infile, 'CADENCENO',logfile, verbose)
+    kepid, channel, skygroup, module, output, quarter, season, \
+        ra, dec, column, row, kepmag, xdim, ydim, fluxpixels = \
+        kepio.readTPF(infile, 'FLUX', logfile, verbose)
+    kepid, channel, skygroup, module, output, quarter, season, \
+        ra, dec, column, row, kepmag, xdim, ydim, errpixels = \
+        kepio.readTPF(infile, 'FLUX_ERR', logfile, verbose)
+    kepid, channel, skygroup, module, output, quarter, season, \
+        ra, dec, column, row, kepmag, xdim, ydim, qual = \
+        kepio.readTPF(infile, 'QUALITY', logfile, verbose)
 
-    if colmap == 'browse':
-        status = cmap_plot()
-
-# open TPF FITS file
-
-    if status == 0:
-        kepid, channel, skygroup, module, output, quarter, season, \
-            ra, dec, column, row, kepmag, xdim, ydim, barytime, status = \
-            kepio.readTPF(infile,'TIME',logfile,verbose)
-    if status == 0:
-        kepid, channel, skygroup, module, output, quarter, season, \
-            ra, dec, column, row, kepmag, xdim, ydim, tcorr, status = \
-            kepio.readTPF(infile,'TIMECORR',logfile,verbose)
-    if status == 0:
-        kepid, channel, skygroup, module, output, quarter, season, \
-            ra, dec, column, row, kepmag, xdim, ydim, cadno, status = \
-            kepio.readTPF(infile,'CADENCENO',logfile,verbose)
-    if status == 0:
-        kepid, channel, skygroup, module, output, quarter, season, \
-            ra, dec, column, row, kepmag, xdim, ydim, fluxpixels, status = \
-            kepio.readTPF(infile,'FLUX',logfile,verbose)
-    if status == 0:
-        kepid, channel, skygroup, module, output, quarter, season, \
-            ra, dec, column, row, kepmag, xdim, ydim, errpixels, status = \
-            kepio.readTPF(infile,'FLUX_ERR',logfile,verbose)
-    if status == 0:
-        kepid, channel, skygroup, module, output, quarter, season, \
-            ra, dec, column, row, kepmag, xdim, ydim, qual, status = \
-            kepio.readTPF(infile,'QUALITY',logfile,verbose)
-
-# read mask defintion data from TPF file
-
-    if status == 0:
-        maskimg, pixcoord1, pixcoord2, status = kepio.readMaskDefinition(infile,logfile,verbose)
+    # read mask defintion data from TPF file
+    maskimg, pixcoord1, pixcoord2 = kepio.readMaskDefinition(infile, logfile,
+                                                             verbose)
 
 # print target data
 
@@ -142,16 +109,16 @@ def kepdiffim(infile,outfile,plotfile,imscale,colmap,filter,function,cutoff,
 
 # define data sampling
 
-    if status == 0 and filter:
+    if status == 0 and filterlc:
         tpf, status = kepio.openfits(infile,'readonly',logfile,verbose)
-    if status == 0 and filter:
+    if status == 0 and filterlc:
         cadence, status = kepkey.cadence(tpf[1],infile,logfile,verbose)
         tr = 1.0 / (cadence / 86400)
         timescale = 1.0 / (cutoff / tr)
 
 # define convolution function
 
-    if status == 0 and filter:
+    if status == 0 and filterlc:
         if function == 'boxcar':
             filtfunc = np.ones(int(np.ceil(timescale)))
         elif function == 'gauss':
@@ -169,7 +136,7 @@ def kepdiffim(infile,outfile,plotfile,imscale,colmap,filter,function,cutoff,
 
 # pad time series at both ends with noise model
 
-    if status == 0 and filter:
+    if status == 0 and filterlc:
         for i in range(ydim * xdim):
             ave, sigma  = (np.mean(pixseries[i, :len(filtfunc)]),
                            np.std(pixseries[i, :len(filtfunc)]))
@@ -384,10 +351,8 @@ def cmap_plot():
     status = 1
     return status
 
-# -----------------------------------------------------------
-# main
+def kepdiffim_main():
 
-if '--shell' in sys.argv:
     import argparse
     parser = argparse.ArgumentParser(description='Difference imaging of pixels within a target mask')
     parser.add_argument('--shell', action='store_true', help='Are we running from the shell?')
@@ -398,7 +363,7 @@ if '--shell' in sys.argv:
     parser.add_argument('--plotfile', default='None', help='name of output PNG plot file', type=str)
     parser.add_argument('--imscale', default='logarithmic', help='type of image intensity scale', type=str, choices=['linear','logarithmic','squareroot'])
     parser.add_argument('--cmap', default='PuBu', help='image colormap', type=str)
-    parser.add_argument('--filter', action='store_true', help='High-pass Filter data?')
+    parser.add_argument('--filterlc', action='store_true', help='High-pass Filter data?')
 
     parser.add_argument('--function', help='filter function', default='boxcar', type=str, choices=['boxcar','gauss','sinc'])
     parser.add_argument('--cutoff', help='Characteristic frequency cutoff of filter [1/days]', type=int, default=1.0)
@@ -410,10 +375,4 @@ if '--shell' in sys.argv:
 
     args = parser.parse_args()
 
-    cmdLine=True
-    kepdiffim(args.infile, args.outfile, args.plotfile, args.imscale, args.cmap, args.filter, args.function, args.cutoff,
-            args.clobber, args.verbose, args.logfile, args.status, cmdLine)
-else:
-    from pyraf import iraf
-    parfile = iraf.osfn("kepler$kepdiffim.par")
-    t = iraf.IrafTaskFactory(taskname="kepdiffim", value=parfile, function=kepdiffim)
+    kepdiffim(args.infile, args.outfile, args.plotfile, args.imscale, args.cmap, args.filterlc, args.function, args.cutoff, args.clobber, args.verbose, args.logfile, args.status, cmdLine)
