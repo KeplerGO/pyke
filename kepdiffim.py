@@ -1,30 +1,30 @@
+from . import kepio, kepmsg, kepkey, kepplot, kepstat
 import numpy as np
 from matplotlib import pyplot as plt
 from astropy.io import fits as pyfits
-from . import kepio, kepmsg, kepkey, kepplot, kepstat
 
 
 def kepdiffim(infile, outfile, plotfile, imscale, colmap, filterlc, function,
               cutoff, clobber, verbose, logfile):
-# log the call
+    # log the call
     hashline = '--------------------------------------------------------------'
     kepmsg.log(logfile,hashline,verbose)
-    call = 'KEPDIFFIM -- '
-            'infile='+infile+' '
-            'outfile='+outfile+' '
-            'plotfile='+plotfile+' '
-            'imscale='+imscale+' '
-            'colmap='+colmap+' '
-            'filterlc='+filt+ ' '
-            'function='+function+' '
-            'cutoff='+str(cutoff)+' '
-            'clobber='+overwrite+ ' '
-            'verbose='+chatter+' '
-            'logfile='+logfile
-    kepmsg.log(logfile,call+'\n',verbose)
+    call = ('KEPDIFFIM -- '
+            + ' infile={}'.format(infile)
+            + ' outfile={}'.format(outfile)
+            + ' plotfile={}'.format(plotfile)
+            + ' imscale={}'.format(imscale)
+            + ' colmap={}'.format(colmap)
+            + ' filterlc={}'.format(filt)
+            + ' function={}'.format(function)
+            + ' cutoff={}'.format(cutoff)
+            + ' clobber={}'.format(overwrite)
+            + ' verbose={}'.format(chatter)
+            + ' logfile={}'.format(logfile))
+    kepmsg.log(logfile, call+'\n', verbose)
 
     # start time
-    kepmsg.clock('KEPDIFFIM started at: ',logfile,verbose)
+    kepmsg.clock('KEPDIFFIM started at: ', logfile, verbose)
 
     # clobber output file
     if clobber:
@@ -57,221 +57,188 @@ def kepdiffim(infile, outfile, plotfile, imscale, colmap, filterlc, function,
     maskimg, pixcoord1, pixcoord2 = kepio.readMaskDefinition(infile, logfile,
                                                              verbose)
 
-# print target data
+    # print target data
+    print('')
+    print('      KepID:  %s' % kepid)
+    print(' RA (J2000):  %s' % ra)
+    print('Dec (J2000): %s' % dec)
+    print('     KepMag:  %s' % kepmag)
+    print('   SkyGroup:    %2s' % skygroup)
+    print('     Season:    %2s' % str(season))
+    print('    Channel:    %2s' % channel)
+    print('     Module:    %2s' % module)
+    print('     Output:     %1s' % output)
+    print('')
 
-    if status == 0:
-        print ''
-        print '      KepID:  %s' % kepid
-        print ' RA (J2000):  %s' % ra
-        print 'Dec (J2000): %s' % dec
-        print '     KepMag:  %s' % kepmag
-        print '   SkyGroup:    %2s' % skygroup
-        print '     Season:    %2s' % str(season)
-        print '    Channel:    %2s' % channel
-        print '     Module:    %2s' % module
-        print '     Output:     %1s' % output
-        print ''
+    # how many quality = 0 rows?
+    npts = 0
+    nrows = len(fluxpixels)
+    for i in range(nrows):
+        if (qual[i] == 0 and np.isfinite(barytime[i])
+            and np.isfinite(fluxpixels[i, int(ydim * xdim / 2)])):
+            npts += 1
+    time = np.empty((npts))
+    timecorr = np.empty((npts))
+    cadenceno = np.empty((npts))
+    quality = np.empty((npts))
+    pixseries = np.empty((ydim * xdim, npts))
+    errseries = np.empty((ydim * xdim, npts))
 
-# how many quality = 0 rows?
-
-    if status == 0:
+    # construct output light curves
+    nptsx = 0
+    for i in range(ydim*xdim):
         npts = 0
-        nrows = len(fluxpixels)
-        for i in range(nrows):
-            if qual[i] == 0 and np.isfinite(barytime[i]) \
-                    and np.isfinite(fluxpixels[i,int(ydim*xdim/2)]):
+        for k in range(nrows):
+            if (qual[k] == 0
+                and np.isfinite(barytime[k])
+                and np.isfinite(fluxpixels[k, int(ydim * xdim / 2)])):
+                time[npts] = barytime[k]
+                timecorr[npts] = tcorr[k]
+                cadenceno[npts] = cadno[k]
+                quality[npts] = qual[k]
+                pixseries[i, npts] = fluxpixels[k, nptsx]
+                errseries[i, npts] = errpixels[k, nptsx]
                 npts += 1
-        time = np.empty((npts))
-        timecorr = np.empty((npts))
-        cadenceno = np.empty((npts))
-        quality = np.empty((npts))
-        pixseries = np.empty((ydim*xdim,npts))
-        errseries = np.empty((ydim*xdim,npts))
+        nptsx += 1
 
-# construct output light curves
-
-    if status == 0:
-        nptsx = 0
-        for i in range(ydim*xdim):
-            npts = 0
-            for k in range(nrows):
-                if (qual[k] == 0 and
-                    np.isfinite(barytime[k]) and
-                    np.isfinite(fluxpixels[k,int(ydim*xdim/2)])):
-                    time[npts] = barytime[k]
-                    timecorr[npts] = tcorr[k]
-                    cadenceno[npts] = cadno[k]
-                    quality[npts] = qual[k]
-                    pixseries[i,npts] = fluxpixels[k,nptsx]
-                    errseries[i,npts] = errpixels[k,nptsx]
-                    npts += 1
-            nptsx += 1
-
-# define data sampling
-
-    if status == 0 and filterlc:
-        tpf, status = kepio.openfits(infile,'readonly',logfile,verbose)
-    if status == 0 and filterlc:
-        cadence, status = kepkey.cadence(tpf[1],infile,logfile,verbose)
+    # define data sampling
+    if filterlc:
+        tpf = kepio.openfits(infile, 'readonly', logfile, verbose)
+        cadence = kepkey.cadence(tpf[1], infile, logfile, verbose)
         tr = 1.0 / (cadence / 86400)
         timescale = 1.0 / (cutoff / tr)
 
-# define convolution function
-
-    if status == 0 and filterlc:
+        # define convolution function
         if function == 'boxcar':
             filtfunc = np.ones(int(np.ceil(timescale)))
         elif function == 'gauss':
             timescale /= 2
             dx = np.ceil(timescale * 10 + 1)
             filtfunc = kepfunc.gauss()
-            filtfunc = filtfunc([1.0,dx/2-1.0,timescale],linspace(0,dx-1,dx))
+            filtfunc = filtfunc([1.0, dx / 2 - 1.0, timescale],
+                                linspace(0, dx - 1, dx))
         elif function == 'sinc':
             dx = np.ceil(timescale * 12 + 1)
-            fx = linspace(0,dx-1,dx)
+            fx = linspace(0, dx - 1, dx)
             fx = fx - dx / 2 + 0.5
             fx /= timescale
             filtfunc = np.sinc(fx)
         filtfunc /= np.sum(filtfunc)
 
-# pad time series at both ends with noise model
-
-    if status == 0 and filterlc:
+    # pad time series at both ends with noise model
         for i in range(ydim * xdim):
             ave, sigma  = (np.mean(pixseries[i, :len(filtfunc)]),
                            np.std(pixseries[i, :len(filtfunc)]))
             padded = np.append(kepstat.randarray(np.ones(len(filtfunc)) * ave,
-                    np.ones(len(filtfunc)) * sigma), pixseries[i,:])
-            ave, sigma  = (np.mean(pixseries[i,-len(filtfunc):]),
-                           np.std(pixseries[i,-len(filtfunc):]))
-            padded = np.append(padded, kepstat.randarray(np.ones(len(filtfunc))
-                    * ave, np.ones(len(filtfunc)) * sigma))
+                               np.ones(len(filtfunc)) * sigma), pixseries[i, :])
+            ave, sigma  = (np.mean(pixseries[i, -len(filtfunc):]),
+                           np.std(pixseries[i, -len(filtfunc):]))
+            padded = np.append(padded,
+                               kepstat.randarray(np.ones(len(filtfunc)) * ave,
+                               np.ones(len(filtfunc)) * sigma))
 
-# convolve data
-            if status == 0:
-                convolved = np.convolve(padded,filtfunc,'same')
-# remove padding from the output array
-            if status == 0:
-                outdata = convolved[len(filtfunc):-len(filtfunc)]
-# subtract low frequencies
-            if status == 0:
-                outmedian = np.median(outdata)
-                pixseries[i,:] = pixseries[i,:] - outdata + outmedian
+            # convolve data
+            convolved = np.convolve(padded,filtfunc,'same')
+            # remove padding from the output array
+            outdata = convolved[len(filtfunc):-len(filtfunc)]
+            # subtract low frequencies
+            outmedian = np.median(outdata)
+            pixseries[i, :] = pixseries[i, :] - outdata + outmedian
 
-# sum pixels over cadence
+    # sum pixels over cadence
+    nptsx = 0
+    nrows = len(fluxpixels)
+    pixsum = np.zeros((ydim*xdim))
+    errsum = np.zeros((ydim*xdim))
+    for i in range(npts):
+        if quality[i] == 0:
+            pixsum += pixseries[:, i]
+            errsum += errseries[:, i] **2
+            nptsx += 1
+    pixsum /= nptsx
+    errsum = np.sqrt(errsum) / nptsx
 
-    if status == 0:
-        nptsx = 0
-        nrows = len(fluxpixels)
-        pixsum = np.zeros((ydim*xdim))
-        errsum = np.zeros((ydim*xdim))
-        for i in range(npts):
-            if quality[i] == 0:
-                pixsum += pixseries[:,i]
-                errsum += errseries[:,i]**2
-                nptsx += 1
-        pixsum /= nptsx
-        errsum = np.sqrt(errsum) / nptsx
+    # calculate standard deviation pixels
+    pixvar = np.zeros((ydim*xdim))
+    for i in range(npts):
+        if quality[i] == 0:
+            pixvar += (pixsum - pixseries[:,i] / errseries[:,i])**2
+    pixvar = np.sqrt(pixvar)
 
-# calculate standard deviation pixels
+    # median pixel errors
+    errmed = np.empty((ydim*xdim))
+    for i in range(ydim*xdim):
+        errmed[i] = np.median(errseries[:,i])
 
-    if status == 0:
-        pixvar = np.zeros((ydim*xdim))
-        for i in range(npts):
-            if quality[i] == 0:
-                pixvar += (pixsum - pixseries[:,i] / errseries[:,i])**2
-        pixvar = np.sqrt(pixvar)
+    # calculate chi distribution pixels
+    pixdev = np.zeros((ydim*xdim))
+    for i in range(npts):
+        if quality[i] == 0:
+            pixdev += ((pixsum - pixseries[:,i]) / pixsum)**2
+    pixdev = np.sqrt(pixdev)
 
-# median pixel errors
+    # image scale and intensity limits
+    pixsum_pl, zminsum, zmaxsum = kepplot.intScale1D(pixsum, imscale)
+    pixvar_pl, zminvar, zmaxvar = kepplot.intScale1D(pixvar, imscale)
+    pixdev_pl, zmindev, zmaxdev = kepplot.intScale1D(pixdev, imscale)
 
-    if status == 0:
-        errmed = np.empty((ydim*xdim))
-        for i in range(ydim*xdim):
-            errmed[i] = np.median(errseries[:,i])
+    # construct output summed image
+    imgsum = np.empty((ydim, xdim))
+    imgvar = np.empty((ydim, xdim))
+    imgdev = np.empty((ydim, xdim))
+    imgsum_pl = np.empty((ydim, xdim))
+    imgvar_pl = np.empty((ydim, xdim))
+    imgdev_pl = np.empty((ydim, xdim))
+    n = 0
+    for i in range(ydim):
+        for j in range(xdim):
+            imgsum[i, j] = pixsum[n]
+            imgvar[i, j] = pixvar[n]
+            imgdev[i, j] = pixdev[n]
+            imgsum_pl[i, j] = pixsum_pl[n]
+            imgvar_pl[i, j] = pixvar_pl[n]
+            imgdev_pl[i, j] = pixdev_pl[n]
+            n += 1
 
-# calculate chi distribution pixels
+    # construct output file
+    instruct = kepio.openfits(infile, 'readonly', logfile, verbose)
+    kepkey.history(call, instruct[0], outfile, logfile, verbose)
+    hdulist = pyfits.HDUList(instruct[0])
+    hdulist.writeto(outfile)
+    kepkey.new('EXTNAME', 'FLUX', 'name of extension', instruct[2], outfile,
+               logfile, verbose)
+    pyfits.append(outfile, imgsum, instruct[2].header)
+    kepkey.new('EXTNAME', 'CHI', 'name of extension', instruct[2], outfile,
+               logfile, verbose)
+    pyfits.append(outfile, imgvar, instruct[2].header)
+    kepkey.new('EXTNAME', 'STDDEV', 'name of extension', instruct[2], outfile,
+               logfile, verbose)
+    pyfits.append(outfile, imgdev, instruct[2].header)
+    kepkey.new('EXTNAME', 'APERTURE', 'name of extension', instruct[2], outfile,
+               logfile, verbose)
+    pyfits.append(outfile, instruct[2].data,instruct[2].header)
+    kepio.closefits(instruct, logfile, verbose)
 
-    if status == 0:
-        pixdev = np.zeros((ydim*xdim))
-        for i in range(npts):
-            if quality[i] == 0:
-                pixdev += ((pixsum - pixseries[:,i]) / pixsum)**2
-        pixdev = np.sqrt(pixdev)
+    # pixel limits of the subimage
+    ymin = row
+    ymax = ymin + ydim
+    xmin = column
+    xmax = xmin + xdim
 
-# image scale and intensity limits
+    # plot limits for summed image
+    ymin = float(ymin) - 0.5
+    ymax = float(ymax) - 0.5
+    xmin = float(xmin) - 0.5
+    xmax = float(xmax) - 0.5
 
-    if status == 0:
-        pixsum_pl, zminsum, zmaxsum = kepplot.intScale1D(pixsum,imscale)
-        pixvar_pl, zminvar, zmaxvar = kepplot.intScale1D(pixvar,imscale)
-        pixdev_pl, zmindev, zmaxdev = kepplot.intScale1D(pixdev,imscale)
+    # plot style
+    plotimage(imgsum_pl, imgvar_pl, imgdev_pl, zminsum, zminvar, zmindev,
+              zmaxsum, zmaxvar, zmaxdev, xmin, xmax, ymin, ymax, colmap, plotfile)
 
-# construct output summed image
-
-    if status == 0:
-        imgsum = np.empty((ydim,xdim))
-        imgvar = np.empty((ydim,xdim))
-        imgdev = np.empty((ydim,xdim))
-        imgsum_pl = np.empty((ydim,xdim))
-        imgvar_pl = np.empty((ydim,xdim))
-        imgdev_pl = np.empty((ydim,xdim))
-        n = 0
-        for i in range(ydim):
-            for j in range(xdim):
-                imgsum[i,j] = pixsum[n]
-                imgvar[i,j] = pixvar[n]
-                imgdev[i,j] = pixdev[n]
-                imgsum_pl[i,j] = pixsum_pl[n]
-                imgvar_pl[i,j] = pixvar_pl[n]
-                imgdev_pl[i,j] = pixdev_pl[n]
-                n += 1
-
-# construct output file
-
-    if status == 0:
-        instruct, status = kepio.openfits(infile,'readonly',logfile,verbose)
-        status = kepkey.history(call,instruct[0],outfile,logfile,verbose)
-        hdulist = pyfits.HDUList(instruct[0])
-        hdulist.writeto(outfile)
-        status = kepkey.new('EXTNAME','FLUX','name of extension',instruct[2],outfile,logfile,verbose)
-        pyfits.append(outfile,imgsum,instruct[2].header)
-        status = kepkey.new('EXTNAME','CHI','name of extension',instruct[2],outfile,logfile,verbose)
-        pyfits.append(outfile,imgvar,instruct[2].header)
-        status = kepkey.new('EXTNAME','STDDEV','name of extension',instruct[2],outfile,logfile,verbose)
-        pyfits.append(outfile,imgdev,instruct[2].header)
-        status = kepkey.new('EXTNAME','APERTURE','name of extension',instruct[2],outfile,logfile,verbose)
-        pyfits.append(outfile,instruct[2].data,instruct[2].header)
-        status = kepio.closefits(instruct,logfile,verbose)
-
-# pixel limits of the subimage
-
-    if status == 0:
-        ymin = row
-        ymax = ymin + ydim
-        xmin = column
-        xmax = xmin + xdim
-
-# plot limits for summed image
-
-        ymin = float(ymin) - 0.5
-        ymax = float(ymax) - 0.5
-        xmin = float(xmin) - 0.5
-        xmax = float(xmax) - 0.5
-
-# plot style
-
-    if status == 0:
-        plotimage(imgsum_pl,imgvar_pl,imgdev_pl,zminsum,zminvar,zmindev,
-                  zmaxsum,zmaxvar,zmaxdev,xmin,xmax,ymin,ymax,colmap,plotfile,cmdLine)
-
-# stop time
-
+    # stop time
     kepmsg.clock('KEPDIFFIM ended at: ',logfile,verbose)
 
-    return
-
-# -----------------------------------------------------------
 # plot channel image
-
 def plotimage(imgsum_pl,imgvar_pl,imgdev_pl,zminsum,zminvar,zmindev,
               zmaxsum,zmaxvar,zmaxdev,xmin,xmax,ymin,ymax,colmap,plotfile,cmdLine):
 
