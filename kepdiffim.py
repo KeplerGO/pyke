@@ -4,8 +4,76 @@ from matplotlib import pyplot as plt
 from astropy.io import fits as pyfits
 
 
-def kepdiffim(infile, outfile, plotfile, imscale, colmap, filterlc, function,
-              cutoff, clobber, verbose, logfile):
+def kepdiffim(infile, outfile, plotfile=None, imscale='logarithmic',
+              colmap='PuBu', filterlc=False, function='boxcar', cutoff=1.0,
+              clobber=False, verbose=False, logfile='kepdiffim.log'):
+    """
+    kepdiffim -- difference imaging of pixels within a target mask
+
+    kepdiffim plots the mean, standard deviation and chi distribution images
+    for the mask contained within a target pixel file. The standard deviation
+    on each pixel is defined as [mean - flux]^2 / [N - 1]. The chi distribution
+    is sqrt({[mean - flux] / sigma} 2). If required, the data can be fed
+    through a ``boxcar``, ``gaussian`` or ``sinc`` function high bandpass
+    filter in order to remove low frequency signal from the data. kepdiffim is
+    a diagnostic tool for identifying source contaminants in the background or
+    foreground of the target. It can be employed to identify pixels for
+    inclusion or exclusion when re-extracting a Kepler light curve from target
+    pixel files.
+
+    infile : str
+        The name of a MAST standard format FITS file containing Kepler Target
+        Pixel data within the first data extension.
+    outfile : str
+        The name of the output FITS file. This file has four data extensions.
+        The first called ``'FLUX'`` contains an image of the pixel-by-pixel
+        mean flux within target mask. The second contains the pixel variance
+        image of the mask pixels over time. The third contains the standard
+        deviation image, in this case the variance image is normalized to the
+        median 1-sigma error for each pixel. The fourth extension is the pixel
+        mask, as defined in the second extension of the target pixel file.
+    plotfile : str
+        Name of an optional diagnostic output plot file containing the results
+        of kepdiffim. An example is provided in Figure 1. Typically this is a
+        PNG format file. If no diagnostic file is required, plotfile can be
+        'None'. If plotfile='None' the plot will be generated but the plot will
+        not be saved to a file.
+    imscale : str
+        kepdiffim can plot images with three choices of image scales. The
+        choice is made using this argument.
+        The options are:
+
+        * linear
+
+        * logarithmic
+
+        * squareroot
+
+    cmap : str
+        color intensity scheme for the image display.
+    filter : bool
+        If ``filter=True``, the light curve for each pixel will be treated by
+        a high band-pass filter to remove long-term trends from e.g.
+        differential velocity aberration.
+    function : str
+        The functional form of the high pass-band filter. The options are:
+
+        * boxcar
+
+        * gauss
+
+        * sinc
+
+    cutoff : float
+        The frequency of the high pass-band cutoff in units of days^-1.
+
+    clobber : bool
+        Overwrite the output file?
+    verbose : bool
+        Print informative messages and warnings to the shell and logfile?
+    logfile : str
+        Name of the logfile containing error and warning messages.
+    """
     # log the call
     hashline = '--------------------------------------------------------------'
     kepmsg.log(logfile,hashline,verbose)
@@ -103,7 +171,7 @@ def kepdiffim(infile, outfile, plotfile, imscale, colmap, filterlc, function,
 
     # define data sampling
     if filterlc:
-        tpf = kepio.openfits(infile, 'readonly', logfile, verbose)
+        tpf = pyfits.open(infile)
         cadence = kepkey.cadence(tpf[1], infile, logfile, verbose)
         tr = 1.0 / (cadence / 86400)
         timescale = 1.0 / (cutoff / tr)
@@ -201,7 +269,7 @@ def kepdiffim(infile, outfile, plotfile, imscale, colmap, filterlc, function,
             n += 1
 
     # construct output file
-    instruct = kepio.openfits(infile, 'readonly', logfile, verbose)
+    instruct = pyfits.open(infile)
     kepkey.history(call, instruct[0], outfile, logfile, verbose)
     hdulist = pyfits.HDUList(instruct[0])
     hdulist.writeto(outfile)
@@ -233,24 +301,25 @@ def kepdiffim(infile, outfile, plotfile, imscale, colmap, filterlc, function,
 
     # plot style
     plotimage(imgsum_pl, imgvar_pl, imgdev_pl, zminsum, zminvar, zmindev,
-              zmaxsum, zmaxvar, zmaxdev, xmin, xmax, ymin, ymax, colmap, plotfile)
+              zmaxsum, zmaxvar, zmaxdev, xmin, xmax, ymin, ymax, colmap,
+              plotfile)
 
     # stop time
     kepmsg.clock('KEPDIFFIM ended at: ',logfile,verbose)
 
 # plot channel image
-def plotimage(imgsum_pl,imgvar_pl,imgdev_pl,zminsum,zminvar,zmindev,
-              zmaxsum,zmaxvar,zmaxdev,xmin,xmax,ymin,ymax,colmap,plotfile,cmdLine):
+def plotimage(imgsum_pl, imgvar_pl, imgdev_pl, zminsum, zminvar, zmindev,
+              zmaxsum, zmaxvar, zmaxdev, xmin ,xmax, ymin, ymax, colmap,
+              plotfile):
 
-    plt.figure(figsize=[15,6])
-    #ion()
+    plt.figure(figsize=[15, 6])
     plt.clf()
 
-# plot the image window
-
-    ax = plt.axes([0.04,0.11,0.31,0.78])
-    plt.imshow(imgsum_pl,aspect='auto',interpolation='nearest',origin='lower',
-           vmin=zminsum,vmax=zmaxsum,extent=(xmin,xmax,ymin,ymax),cmap=colmap)
+    # plot the image window
+    ax = plt.axes([0.04, 0.11, 0.31, 0.78])
+    plt.imshow(imgsum_pl,aspect='auto', interpolation='nearest',
+               origin='lower', vmin=zminsum, vmax=zmaxsum,
+               extent=(xmin, xmax, ymin, ymax), cmap=colmap)
     plt.gca().set_autoscale_on(False)
     labels = ax.get_yticklabels()
     plt.setp(labels, 'rotation', 90)
@@ -260,11 +329,11 @@ def plotimage(imgsum_pl,imgvar_pl,imgdev_pl,zminsum,zminvar,zmindev,
     plt.ylabel('Pixel Row Number', {'color' : 'k'})
     plt.title('Flux', {'color' : 'k', 'fontsize' : '24'})
 
-# plot the variance window
-
-    plt.axes([0.36,0.11,0.31,0.78])
-    plt.imshow(imgvar_pl,aspect='auto',interpolation='nearest',origin='lower',
-           vmin=zminvar,vmax=zmaxvar,extent=(xmin,xmax,ymin,ymax),cmap=colmap)
+    # plot the variance window
+    plt.axes([0.36, 0.11, 0.31, 0.78])
+    plt.imshow(imgvar_pl, aspect='auto', interpolation='nearest',
+               origin='lower', vmin=zminvar, vmax=zmaxvar,
+               extent=(xmin, xmax, ymin, ymax), cmap=colmap)
     plt.gca().set_autoscale_on(False)
     plt.gca().xaxis.set_major_formatter(plt.ScalarFormatter(useOffset=False))
     plt.gca().yaxis.set_major_formatter(plt.ScalarFormatter(useOffset=False))
@@ -275,11 +344,11 @@ def plotimage(imgsum_pl,imgvar_pl,imgdev_pl,zminsum,zminvar,zmindev,
     except:
         plt.title('Chi Distribution', {'color' : 'k', 'fontsize' : '24'})
 
-# plot the normalized standard deviation window
-
-    plt.axes([0.68,0.11,0.31,0.78])
-    plt.imshow(imgdev_pl,aspect='auto',interpolation='nearest',origin='lower',
-           vmin=zmindev,vmax=zmaxdev,extent=(xmin,xmax,ymin,ymax),cmap=colmap)
+    # plot the normalized standard deviation window
+    plt.axes([0.68, 0.11, 0.31, 0.78])
+    plt.imshow(imgdev_pl, aspect='auto', interpolation='nearest',
+               origin='lower', vmin=zmindev, vmax=zmaxdev,
+               extent=(xmin, xmax, ymin, ymax), cmap=colmap)
     plt.gca().set_autoscale_on(False)
     plt.gca().xaxis.set_major_formatter(plt.ScalarFormatter(useOffset=False))
     plt.gca().yaxis.set_major_formatter(plt.ScalarFormatter(useOffset=False))
@@ -287,59 +356,39 @@ def plotimage(imgsum_pl,imgvar_pl,imgdev_pl,zminsum,zminvar,zmindev,
     plt.xlabel('Pixel Column Number', {'color' : 'k'})
     plt.title('Normalized Standard Deviation', {'color' : 'k', 'fontsize' : '24'})
 
-# render plot
-    plt.ion()
+    # render plot
     plt.show()
 
-    if plotfile.lower() != 'none':
+    if plotfile is not None:
         plt.savefig(plotfile)
-
-    return
-
-# -----------------------------------------------------------
-# these are the choices for the image colormap
-
-def cmap_plot():
-
-    plt.figure(1,figsize=[5,10])
-    #ion()
-    a=outer(ones(10),arange(0,1,0.01))
-    plt.subplots_adjust(top=0.99,bottom=0.00,left=0.01,right=0.8)
-    maps=[m for m in cm.datad if not m.endswith("_r")]
-    maps.sort()
-    l=len(maps)+1
-    for i, m in enumerate(maps):
-        print m
-        plt.subplot(l,1,i+1)
-        plt.setp(plt.gca(),xticklabels=[],xticks=[],yticklabels=[],yticks=[])
-        plt.imshow(a,aspect='auto',cmap=get_cmap(m),origin="lower")
-        plt.text(100.85,0.5,m,fontsize=10)
-    #ioff()
-    status = 1
-    return status
 
 def kepdiffim_main():
 
     import argparse
-    parser = argparse.ArgumentParser(description='Difference imaging of pixels within a target mask')
-    parser.add_argument('--shell', action='store_true', help='Are we running from the shell?')
-
+    parser = argparse.ArgumentParser(
+            description=('Difference imaging of pixels within a target mask'))
     parser.add_argument('infile', help='Name of input file', type=str)
     parser.add_argument('outfile', help='Name of FITS file to output', type=str)
-
-    parser.add_argument('--plotfile', default='None', help='name of output PNG plot file', type=str)
-    parser.add_argument('--imscale', default='logarithmic', help='type of image intensity scale', type=str, choices=['linear','logarithmic','squareroot'])
+    parser.add_argument('--plotfile', default='None',
+                        help='name of output PNG plot file', type=str)
+    parser.add_argument('--imscale', default='logarithmic',
+                        help='type of image intensity scale', type=str,
+                        choices=['linear', 'logarithmic', 'squareroot'])
     parser.add_argument('--cmap', default='PuBu', help='image colormap', type=str)
-    parser.add_argument('--filterlc', action='store_true', help='High-pass Filter data?')
-
-    parser.add_argument('--function', help='filter function', default='boxcar', type=str, choices=['boxcar','gauss','sinc'])
-    parser.add_argument('--cutoff', help='Characteristic frequency cutoff of filter [1/days]', type=int, default=1.0)
-
-    parser.add_argument('--clobber', action='store_true', help='Overwrite output file?')
-    parser.add_argument('--verbose', action='store_true', help='Write to a log file?')
-    parser.add_argument('--logfile', '-l', help='Name of ascii log file', default='kepdiffim.log', dest='logfile', type=str)
-    parser.add_argument('--status', '-e', help='Exit status (0=good)', default=0, dest='status', type=int)
-
+    parser.add_argument('--filterlc', action='store_true',
+                        help='High-pass Filter data?')
+    parser.add_argument('--function', help='filter function', default='boxcar',
+                        type=str, choices=['boxcar','gauss','sinc'])
+    parser.add_argument('--cutoff',
+                        help='Characteristic frequency cutoff of filter [1/days]',
+                        type=int, default=1.0)
+    parser.add_argument('--clobber', action='store_true',
+                        help='Overwrite output file?')
+    parser.add_argument('--verbose', action='store_true',
+                        help='Write to a log file?')
+    parser.add_argument('--logfile', '-l', help='Name of ascii log file',
+                        default='kepdiffim.log', dest='logfile', type=str)
     args = parser.parse_args()
-
-    kepdiffim(args.infile, args.outfile, args.plotfile, args.imscale, args.cmap, args.filterlc, args.function, args.cutoff, args.clobber, args.verbose, args.logfile, args.status, cmdLine)
+    kepdiffim(args.infile, args.outfile, args.plotfile, args.imscale,
+              args.cmap, args.filterlc, args.function, args.cutoff,
+              args.clobber, args.verbose, args.logfile)

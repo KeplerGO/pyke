@@ -31,7 +31,8 @@ entry_points = {'console_scripts': [
         'keptimefix = pyke.keptimefix:keptimefix_main',
         'kepft = pyke.kepft:kepft_main',
         'kepoutlier = pyke.kepoutlier:kepoutlier_main',
-        'kephead = pyke.kephead:kephead_main'
+        'kephead = pyke.kephead:kephead_main',
+        'kepdiffim = pyke.kepdiffim:kepdiffim_main'
 ]}
 
 setup(name='pyke',
