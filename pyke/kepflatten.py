@@ -1,10 +1,10 @@
+from . import kepio, kepmsg, kepkey, kepfit, kepstat, kepfunc
 import re
 import numpy as np
 import matplotlib.pyplot as plt
 from copy import copy
 from astropy.io import fits as pyfits
 from tqdm import tqdm
-from . import kepio, kepmsg, kepkey, kepfit, kepstat, kepfunc
 
 
 __all__ = ['kepflatten']
@@ -40,7 +40,7 @@ def kepflatten(infile, outfile, datacol='PDCSAP_FLUX',
         infile but with NaN timestamps removed and two new columns in the 1st
         extension - DETSAP_FLUX (a flattened or detrended for low-frequency
         variations version of the data) and DETSAP_FLUX_ERR (the associated
-        1-σ error).
+        1-sigma error).
     datacol : str
         The column name containing data stored within extension 1 of infile.
         Typically this name is SAP_FLUX (Simple Aperture Photometry fluxes),
@@ -48,16 +48,16 @@ def kepflatten(infile, outfile, datacol='PDCSAP_FLUX',
         (SAP_FLUX corrected for systematic artifacts by the PyKE tool
         kepcotrend).
     errcol : str
-        The column name containing photometric 1-σ errors stored within
-        extension 1 of infile. Typically this name is SAP_FLUX_ERR (Simple
-        Aperture Photometry fluxes), PDCSAP_FLUX_ERR (Pre-search Data
-        Conditioning fluxes). The error column coupled to CBVSAP_FLUX data
-        is SAP_FLUX_ERR. kepflatten normalizes datacol and errcol consistently
-        using a series of best fit polynomials.
+        The column name containing photometric 1-standard deviation errors
+        stored within extension 1 of infile. Typically this name is
+        SAP_FLUX_ERR (Simple Aperture Photometry fluxes), PDCSAP_FLUX_ERR
+        (Pre-search Data Conditioning fluxes). The error column coupled to
+        CBVSAP_FLUX data is SAP_FLUX_ERR. kepflatten normalizes datacol and
+        errcol consistently using a series of best fit polynomials.
     nsig : float
-        The sigma clipping threshold in units of σ. Data deviating from a best
-        fit function by more than the threshold will ignored during subsequent
-        fit iterations.
+        The sigma clipping threshold in units of standard deviation. Data
+        deviating from a best fit function by more than the threshold will
+        ignored during subsequent fit iterations.
     stepsize : float
         The data within datacol is unlikely to be well represented by a single
         polynomial function. stepsize splits the data up into a series of time

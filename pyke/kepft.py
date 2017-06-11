@@ -79,7 +79,7 @@ def kepft(infile, outfile, fcol='SAP_FLUX', pmin=0.1, pmax=10., nfreq=100,
         errmsg = 'ERROR -- KEPFT: {} exists. Use --clobber'.format(clobber)
         kepmsg.err(logfile, errmsg, verbose)
     ## open input file
-    instr = kepio.openfits(infile, 'readonly', logfile, verbose)
+    instr = pyfits.open(infile)
     tstart, tstop, bjdref, cadence = kepio.timekeys(instr, infile, logfile,
                                                     verbose)
     ## fudge non-compliant FITS keywords with no values
@@ -113,7 +113,7 @@ def kepft(infile, outfile, fcol='SAP_FLUX', pmin=0.1, pmax=10., nfreq=100,
     ## history keyword in output file
     kepkey.history(call, instr[0], outfile, logfile, verbose)
     ## close input file
-    kepio.closefits(instr, logfile, verbose)
+    instr.close()
 
     ## data limits
     nrm = int(math.log10(power.max()))

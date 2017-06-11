@@ -15,19 +15,20 @@ def keptrial(infile, outfile, datacol='SAP_FLUX', errcol='SAP_FLUX_ERR',
     keptrial -- Calculate best period and error estimate from time series
 
     ``keptrial`` measures the strongest period within the frequency range
-    ``fmin`` to ``fmax`` and estimates the 1-σ error associated with that
-    period. The error estimate is performed by constructing ntrial new light
-    curves from the original data provided in datacol and adjusting each
-    individual data point according to a random number generator and a shot
-    noise model. While a shot noise model is not uniformly applicable to all
-    Kepler targets it provides a useful 1st order estimate for most. A power
-    spectrum is calculated for each light curve using a user-specified method
-    and the highest peak in each power spectrum recorded. The distribution of
-    peaks is fit by a normal function, the centroid is adopted as the
-    best period and the 1-σ error is taken from the standard deviation. A
-    confidence limit is recorded as the range within which all trial periods
-    fall. While this is termed a '100%' confidence limit, this only refers to
-    the total number of trials rather than formal confidence.
+    ``fmin`` to ``fmax`` and estimates 1-standard deviation error associated
+    with that period. The error estimate is performed by constructing ntrial
+    new light curves from the original data provided in datacol and adjusting
+    each individual data point according to a random number generator and a
+    shot noise model. While a shot noise model is not uniformly applicable to
+    all Kepler targets it provides a useful 1st order estimate for most. A
+    power spectrum is calculated for each light curve using a user-specified
+    method and the highest peak in each power spectrum recorded. The
+    distribution of peaks is fit by a normal function, the centroid is adopted
+    as the best period and 1-standard deviation error is taken from the
+    standard deviation. A confidence limit is recorded as the range within
+    which all trial periods fall. While this is termed a '100%' confidence
+    limit, this only refers to the total number of trials rather than formal
+    confidence.
 
     The larger the number of ``ntrials``, the more robust the result. The
     values of nfreq and ntrial have to be chosen carefully to avoid excessive

@@ -88,7 +88,7 @@ def kepstddev(infile, outfile, datacol='PDCSAP_FLUX', timescale=6.5,
         kepmsg.err(logfile, errmsg, verbose)
 
     # open input file
-    instr = kepio.openfits(infile, 'readonly', logfile, verbose)
+    instr = pyfits.open(infile)
     tstart, tstop, bjdref, cadence = kepio.timekeys(instr, infile, logfile,
                                                     verbose)
     try:

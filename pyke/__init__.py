@@ -9,6 +9,9 @@ from .keparray import *
 from .kepbls import *
 from .kepclip import *
 from .kepconvert import *
+from .kepcotrend import *
+from .kepdetrend import *
+from .kepdiffim import *
 from .kepdynamic import *
 from .kepextract import *
 from .kepfilter import *
@@ -29,6 +32,7 @@ from .keppca import *
 from .keppixseries import *
 from .kepplot import *
 from .kepprf import *
+from .kepprfphot import *
 from .kepsmooth import *
 from .kepstat import *
 from .kepstddev import *

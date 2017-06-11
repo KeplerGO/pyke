@@ -32,7 +32,9 @@ def kepfilter(infile, outfile, passband, datacol='SAP_FLUX', function='boxcar',
         The options are:
 
         * boxcar
+
         * gauss
+
         * sinc
     cutoff : float
         The frequency of the bandpass cutoff in units of days-1.
@@ -43,7 +45,9 @@ def kepfilter(infile, outfile, passband, datacol='SAP_FLUX', function='boxcar',
         The options are:
 
         * low
+
         * high
+
     plot : bool
         Plot the original light curve and the result of the filter?
     clobber : bool
@@ -89,7 +93,7 @@ def kepfilter(infile, outfile, passband, datacol='SAP_FLUX', function='boxcar',
         kepmsg.err(logfile, message, verbose)
 
     ## open input file
-    instr = kepio.openfits(infile, 'readonly', logfile, verbose)
+    instr = pyfits.open(infile, 'readonly')
     tstart, tstop, bjdref, cadence = kepio.timekeys(instr, infile,
                                                     logfile, verbose)
     try:

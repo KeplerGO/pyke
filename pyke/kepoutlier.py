@@ -300,7 +300,7 @@ def kepoutlier(infile, outfile, datacol, nsig=3.0, stepsize=1.0, npoly=3,
     # write output file
     instr.writeto(outfile)
     # close input file
-    kepio.closefits(instr, logfile, verbose)
+    instr.close()
     kepmsg.clock('KEPOUTLIER completed at', logfile, verbose)
 
 def kepoutiler_main():

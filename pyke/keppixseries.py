@@ -449,7 +449,7 @@ def keppixseries(infile, outfile, plotfile=None, plottype='global',
         kepkey.new('EXTNAME', 'APERTURE', 'name of extension', instruct[2],
                    outfile, logfile, verbose)
         pyfits.append(outfile, instruct[2].data, instruct[2].header)
-        kepio.closefits(instruct, logfile, verbose)
+        instruct.close()
     else:
         warnmsg = ('WARNING -- KEPPIXSERIES: output FITS file requires > 999'
                    'columns. Non-compliant with FITS convention.')

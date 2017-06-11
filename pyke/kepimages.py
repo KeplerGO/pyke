@@ -36,14 +36,14 @@ def kepimages(infile, prefix, imtype='FLUX', ranges='0,0', clobber=True,
     * ``FLUX`` -- calibrated pixel, background-subtracted, cosmic ray-removed
     fluxes in units of e-/s
 
-    * ``FLUX_ERR`` -- 1-σ errors on the FLUX image, as propagated through the
-    pixel calibration
+    * ``FLUX_ERR`` -- 1-standard deviation errors on the FLUX image, as
+    propagated through the pixel calibration
 
     * ``FLUX_BKG`` -- the background that has been subtracted from the FLUX
     image in units of e-/s
 
-    * ``FLUX_BKG_ERR`` -- 1-σ errors on the FLUX_BKG image, as propagated
-    through the pixel calibration
+    * ``FLUX_BKG_ERR`` -- 1-standard deviation errors on the FLUX_BKG image, as
+    propagated through the pixel calibration
 
     * ``COSMIC_RAYS`` -- the cosmic ray map that has been subtracted from the
     FLUX image in units of e-/s
@@ -270,7 +270,7 @@ def kepimages(infile, prefix, imtype='FLUX', ranges='0,0', clobber=True,
         sys.stdout.flush()
 
     # close input structure
-    kepio.closefits(instr, logfile, verbose)
+    instr.close()
     print ('\n')
 
     # end time

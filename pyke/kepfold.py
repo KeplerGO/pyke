@@ -48,12 +48,12 @@ def kepfold(infile, outfile, period, bjd0, bindata=False,
         * `mean` calculates the mean of all data points contained within a bin.
         * `median` calculates the median of all data points within a bin.
         * `sigclip` calculates a mean iteratively. Each iteration rejects data
-        lying further than a threshold number of standard deviations (σ) from
-        the mean before recalculating the result.
+        lying further than a threshold number of standard deviations from the
+        mean before recalculating the result.
     threshold : float
         The sigma clipping threshold in units of the standard deviation about
-        the calculated mean within a phase bin. A typical outlier lies > 3.0σ
-        from the mean.
+        the calculated mean within a phase bin. A typical outlier
+        lies > 3.0 standard deviations from the mean.
     niter : int
         The maximum number of iterations over which to reject outliers before
         accepting the sigclip result.

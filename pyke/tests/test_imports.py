@@ -1,30 +1,39 @@
 def test_import():
+    from .. import keparray
+    from .. import kepbls
+    from .. import kepclip
+    from .. import kepconvert
+    from .. import kepcotrend
+    from .. import kepdiffim
+    from .. import kepdynamic
+    from .. import kepextract
+    from .. import kepffi
+    from .. import kepfilter
+    from .. import kepfit
+    from .. import kepflatten
+    from .. import kepfold
+    from .. import kepfourier
+    from .. import kepft
+    from .. import kepfunc
+    from .. import kephead
+    from .. import kepimages
     from .. import kepio
+    from .. import kepkey
     from .. import kepmask
     from .. import kepmsg
-    from .. import kepkey
-    from .. import kepplot
-    from .. import kepstat
-    from .. import kepfunc
-    from .. import keparray
-    from .. import kepprf
-    from .. import kepfit
-    from .. import kepfold
-    from .. import kepclip
-    from .. import kepsmooth
-    from .. import kepflatten
-    from .. import kepdynamic
-    from .. import kepstddev
-    from .. import kepwindow
-    from .. import keptrim
-    from .. import keppca
-    from .. import kepconvert
-    from .. import kepfilter
-    from .. import kepextract
-    from .. import keptrial
-    from .. import kepimages
-    from .. import keptimefix
-    from .. import kepft
     from .. import kepoutlier
-    from .. import kephead
+    from .. import keppca
     from .. import keppixseries
+    from .. import kepplot
+    from .. import kepprf
+    from .. import kepprfphot
+    from .. import keprange
+    from .. import kepsmooth
+    from .. import kepstat
+    from .. import kepstddev
+    from .. import kepstitch
+    from .. import keptimefix
+    from .. import keptrial
+    from .. import keptrim
+    from .. import kepwindow
+
