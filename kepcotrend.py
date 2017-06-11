@@ -637,9 +637,9 @@ def kepcotrend(infile, outfile, bvfile, listbv, fitmethod='llsq', fitpower=1,
 
     # clobber output file
     if clobber:
-        kepio.clobber(outfile,logfile,verbose)
+        kepio.clobber(outfile, logfile, verbose)
     if kepio.fileexists(outfile):
-        errmsg = 'ERROR -- KEPCOTREND: ' + outfile + ' exists. Use --clobber'
+        errmsg = 'ERROR -- KEPCOTREND: {} exists. Use --clobber'.format(outfile)
         kepmsg.err(logfile, errmsg, verbose)
 
     # open input file
@@ -659,8 +659,8 @@ def kepcotrend(infile, outfile, bvfile, listbv, fitmethod='llsq', fitpower=1,
         kepmsg.err(logfile, errmsg, verbose)
 
     if not is_numlike(fitpower) and fitpower is not None:
-        message = 'Fit power must be an real number or None'
-        kepmsg.err(logfile, message, verbose)
+        errmsg = 'Fit power must be an real number or None'
+        kepmsg.err(logfile, errmsg, verbose)
 
     if fitpower is None:
         fitpower = 1.
@@ -887,12 +887,9 @@ def kepcotrend(infile, outfile, bvfile, listbv, fitmethod='llsq', fitpower=1,
 
 def kepcotrend_main():
     import argparse
-    parser = argparse.ArgumentParser(description=('Remove systematic '
-                                                  'trends in photometry '
-                                                  'using cotrending basis '
-                                                  'vectors'))
-    parser.add_argument('--shell', action='store_true',
-                        help='Are we running from the shell?')
+    parser = argparse.ArgumentParser(
+            description=('Remove systematic trends in photometry using'
+                         ' cotrending basis vectors'))
     parser.add_argument('infile', help='Name of input file', type=str)
     parser.add_argument('outfile', help='Name of FITS file to output',
                         type=str)

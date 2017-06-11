@@ -1,7 +1,7 @@
+from . import kepio, kepmsg, kepkey
 import numpy as np
 from astropy.io import fits as pyfits
 from matplotlib import pyplot as plt
-from . import kepio, kepmsg, kepkey
 
 # global variables
 
@@ -199,11 +199,11 @@ def plotlc():
             ldata.append(work2[i])
         else:
             ltime = np.array(ltime, dtype=np.float64) - barytime0
-            ldata = np.array(ldata, dtype=np.float64) / 10**nrm
+            ldata = np.array(ldata, dtype=np.float64) / 10 ** nrm
             plt.plot(ltime,ldata,color=lcolor,linestyle='-',linewidth=lwidth)
             ltime = []; ldata = []
     ltime = np.array(ltime, dtype=np.float64) - barytime0
-    ldata = np.array(ldata, dtype=np.float64) / 10**nrm
+    ldata = np.array(ldata, dtype=np.float64) / 10 ** nrm
     plt.plot(ltime, ldata, color=lcolor, linestyle='-', linewidth=lwidth)
     plt.fill(barytime, flux, fc=fcolor, linewidth=0.0, alpha=falpha)
     plt.xlabel(xlab, {'color' : 'k'})

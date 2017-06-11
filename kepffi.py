@@ -19,7 +19,7 @@ pkepmag = None; pkepid = None; pra = None; pdec = None
 # core code
 
 def kepffi(ffifile, kepid, ra, dec, aperfile, imin, imax, iscale, cmap, npix,
-           verbose=True, logfile='kepffi.log'):
+           verbose=False, logfile='kepffi.log'):
 
     global pimg, zscale, zmin, zmax, xmin, xmax, ymin, ymax, quarter
     global kepmag, skygroup, season, channel
@@ -565,9 +565,9 @@ def clicker6(event):
 
 def kepffi_main():
     import argparse
-    parser = argparse.ArgumentParser(description='Plot sub-areas of Kepler '
-                                     'Full Frame Images and define custom '
-                                     'target apertures')
+    parser = argparse.ArgumentParser(
+            description='Plot sub-areas of Kepler Full Frame Images and define'
+                        ' custom target apertures')
     parser.add_argument('ffifile', help='name of input FFI FITS file',
                         type=str)
     parser.add_argument('--kepid', default='',

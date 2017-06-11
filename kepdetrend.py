@@ -255,10 +255,10 @@ def kepdetrend(infile, outfile, ranges1, ranges2, npoly1, npoly2, nsig1, nsig2,
     ploty1
     ploty2
     nrm = len(str(int(np.nanmax(indata))))-1
-    indata = indata / 10**nrm
-    pout = pout / 10**nrm
-    ploty1 = ploty1 / 10**nrm
-    ploty2 = ploty2 / 10**nrm
+    indata = indata / 10 ** nrm
+    pout = pout / 10 ** nrm
+    ploty1 = ploty1 / 10 ** nrm
+    ploty2 = ploty2 / 10 ** nrm
     ylab = '10$^%d$ e$^-$ s$^{-1}$' % nrm
 
     # data limits
@@ -349,8 +349,8 @@ def kepdetrend(infile, outfile, ranges1, ranges2, npoly1, npoly2, nsig1, nsig2,
 def kepdetrend_main():
     import argparse
     parser = argparse.ArgumentParser(
-            description=('Detrend systematic features from Simple Aperture '
-                         'Photometry (SAP) data'))
+            description=('Detrend systematic features from Simple Aperture'
+                         ' Photometry (SAP) data'))
     parser.add_argument('infile', help='Name of input file', type=str)
     parser.add_argument('outfile', help='Name of FITS file to output',
                         type=str)

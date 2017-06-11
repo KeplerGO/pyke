@@ -13,31 +13,32 @@ from scipy.interpolate import RectBivariateSpline
 from . import kepio, kepmsg, kepkey, kepplot, kepfit, kepfunc
 
 
-def kepprfphot(infile, outroot, columns, rows, fluxes, border, background,
-               focus, prfdir, ranges, xtol, ftol, qualflags, plot=True,
-               clobber=True, verbose=True, logfile='kepprfphot.log'):
+def kepprfphot(infile, outroot, columns, rows, fluxes, prfdir, border=0,
+               background=False, focus=False, ranges='0,0', xtol=1e-4,
+               ftol=1e-2, qualflags=False, plot=False, clobber=False,
+               verbose=False, logfile='kepprfphot.log'):
 
-# log the call
-    hashline = '----------------------------------------------------------------------------'
+    # log the call
+    hashline = '--------------------------------------------------------------'
     kepmsg.log(logfile,hashline,verbose)
     call = ('KEPPRFPHOT -- '
-            ' infile={}'.format(infile)
-            ' outroot={}'.format(outroot)
-            ' columns={}'.format(columns)
-            ' rows={}'.format(rows)
-            ' fluxes={}'.format(fluxes)
-            ' border={}'.format(border)
-            ' background={}'.format(background)
-            ' focus={}'.format(focs)
-            ' prfdir={}'.format(prfdir)
-            ' ranges={}'.format(ranges)
-            ' xtol={}'.format(xtol)
-            ' ftol={}'.format(ftol)
-            ' qualflags={}'.format(qualflags)
-            ' plot={}'.format(plot)
-            ' clobber={}'.format(clobber)
-            ' verbose={}'.format(verbose)
-            ' logfile={}'.format(logfile)
+            + ' infile={}'.format(infile)
+            + ' outroot={}'.format(outroot)
+            + ' columns={}'.format(columns)
+            + ' rows={}'.format(rows)
+            + ' fluxes={}'.format(fluxes)
+            + ' border={}'.format(border)
+            + ' background={}'.format(background)
+            + ' focus={}'.format(focs)
+            + ' prfdir={}'.format(prfdir)
+            + ' ranges={}'.format(ranges)
+            + ' xtol={}'.format(xtol)
+            + ' ftol={}'.format(ftol)
+            + ' qualflags={}'.format(qualflags)
+            + ' plot={}'.format(plot)
+            + ' clobber={}'.format(clobber)
+            + ' verbose={}'.format(verbose)
+            + ' logfile={}'.format(logfile)
     kepmsg.log(logfile, call+'\n', verbose)
 
     # start time
@@ -45,8 +46,8 @@ def kepprfphot(infile, outroot, columns, rows, fluxes, border, background,
 
     # number of sources
     work = fluxes.strip()
-    work = re.sub(' ',',',work)
-    work = re.sub(';',',',work)
+    work = re.sub(' ', ',', work)
+    work = re.sub(';', ',', work)
     nsrc = len(work.split(','))
 
     # construct inital guess vector for fit
@@ -67,17 +68,17 @@ def kepprfphot(infile, outroot, columns, rows, fluxes, border, background,
             guess.append(float(f[i]))
         except:
             message = 'ERROR -- KEPPRF: Fluxes must be floating point numbers'
-            kepmsg.err(logfile,message,verbose)
+            kepmsg.err(logfile, message, verbose)
     if len(x) != nsrc or len(y) != nsrc:
-        message = 'ERROR -- KEPFIT:FITMULTIPRF: Guesses for rows, columns and '
-        message += 'fluxes must have the same number of sources'
-        kepmsg.err(logfile,message,verbose)
+        message = ('ERROR -- KEPFIT:FITMULTIPRF: Guesses for rows, columns'
+                   ' and fluxes must have the same number of sources')
+        kepmsg.err(logfile, message, verbose)
     for i in range(nsrc):
         try:
             guess.append(float(x[i]))
         except:
             message = 'ERROR -- KEPPRF: Columns must be floating point numbers'
-            kepmsg.err(logfile,message,verbose)
+            kepmsg.err(logfile, message, verbose)
     for i in range(nsrc):
         try:
             guess.append(float(y[i]))
@@ -139,7 +140,7 @@ def kepprfphot(infile, outroot, columns, rows, fluxes, border, background,
     kepid, channel, skygroup, module, output, quarter, season, \
         ra, dec, column, row, kepmag, xdim, ydim, qual = \
         kepio.readTPF(infile,'QUALITY',logfile,verbose)
-    struct = kepio.openfits(infile, 'readonly', logfile, verbose)
+    struct = pyfits.open(infile)
     tstart, tstop, bjdref, cadence = kepio.timekeys(struct, infile, logfile, verbose)
 
     # input file keywords and mask map
@@ -230,7 +231,8 @@ def kepprfphot(infile, outroot, columns, rows, fluxes, border, background,
                 and np.isfinite(np.nansum(fluxpixels[rownum, :]))):
                 incl[rownum] = 1
     if not np.in1d(1,incl):
-        message = 'ERROR -- KEPPRFPHOT: No legal data within the range ' + ranges
+        message = ('ERROR -- KEPPRFPHOT: No legal data within the'
+                   ' range {}'.format(ranges))
         kepmsg.err(logfile, message, verbose)
     # filter out bad data
     n = 0
@@ -341,21 +343,22 @@ def kepprfphot(infile, outroot, columns, rows, fluxes, border, background,
             pass
 
     # single processor version
-    """if status == 0 and not cmdLine:
-        oldtime = 0.0; ans = []
-        for rownum in range(nincl):
-            proctime = time.time()
-            try:
-                if barytime[rownum] - oldtime > 0.5:
-                    ftol = 1.0e-10; xtol = 1.0e-10
-            except:
-                pass
-            args = (fluxpixels[rownum,:],errpixels[rownum,:],DATx,DATy,nsrc,border,xx,yy,PRFx,PRFy,splineInterpolation,
-                    guess,ftol,xtol,focus,background,rownum,nincl,float(x[0]),float(y[0]),True)
-            guess = PRFfits(args)
-            ans.append(guess)
-            ftol = ftol; xtol = xtol; oldtime = barytime[rownum]
-        ans = np.array(ans).transpose()"""
+    oldtime = 0.0; ans = []
+    for rownum in range(nincl):
+        proctime = time.time()
+        try:
+            if barytime[rownum] - oldtime > 0.5:
+                ftol = 1.0e-10; xtol = 1.0e-10
+        except:
+            pass
+        args = (fluxpixels[rownum, :], errpixels[rownum, :], DATx, DATy, nsrc,
+                border, xx, yy, PRFx, PRFy, splineInterpolation, guess, ftol,
+                xtol, focus, background, rownum, nincl, float(x[0]),
+                float(y[0]), True)
+        guess = PRFfits(args)
+        ans.append(guess)
+        ftol = ftol; xtol = xtol; oldtime = barytime[rownum]
+    ans = np.array(ans).transpose()
 
     # unpack the best fit parameters
     flux, OBJx, OBJy = [], [], []
@@ -533,7 +536,7 @@ def kepprfphot(infile, outroot, columns, rows, fluxes, border, background,
         # write output file
         outstr.writeto(outroot + '_' + str(j) + '.fits',checksum=True)
         # close input structure
-        kepio.closefits(struct,logfile,verbose)
+        struct.close()
 
     # clean up x-axis unit
     barytime0 = float(int(t[0] / 100) * 100.0)
@@ -543,22 +546,22 @@ def kepprfphot(infile, outroot, columns, rows, fluxes, border, background,
     xlab = 'BJD $-$ %d' % barytime0
 
     # plot the light curves
-    bg = np.insert(bg,[0],[-1.0e10])
-    bg = np.append(bg,-1.0e10)
-    fx = np.insert(fx,[0],[fx[0]])
-    fx = np.append(fx,fx[-1])
-    fy = np.insert(fy,[0],[fy[0]])
-    fy = np.append(fy,fy[-1])
-    fa = np.insert(fa,[0],[fa[0]])
-    fa = np.append(fa,fa[-1])
-    rs = np.insert(rs,[0],[-1.0e10])
-    rs = np.append(rs,-1.0e10)
-    ch = np.insert(ch,[0],[-1.0e10])
-    ch = np.append(ch,-1.0e10)
+    bg = np.insert(bg, [0], [-1.0e10])
+    bg = np.append(bg, -1.0e10)
+    fx = np.insert(fx, [0], [fx[0]])
+    fx = np.append(fx, fx[-1])
+    fy = np.insert(fy, [0], [fy[0]])
+    fy = np.append(fy, fy[-1])
+    fa = np.insert(fa, [0], [fa[0]])
+    fa = np.append(fa, fa[-1])
+    rs = np.insert(rs, [0], [-1.0e10])
+    rs = np.append(rs, -1.0e10)
+    ch = np.insert(ch, [0], [-1.0e10])
+    ch = np.append(ch, -1.0e10)
     for i in range(nsrc):
         # clean up y-axis units
         nrm = math.ceil(math.log10(np.nanmax(fl[i]))) - 1.0
-        fl[i] /= 10**nrm
+        fl[i] /= 10 ** nrm
         if nrm == 0:
             ylab1 = 'e$^-$ s$^{-1}$'
         else:
@@ -577,8 +580,8 @@ def kepprfphot(infile, outroot, columns, rows, fluxes, border, background,
         ymax3 = np.nanmax(yy)
         ymin4 = np.nanmin(bg[1:-1])
         ymax4 = np.nanmax(bg[1:-1])
-        ymin5 = np.nanmin([np.nanmin(fx),np.nanmin(fy)])
-        ymax5 = np.nanmax([np.nanmax(fx),np.nanmax(fy)])
+        ymin5 = np.nanmin([np.nanmin(fx), np.nanmin(fy)])
+        ymax5 = np.nanmax([np.nanmax(fx), np.nanmax(fy)])
         ymin6 = np.nanmin(fa[1:-1])
         ymax6 = np.nanmax(fa[1:-1])
         ymin7 = np.nanmin(rs[1:-1])
@@ -594,10 +597,10 @@ def kepprfphot(infile, outroot, columns, rows, fluxes, border, background,
         yr6 = ymax6 - ymin6
         yr7 = ymax7 - ymin7
         yr8 = ymax8 - ymin8
-        fl[i] = np.insert(fl[i],[0],[0.0])
-        fl[i] = np.append(fl[i],0.0)
+        fl[i] = np.insert(fl[i], [0], [0.0])
+        fl[i] = np.append(fl[i], 0.0)
         # define size of plot on monitor screen
-        plt.figure(str(i+1) + ' ' + str(time.asctime(time.localtime())),
+        plt.figure(str(i + 1) + ' ' + str(time.asctime(time.localtime())),
                    figsize=[12,16])
         # delete any fossil plots in the matplotlib window
         plt.clf()
@@ -921,8 +924,6 @@ def kepprfphot(infile, outroot, columns, rows, fluxes, border, background,
     # stop time
     kepmsg.clock('\n\nKEPPRFPHOT ended at',logfile,verbose)
 
-
-
 def PRFfits(args):
 
     # start time
@@ -942,21 +943,25 @@ def PRFfits(args):
 
     # minimize data and model
     if args[14] and args[15]:
-        argm = (args[2],args[3],DATimg,DATerr,args[4],args[5],args[6],args[7],args[10],args[18],args[19])
-        ans = fmin_powell(kepfunc.PRFwithFocusAndBackground,args[11],args=argm,xtol=args[12],
-                          ftol=args[13],disp=False)
+        argm = (args[2], args[3], DATimg, DATerr, args[4], args[5], args[6],
+                args[7], args[10], args[18], args[19])
+        ans = fmin_powell(kepfunc.PRFwithFocusAndBackground, args[11],
+                          args=argm, xtol=args[12], ftol=args[13], disp=False)
     elif args[14] and not args[15]:
-        argm = (args[2],args[3],DATimg,DATerr,args[4],args[10],args[18],args[19])
-        ans = fmin_powell(kepfunc.PRFwithFocus,args[11],args=argm,xtol=args[12],
-                          ftol=args[13],disp=False)
+        argm = (args[2], args[3], DATimg, DATerr, args[4], args[10], args[18],
+                args[19])
+        ans = fmin_powell(kepfunc.PRFwithFocus, args[11], args=argm,
+                          xtol=args[12], ftol=args[13], disp=False)
     elif args[15] and not args[14]:
-        argm = (args[2],args[3],DATimg,DATerr,args[4],args[5],args[6],args[7],args[10],args[18],args[19])
-        ans = fmin_powell(kepfunc.PRFwithBackground,args[11],args=argm,xtol=args[12],
-                          ftol=args[13],disp=False)
+        argm = (args[2], args[3], DATimg, DATerr, args[4], args[5], args[6],
+                args[7], args[10], args[18], args[19])
+        ans = fmin_powell(kepfunc.PRFwithBackground, args[11], args=argm,
+                          xtol=args[12], ftol=args[13], disp=False)
     else:
-        argm = (args[2],args[3],DATimg,DATerr,args[4],args[10],args[18],args[19])
-        ans = fmin_powell(kepfunc.PRF,args[11],args=argm,xtol=args[12],
-                          ftol=args[13],disp=False)
+        argm = (args[2], args[3], DATimg, DATerr, args[4], args[10], args[18],
+                args[19])
+        ans = fmin_powell(kepfunc.PRF, args[11], args=argm, xtol=args[12],
+                          ftol=args[13], disp=False)
 
     # print progress
     if args[20]:
@@ -978,36 +983,44 @@ def kepprfphot_main():
     parser.add_argument('infile', help='Name of input target pixel file',
                         type=str)
     parser.add_argument('outroot',
-                        help='Root name of output light curve files', type=str)
+                        help='Root name of output light curve files',
+                        type=str)
     parser.add_argument('--columns',
-                        help='Column number of each source to be fit', type=str)
+                        help='Column number of each source to be fit',
+                        type=str)
     parser.add_argument('--rows', help='Row number of each source to be fit',
                         type=str)
     parser.add_argument('--fluxes',
-                        help='Relative flux of each source to be fit', type=str)
+                        help='Relative flux of each source to be fit',
+                        type=str)
+    parser.add_argument('--prfdir',
+                        help='Folder containing PRF files', dest='prfdir',
+                        type=str)
     parser.add_argument('--border',
                         help='Order of background polynmial fit', default=0,
                         type=int)
     parser.add_argument('--background', action='store_true',
-                        help='Fit background?', default=False)
+                        help='Fit background?')
     parser.add_argument('--focus', action='store_true',
-                        help='Fit focus changes?', default=False)
-    parser.add_argument('--prfdir',
-                        help='Folder containing PRF files', dest='prfdir',
-                        type=str)
+                        help='Fit focus changes?')
     parser.add_argument('--ranges', default='0,0', help='Time ranges to fit',
                         type=str)
     parser.add_argument('--xtol', default=1.0e-4, help='Fit parameter xtol',
                         type=float)
     parser.add_argument('--ftol', default=1.0e-2,
                         help='Fit minimization tolerance', type=float)
-    parser.add_argument('--qualflags', action='store_true', help='Fit data that have quality flags?', default=False)
-    parser.add_argument('--plot', action='store_true', help='Plot fit results?', default=False)
-    parser.add_argument('--clobber', action='store_true', help='Overwrite output file?', default=False)
-    parser.add_argument('--verbose', action='store_true', help='Write to a log file?', default=False)
-    parser.add_argument('--logfile', '-l', default='kepprfphot.log', help='Name of ascii log file', dest='logfile', type=str)
+    parser.add_argument('--qualflags', action='store_true',
+                        help='Fit data that have quality flags?')
+    parser.add_argument('--plot', action='store_true',
+                        help='Plot fit results?')
+    parser.add_argument('--clobber', action='store_true',
+                        help='Overwrite output file?')
+    parser.add_argument('--verbose', action='store_true',
+                        help='Write to a log file?')
+    parser.add_argument('--logfile', '-l', default='kepprfphot.log',
+                        help='Name of ascii log file', type=str)
     args = parser.parse_args()
-    kepprfphot(args.infile,args.outroot,args.columns,args.rows,args.fluxes,args.border,
-               args.background,args.focus,args.prfdir,args.ranges,args.xtol,
-               args.ftol,args.qualflags,args.plot,args.clobber,args.verbose,
-               args.logfile)
+    kepprfphot(args.infile, args.outroot, args.columns, args.rows, args.fluxes,
+               args.border, args.background, args.focus, args.prfdir,
+               args.ranges, args.xtol, args.ftol, args.qualflags, args.plot,
+               args.clobber, args.verbose, args.logfile)
