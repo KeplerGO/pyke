@@ -3,22 +3,31 @@ Modules/API
 
 .. toctree::
 
-    kepmask
-    kepprf
-    kepfold
+    kepbls
     kepclip
-    kepsmooth
-    kepflatten
-    kepdynamic
-    kepstddev
-    kepwindow
-    keppca
     kepconvert
-    kepfilter
+    kepcotrend
+    kepdetrend
+    kepdiffim
+    kepdynamic
     kepextract
-    kepstitch
-    kepimages
-    keptimefix
+    kepffi
+    kepfilter
+    kepflatten
+    kepfold
     kepft
-    kepoutlier
     kephead
+    kepimages
+    kepmask
+    kepoutlier
+    keppca
+    kepprf
+    kepprfphot
+    keprange
+    kepsmooth
+    kepstddev
+    kepstitch
+    keptimefix
+    keptrial
+    keptrim
+    kepwindow

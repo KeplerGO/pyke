@@ -2,6 +2,8 @@ import numpy as np
 import scipy.interpolate
 import scipy.ndimage
 
+__all__ = ['rebin2D']
+
 def rebin2D(a, newdims, method='linear', centre=False, minusone=False):
     """
     Arbitrary resampling of source array to new dimension sizes.
@@ -9,26 +11,31 @@ def rebin2D(a, newdims, method='linear', centre=False, minusone=False):
     To use 1-D arrays, first promote them to shape (x,1).
 
     Uses the same parameters and creates the same co-ordinate lookup points
-    as IDL''s congrid routine, which apparently originally came from a VAX/VMS
+    as IDL's congrid routine, which apparently originally came from a VAX/VMS
     routine of the same name.
 
     Parameters
     ----------
     method : str
         * neighbour - closest value from original data
-        * nearest and linear - uses n x 1-D interpolations using
-                             scipy.interpolate.interp1d
+
+        * linear - uses n x 1-D interpolations using scipy.interpolate.interp1d
         (see Numerical Recipes for validity of use of n 1-D interpolations)
-        spline - uses ndimage.map_coordinates
+
+        * spline - uses ndimage.map_coordinates
 
     centre : bool
         * True - interpolation points are at the centres of the bins
+
         * False - points are at the front edge of the bin
 
     minusone: : bool
-        For example- inarray.shape = (i,j) & new dimensions = (x,y)
-        False - inarray is resampled by factors of (i/x) * (j/y)
-        True - inarray is resampled by(i-1)/(x-1) * (j-1)/(y-1)
+        For example- inarray.shape = (i, j) & new dimensions = (x, y)
+
+        * False - inarray is resampled by factors of (i / x) * (j / y)
+
+        * True - inarray is resampled by (i - 1) / (x - 1) * (j - 1) / (y - 1)
+
         This prevents extrapolation one element beyond bounds of input array.
     """
     if not a.dtype in [np.float64, np.float32]:

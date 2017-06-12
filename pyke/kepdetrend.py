@@ -56,7 +56,7 @@ def kepdetrend(infile, outfile, ranges1, ranges2, npoly1, npoly2, nsig1, nsig2,
         polynomial fit.
     datacol : str
         The column name containing data stored within extension 1 of infile.
-        This data will be detrended. Typically this name is SAP_FLUX (Simple
+        This data will be detrended. Typically this name is ``SAP_FLUX`` (Simple
         Aperture Photometry fluxes), but any data column within extension 1 of
         the FITS file can be corrected.
     errcol : str
@@ -66,8 +66,10 @@ def kepdetrend(infile, outfile, ranges1, ranges2, npoly1, npoly2, nsig1, nsig2,
     ranges1, ranges2 : list, list
         Time ranges are supplied as comma-separated pairs of Barycentric Julian
         Dates (BJDs). Multiple ranges are separated by a semi-colon. An example
-        containing two time ranges is:
+        containing two time ranges is::
+
             ``'2455012.48517,2455014.50072;2455022.63487,2455025.08231'``
+
         Data within the range ``ranges1`` will be detrended by subtracting the
         difference between the best fit to data in that range and the best fit
         function in the range ``ranges2`` extrapolated into ranges1.

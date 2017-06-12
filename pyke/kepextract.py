@@ -24,15 +24,15 @@ def kepextract(infile, outfile, maskfile='ALL', bkg=False, clobber=False,
     detection. This tool provides users with a straightforward capability to
     alter the summed pixel set. Applications include::
 
-    * Use of all pixels in the aperture
+        * Use of all pixels in the aperture
 
-    * The pipeline does not produce a light curve for sources observed with
-    custom or dedicated pixel masks. The user can create a light curve for
-    these sources using kepextract.
+        * The pipeline does not produce a light curve for sources observed with
+        custom or dedicated pixel masks. The user can create a light curve for
+        these sources using kepextract.
 
-    * Construction of pixel light curves, in which the time series for a single
-    pixel can be examined. Light curves for extended sources which may be
-    poorly sampled by the optimal aperture.
+        * Construction of pixel light curves, in which the time series for a single
+        pixel can be examined. Light curves for extended sources which may be
+        poorly sampled by the optimal aperture.
 
     infile : str
         Filename for the target pixel file.
@@ -42,18 +42,18 @@ def kepextract(infile, outfile, maskfile='ALL', bkg=False, clobber=False,
     maskfile : str
         This string can be one of three options::
 
-        * 'ALL' tells the task to calculate principal components from all
-        pixels within the pixel mask stored in the input file.
+            * 'ALL' tells the task to calculate principal components from all
+            pixels within the pixel mask stored in the input file.
 
-        * 'APER' tells the task to calculate principal components from only the
-        pixels within the photometric aperture stored in the input file (e.g.
-        only those pixels summed by the Kepler pipeline to produce the light
-        curve archived at MAST.
+            * 'APER' tells the task to calculate principal components from only the
+            pixels within the photometric aperture stored in the input file (e.g.
+            only those pixels summed by the Kepler pipeline to produce the light
+            curve archived at MAST.
 
-        * A filename describing the desired photometric aperture. Such a file
-        can be constructed using the kepmask or kepffi tools, or can be
-        created manually using the format described in the documentation for
-        those tools.
+            * A filename describing the desired photometric aperture. Such a file
+            can be constructed using the kepmask or kepffi tools, or can be
+            created manually using the format described in the documentation for
+            those tools.
 
     bkg : bool
         Option to subtract an estimate of the background. Background is
