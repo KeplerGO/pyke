@@ -2,6 +2,7 @@ from . import kepio, kepmsg, kepkey
 import numpy as np
 from astropy.io import fits as pyfits
 from matplotlib import pyplot as plt
+from tqdm import tqdm
 
 def kepclip(infile, outfile, ranges, datacol='SAP_FLUX', plot=False,
             clobber=False, verbose=False, logfile='kepclip.log'):
@@ -35,14 +36,13 @@ def kepclip(infile, outfile, ranges, datacol='SAP_FLUX', plot=False,
     --------
     .. code-block:: bash
 
-        $ kepclip kplr002436324-2009259160929_llc.fits kepclip.fits
-          2455012.48517,2455060.50072
+        $ kepclip kplr002436324-2009259160929_llc.fits kepclip.fits '2455012.48517,2455018.50072;2455022.63487,2455060.08231'
+          --verbose --plot --clobber
+
+    .. image:: _static/images/kepclip.png
+        :align: center
     """
 
-    labelsize = 32
-    ticksize = 14
-    xsize = 14
-    ysize = 8
     lcolor = '#0000ff'
     lwidth = 1.0
     fcolor = '#ffff00'
@@ -70,7 +70,7 @@ def kepclip(infile, outfile, ranges, datacol='SAP_FLUX', plot=False,
         kepio.clobber(outfile, logfile, verbose)
     if kepio.fileexists(outfile):
         errmsg = 'ERROR -- KEPCLIP: ' + outfile + ' exists. Use --clobber'
-        kepmsg.err(logfile, message, verbose)
+        kepmsg.err(logfile, errmsg, verbose)
 
     # time ranges for region
     t1 = []; t2 = []
@@ -103,7 +103,7 @@ def kepclip(infile, outfile, ranges, datacol='SAP_FLUX', plot=False,
     naxis2 = 0
     work1 = np.array([], 'float64')
     work2 = np.array([], 'float32')
-    for i in range(len(barytime)):
+    for i in tqdm(range(len(barytime))):
         if (np.isfinite(barytime[i]) and np.isfinite(flux[i])
             and flux[i] != 0.0):
             reject = False
@@ -148,18 +148,15 @@ def kepclip(infile, outfile, ranges, datacol='SAP_FLUX', plot=False,
 
     # clear window, plot box
     if plot:
-        plt.figure(figsize=[xsize,ysize])
+        plt.figure()
         plt.clf()
-        ax = plt.axes([0.05,0.1,0.94,0.88])
+        ax = plt.axes()
 
         # force tick labels to be absolute rather than relative
         plt.gca().xaxis.set_major_formatter(plt.ScalarFormatter(useOffset=False))
         plt.gca().yaxis.set_major_formatter(plt.ScalarFormatter(useOffset=False))
 
         # rotate y labels by 90 deg
-        labels = ax.get_yticklabels()
-        plt.setp(labels, 'rotation', 90, fontsize=12)
-
         # plot line data
         ltime = [barytime[0]]; ldata = [flux[0]]
         for i in range(1, len(flux)):
@@ -222,5 +219,5 @@ def kepclip_main():
     parser.add_argument('--logfile', '-l', help='Name of ascii log file',
                         default='kepclip.log', dest='logfile', type=str)
     args = parser.parse_args()
-    kepclip(args.infile, args.outfile, args.ranges, args.plot, args.datacol,
+    kepclip(args.infile, args.outfile, args.ranges, args.datacol, args.plot,
             args.clobber, args.verbose, args.logfile)

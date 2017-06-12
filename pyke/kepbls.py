@@ -84,10 +84,28 @@ def kepbls(infile, outfile, datacol='DETSAP_FLUX', errcol='DETSAP_FLUX_ERR',
         Print informative messages and warnings to the shell and logfile?
     logfile : str
         Name of the logfile containing error and warning messages.
+
+    Examples
+    --------
+
+    After using ``kepflatten`` to remove low frequency variability in ``kplr011904151-2009350155506_llc.fits``,
+    we can use the output, ``kepflatten.fits``, into ``kepbls``, i.e.,
+
+    .. code-block:: bash
+
+        $ kepbls kepflatten.fits kepbls.fits --datacol DETSAP_FLUX
+        --errcol DETSAP_FLUX_ERR --minper 0.8 --maxper 1.0 --mindur 1.0
+        --maxdur 12.0 --nsearch 1000 --nbins 1000 --plot --verbose
+
+             Best trial period = 0.8375062346458435 days
+           Time of mid-transit = BJD 2455093.5457274746
+              Transit duration = 1.7099086232483387 hours
+        Maximum signal residue = 4.487271046981536e-06
+
+    .. image:: _static/images/kepbls.png
+        :align: center
     """
     # startup parameters
-    labelsize = 32
-    ticksize = 18
     xsize = 16
     ysize = 8
     lcolor = '#0000ff'
@@ -166,7 +184,7 @@ def kepbls(infile, outfile, datacol='DETSAP_FLUX', errcol='DETSAP_FLUX_ERR',
     transitDuration = np.array([], dtype='float32')
     transitPhase = np.array([], dtype='float32')
     dPeriod = (maxper - minper) / nsearch
-    trialPeriods = np.arange(minper, maxper+dPeriod, dPeriod, dtype='float32')
+    trialPeriods = np.arange(minper, maxper + dPeriod, dPeriod, dtype='float32')
     complete = 0
     print(' ')
     for trialPeriod in tqdm(trialPeriods):
@@ -214,7 +232,7 @@ def kepbls(infile, outfile, datacol='DETSAP_FLUX', errcol='DETSAP_FLUX_ERR',
         # iterate through trial period phase
         for i1 in range(nbins):
             # iterate through transit durations
-            for duration in range(duration1, duration2+1, int(halfHour)):
+            for duration in range(duration1, duration2 + 1, int(halfHour)):
                 # calculate maximum signal residue
                 i2 = i1 + duration
                 sr1 = np.sum(np.power(s[i1:i2], 2))

@@ -99,15 +99,14 @@ def kepflatten(infile, outfile, datacol='PDCSAP_FLUX',
     --------
     .. code-block:: bash
 
-        $ kepflatten kplr012557548-2011177032512_llc.fits kepflatten.fits --nsig 3
-          --stepsize 1.0 --winsize 3.0 --npoly 3 --niter 10 --clobber --plot
-          --verbose
+        $ kepflatten kplr012557548-2011177032512_llc.fits kepflatten.fits
+        --nsig 3 --stepsize 1.0 --winsize 3.0 --npoly 3 --niter 10 --plot
+        --clobber --verbose
+
+    .. image:: _static/images/kepflatten.png
+        :align: center
     """
     # startup parameters
-    labelsize = 32
-    ticksize = 18
-    xsize = 16
-    ysize = 10
     lcolor = '#0000ff'
     lwidth = 1.0
     fcolor = '#ffff00'
@@ -242,7 +241,7 @@ def kepflatten(infile, outfile, datacol='PDCSAP_FLUX',
     pout = np.append(pout, 0.0)
 
     if plot:
-        plt.figure(figsize=[xsize, ysize])
+        plt.figure()
         plt.clf()
         # plot data
         ax = plt.axes([0.06, 0.54, 0.93, 0.43])
@@ -251,7 +250,6 @@ def kepflatten(infile, outfile, datacol='PDCSAP_FLUX',
         plt.gca().yaxis.set_major_formatter(plt.ScalarFormatter(useOffset=False))
         # rotate y labels by 90 deg
         labels = ax.get_yticklabels()
-        plt.setp(labels, 'rotation', 90)
         plt.setp(plt.gca(), xticklabels=[])
         plt.plot(ptime[1:-1], pout[1:-1], color=lcolor, linestyle='-',
                  linewidth=lwidth)
@@ -298,7 +296,7 @@ def kepflatten(infile, outfile, datacol='PDCSAP_FLUX',
     masterfit[-1] = masterfit[-4] #fudge
     masterfit[-2] = masterfit[-4] #fudge
     masterfit[-3] = masterfit[-4] #fudge
-    plt.plot(intime-intime0, masterfit / 10**nrm, 'g', lw='3')
+    plt.plot(intime - intime0, masterfit / 10 ** nrm, 'g', lw='3')
 
     # reject outliers
     rejtime, rejdata = [], []
@@ -330,7 +328,6 @@ def kepflatten(infile, outfile, datacol='PDCSAP_FLUX',
         plt.gca().yaxis.set_major_formatter(plt.ScalarFormatter(useOffset=False))
         # rotate y labels by 90 deg
         labels = ax.get_yticklabels()
-        plt.setp(labels, 'rotation', 90)
 
         ymin = pout.min()
         ymax = pout.max()
@@ -344,11 +341,11 @@ def kepflatten(infile, outfile, datacol='PDCSAP_FLUX',
         plt.ylabel(ylab, {'color' : 'k'})
         plt.grid()
         # plot ranges
-        plt.xlim(xmin-xr*0.01, xmax+xr*0.01)
+        plt.xlim(xmin - xr * 0.01, xmax + xr * 0.01)
         if ymin >= 0.0:
-            plt.ylim(ymin-yr*0.01, ymax+yr*0.01)
+            plt.ylim(ymin - yr * 0.01, ymax + yr * 0.01)
         else:
-            plt.ylim(1.0e-10, ymax+yr*0.01)
+            plt.ylim(1.0e-10, ymax + yr * 0.01)
         # render plot
         plt.savefig(re.sub('.fits', '.png', outfile))
         plt.show()
