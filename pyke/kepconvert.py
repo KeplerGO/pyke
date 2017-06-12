@@ -47,8 +47,10 @@ def kepconvert(infile, outfile, conversion, columns, baddata=True,
 
     Examples
     --------
-    $ kepconvert kplr002436324-2009259160929_llc.fits kepconvert.txt fits2asc
-    --columns TIME,SAP_FLUX,SAP_FLUX_ERR,SAP_QUALITY --verbose
+    .. code-block:: bash
+
+        $ kepconvert kplr002436324-2009259160929_llc.fits kepconvert.txt fits2asc
+          --columns TIME,SAP_FLUX,SAP_FLUX_ERR,SAP_QUALITY --verbose
     """
 
     hashline = '--------------------------------------------------------------'
@@ -76,7 +78,7 @@ def kepconvert(infile, outfile, conversion, columns, baddata=True,
     if not kepio.fileexists(infile):
         errmsg = ('ERROR -- KEPCONVERT: input file {} does not exist'
                   .format(infile))
-        kepmsg.err(logfile, message, verbose)
+        kepmsg.err(logfile, errmsg, verbose)
     # clobber output file
     if clobber:
         kepio.clobber(outfile, logfile, verbose)

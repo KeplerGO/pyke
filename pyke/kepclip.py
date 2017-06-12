@@ -36,7 +36,8 @@ def kepclip(infile, outfile, ranges, datacol='SAP_FLUX', plot=False,
     --------
     .. code-block:: bash
 
-        $ kepclip kplr002436324-2009259160929_llc.fits kepclip.fits '2455012.48517,2455018.50072;2455022.63487,2455060.08231'
+        $ kepclip kplr002436324-2009259160929_llc.fits kepclip.fits
+          '2455012.48517,2455018.50072;2455022.63487,2455060.08231'
           --verbose --plot --clobber
 
     .. image:: _static/images/kepclip.png

@@ -449,7 +449,7 @@ def split_on_nans(bad_data, cad):
     return blocks
 
 def kepcotrend(infile, outfile, bvfile, listbv, fitmethod='llsq', fitpower=1,
-               iterate=False, sigma=None, maskfile='', scinterp=None,
+               iterate=False, sigma=None, maskfile='', scinterp='linear',
                plot=False, clobber=False, verbose=False,
                logfile='kepcotrend.log'):
     """
@@ -601,8 +601,19 @@ def kepcotrend(infile, outfile, bvfile, listbv, fitmethod='llsq', fitpower=1,
         vectors. There are several methods to do this, the best of these probably
         being nearest which picks the value of the nearest long cadence data
         point.
-        The options available are None|linear|nearest|zero|slinear|quadratic|cubic
-        If you are using short cadence data don't choose none
+        The options available are:
+
+        * linear
+
+        * nearest
+
+        * zero
+
+        * slinear
+
+        * quadratic
+
+        *cubic
     plot : bool
         Plot the data and result?
     clobber : bool
@@ -630,7 +641,7 @@ def kepcotrend(infile, outfile, bvfile, listbv, fitmethod='llsq', fitpower=1,
             + ' clobber='.format(clobber)
             + ' verbose='.format(verbose)
             + ' logfile='.format(logfile))
-    kepmsg.log(logfile,call+'\n',verbose)
+    kepmsg.log(logfile, call+'\n', verbose)
 
     # start time
     kepmsg.clock('KEPCOTREND started at', logfile, verbose)
@@ -767,8 +778,7 @@ def kepcotrend(infile, outfile, bvfile, listbv, fitmethod='llsq', fitpower=1,
     if short:
         bvdata.field('CADENCENO')[:] = ((((bvdata.field('CADENCENO')[:] +
                                         (7.5/15.) )* 30.) - 11540.).round())
-    bvectors, in1derror = get_pcomp_list_newformat(bvdata, bvlist, lc_cad,
-                                                   short, scinterp)
+    bvectors, in1derror = get_pcomp_list_newformat(bvdata, bvlist, lc_cad, short, scinterp)
     if in1derror:
         message = ('It seems that you have an old version of numpy '
                    'which does not have the in1d function included. '
@@ -813,9 +823,9 @@ def kepcotrend(infile, outfile, bvfile, listbv, fitmethod='llsq', fitpower=1,
         lc_cad_masked = np.copy(lc_cad)
         n_err_masked = np.copy(n_err)
 
-    bvectors_masked,hasin1d = get_pcomp_list_newformat(bvdata,bvlist,
-                                                       lc_cad_masked,
-                                                       short,scinterp)
+    bvectors_masked, hasin1d = get_pcomp_list_newformat(bvdata, bvlist,
+                                                        lc_cad_masked,
+                                                        short, scinterp)
 
     if iterate and sigma is None:
         errmsg = 'If fitting iteratively you must specify a clipping range'
@@ -889,14 +899,13 @@ def kepcotrend_main():
     import argparse
     parser = argparse.ArgumentParser(
             description=('Remove systematic trends in photometry using'
-                         ' cotrending basis vectors'))
+                         ' cotrending basis vectors (CBV)'))
     parser.add_argument('infile', help='Name of input file', type=str)
     parser.add_argument('outfile', help='Name of FITS file to output',
                         type=str)
     parser.add_argument('cbvfile', help='Name of file containing the CBVs',
                         type=str)
-    parser.add_argument('vectors', dest='listbv', help='The CBVs to use',
-                        type=str)
+    parser.add_argument('listbv', help='The CBVs to use', type=str)
     parser.add_argument('--method', '-m', help='Fitting method',
                         default='llsq', dest='fitmethod', type=str,
                         choices=['llsq', 'simplex', 'lst_sq'])
@@ -911,13 +920,13 @@ def kepcotrend_main():
     parser.add_argument('--maskfile', '-q',
                         help='Name of file containing a mask', default='',
                         dest='maskfile', type=str)
-    parser.add_argument('--scinterp',
+    parser.add_argument('--scinterp', type=str,
                         help='Short cadence interpolation method',
-                        default='None', type=str,
+                        default='linear',
                         choices=['linear', 'nearest', 'slinear', 'quadratic',
                                  'cubic'])
     parser.add_argument('--plot', '-p', action='store_true',
-                        help='Plot result?', dest='plot')
+                        help='Plot result?')
     parser.add_argument('--clobber', action='store_true',
                         help='Overwrite output file?')
     parser.add_argument('--verbose', action='store_true',
