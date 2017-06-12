@@ -553,7 +553,7 @@ def kepextract_main():
                         type=str)
     parser.add_argument('outfile', help='Name of output light curve FITS file',
                         type=str)
-    parser.add_argument('--maskfile', help='Name of mask defintion ASCII file',
+    parser.add_argument('--maskfile', default='ALL', help='Name of mask defintion ASCII file',
                         type=str)
     parser.add_argument('--bkg', action='store_true',
                         help='Subtract background from data?')
