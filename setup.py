@@ -29,6 +29,7 @@ entry_points = {'console_scripts': [
         'kepmask = pyke.kepmask:kepmask_main',
         'kepoutlier = pyke.kepoutlier:kepoutlier_main',
         'keppca = pyke.keppca:keppca_main',
+        'keppixseries = pyke.keppixseries:keppixseries_main',
         'kepprf = pyke.kepprf:kepprf_main',
         'kepprfphot = pyke.kepprfphot:kepprfphot_main',
         'keprange = pyke.keprange:keprange_main',
