@@ -1,3 +1,4 @@
+from . import kepmsg, kepio, kepkey
 import math
 import numpy as np
 import matplotlib.pyplot as plt
@@ -6,7 +7,7 @@ from scipy.optimize import leastsq
 from scipy.optimize import fmin as effmin
 from scipy.interpolate import interp1d
 from astropy.io import fits as pyfits
-from . import kepmsg, kepio, kepkey
+from tqdm import tqdm
 
 
 __all__ = ['kepcotrend']
@@ -273,8 +274,9 @@ def do_lst_iter(bvs, cad, flux, nsigma, niter, method, order):
     bvsum = get_pcompsum(bvsnew, t)
     while (iiter < niter):
         iiter += 1
-        matchrange = 1.4826 * nsigma * MAD_model(subtract(fluxnew, bvsum))
-        mask = abs(fluxnew - bvsum) < matchrange
+        matchrange = 1.4826 * nsigma * MAD_model(np.subtract(fluxnew, bvsum))
+        mask = np.asarray(abs(fluxnew - bvsum) < matchrange)
+        mask = mask.flatten()
         fluxnew = fluxnew[mask]
         lcnew = lcnew[mask]
         try:
@@ -303,9 +305,10 @@ def newpcompsarray(pcomp, mask):
 
 def MAD_model(xx, minSd=1E-16):
   """Median Absolute Deviation"""
-  absdev=abs(xx)
-  mad=np.median(absdev, 0)
-  mad=maximum(mad, np.multiply(np.ones(mad.shape, np.float32), (minSd / 1.48)))
+  absdev = abs(xx)
+  mad = np.median(absdev, 0)
+  mad = np.maximum(mad, np.multiply(np.ones(mad.shape, np.float32), (minSd / 1.48)))
+  mad = np.asarray(mad)
   return mad
 
 
@@ -433,7 +436,6 @@ def do_plot(date, flux_old, flux_new, bvsum, cad, bad_data, cad_nans, version):
     plt.gca().yaxis.set_major_formatter(plt.ScalarFormatter(useOffset=False))
 
     # render plot
-    plt.ion()
     plt.show()
 
 def split_on_nans(bad_data, cad):
@@ -613,7 +615,7 @@ def kepcotrend(infile, outfile, bvfile, listbv, fitmethod='llsq', fitpower=1,
 
         * quadratic
 
-        *cubic
+        * cubic
     plot : bool
         Plot the data and result?
     clobber : bool
@@ -622,6 +624,12 @@ def kepcotrend(infile, outfile, bvfile, listbv, fitmethod='llsq', fitpower=1,
         Print informative messages and warnings to the shell and logfile?
     logfile : str
         Name of the logfile containing error and warning messages.
+
+    Examples
+    --------
+    .. code-block:: bash
+        $ kepcotrend kplr005110407-2009350155506_llc.fits kepcotrend.fits ~/cbv/kplr2009350155506-q03-d25_lcbv.fits
+        '1 2 3' --plot --verbose --clobber
     """
     # log the call
     hashline = '----------------------------------------------------------------------------'
@@ -778,13 +786,7 @@ def kepcotrend(infile, outfile, bvfile, listbv, fitmethod='llsq', fitpower=1,
     if short:
         bvdata.field('CADENCENO')[:] = ((((bvdata.field('CADENCENO')[:] +
                                         (7.5/15.) )* 30.) - 11540.).round())
-    bvectors, in1derror = get_pcomp_list_newformat(bvdata, bvlist, lc_cad, short, scinterp)
-    if in1derror:
-        message = ('It seems that you have an old version of numpy '
-                   'which does not have the in1d function included. '
-                   'Please update your version of numpy to a version '
-                   '1.4.0 or later')
-        kepmsg.err(logfile, message, verbose)
+    bvectors = get_pcomp_list_newformat(bvdata, bvlist, lc_cad, short, scinterp)
     medflux = np.median(lc_flux)
     n_flux = (lc_flux /medflux)-1
     n_err = np.sqrt(lc_err * lc_err / (medflux * medflux))
@@ -823,9 +825,8 @@ def kepcotrend(infile, outfile, bvfile, listbv, fitmethod='llsq', fitpower=1,
         lc_cad_masked = np.copy(lc_cad)
         n_err_masked = np.copy(n_err)
 
-    bvectors_masked, hasin1d = get_pcomp_list_newformat(bvdata, bvlist,
-                                                        lc_cad_masked,
-                                                        short, scinterp)
+    bvectors_masked = get_pcomp_list_newformat(bvdata, bvlist, lc_cad_masked,
+                                               short, scinterp)
 
     if iterate and sigma is None:
         errmsg = 'If fitting iteratively you must specify a clipping range'
@@ -856,7 +857,9 @@ def kepcotrend(infile, outfile, bvfile, listbv, fitmethod='llsq', fitpower=1,
             coeffs = do_lsq_uhat(bvectors_masked,lc_cad_masked,
                                  n_flux_masked)
 
-    flux_after = (get_newflux(n_flux,bvectors,coeffs) + 1) * medflux
+    coeffs = np.asarray(coeffs)
+
+    flux_after = (get_newflux(n_flux, bvectors, coeffs) + 1) * medflux
     flux_after_masked = ((get_newflux(n_flux_masked, bvectors_masked,
                                       coeffs) + 1) * medflux)
     bvsum = get_pcompsum(bvectors, coeffs)
@@ -914,7 +917,7 @@ def kepcotrend_main():
                         default=1, type=float)
     parser.add_argument('--iterate', action='store_true',
                         help='Fit iteratively ', dest='iterate')
-    parser.add_argument('--sigmaclip', '-s',
+    parser.add_argument('--sigmaclip', type=float,
                         help='Sigma clip value when iteratively fitting',
                         default=None, dest='sigma')
     parser.add_argument('--maskfile', '-q',
