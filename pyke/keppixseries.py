@@ -83,7 +83,7 @@ def keppixseries(infile, outfile, plotfile=None, plottype='global',
             + ' outfile={}'.format(outfile)
             + ' plotfile={}'.format(plotfile)
             + ' plottype={}'.format(plottype)
-            + ' filterlc={}'.format(filt)
+            + ' filterlc={}'.format(filterlc)
             + ' function={}'.format(function)
             + ' cutoff={}'.format(cutoff)
             + ' clobber={}'.format(clobber)

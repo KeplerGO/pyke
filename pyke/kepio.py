@@ -684,7 +684,7 @@ def readTPF(infile, colname, logfile, verbose):
                   "column in {1} '[TARGETTABLES]'".format(colname, infile))
         kepmsg.err(logfile, errmsg, verbose)
 
-    closefits(tpf, logfile, verbose)
+    tpf.close()
 
     # for STSCI_PYTHON v2.12 - convert 3D data array to 2D
 
@@ -735,7 +735,7 @@ def readMaskDefinition(infile, logfile, verbose):
             pixelcoord1[i, j] = kepkey.wcs(i, crpix1p, crval1p, cdelt1p)
             pixelcoord2[i, j] = kepkey.wcs(j, crpix2p, crval2p, cdelt2p)
     # close input file
-    closefits(inf, logfile, verbose)
+    inf.close()
     return img, pixelcoord1, pixelcoord2
 
 
@@ -769,5 +769,5 @@ def readPRFimage(infile, hdu, logfile, verbose):
             infile, prf[hdu], logfile, verbose
                                                                          )
 
-    closefits(prf,logfile,verbose)
+    prf.close()
     return img, crpix1p, crpix2p, crval1p, crval2p, cdelt1p, cdelt2p
