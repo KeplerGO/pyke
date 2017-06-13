@@ -47,7 +47,6 @@ def kepfilter(infile, outfile, passband, datacol='SAP_FLUX', function='boxcar',
         * low
 
         * high
-
     plot : bool
         Plot the original light curve and the result of the filter?
     clobber : bool
@@ -57,12 +56,18 @@ def kepfilter(infile, outfile, passband, datacol='SAP_FLUX', function='boxcar',
         Print informative messages and warnings to the shell and logfile?
     logfile : str
         Name of the logfile containing error and warning messages.
+
+    Examples
+    --------
+    ..code-block :: bash
+
+        $ kepfilter kplr002436324-2009259160929_llc.fits kepfilter.fits --datacol 'SAP_FLUX' --function 'boxcar'
+        --plot --verbose --clobber
+
+    ..image :: _static/images/kepfilter.png
+        :align: center
     """
     ## startup parameters
-    labelsize = 24
-    ticksize = 16
-    xsize = 16
-    ysize = 6
     lcolor = '#0000ff'
     lwidth = 1.0
     fcolor = '#ffff00'
@@ -76,9 +81,9 @@ def kepfilter(infile, outfile, passband, datacol='SAP_FLUX', function='boxcar',
             + ' outfile={}'.format(outfile)
             + ' datacol={}'.format(datacol)
             + ' function={}'.format(function)
-            + ' cutoff='.format(cutoff)
-            + ' passband='.format(passband)
-            + ' plot='.format(plotit)
+            + ' cutoff={}'.format(cutoff)
+            + ' passband={}'.format(passband)
+            + ' plot={}'.format(plot)
             + ' clobber={}'.format(clobber)
             + ' verbose={}'.format(verbose)
             + ' logfile={}'.format(logfile))
@@ -138,7 +143,7 @@ def kepfilter(infile, outfile, passband, datacol='SAP_FLUX', function='boxcar',
         timescale /= 2
         dx = np.ceil(timescale * 10 + 1)
         filtfunc = kepfunc.gauss([1.0, dx / 2 - 1.0, timescale],
-                                 linspace(0,dx-1,dx))
+                                 np.linspace(0, dx - 1, dx))
     elif function == 'sinc':
         dx = np.ceil(timescale * 12 + 1)
         fx = (np.linspace(0, dx - 1, dx) - dx / 2 + 0.5) / timescale
@@ -194,15 +199,13 @@ def kepfilter(infile, outfile, passband, datacol='SAP_FLUX', function='boxcar',
     pout2 = np.append(pout2, 0.0)
     ## plot light curve
     if plot:
-        plt.figure(figsize=[xsize, ysize])
+        plt.figure()
         plt.clf()
 
         ## plot filtered data
         ax = plt.axes([0.06, 0.1, 0.93, 0.87])
         plt.gca().xaxis.set_major_formatter(plt.ScalarFormatter(useOffset=False))
         plt.gca().yaxis.set_major_formatter(plt.ScalarFormatter(useOffset=False))
-        labels = ax.get_yticklabels()
-        plt.setp(labels, 'rotation', 90, fontsize=12)
         plt.plot(ptime, pout, color='#ff9900', linestyle='-', linewidth=lwidth)
         plt.fill(ptime, pout, color=fcolor, linewidth=0.0, alpha=falpha)
         if passband == 'low':

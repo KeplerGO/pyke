@@ -4,6 +4,7 @@ from copy import copy
 from scipy import stats
 from astropy.io import fits as pyfits
 from matplotlib import pyplot as plt
+from tqdm import tqdm
 
 def kepfold(infile, outfile, period, bjd0, bindata=False,
             binmethod='median', threshold=1.0, niter=5, nbins=1000,
@@ -94,31 +95,29 @@ def kepfold(infile, outfile, period, bjd0, bindata=False,
         $ kepfold kplr010544976-2009201121230_slc.fits kepfold.fits
           0.350471 2455002.825 --bindata --binmethod median --threshold 3.0
           --niter 1000 --plottype sap --verbose
-    """
 
-    # startup parameters
-    labelsize, ticksize, xsize, ysize = 32, 18, 18, 10
-    lcolor, fcolor = '#0000ff', '#ffff00'
-    lwidth, falpha = 2.0, 0.2
+    .. image:: _statis/images/kepfold.png
+        :align: center
+    """
 
     # log the call
     hashline = '----------------------------------------------------------------------------'
     kepmsg.log(logfile, hashline, verbose)
     call = ('KEPFOLD -- '
-            'infile=' + infile +
-            ' outfile=' + outfile +
-            ' period=' + str(period) +
-            ' bjd0=' + str(bjd0) +
-            ' bindata=' + str(bindata) +
-            ' binmethod=' + binmethod +
-            ' threshold=' + str(threshold) +
-            ' niter=' + str(niter) +
-            ' nbins=' + str(nbins) +
-            ' rejqual=' + str(rejqual) +
-            ' plottype=' + plottype +
-            ' clobber=' + str(clobber) +
-            ' verbose=' + str(verbose) +
-            ' logfile=' + logfile)
+            + ' infile={}'.format(infile)
+            + ' outfile={}'.format(outfile)
+            + ' period={}'.format(period)
+            + ' bjd0={}'.format(bjd0)
+            + ' bindata={}'.format(bindata)
+            + ' binmethod={}'.format(binmethod)
+            + ' threshold={}'.format(threshold)
+            + ' niter={}'.format(niter)
+            + ' nbins={}'.format(nbins)
+            + ' rejqual={}'.format(rejqual)
+            + ' plottype={}'.format(plottype)
+            + ' clobber={}'.format(clobber)
+            + ' verbose={}'.format(verbose)
+            + ' logfile={}'.format(logfile))
 
     kepmsg.log(logfile, call+'\n', verbose)
 
@@ -498,7 +497,7 @@ def kepfold(infile, outfile, period, bjd0, bindata=False,
             pout1 = np.append(pout1, work[i])
     ptime1 = np.append(ptime1, phase3)
     pout1 = np.append(pout1, work)
-    for i in range(len(phase3)):
+    for i in tqdm(range(len(phase3))):
         if phase3[i] <= 0.5:
             ptime1 = np.append(ptime1, phase3[i] + 1.0)
             pout1 = np.append(pout1, work[i])
@@ -542,16 +541,16 @@ def kepfold(infile, outfile, period, bjd0, bindata=False,
         labels = ax.get_yticklabels()
         plt.setp(labels, 'rotation', 90)
         if bindata:
-            plt.fill(ptime2, pout2, color=fcolor, linewidth=0.0, alpha=falpha)
+            plt.fill(ptime2, pout2, color='#ffff00', linewidth=0.0, alpha=0.2)
         else:
             if 'det' in plottype:
-                plt.fill(ptime1, pout1, color=fcolor, linewidth=0.0,
-                         alpha=falpha)
-        plt.plot(ptime1, pout1, color=lcolor, linestyle='', linewidth=lwidth,
+                plt.fill(ptime1, pout1, color='#ffff00', linewidth=0.0,
+                         alpha=0.2)
+        plt.plot(ptime1, pout1, color='#0000ff', linestyle='', linewidth=2.0,
                  marker='.')
         if bindata:
             plt.plot(ptime2[1:-1], pout2[1:-1], color='r', linestyle='-',
-                     linewidth=lwidth, marker='')
+                     linewidth=2.0, marker='')
         plt.xlabel(xlab, {'color' : 'k'})
         plt.ylabel(ylab, {'color' : 'k'})
         plt.xlim(-0.49999, 1.49999)
@@ -568,8 +567,8 @@ def kepfold(infile, outfile, period, bjd0, bindata=False,
 
 def kepfold_main():
     import argparse
-    parser = argparse.ArgumentParser(description=("Low bandpass or high"
-                                                  "bandpass signal filtering"))
+    parser = argparse.ArgumentParser(
+            description=("Phase-fold light curve data on linear ephemeris."))
     parser.add_argument('infile', help='Name of FITS input file', type=str)
     parser.add_argument('outfile', help='Name of FITS file to output',
                         type=str)

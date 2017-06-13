@@ -53,13 +53,13 @@ def poly1con(p, x):
     return p[0] + x
 
 def gauss(p, x):
-    return p[0] * scipy.exp(-(x - p[1]) ** 2 / (2.0 * p[2] ** 2))
+    return p[0] * np.exp(-(x - p[1]) ** 2 / (2.0 * p[2] ** 2))
 
 def gauss0(p, x):
-    return p[0] * scipy.exp(-x**2 / (2.0 * p[1] ** 2))
+    return p[0] * np.exp(-x**2 / (2.0 * p[1] ** 2))
 
 def congauss(p, x):
-    return p[0] + p[1] * scipy.exp(-(x - p[2]) ** 2 / (2.0 * p[3] ** 2))
+    return p[0] + p[1] * np.exp(-(x - p[2]) ** 2 / (2.0 * p[3] ** 2))
 
 def moffat0(p, x):
     return p[0] / (1.0 + (x / p[1]) ** 2) ** p[2]
@@ -68,7 +68,7 @@ def conmoffat(p, x):
     return p[0] + p[1] / (1.0 + ((x - p[2]) / p[3]) ** 2) ** p[4]
 
 def sine(p, x):
-    return p[0] * scipy.sin(2.0 * np.pi * x / p[1] - p[2])
+    return p[0] * np.sin(2.0 * np.pi * x / p[1] - p[2])
 
 def smooth(x, window_len=10, window='hanning'):
     """Smooth the data using a window with requested size.
