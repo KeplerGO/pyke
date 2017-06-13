@@ -37,6 +37,34 @@ def kephead(infile, outfile, keyname, clobber=False, verbose=False,
         Print informative messages and warnings to the shell and logfile?
     logfile : str
         Name of the logfile containing error and warning messages.
+
+    Examples
+    --------
+    .. code-block:: bash
+
+        $ kephead kplr002436324-2009259160929_llc.fits kephead.txt 'mag' --verbose --clobber
+        --------------------------------------------------------------
+        KEPHEAD --  infile=kplr002436324-2009259160929_llc.fits outfile=kephead.txt keyname=mag
+        clobber=True verbose=True logfile=kephead.log
+
+        KEPHEAD started at: : Tue Jun 13 15:26:58 2017
+
+        ---------------------------------------
+        kplr002436324-2009259160929_llc.fits[0]
+        ---------------------------------------
+
+        GMAG    =               16.334 / [mag] SDSS g band magnitude
+        RMAG    =               16.789 / [mag] SDSS r band magnitude
+        IMAG    =               17.112 / [mag] SDSS i band magnitude
+        ZMAG    =                      / [mag] SDSS z band magnitude
+        D51MAG  =                      / [mag] D51 magnitude,
+        JMAG    =                8.176 / [mag] J band magnitude from 2MASS
+        HMAG    =                7.262 / [mag] H band magnitude from 2MASS
+        KMAG    =                6.874 / [mag] K band magnitude from 2MASS
+        KEPMAG  =               16.879 / [mag] Kepler magnitude (Kp)
+
+
+        KEPHEAD ended at: : Tue Jun 13 15:26:58 2017
     """
     # log the call
     hashline = '--------------------------------------------------------------'
@@ -45,8 +73,8 @@ def kephead(infile, outfile, keyname, clobber=False, verbose=False,
             + ' infile={}'.format(infile)
             + ' outfile={}'.format(outfile)
             + ' keyname={}'.format(keyname)
-            + ' clobber={}'.format(overwrite)
-            + ' verbose={}'.format(chatter)
+            + ' clobber={}'.format(clobber)
+            + ' verbose={}'.format(verbose)
             + ' logfile={}'.format(logfile))
     kepmsg.log(logfile, call+'\n', verbose)
     # start time
@@ -72,7 +100,7 @@ def kephead(infile, outfile, keyname, clobber=False, verbose=False,
         prhead = False
         for i in range(nkeys):
             if (keyname.upper() == 'ALL'
-                or keyname.upper() in instr[hdu].header.keys()[i]):
+                or keyname.upper() in list(instr[hdu].header.keys())[i]):
                 prhead = True
         if prhead:
             dashes = ''
@@ -86,8 +114,8 @@ def kephead(infile, outfile, keyname, clobber=False, verbose=False,
         # print keywords
         for i in range(nkeys):
             if ((keyname.upper() == 'ALL'
-                  or keyname.upper() in instr[hdu].header.keys()[i])
-                and 'COMMENT' not in instr[hdu].header.keys()[i]):
+                  or keyname.upper() in list(instr[hdu].header.keys())[i])
+                and 'COMMENT' not in list(instr[hdu].header.keys())[i]):
                 kepmsg.log(outfile, str(keylist[i]), True)
         kepmsg.log(outfile, '', True)
     # stop time
