@@ -28,8 +28,8 @@ def kepmask(infile, frameno, maskfile='mask.txt', plotfile='kepmask.png',
     files. The product from this task is a target mask definition file which
     can be used by kepextract to extract a light curve from target pixel data.
     This tool is a GUI interface for defining a pixel mask by moving a mouse
-    over image pixels and selecting them by pressing the 'x' key on the
-    keyboard.
+    over image pixels and selecting them by pressing the left-button of your
+    mouse/keypad.
 
     Parameters
     ----------
@@ -65,10 +65,14 @@ def kepmask(infile, frameno, maskfile='mask.txt', plotfile='kepmask.png',
     logfile : str
         Name of the logfile containing error and warning messages.
 
-    Notes
-    -----
-    IMPORTANT: use the left-button of your mouse/keypad to select pixels.
-    No need to press 'x' key anymore.
+    Examples
+    --------
+    .. code-block:: bash
+
+        $ kepmask ktwo202933888-c02_lpd-targ.fits.gz 20
+
+    .. image:: _static/images/kepmask.png
+        :align: center
     """
 
     global pimg, zscale, zmin, zmax, xmin, xmax, ymin, ymax, quarter
@@ -81,19 +85,19 @@ def kepmask(infile, frameno, maskfile='mask.txt', plotfile='kepmask.png',
     mfile = maskfile; pfile = plotfile
 
     # log the call
-    hashline = '----------------------------------------------------------------------------'
+    hashline = '--------------------------------------------------------------'
     kepmsg.log(logfile, hashline, verbose)
     call = ('KEPMASK -- '
-            'infile=' + infile +
-            ' maskfile=' + mfile +
-            ' plotfile=' + pfile +
-            ' frameno=' + str(frameno) +
-            ' imin=' + str(imin) +
-            ' imax=' + str(imax) +
-            ' iscale=' + str(iscale) +
-            ' cmap=' + str(cmap) +
-            ' verbose=' + str(verbose) +
-            ' logfile=' + logfile)
+            + ' infile={}'.format(infile)
+            + ' maskfile={}'.format(mfile)
+            + ' plotfile={}'.format(pfile)
+            + ' frameno={}'.format(frameno)
+            + ' imin={}'.format(imin)
+            + ' imax={}'.format(imax)
+            + ' iscale={}'.format(iscale)
+            + ' cmap={}'.format(cmap)
+            + ' verbose={}'.format(verbose)
+            + ' logfile={}'.format(logfile))
 
     kepmsg.log(logfile, call + '\n', verbose)
     kepmsg.clock('KEPMASK started at', logfile, verbose)
