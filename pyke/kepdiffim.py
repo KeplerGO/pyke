@@ -63,16 +63,25 @@ def kepdiffim(infile, outfile, plotfile=None, imscale='logarithmic',
         * gauss
 
         * sinc
-
     cutoff : float
         The frequency of the high pass-band cutoff in units of days^-1.
-
     clobber : bool
         Overwrite the output file?
     verbose : bool
         Print informative messages and warnings to the shell and logfile?
     logfile : str
         Name of the logfile containing error and warning messages.
+
+    Examples
+    --------
+    .. code-block:: bash
+
+        $ kepdiffim kplr011390659-2010355172524_lpd-targ.fits.gz kepdiffim.fits
+        --filter --function boxcar --cutoff 0.1 --plotfile kepdiffim.png
+        --cmap YlOrBr --imscale linear --verbose
+
+    .. image:: _static/images/kepdiffim.png
+        :align: center
     """
     # log the call
     hashline = '--------------------------------------------------------------'
@@ -82,12 +91,12 @@ def kepdiffim(infile, outfile, plotfile=None, imscale='logarithmic',
             + ' outfile={}'.format(outfile)
             + ' plotfile={}'.format(plotfile)
             + ' imscale={}'.format(imscale)
-            + ' colmap={}'.format(colmap)
-            + ' filterlc={}'.format(filt)
+            + ' cmap={}'.format(colmap)
+            + ' filterlc={}'.format(filterlc)
             + ' function={}'.format(function)
             + ' cutoff={}'.format(cutoff)
-            + ' clobber={}'.format(overwrite)
-            + ' verbose={}'.format(chatter)
+            + ' clobber={}'.format(clobber)
+            + ' verbose={}'.format(verbose)
             + ' logfile={}'.format(logfile))
     kepmsg.log(logfile, call+'\n', verbose)
 
@@ -210,7 +219,7 @@ def kepdiffim(infile, outfile, plotfile=None, imscale='logarithmic',
             # remove padding from the output array
             outdata = convolved[len(filtfunc):-len(filtfunc)]
             # subtract low frequencies
-            outmedian = np.median(outdata)
+            outmedian = np.nanmedian(outdata)
             pixseries[i, :] = pixseries[i, :] - outdata + outmedian
 
     # sum pixels over cadence
@@ -327,7 +336,7 @@ def plotimage(imgsum_pl, imgvar_pl, imgdev_pl, zminsum, zminvar, zmindev,
     plt.gca().yaxis.set_major_formatter(plt.ScalarFormatter(useOffset=False))
     plt.xlabel('Pixel Column Number', {'color' : 'k'})
     plt.ylabel('Pixel Row Number', {'color' : 'k'})
-    plt.title('Flux', {'color' : 'k', 'fontsize' : '24'})
+    plt.title('Flux', {'color' : 'k', 'fontsize' : '16'})
 
     # plot the variance window
     plt.axes([0.36, 0.11, 0.31, 0.78])
@@ -340,9 +349,9 @@ def plotimage(imgsum_pl, imgvar_pl, imgdev_pl, zminsum, zminvar, zmindev,
     plt.setp(plt.gca(),yticklabels=[])
     plt.xlabel('Pixel Column Number', {'color' : 'k'})
     try:
-        plt.title(r'$\chi$ Distribution', {'color' : 'k', 'fontsize' : '28'})
+        plt.title(r'$\chi$ Distribution', {'color' : 'k', 'fontsize' : '16'})
     except:
-        plt.title('Chi Distribution', {'color' : 'k', 'fontsize' : '24'})
+        plt.title('Chi Distribution', {'color' : 'k', 'fontsize' : '16'})
 
     # plot the normalized standard deviation window
     plt.axes([0.68, 0.11, 0.31, 0.78])
@@ -354,7 +363,7 @@ def plotimage(imgsum_pl, imgvar_pl, imgdev_pl, zminsum, zminvar, zmindev,
     plt.gca().yaxis.set_major_formatter(plt.ScalarFormatter(useOffset=False))
     plt.setp(plt.gca(),yticklabels=[])
     plt.xlabel('Pixel Column Number', {'color' : 'k'})
-    plt.title('Normalized Standard Deviation', {'color' : 'k', 'fontsize' : '24'})
+    plt.title('Normalized Standard Deviation', {'color' : 'k', 'fontsize' : '16'})
 
     # render plot
     plt.show()
@@ -381,7 +390,7 @@ def kepdiffim_main():
                         type=str, choices=['boxcar','gauss','sinc'])
     parser.add_argument('--cutoff',
                         help='Characteristic frequency cutoff of filter [1/days]',
-                        type=int, default=1.0)
+                        type=float, default=1.0)
     parser.add_argument('--clobber', action='store_true',
                         help='Overwrite output file?')
     parser.add_argument('--verbose', action='store_true',

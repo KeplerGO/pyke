@@ -74,8 +74,20 @@ def kepextract(infile, outfile, maskfile='ALL', bkg=False, clobber=False,
     --------
     .. code-block:: bash
 
-        $ kepextract kplr008256049-2010174085026_lpd-targ.fits outlc.fits
-        --maskfile ALL
+        $ kepextract kplr008256049-2010174085026_lpd-targ.fits outlc.fits --maskfile ALL
+
+    One further can plot the resulted light curve by doing
+
+    .. code-block:: python
+
+        import matplotlib.pyplot as plt
+        from astropy.io import fits
+
+        f = fits.open(outlc)
+        plt.plot(f[1].data['TIME'], f[1].data['SAP_FLUX'])
+
+    .. image:: _static/images/kepextract.png
+        :align: center
     """
 
     # log the call

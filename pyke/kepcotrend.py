@@ -628,8 +628,9 @@ def kepcotrend(infile, outfile, bvfile, listbv, fitmethod='llsq', fitpower=1,
     Examples
     --------
     .. code-block:: bash
+
         $ kepcotrend kplr005110407-2009350155506_llc.fits kepcotrend.fits ~/cbv/kplr2009350155506-q03-d25_lcbv.fits
-        '1 2 3' --plot --verbose --clobber
+        '1 2 3' --plot --verbose
     """
     # log the call
     hashline = '----------------------------------------------------------------------------'

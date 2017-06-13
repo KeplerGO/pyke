@@ -52,13 +52,19 @@ def kepdynamic(infile, outfile, fcol='SAP_FLUX', pmin=0.1, pmax=10., nfreq=100,
         Print informative messages and warnings to the shell and logfile?
     logfile : str
         Name of the logfile containing error and warning messages.
+
+    Examples
+    --------
+    .. code-block:: bash
+
+        $ kepdynamic kplr002436324-2009259160929_llc.fits kepdynamic.fits --fcol SAP_FLUX
+        --pmin 0.08 --pmax 0.1 --nfreq 500 --deltat 5.0 --nslice 500 --plot --verbose
+
+    .. image:: _static/images/kepdynamic.png
+        :align: center
     """
 
     # startup parameters
-    labelsize = 24
-    ticksize = 16
-    xsize = 12
-    ysize = 6
     lcolor = '#0000ff'
     lwidth = 1.0
     fcolor = '#ffff00'
@@ -157,7 +163,6 @@ def kepdynamic(infile, outfile, fcol='SAP_FLUX', pmin=0.1, pmax=10., nfreq=100,
         fr, power = kepfourier.ft(x, y, fmin, fmax, deltaf, False)
         for j in range(len(power)):
             dynam.append(power[j])
-        print('Timeslice: %.4f  Pmax: %.2E' % ((t2[i] + t1[i]) / 2, power.max()))
 
     # define shape of results array
     dynam = np.array(dynam, dtype='float64')
@@ -212,7 +217,7 @@ def kepdynamic(infile, outfile, fcol='SAP_FLUX', pmin=0.1, pmax=10., nfreq=100,
         zmax = np.nanmax(pixels)
 
     # plot power spectrum
-    plt.figure(1,figsize=[xsize,ysize])
+    plt.figure()
     plt.clf()
     plt.axes([0.08,0.113,0.91,0.86])
     dynam = dynam.transpose()

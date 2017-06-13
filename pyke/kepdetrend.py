@@ -100,13 +100,21 @@ def kepdetrend(infile, outfile, ranges1, ranges2, npoly1, npoly2, nsig1, nsig2,
         Print informative messages and warnings to the shell and logfile?
     logfile : str
         Name of the logfile containing error and warning messages.
+
+    Examples
+    --------
+    .. code-block:: bash
+
+        $ kepdetrend kplr002436324-2009259160929_llc.fits new1.fits --datacol SAP_FLUX
+        --errcol SAP_FLUX_ERR --ranges1 '2455063.59357,2455066.47292' --npoly1 5
+        --nsig1 3 --niter1 10 --ranges2 '2455060.57026,2455063.59357;2455066.9768,2455068.99235'
+        --npoly2 5 --nsig2 3 --niter2 10 --plot --verbose
+
+    .. image:: _static/images/kepdetrend.png
+        :align: center
     """
 
     # startup parameters
-    labelsize = 24
-    ticksize = 16
-    xsize = 16
-    ysize = 9
     lcolor = '#0000ff'
     lwidth = 1.0
     fcolor = '#ffff00'
@@ -116,23 +124,23 @@ def kepdetrend(infile, outfile, ranges1, ranges2, npoly1, npoly2, nsig1, nsig2,
     hashline = '----------------------------------------------------------------------------'
     kepmsg.log(logfile, hashline, verbose)
     call = ('KEPDETREND -- '
-            + 'infile={}'.format(infile)
-            + 'outfile={}'.format(outfile)
-            + 'datacol={}'.format(datacol)
-            + 'errcol={}'.format(errcol)
-            + 'ranges1={}'.format(ranges1)
-            + 'npoly1={}'.format(npoly1)
-            + 'nsig1={}'.format(nsig1)
-            + 'niter1={}'.format(niter1)
-            + 'ranges2={}'.format(ranges2)
-            + 'npoly2={}'.format(npoly2)
-            + 'nsig2={}'.format(nsig2)
-            + 'niter2={}'.format(niter2)
-            + 'popnans={}'.format(popnans)
-            + 'plot={}'.format(plot)
-            + 'clobber={}'.format(clobber)
-            + 'verbose={}'.format(verbose)
-            + 'logfile={}'.format(logfile))
+            + ' infile={}'.format(infile)
+            + ' outfile={}'.format(outfile)
+            + ' datacol={}'.format(datacol)
+            + ' errcol={}'.format(errcol)
+            + ' ranges1={}'.format(ranges1)
+            + ' npoly1={}'.format(npoly1)
+            + ' nsig1={}'.format(nsig1)
+            + ' niter1={}'.format(niter1)
+            + ' ranges2={}'.format(ranges2)
+            + ' npoly2={}'.format(npoly2)
+            + ' nsig2={}'.format(nsig2)
+            + ' niter2={}'.format(niter2)
+            + ' popnans={}'.format(popnans)
+            + ' plot={}'.format(plot)
+            + ' clobber={}'.format(clobber)
+            + ' verbose={}'.format(verbose)
+            + ' logfile={}'.format(logfile))
 
     kepmsg.log(logfile, call+'\n', verbose)
     # start time
@@ -282,7 +290,7 @@ def kepdetrend(infile, outfile, ranges1, ranges2, npoly1, npoly2, nsig1, nsig2,
 
     # plot light curve
     if plot:
-        plt.figure(figsize=[xsize, ysize])
+        plt.figure()
         plt.clf()
         # plot original data
         ax = plt.axes([0.06,0.523,0.93,0.45])
@@ -292,7 +300,6 @@ def kepdetrend(infile, outfile, ranges1, ranges2, npoly1, npoly2, nsig1, nsig2,
 
         # rotate y labels by 90 deg
         labels = ax.get_yticklabels()
-        plt.setp(labels, 'rotation', 90, fontsize=12)
         plt.plot(ptime, indata, color=lcolor, linestyle='-', linewidth=lwidth)
         plt.fill(ptime, indata, color=fcolor, linewidth=0.0, alpha=falpha)
         plt.plot(plotx1, ploty1, color='r', linestyle='-', linewidth=2.0)
@@ -313,7 +320,6 @@ def kepdetrend(infile, outfile, ranges1, ranges2, npoly1, npoly2, nsig1, nsig2,
 
         # rotate y labels by 90 deg
         labels = ax.get_yticklabels()
-        plt.setp(labels, 'rotation', 90, fontsize=12)
         plt.plot(ptime, pout, color=lcolor, linestyle='-', linewidth=lwidth)
         plt.fill(ptime, pout, color=fcolor, linewidth=0.0, alpha=falpha)
         plt.xlim(xmin-xr*0.01, xmax+xr*0.01)
@@ -327,6 +333,7 @@ def kepdetrend(infile, outfile, ranges1, ranges2, npoly1, npoly2, nsig1, nsig2,
         except:
             ylab = '10**{} e-/s'.format(nrm)
             plt.ylabel(ylab, {'color' : 'k'})
+        plt.grid()
 
     # render plot
     plt.show()
@@ -387,8 +394,8 @@ def kepdetrend_main():
     parser.add_argument('--logfile', help='Name of ascii log file',
                         default='kepdetrend.log', dest='logfile', type=str)
     args = parser.parse_args()
-    kepdetrend(args.infile, args.outfile, args.datacol, args.errcol,
-               args.ranges1, args.npoly1, args.nsig1, args.niter1,
-               args.ranges2, args.npoly2, args.nsig2, args.niter2,
+    kepdetrend(args.infile, args.outfile, args.ranges1, args.ranges2,
+               args.npoly1, args.npoly2, args.nsig1, args.nsig2,
+               args.niter1, args.niter2, args.datacol, args.errcol,
                args.popnans, args.plot, args.clobber, args.verbose,
                args.logfile)

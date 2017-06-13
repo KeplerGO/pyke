@@ -23,6 +23,57 @@ pkepmag = None; pkepid = None; pra = None; pdec = None
 
 def kepffi(ffifile, kepid, ra, dec, aperfile, imin, imax, iscale, cmap, npix,
            verbose=False, logfile='kepffi.log'):
+    """
+    kepffi -- Display a portion of a Full Frame Image (FFI) and define custom
+    target apertures
+
+    ffifile : str
+        The name of a MAST standard format Full Frame Image (FFI) FITS file
+        containing a Kepler channel image within each data extension.
+    kepid : str
+        The numerical Kepler identification number for a specific source,
+        obtained from the MAST Target Search page.
+    ra : str
+        The J2000 Right Ascension of a target in decimal degrees or sexadecimal
+        hours (hh:mm:ss.ss). In conjunction with dec, this parameter overrides
+        the content of kepid.
+    dec : str
+        The J2000 Declination of a target in decimal degrees or sexadecimal
+        degrees (dd:mm:ss.s). In conjunction with ra, this parameter argument
+        overrides the content of kepid.
+    aperfile : str
+        The (directory path and) name of an existing custom aperture definition
+        file. If provided, this aperture will be plotted over the displayed
+        image.
+    imin : float
+        Sets the minimum intensity range for the image display. The user can
+        select the minimum level (in electrons per cadence) with this
+        parameter. The default minimum intensity level is the median of the
+        faintest 10% of pixels in the image.
+    imax : float
+        Sets the maximum intensity range for the image display. The user can
+        select the maximum level (in electrons per cadence) with this
+        parameter. The default maximum intensity level is the median of the
+        brightest 10% of pixels in the image.
+    iscale : str
+        The type of intensity scaling for the image display.
+        Options:
+
+        * linear
+
+        * logarithmic
+
+        * squareroot
+    cmap : str
+        Color intensity scheme for the image display.
+    npix : int
+        The pixel size of the square subimage extracted from the FFI for
+        display.
+    verbose : bool
+        Print informative messages and warnings to the shell and logfile?
+    logfile : str
+        Name of the logfile containing error and warning messages.
+    """
 
     global pimg, zscale, zmin, zmax, xmin, xmax, ymin, ymax, quarter
     global kepmag, skygroup, season, channel
@@ -178,7 +229,6 @@ def kepffi(ffifile, kepid, ra, dec, aperfile, imin, imax, iscale, cmap, npix,
     plt.figure(figsize=[10, 7])
     plotimage()
 
-    plt.ion()
     plt.show()
 
 # -----------------------------------------------------------
