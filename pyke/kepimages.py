@@ -80,6 +80,25 @@ def kepimages(infile, prefix, imtype='FLUX', ranges='0,0', clobber=True,
     .. code-block: bash
 
         $ kepimages ktwo202073445-c00_lpd-targ.fits ktwo202073445-c00 --verbose
+        $ ls
+        -rw-r--r--   1 jvmirca  staff    14K Jun 13 15:35 ktwo202073445-c00_BJD2456728.5277.fits
+        -rw-r--r--   1 jvmirca  staff    14K Jun 13 15:35 ktwo202073445-c00_BJD2456728.5482.fits
+        -rw-r--r--   1 jvmirca  staff    14K Jun 13 15:35 ktwo202073445-c00_BJD2456728.5686.fits
+        -rw-r--r--   1 jvmirca  staff    14K Jun 13 15:35 ktwo202073445-c00_BJD2456728.5890.fits
+        -rw-r--r--   1 jvmirca  staff    14K Jun 13 15:35 ktwo202073445-c00_BJD2456728.6095.fits
+        -rw-r--r--   1 jvmirca  staff    14K Jun 13 15:35 ktwo202073445-c00_BJD2456728.6299.fits
+        -rw-r--r--   1 jvmirca  staff    14K Jun 13 15:35 ktwo202073445-c00_BJD2456728.6503.fits
+        -rw-r--r--   1 jvmirca  staff    14K Jun 13 15:35 ktwo202073445-c00_BJD2456728.6708.fits
+        -rw-r--r--   1 jvmirca  staff    14K Jun 13 15:35 ktwo202073445-c00_BJD2456728.6912.fits
+        -rw-r--r--   1 jvmirca  staff    14K Jun 13 15:35 ktwo202073445-c00_BJD2456728.7116.fits
+        -rw-r--r--   1 jvmirca  staff    14K Jun 13 15:35 ktwo202073445-c00_BJD2456728.7321.fits
+        -rw-r--r--   1 jvmirca  staff    14K Jun 13 15:35 ktwo202073445-c00_BJD2456728.7525.fits
+        -rw-r--r--   1 jvmirca  staff    14K Jun 13 15:35 ktwo202073445-c00_BJD2456728.7729.fits
+        -rw-r--r--   1 jvmirca  staff    14K Jun 13 15:35 ktwo202073445-c00_BJD2456728.7934.fits
+        -rw-r--r--   1 jvmirca  staff    14K Jun 13 15:35 ktwo202073445-c00_BJD2456728.8138.fits
+        .
+        .
+        .
     """
 
     # log the call
