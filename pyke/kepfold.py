@@ -96,7 +96,7 @@ def kepfold(infile, outfile, period, bjd0, bindata=False,
           0.350471 2455002.825 --bindata --binmethod median --threshold 3.0
           --niter 1000 --plottype sap --verbose
 
-    .. image:: _statis/images/kepfold.png
+    .. image:: _static/images/kepfold.png
         :align: center
     """
 

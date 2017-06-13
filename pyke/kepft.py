@@ -1,3 +1,4 @@
+import math
 import numpy as np
 from matplotlib import pyplot as plt
 from astropy.io import fits as pyfits
@@ -43,13 +44,19 @@ def kepft(infile, outfile, fcol='SAP_FLUX', pmin=0.1, pmax=10., nfreq=100,
         Print informative messages and warnings to the shell and logfile?
     logfile : str
         Name of the logfile containing error and warning messages.
+
+    Examples
+    --------
+    .. code-block:: bash
+
+        $ kepft kplr002436324-2009259160929_llc.fits kepout.fits --pmin 0.5 -pmax 100 --nfreq 1000 --plot
+          --verbose
+
+    .. image:: _static/images/kepft.png
+        :align: center
     """
 
     ## startup parameters
-    labelsize = 24
-    ticksize = 16
-    xsize = 18
-    ysize = 6
     lcolor = '#0000ff'
     lwidth = 1.0
     fcolor = '#ffff00'
@@ -66,8 +73,8 @@ def kepft(infile, outfile, fcol='SAP_FLUX', pmin=0.1, pmax=10., nfreq=100,
             + ' pmax={}'.format(pmax)
             + ' nfreq={}'.format(nfreq)
             + ' plot={}'.format(plot)
-            + ' clobber={}'.format(overwrite)
-            + ' verbose={}'.format(chatter)
+            + ' clobber={}'.format(clobber)
+            + ' verbose={}'.format(verbose)
             + ' logfile={}'.format(logfile))
     kepmsg.log(logfile, call+'\n', verbose)
     ## start time
@@ -76,7 +83,7 @@ def kepft(infile, outfile, fcol='SAP_FLUX', pmin=0.1, pmax=10., nfreq=100,
     if clobber:
         kepio.clobber(outfile, logfile, verbose)
     if kepio.fileexists(outfile):
-        errmsg = 'ERROR -- KEPFT: {} exists. Use --clobber'.format(clobber)
+        errmsg = 'ERROR -- KEPFT: {} exists. Use --clobber'.format(outfile)
         kepmsg.err(logfile, errmsg, verbose)
     ## open input file
     instr = pyfits.open(infile)
@@ -131,7 +138,7 @@ def kepft(infile, outfile, fcol='SAP_FLUX', pmin=0.1, pmax=10., nfreq=100,
     power = np.append(power, 0.0)
 
     if plot:
-        plt.figure(1, figsize=[xsize, ysize])
+        plt.figure()
         plt.clf()
         plt.axes([0.06, 0.113, 0.93, 0.86])
         plt.plot(fr, power, color=lcolor, linestyle='-', linewidth=lwidth)
@@ -158,13 +165,14 @@ def kepft_main():
     parser.add_argument('outfile', help='Name of FITS file to output',
                         type=str)
     parser.add_argument('--datacol', default='SAP_FLUX',
-                        help='Name of data column to plot', type=str, dest='fcol')
+                        help='Name of data column to plot', type=str)
     parser.add_argument('--pmin', default=0.1,
                         help='Minimum search period [days]', type=float)
     parser.add_argument('--pmax', default=10.,
                         help='Maximum search period [days]', type=float)
     parser.add_argument('--nfreq', default=100,
                         help='Number of frequency intervals', type=int)
+    parser.add_argument('--plot', action='store_true', help='Plot result?')
     parser.add_argument('--clobber', action='store_true',
                         help='Overwrite output file?')
     parser.add_argument('--verbose', action='store_true',
@@ -172,5 +180,5 @@ def kepft_main():
     parser.add_argument('--logfile', '-l', help='Name of ascii log file',
                         default='kepft.log', type=str)
     args = parser.parse_args()
-    kepft(args.infile, args.outfile, args.fcol, args.pmin, args.pmax,
+    kepft(args.infile, args.outfile, args.datacol, args.pmin, args.pmax,
           args.nfreq, args.plot, args.clobber, args.verbose, args.logfile)
