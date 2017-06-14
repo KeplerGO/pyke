@@ -49,25 +49,25 @@ def kepoutlier(infile, outfile, datacol, nsig=3.0, stepsize=1.0, npoly=3,
         removed temporarily and the time series fit again. This will be
         iterated niter times before freezing upon the best available fit.
     operation : str
+
         * ``remove`` throws away outliers. The output data table will smaller
-        or equal in size to the input table.
+          or equal in size to the input table.
 
         * ``replace`` replaces outliers with a value that is consistent with
-        the best-fit polynomial function and a random component defined by the
-        rms of the data relative to the fit and calculated using the inverse
-        normal cumulative function and a random number generator.
+          the best-fit polynomial function and a random component defined by the
+          rms of the data relative to the fit and calculated using the inverse
+          normal cumulative function and a random number generator.
     ranges : str
         The user can choose specific time ranges of data on which to work. This
         could, for example, avoid removing known stellar flares from a dataset.
         Time ranges are supplied as comma-separated pairs of Barycentric Julian
         Dates (BJDs). Multiple ranges are separated by a semi-colon. An example
-        containing two time ranges is:
+        containing two time ranges is::
 
             ``'2455012.48517,2455014.50072;2455022.63487,2455025.08231'``
 
         If the user wants to correct the entire time series then providing
         ``ranges = '0,0'`` will tell the task to operate on the whole time series.
-
     plot : bool
         Plot the data and outliers?
     plotfit : bool
@@ -89,7 +89,6 @@ def kepoutlier(infile, outfile, datacol, nsig=3.0, stepsize=1.0, npoly=3,
     .. image:: _static/images/kepoutlier.png
         :align: center
     """
-
 
     # log the call
     hashline = '--------------------------------------------------------------'
