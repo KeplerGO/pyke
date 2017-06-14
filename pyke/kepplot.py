@@ -86,7 +86,7 @@ def cleany(signal, cadence, logfile, verbose):
         if nrm == 0:
             label = 'Flux (e$^-$ s$^{-1}$)'
         else:
-            label = "Flux (10$^{0}$".format(nrm) + "e$^-$ s$^{-1}$)"
+            label = "Flux ($10^%d$" % nrm + "e$^-$ s$^{-1}$)"
     except:
         txt = ("ERROR -- KEPPLOT.CLEANY: cannot calculate plot scaling in "
                "y dimension")

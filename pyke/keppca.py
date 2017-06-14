@@ -4,10 +4,13 @@ import numpy as np
 from astropy.io import fits as pyfits
 from scipy import optimize as opt
 from matplotlib import pyplot as plt
+from tqdm import tqdm
 import random
 import mdp
 
+
 __all__ = ['keppca']
+
 
 def keppca(infile, outfile, maskfile='ALL', components='1-3', plotpca=False,
            nmaps=10, clobber=False, verbose=False, logfile='keppca.log'):
@@ -92,17 +95,16 @@ def keppca(infile, outfile, maskfile='ALL', components='1-3', plotpca=False,
         Print informative messages and warnings to the shell and logfile?
     logfile : str
         Name of the logfile containing error and warning message
-    """
 
-    # startup parameters
-    labelsize = 32
-    ticksize = 18
-    xsize = 16
-    ysize = 10
-    lcolor = '#0000ff'
-    lwidth = 1.0
-    fcolor = '#ffff00'
-    falpha = 0.2
+    Examples
+    --------
+    .. code-block:: bash
+
+        $ keppca ktwo202073445-c00_lpd-targ.fits.gz keppca.fits --plotpca
+
+    .. image:: _static/images/keppca.png
+        :align: center
+    """
 
     # log the call
     hashline = '--------------------------------------------------------------'
@@ -356,7 +358,7 @@ def keppca(infile, outfile, maskfile='ALL', components='1-3', plotpca=False,
 
     # Subtract components by fitting them to the summed light curve
     x0 = np.tile(-1.0, 1)
-    for k in range(0, nrem):
+    for k in tqdm(range(0, nrem)):
         def f(x):
             fluxcor = pixseriessum
             for k in range(0, len(x)):
@@ -648,14 +650,14 @@ def keppca(infile, outfile, maskfile='ALL', components='1-3', plotpca=False,
                 px, xlab = kepplot.cleanx(px, logfile, verbose)
                 py, ylab = kepplot.cleany(py, 1.0, logfile, verbose)
                 kepplot.RangeOfPlot(px, py, 0.01, False)
-                kepplot.plot1d(px, py, cadence, lcolor, lwidth, fcolor, falpha,
+                kepplot.plot1d(px, py, cadence, '#0000ff', 1.0, '#ffff00', 0.2,
                                True)
                 py = np.copy(fluxcor)
                 py, ylab = kepplot.cleany(py, 1.0, logfile, verbose)
                 plt.plot(px, py, marker='.', color='r', linestyle='',
                          markersize=1.0)
                 kepplot.labels('', re.sub('\)', '', re.sub('Flux \(','', ylab)),
-                               'k', 18)
+                               'k', 14)
                 plt.grid()
                 plt.setp(ax1.get_xticklabels(), visible=False)
 
@@ -672,8 +674,8 @@ def keppca(infile, outfile, maskfile='ALL', components='1-3', plotpca=False,
                 plt.subplot2grid((npp, 6), (l, 2), colspan=4)
                 py = np.copy(model[:, k])
                 kepplot.RangeOfPlot(px, py, 0.01, False)
-                kepplot.plot1d(px, py, cadence, 'r', lwidth, 'g', falpha, True)
-                kepplot.labels(xlab, 'PC ' + str(k + 1), 'k', 18)
+                kepplot.plot1d(px, py, cadence, 'r', 1.0, 'g', 0.2, True)
+                kepplot.labels(xlab, 'PC ' + str(k + 1), 'k', 14)
                 plt.grid()
                 plt.tight_layout()
                 l = 1
@@ -684,8 +686,8 @@ def keppca(infile, outfile, maskfile='ALL', components='1-3', plotpca=False,
                 ax2 = plt.subplot2grid((npp, 6), (l, 2), colspan=4)
                 py = np.copy(model[:, k])
                 kepplot.RangeOfPlot(px, py, 0.01, False)
-                kepplot.plot1d(px, py, cadence, 'r', lwidth, 'g', falpha, True)
-                kepplot.labels('', 'PC ' + str(k+1), 'k', 18)
+                kepplot.plot1d(px, py, cadence, 'r', 1.0, 'g', 0.2, True)
+                kepplot.labels('', 'PC ' + str(k + 1), 'k', 14)
                 plt.grid()
                 plt.setp(ax2.get_xticklabels(), visible=False)
                 plt.tight_layout()
@@ -694,7 +696,7 @@ def keppca(infile, outfile, maskfile='ALL', components='1-3', plotpca=False,
 
     # plot style and size
     if plotpca:
-        plt.figure(figsize=[xsize, ysize])
+        plt.figure()
         plt.clf()
         # plot aperture photometry and PCA corrected data
         ax = kepplot.location([0.06, 0.54, 0.93, 0.43])
@@ -703,12 +705,12 @@ def keppca(infile, outfile, maskfile='ALL', components='1-3', plotpca=False,
         px, xlab = kepplot.cleanx(px, logfile, verbose)
         py, ylab = kepplot.cleany(py, 1.0, logfile, verbose)
         kepplot.RangeOfPlot(px, py, 0.01, False)
-        kepplot.plot1d(px, py, cadence, lcolor, lwidth, fcolor, falpha, True)
+        kepplot.plot1d(px, py, cadence, '#0000ff', 1.0, '#ffff00', 0.2, True)
         py = np.copy(fluxcor)
         py, ylab = kepplot.cleany(py, 1.0, logfile, verbose)
-        kepplot.plot1d(px, py, cadence, 'r', 2, fcolor, 0.0, True)
+        kepplot.plot1d(px, py, cadence, 'r', 2, '#ffff00', 0.0, True)
         plt.setp(plt.gca(), xticklabels=[])
-        kepplot.labels('', ylab, 'k', 24)
+        kepplot.labels('', ylab, 'k', 14)
         plt.grid()
         # plot aperture photometry and PCA corrected data
         ax = kepplot.location([0.06, 0.09, 0.93, 0.43])
@@ -718,13 +720,13 @@ def keppca(infile, outfile, maskfile='ALL', components='1-3', plotpca=False,
             py = pcar[:, i] * c[i]
             py, ylab = kepplot.cleany(py, 1.0, logfile, verbose)
             cl = float(i) / (float(npc))
-            kepplot.plot1d(px, py, cadence, [1.0 - cl, 0.0, cl], 2, fcolor,
+            kepplot.plot1d(px, py, cadence, [1.0 - cl, 0.0, cl], 2, '#ffff00',
                            0.0, True)
             yr = np.append(yr, py)
         y1 = max(yr)
         y2 = -min(yr)
         kepplot.RangeOfPlot(px, np.array([-y1, y1, -y2, y2]), 0.01, False)
-        kepplot.labels(xlab, 'Principal Components', 'k', 24)
+        kepplot.labels(xlab, 'Principal Components', 'k', 14)
         plt.grid()
         # save plot to file
         plt.savefig(repname)
@@ -753,14 +755,12 @@ def mad(data):
 
 def keppca_main():
     import argparse
-    parser = argparse.ArgumentParser(description=('Correct aperture photmetry '
-                                                  'using target motion'))
-    parser.add_argument('--shell', action='store_true',
-                        help='Are we running from the shell?')
+    parser = argparse.ArgumentParser(
+       description=('Pixel-level principal component analysis of time series'))
     parser.add_argument('infile', help='Name of input target pixel FITS file',
                         type=str)
     parser.add_argument('outfile', help='Name of output FITS file', type=str)
-    parser.add_argument('maskfile', help='Name of mask defintion ASCII file',
+    parser.add_argument('--maskfile', help='Name of mask defintion ASCII file',
                         default='ALL', type=str)
     parser.add_argument('--components', default='1-3',
                         help='Principal components to be removed', type=str)
