@@ -1,3 +1,4 @@
+from . import kepio, kepmsg, kepkey, kepplot, kepfit, kepfunc
 import math
 import multiprocessing
 import itertools
@@ -10,13 +11,143 @@ from matplotlib import pyplot as plt
 from astropy.io import fits as pyfits
 from scipy.optimize import fmin_powell
 from scipy.interpolate import RectBivariateSpline
-from . import kepio, kepmsg, kepkey, kepplot, kepfit, kepfunc
+
+
+__all__ = ['kepprfphot']
 
 
 def kepprfphot(infile, outroot, columns, rows, fluxes, prfdir, border=0,
                background=False, focus=False, ranges='0,0', xtol=1e-4,
                ftol=1e-2, qualflags=False, plot=False, clobber=False,
                verbose=False, logfile='kepprfphot.log'):
+    """
+    kepprfphot -- Fit a PSF model to time series observations within a Target
+    Pixel File
+
+    Parameters
+    ----------
+    nfile : str
+        The name of a MAST standard format FITS file containing Kepler Target
+        Pixel data within the first data extension.
+    outroot : str
+        kepprfphot creates two types of output file containing fit results and
+        diagnostics. ``outroot.png`` contains a time series plot of fit
+        parameters, residuals and chi-squared. ``outroot.fits`` contains a
+        table of the same properties, consistent with Kepler archive light
+        curve files. The FITS column PSF_FLUX contains the flux time-series in
+        units of e-/s derived by integrating under the best-fit PRF model.
+        PSF_BKG provides the best-fit background (if calculated) averaged over
+        all mask pixels in units of e-/s/pixel. PSF_CENTR1 provides the
+        best-fit PSF centroid position in the CCD column direction, in CCD
+        pixel units. Similarly, PSF_CENTR2 provides the best-fit PSF centroid
+        position in the CCD row direction, in CCD pixel units. If calculated,
+        PSF_FOCUS1 and PSF_FOCUS2 provide scale factors in the column and row
+        dimensions by which the CCD pixel scale is adjusted to approximate
+        focus variation. PSF_ROTATION provides the angle by which the scaled
+        PSF model was rotated on the focal plane in order to yield a best fit.
+        The table column PSF_RESIDUAL provides the sum of all mask pixels
+        after the best-fit model has been subtracted from the data. PSF_CHI2
+        delivers the best-fit chi-squred statistic for each observation.
+    columns : float or list
+        A starting guess for the CCD column position(s) of the source(s) that
+        are to be fit. The model is unlikely to converge if the guess is too
+        far away from the correct location. A rule of thumb is to provide a
+        guess within 1 CCD pixel of the true position. If more than one source
+        is being modeled then the column positions of each are separated by a
+        comma. The same number of sources in the columns, rows and fluxes field
+        is a requirement of this task.
+    rows : float or list
+        A starting guess for the CCD row position(s) of the source(s) that are
+        to be fit. The model is unlikely to converge if the guess is too far
+        away from the correct location. A rule of thumb is to provide a guess
+        within 1 CCD pixel of the true position. If more than one source is
+        being modeled then the row positions of each are separated by a comma.
+        The same number of sources in the columns, rows and fluxes field is a
+        requirement of this task.
+    fluxes : float or list
+        A starting guess for the flux(es) of the source(s) that are to be fit.
+        Fit convergence is not particularly reliant on the accuracy of these
+        guesses, but the fit will converge faster the more accurate the guess.
+        If more than one source is being modeled then the row positions of
+        each are separated by a comma. The same number of sources in the
+        columns, rows and fluxes field is a requirement of this task.
+    prfdir : str
+        The full or relative directory path to a folder containing the Kepler
+        PSF calibration. Calibration files can be downloaded from the Kepler
+        focal plane characteristics page at the MAST.
+    border : int
+        If a background is included in the fit then it is modeled as a
+        two-dimensional polynomial. This parameter is the polynomial order.
+        A zero-order polynomial is generally recommended.
+    background : bool
+        Whether to include a background component in the model. If ``True``
+        the background will be represented by a two-dimensional polynomial of
+        order border. This functionality is somewhat experimental, with one eye
+        upon potential background gradients across large masks or on those
+        detectors more prone to pattern noise. Generally it is recommended to
+        set background as ``False``.
+    focus : bool
+        Whether to include pixel scale and focus rotation with the fit
+        parameters of the model. This is also an experimental function. This
+        approach does not attempt to deal with inter- or intra-pixel
+        variations. The recommended use is currently to set focus as ``False``.
+    ranges : str
+        The user can choose specific time ranges of data on which to work. This
+        could, for example, avoid removing known stellar flares from a dataset
+        Time ranges are supplied as comma-separated pairs of Barycentric Julian
+        Dates (BJDs). Multiple ranges are separated by a semi-colon.
+        An example containing two time ranges is::
+
+            ``'2455012.48517,2455014.50072;2455022.63487,2455025.08231'``
+
+        If the user wants to correct the entire time series then providing
+        ranges = '0,0' will tell the task to operate on the whole time series.
+    xtol : float
+        The dimensionless, relative model parameter convergence criterion for
+        the fit algorithm.
+    ftol : float
+        The dimensionless, relative model residual convergence criterion for
+        the fit algorithm.
+    qualflags : bool
+        If qualflags is ``False``, archived observations flagged with any
+        quality issue will not be fit.
+    plot : bool
+        Plot fit results to the screen?
+    verbose : bool
+        Print informative messages and warnings to the shell and logfile?
+    logfile : str
+        Name of the logfile containing error and warning messages.
+
+    Examples
+    --------
+    .. code-block::
+
+        $ kepprfphot kplr012557548-2012004120508_lpd-targ.fits.gz photometry --columns 95
+          --rows 1020 --fluxes 1.0 --border 0 --prfdir ../kplr2011265_prf --xtol 1e-7 --ftol 1e-7
+          --plot --verbose
+
+          --------------------------------------------------------------
+          KEPPRFPHOT --  infile=kplr012557548-2012004120508_lpd-targ.fits.gz
+          outroot=photometry columns=95 rows=1020 fluxes=1.0 border=0 background=False
+          focus=False prfdir=../kplr2011265_prf ranges=0,0 xtol=1e-07 ftol=1e-07
+          qualflags=False plot=True clobber=True verbose=True logfile=kepprfphot.log
+
+          KEPPRFPHOT started at: Wed Jun 14 15:33:30 2017
+
+                KepID: 12557548
+           RA (J2000): 290.96622
+          Dec (J2000): 51.50472
+               KepMag: 15.692
+             SkyGroup: 4
+               Season: 1
+              Channel: 32
+               Module: 10
+               Output: 4
+
+           19% nrow = 740 t = 0.1 sec
+
+    .. image:: _static/images/kepprfphot.png
+    """
 
     # log the call
     hashline = '--------------------------------------------------------------'
@@ -29,7 +160,7 @@ def kepprfphot(infile, outroot, columns, rows, fluxes, prfdir, border=0,
             + ' fluxes={}'.format(fluxes)
             + ' border={}'.format(border)
             + ' background={}'.format(background)
-            + ' focus={}'.format(focs)
+            + ' focus={}'.format(focus)
             + ' prfdir={}'.format(prfdir)
             + ' ranges={}'.format(ranges)
             + ' xtol={}'.format(xtol)
@@ -42,7 +173,7 @@ def kepprfphot(infile, outroot, columns, rows, fluxes, prfdir, border=0,
     kepmsg.log(logfile, call+'\n', verbose)
 
     # start time
-    kepmsg.clock('KEPPRFPHOT started at',logfile,verbose)
+    kepmsg.clock('KEPPRFPHOT started at', logfile, verbose)
 
     # number of sources
     work = fluxes.strip()
@@ -112,33 +243,33 @@ def kepprfphot(infile, outroot, columns, rows, fluxes, prfdir, border=0,
         message = 'ERROR -- KEPPRFPHOT: is %s a Target Pixel File? ' % infile
         kepmsg.err(logfile,message,verbose)
     kepid, channel, skygroup, module, output, quarter, season, \
-        ra, dec, column, row, kepmag, xdim, ydim, tcorr = \
+    ra, dec, column, row, kepmag, xdim, ydim, tcorr = \
         kepio.readTPF(infile,'TIMECORR', logfile, verbose)
     kepid, channel, skygroup, module, output, quarter, season, \
-        ra, dec, column, row, kepmag, xdim, ydim, cadno = \
+    ra, dec, column, row, kepmag, xdim, ydim, cadno = \
         kepio.readTPF(infile,'CADENCENO',logfile, verbose)
     kepid, channel, skygroup, module, output, quarter, season, \
-        ra, dec, column, row, kepmag, xdim, ydim, fluxpixels = \
+    ra, dec, column, row, kepmag, xdim, ydim, fluxpixels = \
         kepio.readTPF(infile,'FLUX', logfile, verbose)
     kepid, channel, skygroup, module, output, quarter, season, \
         ra, dec, column, row, kepmag, xdim, ydim, errpixels = \
         kepio.readTPF(infile,'FLUX_ERR', logfile, verbose)
     try:
         kepid, channel, skygroup, module, output, quarter, season, \
-            ra, dec, column, row, kepmag, xdim, ydim, poscorr1 = \
+        ra, dec, column, row, kepmag, xdim, ydim, poscorr1 = \
             kepio.readTPF(infile, 'POS_CORR1', logfile, verbose)
     except:
         poscorr1 = np.zeros((len(barytime)), dtype='float32')
         poscorr1[:] = np.nan
     try:
         kepid, channel, skygroup, module, output, quarter, season, \
-            ra, dec, column, row, kepmag, xdim, ydim, poscorr2 = \
+        ra, dec, column, row, kepmag, xdim, ydim, poscorr2 = \
             kepio.readTPF(infile, 'POS_CORR2', logfile, verbose)
     except:
         poscorr2 = np.zeros((len(barytime)), dtype='float32')
         poscorr2[:] = np.nan
     kepid, channel, skygroup, module, output, quarter, season, \
-        ra, dec, column, row, kepmag, xdim, ydim, qual = \
+    ra, dec, column, row, kepmag, xdim, ydim, qual = \
         kepio.readTPF(infile,'QUALITY',logfile,verbose)
     struct = pyfits.open(infile)
     tstart, tstop, bjdref, cadence = kepio.timekeys(struct, infile, logfile, verbose)
@@ -267,7 +398,7 @@ def kepprfphot(infile, outroot, columns, rows, fluxes, prfdir, border=0,
 
     # initialize plot arrays
     t = np.array([], dtype='float64')
-    fl, dx, dy, bg, fx, fy, fa, rs, ch = [], [], [], [], [], [], [], [], [], []
+    fl, dx, dy, bg, fx, fy, fa, rs, ch = [], [], [], [], [], [], [], [], []
     for i in range(nsrc):
         fl.append(np.array([], dtype='float32'))
         dx.append(np.array([], dtype='float32'))
@@ -1021,6 +1152,6 @@ def kepprfphot_main():
                         help='Name of ascii log file', type=str)
     args = parser.parse_args()
     kepprfphot(args.infile, args.outroot, args.columns, args.rows, args.fluxes,
-               args.border, args.background, args.focus, args.prfdir,
+               args.prfdir, args.border, args.background, args.focus,
                args.ranges, args.xtol, args.ftol, args.qualflags, args.plot,
                args.clobber, args.verbose, args.logfile)
