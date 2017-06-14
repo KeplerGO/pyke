@@ -102,7 +102,7 @@ def kepprf(infile, plotfile, frameno, columns, rows, fluxes, prfdir,
 
     Examples
     --------
-    Using the command line tool ``kepprf``, one can fit the PRF to a given
+    Using the command line tool ``kepprf``, one can fit multiple PRFs to a given
     frame in a target pixel file as follows
 
     .. code-block:: bash
@@ -137,20 +137,33 @@ def kepprf(infile, plotfile, frameno, columns, rows, fluxes, prfdir,
                Residual flux = -0.5748827605745994 e-/s
         Pearsons chi^2 test = 296.12077907844986 for 13 dof
                  Chi^2 test = 19803.55879917441 for 13 dof
+
+    .. image:: _static/images/kepprf.png
+        :align:
     """
     # log the call
 
-    hashline = '----------------------------------------------------------------------------'
+    hashline = '--------------------------------------------------------------'
     kepmsg.log(logfile, hashline, verbose)
     call = ('KEPPRF -- '
-            'infile=' + infile + ' plotfile=' + plotfile +
-            ' frameno=' + str(frameno) + ' columns=' + str(columns) +
-            ' rows=' + str(rows) + ' fluxes=' + str(fluxes) + ' prfdir=' + prfdir +
-            ' background=' + str(background) + 'border=' + str(border) +
-            ' focus=' + str(focus) + ' xtol=' + str(xtol) +
-            ' ftol=' + str(xtol) + ' plot=' + str(plot) + ' imscale=' +
-            imscale + ' cmap=' + cmap + ' apercol=' + apercol + ' verbose=' +
-            str(verbose) + ' logfile=' + logfile)
+            'infile={}'.format(infile)
+            ' plotfile={}'.format(plotfile)
+            ' frameno={}'.format(frameno)
+            ' columns={}'.format(columns)
+            ' rows={}'.format(rows)
+            ' fluxes={}'.format(fluxes)
+            ' prfdir={}'.format(prfdir)
+            ' background={}'.format(background)
+            ' border={}'.format(border)
+            ' focus={}'.format(focus)
+            ' xtol={}'.format(xtol)
+            ' ftol={}'.format(xtol)
+            ' plot={}'.format(plot)
+            ' imscale={}'.format(imscale)
+            ' cmap={}'.format(cmap)
+            ' apercol={}'.format(apercol)
+            ' verbose={}'.format(verbose)
+            ' logfile={}'.format(logfile))
 
     kepmsg.log(logfile, call + '\n', verbose)
 
@@ -499,7 +512,6 @@ def kepprf(infile, plotfile, frameno, columns, rows, fluxes, prfdir,
     plt.gca().set_autoscale_on(False)
     plt.setp(plt.gca(), xticklabels=[], xticks=[])
     plt.ylabel('Flux (10$^{%d}$ e$^-$ s$^{-1}$)' % nrm)
-    plt.setp(barwin.get_yticklabels(), 'rotation', 90)
     barwin.yaxis.set_major_formatter(ticker.FormatStrFormatter('%.1f'))
 
     # render plot
@@ -530,7 +542,6 @@ def plotimage(imgflux_pl, zminfl, zmaxfl, plmode, row, column,
            vmin=zminfl,vmax=zmaxfl,extent=(xmin,xmax,ymin,ymax),cmap=cmap)
     plt.gca().set_autoscale_on(False)
     labels = ax.get_yticklabels()
-    plt.setp(labels, 'rotation', 90)
     plt.gca().xaxis.set_major_formatter(plt.ScalarFormatter(useOffset=False))
     plt.gca().yaxis.set_major_formatter(plt.ScalarFormatter(useOffset=False))
     if plmode == 1:
