@@ -21,6 +21,7 @@ Modules/API
     kepmask
     kepoutlier
     keppca
+    keppixseries
     kepprf
     kepprfphot
     keprange

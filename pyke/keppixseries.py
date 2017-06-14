@@ -2,6 +2,7 @@ from . import kepio, kepmsg, kepkey, kepplot, kepstat, kepfunc
 import numpy as np
 from astropy.io import fits as pyfits
 from matplotlib import pyplot as plt
+from tqdm import tqdm
 
 def keppixseries(infile, outfile, plotfile=None, plottype='global',
                  filterlc=False, function='boxcar', cutoff=1.0, clobber=False,
@@ -39,26 +40,25 @@ def keppixseries(infile, outfile, plotfile=None, plottype='global',
         field, but the plot will not be saved to a file if plotfile='None'.
     plottype : str
         keppixseries can plot light curves of three types.
-        The choice is made using this argument. The options are::
+        The choice is made using this argument. The options are:
 
         * local - All individual pixel light curves are scaled separately to
-        provide the most dynamic range for each pixel.
+          provide the most dynamic range for each pixel.
 
         * global - All pixel light curves are scaled between zero and the
-        maximum flux attained by the brightest pixel in the mask. This option
-        provides the relative contribution to the archived light curve by each
-        pixel.
+          maximum flux attained by the brightest pixel in the mask. This option
+          provides the relative contribution to the archived light curve by each
+          pixel.
 
         * full - All pixels light curves are scaled between zero and the
-        maximum flux attained by that pixel. This provides the fraction of
-        variability within each individual pixel.
-
+          maximum flux attained by that pixel. This provides the fraction of
+          variability within each individual pixel.
     filterlc : bool
         If True, the light curve for each pixel will be treated by a high
         band-pass filter to remove long-term trends from e.g. differential
         velocity aberration.
     function : str
-        The functional form of the high pass-band filter::
+        The functional form of the high pass-band filter:
 
         * boxcar
 
@@ -73,6 +73,15 @@ def keppixseries(infile, outfile, plotfile=None, plottype='global',
         Print informative messages and warnings to the shell and logfile?
     logfile = str
         Name of the logfile containing error and warning messages.
+
+    Examples
+    --------
+    .. code-block :: bash
+
+        $ keppixseries kplr008256049-2010174085026_lpd-targ.fits.gz keppixseries.fits
+
+    .. image:: _static/images/keppixseries.png
+        :align: center
     """
 
     # log the call
@@ -153,7 +162,7 @@ def keppixseries(infile, outfile, plotfile=None, plottype='global',
 
     # construct output light curves
     nptsx = 0
-    for i in range(ydim):
+    for i in tqdm(range(ydim)):
         for j in range(xdim):
             npts = 0
             for k in range(nrows):
@@ -196,7 +205,7 @@ def keppixseries(infile, outfile, plotfile=None, plottype='global',
                 ave, sigma = (np.mean(pixseries[i, j, :len(filtfunc)]),
                               np.std(pixseries[i, j, :len(filtfunc)]))
                 padded = np.append(kepstat.randarray(np.ones(len(filtfunc)) * ave,
-                                   np.ones(len(filtfunc)) * sigma), pixseries[i,j,:])
+                                   np.ones(len(filtfunc)) * sigma), pixseries[i, j, :])
                 ave, sigma = (np.mean(pixseries[i, j, -len(filtfunc):]),
                               np.std(pixseries[i, j, -len(filtfunc):]))
                 padded = np.append(padded,
@@ -458,17 +467,15 @@ def keppixseries(infile, outfile, plotfile=None, plottype='global',
     # plot pixel array
     fmin = 1.0e33
     fmax = -1.033
-    plt.figure(num=None,figsize=[12,12])
+    plt.figure()
     plt.clf()
     dx = 0.93 / xdim
     dy = 0.94 / ydim
-    ax = plt.axes([0.06,0.05,0.93,0.94])
+    ax = plt.axes([0.06, 0.05, 0.93, 0.94])
     plt.gca().xaxis.set_major_formatter(plt.ScalarFormatter(useOffset=False))
     plt.gca().yaxis.set_major_formatter(plt.ScalarFormatter(useOffset=False))
     plt.gca().xaxis.set_major_locator(plt.MaxNLocator(integer=True))
     plt.gca().yaxis.set_major_locator(plt.MaxNLocator(integer=True))
-    labels = ax.get_yticklabels()
-    plt.setp(labels, 'rotation', 90, fontsize=12)
     plt.xlim(np.min(pixcoord1) - 0.5, np.max(pixcoord1) + 0.5)
     plt.ylim(np.min(pixcoord2) - 0.5, np.max(pixcoord2) + 0.5)
     plt.xlabel('time', {'color' : 'k'})
@@ -490,10 +497,10 @@ def keppixseries(infile, outfile, plotfile=None, plottype='global',
             ymax = fmax + (fmax - fmin) / 20
             if kepstat.bitInBitmap(maskimg[i, j], 2):
                 plt.axes([0.06 + float(j) * dx, 0.05 + i * dy, dx, dy],
-                         axisbg='lightslategray')
+                         facecolor='lightslategray')
             elif maskimg[i, j] == 0:
                 plt.axes([0.06 + float(j) * dx, 0.05 + i * dy, dx, dy],
-                         axisbg='black')
+                         facecolor='black')
             else:
                 plt.axes([0.06 + float(j) * dx, 0.05 + i * dy, dx, dy])
             if j == int(xdim / 2) and i == 0:

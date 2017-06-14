@@ -62,20 +62,21 @@ def keppca(infile, outfile, maskfile='ALL', components='1-3', plotpca=False,
         This string can be one of three options:
 
         * 'ALL' tells the task to calculate principal components from all
-        pixels within the pixel mask stored in the input file.
+          pixels within the pixel mask stored in the input file.
 
         * 'APER' tells the task to calculate principal components from only the
-        pixels within the photometric aperture stored in the input file (e.g.
-        only those pixels summed by the Kepler pipeline to produce the light
-        curve archived at MAST (note that no such light curves are currently
-        being created for the K2 mission)
+          pixels within the photometric aperture stored in the input file (e.g.
+          only those pixels summed by the Kepler pipeline to produce the light
+          curve archived at MAST (note that no such light curves are currently
+          being created for the K2 mission)
 
         * A filename describing the desired photometric aperture. Such a file
-        can be constructed using the kepmask or kepffi tools, or can be created
-        manually using the format described in the documentation for those
-        tools. Note that if an aperture provided is not stricly rectangular,
-        keppca will increase the size of the aperture so that it defines the
-        smallest possible rectangle that contains all of the specified pixels.
+          can be constructed using the kepmask or kepffi tools, or can be created
+          manually using the format described in the documentation for those
+          tools. Note that if an aperture provided is not stricly rectangular,
+          keppca will increase the size of the aperture so that it defines the
+          smallest possible rectangle that contains all of the specified pixels.
+
     components : str
         A list of the principal components to subtract from the aperture light
         curve. The strings '1 2 3 4 5', 1,'2,3,4,5' and '1,2,3-5' yield the
