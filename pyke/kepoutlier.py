@@ -1,7 +1,8 @@
+from . import kepio, kepmsg, kepkey, kepfit, kepstat, kepfunc
 import numpy as np
 from astropy.io import fits as pyfits
 from matplotlib import pyplot as plt
-from . import kepio, kepmsg, kepkey, kepfit, kepstat
+from tqdm import tqdm
 
 def kepoutlier(infile, outfile, datacol, nsig=3.0, stepsize=1.0, npoly=3,
                niter=1, operation='remove', ranges='0,0', plot=False,
@@ -77,16 +78,18 @@ def kepoutlier(infile, outfile, datacol, nsig=3.0, stepsize=1.0, npoly=3,
         Print informative messages and warnings to the shell and logfile?
     logfile : str
         Name of the logfile containing error and warning messages.
+
+    Examples
+    --------
+    .. code-block:: bash
+
+        $ kepoutlier kplr002437329-2010355172524_llc.fits kepoutlier.fits --datacol SAP_FLUX
+          --nsig 4 --stepsize 5 --npoly 2 --niter 10 --operation replace --verbose --plot --plotfit
+
+    .. image:: _static/images/kepoutlier.png
+        :align: center
     """
-    # startup parameters
-    labelsize = 24
-    ticksize = 16
-    xsize = 16
-    ysize = 6
-    lcolor = '#0000ff'
-    lwidth = 1.0
-    fcolor = '#ffff00'
-    falpha = 0.2
+
 
     # log the call
     hashline = '--------------------------------------------------------------'
@@ -104,7 +107,7 @@ def kepoutlier(infile, outfile, datacol, nsig=3.0, stepsize=1.0, npoly=3,
             + ' plot={}'.format(plot)
             + ' plotfit={}'.format(plotfit)
             + ' clobber={}'.format(clobber)
-            + ' verbose={}'.format(chatter)
+            + ' verbose={}'.format(verbose)
             + ' logfile={}'.format(logfile))
     kepmsg.log(logfile, call+'\n', verbose)
     # start time
@@ -137,14 +140,14 @@ def kepoutlier(infile, outfile, datacol, nsig=3.0, stepsize=1.0, npoly=3,
     except:
         naxis2 = 0
         try:
-            for i in range(len(table.field(0))):
+            for i in tqdm(range(len(table.field(0)))):
                 if (np.isfinite(table.field('barytime')[i])
                     and np.isfinite(table.field(datacol)[i])):
                     table[naxis2] = table[i]
                     naxis2 += 1
                     instr[1].data = table[:naxis2]
         except:
-            for i in range(len(table.field(0))):
+            for i in tqdm(range(len(table.field(0)))):
                 if (np.isfinite(table.field('time')[i])
                     and np.isfinite(table.field(datacol)[i])):
                     table[naxis2] = table[i]
@@ -220,18 +223,15 @@ def kepoutlier(infile, outfile, datacol, nsig=3.0, stepsize=1.0, npoly=3,
 
     # plot light curve
     if plot:
-        plt.figure(figsize=[xsize,ysize])
+        plt.figure()
         plt.clf()
         # plot data
         ax = plt.axes([0.06, 0.1, 0.93, 0.87])
         # force tick labels to be absolute rather than relative
         plt.gca().xaxis.set_major_formatter(plt.ScalarFormatter(useOffset=False))
         plt.gca().yaxis.set_major_formatter(plt.ScalarFormatter(useOffset=False))
-        # rotate y labels by 90 deg
-        labels = ax.get_yticklabels()
-        plt.setp(labels, 'rotation', 90, fontsize=12)
-        plt.plot(ptime, pout, color=lcolor, linestyle='-', linewidth=lwidth)
-        plt.fill(ptime, pout, color=fcolor, linewidth=0.0, alpha=falpha)
+        plt.plot(ptime, pout, color='#0000ff', linestyle='-', linewidth=1.0)
+        plt.fill(ptime, pout, color='#ffff00', linewidth=0.0, alpha=0.2)
         plt.xlabel(xlab, {'color' : 'k'})
         plt.ylabel(ylab, {'color' : 'k'})
         plt.grid()
@@ -303,7 +303,7 @@ def kepoutlier(infile, outfile, datacol, nsig=3.0, stepsize=1.0, npoly=3,
     instr.close()
     kepmsg.clock('KEPOUTLIER completed at', logfile, verbose)
 
-def kepoutiler_main():
+def kepoutlier_main():
     import argparse
     parser = argparse.ArgumentParser(
             description='Remove or replace data outliers from a time series')
