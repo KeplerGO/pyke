@@ -46,17 +46,17 @@ def kepwindow(infile, outfile, fcol='SAP_FLUX', fmax=1.0, nfreq=100, plot=False,
         Print informative messages and warnings to the shell and logfile?
     logfile : str
         Name of the logfile containing error and warning messages.
-    """
 
-    ## startup parameters
-    labelsize = 24
-    ticksize = 16
-    xsize = 18
-    ysize = 6
-    lcolor = '#0000ff'
-    lwidth = 1.0
-    fcolor = '#ffff00'
-    falpha = 0.2
+    Examples
+    --------
+    .. code-block:: bash
+
+        $ kepwindow kplr002436324-2009259160929_llc.fits kepwindow.fits --datacol SAP_FLUX
+        --fmax 0.7 --nfreq 500 --plot --verbose
+
+    .. images:: _static/images/kepwindow.png
+        :align: center
+    """
 
     ## log the call
     hashline = '--------------------------------------------------------------'
@@ -94,7 +94,7 @@ def kepwindow(infile, outfile, fcol='SAP_FLUX', fmax=1.0, nfreq=100, plot=False,
         cadenom = cadence
 
     ## fudge non-compliant FITS keywords with no values
-    instr = kepkey.emptykeys(instr,file,logfile,verbose)
+    instr = kepkey.emptykeys(instr, infile, logfile, verbose)
 
     ## read table columns
     try:
@@ -160,10 +160,10 @@ def kepwindow(infile, outfile, fcol='SAP_FLUX', fmax=1.0, nfreq=100, plot=False,
 
     ## plot power spectrum
     if plot:
-        plt.figure(1, figsize=[xsize, ysize])
+        plt.figure()
         plt.axes([0.06, 0.113, 0.93, 0.86])
-        plt.plot(fr, power, color=lcolor, linestyle='-', linewidth=lwidth)
-        plt.fill(fr, power, color=fcolor, linewidth=0.0, alpha=falpha)
+        plt.plot(fr, power, color='#0000ff', linestyle='-', linewidth=1.0)
+        plt.fill(fr, power, color='#ffff00', linewidth=0.0, alpha=0.2)
         plt.xlim(xmin - xr * 0.01, xmax+xr*0.01)
         if ymin - yr * 0.01 <= 0.0:
             plt.ylim(1.0e-10, ymax + yr * 0.01)
