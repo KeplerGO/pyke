@@ -12,12 +12,19 @@ nrm = 1; barytime = []; flux = []; xmin = 0; xmax = 1
 ymin = 0; ymax = 1; xr = 1; yr = 1; xlab = ''; ylab = ''
 mask = []; aid = None; bid = None; cid = None; did = None; eid = None; fid = None
 clobb = True; outf = ''; verb = True; logf = ''; rinf = ''
-cmdLine = False
 
-def keprange(infile, outfile, column, rinfile=None, clobber=False, verbose=False,
+def keprange(infile, outfile, column, rinfile='', clobber=False, verbose=False,
              logfile='keprange.log'):
     """
     keprange -- Define time ranges interactively for use with other PyKE tasks.
+
+    A number of PyKE tasks, e.g. kepdetrend, kepoutlier, require the user to
+    specify ranges in time over which to operate. keprange provides a visual
+    and interactive tool with which to define time ranges and store them within
+    an ASCII file. Choices are made using a GUI. Use the left-button of your
+    mouse to select ranges. An existing ASCII file can be loaded, a new ASCII
+    file can be written, the list of times can be cleared or printed using the
+    buttons on the GUI.
 
     Parameters
     ----------
@@ -43,26 +50,33 @@ def keprange(infile, outfile, column, rinfile=None, clobber=False, verbose=False
         Print informative messages and warnings to the shell and logfile?
     logfile : str
         Name of the logfile containing error and warning messages.
+
+    Examples
+    --------
+    .. code-block:: bash
+
+        $ keprange kplr002436324-2009259160929_llc.fits keprange.txt --verbose
+
+    .. image:: _static/images/keprange.png
+        :align: center
     """
 
     # startup parameters
     global instr, cadence, barytime0, nrm, barytime, flux
     global xmin, xmax, ymin, ymax, xr, yr, xlab, ylab
-    global clobb, outf, verb, logf, rinf, col, bjdref, cade, cmdLine
+    global clobb, outf, verb, logf, rinf, col, bjdref, cade
 
     # log the call
-    if rinfile.lower() == 'none':
-        rinfile = ''
     hashline = '--------------------------------------------------------------'
     kepmsg.log(logfile, hashline, verbose)
     call = ('KEPRANGE -- '
             + ' infile={}'.format(infile)
             + ' outfile={}'.format(outfile)
             + ' rinfile={}'.format(rinfile)
-            + ' column={}'+column+' '
-            + ' clobber={}'+overwrite+ ' '
-            + ' verbose={}'+chatter+' '
-            + ' logfile={}'+logfile)
+            + ' column={}'.format(column)
+            + ' clobber={}'.format(clobber)
+            + ' verbose={}'.format(verbose)
+            + ' logfile={}'.format(logfile))
     kepmsg.log(logfile, call+'\n', verbose)
     clobb = clobber
     outf = outfile
@@ -136,8 +150,7 @@ def keprange(infile, outfile, column, rinfile=None, clobber=False, verbose=False
 
     # plot new light curve
     plt.rcParams['figure.dpi'] = 80
-    plt.figure(figsize=[xsize,ysize])
-    plt.clf()
+    plt.figure(figsize=[xsize, ysize])
     plotlc()
 
 
@@ -145,8 +158,6 @@ def plotlc():
     global aid, bid, cid, did, eid, fid, mask
 
     # load button
-    plt.ion()
-    plt.clf()
     plt.axes([0.06, 0.02, 0.22, 0.1])
     plt.text(0.5, 0.5, 'LOAD', fontsize=24, weight='heavy',
              horizontalalignment='center', verticalalignment='center')
@@ -229,14 +240,14 @@ def plotlc():
         plt.ylim(ymin - yr * 0.01, ymax + yr * 0.01)
 
     # ranges
-    eid = plt.connect('key_press_event' ,clicker6)
+    eid = plt.connect('button_press_event', clicker6)
 
     # render plot
     plt.show()
 
 def clicker1(event):
 
-    global mask, aid, bid, cid, did, eid, fid, cmdLine
+    global mask, aid, bid, cid, did, eid, fid
 
     if event.inaxes:
         if event.button == 1:
@@ -266,7 +277,7 @@ def clicker1(event):
                     plt.disconnect(did)
                     plt.disconnect(eid)
                     plt.disconnect(fid)
-                    plotlc(cmdLine)
+                    plotlc()
                 else:
                     print('WARNING -- KEPRANGE: input ranges file does not'
                           ' exist or was not provided')
@@ -277,7 +288,7 @@ def clicker1(event):
 
 def clicker2(event):
 
-    global mask, aid, bid, cid, did, eid, fid, clobb, cmdLine
+    global mask, aid, bid, cid, did, eid, fid, clobb
 
     if clobb:
         kepio.clobber(outf, logf, verb)
@@ -299,17 +310,16 @@ def clicker2(event):
                         nt += 2
                     txt = txt.strip()
                     print(txt)
-                    kepmsg.file(outf, txt, True)
+                    kepmsg.log(outf, txt, True)
                     print('\nWrote ASCII file ' + outf)
-                    plotlc(cmdLine)
-    return
+                    plotlc()
 
 # -----------------------------------------------------------
 # clear time domain mask
 
 def clicker3(event):
 
-    global mask, aid, bid, cid, did, eid, fid, cmdLine
+    global mask, aid, bid, cid, did, eid, fid
 
     if event.inaxes:
         if event.button == 1:
@@ -322,15 +332,14 @@ def clicker3(event):
                 plt.disconnect(did)
                 plt.disconnect(eid)
                 plt.disconnect(fid)
-                plotlc(cmdLine)
-    return
+                plotlc()
 
 # -----------------------------------------------------------
 # print time domain mask
 
 def clicker4(event):
 
-    global mask, aid, bid, cid, did, eid, fid, cmdLine
+    global mask, aid, bid, cid, did, eid, fid
 
     if event.inaxes:
         if event.button == 1:
@@ -352,61 +361,17 @@ def clicker4(event):
                 plt.disconnect(did)
                 plt.disconnect(eid)
                 plt.disconnect(fid)
-                plotlc(cmdLine)
-    return
+                plotlc()
 
 # -----------------------------------------------------------
-# right-click create time ranges
+# left-click create time ranges
 
 def clicker6(event):
 
-    global mask, aid, bid, cid, did, eid, fid, cmdLine
+    global mask, aid, bid, cid, did, eid, fid
 
     if event.inaxes:
-#        event.key
-        if (event.key == ''
-            or event.key == '1'
-            or event.key == '2'
-            or event.key == '3'
-            or event.key == '4'
-            or event.key == '5'
-            or event.key == '6'
-            or event.key == '7'
-            or event.key == '8'
-            or event.key == '9'
-            or event.key == '0'
-            or event.key == '-'
-            or event.key == '='
-            or event.key == 'q'
-            or event.key == 'w'
-            or event.key == 'e'
-            or event.key == 'r'
-            or event.key == 't'
-            or event.key == 'y'
-            or event.key == 'u'
-            or event.key == 'i'
-            or event.key == 'o'
-            or event.key == 'p'
-            or event.key == '['
-            or event.key == ']'
-            or event.key == 'a'
-            or event.key == 'd'
-            or event.key == 'f'
-            or event.key == 'g'
-            or event.key == 'h'
-            or event.key == 'j'
-            or event.key == 'k'
-            or event.key == 'l'
-            or event.key == ';'
-            or event.key == 'x'
-            or event.key == 'c'
-            or event.key == 'v'
-            or event.key == 'b'
-            or event.key == 'n'
-            or event.key == 'm'
-            or event.key == ','
-            or event.key == '.'
-            or event.key == '/'):
+        if event.button == 1:
             if (event.x > 83 and event.x < 1337 and
                 event.y > 122 and event.y < 558):
                 if len(mask) % 2 == 0:
@@ -417,23 +382,26 @@ def clicker6(event):
                     else:
                         mask.append(mask[-1])
                         mask[-2] = event.xdata
-                plotlc(cmdLine)
-        if event.key == 'z':
-            instr.close()
-            plt.close()
+                plt.disconnect(aid)
+                plt.disconnect(bid)
+                plt.disconnect(cid)
+                plt.disconnect(did)
+                plt.disconnect(eid)
+                plt.disconnect(fid)
+                plotlc()
 
 def keprange_main():
     import argparse
     parser = argparse.ArgumentParser(
             description=('Interactively define and store time ranges via a GUI'))
     parser.add_argument('infile', help='Name of input file', type=str)
-    parser.add_argument('--outfile', default='',
+    parser.add_argument('outfile',
                         help='Name of output ASCII time ranges file',
                         type=str)
-    parser.add_argument('--rinfile', default=None,
-                        help='Name of input ASCII time ranges file')
     parser.add_argument('--column', default='SAP_FLUX',
                         help='Name of diagnostic FITS column', type=str)
+    parser.add_argument('--rinfile', default='',
+                        help='Name of input ASCII time ranges file')
     parser.add_argument('--clobber', action='store_true',
                         help='Overwrite output file?')
     parser.add_argument('--verbose', action='store_true',
@@ -441,5 +409,5 @@ def keprange_main():
     parser.add_argument('--logfile', '-l', help='Name of ascii log file',
                         default='keprange.log', dest='logfile', type=str)
     args = parser.parse_args()
-    keprange(args.infile, args.outfile, args.rinfile, args.column,
+    keprange(args.infile, args.outfile, args.column, args.rinfile,
              args.clobber, args.verbose, args.logfile)
