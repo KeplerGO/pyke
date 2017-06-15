@@ -237,7 +237,7 @@ def kepstddev(infile,outfile,datacol,timescale,clobber,verbose,logfile,status,cm
         colname = 'CDPP_%d' % (timescale * 10)
         col1 = pyfits.Column(name=colname,format='E13.7',array=work1)
         cols = instr[1].data.columns + col1
-        instr[1] = pyfits.new_table(cols,header=instr[1].header)
+        instr[1] = pyfits.BinTableHDU.from_columns(cols,header=instr[1].header)
         instr.writeto(outfile)
 # comment keyword in output file
 
