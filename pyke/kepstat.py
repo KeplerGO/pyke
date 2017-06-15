@@ -197,15 +197,15 @@ def savitzky_golay(y, window_size, order, deriv=0):
     m = linalg.pinv(b).A[deriv]
 
     # pad the signal at the extremes with values taken from the signal itself
-    firstvals = y[0] - abs( y[1:half_window+1][::-1] - y[0] )
-    lastvals = y[-1] + abs(y[-half_window-1:-1][::-1] - y[-1])
-    y = concatenate((firstvals, y, lastvals))
-    sg = convolve(m, y, mode='valid')
+    firstvals = y[0] - np.abs( y[1:half_window+1][::-1] - y[0] )
+    lastvals = y[-1] + np.abs(y[-half_window-1:-1][::-1] - y[-1])
+    y = np.concatenate((firstvals, y, lastvals))
+    sg = np.convolve(m, y, mode='valid')
 
     return sg
 
 
-def running_frac_std(time,flux,wid,sig=None):
+def running_frac_std(time, flux, wid):
     """calculate running fractional standard deviation across the array flux
        within a window of width wid
     """
@@ -213,10 +213,7 @@ def running_frac_std(time,flux,wid,sig=None):
     hwid = wid / 2
     runstd = np.zeros(len(flux))
     for i in range(len(time)):
-        valsinwid = flux[logical_and(time < time[i] + hwid, time > time[i] - hwid)]
-        if sig is None:
-            runstd[i] = std(valsinwid) / mean(valsinwid)
-        else:
-            runstd[i] = std(sig_clip(valsinwid,sig)) / mean(valsinwid)
+        valsinwid = flux[np.logical_and(time < time[i] + hwid, time > time[i] - hwid)]
+        runstd[i] = np.std(valsinwid) / np.mean(valsinwid)
 
-    return array(runstd)
+    return np.array(runstd)

@@ -50,17 +50,24 @@ def kepstddev(infile, outfile, datacol='PDCSAP_FLUX', timescale=6.5,
         Print informative messages and warnings to the shell and logfile?
     logfile : str
         Name of the logfile containing error and warning messages.
-    """
 
-    # startup parameters
-    labelsize = 44
-    ticksize = 36
-    xsize = 16
-    ysize = 6
-    lcolor = '#0000ff'
-    lwidth = 1.0
-    fcolor = '#ffff00'
-    falpha = 0.2
+    Examples
+    --------
+    After applying ``kepflatten`` to ``kplr002437145-2009350155506_llc.fits``,
+    one can input it to ``kepstddev``:
+
+    .. code-block:: bash
+
+        $ kepstddev kplr002437145-2009350155506_llc.fits.fits kepstddev.fits --datacol DETSAP_FLUX
+        --verbose
+        --------------------------------------------------------------
+        KEPSTDDEV --  infile=kplr002437145-2009350155506_llc.fits.fits outfile=kepstddev.fits datacol=DETSAP_FLUX
+        timescale=6.5 clobber=False verbose=True logfile=kepstddev.log
+
+        Standard deviation = 1295.0731328136349 ppm
+        Median 6.5hr CDPP = 313 ppm
+           RMS 6.5hr CDPP = 329 ppm
+    """
 
     # log the call
     hashline = '--------------------------------------------------------------'
@@ -136,7 +143,7 @@ def kepstddev(infile, outfile, datacol='PDCSAP_FLUX', timescale=6.5,
     # clean up x-axis unit
     intime0 = float(int(tstart / 100) * 100.0)
     ptime = intime - intime0
-    xlab = 'BJD $-$ %d'.format(intime0)
+    xlab = 'BJD $-$ {}'.format(intime0)
 
     # clean up y-axis units
     pout = copy(cdpp)
@@ -156,7 +163,7 @@ def kepstddev(infile, outfile, datacol='PDCSAP_FLUX', timescale=6.5,
     pout = np.append(pout,0.0)
 
     # define size of plot on monitor screen
-    plt.figure(figsize=[xsize,ysize])
+    plt.figure()
     # delete any fossil plots in the matplotlib window
     plt.clf()
     # position first axes inside the plotting window
@@ -165,10 +172,6 @@ def kepstddev(infile, outfile, datacol='PDCSAP_FLUX', timescale=6.5,
     plt.gca().xaxis.set_major_formatter(plt.ScalarFormatter(useOffset=False))
     plt.gca().yaxis.set_major_formatter(plt.ScalarFormatter(useOffset=False))
     ax.yaxis.set_major_locator(plt.MaxNLocator(5))
-
-    # rotate y labels by 90 deg
-    labels = ax.get_yticklabels()
-    plt.setp(labels, 'rotation', 90,fontsize=36)
 
     # plot flux vs time
     ltime = np.array([], dtype='float64')
@@ -188,7 +191,7 @@ def kepstddev(infile, outfile, datacol='PDCSAP_FLUX', timescale=6.5,
     plt.plot(ltime, ldata, color='#0000ff', linestyle='-', linewidth=1.0)
 
     # plot the fill color below data time series, with no data gaps
-    plt.fill(ptime,pout,fc='#ffff00',linewidth=0.0,alpha=0.2)
+    plt.fill(ptime, pout, fc='#ffff00', linewidth=0.0, alpha=0.2)
 
     # define plot x and y limits
     plt.xlim(xmin - xr * 0.01, xmax + xr * 0.01)
@@ -203,20 +206,19 @@ def kepstddev(infile, outfile, datacol='PDCSAP_FLUX', timescale=6.5,
     plt.grid()
 
     # render plot
-    plt.ion()
-    plt.show(block=True)
+    plt.show()
 
     # add NaNs back into data
     n = 0
-    work1 = np.array([],dtype='float32')
+    work1 = np.array([], dtype='float32')
     instr = pyfits.open(infile)
     table = kepio.readfitstab(infile, instr[1], logfile, verbose)
     for i in range(len(table.field(0))):
-        if isfinite(table.field('time')[i]) and isfinite(table.field(datacol)[i]):
-            work1 = np.append(work1,cdpp[n])
+        if np.isfinite(table.field('time')[i]) and np.isfinite(table.field(datacol)[i]):
+            work1 = np.append(work1, cdpp[n])
             n += 1
         else:
-            work1 = np.append(work1,nan)
+            work1 = np.append(work1, np.nan)
 
     # write output file
     kepkey.new('MCDPP%d' % (timescale * 10.0), medcdpp[0],
@@ -228,7 +230,7 @@ def kepstddev(infile, outfile, datacol='PDCSAP_FLUX', timescale=6.5,
     colname = 'CDPP_{}'.format(timescale * 10)
     col1 = pyfits.Column(name=colname, format='E13.7', array=work1)
     cols = instr[1].data.columns + col1
-    instr[1] = pyfits.new_table(cols, header=instr[1].header)
+    instr[1] = pyfits.BinTableHDU.from_columns(cols, header=instr[1].header)
     instr.writeto(outfile)
     # comment keyword in output file
     kepkey.history(call, instr[0], outfile, logfile, verbose)
@@ -241,7 +243,8 @@ def kepstddev(infile, outfile, datacol='PDCSAP_FLUX', timescale=6.5,
 def kepstddev_main():
     import argparse
     parser = argparse.ArgumentParser(
-            description='Calculate CDPP from a time series')
+            description=('Calculate Combined Differential Photometric'
+                         'Precision for a time series light curve'))
     parser.add_argument('infile', help='Name of input FITS file', type=str)
     parser.add_argument('outfile', help='Name of output FITS file', type=str)
     parser.add_argument('--datacol', default='PDCSAP_FLUX',
