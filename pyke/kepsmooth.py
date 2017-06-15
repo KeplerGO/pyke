@@ -54,18 +54,11 @@ def kepsmooth(infile, outfile, datacol='SAP_FLUX', function='flat',
     --------
     .. code-block:: bash
 
-        $ kepsmooth kplr005110407-2009259160929_llc.fits kepsmooth.fits
-    """
+        $ kepsmooth kplr005110407-2009259160929_llc.fits kepsmooth.fits --plot
 
-    ## startup parameters
-    labelsize = 24
-    ticksize = 16
-    xsize = 18
-    ysize = 6
-    lcolor = '#0000ff'
-    lwidth = 1.0
-    fcolor = '#ffff00'
-    falpha = 0.2
+    .. image:: _static/images/kepsmooth.png
+        :align: center
+    """
 
     ## log the call
     hashline = '--------------------------------------------------------------'
@@ -170,7 +163,7 @@ def kepsmooth(infile, outfile, datacol='SAP_FLUX', function='flat',
     pout2 = np.append(pout2, 0.0)
     ## plot light curve
     if plot:
-        plt.figure(1, figsize=[xsize, ysize])
+        plt.figure()
 
         # delete any fossil plots in the matplotlib window
         plt.clf()
@@ -187,10 +180,9 @@ def kepsmooth(infile, outfile, datacol='SAP_FLUX', function='flat',
         labels = ax.get_yticklabels()
         plt.setp(labels, 'rotation', 90)
         plt.plot(ptime[1:-1], pout[1:-1], color='#ff9900', linestyle='-',
-                 linewidth=lwidth)
-        plt.fill(ptime, pout, color=fcolor, linewidth=0.0, alpha=falpha)
-        plt.plot(ptime, pout2, color=lcolor, linestyle='-',
-                 linewidth=lwidth*4.0)
+                 linewidth=1.0)
+        plt.fill(ptime, pout, color='#ffff00', linewidth=0.0, alpha=0.2)
+        plt.plot(ptime, pout2, color='#0000ff', linestyle='-', linewidth=1.0*4.0)
         plt.xlabel(xlab, {'color' : 'k'})
         plt.ylabel(ylab, {'color' : 'k'})
         plt.xlim(xmin - xr * 0.01, xmax + xr * 0.01)
