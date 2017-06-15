@@ -45,6 +45,16 @@ def keptrim(infile, outfile, column, row, imsize, kepid=None, clobber=False,
         the shell and a logfile.
     logfile : str
         Name of the logfile containing error and warning messages.
+
+    Examples
+    --------
+    .. code-block:: bash
+
+        $ keptrim ktwo251248961-c112_lpd-targ.fits keptrim.fits 14 770 --imsize 3
+        --clobber --verbose
+
+    .. image:: _static/images/keptrim.png
+        :align: center
     """
 
     # log the call
@@ -53,10 +63,10 @@ def keptrim(infile, outfile, column, row, imsize, kepid=None, clobber=False,
     call = ('KEPTRIM -- '
             + ' infile={}'.format(infile)
             + ' outfile={}'.format(outfile)
-            + ' kepid={}'.format(kepid)
             + ' column={}'.format(column)
             + ' row={}'.format(row)
             + ' imsize={}'.format(imsize)
+            + ' kepid={}'.format(kepid)
             + ' clobber={}'.format(clobber)
             + ' verbose={}'.format(verbose)
             + ' logfile={}'.format(logfile))
@@ -110,9 +120,9 @@ def keptrim(infile, outfile, column, row, imsize, kepid=None, clobber=False,
     # check subimage is contained inside the input image
     naxis1 = cards2['NAXIS1'].value
     naxis2 = cards2['NAXIS2'].value
-    x1 = imcol - imsize / 2 + 0.5
+    x1 = int(imcol - imsize // 2 + 0.5)
     x2 = x1 + imsize
-    y1 = imrow - imsize / 2 + 0.5
+    y1 = int(imrow - imsize // 2 + 0.5)
     y2 = y1 + imsize
     if x1 < 0 or y1 < 0 or x2 > naxis1 or y2 > naxis2:
         errmsg = ('ERROR -- KEPTRIM: Requested pixel area falls outside of '
@@ -259,7 +269,7 @@ def keptrim(infile, outfile, column, row, imsize, kepid=None, clobber=False,
     outstr.append(hdu1)
 
     # construct output mask bitmap extension
-    hdu2 = ImageHDU(maskmap)
+    hdu2 = pyfits.ImageHDU(maskmap)
     for i in range(len(cards2)):
         try:
             if cards2[i].keyword not in hdu2.header.keys():
@@ -319,14 +329,15 @@ def keptrim_main():
                         type=str)
     parser.add_argument('outfile', help='Name of output target pixel file',
                         type=str)
-    parser.add_argument('--kepid', type=int,
-                        help='Kepler ID number from the Kepler Input Catalog')
-    parser.add_argument('--column', help='CCD column number of the target',
+    parser.add_argument('column', help='CCD column number of the target',
                         type=int)
-    parser.add_argument('--row', help='CCD row number of the target', type=int)
-    parser.add_argument('--imsize',
+    parser.add_argument('row', help='CCD row number of the target', type=int)
+    parser.add_argument('imsize',
                         help=('Number of pixels to extract in both row and'
                               ' column dimensions'), type=int)
+    parser.add_argument('--kepid', type=int,
+                        help='Kepler ID number from the Kepler Input Catalog')
+
     parser.add_argument('--clobber', action='store_true',
                         help='Overwrite output file?')
     parser.add_argument('--verbose', action='store_true',
@@ -334,5 +345,5 @@ def keptrim_main():
     parser.add_argument('--logfile', '-l', help='Name of ascii log file',
                         default='keptrim.log', type=str)
     args = parser.parse_args()
-    keptrim(args.infile, args.outfile, args.kepid, args.column, args.row,
-            args.imsize, args.clobber, args.verbose, args.logfile)
+    keptrim(args.infile, args.outfile, args.column, args.row, args.imsize,
+            args.kepid, args.clobber, args.verbose, args.logfile)

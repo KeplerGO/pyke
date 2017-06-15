@@ -139,7 +139,7 @@ def kepprf(infile, plotfile, frameno, columns, rows, fluxes, prfdir,
                  Chi^2 test = 19803.55879917441 for 13 dof
 
     .. image:: _static/images/kepprf.png
-        :align:
+        :align: center
     """
     # log the call
 

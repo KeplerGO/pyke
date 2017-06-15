@@ -156,33 +156,31 @@ def keptrial(infile, outfile, datacol='SAP_FLUX', errcol='SAP_FLUX_ERR',
                 pmax[-1] = power[j]
                 f1 = fr[j]
         freq.append(f1)
-        # plot stop-motion histogram
-        plt.figure(1, figsize=[7, 10])
-        plt.clf()
-        plt.axes([0.08, 0.08, 0.88, 0.89])
-        plt.gca().xaxis.set_major_formatter(plt.ScalarFormatter(useOffset=False))
-        plt.gca().yaxis.set_major_formatter(plt.ScalarFormatter(useOffset=False))
-        n,bins,patches = plt.hist(freq, bins=nfreq, range=[fmin, fmax],
-                                  align='mid', rwidth=1, ec='#0000ff',
-                                  fc='#ffff00', lw=2)
-        # fit normal distribution to histogram
-        x = np.zeros(len(bins))
-        for j in range(1, len(bins)):
-            x[j] = (bins[j] + bins[j - 1]) / 2
-        pinit = np.array([float(i), freq[-1], deltaf])
-        if i > 3:
-            n = np.array(n, dtype='float32')
-            coeffs, errors, covar, sigma, chi2, dof, fit, plotx, ploty = \
-                kepfit.leastsquares(kepfunc.gauss, pinit, x[1:], n, None,
-                                    logfile, verbose)
-            f = np.arange(fmin, fmax, (fmax - fmin) /100)
-            fit = kepfunc.gauss(coeffs, f)
-            plt.plot(f, fit, 'r-', linewidth=2)
-            plt.xlabel(r'Frequency (1/d)', {'color' : 'k'})
-        plt.ylabel('N', {'color' : 'k'})
-        plt.xlim(fmin, fmax)
-        plt.grid()
-        plt.show()
+    # plot stop-motion histogram
+    plt.figure()
+    plt.clf()
+    plt.axes([0.08, 0.08, 0.88, 0.89])
+    plt.gca().xaxis.set_major_formatter(plt.ScalarFormatter(useOffset=False))
+    plt.gca().yaxis.set_major_formatter(plt.ScalarFormatter(useOffset=False))
+    n, bins, patches = plt.hist(freq, bins=nfreq, range=[fmin, fmax],
+                                align='mid', rwidth=1, ec='#0000ff',
+                                fc='#ffff00', lw=2)
+    # fit normal distribution to histogram
+    x = np.zeros(len(bins))
+    for j in range(1, len(bins)):
+        x[j] = (bins[j] + bins[j - 1]) / 2
+    pinit = np.array([float(i), freq[-1], deltaf])
+    n = np.array(n, dtype='float32')
+    coeffs, errors, covar, sigma, chi2, dof, fit, plotx, ploty = \
+            kepfit.leastsquares(kepfunc.gauss, pinit, x[1:], n, None,
+                                logfile, verbose)
+    f = np.arange(fmin, fmax, (fmax - fmin) /100)
+    fit = kepfunc.gauss(coeffs, f)
+    plt.plot(f, fit, 'r-', linewidth=2)
+    plt.xlabel(r'Frequency (1/d)', {'color' : 'k'})
+    plt.ylabel('N', {'color' : 'k'})
+    plt.xlim(fmin, fmax)
+    plt.grid()
     # render plot
     if plot:
         plt.show()
