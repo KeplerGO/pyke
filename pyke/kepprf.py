@@ -16,7 +16,7 @@ __all__ = ['kepprf']
 def kepprf(infile, plotfile, frameno, columns, rows, fluxes, prfdir,
            background=False, border=1, focus=False, xtol=1e-4, ftol=1.,
            plot=False, imscale='linear', cmap='YlOrBr', apercol='#ffffff',
-           verbose=True, logfile='kepprf.log'):
+           verbose=False, logfile='kepprf.log'):
     """
     Fit a PSF model, combined with spacecraft jitter and pixel scale
     drift (the Pixel Response Function; PRF) to a single observation of Kepler
@@ -375,7 +375,7 @@ def kepprf(infile, plotfile, frameno, columns, rows, fluxes, prfdir,
             txt = ("Flux = {0} e-/s X = {1} pix Y = {2} pix"
                    .format(flux[i], OBJx[i], OBJy[i]))
             kepmsg.log(logfile, txt, True)
-    if verbose and background:
+    if background:
         bterms = border + 1
         if bterms == 1:
             b = ans[nsrc * 3]
@@ -390,7 +390,7 @@ def kepprf(infile, plotfile, frameno, columns, rows, fluxes, prfdir,
         wx = ans[-3]
         wy = ans[-2]
         angle = ans[-1]
-    if verbose and focus:
+    if focus:
         if not background:
             kepmsg.log(logfile, '', True)
         kepmsg.log(logfile, " X/Y focus factors = {0}/{1}".format(wx, wy),
