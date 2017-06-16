@@ -34,6 +34,14 @@ API Documentation
 
     api/index
 
+Tutorials
+=========
+
+.. toctree::
+    :maxdepth: 2
+
+    tutorials/index
+
 
 Indices and tables
 ==================
