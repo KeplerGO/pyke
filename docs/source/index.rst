@@ -32,7 +32,7 @@ API Documentation
 .. toctree::
     :maxdepth: 2
 
-    api
+    api/index
 
 
 Indices and tables
@@ -44,5 +44,6 @@ Indices and tables
 Acknowledgment
 --------------
 
-PyKE was primarily developed by Martin Still and Tom Barclay.
+PyKE is developed by the Kepler/K2 Guest Observer Office.
+PyKE was firstly designed by Dr. Martin Still and Dr. Tom Barclay.
 Check out the previous project webpage: https://keplerscience.arc.nasa.gov/PyKE.shtml

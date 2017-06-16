@@ -196,7 +196,7 @@ def plotimage():
     plt.text(0.1, 0.8,'Dec (J2000): {}'.format(pdec, fontsize=12))
     plt.text(0.1, 0.7,'     KepMag: {}'.format(pkepmag, fontsize=12))
     plt.text(0.1, 0.6,'   SkyGroup: {}'.format(skygroup, fontsize=12))
-    plt.text(0.1, 0.5,'     Season: {}'.format(str(season), fontsize=12))
+    plt.text(0.1, 0.5,'     Season: {}'.format(season, fontsize=12))
     plt.text(0.1, 0.4,'    Channel: {}'.format(channel, fontsize=12))
     plt.text(0.1, 0.3,'     Module: {}'.format(module, fontsize=12))
     plt.text(0.1, 0.2,'     Output: {}'.format(output, fontsize=12))
@@ -207,7 +207,7 @@ def plotimage():
     plt.ylim(-0.05, 1.12)
     # clear button
     plt.axes([0.73, 0.86, 0.25, 0.11])
-    plt.text(0.5, 0.5, 'CLEAR', fontsize=24, weight='heavy',
+    plt.text(0.5, 0.5, 'CLEAR', fontsize=24,
              horizontalalignment='center', verticalalignment='center')
     plt.setp(plt.gca(), xticklabels=[], xticks=[], yticklabels=[],
              yticks=[])
@@ -217,7 +217,7 @@ def plotimage():
     aid = plt.connect('button_press_event', clicker1)
     # load mask button
     plt.axes([0.73, 0.74, 0.25, 0.11])
-    plt.text(0.5, 0.5, 'LOAD', fontsize=24, weight='heavy',
+    plt.text(0.5, 0.5, 'LOAD', fontsize=24,
              horizontalalignment='center', verticalalignment='center')
     plt.setp(plt.gca(), xticklabels=[], xticks=[], yticklabels=[], yticks=[])
     plt.fill([0.0, 1.0, 1.0, 0.0, 0.0],[0.0, 0.0, 1.0, 1.0, 0.0], '#ffffee')
@@ -226,7 +226,7 @@ def plotimage():
     bid = plt.connect('button_press_event', clicker2)
     # dump custom aperture to file button
     plt.axes([0.73, 0.62, 0.25, 0.11])
-    plt.text(0.5, 0.5, 'DUMP', fontsize=24, weight='heavy',
+    plt.text(0.5, 0.5, 'DUMP', fontsize=24,
              horizontalalignment='center', verticalalignment='center')
     plt.setp(plt.gca(), xticklabels=[], xticks=[], yticklabels=[], yticks=[])
     plt.fill([0.0, 1.0, 1.0, 0.0, 0.0], [0.0, 0.0, 1.0, 1.0, 0.0], '#ffffee')
@@ -235,7 +235,7 @@ def plotimage():
     cid = plt.connect('button_press_event', clicker3)
     # print window to png file button
     plt.axes([0.73, 0.50, 0.25, 0.11])
-    plt.text(0.5, 0.5, 'PRINT', fontsize=24, weight='heavy',
+    plt.text(0.5, 0.5, 'PRINT', fontsize=24,
              horizontalalignment='center', verticalalignment='center')
     plt.setp(plt.gca(), xticklabels=[], xticks=[], yticklabels=[], yticks=[])
     plt.fill([0.0, 1.0, 1.0, 0.0, 0.0], [0.0, 0.0, 1.0, 1.0, 0.0], '#ffffee')
@@ -248,16 +248,15 @@ def plotimage():
     plt.gca().xaxis.set_major_formatter(plt.ScalarFormatter(useOffset=False))
     plt.gca().yaxis.set_major_formatter(plt.ScalarFormatter(useOffset=False))
     plt.subplots_adjust(0.06, 0.1, 0.93, 0.88)
-    labels = ax.get_yticklabels()
-    plt.setp(labels, 'rotation', 90)
     # plot the image window
     imgsum = pimg.reshape((pydim, pxdim))
     plt.imshow(imgsum, aspect='auto', interpolation='nearest', origin='lower',
                extent=(xmin, xmax, ymin, ymax), cmap=colmap, vmin=zmin,
                vmax=zmax)
     plt.gca().set_autoscale_on(False)
-    plt.xlabel('Pixel Column Number', {'color' : 'k'})
-    plt.ylabel('Pixel Row Number', {'color' : 'k'})
+    plt.xlabel('Pixel Column Number', {'color' : 'k'}, fontsize=14)
+    plt.ylabel('Pixel Row Number', {'color' : 'k'}, fontsize=14)
+    plt.tick_params(labelsize=12)
     # plot the mask
     if colmap in ['Greys','binary','bone','gist_gray','gist_yarg',
                 'gray','pink','RdGy']:
