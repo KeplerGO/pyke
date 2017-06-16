@@ -17,13 +17,13 @@ The lighcurve module has been modified by TSB in order to sample the model
 on a finer grid than the original data.
 """
 
+import sys
 import lightcurve as tmod
 import matplotlib.pyplot as plt
 import numpy as np
 from astropy.io import fits as pyfits
 from scipy.optimize import leastsq, fmin
-import sys
-import kepio, kepmsg, kepkey, kepfit, kepstat
+from .. import kepio, kepmsg, kepkey, kepfit, kepstat
 
 
 def cutBadData(date, flux, err, removeflaggeddata, qualflag):
@@ -109,21 +109,21 @@ def fit_tmod2(params,LDparams,time,flux,error,fixed_dict,guess_params):
                                  omega, LDparams, sec)
     return np.sum(get_chi2(flux, mod_output, error))
 
-def fix_params(fixperiod,fixrprs,fixT0,
-    fixEcc,fixars,fixinc,fixomega,fixsec, fixfluxoffset):
+def fix_params(fixperiod, fixrprs,fixT0, fixEcc, fixars, fixinc, fixomega,
+               fixsec, fixfluxoffset):
     fixed_dict = {'period' : fixperiod,
-                    'rprs' : fixrprs,
-                    'T0' : fixT0,
-                    'Ecc' : fixEcc,
-                    'ars' : fixars,
-                    'inc' : fixinc,
-                    'omega' : fixomega,
-                    'sec' : fixsec,
-                    'fluxoffset' : fixfluxoffset}
+                   'rprs' : fixrprs,
+                   'T0' : fixT0,
+                   'Ecc' : fixEcc,
+                   'ars' : fixars,
+                   'inc' : fixinc,
+                   'omega' : fixomega,
+                   'sec' : fixsec,
+                   'fluxoffset' : fixfluxoffset}
     return fixed_dict
 
-def do_plot(time,model,flux,error,period,T0,cmdLine=False):
-    plt.figure(figsize=[15,8])
+def do_plot(time, model, flux, error, period, T0):
+    plt.figure()
     plt.clf()
 
     plt.subplots_adjust(0.09,0.1,0.98,0.95,0.19,0.27)
@@ -225,8 +225,7 @@ def keptransit(inputfile, outputfile, datacol, errorcol, periodini_d,
                LDparams, secini,fixperiod, fixrprs, fixT0, fixEcc, fixars,
                fixinc, fixomega, fixsec, fixfluxoffset, removeflaggeddata,
                ftol=0.0001, fitter='nothing', norm=False, clobber=False,
-               plot=True, verbose=0, logfile='logfile.dat', status=0,
-               cmdLine=False):
+               plot=True, verbose=0, logfile='logfile.dat'):
     """
     tmod.lightcurve(xdata,period,rprs,T0,Ecc,ars, incl, omega, ld, sec)
 
@@ -457,23 +456,19 @@ def keptransit(inputfile, outputfile, datacol, errorcol, periodini_d,
 
     # end time
 
-    if (status == 0):
-        message = 'KEPTRANSIT completed at'
-    else:
-        message = '\nKEPTRANSIT aborted at'
-    kepmsg.clock(message,logfile,verbose)
+    kepmsg.clock('KEPTRANSIT completed at', logfile, verbose)
 
-    if plot and status == 0:
-        do_plot(intime,modelfit,indata,inerr,newperiod,newT0,cmdLine)
+    if plot:
+        do_plot(intime, modelfit, indata, inerr, newperiod, newT0)
 
 def keptransit_main():
     import argparse
-    parser = argparse.ArgumentParser(description='Fit a exoplanet transit model to the light curve')
-    parser.add_argument('--shell', action='store_true', help='Are we running from the shell?')
-    parser.add_argument('infile', help='Name of input file', type=str, dest=inputfile)
-    parser.add_argument('outfile', help='Name of output FITS file', type=str, dest=outputfile)
-    parser.add_argument('--datacol', help='Column containing flux data to fit', type=str,
-        default='DETSAP_FLUX')
+    parser = argparse.ArgumentParser(
+            description='Fit a exoplanet transit model to the light curve')
+    parser.add_argument('infile', help='Name of input file', type=str)
+    parser.add_argument('outfile', help='Name of output FITS file', type=str)
+    parser.add_argument('--datacol', help='Column containing flux data to fit',
+                        type=str, default='DETSAP_FLUX')
     parser.add_argument('--errorcol', help='Column containing flux uncertainty', type=str,
         default='DETSAP_FLUX_ERR')
     parser.add_argument('period', help='Guess for planet orbital period',

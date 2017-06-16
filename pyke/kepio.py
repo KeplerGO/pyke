@@ -403,42 +403,19 @@ def timeranges(ranges, logfile, verbose):
 
     tstart = []
     tstop = []
-    if '@' in ranges:
-        try:
-            lines = openascii(ranges[1:], 'r', logfile, verbose)
-        except:
-            errmsg = ('ERROR -- KEPIO.TIMERANGES: cannot open file '
-                      + ranges[1:])
-            kepmsg.err(logfile, txt, verbose)
-        for line in lines:
-            line = line.strip().split(',')
-            if len(line) == 2:
-                try:
-                    tstart.append(float(line[0]))
-                    tstop.append(float(line[1]))
-                    if tstart[-1] == 0.0 and tstop[-1] == 0.0:
-                        tstop[-1] = 1.0e8
-                except:
-                    continue
-        closeascii(lines, logfile, verbose)
-        if len(tstart) == 0 or len(tstop) == 0 or len(tstart) != len(tstop):
-            errmsg = ('ERROR -- KEPIO.TIMERANGES: cannot understand content of '
-                      + ranges[1:])
-            kepmsg.err(logfile, errmsg, verbose)
-    else:
-        try:
-            ranges = ranges.strip().split(';')
-            for i in range(len(ranges)):
-                tstart.append(float(ranges[i].strip().split(',')[0]))
-                tstop.append(float(ranges[i].strip().split(',')[1]))
-                if tstart[-1] == 0.0 and tstop[-1] == 0.0: tstop[-1] = 1.0e8
-        except:
-            tstart = []
-            tstop = []
-        if len(tstart) == 0 or len(tstop) == 0 or len(tstart) != len(tstop):
-            errmsg = ('ERROR -- KEPIO.TIMERANGES: cannot understand time '
-                      'ranges provided')
-            kepmsg.err(logfile, errmsg, verbose)
+    try:
+        ranges = ranges.strip().split(';')
+        for i in range(len(ranges)):
+            tstart.append(float(ranges[i].strip().split(',')[0]))
+            tstop.append(float(ranges[i].strip().split(',')[1]))
+            if tstart[-1] == 0.0 and tstop[-1] == 0.0: tstop[-1] = 1.0e8
+    except:
+        tstart = []
+        tstop = []
+    if len(tstart) == 0 or len(tstop) == 0 or len(tstart) != len(tstop):
+        errmsg = ('ERROR -- KEPIO.TIMERANGES: cannot understand time '
+                  'ranges provided')
+        kepmsg.err(logfile, errmsg, verbose)
 
     return tstart, tstop
 

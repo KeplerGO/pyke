@@ -124,6 +124,7 @@ def keptrim(infile, outfile, column, row, imsize, kepid=None, clobber=False,
     x2 = x1 + imsize
     y1 = int(imrow - imsize // 2 + 0.5)
     y2 = y1 + imsize
+
     if x1 < 0 or y1 < 0 or x2 > naxis1 or y2 > naxis2:
         errmsg = ('ERROR -- KEPTRIM: Requested pixel area falls outside of '
                   'the pixel image in file {}. Make the pixel area smaller '

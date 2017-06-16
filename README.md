@@ -20,10 +20,10 @@ Or if you would like to experiment our development version::
 
 ## Installation with PyRAF
 
-The easiest way to install PyKE within PyRAF is through the astroconda-iraf channel:
+To install PyKE within PyRAF one may follow the instructions in the astroconda-iraf channel:
 http://astroconda.readthedocs.io/en/latest/installation.html#legacy-software-stack-with-iraf
 
-After that, run the following commands on a terminal of your preference:
+After that, run the following commands on your favorite terminal:
 
 1. ``mkiraf``
 2. ``pyraf``
@@ -42,7 +42,8 @@ Publication:      Astrophysics Source Code Library, record ascl:1208.004
 Publication Date: 08/2012
 ```
 
-*This package was mostly developed by Tom Barclay ([@mrtommyb](http://www.github.com/mrtommyb)) and Martin Still.*
+*This package was mostly developed by Tom Barclay ([@mrtommyb](http://www.github.com/mrtommyb)) and Martin Still.
+Currently, this package is being developed and maintained by [Zé](http://www.github.com/mirca), [Gully](http://www.github.com/gully), and [Geert](http://www.github.com/barentsen).*
 
 
 ## Dependencies
