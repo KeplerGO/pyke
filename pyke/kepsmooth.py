@@ -56,7 +56,7 @@ def kepsmooth(infile, outfile, datacol='SAP_FLUX', function='flat',
 
         $ kepsmooth kplr005110407-2009259160929_llc.fits kepsmooth.fits --plot
 
-    .. image:: _static/images/kepsmooth.png
+    .. image:: ../_static/images/api/kepsmooth.png
         :align: center
     """
 

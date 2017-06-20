@@ -64,7 +64,7 @@ def kepfilter(infile, outfile, passband, datacol='SAP_FLUX', function='boxcar',
         $ kepfilter kplr002436324-2009259160929_llc.fits kepfilter.fits --datacol 'SAP_FLUX' --function 'boxcar'
         --plot --verbose --clobber
 
-    ..image :: _static/images/kepfilter.png
+    ..image :: ../_static/images/api/kepfilter.png
         :align: center
     """
     ## startup parameters

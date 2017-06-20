@@ -120,7 +120,7 @@ def kepprfphot(infile, outroot, columns, rows, fluxes, prfdir, border=0,
 
     Examples
     --------
-    .. code-block::
+    .. code-block:: bash
 
         $ kepprfphot kplr012557548-2012004120508_lpd-targ.fits.gz photometry --columns 95
           --rows 1020 --fluxes 1.0 --border 0 --prfdir ../kplr2011265_prf --xtol 1e-7 --ftol 1e-7
@@ -146,7 +146,7 @@ def kepprfphot(infile, outroot, columns, rows, fluxes, prfdir, border=0,
 
            19% nrow = 740 t = 0.1 sec
 
-    .. image:: _static/images/kepprfphot.png
+    .. image:: ../_static/images/api/kepprfphot.png
     """
 
     # log the call

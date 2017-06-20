@@ -86,7 +86,7 @@ def kepextract(infile, outfile, maskfile='ALL', bkg=False, clobber=False,
         f = fits.open(outlc)
         plt.plot(f[1].data['TIME'], f[1].data['SAP_FLUX'])
 
-    .. image:: _static/images/kepextract.png
+    .. image:: ../_static/images/api/kepextract.png
         :align: center
     """
 

@@ -103,7 +103,7 @@ def keppca(infile, outfile, maskfile='ALL', components='1-3', plotpca=False,
 
         $ keppca ktwo202073445-c00_lpd-targ.fits.gz keppca.fits --plotpca
 
-    .. image:: _static/images/keppca.png
+    .. image:: ../_static/images/api/keppca.png
         :align: center
     """
 

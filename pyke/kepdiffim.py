@@ -80,7 +80,7 @@ def kepdiffim(infile, outfile, plotfile=None, imscale='logarithmic',
         --filter --function boxcar --cutoff 0.1 --plotfile kepdiffim.png
         --cmap YlOrBr --imscale linear --verbose
 
-    .. image:: _static/images/kepdiffim.png
+    .. image:: ../_static/images/api/kepdiffim.png
         :align: center
     """
     # log the call

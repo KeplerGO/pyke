@@ -52,7 +52,7 @@ def kepft(infile, outfile, fcol='SAP_FLUX', pmin=0.1, pmax=10., nfreq=100,
         $ kepft kplr002436324-2009259160929_llc.fits kepout.fits --pmin 0.5 -pmax 100 --nfreq 1000 --plot
           --verbose
 
-    .. image:: _static/images/kepft.png
+    .. image:: ../_static/images/api/kepft.png
         :align: center
     """
 

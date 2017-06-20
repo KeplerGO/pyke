@@ -71,7 +71,7 @@ def kepmask(infile, frameno, maskfile='mask.txt', plotfile='kepmask.png',
 
         $ kepmask ktwo202933888-c02_lpd-targ.fits.gz 20
 
-    .. image:: _static/images/kepmask.png
+    .. image:: ../_static/images/api/kepmask.png
         :align: center
     """
 

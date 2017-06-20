@@ -138,7 +138,7 @@ def kepprf(infile, plotfile, frameno, columns, rows, fluxes, prfdir,
         Pearsons chi^2 test = 296.12077907844986 for 13 dof
                  Chi^2 test = 19803.55879917441 for 13 dof
 
-    .. image:: _static/images/kepprf.png
+    .. image:: ../_static/images/api/kepprf.png
         :align: center
     """
     # log the call

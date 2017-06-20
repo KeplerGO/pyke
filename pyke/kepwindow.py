@@ -54,7 +54,7 @@ def kepwindow(infile, outfile, fcol='SAP_FLUX', fmax=1.0, nfreq=100, plot=False,
         $ kepwindow kplr002436324-2009259160929_llc.fits kepwindow.fits --datacol SAP_FLUX
         --fmax 0.7 --nfreq 500 --plot --verbose
 
-    .. images:: _static/images/kepwindow.png
+    .. image:: ../_static/images/api/kepwindow.png
         :align: center
     """
 

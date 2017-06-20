@@ -60,7 +60,7 @@ def kepdynamic(infile, outfile, fcol='SAP_FLUX', pmin=0.1, pmax=10., nfreq=100,
         $ kepdynamic kplr002436324-2009259160929_llc.fits kepdynamic.fits --fcol SAP_FLUX
         --pmin 0.08 --pmax 0.1 --nfreq 500 --deltat 5.0 --nslice 500 --plot --verbose
 
-    .. image:: _static/images/kepdynamic.png
+    .. image:: ../_static/images/api/kepdynamic.png
         :align: center
     """
 

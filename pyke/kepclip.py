@@ -40,7 +40,7 @@ def kepclip(infile, outfile, ranges, datacol='SAP_FLUX', plot=False,
           '2455012.48517,2455018.50072;2455022.63487,2455060.08231'
           --verbose --plot --clobber
 
-    .. image:: _static/images/kepclip.png
+    .. image:: ../_static/images/api/kepclip.png
         :align: center
     """
 

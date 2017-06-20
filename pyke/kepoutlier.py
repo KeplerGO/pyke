@@ -86,7 +86,7 @@ def kepoutlier(infile, outfile, datacol, nsig=3.0, stepsize=1.0, npoly=3,
         $ kepoutlier kplr002437329-2010355172524_llc.fits kepoutlier.fits --datacol SAP_FLUX
           --nsig 4 --stepsize 5 --npoly 2 --niter 10 --operation replace --verbose --plot --plotfit
 
-    .. image:: _static/images/kepoutlier.png
+    .. image:: ../_static/images/api/kepoutlier.png
         :align: center
     """
 

@@ -57,7 +57,7 @@ def keprange(infile, outfile, column, rinfile='', clobber=False, verbose=False,
 
         $ keprange kplr002436324-2009259160929_llc.fits keprange.txt --verbose
 
-    .. image:: _static/images/keprange.png
+    .. image:: ../_static/images/api/keprange.png
         :align: center
     """
 

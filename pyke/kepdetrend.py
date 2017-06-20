@@ -110,7 +110,7 @@ def kepdetrend(infile, outfile, ranges1, ranges2, npoly1, npoly2, nsig1, nsig2,
         --nsig1 3 --niter1 10 --ranges2 '2455060.57026,2455063.59357;2455066.9768,2455068.99235'
         --npoly2 5 --nsig2 3 --niter2 10 --plot --verbose
 
-    .. image:: _static/images/kepdetrend.png
+    .. image:: ../_static/images/api/kepdetrend.png
         :align: center
     """
 

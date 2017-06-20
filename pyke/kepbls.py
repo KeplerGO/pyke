@@ -102,7 +102,7 @@ def kepbls(infile, outfile, datacol='DETSAP_FLUX', errcol='DETSAP_FLUX_ERR',
               Transit duration = 1.7099086232483387 hours
         Maximum signal residue = 4.487271046981536e-06
 
-    .. image:: _static/images/kepbls.png
+    .. image:: ../_static/images/api/kepbls.png
         :align: center
     """
     # startup parameters

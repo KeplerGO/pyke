@@ -103,7 +103,7 @@ def kepflatten(infile, outfile, datacol='PDCSAP_FLUX',
         --nsig 3 --stepsize 1.0 --winsize 3.0 --npoly 3 --niter 10 --plot
         --clobber --verbose
 
-    .. image:: _static/images/kepflatten.png
+    .. image:: ../_static/images/api/kepflatten.png
         :align: center
     """
     # startup parameters

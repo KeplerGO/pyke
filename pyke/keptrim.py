@@ -53,7 +53,7 @@ def keptrim(infile, outfile, column, row, imsize, kepid=None, clobber=False,
         $ keptrim ktwo251248961-c112_lpd-targ.fits keptrim.fits 14 770 --imsize 3
         --clobber --verbose
 
-    .. image:: _static/images/keptrim.png
+    .. image:: ../_static/images/api/keptrim.png
         :align: center
     """
 

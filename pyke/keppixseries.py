@@ -80,7 +80,7 @@ def keppixseries(infile, outfile, plotfile=None, plottype='global',
 
         $ keppixseries kplr008256049-2010174085026_lpd-targ.fits.gz keppixseries.fits
 
-    .. image:: _static/images/keppixseries.png
+    .. image:: ../_static/images/api/keppixseries.png
         :align: center
     """
 
