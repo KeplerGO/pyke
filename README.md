@@ -7,11 +7,11 @@ visit http://keplerscience.arc.nasa.gov/software.html#pyke
 
 ## Installation
 
-The easiest way to install PyKE is through ``pip``::
+The easiest way to install PyKE is through ``pip``:
 
     pip install pyke
 
-Or if you would like to experiment our development version::
+Or if you would like to experiment our development version:
 
     git clone https://github.com/KeplerGO/PyKE.git
     cd PyKE

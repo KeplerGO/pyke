@@ -34,19 +34,19 @@ def kepimages(infile, prefix, imtype='FLUX', ranges='0,0', clobber=True,
     * ``RAW_CNTS`` -- uncalibrated pixel count values
 
     * ``FLUX`` -- calibrated pixel, background-subtracted, cosmic ray-removed
-    fluxes in units of e-/s
+      fluxes in units of e-/s
 
     * ``FLUX_ERR`` -- 1-standard deviation errors on the FLUX image, as
-    propagated through the pixel calibration
+      propagated through the pixel calibration
 
     * ``FLUX_BKG`` -- the background that has been subtracted from the FLUX
-    image in units of e-/s
+      image in units of e-/s
 
     * ``FLUX_BKG_ERR`` -- 1-standard deviation errors on the FLUX_BKG image, as
-    propagated through the pixel calibration
+      propagated through the pixel calibration
 
     * ``COSMIC_RAYS`` -- the cosmic ray map that has been subtracted from the
-    FLUX image in units of e-/s
+      FLUX image in units of e-/s
 
     We recommend the tools ds9 and fv for the inspection of the FITS image
     products. The intent of the kepimages tool is to convert the TPF content
@@ -66,6 +66,7 @@ def kepimages(infile, prefix, imtype='FLUX', ranges='0,0', clobber=True,
         to export images. Time ranges are supplied as comma-separated pairs of
         Barycentric Julian Dates (BJDs). Multiple ranges are separated by a
         semi-colon. An example containing two time ranges is:
+
             ``'2455641.658,2455641.740;2455671.658,2455672.740'``
     clobber : bool
         Overwrite the output file? if clobber is False and an existing file has
@@ -81,24 +82,21 @@ def kepimages(infile, prefix, imtype='FLUX', ranges='0,0', clobber=True,
 
         $ kepimages ktwo202073445-c00_lpd-targ.fits ktwo202073445-c00 --verbose
         $ ls
-        -rw-r--r--   1 jvmirca  staff    14K Jun 13 15:35 ktwo202073445-c00_BJD2456728.5277.fits
-        -rw-r--r--   1 jvmirca  staff    14K Jun 13 15:35 ktwo202073445-c00_BJD2456728.5482.fits
-        -rw-r--r--   1 jvmirca  staff    14K Jun 13 15:35 ktwo202073445-c00_BJD2456728.5686.fits
-        -rw-r--r--   1 jvmirca  staff    14K Jun 13 15:35 ktwo202073445-c00_BJD2456728.5890.fits
-        -rw-r--r--   1 jvmirca  staff    14K Jun 13 15:35 ktwo202073445-c00_BJD2456728.6095.fits
-        -rw-r--r--   1 jvmirca  staff    14K Jun 13 15:35 ktwo202073445-c00_BJD2456728.6299.fits
-        -rw-r--r--   1 jvmirca  staff    14K Jun 13 15:35 ktwo202073445-c00_BJD2456728.6503.fits
-        -rw-r--r--   1 jvmirca  staff    14K Jun 13 15:35 ktwo202073445-c00_BJD2456728.6708.fits
-        -rw-r--r--   1 jvmirca  staff    14K Jun 13 15:35 ktwo202073445-c00_BJD2456728.6912.fits
-        -rw-r--r--   1 jvmirca  staff    14K Jun 13 15:35 ktwo202073445-c00_BJD2456728.7116.fits
-        -rw-r--r--   1 jvmirca  staff    14K Jun 13 15:35 ktwo202073445-c00_BJD2456728.7321.fits
-        -rw-r--r--   1 jvmirca  staff    14K Jun 13 15:35 ktwo202073445-c00_BJD2456728.7525.fits
-        -rw-r--r--   1 jvmirca  staff    14K Jun 13 15:35 ktwo202073445-c00_BJD2456728.7729.fits
-        -rw-r--r--   1 jvmirca  staff    14K Jun 13 15:35 ktwo202073445-c00_BJD2456728.7934.fits
-        -rw-r--r--   1 jvmirca  staff    14K Jun 13 15:35 ktwo202073445-c00_BJD2456728.8138.fits
-        .
-        .
-        .
+          ktwo202073445-c00_BJD2456728.5277.fits
+          ktwo202073445-c00_BJD2456728.5482.fits
+          ktwo202073445-c00_BJD2456728.5686.fits
+          ktwo202073445-c00_BJD2456728.5890.fits
+          ktwo202073445-c00_BJD2456728.6095.fits
+          ktwo202073445-c00_BJD2456728.6299.fits
+          ktwo202073445-c00_BJD2456728.6503.fits
+          ktwo202073445-c00_BJD2456728.6708.fits
+          ktwo202073445-c00_BJD2456728.6912.fits
+          ktwo202073445-c00_BJD2456728.7116.fits
+          ktwo202073445-c00_BJD2456728.7321.fits
+          ktwo202073445-c00_BJD2456728.7525.fits
+          ktwo202073445-c00_BJD2456728.7729.fits
+          ktwo202073445-c00_BJD2456728.7934.fits
+          ktwo202073445-c00_BJD2456728.8138.fits
     """
 
     # log the call
