@@ -6,7 +6,6 @@ from scipy import optimize as opt
 from matplotlib import pyplot as plt
 from tqdm import tqdm
 import random
-import mdp
 
 
 __all__ = ['keppca']
@@ -106,6 +105,7 @@ def keppca(infile, outfile, maskfile='ALL', components='1-3', plotpca=False,
     .. image:: ../_static/images/api/keppca.png
         :align: center
     """
+    import mdp
 
     # log the call
     hashline = '--------------------------------------------------------------'

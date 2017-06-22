@@ -1,3 +1,12 @@
+import pytest
+
+HAS_MDP = True
+try:
+    import mdp
+except ImportError:
+    HAS_MDP = False
+
+
 def test_import():
     from .. import keparray
     from .. import kepbls
@@ -22,7 +31,6 @@ def test_import():
     from .. import kepmask
     from .. import kepmsg
     from .. import kepoutlier
-    from .. import keppca
     from .. import keppixseries
     from .. import kepplot
     from .. import kepprf
@@ -37,3 +45,6 @@ def test_import():
     from .. import keptrim
     from .. import kepwindow
 
+@pytest.mark.skipif('not HAS_MDP')
+def test_import_keppca():
+    from .. import keppca

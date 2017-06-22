@@ -53,7 +53,7 @@ setup(name='pyke',
       license='MIT',
       packages=['pyke'],
       install_requires=['numpy>=1.11', 'astropy>=1.3', 'scipy>=0.17.0',
-                        'matplotlib>=1.5.3', 'tqdm', 'mdp'],
+                        'matplotlib>=1.5.3', 'tqdm'],
       entry_points=entry_points,
       include_package_data=True,
       classifiers=[
