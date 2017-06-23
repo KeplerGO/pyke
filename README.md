@@ -1,4 +1,5 @@
-# PyKE [![Build Status](https://travis-ci.org/KeplerGO/PyKE.svg?branch=dev)](https://travis-ci.org/KeplerGO/PyKE)
+# PyKE [![Build Status](https://travis-ci.org/KeplerGO/PyKE.svg?branch=dev)](https://travis-ci.org/KeplerGO/PyKE) [![Documentation Status](https://readthedocs.org/projects/pyke/badge/?version=latest)](http://pyke.readthedocs.io/en/latest/?badge=latest)
+
 ***A suite of Python/PyRAF tools to analyze Kepler data.***
 
 ## Installation
