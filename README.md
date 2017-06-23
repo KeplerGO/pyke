@@ -1,10 +1,6 @@
 # PyKE [![Build Status](https://travis-ci.org/KeplerGO/PyKE.svg?branch=dev)](https://travis-ci.org/KeplerGO/PyKE)
 ***A suite of Python/PyRAF tools to analyze Kepler data.***
 
-For more information and documentation,
-visit http://keplerscience.arc.nasa.gov/software.html#pyke
-
-
 ## Installation
 
 The easiest way to install PyKE is through ``pip``:
@@ -20,7 +16,7 @@ Or if you would like to experiment our development version:
 
 ## Installation with PyRAF
 
-To install PyKE within PyRAF one may follow the instructions in the astroconda-iraf channel:
+To install PyKE within PyRAF, one may follow the instructions in the astroconda-iraf channel:
 http://astroconda.readthedocs.io/en/latest/installation.html#legacy-software-stack-with-iraf
 
 After that, run the following commands on your favorite terminal:
@@ -29,7 +25,7 @@ After that, run the following commands on your favorite terminal:
 2. ``pyraf``
 3. ``kepler``
 
-The developer version of PyKE that is compatible with PyRAF is under the branch ``pyraf``.
+The developer version of PyKE that is compatible with PyRAF is under the branch ``py27-pyraf``.
 
 
 ## Acknowledgement
@@ -53,7 +49,7 @@ scipy
 astropy
 matplotlib
 tqdm
-mdp
+mdp (optional, needed for keppca)
 ```
 
 ## Support
