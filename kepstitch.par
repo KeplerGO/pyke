@@ -1,7 +1,0 @@
-infiles,s,a,'@kepstitch.lis',,,'List of input files (string)'
-outfile,s,a,'kepstitch.fits',,,'Name of output FITS file (string)'
-clobber,b,h,'yes',,,'Overwrite output file? (boolean)'
-verbose,b,h,'yes',,,'Write to log file? (boolean)'
-logfile,s,h,'kepstitch.log',,,'Name of ascii log file? (string)'
-status,i,h,0,,,'Exit status (0=good)'
-mode,s,h,"al"
