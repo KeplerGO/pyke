@@ -1,9 +1,0 @@
-infile,s,a,'keprange.fits',,,'Name of input FITS light curve file (string)'
-rinfile,s,h,'',,,'Name of input ASCII time ranges file (string)'
-outfile,s,a,'keprange.txt',,,'Name of output ASCII time ranges file (string)'
-column,s,a,'SAP_FLUX',,,'Name of diagnostic FITS column (string)'
-clobber,b,h,'no',,,'Overwrite output file? (boolean)'
-verbose,b,h,'no',,,'Write to log file? (boolean)'
-logfile,s,h,'keprange.log',,,'Name of ascii log file? (string)'
-status,i,h,0,,,'Exit status (0=good)'
-mode,s,h,"al"
