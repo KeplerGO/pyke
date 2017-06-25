@@ -11,7 +11,7 @@ def kepfold(infile, outfile, period, bjd0, bindata=False,
             rejqual=False, plottype='sap', clobber=False, verbose=False,
             logfile="kepfold.log"):
     """
-    Phase-fold light curve data on linear ephemeris.
+    kepfold: Phase-fold light curve data on linear ephemeris.
 
     kepfold calculates the phase of all time-tagged data points relative to a
     user-supplied linear ephemeris. The relation is:

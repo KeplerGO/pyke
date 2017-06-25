@@ -24,8 +24,10 @@ def kepmask(infile, frameno, maskfile='mask.txt', plotfile='kepmask.png',
             imin=None, imax=None, iscale='logarithmic', cmap='bone',
             verbose=False, logfile='kepmask.log'):
     """
-    kepmask plots, creates or edits custom target masks for target pixel
-    files. The product from this task is a target mask definition file which
+    kepmask - plots, creates or edits custom target masks for target pixel
+    files.
+
+    The product from this task is a target mask definition file which
     can be used by kepextract to extract a light curve from target pixel data.
     This tool is a GUI interface for defining a pixel mask by moving a mouse
     over image pixels and selecting them by pressing the left-button of your

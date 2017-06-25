@@ -1,9 +1,11 @@
 from . import kepio, kepmsg, kepplot, kepfunc, kepstat
 import numpy as np
+import time
+import math
+import glob
 from matplotlib import pyplot as plt
 from matplotlib import ticker
 from astropy.io import fits as pyfits
-import time, math, glob
 from scipy import interpolate, optimize, ndimage, stats
 from scipy.optimize import fmin_powell
 from scipy.interpolate import RectBivariateSpline
@@ -18,6 +20,8 @@ def kepprf(infile, plotfile, frameno, columns, rows, fluxes, prfdir,
            plot=False, imscale='linear', cmap='YlOrBr', apercol='#ffffff',
            verbose=False, logfile='kepprf.log'):
     """
+    kepprf -- Fit a PSF model to a specific image within a Target Pixel File
+
     Fit a PSF model, combined with spacecraft jitter and pixel scale
     drift (the Pixel Response Function; PRF) to a single observation of Kepler
     target pixels.

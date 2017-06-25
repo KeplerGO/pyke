@@ -9,8 +9,10 @@ def kepsmooth(infile, outfile, datacol='SAP_FLUX', function='flat',
               logfile='kepsmooth.log'):
     """
     kepsmooth -- Smooth Kepler light curve data by convolution with a choice
-    of analytical functions. The smoothed data is copied to a new FITS file
-    with the same structure as the input file.
+    of analytical functions.
+
+    The smoothed data is copied to a new FITS file with the same structure as
+    the input file.
 
     Parameters
     ----------
