@@ -16,6 +16,8 @@ def kepdynamic(infile, outfile, fcol='SAP_FLUX', pmin=0.1, pmax=10., nfreq=100,
     kepdynamic -- Construct a dynamic (time-dependent) power spectrum from
     Kepler time series data
 
+    Parameters
+    ----------
     infile : str
         The name of a MAST standard format FITS file containing a Kepler light
         curve within the first data extension.
