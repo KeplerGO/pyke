@@ -14,6 +14,12 @@ Or if you would like to experiment our development version:
     cd PyKE
     pip install -e .
 
+Documentation is hosted at [readthedocs](http://pyke.rtfd.io).
+Alternatively, it can be built locally:
+
+    $ cd pyke/docs
+    $ python setup.py build_sphinx
+
 
 ## Installation with PyRAF
 

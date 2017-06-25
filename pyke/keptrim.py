@@ -10,7 +10,7 @@ from . import kepkey
 def keptrim(infile, outfile, column, row, imsize, kepid=None, clobber=False,
             verbose=False, logfile='keptrim.log'):
     """
-    keptrim -- create a series of subimages from a Target Pixel File
+    keptrim -- trim pixels from Target Pixel Files
 
     keptrim will extract a square-shaped series of sub-images from a Target
     Pixel File. The simple purpose of this task is to reduce the size of large

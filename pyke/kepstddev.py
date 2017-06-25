@@ -19,6 +19,8 @@ def kepstddev(infile, outfile, datacol='PDCSAP_FLUX', timescale=6.5,
     kepstddev -- Calculate Combined Differential Photometric Precision for a
     time series light curve.
 
+    Parameters
+    ----------
     infile : str
         The name of a MAST standard format FITS file containing Kepler light
         curve data within the first data extension. While the kepstddev task
