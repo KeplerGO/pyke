@@ -1,4 +1,4 @@
-# PyKE [![Build Status](https://travis-ci.org/KeplerGO/PyKE.svg?branch=dev)](https://travis-ci.org/KeplerGO/PyKE) [![Documentation Status](https://readthedocs.org/projects/pyke/badge/?version=latest)](http://pyke.readthedocs.io/en/latest/?badge=latest)
+# PyKE [![Build Status](https://travis-ci.org/KeplerGO/PyKE.svg?branch=dev)](https://travis-ci.org/KeplerGO/PyKE) [![Documentation Status](https://readthedocs.org/projects/pyke/badge/?version=latest)](http://pyke.readthedocs.io/en/latest/?badge=latest) <a href="http://ascl.net/1208.004"><img src="https://img.shields.io/badge/ascl-1208.004-blue.svg?colorB=262255" alt="ascl:1208.004" /></a>
 
 ***A suite of Python/PyRAF tools to analyze Kepler data.***
 
