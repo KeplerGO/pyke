@@ -16,6 +16,9 @@ def kepfilter(infile, outfile, passband, datacol='SAP_FLUX', function='boxcar',
     the convolution is subtracted from the original data. The filtered data is
     copied to a new FITS file with the same structure as the input file.
 
+    Parameters
+    ----------
+
     infile : str
         The name of a MAST standard format FITS file containing Kepler light
         curve data within the first data extension.

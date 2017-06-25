@@ -27,6 +27,8 @@ def kepffi(ffifile, kepid, ra, dec, aperfile, imin, imax, iscale, cmap, npix,
     kepffi -- Display a portion of a Full Frame Image (FFI) and define custom
     target apertures
 
+    Parameters
+    ----------
     ffifile : str
         The name of a MAST standard format Full Frame Image (FFI) FITS file
         containing a Kepler channel image within each data extension.
@@ -149,7 +151,7 @@ def kepffi(ffifile, kepid, ra, dec, aperfile, imin, imax, iscale, cmap, npix,
             if dateobs == '2009-11-18': quarter = 3
             if dateobs == '2009-12-17': quarter = 3
         except:
-            sys.exit('ERROR -- cannot determine quarter when FFI was taken\n'
+            sys.exit('ERROR -- cannot determine quarter when FFI was taken'
                      ' . Either a\n QUARTER or DATE-OBS keyword is expected in'
                      ' the primary header.')
     if quarter == 0:
