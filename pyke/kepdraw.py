@@ -23,19 +23,19 @@ def kepdraw(infile, outfile, datacol, ploterr, errcol, quality,
             + ' lwidth='.format(lwidth)
             + ' fcolor='.format(fcolor)
             + ' falpha='.format(falpha)
-            + ' labelsize='+str(labelsize)+' '
-            + ' ticksize='+str(ticksize)+' '
-            + ' xsize='+str(xsize)+' '
-            + ' ysize='+str(ysize)+' '
-            + ' fullrange='+frange+ ' '
-            + ' chooserange='+crange+ ' '
-            + ' ymin='+str(y1)+' '
-            + ' ymax='+str(y2)+' '
-            + ' plotgrid='+pgrid+ ' '
-            + ' ylabel='+str(ylabel)+' '
-            + ' plottype='+plottype+' '
-            + ' verbose='+chatter+' '
-            + ' logfile='+logfile
+            + ' labelsize='.format(labelsize)
+            + ' ticksize='.format(ticksize)
+            + ' xsize='.format(xsize)
+            + ' ysize='.format(ysize)
+            + ' fullrange='.format(frange)
+            + ' chooserange='.format(crange)
+            + ' ymin='.format(y1)
+            + ' ymax='.format(y2)
+            + ' plotgrid='.format(pgrid)
+            + ' ylabel='.format(ylabel)
+            + ' plottype='.format(plottype)
+            + ' verbose='.format(chatter)
+            + ' logfile='.format(logfile)
 
     kepmsg.log(logfile, call+'\n', verbose)
 
