@@ -49,6 +49,8 @@ def kepdetrend(infile, outfile, ranges1, ranges2, npoly1, npoly2, nsig1, nsig2,
     correction of three systematic features within a Q2 light curve. These
     three corrections are provided in the task examples below.
 
+    Parameters
+    ----------
     infile : str
         The name of a MAST standard format FITS file containing a Kepler light
         curve within the first data extension.
