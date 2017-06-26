@@ -1,4 +1,4 @@
-**kepbls**:  Perform Box-Least Square searches for periodic exoplanet transits
+**kepbls**: perform Box-Least Square searches for periodic exoplanet transits
 ==============================================================================
 
 .. autofunction:: pyke.kepbls.kepbls

@@ -1,4 +1,4 @@
-**kepcotrend**: Remove systematic trends Kepler light curves using cotrending basis vectors
+**kepcotrend**: remove systematic trends Kepler light curves using cotrending basis vectors
 ===========================================================================================
 
 .. autofunction:: pyke.kepcotrend.kepcotrend

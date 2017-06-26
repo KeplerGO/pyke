@@ -1,4 +1,4 @@
-**kepdetrend**: Detrend aperture photometry data
+**kepdetrend**: detrend aperture photometry data
 ================================================
 
 .. autofunction:: pyke.kepdetrend.kepdetrend
