@@ -12,6 +12,7 @@ from .kepconvert import *
 from .kepcotrend import *
 from .kepdetrend import *
 from .kepdiffim import *
+from .kepdraw import *
 from .kepdynamic import *
 from .kepextract import *
 from .kepfilter import *

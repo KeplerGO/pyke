@@ -17,6 +17,7 @@ entry_points = {'console_scripts': [
         'kepcotrend = pyke.kepcotrend:kepcotrend_main',
         'kepdetrend = pyke.kepdetrend:kepdetrend_main',
         'kepdiffim = pyke.kepdiffim:kepdiffim_main',
+        'kepdraw = pyke.kepdraw:kepdraw_main',
         'kepdynamic = pyke.kepdynamic:kepdynamic_main',
         'kepextract = pyke.kepextract:kepextract_main',
         'kepffi = pyke.kepffi:kepffi_main',

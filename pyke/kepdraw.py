@@ -2,6 +2,7 @@ import re
 import numpy as np
 import sys
 from matplotlib import pyplot as plt
+from astropy.io import fits as pyfits
 from . import kepio, kepmsg, kepkey
 
 
@@ -94,14 +95,14 @@ def kepdraw(infile, outfile, datacol='SAP_FLUX', ploterr=False,
             + ' ticksize={}'.format(ticksize)
             + ' xsize={}'.format(xsize)
             + ' ysize={}'.format(ysize)
-            + ' fullrange={}'.format(frange)
-            + ' chooserange={}'.format(crange)
+            + ' fullrange={}'.format(fullrange)
+            + ' chooserange={}'.format(chooserange)
             + ' ymin={}'.format(y1)
             + ' ymax={}'.format(y2)
-            + ' plotgrid={}'.format(pgrid)
+            + ' plotgrid={}'.format(plotgrid)
             + ' ylabel={}'.format(ylabel)
             + ' plottype={}'.format(plottype)
-            + ' verbose={}'.format(chatter)
+            + ' verbose={}'.format(verbose)
             + ' logfile={}'.format(logfile))
 
     kepmsg.log(logfile, call+'\n', verbose)
@@ -110,7 +111,7 @@ def kepdraw(infile, outfile, datacol='SAP_FLUX', ploterr=False,
     kepmsg.clock('KEPDRAW started at', logfile, verbose)
 
     # open input file
-    struct = kepio.openfits(infile,'readonly',logfile,verbose)
+    struct = pyfits.open(infile, 'readonly')
     tstart, tstop, bjdref, cadence = kepio.timekeys(struct, infile,
                                                     logfile, verbose)
 
@@ -124,7 +125,7 @@ def kepdraw(infile, outfile, datacol='SAP_FLUX', ploterr=False,
     qualty = kepio.readfitscol(infile, table, 'SAP_QUALITY', logfile, verbose)
 
     # close infile
-    kepio.closefits(struct,logfile,verbose)
+    struct.close()
 
     # remove infinities and bad data
     if np.isnan(np.nansum(indataerr)):
@@ -243,30 +244,55 @@ def kepdraw(infile, outfile, datacol='SAP_FLUX', ploterr=False,
 def kepdraw_main():
     import argparse
 
-    parser = argparse.ArgumentParser(description='Interactive plotting of Kepler time series data')
+    parser = argparse.ArgumentParser(
+            description='Interactive plotting of Kepler time series data')
     parser.add_argument('infile', help='Name of input file', type=str)
     parser.add_argument('outfile', help='name of output PNG file', type=str)
-    parser.add_argument('--datacol', default='SAP_FLUX', help='Name of data column to plot', type=str)
-    parser.add_argument('--ploterr', action='store_true', help='Plot data error bars?')
-    parser.add_argument('--errcol', default='SAP_FLUX_ERR', help='Name of data error column', type=str)
-    parser.add_argument('--quality', action='store_true', help='Ignore cadences where the data quality is questionable?')
-    parser.add_argument('--lcolor', default='#0000ff', help='HTML color of data line within plot', type=str)
-    parser.add_argument('--lwidth', default=1.0, help='type of image intensity scale', type=float)
-    parser.add_argument('--fcolor', default='#ffff00', help='HTML color of data line within plot', type=str)
-    parser.add_argument('--falpha', default=0.2, help='type of image intensity scale', type=float)
-    parser.add_argument('--labelsize', default=24., help='Fontsize of axis labels', type=float)
-    parser.add_argument('--ticksize', default=16., help='Fontsize of numeric tick labels', type=float)
-    parser.add_argument('--xsize', default=18., help='X-dimension size of plot', type=float)
-    parser.add_argument('--ysize', default=6., help='Y-dimension size of plot', type=float)
-    parser.add_argument('--fullrange', action='store_true', help='Plot flux range from 0.0 e-/sec?')
-    parser.add_argument('--chooserange', action='store_true', help='Choose Y-axis range?')
-    parser.add_argument('--ymin', default=0., help='Low limit of the Y-axis range to plot [e-/s]', type=float)
-    parser.add_argument('--ymax', default=1e4, help='High limit of the Y-axis range to plot [e-/s]', type=float)
-    parser.add_argument('--plotgrid', action='store_true', help='Plot axis grid?')
-    parser.add_argument('--ylabel', default='e$^-$ s$^{-1}$', help='Plot axis label', type=str)
-    parser.add_argument('--plottype', default='fast', help='plot type', type=str, choices=['fast','pretty'])
-    parser.add_argument('--verbose', action='store_true', help='Write to a log file?')
-    parser.add_argument('--logfile', '-l', help='Name of ascii log file', default='kepdraw.log', dest='logfile', type=str)
+    parser.add_argument('--datacol', default='SAP_FLUX',
+                        help='Name of data column to plot', type=str)
+    parser.add_argument('--ploterr', action='store_true',
+                        help='Plot data error bars?')
+    parser.add_argument('--errcol', default='SAP_FLUX_ERR',
+                        help='Name of data error column', type=str)
+    parser.add_argument('--quality', action='store_true',
+                        help=('Ignore cadences where the data quality is'
+                              ' questionable?'))
+    parser.add_argument('--lcolor', default='#0000ff',
+                        help='HTML color of data line within plot', type=str)
+    parser.add_argument('--lwidth', default=1.0,
+                        help='type of image intensity scale', type=float)
+    parser.add_argument('--fcolor', default='#ffff00',
+                        help='HTML color of data line within plot', type=str)
+    parser.add_argument('--falpha', default=0.2,
+                        help='type of image intensity scale', type=float)
+    parser.add_argument('--labelsize', default=24.,
+                        help='Fontsize of axis labels', type=float)
+    parser.add_argument('--ticksize', default=16.,
+                        help='Fontsize of numeric tick labels', type=float)
+    parser.add_argument('--xsize', default=18.,
+                        help='X-dimension size of plot', type=float)
+    parser.add_argument('--ysize', default=6.,
+                        help='Y-dimension size of plot', type=float)
+    parser.add_argument('--fullrange', action='store_true',
+                        help='Plot flux range from 0.0 e-/sec?')
+    parser.add_argument('--chooserange', action='store_true',
+                        help='Choose Y-axis range?')
+    parser.add_argument('--ymin', default=0.,
+                        help='Low limit of the Y-axis range to plot [e-/s]',
+                        type=float)
+    parser.add_argument('--ymax', default=1e4,
+                        help='High limit of the Y-axis range to plot [e-/s]',
+                        type=float)
+    parser.add_argument('--plotgrid', action='store_true',
+                        help='Plot axis grid?')
+    parser.add_argument('--ylabel', default='e$^-$ s$^{-1}$',
+                        help='Plot axis label', type=str)
+    parser.add_argument('--plottype', default='fast', help='plot type',
+                        type=str, choices=['fast','pretty'])
+    parser.add_argument('--verbose', action='store_true',
+                        help='Write to a log file?')
+    parser.add_argument('--logfile', '-l', help='Name of ascii log file',
+                        default='kepdraw.log', type=str)
     args = parser.parse_args()
     kepdraw(args.infile, args.outfile, args.datacol, args.ploterr, args.errcol, args.quality,
             args.lcolor, args.lwidth, args.fcolor, args.falpha, args.labelsize, args.ticksize,

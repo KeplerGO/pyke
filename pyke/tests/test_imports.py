@@ -14,6 +14,7 @@ def test_import():
     from .. import kepconvert
     from .. import kepcotrend
     from .. import kepdiffim
+    from .. import kepdraw
     from .. import kepdynamic
     from .. import kepextract
     from .. import kepffi

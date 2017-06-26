@@ -7,7 +7,7 @@ Welcome to PyKE!
 ================
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
    :caption: Contents:
 
 PyKE is a set of data analysis tools, maintained by the K2 Guest Observer
