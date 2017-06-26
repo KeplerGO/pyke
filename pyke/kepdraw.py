@@ -5,10 +5,77 @@ from matplotlib import pyplot as plt
 from . import kepio, kepmsg, kepkey
 
 
-def kepdraw(infile, outfile, datacol, ploterr, errcol, quality,
-            lcolor, lwidth, fcolor, falpha, labelsize=24, ticksize=16,
-            xsize=18., ysize=6., fullrange=False, chooserange=False, y1=0, y2=1e4, plotgrid=False,
-            ylabel='e$^-$ s$^{-1}$', plottype='fast', verbose=False, logfile='kepdraw.log'):
+def kepdraw(infile, outfile, datacol='SAP_FLUX', ploterr=False,
+            errcol='SAP_FLUX_ERR', quality=False, lcolor='#0000ff', lwidth=1.0,
+            fcolor='#ffff00', falpha=0.2, labelsize=24, ticksize=16, xsize=18.,
+            ysize=6., fullrange=False, chooserange=False, y1=0, y2=1e4,
+            plotgrid=False, ylabel='e$^-$ s$^{-1}$', plottype='fast',
+            verbose=False, logfile='kepdraw.log'):
+    """
+    kepdraw -- Interactive plotting of Kepler time series data
+
+    Parameters
+    ----------
+    infile : str
+        The name of a MAST standard format FITS file containing a Kepler light
+        curve within the first data extension.
+    outfile : string
+        The name of the output PNG plot file.
+    datacol : string
+        The FITS column within extension 1 of infile to be plotted against
+        time.
+    ploterr : bool
+        Plot error bars with the data?
+    errcol : str
+        The uncertainty data coupled to datacol. If ploterr is ``True`` then
+        these data will be plotted as error bars
+    quality : bool
+        Ignore bad data and cadence gaps in datacol?
+    lcolor : str
+        The color of the line plot. These can be chosen in html notation, e.g.
+        black is #000000 and white is #ffffff.
+    lwidth : float
+        The width of the plot line in arbitrary units. The plotting default
+        width is 1.0.
+    fcolor : str
+        The color of the fill under the plot line. These can be chosen in html
+        notation, e.g. black is #000000 and white is #ffffff. The html color
+        scheme can be browsed in multiple online charts.
+    falpha : float
+        The transparency of the fill color. 0.0 is transparent, 1.0 is opaque.
+    labelsize : float
+        The font size of the plot labels.
+    ticksize : float
+        The axes tick sizes within the plot.
+    xsize : float
+        The length of the plotting window in arbitrary units.
+        A typical value is 16.0
+    ysize : float
+        The height of the plotting window in arbitrary units.
+        A typical value is 8.0
+    fullrange : bool
+        Plot the flux range between zero and the maximum and 101% of the flux
+        maximum? Otherwise plot the range 99% of the flux minimum to 101% of
+        the flux maximum.
+    plotgrid : bool
+        Plot a grid over the data on the major tick marks?
+    plottype : str
+        The look and feel of the plot. 'fast' provides a rapid quick look plot
+        using discrete points to represent the data. 'pretty' provides a
+        continuous curve between data points, except at natural data gaps or
+        where quality issues occur. Pretty curves are significantly slower to
+        build. Options::
+
+            * fast
+            * pretty
+    verbose : bool
+        Print informative messages and warnings to the shell and logfile?
+    logfile : str
+        Name of the logfile containing error and warning messages.
+
+    Examples
+    --------
+    """
 
     hashline = '--------------------------------------------------------------'
     kepmsg.log(logfile, hashline, verbose)
