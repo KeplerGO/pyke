@@ -257,7 +257,7 @@ def kepoutlier(infile, outfile, datacol, nsig=3.0, stepsize=1.0, npoly=3,
                 mastersigma[j] = sigma
             if plotfit:
                 plt.plot(plotx + intime[cstep1[i]] - intime0, ploty / 10 ** nrm,
-                         'g', lw='3')
+                         'g', lw=3)
         except:
             for j in range(cstep1[i], cstep2[i] + 1):
                 masterfit[j] = indata[j]
