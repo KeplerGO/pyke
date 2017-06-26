@@ -3,6 +3,10 @@ from matplotlib import pyplot as plt
 import numpy as np
 from . import kepio, kepmsg, kepkey, kepfunc, kepstat
 
+
+__all__ = ['kepfilter']
+
+
 def kepfilter(infile, outfile, passband, datacol='SAP_FLUX', function='boxcar',
               cutoff=1.0, plot=False, clobber=False, verbose=False,
               logfile='kepfilter.log'):

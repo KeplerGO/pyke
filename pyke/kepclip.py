@@ -4,6 +4,11 @@ from astropy.io import fits as pyfits
 from matplotlib import pyplot as plt
 from tqdm import tqdm
 
+
+__all__ = ['kepclip']
+
+
+
 def kepclip(infile, outfile, ranges, datacol='SAP_FLUX', plot=False,
             clobber=False, verbose=False, logfile='kepclip.log'):
     """

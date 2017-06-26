@@ -8,7 +8,9 @@ from . import kepkey
 from . import kepfit
 from . import kepstat
 
+
 __all__ = ['kepdetrend']
+
 
 def kepdetrend(infile, outfile, ranges1, ranges2, npoly1, npoly2, nsig1, nsig2,
                niter1, niter2, datacol='SAP_FLUX', errcol='SAP_FLUX_ERR',

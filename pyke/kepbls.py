@@ -7,6 +7,10 @@ from astropy.io import fits as pyfits
 from matplotlib import pyplot as plt
 from tqdm import tqdm
 
+
+__all__ = ['kepbls']
+
+
 def kepbls(infile, outfile, datacol='DETSAP_FLUX', errcol='DETSAP_FLUX_ERR',
            minper=1.0, maxper=30, mindur=0.5, maxdur=12, nsearch=1000,
            nbins=1000, plot=False, clobber=False, verbose=False,

@@ -1,4 +1,3 @@
-from . import kepio, kepmsg, kepkey
 import sys
 import os
 import urllib
@@ -7,6 +6,11 @@ import math
 import numpy as np
 from astropy.io import fits as pyfits
 from matplotlib import pyplot as plt
+from . import kepio, kepmsg, kepkey
+
+
+__all__ = ['kepffi']
+
 
 # global variables
 
