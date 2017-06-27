@@ -1,6 +1,7 @@
 import sys
 import os
 import scipy
+import numpy as np
 from matplotlib import pyplot as plt
 from . import kepmsg, kepio, kepkey, kepplot, kepfit, kepfunc
 
@@ -114,7 +115,7 @@ def kepsff(infile, outfile, datacol, cenmethod, stepsize, npoly_cxcy,
             coeffs, errors, covar, iiter, sigma, chi2, dof, fit, plotx, ploty, status = \
                 kepfit.lsqclip(functype,pinit,centr1,centr2,None,sigma_cxcy,sigma_cxcy,10,logfile,verbose)
             for j in range(len(coeffs)):
-                cfit += coeffs[j] * numpy.power(centr1,j)
+                cfit += coeffs[j] * np.power(centr1, j)
                 csig[:] = sigma
         except:
             errmsg = ('ERROR -- KEPSFF: could not fit centroid data with'
@@ -124,7 +125,7 @@ def kepsff(infile, outfile, datacol, cenmethod, stepsize, npoly_cxcy,
                       ' light curve quality this will have!), or better yet'
                       ' - cut the timeseries up to remove large gaps in the'
                       'input light curve using kepclip.'.format(t1,t2))
-            kepmsg.err(logfile, message, verbose)
+            kepmsg.err(logfile, errmsg, verbose)
 
         # reject outliers
         time_good = array([], 'float64')
@@ -229,93 +230,89 @@ def kepsff(infile, outfile, datacol, cenmethod, stepsize, npoly_cxcy,
                 kepfit.lsqclip(functype, pinit, t, dx, None, 3.0, 3.0, 10,
                                logfile, verbose)
         except:
-            errmsg = ('ERROR -- KEPSFF: could not fit rotated centroid data'
-                      ' with polynomial')
+            errmsg = ('ERROR -- KEPSFF: could not fit arclength derivative'
+                      ' with polynomial.')
             kepmsg.err(logfile, errmsg, verbose)
         for i in range(len(dcoeffs)):
             dfit = dfit + dcoeffs[i] * np.power(t,i)
-        centr1_pnt = array([],'float32')
-        centr2_pnt = array([],'float32')
-        time_pnt = array([],'float64')
-        flux_pnt = array([],'float32')
-        dx_pnt = array([],'float32')
-        s_pnt = array([],'float32')
-        time_thr = array([],'float64')
-        flux_thr = array([],'float32')
-        dx_thr = array([],'float32')
+        centr1_pnt = np.array([], 'float32')
+        centr2_pnt = np.array([], 'float32')
+        time_pnt = np.array([], 'float64')
+        flux_pnt = np.array([], 'float32')
+        dx_pnt = np.array([], 'float32')
+        s_pnt = np.array([], 'float32')
+        time_thr = np.array([], 'float64')
+        flux_thr = np.array([], 'float32')
+        dx_thr = np.array([], 'float32')
         thr_cadence = []
         for i in range(len(t)):
-            if dx[i] < dfit[i] + sigma_dsdt * dsigma and dx[i] > dfit[i] - sigma_dsdt * dsigma:
-                time_pnt = append(time_pnt,time_good[i])
-                flux_pnt = append(flux_pnt,flux_good[i])
-                dx_pnt = append(dx_pnt,dx[i])                
-                s_pnt = append(s_pnt,x[i])                
-                centr1_pnt = append(centr1_pnt,centr1_good[i])
-                centr2_pnt = append(centr2_pnt,centr2_good[i])
+            if (dx[i] < dfit[i] + sigma_dsdt * dsigma
+                and dx[i] > dfit[i] - sigma_dsdt * dsigma):
+                time_pnt = np.append(time_pnt, time_good[i])
+                flux_pnt = np.append(flux_pnt, flux_good[i])
+                dx_pnt = np.append(dx_pnt, dx[i])
+                s_pnt = np.append(s_pnt, x[i])
+                centr1_pnt = np.append(centr1_pnt, centr1_good[i])
+                centr2_pnt = np.append(centr2_pnt, centr2_good[i])
             else:
-                time_thr = append(time_thr,time_good[i])
-                flux_thr = append(flux_thr,flux_good[i])                
-                dx_thr = append(dx_thr,dx[i]) 
+                time_thr = np.append(time_thr, time_good[i])
+                flux_thr = np.append(flux_thr, flux_good[i])
+                dx_thr = append(dx_thr, dx[i])
                 thr_cadence.append(cad_good[i])
 
-# fit arclength-flux correlation
-
-        cfit = zeros((len(time_pnt)))
-        csig = zeros((len(time_pnt)))
-        functype = 'poly' + str(npoly_arfl)
-        pinit = array([nanmean(flux_pnt)])
+        # fit arclength-flux correlation
+        cfit = np.zeros((len(time_pnt)))
+        csig = np.zeros((len(time_pnt)))
+        functype = getattr(kepfunc, 'poly' + str(npoly_arfl))
+        pinit = np.array([np.nanmean(flux_pnt)])
         if npoly_arfl > 0:
             for j in range(npoly_arfl):
-                pinit = append(pinit,0.0)
+                pinit = np.append(pinit, 0.0)
         try:
-            ccoeffs, errors, covar, iiter, sigma, chi2, dof, fit, plx, ply, status = \
-                kepfit.lsqclip(functype,pinit,s_pnt,flux_pnt,None,sigma_arfl,sigma_arfl,100,logfile,verbose)
+            ccoeffs, errors, covar, iiter, sigma, chi2, dof, fit, plx, ply = \
+                kepfit.lsqclip(functype, pinit, s_pnt, flux_pnt, None,
+                               sigma_arfl, sigma_arfl, 100, logfile, verbose)
         except:
-            message  = 'ERROR -- KEPSFF: could not fit rotated centroid data with polynomial'
-            status = kepmsg.err(logfile,message,verbose)        
+            errmsg = ('ERROR -- KEPSFF: could not fit arclength-flux'
+                      ' correlation with polynomial')
+            kepmsg.err(logfile, message, verbose)
 
-# correction factors for unfiltered data
-
-        centr = concatenate([[centr1] - mean(centr1_good), [centr2] - mean(centr2_good)])
-        centr_rot = dot(evec.T,centr)
-        yy = copy(indata)
-        zz = centr_rot[1,:]
-        xx = zeros((len(zz)))
-        cfac = zeros((len(zz)))
+        # correction factors for unfiltered data
+        centr = np.concatenate([[centr1] - np.mean(centr1_good),
+                                [centr2] - np.mean(centr2_good)])
+        centr_rot = np.dot(evec.T, centr)
+        yy = np.copy(indata)
+        zz = centr_rot[1, :]
+        xx = np.zeros((len(zz)))
+        cfac = np.zeros((len(zz)))
         for i in range(len(acoeffs)):
-            xx = xx + acoeffs[i] * numpy.power(zz,i)
+            xx = xx + acoeffs[i] * np.power(zz,i)
         for i in range(len(ccoeffs)):
-            cfac = cfac + ccoeffs[i] * numpy.power(xx,i)
+            cfac = cfac + ccoeffs[i] * np.power(xx,i)
 
-# apply correction to flux time-series
-
+        # apply correction to flux time-series
         out_detsap = indata / cfac
-
-# split time-series data for plotting
-
-        tim_gd = array([],'float32')
-        flx_gd = array([],'float32')
-        tim_bd = array([],'float32')
-        flx_bd = array([],'float32')
+        # split time-series data for plotting
+        tim_gd = array([], 'float32')
+        flx_gd = array([], 'float32')
+        tim_bd = array([], 'float32')
+        flx_bd = array([], 'float32')
         for i in range(len(indata)):
             if intime[i] in time_pnt:
-                tim_gd = append(tim_gd,intime[i])
-                flx_gd = append(flx_gd,out_detsap[i])
+                tim_gd = np.append(tim_gd, intime[i])
+                flx_gd = np.append(flx_gd, out_detsap[i])
             else:
-                tim_bd = append(tim_bd,intime[i])
-                flx_bd = append(flx_bd,out_detsap[i])
+                tim_bd = np.append(tim_bd, intime[i])
+                flx_bd = np.append(flx_bd, out_detsap[i])
+        # plot style and size
+        kepplot.define(16, 14, logfile, verbose)
+        plt.figure(figsize=[20, 8])
+        plt.clf()
 
-# plot style and size
-
-        status = kepplot.define(16,14,logfile,verbose)
-        pylab.figure(figsize=[20,8])
-        pylab.clf()
-
-# plot x-centroid vs y-centroid
-
-        ax = kepplot.location([0.04,0.57,0.16,0.41])                                      # plot location
-        px = copy(centr1)                                                             # clean-up x-axis units
-        py = copy(centr2)                                                             # clean-up y-axis units
+        # plot x-centroid vs y-centroid
+        ax = kepplot.location([0.04, 0.57, 0.16, 0.41])
+        px = np.copy(centr1)
+        py = np.copy(centr2)
         pxmin = px.min()
         pxmax = px.max()
         pymin = py.min()
@@ -324,124 +321,119 @@ def kepsff(infile, outfile, datacol, cenmethod, stepsize, npoly_cxcy,
         pyr = pymax - pymin
         pad = 0.05
         if pxr > pyr:
-            dely = (pxr - pyr) / 2 
-            xlim(pxmin - pxr * pad, pxmax + pxr * pad)
-            ylim(pymin - dely - pyr * pad, pymax + dely + pyr * pad)
+            dely = (pxr - pyr) / 2
+            plt.xlim(pxmin - pxr * pad, pxmax + pxr * pad)
+            plt.ylim(pymin - dely - pyr * pad, pymax + dely + pyr * pad)
         else:
-            delx = (pyr - pxr) / 2 
-            ylim(pymin - pyr * pad, pymax + pyr * pad)
-            xlim(pxmin - delx - pxr * pad, pxmax + delx + pxr * pad)
-        pylab.plot(px,py,color='#980000',markersize=5,marker='D',ls='')                   # plot data
-        pylab.plot(centr1_good,centr2_good,color='#009900',markersize=5,marker='D',ls='') # plot data
+            delx = (pyr - pxr) / 2
+            plt.ylim(pymin - pyr * pad, pymax + pyr * pad)
+            plt.xlim(pxmin - delx - pxr * pad, pxmax + delx + pxr * pad)
+        pylab.plot(px, py, color='#980000', markersize=5, marker='D', ls='')
+        pylab.plot(centr1_good,centr2_good,color='#009900',markersize=5, marker='D', ls='')
         pylab.plot(ex,epar,color='k',ls='-')
         pylab.plot(ex,enor,color='k',ls='-')
-        for tick in ax.xaxis.get_major_ticks(): tick.label.set_fontsize(14) 
-        for tick in ax.yaxis.get_major_ticks(): tick.label.set_fontsize(14) 
-        kepplot.labels('CCD Column','CCD Row','k',16)                                     # labels
-        pylab.grid()                                                                      # grid lines
-        
-# plot arclength fits vs drift along strongest eigenvector
+        for tick in ax.xaxis.get_major_ticks():
+            tick.label.set_fontsize(14)
+        for tick in ax.yaxis.get_major_ticks():
+            tick.label.set_fontsize(14)
+        kepplot.labels('CCD Column', 'CCD Row', 'k', 16)
+        plt.grid()
 
-        ax = kepplot.location([0.24,0.57,0.16,0.41])                                      # plot location
+        # plot arclength fits vs drift along strongest eigenvector
+        ax = kepplot.location([0.24, 0.57, 0.16, 0.41])
         px = rx - rx[0]
-        py = s - rx - (s[0] - rx[0])                                                      # clean-up y-axis units
-        py, ylab, status = kepplot.cleany(py,1.0,logfile,verbose)                         # clean-up x-axis units
-        kepplot.RangeOfPlot(px,py,0.05,False)                                             # data limits
+        py = s - rx - (s[0] - rx[0])
+        py, ylab, status = kepplot.cleany(py, 1.0, logfile, verbose)
+        kepplot.RangeOfPlot(px, py, 0.05, False)
         pylab.plot(px,py,color='#009900',markersize=5,marker='D',ls='')
-        px = plotx - rx[0]                                                              # clean-up x-axis units
-        py = ploty-plotx - (s[0] - rx[0])                                              # clean-up y-axis units
-        py, ylab, status = kepplot.cleany(py,1.0,logfile,verbose)                         # clean-up x-axis units
-        pylab.plot(px,py,color='r',ls='-',lw=3)
-        for tick in ax.xaxis.get_major_ticks(): tick.label.set_fontsize(14) 
-        for tick in ax.yaxis.get_major_ticks(): tick.label.set_fontsize(14) 
-        ylab = re.sub(' e\S+',' pixels)',ylab)
-        ylab = re.sub(' s\S+','',ylab)
-        ylab = re.sub('Flux','s $-$ x\'',ylab)
-        kepplot.labels('Linear Drift [x\'] (pixels)',ylab,'k',16)                               # labels
-        pylab.grid()                                                                      # grid lines
+        px = plotx - rx[0]
+        py = ploty - plotx - (s[0] - rx[0])
+        py, ylab = kepplot.cleany(py, 1.0, logfile, verbose)
+        pylab.plot(px, py, color='r', ls='-', lw=3)
+        for tick in ax.xaxis.get_major_ticks():
+            tick.label.set_fontsize(14)
+        for tick in ax.yaxis.get_major_ticks():
+            tick.label.set_fontsize(14)
+        ylab = re.sub(' e\S+', ' pixels)', ylab)
+        ylab = re.sub(' s\S+', '', ylab)
+        ylab = re.sub('Flux', 's $-$ x\'', ylab)
+        kepplot.labels('Linear Drift [x\'] (pixels)', ylab, 'k', 16)
+        plt.grid()
 
-# plot time derivative of arclength s
-
-        ax = kepplot.location([0.04,0.08,0.16,0.41])                                        # plot location
+        # plot time derivative of arclength s
+        ax = kepplot.location([0.04,0.08,0.16,0.41])
         px = copy(time_pnt)
         py = copy(dx_pnt)
-        px, xlab, status = kepplot.cleanx(px,logfile,verbose)       # clean-up x-axis units
-        kepplot.RangeOfPlot(px,dx,0.05,False)                                             # data limits
-        pylab.plot(px,py,color='#009900',markersize=5,marker='D',ls='')
+        px, xlab, status = kepplot.cleanx(px,logfile,verbose)
+        kepplot.RangeOfPlot(px, dx, 0.05, False)
+        pylab.plot(px, py, color='#009900', markersize=5, marker='D', ls='')
         try:
             px = copy(time_thr)
             py = copy(dx_thr)
-            px, xlab, status = kepplot.cleanx(px,logfile,verbose)       # clean-up x-axis units
-            pylab.plot(px,py,color='#980000',markersize=5,marker='D',ls='')
+            px, xlab, status = kepplot.cleanx(px, logfile, verbose)
+            pylab.plot(px, py, color='#980000', markersize=5, marker='D', ls='')
         except:
             pass
-        px = copy(t)
-        py = copy(dfit)
-        px, xlab, status = kepplot.cleanx(px,logfile,verbose)       # clean-up x-axis units
-        pylab.plot(px,py,color='r',ls='-',lw=3)
-        py = copy(dfit+sigma_dsdt*dsigma)
-        pylab.plot(px,py,color='r',ls='--',lw=3)
+        px = np.copy(t)
+        py = np.copy(dfit)
+        px, xlab = kepplot.cleanx(px, logfile, verbose)
+        plt.plot(px, py, color='r', ls='-', lw=3)
+        py = np.copy(dfit + sigma_dsdt * dsigma)
+        pylab.plot(px, py, color='r', ls='--', lw=3)
         py = copy(dfit-sigma_dsdt*dsigma)
         pylab.plot(px,py,color='r',ls='--',lw=3)
-        for tick in ax.xaxis.get_major_ticks(): tick.label.set_fontsize(14) 
-        for tick in ax.yaxis.get_major_ticks(): tick.label.set_fontsize(14) 
-        kepplot.labels(xlab,'ds/dt (pixels day$^{-1}$)','k',16)                                  # labels
-        pylab.grid()                                                                      # grid lines
+        for tick in ax.xaxis.get_major_ticks():
+            tick.label.set_fontsize(14)
+        for tick in ax.yaxis.get_major_ticks():
+            tick.label.set_fontsize(14)
+        kepplot.labels(xlab, 'ds/dt (pixels day$^{-1}$)', 'k', 16)
+        plt.grid()
+        # plot relation of arclength vs detrended flux
+        ax = kepplot.location([0.24, 0.08, 0.16, 0.41])
+        px = np.copy(s_pnt)
+        py = np.copy(flux_pnt)
+        py, ylab = kepplot.cleany(py, 1.0, logfile, verbose)
+        kepplot.RangeOfPlot(px, py, 0.05, False)
+        pylab.plot(px, py, color='#009900', markersize=5, marker='D', ls='')
+        pylab.plot(plx, ply, color='r', ls='-', lw=3)
+        for tick in ax.xaxis.get_major_ticks():
+            tick.label.set_fontsize(14)
+        for tick in ax.yaxis.get_major_ticks():
+            tick.label.set_fontsize(14)
+        kepplot.labels('Arclength [s] (pixels)', ylab, 'k', 16)
+        plt.grid()
 
-# plot relation of arclength vs detrended flux
-
-        ax = kepplot.location([0.24,0.08,0.16,0.41])                                       # plot location
-        px = copy(s_pnt)
-        py = copy(flux_pnt)
-        py, ylab, status = kepplot.cleany(py,1.0,logfile,verbose)                         # clean-up x-axis units
-        kepplot.RangeOfPlot(px,py,0.05,False)                                             # data limits
-        pylab.plot(px,py,color='#009900',markersize=5,marker='D',ls='')
-        pylab.plot(plx,ply,color='r',ls='-',lw=3)
-        for tick in ax.xaxis.get_major_ticks(): tick.label.set_fontsize(14) 
-        for tick in ax.yaxis.get_major_ticks(): tick.label.set_fontsize(14) 
-        kepplot.labels('Arclength [s] (pixels)',ylab,'k',16)                                  # labels
-        pylab.grid()                                                                      # grid lines
-        
-# plot aperture photometry
-
-        kepplot.location([0.44,0.53,0.55,0.45])                          # plot location
-        px, xlab, status = kepplot.cleanx(intime,logfile,verbose)       # clean-up x-axis units
-        py, ylab, status = kepplot.cleany(indata,1.0,logfile,verbose)   # clean-up x-axis units
-        kepplot.RangeOfPlot(px,py,0.01,True)                                 # data limits
-        kepplot.plot1d(px,py,cadence,'#0000ff',1.0,'#ffff00',0.2,True)  # plot data
-        kepplot.labels(' ',ylab,'k',16)                                   # labels
-        pylab.setp(pylab.gca(),xticklabels=[])                          # remove x- or y-tick labels
-        kepplot.labels(xlab,re.sub('Flux','Aperture Flux',ylab),'k',16)   # labels
-        pylab.grid()                                                    # grid lines
-
-# Plot corrected photometry
-
-        kepplot.location([0.44,0.08,0.55,0.45])                          # plot location
-        kepplot.RangeOfPlot(px,py,0.01,True)                                 # data limits
-        px, xlab, status = kepplot.cleanx(tim_gd,logfile,verbose)       # clean-up x-axis units
-        py, ylab, status = kepplot.cleany(flx_gd,1.0,logfile,verbose)   # clean-up x-axis units
-        kepplot.plot1d(px,py,cadence,'#0000ff',1.0,'#ffff00',0.2,True)  # plot data
+        # plot aperture photometry
+        kepplot.location([0.44, 0.53, 0.55, 0.45])
+        px, xlab, status = kepplot.cleanx(intime, logfile, verbose)
+        py, ylab, status = kepplot.cleany(indata, 1.0, logfile, verbose)
+        kepplot.RangeOfPlot(px, py, 0.01, True)
+        kepplot.plot1d(px, py, cadence, '#0000ff', 1.0, '#ffff00', 0.2, True)
+        kepplot.labels(' ',ylab,'k',16)
+        pylab.setp(pylab.gca(),xticklabels=[])
+        kepplot.labels(xlab,re.sub('Flux','Aperture Flux',ylab),'k',16)
+        pylab.grid()
+        kepplot.location([0.44, 0.08, 0.55, 0.45])
+        kepplot.RangeOfPlot(px, py, 0.01, True)
+        px, xlab = kepplot.cleanx(tim_gd, logfile, verbose)
+        py, ylab = kepplot.cleany(flx_gd, 1.0, logfile, verbose)
+        kepplot.plot1d(px, py, cadence, '#0000ff', 1.0, '#ffff00', 0.2, True)
         try:
-            px, xlab, status = kepplot.cleanx(tim_bd,logfile,verbose)       # clean-up x-axis units
-            py = copy(flx_bd)
-            pylab.plot(px,py,color='#980000',markersize=5,marker='D',ls='')
+            px, xlab = kepplot.cleanx(tim_bd,logfile,verbose)
+            py = np.copy(flx_bd)
+            plt.plot(px, py,color='#980000',markersize=5,marker='D',ls='')
         except:
             pass
         kepplot.labels(xlab,re.sub('Flux','Corrected Flux',ylab),'k',16)   # labels
         pylab.grid()                                                    # grid lines
-
-# render plot
-
+        # render plot
         if plotres:
             kepplot.render(cmdLine)
-
-# save plot to file
-
+        # save plot to file
         if plotres:
             pylab.savefig(re.sub('.fits','_%d.png' % (iw + 1),outfile))
 
-# correct fluxes within the output file
-            
+        # correct fluxes within the output file
         intime = work1[:,7] + bjdref
         cadenceno = work1[:,6].astype(int)
         indata = work1[:,5]
