@@ -34,6 +34,7 @@ entry_points = {'console_scripts': [
         'kepprf = pyke.kepprf:kepprf_main',
         'kepprfphot = pyke.kepprfphot:kepprfphot_main',
         'keprange = pyke.keprange:keprange_main',
+        'kepsff = pyke.kepsff:kepsff_main',
         'kepsmooth = pyke.kepsmooth:kepsmooth_main',
         'kepstddev = pyke.kepstddev:kepstddev_main',
         'kepstitch = pyke.kepstitch:kepstitch_main',

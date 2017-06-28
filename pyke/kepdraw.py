@@ -6,7 +6,7 @@ from astropy.io import fits as pyfits
 from . import kepio, kepmsg, kepkey
 
 
-def kepdraw(infile, outfile, datacol='SAP_FLUX', ploterr=False,
+def kepdraw(infile, outfile='kepdraw.png', datacol='SAP_FLUX', ploterr=False,
             errcol='SAP_FLUX_ERR', quality=False, lcolor='#0000ff', lwidth=1.0,
             fcolor='#ffff00', falpha=0.2, labelsize=24, ticksize=16, xsize=18.,
             ysize=6., fullrange=False, chooserange=False, y1=0, y2=1e4,
@@ -247,7 +247,8 @@ def kepdraw_main():
     parser = argparse.ArgumentParser(
             description='Interactive plotting of Kepler time series data')
     parser.add_argument('infile', help='Name of input file', type=str)
-    parser.add_argument('outfile', help='name of output PNG file', type=str)
+    parser.add_argument('--outfile', default='kepdraw.png',
+                        help='name of output PNG file', type=str)
     parser.add_argument('--datacol', default='SAP_FLUX',
                         help='Name of data column to plot', type=str)
     parser.add_argument('--ploterr', action='store_true',
