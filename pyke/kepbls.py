@@ -82,7 +82,7 @@ def kepbls(infile, outfile, datacol='DETSAP_FLUX', errcol='DETSAP_FLUX_ERR',
         Plot the calculated Normalized Signal Residue as a function of trial
         orbital period?
     overwrite : bool
-        Overwrite the output file? if overwrite = no and an existing file has the
+        Overwrite the output file? if overwrite = False and an existing file has the
         same name as outfile then the task will stop with an error.
     verbose : bool
         Print informative messages and warnings to the shell and logfile?

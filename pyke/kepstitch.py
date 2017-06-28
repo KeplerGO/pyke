@@ -26,7 +26,7 @@ def kepstitch(infiles, outfile='kepstitch.fits', overwrite=False, verbose=False,
     outfile : str
         The name of the output FITS file with concatenated time series data.
     overwrite : bool
-        Overwrite the output file? if overwrite = no and an existing file has the
+        Overwrite the output file? if overwrite = False and an existing file has the
         same name as outfile then the task will stop with an error.
     verbose : bool
         Print informative messages and warnings to the shell and logfile?

@@ -46,7 +46,7 @@ def kepstddev(infile, outfile, datacol='PDCSAP_FLUX', timescale=6.5,
         The characteristic timescale over which to calculate CDPP. The units
         are hours.
     overwrite : bool
-        Overwrite the output file? if overwrite = no and an existing file has the
+        Overwrite the output file? if overwrite = False and an existing file has the
         same name as outfile then the task will stop with an error.
     verbose : bool
         Print informative messages and warnings to the shell and logfile?
