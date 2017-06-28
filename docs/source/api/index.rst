@@ -9,6 +9,7 @@ Modules/API
     kepcotrend
     kepdetrend
     kepdiffim
+    kepdraw
     kepdynamic
     kepextract
     kepffi
@@ -25,6 +26,7 @@ Modules/API
     kepprf
     kepprfphot
     keprange
+    kepsff
     kepsmooth
     kepstddev
     kepstitch
