@@ -1,5 +1,7 @@
+import re
 import numpy as np
 from matplotlib import pyplot as plt
+from astropy.io import fits as pyfits
 from . import kepmsg, kepio, kepkey, kepplot, kepfit, kepfunc
 
 
@@ -338,7 +340,7 @@ def kepsff(infile, outfile, datacol='DETSAP_FLUX', cenmethod='moments',
         # fit centroid data with low-order polynomial
         cfit = np.zeros((len(centr2)))
         csig = np.zeros((len(centr2)))
-        functype = 'poly' + str(npoly_cxcy)
+        functype = getattr(kepfunc, 'poly' + str(npoly_cxcy))
         pinit = np.array([np.nanmean(centr2)])
         if npoly_cxcy > 0:
             for j in range(npoly_cxcy):
@@ -380,7 +382,7 @@ def kepsff(infile, outfile, datacol='DETSAP_FLUX', cenmethod='moments',
         covar = np.cov(centr)
         # eigenvector eigenvalues of covariance matrix
         [eval, evec] = np.linalg.eigh(covar)
-        ex = arange(-10.0, 10.0, 0.1)
+        ex = np.arange(-10.0, 10.0, 0.1)
         epar = evec[1, 1] / evec[0, 1] * ex
         enor = evec[1, 0] / evec[0, 0] * ex
         ex = ex + np.mean(centr1)
@@ -416,7 +418,7 @@ def kepsff(infile, outfile, datacol='DETSAP_FLUX', cenmethod='moments',
         s = np.zeros((len(rx)))
         for i in range(1, len(s)):
             work3 = ((ry[i] - ry[i - 1]) / (rx[i] - rx[i-1])) ** 2
-            s[i] = s[i - 1] + math.sqrt(1.0 + work3) * (rx[i] - rx[i-1])
+            s[i] = s[i - 1] + np.sqrt(1.0 + work3) * (rx[i] - rx[i-1])
 
         # fit arclength as a function of strongest eigenvector
         sfit = np.zeros((len(centr2)))
@@ -439,13 +441,13 @@ def kepsff(infile, outfile, datacol='DETSAP_FLUX', cenmethod='moments',
         t = np.copy(time_good)
         c = np.copy(cad_good)
         y = np.copy(flux_good)
-        z = np.centr_rot[1, :]
+        z = centr_rot[1, :]
         x = np.zeros((len(z)))
         for i in range(len(acoeffs)):
             x = x + acoeffs[i] * np.power(z, i)
 
         # calculate time derivative of arclength s
-        dx = zeros((len(x)))
+        dx = np.zeros((len(x)))
         for i in range(1,len(x)):
             dx[i] = (x[i] - x[i-1]) / (t[i] - t[i-1])
         dx[0] = dx[1]
@@ -453,7 +455,7 @@ def kepsff(infile, outfile, datacol='DETSAP_FLUX', cenmethod='moments',
         # fit polynomial to derivative and flag outliers (thruster firings)
         dfit = np.zeros((len(dx)))
         dsig = np.zeros((len(dx)))
-        functype = 'poly' + str(npoly_dsdt)
+        functype = getattr(kepfunc, 'poly' + str(npoly_dsdt))
         pinit = np.array([np.nanmean(dx)])
         if npoly_dsdt > 0:
             for j in range(npoly_dsdt):
@@ -538,7 +540,7 @@ def kepsff(infile, outfile, datacol='DETSAP_FLUX', cenmethod='moments',
                 tim_bd = np.append(tim_bd, intime[i])
                 flx_bd = np.append(flx_bd, out_detsap[i])
         # plot style and size
-        kepplot.define(16, 14, logfile, verbose)
+        #kepplot.define(16, 14, logfile, verbose)
         plt.figure(figsize=[20, 8])
         plt.clf()
 
@@ -596,8 +598,8 @@ def kepsff(infile, outfile, datacol='DETSAP_FLUX', cenmethod='moments',
 
         # plot time derivative of arclength s
         ax = kepplot.location([0.04,0.08,0.16,0.41])
-        px = copy(time_pnt)
-        py = copy(dx_pnt)
+        px = np.copy(time_pnt)
+        py = np.copy(dx_pnt)
         px, xlab = kepplot.cleanx(px,logfile,verbose)
         kepplot.RangeOfPlot(px, dx, 0.05, False)
         plt.plot(px, py, color='#009900', markersize=5, marker='D', ls='')
@@ -614,7 +616,7 @@ def kepsff(infile, outfile, datacol='DETSAP_FLUX', cenmethod='moments',
         plt.plot(px, py, color='r', ls='-', lw=3)
         py = np.copy(dfit + sigma_dsdt * dsigma)
         plt.plot(px, py, color='r', ls='--', lw=3)
-        py = copy(dfit-sigma_dsdt*dsigma)
+        py = np.copy(dfit-sigma_dsdt*dsigma)
         plt.plot(px,py,color='r',ls='--',lw=3)
         for tick in ax.xaxis.get_major_ticks():
             tick.label.set_fontsize(14)
@@ -677,13 +679,13 @@ def kepsff(infile, outfile, datacol='DETSAP_FLUX', cenmethod='moments',
         psf_centr2 = work1[:, 1]
         centr1 = np.copy(mom_centr1)
         centr2 = np.copy(mom_centr2)
-        centr = concatenate([[centr1] - np.mean(centr1_good),
-                             [centr2] - np.mean(centr2_good)])
-        centr_rot = dot(evec.T,centr)
-        yy = copy(indata)
+        centr = np.concatenate([[centr1] - np.mean(centr1_good),
+                               [centr2] - np.mean(centr2_good)])
+        centr_rot = np.dot(evec.T,centr)
+        yy = np.copy(indata)
         zz = centr_rot[1,:]
-        xx = zeros((len(zz)))
-        cfac = zeros((len(zz)))
+        xx = np.zeros((len(zz)))
+        cfac = np.zeros((len(zz)))
         for i in range(len(acoeffs)):
             xx = xx + acoeffs[i] * np.power(zz,i)
         for i in range(len(ccoeffs)):
