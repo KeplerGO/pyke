@@ -13,7 +13,7 @@ __all__ = ['kepbls']
 
 def kepbls(infile, outfile, datacol='DETSAP_FLUX', errcol='DETSAP_FLUX_ERR',
            minper=1.0, maxper=30, mindur=0.5, maxdur=12, nsearch=1000,
-           nbins=1000, plot=False, clobber=False, verbose=False,
+           nbins=1000, plot=False, overwrite=False, verbose=False,
            logfile='kepbls.log'):
     """
     kepbls -- Perform Box-Least Square searches for periodic exoplanet transits
@@ -81,8 +81,8 @@ def kepbls(infile, outfile, datacol='DETSAP_FLUX', errcol='DETSAP_FLUX_ERR',
     plot : bool
         Plot the calculated Normalized Signal Residue as a function of trial
         orbital period?
-    clobber : bool
-        Overwrite the output file? if clobber = no and an existing file has the
+    overwrite : bool
+        Overwrite the output file? if overwrite = no and an existing file has the
         same name as outfile then the task will stop with an error.
     verbose : bool
         Print informative messages and warnings to the shell and logfile?
@@ -132,7 +132,7 @@ def kepbls(infile, outfile, datacol='DETSAP_FLUX', errcol='DETSAP_FLUX_ERR',
             + ' nsearch={}'.format(nsearch)
             + ' nbins={}'.format(nbins)
             + ' plot={}'.format(plot)
-            + ' clobber={}'.format(clobber)
+            + ' overwrite={}'.format(overwrite)
             + ' verbose={}'.format(verbose)
             + ' logfile={}'.format(logfile))
 
@@ -148,10 +148,10 @@ def kepbls(infile, outfile, datacol='DETSAP_FLUX', errcol='DETSAP_FLUX_ERR',
                    .format(maxdur, maxper))
         kepmsg.warn(logfile, message)
 
-    if clobber:
-        kepio.clobber(outfile, logfile, verbose)
+    if overwrite:
+        kepio.overwrite(outfile, logfile, verbose)
     if kepio.fileexists(outfile):
-        message = 'ERROR -- KEPBLS: ' + outfile + ' exists. Use clobber=True'
+        message = 'ERROR -- KEPBLS: ' + outfile + ' exists. Use overwrite=True'
         kepmsg.err(logfile, message, verbose)
 
     # open input file
@@ -371,7 +371,7 @@ def kepbls_main():
                         type=int)
     parser.add_argument('--plot', action='store_true',
                         help='Plot result?')
-    parser.add_argument('--clobber', action='store_true',
+    parser.add_argument('--overwrite', action='store_true',
                         help='Overwrite output file?')
     parser.add_argument('--verbose', action='store_true',
                         help='Write to a log file?')
@@ -380,4 +380,4 @@ def kepbls_main():
     args = parser.parse_args()
     kepbls(args.infile, args.outfile, args.datacol, args.errcol, args.minper,
            args.maxper, args.mindur, args.maxdur, args.nsearch, args.nbins,
-           args.plot, args.clobber, args.verbose, args.logfile)
+           args.plot, args.overwrite, args.verbose, args.logfile)

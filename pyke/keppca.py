@@ -12,7 +12,7 @@ __all__ = ['keppca']
 
 
 def keppca(infile, outfile, maskfile='ALL', components='1-3', plotpca=False,
-           nmaps=10, clobber=False, verbose=False, logfile='keppca.log'):
+           nmaps=10, overwrite=False, verbose=False, logfile='keppca.log'):
     """
     keppca -- Perform principal component analysis upon a target pixel file
 
@@ -89,7 +89,7 @@ def keppca(infile, outfile, maskfile='ALL', components='1-3', plotpca=False,
         output. This can be any positive integer up to the number of pixels
         within the mask, although note that many hundreds of plots will likely
         become prohibitive and is unlikely to be informative.
-    clobber : bool
+    overwrite : bool
         Overwrite the output file?
     verbose : bool
         Print informative messages and warnings to the shell and logfile?
@@ -117,18 +117,18 @@ def keppca(infile, outfile, maskfile='ALL', components='1-3', plotpca=False,
             + ' components={}'.format(components)
             + ' plotpca={}'.format(plotpca)
             + ' nmaps={}'.format(nmaps)
-            + ' clobber={}'.format(clobber)
+            + ' overwrite={}'.format(overwrite)
             + ' verbose={}'.format(verbose)
             + ' logfile={}'.format(logfile))
     kepmsg.log(logfile, call + '\n', verbose)
 
     kepmsg.clock('KEPPCA started at', logfile, verbose)
 
-    # clobber output file
-    if clobber:
-        kepio.clobber(outfile, logfile, verbose)
+    # overwrite output file
+    if overwrite:
+        kepio.overwrite(outfile, logfile, verbose)
     if kepio.fileexists(outfile):
-        errmsg = ('ERROR -- KEPPCA: {} exists. Use clobber=True'
+        errmsg = ('ERROR -- KEPPCA: {} exists. Use overwrite=True'
                   .format(outfile))
         kepmsg.err(logfile, errmsg, verbose)
 
@@ -770,7 +770,7 @@ def keppca_main():
     parser.add_argument('--nmaps', default=10,
                         help='Number of principal components to include in report',
                         type=int)
-    parser.add_argument('--clobber', action='store_true',
+    parser.add_argument('--overwrite', action='store_true',
                         help='Overwrite output file?')
     parser.add_argument('--verbose', action='store_true',
                         help='Write to a log file?')
@@ -778,4 +778,4 @@ def keppca_main():
                         default='keppca.log', dest='logfile', type=str)
     args = parser.parse_args()
     keppca(args.infile, args.outfile, args.maskfile, args.components,
-           args.plotpca, args.nmaps, args.clobber, args.verbose, args.logfile)
+           args.plotpca, args.nmaps, args.overwrite, args.verbose, args.logfile)

@@ -10,7 +10,7 @@ import shutil
 from astropy.io import fits as pyfits
 
 
-__all__ = ['delete', 'clobber', 'openascii', 'closeascii', 'splitfits',
+__all__ = ['delete', 'overwrite', 'openascii', 'closeascii', 'splitfits',
            'readfitstab', 'readfitscol', 'readtimecol', 'readsapcol',
            'readsaperrcol', 'readpdccol', 'readpdcerrcol', 'readcbvcol',
            'readsapqualcol', 'readlctable', 'tabappend', 'readimage',
@@ -27,12 +27,12 @@ def delete(filename, logfile, verbose):
         message = 'ERROR -- KEPIO.DELETE: could not delete ' + filename
         kepmsg.err(logfile, message, verbose)
 
-def clobber(filename, logfile, verbose):
+def overwrite(filename, logfile, verbose):
     if (os.path.isfile(filename)):
         try:
             delete(filename, logfile, verbose)
         except:
-            message = 'ERROR -- KEPIO.CLOBBER: could not clobber ' + filename
+            message = 'ERROR -- KEPIO.CLOBBER: could not overwrite ' + filename
             kepmsg.err(logfile, message, verbose)
 
 def openascii(filename, mode, logfile, verbose):
@@ -254,10 +254,10 @@ def writeimage(image, hdu, imagedata, logfile, verbose):
         kepmsg.err(logfile, errmsg, verbose)
     return image
 
-def writefits(hdu, filename, clobber, logfile, verbose):
+def writefits(hdu, filename, overwrite, logfile, verbose):
     """write new FITS file"""
 
-    if os.path.isfile(filename) and clobber:
+    if os.path.isfile(filename) and overwrite:
         delete(filename, logfile, verbose)
     try:
         hdu.writeto(filename)
@@ -276,14 +276,14 @@ def tmpfile(path, suffix, logfile, verbose):
         kepmsg.err(logfile,message,verbose)
     return tmpfile
 
-def symlink(infile,linkfile,clobber,logfile,verbose):
+def symlink(infile,linkfile,overwrite,logfile,verbose):
     """create symbolic link"""
 
-    if os.path.exists(linkfile) and not clobber:
+    if os.path.exists(linkfile) and not overwrite:
         errmsg = ('ERROR: KEPIO.SYMLINK -- file ' + linkfile + ' exists, use '
-                  'clobber')
+                  'overwrite')
         kepmsg.err(logfile, errmsg, verbose)
-    if clobber:
+    if overwrite:
         try:
             os.remove(linkfile)
         except:

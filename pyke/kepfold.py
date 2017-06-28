@@ -8,7 +8,7 @@ from tqdm import tqdm
 
 def kepfold(infile, outfile, period, bjd0, bindata=False,
             binmethod='median', threshold=1.0, niter=5, nbins=1000,
-            rejqual=False, plottype='sap', clobber=False, verbose=False,
+            rejqual=False, plottype='sap', overwrite=False, verbose=False,
             logfile="kepfold.log"):
     """
     kepfold: Phase-fold light curve data on linear ephemeris.
@@ -81,7 +81,7 @@ def kepfold(infile, outfile, period, bjd0, bindata=False,
         * ``det`` data has been detrended using piecemeal polynomials with the
             kepflatten tool. DET data is stored in the column DETSAP_FLUX.
 
-    clobber : bool
+    overwrite : bool
         Overwrite the output file?
     verbose : bool
         Print informative messages and warnings to the shell and logfile?
@@ -115,7 +115,7 @@ def kepfold(infile, outfile, period, bjd0, bindata=False,
             + ' nbins={}'.format(nbins)
             + ' rejqual={}'.format(rejqual)
             + ' plottype={}'.format(plottype)
-            + ' clobber={}'.format(clobber)
+            + ' overwrite={}'.format(overwrite)
             + ' verbose={}'.format(verbose)
             + ' logfile={}'.format(logfile))
 
@@ -124,11 +124,11 @@ def kepfold(infile, outfile, period, bjd0, bindata=False,
     # start time
     kepmsg.clock('KEPFOLD started at', logfile, verbose)
 
-    # clobber output file
-    if clobber:
-        kepio.clobber(outfile, logfile, verbose)
+    # overwrite output file
+    if overwrite:
+        kepio.overwrite(outfile, logfile, verbose)
     if kepio.fileexists(outfile):
-        message = 'ERROR -- KEPFOLD: ' + outfile + ' exists. Use --clobber'
+        message = 'ERROR -- KEPFOLD: ' + outfile + ' exists. Use --overwrite'
         kepmsg.err(logfile, message, verbose)
 
     # open input file
@@ -592,7 +592,7 @@ def kepfold_main():
                         help='Reject bad quality timestamps?')
     parser.add_argument('--plottype', default='sap', help='plot type',
                         type=str, choices=['sap', 'pdc', 'cbv', 'det','None'])
-    parser.add_argument('--clobber', action='store_true',
+    parser.add_argument('--overwrite', action='store_true',
                         help='Overwrite output file?')
     parser.add_argument('--verbose', action='store_true',
                         help='Write to a log file?')
@@ -602,5 +602,5 @@ def kepfold_main():
 
     kepfold(args.infile, args.outfile, args.period, args.bjd0, args.bindata,
             args.binmethod, args.threshold, args.niter, args.nbins,
-            args.quality, args.plottype, args.clobber, args.verbose,
+            args.quality, args.plottype, args.overwrite, args.verbose,
             args.logfile)

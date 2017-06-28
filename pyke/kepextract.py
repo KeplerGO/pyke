@@ -10,7 +10,7 @@ from . import kepio, kepmsg, kepkey, kepstat, kepfunc
 __all__ = ['kepextract']
 
 
-def kepextract(infile, outfile, maskfile='ALL', bkg=False, clobber=False,
+def kepextract(infile, outfile, maskfile='ALL', bkg=False, overwrite=False,
                verbose=False, logfile='kepextract.log'):
     """
     kepextract -- create a light curve from a target pixel file by summing
@@ -62,7 +62,7 @@ def kepextract(infile, outfile, maskfile='ALL', bkg=False, clobber=False,
         mask that contain background and negligible source flux. Note that
         background has already been subtracted from calibrated Kepler Target
         Pixel Files, but not early campaign data from the K2 mission.
-    clobber : bool
+    overwrite : bool
         Overwrite the output file?
     verbose : bool
         Option for verbose mode, in which informative messages and warnings to
@@ -98,18 +98,18 @@ def kepextract(infile, outfile, maskfile='ALL', bkg=False, clobber=False,
             + ' maskfile={}'.format(maskfile)
             + ' outfile={}'.format(outfile)
             + ' background={}'.format(bkg)
-            + ' clobber={}'.format(clobber)
+            + ' overwrite={}'.format(overwrite)
             + ' verbose={}'.format(verbose)
             + ' logfile={}'.format(logfile))
     kepmsg.log(logfile, call+'\n', verbose)
 
     # start time
     kepmsg.clock('KEPEXTRACT started at',logfile,verbose)
-    # clobber output file
-    if clobber:
-        kepio.clobber(outfile, logfile, verbose)
+    # overwrite output file
+    if overwrite:
+        kepio.overwrite(outfile, logfile, verbose)
     if kepio.fileexists(outfile):
-        errmsg = ('ERROR -- KEPEXTRACT: {} exists. Use --clobber'
+        errmsg = ('ERROR -- KEPEXTRACT: {} exists. Use --overwrite'
                   .format(outfile))
         kepmsg.err(logfile, errmsg, verbose)
 
@@ -569,7 +569,7 @@ def kepextract_main():
                         type=str)
     parser.add_argument('--bkg', action='store_true',
                         help='Subtract background from data?')
-    parser.add_argument('--clobber', action='store_true',
+    parser.add_argument('--overwrite', action='store_true',
                         help='Overwrite output file?')
     parser.add_argument('--verbose', action='store_true',
                         help='Write to a log file?')
@@ -577,4 +577,4 @@ def kepextract_main():
                         default='kepextract.log', type=str)
     args = parser.parse_args()
     kepextract(args.infile, args.outfile, args.maskfile, args.bkg,
-               args.clobber, args.verbose, args.logfile)
+               args.overwrite, args.verbose, args.logfile)

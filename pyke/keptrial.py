@@ -10,7 +10,7 @@ __all__ = ['keptrial']
 
 def keptrial(infile, outfile, datacol='SAP_FLUX', errcol='SAP_FLUX_ERR',
              fmin=0.1, fmax=50, nfreq=100, method='ft', ntrials=1000,
-             plot=False, clobber=False, verbose=False, logfile='keptrial.log'):
+             plot=False, overwrite=False, verbose=False, logfile='keptrial.log'):
     """
     keptrial -- Calculate best period and error estimate from time series
 
@@ -76,7 +76,7 @@ def keptrial(infile, outfile, datacol='SAP_FLUX', errcol='SAP_FLUX_ERR',
         periods, period uncertainty and confidence in the measurement.
     plot : bool
         Plot the output window function?
-    clobber : bool
+    overwrite : bool
         Overwrite the output file?
     verbose : bool
         Print informative messages and warnings to the shell and logfile?
@@ -107,7 +107,7 @@ def keptrial(infile, outfile, datacol='SAP_FLUX', errcol='SAP_FLUX_ERR',
             + ' method={}'.format(method)
             + ' ntrials={}'.format(ntrials)
             + ' plot={}'.format(plot)
-            + ' clobber={}'.format(clobber)
+            + ' overwrite={}'.format(overwrite)
             + ' verbose={}'.format(verbose)
             + ' logfile={}'.format(logfile))
 
@@ -115,11 +115,11 @@ def keptrial(infile, outfile, datacol='SAP_FLUX', errcol='SAP_FLUX_ERR',
 
     # start time
     kepmsg.clock('KEPTRIAL started at', logfile, verbose)
-    # clobber output file
-    if clobber:
-        kepio.clobber(outfile, logfile, verbose)
+    # overwrite output file
+    if overwrite:
+        kepio.overwrite(outfile, logfile, verbose)
     if kepio.fileexists(outfile):
-        errmsg = 'ERROR -- KEPTRIAL: {} exists. Use --clobber'.format(outfile)
+        errmsg = 'ERROR -- KEPTRIAL: {} exists. Use --overwrite'.format(outfile)
         kepmsg.err(logfile, errmsg, verbose)
     # open input file
     instr = pyfits.open(infile, 'readonly')
@@ -297,7 +297,7 @@ def keptrial_main():
     parser.add_argument('--ntrials', default=1000,
                         help='Number of search trials', type=int)
     parser.add_argument('--plot', action='store_true', help='Plot result?')
-    parser.add_argument('--clobber', action='store_true',
+    parser.add_argument('--overwrite', action='store_true',
                         help='Overwrite output file?')
     parser.add_argument('--verbose', action='store_true',
                         help='Write to a log file?')
@@ -306,4 +306,4 @@ def keptrial_main():
     args = parser.parse_args()
     keptrial(args.infile, args.outfile, args.datacol, args.errcol, args.fmin,
              args.fmax, args.nfreq, args.method, args.ntrials, args.plot,
-             args.clobber, args.verbose, args.logfile)
+             args.overwrite, args.verbose, args.logfile)

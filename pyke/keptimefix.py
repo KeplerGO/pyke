@@ -7,7 +7,7 @@ from astropy.io import fits as pyfits
 __all__ = ['keptimefix']
 
 
-def keptimefix(infile, outfile, clobber, verbose, logfile):
+def keptimefix(infile, outfile, overwrite, verbose, logfile):
     """
     keptimefix -- Correct a time stamp error in the target pixel files
 
@@ -28,7 +28,7 @@ def keptimefix(infile, outfile, clobber, verbose, logfile):
         The name of the output FITS target pixel filefile. outfile will be a
         direct copy of infile but with the TIME column updates to be correct
         and consistent with the Kepler light curve files
-    clobber : bool
+    overwrite : bool
         Overwrite the output file?
     verbose : bool
         Print informative messages and warnings to the shell and logfile?
@@ -42,7 +42,7 @@ def keptimefix(infile, outfile, clobber, verbose, logfile):
     call = ('KEPTIMEFIX -- '
             + ' infile={}'.format(infile)
             + ' outfile={}'.format(outfile)
-            + ' clobber={}'.format(clobber)
+            + ' overwrite={}'.format(overwrite)
             + ' verbose={}'.format(verbose)
             + ' logfile={}'.format(logfile))
     kepmsg.log(logfile, call+'\n', verbose)
@@ -50,10 +50,10 @@ def keptimefix(infile, outfile, clobber, verbose, logfile):
     # start time
     kepmsg.clock('KEPTIMEFIX started at', logfile, verbose)
 
-    if clobber:
-        kepio.clobber(outfile, logfile, verbose)
+    if overwrite:
+        kepio.overwrite(outfile, logfile, verbose)
     if kepio.fileexists(outfile):
-        errmsg = 'ERROR -- KEPTIMEFIX: {} exists. Use --clobber'.format(outfile)
+        errmsg = 'ERROR -- KEPTIMEFIX: {} exists. Use --overwrite'.format(outfile)
         kepmsg.err(logfile, errmsg, verbose)
 
     instr = pyfits.open(infile, 'readonly')
@@ -122,12 +122,12 @@ def keptimefix_main():
     parser.add_argument('outfile',
                         help='Name of FITS target pixel file to output',
                         type=str)
-    parser.add_argument('--clobber', action='store_true',
+    parser.add_argument('--overwrite', action='store_true',
                         help='overwrite a file with the same name as outfile?')
     parser.add_argument('--verbose', action='store_true',
                         help='Write to a log file?')
     parser.add_argument('--logfile', help='Name of ascii log file',
                         default='keptimefix.log', type=str)
     args = parser.parse_args()
-    keptimefix(args.infile, args.outfile, args.clobber, args.verbose,
+    keptimefix(args.infile, args.outfile, args.overwrite, args.verbose,
                args.logfile)

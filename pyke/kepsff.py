@@ -11,7 +11,7 @@ __all__ = ['kepsff']
 def kepsff(infile, outfile, datacol='DETSAP_FLUX', cenmethod='moments',
            stepsize=4.0, npoly_cxcy=1, sigma_cxcy=6.0, npoly_ardx=6,
            npoly_dsdt=2, sigma_dsdt=3.0, npoly_arfl=3, sigma_arfl=3.0,
-           plotres=False, clobber=False, verbose=False, logfile='kepsff.log'):
+           plotres=False, overwrite=False, verbose=False, logfile='kepsff.log'):
     """
     kepsff -- remove motion-correlated noise from aperture light curve data
 
@@ -235,8 +235,8 @@ def kepsff(infile, outfile, datacol='DETSAP_FLUX', cenmethod='moments',
         time window defined by the stepsize parameters. If the output FITS file
         is named filename.fits then each PNG file will be named
         filename_nn.png, where nn is a sequential number beginning with 1.
-    clobber : bool
-        Overwrite the output FITS file? if clobber = no and an existing file
+    overwrite : bool
+        Overwrite the output FITS file? if overwrite = no and an existing file
         has the same name as outfile then the task will stop with an error.
     verbose : bool
         Print informative messages and warnings to the shell and logfile?
@@ -260,7 +260,7 @@ def kepsff(infile, outfile, datacol='DETSAP_FLUX', cenmethod='moments',
             + ' npoly_arfl={}'.format(npoly_arfl)
             + ' sigma_arfl={}'.format(sigma_arfl)
             + ' plotres={}'.format(plotres)
-            + ' clobber={}'.format(clobber)
+            + ' overwrite={}'.format(overwrite)
             + ' verbose={}'.format(verbose)
             + ' logfile={}'.format(logfile))
 
@@ -268,11 +268,11 @@ def kepsff(infile, outfile, datacol='DETSAP_FLUX', cenmethod='moments',
     # start time
     kepmsg.clock('KEPSFF started at', logfile, verbose)
 
-    # clobber output file
-    if clobber:
-        kepio.clobber(outfile, logfile, verbose)
+    # overwrite output file
+    if overwrite:
+        kepio.overwrite(outfile, logfile, verbose)
     if kepio.fileexists(outfile):
-        errmsg = 'ERROR -- KEPSFF: {} exists. Use clobber=True'.format(outfile)
+        errmsg = 'ERROR -- KEPSFF: {} exists. Use overwrite=True'.format(outfile)
         kepmsg.err(logfile, errmsg, verbose)
     # open input file
     instr = pyfits.open(infile, 'readonly')
@@ -748,7 +748,7 @@ def kepsff_main():
                         type=float)
     parser.add_argument('--plotres', action='store_true',
                         help='Save hardcopies of the plots?')
-    parser.add_argument('--clobber', action='store_true',
+    parser.add_argument('--overwrite', action='store_true',
                         help='Overwrite output file?')
     parser.add_argument('--verbose', action='store_true',
                         help='Write to a log file?')
@@ -758,5 +758,5 @@ def kepsff_main():
     kepsff(args.infile, args.outfile, args.datacol, args.cenmethod,
            args.stepsize, args.npoly_cxcy, args.sigma_cxcy, args.npoly_ardx,
            args.npoly_dsdt, args.sigma_dsdt, args.npoly_arfl,
-           args.sigma_arfl, args.plotres, args.clobber, args.verbose,
+           args.sigma_arfl, args.plotres, args.overwrite, args.verbose,
            args.logfile)

@@ -8,7 +8,7 @@ __all__ = ['kepfilter']
 
 
 def kepfilter(infile, outfile, passband, datacol='SAP_FLUX', function='boxcar',
-              cutoff=1.0, plot=False, clobber=False, verbose=False,
+              cutoff=1.0, plot=False, overwrite=False, verbose=False,
               logfile='kepfilter.log'):
     """
     kepfilter -- bandpass filtering of Kepler light curve data
@@ -56,8 +56,8 @@ def kepfilter(infile, outfile, passband, datacol='SAP_FLUX', function='boxcar',
         * high
     plot : bool
         Plot the original light curve and the result of the filter?
-    clobber : bool
-        Overwrite the output file? if clobber = no and an existing file has the
+    overwrite : bool
+        Overwrite the output file? if overwrite = no and an existing file has the
         same name as outfile then the task will stop with an error.
     verbose : bool
         Print informative messages and warnings to the shell and logfile?
@@ -69,7 +69,7 @@ def kepfilter(infile, outfile, passband, datacol='SAP_FLUX', function='boxcar',
     ..code-block :: bash
 
         $ kepfilter kplr002436324-2009259160929_llc.fits kepfilter.fits --datacol 'SAP_FLUX' --function 'boxcar'
-        --plot --verbose --clobber
+        --plot --verbose --overwrite
 
     ..image :: ../_static/images/api/kepfilter.png
         :align: center
@@ -91,17 +91,17 @@ def kepfilter(infile, outfile, passband, datacol='SAP_FLUX', function='boxcar',
             + ' cutoff={}'.format(cutoff)
             + ' passband={}'.format(passband)
             + ' plot={}'.format(plot)
-            + ' clobber={}'.format(clobber)
+            + ' overwrite={}'.format(overwrite)
             + ' verbose={}'.format(verbose)
             + ' logfile={}'.format(logfile))
     kepmsg.log(logfile, call+'\n', verbose)
     ## start time
     kepmsg.clock('KEPFILTER started at',logfile,verbose)
-    ## clobber output file
-    if clobber:
-        kepio.clobber(outfile, logfile, verbose)
+    ## overwrite output file
+    if overwrite:
+        kepio.overwrite(outfile, logfile, verbose)
     if kepio.fileexists(outfile):
-        errmsg = 'ERROR -- KEPFILTER: {} exists. Use --clobber'.format(outfile)
+        errmsg = 'ERROR -- KEPFILTER: {} exists. Use --overwrite'.format(outfile)
         kepmsg.err(logfile, message, verbose)
 
     ## open input file
@@ -261,7 +261,7 @@ def kepfilter_main():
                         type=str, choices=['low','high'])
     parser.add_argument('--plot', action='store_true',
                         help='Plot result?')
-    parser.add_argument('--clobber', action='store_true',
+    parser.add_argument('--overwrite', action='store_true',
                         help='Overwrite output file?')
     parser.add_argument('--verbose', action='store_true',
                         help='Write to a log file?')
@@ -269,5 +269,5 @@ def kepfilter_main():
                         default='kepfilter.log', type=str)
     args = parser.parse_args()
     kepfilter(args.infile, args.outfile, args.passband, args.datacol,
-              args.function, args.cutoff, args.plot, args.clobber,
+              args.function, args.cutoff, args.plot, args.overwrite,
               args.verbose, args.logfile)

@@ -12,7 +12,7 @@ __all__ = ['kepflatten']
 
 def kepflatten(infile, outfile, datacol='PDCSAP_FLUX',
                errcol='PDCSAP_FLUX_ERR', nsig=3., stepsize=0.5, winsize=5.0,
-               npoly=3, niter=1, ranges='0,0', plot=False, clobber=False,
+               npoly=3, niter=1, ranges='0,0', plot=False, overwrite=False,
                verbose=False, logfile='kepflatten.log'):
     """
     kepflatten -- Remove low frequency variability from time-series, preserve
@@ -88,7 +88,7 @@ def kepflatten(infile, outfile, datacol='PDCSAP_FLUX',
         ranges = '0,0' will tell the task to operate on the whole time series.
     plot : bool
         Plot the data, fit, outliers and result?
-    clobber : bool
+    overwrite : bool
         Overwrite the output file?
     verbose : bool
         Print informative messages and warnings to the shell and logfile?
@@ -101,7 +101,7 @@ def kepflatten(infile, outfile, datacol='PDCSAP_FLUX',
 
         $ kepflatten kplr012557548-2011177032512_llc.fits kepflatten.fits
         --nsig 3 --stepsize 1.0 --winsize 3.0 --npoly 3 --niter 10 --plot
-        --clobber --verbose
+        --overwrite --verbose
 
     .. image:: ../_static/images/api/kepflatten.png
         :align: center
@@ -127,7 +127,7 @@ def kepflatten(infile, outfile, datacol='PDCSAP_FLUX',
             + ' niter={}'.format(niter)
             + ' ranges={}'.format(ranges)
             + ' plot={}'.format(plot)
-            + ' clobber={}'.format(clobber)
+            + ' overwrite={}'.format(overwrite)
             + ' verbose={}'.format(verbose)
             + ' logfile={}'.format(logfile))
     kepmsg.log(logfile, call+'\n', verbose)
@@ -140,11 +140,11 @@ def kepflatten(infile, outfile, datacol='PDCSAP_FLUX',
         errmsg = 'ERROR -- KEPFLATTEN: winsize must be greater than stepsize'
         kepmsg.err(logfile, errmsg, verbose)
 
-    # clobber output file
-    if clobber:
-        kepio.clobber(outfile, logfile, verbose)
+    # overwrite output file
+    if overwrite:
+        kepio.overwrite(outfile, logfile, verbose)
     if kepio.fileexists(outfile):
-        errmsg = ('ERROR -- KEPFLATTEN: {} exists. Use clobber=True'
+        errmsg = ('ERROR -- KEPFLATTEN: {} exists. Use overwrite=True'
                   .format(outfile))
         kepmsg.err(logfile, errmsg, verbose)
 
@@ -424,7 +424,7 @@ def kepflatten_main():
                         help='Time ranges of regions to filter',
                         type=str)
     parser.add_argument('--plot', action='store_true', help='Plot result?')
-    parser.add_argument('--clobber', action='store_true',
+    parser.add_argument('--overwrite', action='store_true',
                         help='Overwrite output file?')
     parser.add_argument('--verbose', action='store_true',
                         help='Write to a log file?')
@@ -434,5 +434,5 @@ def kepflatten_main():
 
     kepflatten(args.infile, args.outfile, args.datacol, args.errcol, args.nsig,
                args.stepsize, args.winsize, args.npoly, args.niter,
-               args.ranges, args.plot, args.clobber, args.verbose,
+               args.ranges, args.plot, args.overwrite, args.verbose,
                args.logfile)

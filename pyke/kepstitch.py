@@ -2,7 +2,7 @@ from . import kepio, kepmsg, kepkey, kepstat
 import numpy as np
 from astropy.io import fits as pyfits
 
-def kepstitch(infiles, outfile='kepstitch.fits', clobber=False, verbose=False,
+def kepstitch(infiles, outfile='kepstitch.fits', overwrite=False, verbose=False,
               logfile='kepstich.log'):
     """
     kepstitch -- Append short cadence months and/or long cadence quarters
@@ -25,8 +25,8 @@ def kepstitch(infiles, outfile='kepstitch.fits', clobber=False, verbose=False,
         The ASCII file must be formatted to have one FITS filename per line.
     outfile : str
         The name of the output FITS file with concatenated time series data.
-    clobber : bool
-        Overwrite the output file? if clobber = no and an existing file has the
+    overwrite : bool
+        Overwrite the output file? if overwrite = no and an existing file has the
         same name as outfile then the task will stop with an error.
     verbose : bool
         Print informative messages and warnings to the shell and logfile?
@@ -49,7 +49,7 @@ def kepstitch(infiles, outfile='kepstitch.fits', clobber=False, verbose=False,
     call = ('KEPSTITCH -- '
             + ' infiles={}'.format(infiles)
             + ' outfile={}'.format(outfile)
-            + ' clobber={}'.format(clobber)
+            + ' overwrite={}'.format(overwrite)
             + ' verbose={}'.format(verbose)
             + ' logfile={}'.format(logfile))
     kepmsg.log(logfile, call+'\n', verbose)
@@ -62,11 +62,11 @@ def kepstitch(infiles, outfile='kepstitch.fits', clobber=False, verbose=False,
     except AttributeError:
         pass
 
-    # clobber output file
-    if clobber:
-        kepio.clobber(outfile, logfile, verbose)
+    # overwrite output file
+    if overwrite:
+        kepio.overwrite(outfile, logfile, verbose)
     if kepio.fileexists(outfile):
-        errmsg = 'ERROR -- KEPSTITCH: {} exists. Use --clobber'.format(outfile)
+        errmsg = 'ERROR -- KEPSTITCH: {} exists. Use --overwrite'.format(outfile)
         kepmsg.err(logfile, errmsg, verbose)
 
     # open output file
@@ -153,12 +153,12 @@ def kepstitch_main():
                         type=str)
     parser.add_argument('--outfile', help='Name of FITS file to output',
                         default='kepstitch.fits', type=str)
-    parser.add_argument('--clobber', action='store_true',
+    parser.add_argument('--overwrite', action='store_true',
                         help='Overwrite output file?')
     parser.add_argument('--verbose', action='store_true',
                         help='Write to a log file?')
     parser.add_argument('--logfile', '-l', help='Name of ascii log file',
                         default='kepstitch.log', dest='logfile', type=str)
     args = parser.parse_args()
-    kepstitch(args.infiles, args.outfile, args.clobber, args.verbose,
+    kepstitch(args.infiles, args.outfile, args.overwrite, args.verbose,
               args.logfile)

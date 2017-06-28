@@ -18,7 +18,7 @@ __all__ = ['kepprfphot']
 
 def kepprfphot(infile, outroot, columns, rows, fluxes, prfdir, border=0,
                background=False, focus=False, ranges='0,0', xtol=1e-4,
-               ftol=1e-2, qualflags=False, plot=False, clobber=False,
+               ftol=1e-2, qualflags=False, plot=False, overwrite=False,
                verbose=False, logfile='kepprfphot.log'):
     """
     kepprfphot -- Fit a PSF model to time series observations within a Target
@@ -130,7 +130,7 @@ def kepprfphot(infile, outroot, columns, rows, fluxes, prfdir, border=0,
           KEPPRFPHOT --  infile=kplr012557548-2012004120508_lpd-targ.fits.gz
           outroot=photometry columns=95 rows=1020 fluxes=1.0 border=0 background=False
           focus=False prfdir=../kplr2011265_prf ranges=0,0 xtol=1e-07 ftol=1e-07
-          qualflags=False plot=True clobber=True verbose=True logfile=kepprfphot.log
+          qualflags=False plot=True overwrite=True verbose=True logfile=kepprfphot.log
 
           KEPPRFPHOT started at: Wed Jun 14 15:33:30 2017
 
@@ -167,7 +167,7 @@ def kepprfphot(infile, outroot, columns, rows, fluxes, prfdir, border=0,
             + ' ftol={}'.format(ftol)
             + ' qualflags={}'.format(qualflags)
             + ' plot={}'.format(plot)
-            + ' clobber={}'.format(clobber)
+            + ' overwrite={}'.format(overwrite)
             + ' verbose={}'.format(verbose)
             + ' logfile={}'.format(logfile))
     kepmsg.log(logfile, call+'\n', verbose)
@@ -225,13 +225,13 @@ def kepprfphot(infile, outroot, columns, rows, fluxes, prfdir, border=0,
     if focus:
         guess.append(1.0); guess.append(1.0); guess.append(0.0)
 
-    # clobber output file
+    # overwrite output file
     for i in range(nsrc):
         outfile = '{0}_{1}.fits'.format(outroot, i)
-        if clobber:
-            kepio.clobber(outfile, logfile, verbose)
+        if overwrite:
+            kepio.overwrite(outfile, logfile, verbose)
         if kepio.fileexists(outfile):
-            errmsg = 'ERROR -- KEPPRFPHOT: {} exists. Use --clobber'.format(outfile)
+            errmsg = 'ERROR -- KEPPRFPHOT: {} exists. Use --overwrite'.format(outfile)
             kepmsg.err(logfile, errmsg, verbose)
 
     # open TPF FITS file
@@ -1144,7 +1144,7 @@ def kepprfphot_main():
                         help='Fit data that have quality flags?')
     parser.add_argument('--plot', action='store_true',
                         help='Plot fit results?')
-    parser.add_argument('--clobber', action='store_true',
+    parser.add_argument('--overwrite', action='store_true',
                         help='Overwrite output file?')
     parser.add_argument('--verbose', action='store_true',
                         help='Write to a log file?')
@@ -1154,4 +1154,4 @@ def kepprfphot_main():
     kepprfphot(args.infile, args.outroot, args.columns, args.rows, args.fluxes,
                args.prfdir, args.border, args.background, args.focus,
                args.ranges, args.xtol, args.ftol, args.qualflags, args.plot,
-               args.clobber, args.verbose, args.logfile)
+               args.overwrite, args.verbose, args.logfile)

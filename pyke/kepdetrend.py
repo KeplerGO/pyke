@@ -14,7 +14,7 @@ __all__ = ['kepdetrend']
 
 def kepdetrend(infile, outfile, ranges1, ranges2, npoly1, npoly2, nsig1, nsig2,
                niter1, niter2, datacol='SAP_FLUX', errcol='SAP_FLUX_ERR',
-               popnans=False, plot=False, clobber=False, verbose=False,
+               popnans=False, plot=False, overwrite=False, verbose=False,
                logfile='kepdetrend.log'):
     """
     kepdetrend -- Detrend aperture photometry data
@@ -97,8 +97,8 @@ def kepdetrend(infile, outfile, ranges1, ranges2, npoly1, npoly2, nsig1, nsig2,
         NaNs will no be in the output file.
     plot : boolean
         Plot the data, the fits and the correction?
-    clobber : bool
-        Overwrite the output file? if clobber is False and an existing file has
+    overwrite : bool
+        Overwrite the output file? if overwrite is False and an existing file has
         the same name as outfile then the task will stop with an error.
     verbose : bool
         Print informative messages and warnings to the shell and logfile?
@@ -142,18 +142,18 @@ def kepdetrend(infile, outfile, ranges1, ranges2, npoly1, npoly2, nsig1, nsig2,
             + ' niter2={}'.format(niter2)
             + ' popnans={}'.format(popnans)
             + ' plot={}'.format(plot)
-            + ' clobber={}'.format(clobber)
+            + ' overwrite={}'.format(overwrite)
             + ' verbose={}'.format(verbose)
             + ' logfile={}'.format(logfile))
 
     kepmsg.log(logfile, call+'\n', verbose)
     # start time
     kepmsg.clock('KEPDETREND started at',logfile,verbose)
-    # clobber output file
-    if clobber:
-        kepio.clobber(outfile, logfile, verbose)
+    # overwrite output file
+    if overwrite:
+        kepio.overwrite(outfile, logfile, verbose)
     if kepio.fileexists(outfile):
-        errmsg = ('ERROR -- KEPDETREND: {} exists. Use --clobber'
+        errmsg = ('ERROR -- KEPDETREND: {} exists. Use --overwrite'
                   .format(outfile))
         kepmsg.err(logfile, errmsg, verbose)
 
@@ -391,7 +391,7 @@ def kepdetrend_main():
                         help='Keep cadences with no flux value?')
     parser.add_argument('--plot', action='store_true',
                         help='Plot result?')
-    parser.add_argument('--clobber', action='store_true',
+    parser.add_argument('--overwrite', action='store_true',
                         help='Overwrite output file?')
     parser.add_argument('--verbose', action='store_true',
                         help='Write to a log file?')
@@ -401,5 +401,5 @@ def kepdetrend_main():
     kepdetrend(args.infile, args.outfile, args.ranges1, args.ranges2,
                args.npoly1, args.npoly2, args.nsig1, args.nsig2,
                args.niter1, args.niter2, args.datacol, args.errcol,
-               args.popnans, args.plot, args.clobber, args.verbose,
+               args.popnans, args.plot, args.overwrite, args.verbose,
                args.logfile)

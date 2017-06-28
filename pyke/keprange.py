@@ -13,7 +13,7 @@ ymin = 0; ymax = 1; xr = 1; yr = 1; xlab = ''; ylab = ''
 mask = []; aid = None; bid = None; cid = None; did = None; eid = None; fid = None
 clobb = True; outf = ''; verb = True; logf = ''; rinf = ''
 
-def keprange(infile, outfile, column, rinfile='', clobber=False, verbose=False,
+def keprange(infile, outfile, column, rinfile='', overwrite=False, verbose=False,
              logfile='keprange.log'):
     """
     keprange -- Define time ranges interactively for use with other PyKE tasks.
@@ -44,7 +44,7 @@ def keprange(infile, outfile, column, rinfile='', clobber=False, verbose=False,
         The column name containing data stored within extension 1 of infile.
         This data will be plotted against time so that the user can choose
         appropriate time ranges.
-    clobber : bool
+    overwrite : bool
         Overwrite the output file?
     verbose : bool
         Print informative messages and warnings to the shell and logfile?
@@ -74,11 +74,11 @@ def keprange(infile, outfile, column, rinfile='', clobber=False, verbose=False,
             + ' outfile={}'.format(outfile)
             + ' rinfile={}'.format(rinfile)
             + ' column={}'.format(column)
-            + ' clobber={}'.format(clobber)
+            + ' overwrite={}'.format(overwrite)
             + ' verbose={}'.format(verbose)
             + ' logfile={}'.format(logfile))
     kepmsg.log(logfile, call+'\n', verbose)
-    clobb = clobber
+    clobb = overwrite
     outf = outfile
     verb = verbose
     logf = logfile
@@ -87,11 +87,11 @@ def keprange(infile, outfile, column, rinfile='', clobber=False, verbose=False,
     # start time
     kepmsg.clock('KEPRANGE started at: ', logfile, verbose)
 
-    # clobber output file
-    if clobber:
-        kepio.clobber(outfile, logfile, verbose)
+    # overwrite output file
+    if overwrite:
+        kepio.overwrite(outfile, logfile, verbose)
     if kepio.fileexists(outfile):
-        errmsg = 'ERROR -- KEPRANGE: {} exists. Use --clobber'.format(outfile)
+        errmsg = 'ERROR -- KEPRANGE: {} exists. Use --overwrite'.format(outfile)
         kepmsg.err(logfile, errmsg, verbose)
 
     ## open input file
@@ -291,9 +291,9 @@ def clicker2(event):
     global mask, aid, bid, cid, did, eid, fid, clobb
 
     if clobb:
-        kepio.clobber(outf, logf, verb)
+        kepio.overwrite(outf, logf, verb)
     if kepio.fileexists(outf):
-        message = 'ERROR -- KEPRANGE: {} exists. Use --clobber'.format(outf)
+        message = 'ERROR -- KEPRANGE: {} exists. Use --overwrite'.format(outf)
         kepmsg.err(logf, message, verb)
     else:
         if event.inaxes:
@@ -402,7 +402,7 @@ def keprange_main():
                         help='Name of diagnostic FITS column', type=str)
     parser.add_argument('--rinfile', default='',
                         help='Name of input ASCII time ranges file')
-    parser.add_argument('--clobber', action='store_true',
+    parser.add_argument('--overwrite', action='store_true',
                         help='Overwrite output file?')
     parser.add_argument('--verbose', action='store_true',
                         help='Write to a log file?')
@@ -410,4 +410,4 @@ def keprange_main():
                         default='keprange.log', dest='logfile', type=str)
     args = parser.parse_args()
     keprange(args.infile, args.outfile, args.column, args.rinfile,
-             args.clobber, args.verbose, args.logfile)
+             args.overwrite, args.verbose, args.logfile)

@@ -4,7 +4,7 @@ from astropy.io import fits as pyfits
 from matplotlib import pyplot as plt
 
 def kepwindow(infile, outfile, fcol='SAP_FLUX', fmax=1.0, nfreq=100, plot=False,
-              clobber=False, verbose=False, logfile='kepwindow.log'):
+              overwrite=False, verbose=False, logfile='kepwindow.log'):
     """
     kepwindow -- Calculate and store the window function for a Kepler time
     series
@@ -40,7 +40,7 @@ def kepwindow(infile, outfile, fcol='SAP_FLUX', fmax=1.0, nfreq=100, plot=False,
         window function will be calculated.
     plot : bool
         Plot the output window function?
-    clobber : bool
+    overwrite : bool
         Overwrite the output file?
     verbose : bool
         Print informative messages and warnings to the shell and logfile?
@@ -68,18 +68,18 @@ def kepwindow(infile, outfile, fcol='SAP_FLUX', fmax=1.0, nfreq=100, plot=False,
             + ' fmax={}'.format(fmax)
             + ' nfreq={}'.format(nfreq)
             + ' plot='.format(plot)
-            + ' clobber={}'.format(clobber)
+            + ' overwrite={}'.format(overwrite)
             + ' verbose={}'.format(verbose)
             + ' logfile={}'.format(logfile))
     kepmsg.log(logfile, call+'\n', verbose)
 
     ## start time
     kepmsg.clock('KEPWINDOW started at', logfile, verbose)
-    ## clobber output file
-    if clobber:
-        kepio.clobber(outfile, logfile, verbose)
+    ## overwrite output file
+    if overwrite:
+        kepio.overwrite(outfile, logfile, verbose)
     if kepio.fileexists(outfile):
-        errmsg = ('ERROR -- KEPWINDOW: {} exists. Use clobber=True'
+        errmsg = ('ERROR -- KEPWINDOW: {} exists. Use overwrite=True'
                   .format(outfile))
         kepmsg.err(logfile, errmsg, verbose)
 
@@ -191,7 +191,7 @@ def kepwindow_main():
     parser.add_argument('--nfreq', default=100,
                         help='Number of frequency intervals', type=int)
     parser.add_argument('--plot', action='store_true', help='Plot result?')
-    parser.add_argument('--clobber', action='store_true',
+    parser.add_argument('--overwrite', action='store_true',
                         help='Overwrite output file?')
     parser.add_argument('--verbose', action='store_true',
                         help='Write to a log file?')
@@ -199,4 +199,4 @@ def kepwindow_main():
                         default='kepwindow.log', dest='logfile', type=str)
     args = parser.parse_args()
     kepwindow(args.infile, args.outfile, args.fcol, args.fmax, args.nfreq,
-              args.plot, args.clobber, args.verbose, args.logfile)
+              args.plot, args.overwrite, args.verbose, args.logfile)

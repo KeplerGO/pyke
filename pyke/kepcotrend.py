@@ -452,7 +452,7 @@ def split_on_nans(bad_data, cad):
 
 def kepcotrend(infile, outfile, bvfile, listbv, fitmethod='llsq', fitpower=1,
                iterate=False, sigma=None, maskfile='', scinterp='linear',
-               plot=False, clobber=False, verbose=False,
+               plot=False, overwrite=False, verbose=False,
                logfile='kepcotrend.log'):
     """
     kepcotrend -- Remove systematic trends Kepler light curves using
@@ -618,7 +618,7 @@ def kepcotrend(infile, outfile, bvfile, listbv, fitmethod='llsq', fitpower=1,
         * cubic
     plot : bool
         Plot the data and result?
-    clobber : bool
+    overwrite : bool
         Overwrite the output file?
     verbose : bool
         Print informative messages and warnings to the shell and logfile?
@@ -647,7 +647,7 @@ def kepcotrend(infile, outfile, bvfile, listbv, fitmethod='llsq', fitpower=1,
             + ' mask_file='.format(maskfile)
             + ' scinterp='.format(scinterp)
             + ' plot='.format(plot)
-            + ' clobber='.format(clobber)
+            + ' overwrite='.format(overwrite)
             + ' verbose='.format(verbose)
             + ' logfile='.format(logfile))
     kepmsg.log(logfile, call+'\n', verbose)
@@ -655,11 +655,11 @@ def kepcotrend(infile, outfile, bvfile, listbv, fitmethod='llsq', fitpower=1,
     # start time
     kepmsg.clock('KEPCOTREND started at', logfile, verbose)
 
-    # clobber output file
-    if clobber:
-        kepio.clobber(outfile, logfile, verbose)
+    # overwrite output file
+    if overwrite:
+        kepio.overwrite(outfile, logfile, verbose)
     if kepio.fileexists(outfile):
-        errmsg = 'ERROR -- KEPCOTREND: {} exists. Use --clobber'.format(outfile)
+        errmsg = 'ERROR -- KEPCOTREND: {} exists. Use --overwrite'.format(outfile)
         kepmsg.err(logfile, errmsg, verbose)
 
     # open input file
@@ -931,7 +931,7 @@ def kepcotrend_main():
                                  'cubic'])
     parser.add_argument('--plot', '-p', action='store_true',
                         help='Plot result?')
-    parser.add_argument('--clobber', action='store_true',
+    parser.add_argument('--overwrite', action='store_true',
                         help='Overwrite output file?')
     parser.add_argument('--verbose', action='store_true',
                         help='Write to a log file?')
@@ -940,5 +940,5 @@ def kepcotrend_main():
     args = parser.parse_args()
     kepcotrend(args.infile, args.outfile, args.cbvfile, args.listbv,
                args.fitmethod, args.fitpower, args.iterate, args.sigma,
-               args.maskfile, args.scinterp, args.plot, args.clobber,
+               args.maskfile, args.scinterp, args.plot, args.overwrite,
                args.verbose, args.logfile)
