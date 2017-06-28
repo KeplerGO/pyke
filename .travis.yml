@@ -1,9 +1,16 @@
 language: python
 python:
-  - "3.6"
+  - 2.7
+  - 3.5
+  - 3.6
 # command to install dependencies
-install: "pip install -r requirements.txt"
+install:
+  - pip install -r requirements.txt
+  - pip install coveralls
 
 # command to run tests
 script:
-  - pytest
+  coverage run pytest
+
+after_sucess:
+  coveralls
