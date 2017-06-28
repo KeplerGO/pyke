@@ -94,25 +94,25 @@ def kepsff(infile, outfile, datacol='DETSAP_FLUX', cenmethod='moments',
     datacol : str
         The name of the FITS data column containing detrended flux data (i.e.
         low-frequency structure removed). If the input file is a product of
-        kepextract then this column is named DETSAP_FLUX.
-    cenmethod : str (moments|psf)
+        kepflatten then this column is named DETSAP_FLUX.
+    cenmethod : str
         kepsff requires target position data on the CCD detector in order to
         correlate spacecraft boresight motion with systematic signal within the
         flux time-series. The typical Kepler/K2 light curve files have
         place-holders for two different measures of source centroid:
 
-        * center-of-light within the pixel aperture (alternatively known as the
-          zeroth-moment of the flux distribution over the pixels). These two
-          arrays, the X and Y centroid over time, are stored in FITS columns
-          MOM_CENTR1 and MOM_CENTR2.
+        * ``moments`` -- center-of-light within the pixel aperture
+          (alternatively known as the zeroth-moment of the flux distribution
+          over the pixels). These two arrays, the X and Y centroid over time,
+          are stored in FITS columns MOM_CENTR1 and MOM_CENTR2.
 
-        * The PSF-fitting method, the X and Y locations of best-fit PSF models
-          to the aperture pixels. These are rarely available within archived
-          Kepler data but can be stored in PSF_CENTR1 and PSF_CENTR2. Both sets
-          of centroids are provided in the output from kepextract, where the
-          moments data is generally preferred over the PSF data which derives
-          from the simplifying assumptions that sources are not confused and
-          are well-characterized by symmetric Gaussian profiles.
+        * ``psf`` -- the PSF-fitting method, the X and Y locations of best-fit
+          PSF models to the aperture pixels. These are rarely available within
+          archived Kepler data but can be stored in PSF_CENTR1 and PSF_CENTR2.
+          Both sets of centroids are provided in the output from kepextract,
+          where the moments data is generally preferred over the PSF data which
+          derives from the simplifying assumptions that sources are not
+          confused and are well-characterized by symmetric Gaussian profiles.
     stepsize : float [days]
         Ultimately, kepsff will construct a time-series of flux-correction
         factors based upon a correlation curve between spacecraft boresight
@@ -227,18 +227,18 @@ def kepsff(infile, outfile, datacol='DETSAP_FLUX', cenmethod='moments',
         lower-right on the same plotting scale as above. The red points are
         those flagged as potential thruster firing and their 6-hr cadence
         suggests these events have generally been flagged well.
-    plotres : boolean (optional)
+    plotres : bool
         If true, diagnostic plots identical to figure 1 above will be rendered
         and also saved as PNG files. There will be a different plot for every
         time window defined by the stepsize parameters. If the output FITS file
         is named filename.fits then each PNG file will be named
         filename_nn.png, where nn is a sequential number beginning with 1.
-    clobber : bool (optional)
+    clobber : bool
         Overwrite the output FITS file? if clobber = no and an existing file
         has the same name as outfile then the task will stop with an error.
-    verbose : bool (optional)
+    verbose : bool
         Print informative messages and warnings to the shell and logfile?
-    logfile = string (optional)
+    logfile : str
         Name of the logfile containing error and warning messages.
     """
     # log the call
