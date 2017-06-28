@@ -236,7 +236,7 @@ def kepsff(infile, outfile, datacol='DETSAP_FLUX', cenmethod='moments',
         is named filename.fits then each PNG file will be named
         filename_nn.png, where nn is a sequential number beginning with 1.
     overwrite : bool
-        Overwrite the output FITS file? if overwrite = no and an existing file
+        Overwrite the output FITS file? if overwrite = False and an existing file
         has the same name as outfile then the task will stop with an error.
     verbose : bool
         Print informative messages and warnings to the shell and logfile?

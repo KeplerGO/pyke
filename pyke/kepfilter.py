@@ -57,7 +57,7 @@ def kepfilter(infile, outfile, passband, datacol='SAP_FLUX', function='boxcar',
     plot : bool
         Plot the original light curve and the result of the filter?
     overwrite : bool
-        Overwrite the output file? if overwrite = no and an existing file has the
+        Overwrite the output file? if overwrite = False and an existing file has the
         same name as outfile then the task will stop with an error.
     verbose : bool
         Print informative messages and warnings to the shell and logfile?
