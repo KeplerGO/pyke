@@ -6,9 +6,10 @@ from . import kepmsg, kepio, kepkey, kepplot, kepfit, kepfunc
 __all__ = ['kepsff']
 
 
-def kepsff(infile, outfile, datacol, cenmethod, stepsize, npoly_cxcy,
-           sigma_cxcy, npoly_ardx, npoly_dsdt, sigma_dsdt, npoly_arfl,
-           sigma_arfl, plotres, clobber, verbose, logfile):
+def kepsff(infile, outfile, datacol='DETSAP_FLUX', cenmethod='moments',
+           stepsize=4.0, npoly_cxcy=1, sigma_cxcy=6.0, npoly_ardx=6,
+           npoly_dsdt=2, sigma_dsdt=3.0, npoly_arfl=3, sigma_arfl=3.0,
+           plotres=False, clobber=False, verbose=False, logfile='kepsff.log'):
     """
     kepsff -- remove motion-correlated noise from aperture light curve data
 
