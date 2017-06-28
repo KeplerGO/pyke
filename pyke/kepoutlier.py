@@ -6,7 +6,7 @@ from tqdm import tqdm
 
 def kepoutlier(infile, outfile, datacol, nsig=3.0, stepsize=1.0, npoly=3,
                niter=1, operation='remove', ranges='0,0', plot=False,
-               plotfit=False, clobber=False, verbose=False,
+               plotfit=False, overwrite=False, verbose=False,
                logfile='kepoutlier.log'):
     """
     kepoutlier -- Remove or replace statistical outliers from time series data
@@ -72,7 +72,7 @@ def kepoutlier(infile, outfile, datacol, nsig=3.0, stepsize=1.0, npoly=3,
         Plot the data and outliers?
     plotfit : bool
         Overlay the polynomial fits upon the plot?
-    clobber : bool
+    overwrite : bool
         Overwrite the output file?
     verbose : bool
         Print informative messages and warnings to the shell and logfile?
@@ -105,17 +105,17 @@ def kepoutlier(infile, outfile, datacol, nsig=3.0, stepsize=1.0, npoly=3,
             + ' ranges={}'.format(ranges)
             + ' plot={}'.format(plot)
             + ' plotfit={}'.format(plotfit)
-            + ' clobber={}'.format(clobber)
+            + ' overwrite={}'.format(overwrite)
             + ' verbose={}'.format(verbose)
             + ' logfile={}'.format(logfile))
     kepmsg.log(logfile, call+'\n', verbose)
     # start time
     kepmsg.clock('KEPOUTLIER started at', logfile, verbose)
-    # clobber output file
-    if clobber:
-        kepio.clobber(outfile, logfile, verbose)
+    # overwrite output file
+    if overwrite:
+        kepio.overwrite(outfile, logfile, verbose)
     if kepio.fileexists(outfile):
-        errmsg = ('ERROR -- KEPOUTLIER: {} exists. Use clobber=True'
+        errmsg = ('ERROR -- KEPOUTLIER: {} exists. Use overwrite=True'
                   .format(outfile))
         kepmsg.err(logfile, message, verbose)
 
@@ -329,7 +329,7 @@ def kepoutlier_main():
     parser.add_argument('--plot', action='store_true', help='Plot result?')
     parser.add_argument('--plotfit', action='store_true',
                         help='Plot fit over results?')
-    parser.add_argument('--clobber', action='store_true',
+    parser.add_argument('--overwrite', action='store_true',
                         help='Overwrite output file?')
     parser.add_argument('--verbose', action='store_true',
                         help='Write to a log file?')
@@ -338,5 +338,5 @@ def kepoutlier_main():
     args = parser.parse_args()
     kepoutlier(args.infile, args.outfile, args.datacol, args.nsig,
                args.stepsize, args.npoly,args.niter, args.operation,
-               args.ranges, args.plot, args.plotfit, args.clobber,
+               args.ranges, args.plot, args.plotfit, args.overwrite,
                args.verbose, args.logfile)

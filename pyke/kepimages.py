@@ -8,7 +8,7 @@ from . import kepio, kepmsg, kepkey, kepstat
 __all__ = ['kepimages']
 
 
-def kepimages(infile, prefix, imtype='FLUX', ranges='0,0', clobber=True,
+def kepimages(infile, prefix, imtype='FLUX', ranges='0,0', overwrite=True,
               verbose=True, logfile='kepimages.log'):
     """
     kepimages -- create a series of separate FITS image files from a Target
@@ -68,8 +68,8 @@ def kepimages(infile, prefix, imtype='FLUX', ranges='0,0', clobber=True,
         semi-colon. An example containing two time ranges is:
 
             ``'2455641.658,2455641.740;2455671.658,2455672.740'``
-    clobber : bool
-        Overwrite the output file? if clobber is False and an existing file has
+    overwrite : bool
+        Overwrite the output file? if overwrite is False and an existing file has
         the same name as outfile then the task will stop with an error.
     verbose : bool
         Print informative messages and warnings to the shell and logfile?
@@ -107,7 +107,7 @@ def kepimages(infile, prefix, imtype='FLUX', ranges='0,0', clobber=True,
             + ' prefix={}'.format(prefix)
             + ' imtype={}'.format(imtype)
             + ' ranges={}'.format(ranges)
-            + ' clobber={}'.format(clobber)
+            + ' overwrite={}'.format(overwrite)
             + ' verbose={}'.format(verbose)
             + ' logfile={}'.format(logfile))
     kepmsg.log(logfile,call+'\n',verbose)
@@ -159,13 +159,13 @@ def kepimages(infile, prefix, imtype='FLUX', ranges='0,0', clobber=True,
     tstart, tstop = kepio.timeranges(ranges, logfile, verbose)
     cadencelis = kepstat.filterOnRange(time, tstart, tstop)
 
-    # provide name for each output file and clobber if file exists
+    # provide name for each output file and overwrite if file exists
     for cadence in cadencelis:
         outfile = prefix + '_BJD%.4f' % time[cadence] + '.fits'
-        if clobber:
-            kepio.clobber(outfile, logfile, verbose)
+        if overwrite:
+            kepio.overwrite(outfile, logfile, verbose)
         if kepio.fileexists(outfile):
-            errmsg = ('ERROR -- KEPIMAGES: {} exists. Use --clobber'
+            errmsg = ('ERROR -- KEPIMAGES: {} exists. Use --overwrite'
                       .format(outfile))
             kepmsg.err(logfile, errmsg, True)
 
@@ -310,7 +310,7 @@ def kepimages_main():
                                  'FLUX_BKG_ERR','COSMIC_RAYS'])
     parser.add_argument('--ranges', help='Time ranges for output [BJD]',
                         default='0,0', type=str)
-    parser.add_argument('--clobber', action='store_true',
+    parser.add_argument('--overwrite', action='store_true',
                         help='Overwrite output file?')
     parser.add_argument('--verbose', action='store_true',
                         help='Write to a log file?')
@@ -318,4 +318,4 @@ def kepimages_main():
                         default='kepimages.log', dest='logfile', type=str)
     args = parser.parse_args()
     kepimages(args.infile, args.prefix, args.imtype, args.ranges,
-              args.clobber, args.verbose, args.logfile)
+              args.overwrite, args.verbose, args.logfile)

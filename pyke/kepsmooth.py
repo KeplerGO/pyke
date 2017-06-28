@@ -5,7 +5,7 @@ from tqdm import tqdm
 from . import kepio, kepmsg, kepkey, kepfunc
 
 def kepsmooth(infile, outfile, datacol='SAP_FLUX', function='flat',
-              fscale=1.0, plot=False, clobber=False, verbose=False,
+              fscale=1.0, plot=False, overwrite=False, verbose=False,
               logfile='kepsmooth.log'):
     """
     kepsmooth -- Smooth Kepler light curve data by convolution with a choice
@@ -45,7 +45,7 @@ def kepsmooth(infile, outfile, datacol='SAP_FLUX', function='flat',
         The width of the convolution function in units of days.
     plot : bool
         Plot the original light curve and the result of the smoothing?
-    clobber : bool
+    overwrite : bool
         Overwrite the output file?
     verbose : bool
         Print informative messages and warnings to the shell and logfile?
@@ -72,7 +72,7 @@ def kepsmooth(infile, outfile, datacol='SAP_FLUX', function='flat',
             + ' function={}'.format(function)
             + ' fscale={}'.format(fscale)
             + ' plot={}'.format(plot)
-            + ' clobber={}'.format(clobber)
+            + ' overwrite={}'.format(overwrite)
             + ' verbose={}'.format(verbose)
             + ' logfile={}'.format(logfile))
     kepmsg.log(logfile, call+'\n', verbose)
@@ -80,11 +80,11 @@ def kepsmooth(infile, outfile, datacol='SAP_FLUX', function='flat',
     ## start time
     kepmsg.clock('KEPSMOOTH started at', logfile, verbose)
 
-    ## clobber output file
-    if clobber:
-        kepio.clobber(outfile, logfile, verbose)
+    ## overwrite output file
+    if overwrite:
+        kepio.overwrite(outfile, logfile, verbose)
     if kepio.fileexists(outfile):
-        errmsg = 'ERROR -- KEPSMOOTH: {} exists. Use clobber=True'.format(oufile)
+        errmsg = 'ERROR -- KEPSMOOTH: {} exists. Use overwrite=True'.format(oufile)
         kepmsg.err(logfile, errmsg, verbose)
 
     ## open input file
@@ -223,7 +223,7 @@ def kepsmooth_main():
                         help=('Characteristic width of smoothing function'
                               ' [days]'), type=float)
     parser.add_argument('--plot', action='store_true', help='Plot result?')
-    parser.add_argument('--clobber', action='store_true',
+    parser.add_argument('--overwrite', action='store_true',
                         help='Overwrite output file?')
     parser.add_argument('--verbose', action='store_true',
                         help='Write to a log file?')
@@ -231,5 +231,5 @@ def kepsmooth_main():
                         default='kepsmooth.log', dest='logfile', type=str)
     args = parser.parse_args()
     kepsmooth(args.infile, args.outfile, args.datacol, args.function,
-              args.fscale, args.plot, args.clobber, args.verbose,
+              args.fscale, args.plot, args.overwrite, args.verbose,
               args.logfile)

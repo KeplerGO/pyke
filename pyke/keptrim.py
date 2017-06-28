@@ -7,7 +7,7 @@ from . import kepio
 from . import kepmsg
 from . import kepkey
 
-def keptrim(infile, outfile, column, row, imsize, kepid=None, clobber=False,
+def keptrim(infile, outfile, column, row, imsize, kepid=None, overwrite=False,
             verbose=False, logfile='keptrim.log'):
     """
     keptrim -- trim pixels from Target Pixel Files
@@ -38,7 +38,7 @@ def keptrim(infile, outfile, column, row, imsize, kepid=None, clobber=False,
     imsize : int
         The pixel size of the subimage along either the row or column
         dimension. The subimage will be square.
-    clobber : bool
+    overwrite : bool
         Overwrite the output file?
     verbose : bool
         Option for verbose mode, in which informative messages and warnings to
@@ -51,7 +51,7 @@ def keptrim(infile, outfile, column, row, imsize, kepid=None, clobber=False,
     .. code-block:: bash
 
         $ keptrim ktwo251248961-c112_lpd-targ.fits keptrim.fits 14 770 --imsize 3
-        --clobber --verbose
+        --overwrite --verbose
 
     .. image:: ../_static/images/api/keptrim.png
         :align: center
@@ -67,18 +67,18 @@ def keptrim(infile, outfile, column, row, imsize, kepid=None, clobber=False,
             + ' row={}'.format(row)
             + ' imsize={}'.format(imsize)
             + ' kepid={}'.format(kepid)
-            + ' clobber={}'.format(clobber)
+            + ' overwrite={}'.format(overwrite)
             + ' verbose={}'.format(verbose)
             + ' logfile={}'.format(logfile))
     kepmsg.log(logfile, call+'\n', verbose)
 
     # start time
     kepmsg.clock('KEPTRIM started at', logfile, verbose)
-    # clobber output file
-    if clobber:
-        kepio.clobber(outfile, logfile, verbose)
+    # overwrite output file
+    if overwrite:
+        kepio.overwrite(outfile, logfile, verbose)
     if kepio.fileexists(outfile):
-        errmsg = 'ERROR -- KEPTRIM: {} exists. Use --clobber'.format(outfile)
+        errmsg = 'ERROR -- KEPTRIM: {} exists. Use --overwrite'.format(outfile)
         kepmsg.err(logfile, errmsg, verbose)
 
     # open input file
@@ -339,7 +339,7 @@ def keptrim_main():
     parser.add_argument('--kepid', type=int,
                         help='Kepler ID number from the Kepler Input Catalog')
 
-    parser.add_argument('--clobber', action='store_true',
+    parser.add_argument('--overwrite', action='store_true',
                         help='Overwrite output file?')
     parser.add_argument('--verbose', action='store_true',
                         help='Write to a log file?')
@@ -347,4 +347,4 @@ def keptrim_main():
                         default='keptrim.log', type=str)
     args = parser.parse_args()
     keptrim(args.infile, args.outfile, args.column, args.row, args.imsize,
-            args.kepid, args.clobber, args.verbose, args.logfile)
+            args.kepid, args.overwrite, args.verbose, args.logfile)

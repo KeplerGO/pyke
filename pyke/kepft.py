@@ -5,7 +5,7 @@ from astropy.io import fits as pyfits
 from . import kepio, kepmsg, kepkey, kepstat, kepfourier
 
 def kepft(infile, outfile, fcol='SAP_FLUX', pmin=0.1, pmax=10., nfreq=100,
-          plot=False, clobber=False, verbose=False, logfile='kepft.log'):
+          plot=False, overwrite=False, verbose=False, logfile='kepft.log'):
     """
     kepft -- Calculate and store a Fourier Transform from a Kepler time series
 
@@ -37,8 +37,8 @@ def kepft(infile, outfile, fcol='SAP_FLUX', pmin=0.1, pmax=10., nfreq=100,
         the Fourier transform will be calculated.
     plot : bool
         Plot the output Fourier spectrum?
-    clobber : bool
-        Overwrite the output file? if clobber = no and an existing file has the
+    overwrite : bool
+        Overwrite the output file? if overwrite = no and an existing file has the
         same name as outfile then the task will stop with an error.
     verbose : bool
         Print informative messages and warnings to the shell and logfile?
@@ -73,17 +73,17 @@ def kepft(infile, outfile, fcol='SAP_FLUX', pmin=0.1, pmax=10., nfreq=100,
             + ' pmax={}'.format(pmax)
             + ' nfreq={}'.format(nfreq)
             + ' plot={}'.format(plot)
-            + ' clobber={}'.format(clobber)
+            + ' overwrite={}'.format(overwrite)
             + ' verbose={}'.format(verbose)
             + ' logfile={}'.format(logfile))
     kepmsg.log(logfile, call+'\n', verbose)
     ## start time
     kepmsg.clock('Start time is', logfile, verbose)
-    ## clobber output file
-    if clobber:
-        kepio.clobber(outfile, logfile, verbose)
+    ## overwrite output file
+    if overwrite:
+        kepio.overwrite(outfile, logfile, verbose)
     if kepio.fileexists(outfile):
-        errmsg = 'ERROR -- KEPFT: {} exists. Use --clobber'.format(outfile)
+        errmsg = 'ERROR -- KEPFT: {} exists. Use --overwrite'.format(outfile)
         kepmsg.err(logfile, errmsg, verbose)
     ## open input file
     instr = pyfits.open(infile)
@@ -173,7 +173,7 @@ def kepft_main():
     parser.add_argument('--nfreq', default=100,
                         help='Number of frequency intervals', type=int)
     parser.add_argument('--plot', action='store_true', help='Plot result?')
-    parser.add_argument('--clobber', action='store_true',
+    parser.add_argument('--overwrite', action='store_true',
                         help='Overwrite output file?')
     parser.add_argument('--verbose', action='store_true',
                         help='Write to a log file?')
@@ -181,4 +181,4 @@ def kepft_main():
                         default='kepft.log', type=str)
     args = parser.parse_args()
     kepft(args.infile, args.outfile, args.datacol, args.pmin, args.pmax,
-          args.nfreq, args.plot, args.clobber, args.verbose, args.logfile)
+          args.nfreq, args.plot, args.overwrite, args.verbose, args.logfile)

@@ -10,7 +10,7 @@ __all__ = ['kepconvert']
 
 
 def kepconvert(infile, outfile, conversion, columns, baddata=True,
-               clobber=False, verbose=False, logfile='kepconvert.log'):
+               overwrite=False, verbose=False, logfile='kepconvert.log'):
     """
     kepconvert -- Convert Kepler FITS time series to or from a different file
     format
@@ -38,7 +38,7 @@ def kepconvert(infile, outfile, conversion, columns, baddata=True,
         ascii file. If ``False`` then only rows with SAP_QUALITY equal to zero
         will be outputed. This option is only applicable if
         ``conversion == fits2asc``.
-    clobber : bool
+    overwrite : bool
         Overwrite the output file?
     verbose : bool
         Print informative messages and warnings to the shell and logfile?
@@ -61,7 +61,7 @@ def kepconvert(infile, outfile, conversion, columns, baddata=True,
             + ' conversion={}'.format(conversion)
             + ' columns={}'.format(columns)
             + ' baddata={}'.format(baddata)
-            + ' clobber={}'.format(clobber)
+            + ' overwrite={}'.format(overwrite)
             + ' verbose={}'.format(verbose)
             + ' logfile={}'.format(logfile))
     kepmsg.log(logfile, call+'\n', verbose)
@@ -79,11 +79,11 @@ def kepconvert(infile, outfile, conversion, columns, baddata=True,
         errmsg = ('ERROR -- KEPCONVERT: input file {} does not exist'
                   .format(infile))
         kepmsg.err(logfile, errmsg, verbose)
-    # clobber output file
-    if clobber:
-        kepio.clobber(outfile, logfile, verbose)
+    # overwrite output file
+    if overwrite:
+        kepio.overwrite(outfile, logfile, verbose)
     if kepio.fileexists(outfile):
-        message = ('ERROR -- KEPCONVERT: {} exists. Use --clobber'
+        message = ('ERROR -- KEPCONVERT: {} exists. Use --overwrite'
                    .format(outfile))
         kepmsg.err(logfile, message, verbose)
     # open FITS input file
@@ -345,7 +345,7 @@ def kepconvert_main():
                         type=str)
     parser.add_argument('--baddata', action='store_false',
                         help='Output rows which have been flagged as questionable')
-    parser.add_argument('--clobber', action='store_true',
+    parser.add_argument('--overwrite', action='store_true',
                         help='Overwrite output file?')
     parser.add_argument('--verbose', action='store_true',
                         help='Write to a log file?')
@@ -353,4 +353,4 @@ def kepconvert_main():
                         default='kepconvert.log', dest='logfile', type=str)
     args = parser.parse_args()
     kepconvert(args.infile, args.outfile, args.conversion, args.columns,
-               args.baddata, args.clobber, args.verbose, args.logfile)
+               args.baddata, args.overwrite, args.verbose, args.logfile)

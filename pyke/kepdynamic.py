@@ -11,7 +11,7 @@ __all__ = ['kepdynamic']
 
 def kepdynamic(infile, outfile, fcol='SAP_FLUX', pmin=0.1, pmax=10., nfreq=100,
                deltat=10., nslice=10, plot=False, plotscale='log', cmap='PuBu',
-               clobber=False, verbose=False, logfile='kepdynamic.log'):
+               overwrite=False, verbose=False, logfile='kepdynamic.log'):
     """
     kepdynamic -- Construct a dynamic (time-dependent) power spectrum from
     Kepler time series data
@@ -48,7 +48,7 @@ def kepdynamic(infile, outfile, fcol='SAP_FLUX', pmin=0.1, pmax=10., nfreq=100,
         Plot the output Fourier spectrum?
     cmap : str
         A matplotlib colormap scheme.
-    clobber : bool
+    overwrite : bool
         Overwrite the output file?
     verbose : boolean
         Print informative messages and warnings to the shell and logfile?
@@ -87,7 +87,7 @@ def kepdynamic(infile, outfile, fcol='SAP_FLUX', pmin=0.1, pmax=10., nfreq=100,
             + ' plot={}'.format(plot)
             + ' plotscale={}'.format(plotscale)
             + ' cmap={}'.format(cmap)
-            + ' clobber={}'.format(clobber)
+            + ' overwrite={}'.format(overwrite)
             + ' verbose={}'.format(verbose)
             + ' logfile={}'.format(logfile))
     kepmsg.log(logfile, call+'\n', verbose)
@@ -99,11 +99,11 @@ def kepdynamic(infile, outfile, fcol='SAP_FLUX', pmin=0.1, pmax=10., nfreq=100,
         errmsg = 'ERROR -- KEPDYNAMIC: PMIN must be less than PMAX'
         kepmsg.err(logfile, errmsg, verbose)
 
-    # clobber output file
-    if clobber:
-        kepio.clobber(outfile, logfile, verbose)
+    # overwrite output file
+    if overwrite:
+        kepio.overwrite(outfile, logfile, verbose)
     if kepio.fileexists(outfile):
-        errmsg = ('ERROR -- KEPDYNAMIC: {} exists. Use clobber=True'
+        errmsg = ('ERROR -- KEPDYNAMIC: {} exists. Use overwrite=True'
                   .format(outfile))
         kepmsg.err(logfile, errmsg, verbose)
 
@@ -261,7 +261,7 @@ def kepdynamic_main():
                         choices=['linear', 'log', 'squareroot', 'loglog'])
     parser.add_argument('--cmap', default='PuBu', help='image colormap',
                         type=str)
-    parser.add_argument('--clobber', action='store_true',
+    parser.add_argument('--overwrite', action='store_true',
                         help='Overwrite output file?')
     parser.add_argument('--verbose', action='store_true',
                         help='Write to a log file?')
@@ -270,4 +270,4 @@ def kepdynamic_main():
     args = parser.parse_args()
     kepdynamic(args.infile, args.outfile, args.fcol, args.pmin, args.pmax,
                args.nfreq, args.deltat, args.nslice, args.plot, args.plotscale,
-               args.cmap, args.clobber, args.verbose, args.logfile)
+               args.cmap, args.overwrite, args.verbose, args.logfile)

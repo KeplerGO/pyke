@@ -10,7 +10,7 @@ __all__ = ['kepclip']
 
 
 def kepclip(infile, outfile, ranges, datacol='SAP_FLUX', plot=False,
-            clobber=False, verbose=False, logfile='kepclip.log'):
+            overwrite=False, verbose=False, logfile='kepclip.log'):
     """
     Remove unwanted time ranges from Kepler time series data.
 
@@ -30,7 +30,7 @@ def kepclip(infile, outfile, ranges, datacol='SAP_FLUX', plot=False,
         Plot the output data?
     datacol: str
         Types of photometry stored in the input file.
-    clobber: bool
+    overwrite: bool
         Overwrite the output file?
     verbose: bool
         Print informative messages and warnings to the shell and logfile?
@@ -43,7 +43,7 @@ def kepclip(infile, outfile, ranges, datacol='SAP_FLUX', plot=False,
 
         $ kepclip kplr002436324-2009259160929_llc.fits kepclip.fits
           '2455012.48517,2455018.50072;2455022.63487,2455060.08231'
-          --verbose --plot --clobber
+          --verbose --plot --overwrite
 
     .. image:: ../_static/images/api/kepclip.png
         :align: center
@@ -63,7 +63,7 @@ def kepclip(infile, outfile, ranges, datacol='SAP_FLUX', plot=False,
             + ' ranges={}'.format(ranges)
             + ' plot={}'.format(plot)
             + ' datacol={}'.format(datacol)
-            + ' clobber={}'.format(clobber)
+            + ' overwrite={}'.format(overwrite)
             + ' verbose={}'.format(verbose)
             + ' logfile={}'.format(logfile))
     kepmsg.log(logfile, call+'\n', verbose)
@@ -71,11 +71,11 @@ def kepclip(infile, outfile, ranges, datacol='SAP_FLUX', plot=False,
     # start time
     kepmsg.clock('KEPCLIP started at',logfile,verbose)
 
-    # clobber output file
-    if clobber:
-        kepio.clobber(outfile, logfile, verbose)
+    # overwrite output file
+    if overwrite:
+        kepio.overwrite(outfile, logfile, verbose)
     if kepio.fileexists(outfile):
-        errmsg = 'ERROR -- KEPCLIP: ' + outfile + ' exists. Use --clobber'
+        errmsg = 'ERROR -- KEPCLIP: ' + outfile + ' exists. Use --overwrite'
         kepmsg.err(logfile, errmsg, verbose)
 
     # time ranges for region
@@ -218,7 +218,7 @@ def kepclip_main():
     parser.add_argument('--datacol', help='Data column to plot',
                         default='SAP_FLUX', type=str)
     parser.add_argument('--plot', action='store_true', help='Plot result?')
-    parser.add_argument('--clobber', action='store_true',
+    parser.add_argument('--overwrite', action='store_true',
                         help='Overwrite output file?')
     parser.add_argument('--verbose', action='store_true',
                         help='Write to a log file?')
@@ -226,4 +226,4 @@ def kepclip_main():
                         default='kepclip.log', dest='logfile', type=str)
     args = parser.parse_args()
     kepclip(args.infile, args.outfile, args.ranges, args.datacol, args.plot,
-            args.clobber, args.verbose, args.logfile)
+            args.overwrite, args.verbose, args.logfile)

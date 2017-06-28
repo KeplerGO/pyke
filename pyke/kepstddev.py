@@ -14,7 +14,7 @@ __all__ = ['kepstddev']
 
 
 def kepstddev(infile, outfile, datacol='PDCSAP_FLUX', timescale=6.5,
-              clobber=False, verbose=False, logfile='kepstddev.log'):
+              overwrite=False, verbose=False, logfile='kepstddev.log'):
     """
     kepstddev -- Calculate Combined Differential Photometric Precision for a
     time series light curve.
@@ -45,8 +45,8 @@ def kepstddev(infile, outfile, datacol='PDCSAP_FLUX', timescale=6.5,
     timescale : float
         The characteristic timescale over which to calculate CDPP. The units
         are hours.
-    clobber : bool
-        Overwrite the output file? if clobber = no and an existing file has the
+    overwrite : bool
+        Overwrite the output file? if overwrite = no and an existing file has the
         same name as outfile then the task will stop with an error.
     verbose : bool
         Print informative messages and warnings to the shell and logfile?
@@ -64,7 +64,7 @@ def kepstddev(infile, outfile, datacol='PDCSAP_FLUX', timescale=6.5,
         --verbose
         --------------------------------------------------------------
         KEPSTDDEV --  infile=kplr002437145-2009350155506_llc.fits.fits outfile=kepstddev.fits datacol=DETSAP_FLUX
-        timescale=6.5 clobber=False verbose=True logfile=kepstddev.log
+        timescale=6.5 overwrite=False verbose=True logfile=kepstddev.log
 
         Standard deviation = 1295.0731328136349 ppm
         Median 6.5hr CDPP = 313 ppm
@@ -79,7 +79,7 @@ def kepstddev(infile, outfile, datacol='PDCSAP_FLUX', timescale=6.5,
             + ' outfile={}'.format(outfile)
             + ' datacol={}'.format(datacol)
             + ' timescale={}'.format(timescale)
-            + ' clobber={}'.format(clobber)
+            + ' overwrite={}'.format(overwrite)
             + ' verbose={}'.format(verbose)
             + ' logfile={}'.format(logfile))
     kepmsg.log(logfile, call+'\n', verbose)
@@ -88,11 +88,11 @@ def kepstddev(infile, outfile, datacol='PDCSAP_FLUX', timescale=6.5,
     kepmsg.clock('KEPSTDDEV started at',logfile,verbose)
 
 
-    # clobber output file
-    if clobber:
-        kepio.clobber(outfile, logfile, verbose)
+    # overwrite output file
+    if overwrite:
+        kepio.overwrite(outfile, logfile, verbose)
     if kepio.fileexists(outfile):
-        errmsg = ('ERROR -- KEPSTDDEV: {} exists. Use clobber=True'
+        errmsg = ('ERROR -- KEPSTDDEV: {} exists. Use overwrite=True'
                   .format(outfile))
         kepmsg.err(logfile, errmsg, verbose)
 
@@ -253,7 +253,7 @@ def kepstddev_main():
                         help='Name of data column to plot', type=str)
     parser.add_argument('--timescale', '-t', default=6.5,
                         help='CDPP timescale', type=float)
-    parser.add_argument('--clobber', action='store_true',
+    parser.add_argument('--overwrite', action='store_true',
                         help='Overwrite output file?')
     parser.add_argument('--verbose', action='store_true',
                         help='Write to a log file?')
@@ -261,5 +261,5 @@ def kepstddev_main():
                         default='kepstddev.log', type=str)
     args = parser.parse_args()
     kepstddev(args.infile, args.outfile, args.datacol, args.timescale,
-              args.clobber,args.verbose,
+              args.overwrite,args.verbose,
               args.logfile)

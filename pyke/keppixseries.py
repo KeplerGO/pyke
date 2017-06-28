@@ -5,7 +5,7 @@ from matplotlib import pyplot as plt
 from tqdm import tqdm
 
 def keppixseries(infile, outfile, plotfile=None, plottype='global',
-                 filterlc=False, function='boxcar', cutoff=1.0, clobber=False,
+                 filterlc=False, function='boxcar', cutoff=1.0, overwrite=False,
                  verbose=False, logfile='keppixseries.log'):
     """
     keppixseries -- individual time series photometry for all pixels within a
@@ -67,7 +67,7 @@ def keppixseries(infile, outfile, plotfile=None, plottype='global',
         * sinc
     cutoff : float
         The frequency of the high pass-band cutoff in units of days^{-1}.
-    clobber : bool
+    overwrite : bool
         Overwrite the output file?
     verbose : bool
         Print informative messages and warnings to the shell and logfile?
@@ -95,7 +95,7 @@ def keppixseries(infile, outfile, plotfile=None, plottype='global',
             + ' filterlc={}'.format(filterlc)
             + ' function={}'.format(function)
             + ' cutoff={}'.format(cutoff)
-            + ' clobber={}'.format(clobber)
+            + ' overwrite={}'.format(overwrite)
             + ' verbose={}'.format(verbose)
             + ' logfile={}'.format(logfile))
     kepmsg.log(logfile, call+'\n', verbose)
@@ -103,11 +103,11 @@ def keppixseries(infile, outfile, plotfile=None, plottype='global',
     # start time
     kepmsg.clock('KEPPIXSERIES started at', logfile, verbose)
 
-    # clobber output file
-    if clobber:
-        kepio.clobber(outfile, logfile, verbose)
+    # overwrite output file
+    if overwrite:
+        kepio.overwrite(outfile, logfile, verbose)
     if kepio.fileexists(outfile):
-        errmsg = ('ERROR -- KEPPIXSERIES: {} exists. Use --clobber'
+        errmsg = ('ERROR -- KEPPIXSERIES: {} exists. Use --overwrite'
                   .format(outfile))
         kepmsg.err(logfile, errmsg, verbose)
 
@@ -557,7 +557,7 @@ def keppixseries_main():
     parser.add_argument('--cutoff', default=1.0,
                         help='Characteristic frequency cutoff of filter [1/days]',
                         type=float)
-    parser.add_argument('--clobber', action='store_true',
+    parser.add_argument('--overwrite', action='store_true',
                         help='Overwrite output file?')
     parser.add_argument('--verbose', action='store_true',
                         help='Write to a log file?')
@@ -565,5 +565,5 @@ def keppixseries_main():
                         default='keppixseries.log', dest='logfile', type=str)
     args = parser.parse_args()
     keppixseries(args.infile, args.outfile, args.plotfile, args.plottype,
-                 args.filterlc, args.function, args.cutoff, args.clobber,
+                 args.filterlc, args.function, args.cutoff, args.overwrite,
                  args.verbose, args.logfile)

@@ -6,7 +6,7 @@ from astropy.io import fits as pyfits
 
 def kepdiffim(infile, outfile, plotfile=None, imscale='logarithmic',
               colmap='PuBu', filterlc=False, function='boxcar', cutoff=1.0,
-              clobber=False, verbose=False, logfile='kepdiffim.log'):
+              overwrite=False, verbose=False, logfile='kepdiffim.log'):
     """
     kepdiffim -- difference imaging of pixels within a target mask
 
@@ -65,7 +65,7 @@ def kepdiffim(infile, outfile, plotfile=None, imscale='logarithmic',
         * sinc
     cutoff : float
         The frequency of the high pass-band cutoff in units of days^-1.
-    clobber : bool
+    overwrite : bool
         Overwrite the output file?
     verbose : bool
         Print informative messages and warnings to the shell and logfile?
@@ -95,7 +95,7 @@ def kepdiffim(infile, outfile, plotfile=None, imscale='logarithmic',
             + ' filterlc={}'.format(filterlc)
             + ' function={}'.format(function)
             + ' cutoff={}'.format(cutoff)
-            + ' clobber={}'.format(clobber)
+            + ' overwrite={}'.format(overwrite)
             + ' verbose={}'.format(verbose)
             + ' logfile={}'.format(logfile))
     kepmsg.log(logfile, call+'\n', verbose)
@@ -103,11 +103,11 @@ def kepdiffim(infile, outfile, plotfile=None, imscale='logarithmic',
     # start time
     kepmsg.clock('KEPDIFFIM started at: ', logfile, verbose)
 
-    # clobber output file
-    if clobber:
-        kepio.clobber(outfile, logfile, verbose)
+    # overwrite output file
+    if overwrite:
+        kepio.overwrite(outfile, logfile, verbose)
     if kepio.fileexists(outfile):
-        errmsg = 'ERROR -- KEPDIFFIM: {} exists. Use --clobber'.format(outfile)
+        errmsg = 'ERROR -- KEPDIFFIM: {} exists. Use --overwrite'.format(outfile)
         kepmsg.err(logfile, errmsg, verbose)
 
     # open TPF FITS file
@@ -391,7 +391,7 @@ def kepdiffim_main():
     parser.add_argument('--cutoff',
                         help='Characteristic frequency cutoff of filter [1/days]',
                         type=float, default=1.0)
-    parser.add_argument('--clobber', action='store_true',
+    parser.add_argument('--overwrite', action='store_true',
                         help='Overwrite output file?')
     parser.add_argument('--verbose', action='store_true',
                         help='Write to a log file?')
@@ -400,4 +400,4 @@ def kepdiffim_main():
     args = parser.parse_args()
     kepdiffim(args.infile, args.outfile, args.plotfile, args.imscale,
               args.cmap, args.filterlc, args.function, args.cutoff,
-              args.clobber, args.verbose, args.logfile)
+              args.overwrite, args.verbose, args.logfile)
