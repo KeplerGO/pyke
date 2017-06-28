@@ -37,6 +37,7 @@ def test_import():
     from .. import kepprf
     from .. import kepprfphot
     from .. import keprange
+    from .. import kepsff
     from .. import kepsmooth
     from .. import kepstat
     from .. import kepstddev
