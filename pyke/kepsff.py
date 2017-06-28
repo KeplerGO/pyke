@@ -338,7 +338,7 @@ def kepsff(infile, outfile, datacol='DETSAP_FLUX', cenmethod='moments',
         # fit centroid data with low-order polynomial
         cfit = np.zeros((len(centr2)))
         csig = np.zeros((len(centr2)))
-        functype = 'poly' + str(npoly_cxcy)
+        functype = getattr(kepfunc, 'poly' + str(npoly_cxcy))
         pinit = np.array([np.nanmean(centr2)])
         if npoly_cxcy > 0:
             for j in range(npoly_cxcy):
@@ -357,7 +357,7 @@ def kepsff(infile, outfile, datacol='DETSAP_FLUX', cenmethod='moments',
                       ' stepsize (with an appreciation of the effects on'
                       ' light curve quality this will have!), or better yet'
                       ' - cut the timeseries up to remove large gaps in the'
-                      'input light curve using kepclip.'.format(t1, t2))
+                      ' input light curve using kepclip.'.format(t1, t2))
             kepmsg.err(logfile, errmsg, verbose)
 
         # reject outliers
@@ -453,7 +453,7 @@ def kepsff(infile, outfile, datacol='DETSAP_FLUX', cenmethod='moments',
         # fit polynomial to derivative and flag outliers (thruster firings)
         dfit = np.zeros((len(dx)))
         dsig = np.zeros((len(dx)))
-        functype = 'poly' + str(npoly_dsdt)
+        functype = getattr(kepfunc, 'poly' + str(npoly_dsdt))
         pinit = np.array([np.nanmean(dx)])
         if npoly_dsdt > 0:
             for j in range(npoly_dsdt):
