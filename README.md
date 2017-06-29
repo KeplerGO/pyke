@@ -47,7 +47,7 @@ PyKE, you can install it straight from GitHub:
     $ cd PyKE
     $ pip install -e .
 
-Note: PyKE version 2 and older, which was in use between 2012 and 2016 and required PyRAF, is available in the branch ``py27-pyraf``.
+Note: PyKE version 2 and older, which was in use between 2012 and 2016 and required PyRAF, is available in the branch [py27-pyraf](https://github.com/KeplerGO/PyKE/tree/py27-pyraf).
 
 ## Documentation
 
