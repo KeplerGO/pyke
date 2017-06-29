@@ -12,34 +12,36 @@ def kepdiffim(infile, outfile, plotfile=None, imscale='logarithmic',
 
     kepdiffim plots the mean, standard deviation and chi distribution images
     for the mask contained within a target pixel file. The standard deviation
-    on each pixel is defined as :math:`[flux - mean]^2 / [N - 1]`. The chi distribution
-    is sqrt({[mean - flux] / sigma} 2). If required, the data can be fed
-    through a **boxcar**, **gaussian** or **sinc** function high bandpass
-    filter in order to remove low frequency signal from the data. kepdiffim is
-    a diagnostic tool for identifying source contaminants in the background or
-    foreground of the target. It can be employed to identify pixels for
-    inclusion or exclusion when re-extracting a Kepler light curve from target
-    pixel files.
+    on each pixel is defined as :math:`[flux - mean]^2 / [N - 1]`. The chi
+    distribution is :math:`sqrt{[mean - flux] ^ 2 / sigma ^ 2}`. If required,
+    the data can be fed through a **boxcar**, **gaussian** or **sinc** function
+    high bandpass filter in order to remove low frequency signal from the data.
+    kepdiffim is a diagnostic tool for identifying source contaminants in the
+    background or foreground of the target. It can be employed to identify
+    pixels for inclusion or exclusion when re-extracting a Kepler light curve
+    from target pixel files.
 
+    Parameters
+    ----------
     infile : str
         The name of a MAST standard format FITS file containing Kepler Target
         Pixel data within the first data extension.
     outfile : str
         The name of the output FITS file. This file has four data extensions.
-        The first called ``'FLUX'`` contains an image of the pixel-by-pixel
+        The first called 'FLUX' contains an image of the pixel-by-pixel
         mean flux within target mask. The second contains the pixel variance
         image of the mask pixels over time. The third contains the standard
         deviation image, in this case the variance image is normalized to the
-        median 1-sigma error for each pixel. The fourth extension is the pixel
-        mask, as defined in the second extension of the target pixel file.
+        median 1-:math:`\sigma` error for each pixel. The fourth extension is
+        the pixel mask, as defined in the second extension of the target pixel
+        file.
     plotfile : str
         Name of an optional diagnostic output plot file containing the results
-        of kepdiffim. An example is provided in Figure 1. Typically this is a
-        PNG format file. If no diagnostic file is required, plotfile can be
-        'None'. If plotfile='None' the plot will be generated but the plot will
-        not be saved to a file.
+        of kepdiffim. Typically this is a PNG format file. If no diagnostic
+        file is required, plotfile can be **None**. If **plotfile** is **None**
+        the plot will be generated but the plot will not be saved to a file.
     imscale : str
-        kepdiffim can plot images with three choices of image scales. The
+        **kepdiffim** can plot images with three choices of image scales. The
         choice is made using this argument.
         The options are:
 
@@ -48,13 +50,12 @@ def kepdiffim(infile, outfile, plotfile=None, imscale='logarithmic',
         * logarithmic
 
         * squareroot
-
     cmap : str
         color intensity scheme for the image display.
     filter : bool
-        If ``filter=True``, the light curve for each pixel will be treated by
-        a high band-pass filter to remove long-term trends from e.g.
-        differential velocity aberration.
+        If **filter** is **True**, the light curve for each pixel will be
+        treated by a high band-pass filter to remove long-term trends from
+        e. g. differential velocity aberration.
     function : str
         The functional form of the high pass-band filter. The options are:
 
@@ -63,8 +64,8 @@ def kepdiffim(infile, outfile, plotfile=None, imscale='logarithmic',
         * gauss
 
         * sinc
-    cutoff : float
-        The frequency of the high pass-band cutoff in units of days^-1.
+    cutoff : float [days]
+        The frequency of the high pass-band cutoff.
     overwrite : bool
         Overwrite the output file?
     verbose : bool
