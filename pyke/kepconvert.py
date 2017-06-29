@@ -28,16 +28,18 @@ def kepconvert(infile, outfile, conversion, columns, baddata=True,
     outfile : str
         The name of the output file, e.g. a FITS structure or ASCII table.
     conversion : str
-        Define the type of file conversion.
+        Define the type of file conversion:
+
         * fits2asc
+
         * asc2fits
     columns : str
         A comma-delimited list of data column names or descriptors.
     baddata : bool
-        If ``True``, all the rows from the input FITS file are output to an
-        ascii file. If ``False`` then only rows with SAP_QUALITY equal to zero
-        will be outputed. This option is only applicable if
-        ``conversion == fits2asc``.
+        If **True**, all the rows from the input FITS file are output to an
+        ascii file. If **False** then only rows with SAP_QUALITY equal to zero
+        will be outputed. This option is only applicable if **conversion**
+        is **fits2asc**.
     overwrite : bool
         Overwrite the output file?
     verbose : bool
