@@ -1,38 +1,38 @@
-# PyKE [![Build Status](https://travis-ci.org/KeplerGO/PyKE.svg?branch=dev)](https://travis-ci.org/KeplerGO/PyKE) [![Documentation Status](https://readthedocs.org/projects/pyke/badge/?version=latest)](http://pyke.readthedocs.io/en/latest/?badge=latest) <a href="http://ascl.net/1208.004"><img src="https://img.shields.io/badge/ascl-1208.004-blue.svg?colorB=262255" alt="ascl:1208.004" /></a>
+# PyKE3: Kepler, K2 & TESS Data Analysis Tools
+[![Build Status](https://travis-ci.org/KeplerGO/PyKE.svg?branch=dev)](https://travis-ci.org/KeplerGO/PyKE) [![Documentation Status](https://readthedocs.org/projects/pyke/badge/?version=latest)](http://pyke.readthedocs.io/en/latest/?badge=latest) <a href="http://ascl.net/1208.004"><img src="https://img.shields.io/badge/ascl-1208.004-blue.svg?colorB=262255" alt="ascl:1208.004" /></a>
 
-***A suite of Python/PyRAF tools to analyze Kepler data.***
+<!-- ***Tools for working with data from NASA's Kepler & TESS Space Telescopes.*** -->
+
+Developed since 2012, PyKE offers a user-friendly way to inspect and analyze the pixels and lightcurves obtained by NASA's Kepler, K2, and TESS missions.
+
+## What's new in PyKE v3.0? (July 2017)
+
+PyKE3 is the latest generation of the toolkit.
+It provides the following key improvements:
+* easy installation via `pip`
+* support for Python 2 and 3
+* support for TESS data
+* PyRAF dependency removed
 
 ## Installation
 
-The easiest way to install PyKE is through ``pip``:
+If you have a working version of Python 2 or 3 on your system
+(we recommend [Anaconda Python](https://www.continuum.io/downloads)),
+you can simply install the latest stable release of PyKE using ``pip``:
 
-    pip install pyketools
+    $ pip install pyketools
 
-Or if you would like to experiment our development version:
+Alternatively, if you want to experiment with the latest development version of PyKE, you can install it straight from GitHub:
 
-    git clone https://github.com/KeplerGO/PyKE.git
-    cd PyKE
-    pip install -e .
+    $ git clone https://github.com/KeplerGO/PyKE.git
+    $ cd PyKE
+    $ pip install -e .
+
+Note: PyKE version 2 and older, which was in use between 2012 and 2016 and required PyRAF, is available in the branch ``py27-pyraf``.
+
+## Documentation
 
 Documentation is hosted at [readthedocs](http://pyke.rtfd.io).
-Alternatively, it can be built locally:
-
-    $ pip install sphinx numpydoc sphinx_rtd_theme
-    $ cd pyke
-    $ python setup.py build_sphinx
-
-## Installation with PyRAF
-
-To install PyKE within PyRAF, one may follow the instructions in the astroconda-iraf channel:
-http://astroconda.readthedocs.io/en/latest/installation.html#legacy-software-stack-with-iraf
-
-After that, run the following commands on your favorite terminal:
-
-1. ``mkiraf``
-2. ``pyraf``
-3. ``kepler``
-
-The developer version of PyKE that is compatible with PyRAF is under the branch ``py27-pyraf``.
 
 
 ## Acknowledgement
@@ -45,22 +45,9 @@ Publication:      Astrophysics Source Code Library, record ascl:1208.004
 Publication Date: 08/2012
 ```
 
-*This package was mostly developed by [Tom Barclay](http://www.github.com/mrtommyb) and Martin Still.
-Currently, this package is being developed and maintained by the Kepler/K2 GO Office.*
+*This package is developed by Martin Still, Tom Barclay, Ze Vinicius, Geert Barentsen, Michael Gully-Santiago, Ann Marie Cody, and Christine Hedges for the Kepler/K2 GO Office.*
 
+## Contributing
 
-## Dependencies
-```
-numpy
-scipy
-astropy
-matplotlib
-tqdm
-mdp (optional, needed for keppca)
-```
-
-## Support
-Users are welcome to open [issues](https://github.com/KeplerGO/PyKE/issues) involving any aspects of this software
-or submit [pull requests](https://github.com/KeplerGO/PyKE/pulls).
-
-Feel free to contact us also through: keplergo@mail.arc.nasa.gov
+Users are welcome to open [issues](https://github.com/KeplerGO/PyKE/issues) or [pull requests](https://github.com/KeplerGO/PyKE/pulls).
+You can also contact the development team via keplergo@mail.arc.nasa.gov
