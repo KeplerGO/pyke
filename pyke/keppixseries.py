@@ -37,7 +37,7 @@ def keppixseries(infile, outfile, plotfile=None, plottype='global',
         of keppixseries. An example is provided in Figure 1. Typically this is
         a PNG format file. If no diagnostic file is required, plotfile can be
         'None'. The plot will be generated regardless of the value of this
-        field, but the plot will not be saved to a file if plotfile='None'.
+        field, but the plot will not be saved to a file if ``plotfile='None'``.
     plottype : str
         keppixseries can plot light curves of three types.
         The choice is made using this argument. The options are:
@@ -66,7 +66,7 @@ def keppixseries(infile, outfile, plotfile=None, plottype='global',
 
         * sinc
     cutoff : float
-        The frequency of the high pass-band cutoff in units of days^{-1}.
+        The frequency of the high pass-band cutoff in units of :math:`days^{-1}`.
     overwrite : bool
         Overwrite the output file?
     verbose : bool

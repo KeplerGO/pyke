@@ -206,14 +206,14 @@ def kepsff(infile, outfile, datacol='DETSAP_FLUX', cenmethod='moments',
     npoly_arfl : integer
         The fourth panel (lower-middle) provides the subsequent target motion
         vs aperture flux distribution. The red line is polynomial fit, the
-        order of which is chosen by the user here. Iterative σ-clipping is
-        again required - the many outliers below the best-fit are astrophysical
-        in nature (binary star eclipses) and would bias the fit if they were
-        unrecognized or simply allowed to. The user has flexibility to change
-        the order and clipping threshold in order to provide the most robust
-        fit and there is a degree of objectivity in this process. A low
-        polynomial is generally adequate, this example employs a 3rd order
-        function.
+        order of which is chosen by the user here. Iterative
+        :math:`\sigma`-clipping is again required - the many outliers below
+        the best-fit are astrophysical in nature (binary star eclipses) and
+        would bias the fit if they were unrecognized or simply allowed to.
+        The user has flexibility to change the order and clipping threshold
+        in order to provide the most robust fit and there is a degree of
+        objectivity in this process. A low polynomial is generally adequate,
+        this example employs a 3rd order function.
     sigma_arfl : float [sigma]
         This is the threshold limit in units of 1-sigma standard deviation from
         the best-fit polynomial to the motion-flux relation. Data points
