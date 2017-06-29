@@ -6,7 +6,7 @@
 
 The easiest way to install PyKE is through ``pip``:
 
-    pip install pyke
+    pip install pyketools
 
 Or if you would like to experiment our development version:
 
@@ -17,9 +17,9 @@ Or if you would like to experiment our development version:
 Documentation is hosted at [readthedocs](http://pyke.rtfd.io).
 Alternatively, it can be built locally:
 
-    $ cd pyke/docs
+    $ pip install sphinx numpydoc sphinx_rtd_theme
+    $ cd pyke
     $ python setup.py build_sphinx
-
 
 ## Installation with PyRAF
 
@@ -45,8 +45,8 @@ Publication:      Astrophysics Source Code Library, record ascl:1208.004
 Publication Date: 08/2012
 ```
 
-*This package was mostly developed by Tom Barclay ([@mrtommyb](http://www.github.com/mrtommyb)) and Martin Still.
-Currently, this package is being developed and maintained by [Zé](http://www.github.com/mirca), [Gully](http://www.github.com/gully), and [Geert](http://www.github.com/barentsen).*
+*This package was mostly developed by [Tom Barclay](http://www.github.com/mrtommyb) and Martin Still.
+Currently, this package is being developed and maintained by the Kepler/K2 GO Office.*
 
 
 ## Dependencies
@@ -60,6 +60,7 @@ mdp (optional, needed for keppca)
 ```
 
 ## Support
-Users are welcome to open [issues](https://github.com/KeplerGO/PyKE/issues) involving any aspects of this software.
+Users are welcome to open [issues](https://github.com/KeplerGO/PyKE/issues) involving any aspects of this software
+or submit [pull requests](https://github.com/KeplerGO/PyKE/pulls).
 
 Feel free to contact us also through: keplergo@mail.arc.nasa.gov
