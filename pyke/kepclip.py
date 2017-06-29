@@ -49,11 +49,6 @@ def kepclip(infile, outfile, ranges, datacol='SAP_FLUX', plot=False,
         :align: center
     """
 
-    lcolor = '#0000ff'
-    lwidth = 1.0
-    fcolor = '#ffff00'
-    falpha = 0.2
-
     # log the call
     hashline = '----------------------------------------------------------------------------'
     kepmsg.log(logfile, hashline, verbose)
@@ -172,19 +167,19 @@ def kepclip(infile, outfile, ranges, datacol='SAP_FLUX', plot=False,
             else:
                 ltime = np.array(ltime, dtype=np.float)
                 ldata = np.array(ldata, dtype=np.float)
-                plt.plot(ltime, ldata, color=lcolor, linestyle='-',
-                         linewidth=lwidth)
+                plt.plot(ltime, ldata, color='#0000ff', linestyle='-',
+                         linewidth=1.0)
                 ltime = []; ldata = []
         ltime = np.array(ltime, dtype=np.float)
         ldata = np.array(ldata, dtype=np.float)
-        plt.plot(ltime, ldata, color=lcolor, linestyle='-', linewidth=lwidth)
+        plt.plot(ltime, ldata, color='#0000ff', linestyle='-', linewidth=1.0)
 
         # plot fill data
         barytime = np.insert(barytime, [0], [barytime[0]])
         barytime = np.append(barytime, [barytime[-1]])
         flux = np.insert(flux, [0], [0.0])
         flux = np.append(flux, [0.0])
-        plt.fill(barytime, flux, fc=fcolor, linewidth=0.0, alpha=falpha)
+        plt.fill(barytime, flux, fc='#ffff00', linewidth=0.0, alpha=0.2)
         plt.xlim(xmin - xr * 0.01, xmax + xr * 0.01)
         if ymin - yr * 0.01 <= 0.0:
             plt.ylim(1.0e-10, ymax + yr * 0.01)
