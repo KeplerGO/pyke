@@ -15,14 +15,14 @@ def kepfilter(infile, outfile, passband, datacol='SAP_FLUX', function='boxcar',
 
     ``kepfilter`` applies a bandpass filter to Kepler light curve data. In the
     low bandpass option, the data is convolved with a function of
-    user-specified width. Choices of convolution function are boxcar, Gaussian
-    or sinc. In the high bandpass option the convolution minus the median of
-    the convolution is subtracted from the original data. The filtered data is
-    copied to a new FITS file with the same structure as the input file.
+    user-specified width. Choices of convolution function are **boxcar**,
+    **Gaussian** or **sinc**. In the high bandpass option the convolution minus
+    the median of the convolution is subtracted from the original data. The
+    filtered data is copied to a new FITS file with the same structure as the
+    input file.
 
     Parameters
     ----------
-
     infile : str
         The name of a MAST standard format FITS file containing Kepler light
         curve data within the first data extension.
