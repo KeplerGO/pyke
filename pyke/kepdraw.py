@@ -13,7 +13,7 @@ def kepdraw(infile, outfile='kepdraw.png', datacol='SAP_FLUX', ploterr=False,
             plotgrid=False, ylabel='e$^-$ s$^{-1}$', plottype='fast',
             verbose=False, logfile='kepdraw.log'):
     """
-    kepdraw -- Interactive plotting of Kepler time series data
+    kepdraw -- Interactive plotting of time series data
 
     Parameters
     ----------
@@ -65,9 +65,10 @@ def kepdraw(infile, outfile='kepdraw.png', datacol='SAP_FLUX', ploterr=False,
         using discrete points to represent the data. 'pretty' provides a
         continuous curve between data points, except at natural data gaps or
         where quality issues occur. Pretty curves are significantly slower to
-        build. Options::
+        build. Options:
 
             * fast
+
             * pretty
     verbose : bool
         Print informative messages and warnings to the shell and logfile?
