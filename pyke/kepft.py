@@ -12,8 +12,7 @@ def kepft(infile, outfile, fcol='SAP_FLUX', pmin=0.1, pmax=10., nfreq=100,
     ``kepft`` calculates the discrete Fourier transform for a user-provided
     Kepler time series. The result is stored in a new FITS file that is a
     direct copy of the input file but with an additional table extension
-    containing the power spectrum. A permanent copy of the optional plot can be
-    stored by using the save button on the plotting GUI.
+    containing the power spectrum.
 
     Parameters
     ----------
@@ -26,19 +25,19 @@ def kepft(infile, outfile, fcol='SAP_FLUX', pmin=0.1, pmax=10., nfreq=100,
     fcol : str
         The name of the FITS table column in extension 1 of infile upon which
         the Fourier transform will be calculated.
-    pmin : float
+    pmin : float [day]
         The minimum of the period range over which the Fourier transform will
-        be calculated. The unit is day.
-    pmax : float
+        be calculated.
+    pmax : float [day]
         The maximum of the period range over which the Fourier transform will
-        be calculated. The unit is day.
+        be calculated.
     nfreq : int
-        The number of uniform frequency steps between 1/pmax and 1/pmin that
-        the Fourier transform will be calculated.
+        The number of uniform frequency steps between :math:`1/pmax` and
+        :math:`1/pmin` that the Fourier transform will be calculated.
     plot : bool
         Plot the output Fourier spectrum?
     overwrite : bool
-        Overwrite the output file? if overwrite = False and an existing file has the
+        Overwrite the output file? if **overwrite** is **False** and an existing file has the
         same name as outfile then the task will stop with an error.
     verbose : bool
         Print informative messages and warnings to the shell and logfile?
@@ -55,13 +54,6 @@ def kepft(infile, outfile, fcol='SAP_FLUX', pmin=0.1, pmax=10., nfreq=100,
     .. image:: ../_static/images/api/kepft.png
         :align: center
     """
-
-    ## startup parameters
-    lcolor = '#0000ff'
-    lwidth = 1.0
-    fcolor = '#ffff00'
-    falpha = 0.2
-
     ## log the call
     hashline = '--------------------------------------------------------------'
     kepmsg.log(logfile, hashline, verbose)
@@ -141,8 +133,8 @@ def kepft(infile, outfile, fcol='SAP_FLUX', pmin=0.1, pmax=10., nfreq=100,
         plt.figure()
         plt.clf()
         plt.axes([0.06, 0.113, 0.93, 0.86])
-        plt.plot(fr, power, color=lcolor, linestyle='-', linewidth=lwidth)
-        plt.fill(fr, power, color=fcolor, linewidth=0.0, alpha=falpha)
+        plt.plot(fr, power, color='#0000ff', linestyle='-', linewidth=1.0)
+        plt.fill(fr, power, color='#ffff00', linewidth=0.0, alpha=0.2)
         plt.xlim(xmin - xr * 0.01, xmax + xr * 0.01)
         if ymin - yr * 0.01 <= 0.0:
             plt.ylim(1.0e-10, ymax + yr * 0.01)
