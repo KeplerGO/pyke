@@ -14,7 +14,6 @@ def location(shape):
     ax.yaxis.set_major_locator(plt.MaxNLocator(5))
     # rotate y labels by 90 deg
     labels = ax.get_yticklabels()
-    plt.setp(labels, 'rotation', 90)
 
     return ax
 

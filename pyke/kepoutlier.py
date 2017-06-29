@@ -64,7 +64,7 @@ def kepoutlier(infile, outfile, datacol, nsig=3.0, stepsize=1.0, npoly=3,
         Dates (BJDs). Multiple ranges are separated by a semi-colon. An example
         containing two time ranges is::
 
-            ``'2455012.48517,2455014.50072;2455022.63487,2455025.08231'``
+            '2455012.48517,2455014.50072;2455022.63487,2455025.08231'
 
         If the user wants to correct the entire time series then providing
         ``ranges = '0,0'`` will tell the task to operate on the whole time series.
