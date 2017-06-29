@@ -48,10 +48,11 @@ def kepimages(infile, prefix, imtype='FLUX', ranges='0,0', overwrite=True,
     * ``COSMIC_RAYS`` -- the cosmic ray map that has been subtracted from the
       FLUX image in units of :math:`e^{-}/s`
 
-    We recommend the tools ds9 and fv for the inspection of the FITS image
-    products. The intent of the kepimages tool is to convert the TPF content
-    into a form from which images can be imported into the array of public
-    photometry software available to the K2 and Kepler communities.
+    We recommend the tools [ds9](http://ds9.si.edu/) and
+    [fv](https://heasarc.gsfc.nasa.gov/ftools/fv/) for the inspection of the
+    FITS image products. The intent of the kepimages tool is to convert the
+    TPF content into a form from which images can be imported into the array
+    of public photometry software available to the K2 and Kepler communities.
 
     Parameters
     ----------
@@ -65,7 +66,7 @@ def kepimages(infile, prefix, imtype='FLUX', ranges='0,0', overwrite=True,
         The user can choose here specific time ranges of exposures from which
         to export images. Time ranges are supplied as comma-separated pairs of
         Barycentric Julian Dates (BJDs). Multiple ranges are separated by a
-        semi-colon. An example containing two time ranges is:
+        semi-colon. An example containing two time ranges is::
 
             '2455641.658,2455641.740;2455671.658,2455672.740'
     overwrite : bool
