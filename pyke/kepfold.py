@@ -16,11 +16,13 @@ def kepfold(infile, outfile, period, bjd0, bindata=False,
     kepfold calculates the phase of all time-tagged data points relative to a
     user-supplied linear ephemeris. The relation is:
 
-    ``TIMEi = bjdzero + period * PHASEi``
+    .. math::
 
-    TIME is the column within the FITS light curve file containing
-    barycenter-corrected time stamps. bjdzero is a user-supplied BJD for zero
-    phase. period is a user-supplied period in units of days. PHASE is the
+        TIME_i = bjd0 + period \cdot PHASE_i
+
+    :math:`TIME` is the column within the FITS light curve file containing
+    barycenter-corrected time stamps. :math:`bjd0` is a user-supplied BJD for
+    zero phase. period is a user-supplied period in units of days. PHASE is the
     calculated phase for each time stamp; these results are written to a new
     float column in the LIGHT CURVE extension of the input file before being
     exported as a new file with name defined by the user. Optionally, kepfold
@@ -54,7 +56,7 @@ def kepfold(infile, outfile, period, bjd0, bindata=False,
     threshold : float
         The sigma clipping threshold in units of the standard deviation about
         the calculated mean within a phase bin. A typical outlier
-        lies > 3.0 standard deviations from the mean.
+        lies > 3.0:math:`\sigma` from the mean.
     niter : int
         The maximum number of iterations over which to reject outliers before
         accepting the sigclip result.
@@ -101,7 +103,7 @@ def kepfold(infile, outfile, period, bjd0, bindata=False,
     """
 
     # log the call
-    hashline = '----------------------------------------------------------------------------'
+    hashline = '--------------------------------------------------------------'
     kepmsg.log(logfile, hashline, verbose)
     call = ('KEPFOLD -- '
             + ' infile={}'.format(infile)
@@ -128,8 +130,9 @@ def kepfold(infile, outfile, period, bjd0, bindata=False,
     if overwrite:
         kepio.overwrite(outfile, logfile, verbose)
     if kepio.fileexists(outfile):
-        message = 'ERROR -- KEPFOLD: ' + outfile + ' exists. Use --overwrite'
-        kepmsg.err(logfile, message, verbose)
+        errmsg = ('ERROR -- KEPFOLD: {} exists. Use --overwrite'
+                  .format(outfile))
+        kepmsg.err(logfile, errmsg, verbose)
 
     # open input file
     instr = pyfits.open(infile, 'readonly')
