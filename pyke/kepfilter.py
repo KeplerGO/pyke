@@ -15,14 +15,14 @@ def kepfilter(infile, outfile, passband, datacol='SAP_FLUX', function='boxcar',
 
     ``kepfilter`` applies a bandpass filter to Kepler light curve data. In the
     low bandpass option, the data is convolved with a function of
-    user-specified width. Choices of convolution function are boxcar, Gaussian
-    or sinc. In the high bandpass option the convolution minus the median of
-    the convolution is subtracted from the original data. The filtered data is
-    copied to a new FITS file with the same structure as the input file.
+    user-specified width. Choices of convolution function are **boxcar**,
+    **Gaussian** or **sinc**. In the high bandpass option the convolution minus
+    the median of the convolution is subtracted from the original data. The
+    filtered data is copied to a new FITS file with the same structure as the
+    input file.
 
     Parameters
     ----------
-
     infile : str
         The name of a MAST standard format FITS file containing Kepler light
         curve data within the first data extension.
@@ -32,7 +32,7 @@ def kepfilter(infile, outfile, passband, datacol='SAP_FLUX', function='boxcar',
         in the output file by its filtered version.
     datacol : str
         The name of the data column in the input FITS file to be filtered, e.g.
-        ``SAP_FLUX``, ``PDCSAP_FLUX``, ``MOM_CENTR1`` etc. A full list of
+        SAP_FLUX, PDCSAP_FLUX, MOM_CENTR1 etc. A full list of
         archived data columns is provided in the Kepler Archive Manual.
     function : string
         The functional form of the bandpass convolution function.
@@ -57,8 +57,9 @@ def kepfilter(infile, outfile, passband, datacol='SAP_FLUX', function='boxcar',
     plot : bool
         Plot the original light curve and the result of the filter?
     overwrite : bool
-        Overwrite the output file? if overwrite = False and an existing file has the
-        same name as outfile then the task will stop with an error.
+        Overwrite the output file? if overwrite is **False** and an existing
+        file has the same name as outfile then the task will stop with an
+        error.
     verbose : bool
         Print informative messages and warnings to the shell and logfile?
     logfile : str

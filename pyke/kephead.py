@@ -26,10 +26,10 @@ def kephead(infile, outfile, keyname, overwrite=False, verbose=False,
     keyname : str
         The name of a keyword, value and description to print or store within
         the output file. Partial completions for the keyword are allowed. For
-        example keyname='mag' will return all instances of magnitude keywords
-        (BMAG, VMAG, KEPMAG etc) and their values within the light curves
-        stored at MAST. keyname='all' will return every keyword and their
-        values stored in all extensions within the input FITS file.
+        example ``keyname='mag'`` will return all instances of magnitude
+        keywords (BMAG, VMAG, KEPMAG etc) and their values within the light
+        curves stored at MAST. ``keyname='all'`` will return every keyword and
+        their values stored in all extensions within the input FITS file.
     overwrite : bool
         Overwrite the output file? if overwrite is False and an existing file
         has the same name as outfile then the task will stop with an error.
