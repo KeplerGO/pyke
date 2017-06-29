@@ -22,7 +22,7 @@ def kepextract(infile, outfile, maskfile='ALL', bkg=False, overwrite=False,
     the optimal aperture, the default pixel set is designed to maximize the
     signal-to-noise ratio of the resulting light curve, optimizing for transit
     detection. This tool provides users with a straightforward capability to
-    alter the summed pixel set. Applications include::
+    alter the summed pixel set. Applications include:
 
         * Use of all pixels in the aperture
 
@@ -34,6 +34,8 @@ def kepextract(infile, outfile, maskfile='ALL', bkg=False, overwrite=False,
         pixel can be examined. Light curves for extended sources which may be
         poorly sampled by the optimal aperture.
 
+    Parameters
+    ----------
     infile : str
         Filename for the target pixel file.
     outfile : str
@@ -54,7 +56,6 @@ def kepextract(infile, outfile, maskfile='ALL', bkg=False, overwrite=False,
             can be constructed using the kepmask or kepffi tools, or can be
             created manually using the format described in the documentation for
             those tools.
-
     bkg : bool
         Option to subtract an estimate of the background. Background is
         calculated by identifying the median pixel value for each exposure.
@@ -83,8 +84,14 @@ def kepextract(infile, outfile, maskfile='ALL', bkg=False, overwrite=False,
         import matplotlib.pyplot as plt
         from astropy.io import fits
 
-        f = fits.open(outlc)
+        f = fits.open('outlc.fits')
         plt.plot(f[1].data['TIME'], f[1].data['SAP_FLUX'])
+
+    or
+
+    .. code-block:: bash
+
+        $ kepdraw outlc.fits
 
     .. image:: ../_static/images/api/kepextract.png
         :align: center
