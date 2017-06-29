@@ -6,7 +6,7 @@
 
 The easiest way to install PyKE is through ``pip``:
 
-    pip install pyke
+    pip install pyketools
 
 Or if you would like to experiment our development version:
 
