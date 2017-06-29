@@ -21,14 +21,15 @@ def kepflatten(infile, outfile, datacol='PDCSAP_FLUX',
     kepflatten detrends data for low-frequency photometric structure by
     dividing by the mean of best-fit sliding polynomials over a sequential
     series of small time ranges across the data. For example, a typical
-    timestamp is fit three times of stepsize=1.0 and winsize=3.0. The adopted
-    fit to the timestamp will be the mean of the three values. Outliers are
-    iteratively-clipped from the fit, therefore structure in e.g. short-lived
-    transits or flares are better preserved compared to e.g. bandpass filtering
-    methods (kepfilter). Optionally, input data, best fits, fit outliers and
-    output data are rendered to a plot window. In many respects kepflatten
-    performs the opposite task to kepoutlier which removes statistical outliers
-    while preserving low-frequency structure in light curves.
+    timestamp is fit three times of ``stepsize=1.0`` and ``winsize=3.0``. The
+    adopted fit to the timestamp will be the mean of the three values. Outliers
+    are iteratively-clipped from the fit, therefore structure in e.g.
+    short-lived transits or flares are better preserved compared to e.g.
+    bandpass filtering methods (``kepfilter``). Optionally, input data, best
+    fits, fit outliers and output data are rendered to a plot window. In many
+    respects kepflatten performs the opposite task to kepoutlier which removes
+    statistical outliers while preserving low-frequency structure in light
+    curves.
 
     Parameters
     ----------
@@ -40,7 +41,7 @@ def kepflatten(infile, outfile, datacol='PDCSAP_FLUX',
         infile but with NaN timestamps removed and two new columns in the 1st
         extension - DETSAP_FLUX (a flattened or detrended for low-frequency
         variations version of the data) and DETSAP_FLUX_ERR (the associated
-        1-sigma error).
+        1-:math:`\sigma` error).
     datacol : str
         The column name containing data stored within extension 1 of infile.
         Typically this name is SAP_FLUX (Simple Aperture Photometry fluxes),
@@ -48,7 +49,7 @@ def kepflatten(infile, outfile, datacol='PDCSAP_FLUX',
         (SAP_FLUX corrected for systematic artifacts by the PyKE tool
         kepcotrend).
     errcol : str
-        The column name containing photometric 1-standard deviation errors
+        The column name containing photometric 1-:math:`\sigma` errors
         stored within extension 1 of infile. Typically this name is
         SAP_FLUX_ERR (Simple Aperture Photometry fluxes), PDCSAP_FLUX_ERR
         (Pre-search Data Conditioning fluxes). The error column coupled to
@@ -85,7 +86,8 @@ def kepflatten(infile, outfile, datacol='PDCSAP_FLUX',
         ``2455012.48517,2455014.50072;2455022.63487,2455025.08231``.
 
         If the user wants to correct the entire time series then providing
-        ranges = '0,0' will tell the task to operate on the whole time series.
+        ``ranges='0,0'`` will tell the task to operate on the whole time
+        series.
     plot : bool
         Plot the data, fit, outliers and result?
     overwrite : bool
@@ -106,14 +108,8 @@ def kepflatten(infile, outfile, datacol='PDCSAP_FLUX',
     .. image:: ../_static/images/api/kepflatten.png
         :align: center
     """
-    # startup parameters
-    lcolor = '#0000ff'
-    lwidth = 1.0
-    fcolor = '#ffff00'
-    falpha = 0.2
-
     # log the call
-    hashline = '----------------------------------------------------------------------------'
+    hashline = '--------------------------------------------------------------'
     kepmsg.log(logfile, hashline, verbose)
     call = ('KEPFLATTEN -- '
             + ' infile={}'.format(infile)
@@ -133,7 +129,7 @@ def kepflatten(infile, outfile, datacol='PDCSAP_FLUX',
     kepmsg.log(logfile, call+'\n', verbose)
 
     # start time
-    kepmsg.clock('KEPFLATTEN started at',logfile,verbose)
+    kepmsg.clock('KEPFLATTEN started at', logfile, verbose)
 
     # test winsize > stepsize
     if winsize < stepsize:
@@ -251,9 +247,9 @@ def kepflatten(infile, outfile, datacol='PDCSAP_FLUX',
         # rotate y labels by 90 deg
         labels = ax.get_yticklabels()
         plt.setp(plt.gca(), xticklabels=[])
-        plt.plot(ptime[1:-1], pout[1:-1], color=lcolor, linestyle='-',
-                 linewidth=lwidth)
-        plt.fill(ptime, pout, color=fcolor, linewidth=0.0, alpha=falpha)
+        plt.plot(ptime[1:-1], pout[1:-1], color='#0000ff', linestyle='-',
+                 linewidth=1.0)
+        plt.fill(ptime, pout, color='#ffff00', linewidth=0.0, alpha=0.2)
         plt.ylabel(ylab, {'color' : 'k'})
         plt.grid()
 
@@ -334,9 +330,9 @@ def kepflatten(infile, outfile, datacol='PDCSAP_FLUX',
         yr = ymax - ymin
         pout = np.insert(pout, [0], [0.0])
         pout = np.append(pout, 0.0)
-        plt.plot(ptime[1:-1], pout[1:-1], color=lcolor, linestyle='-',
-                 linewidth=lwidth)
-        plt.fill(ptime, pout, color=fcolor, linewidth=0.0, alpha=falpha)
+        plt.plot(ptime[1:-1], pout[1:-1], color='#0000ff', linestyle='-',
+                 linewidth=1.0)
+        plt.fill(ptime, pout, color='#ffff00', linewidth=0.0, alpha=0.2)
         plt.xlabel(xlab, {'color' : 'k'})
         plt.ylabel(ylab, {'color' : 'k'})
         plt.grid()
