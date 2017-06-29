@@ -45,7 +45,7 @@ Publication:      Astrophysics Source Code Library, record ascl:1208.004
 Publication Date: 08/2012
 ```
 
-*This package was mostly developed by Tom Barclay ([@mrtommyb](http://www.github.com/mrtommyb)) and Martin Still.
+*This package was mostly developed by [Tom Barclay](http://www.github.com/mrtommyb) and Martin Still.
 Currently, this package is being developed and maintained by [Zé](http://www.github.com/mirca), [Gully](http://www.github.com/gully), and [Geert](http://www.github.com/barentsen).*
 
 
@@ -60,6 +60,7 @@ mdp (optional, needed for keppca)
 ```
 
 ## Support
-Users are welcome to open [issues](https://github.com/KeplerGO/PyKE/issues) involving any aspects of this software.
+Users are welcome to open [issues](https://github.com/KeplerGO/PyKE/issues) involving any aspects of this software
+or submit [pull requests](https://github.com/KeplerGO/PyKE/pulls).
 
 Feel free to contact us also through: keplergo@mail.arc.nasa.gov
