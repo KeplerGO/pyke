@@ -515,11 +515,13 @@ def kepcotrend(infile, outfile, bvfile, listbv, fitmethod='llsq', fitpower=1,
     The archived cotrending basis vectors are a reduced-rank representation of
     the full set of basis vectors and consist of the 16 leading columns.
 
-    To correct a SAP light curve, ``Fsap``, for systematic features,
-    ``kepcotrend`` employs the cotrending basis vectors ``CBVi``. The task
-    finds the coefficients ``Ai`` which minimize
+    To correct a SAP light curve, :math:`Fsap`, for systematic features,
+    ``kepcotrend`` employs the cotrending basis vectors :math:`CBVi`. The task
+    finds the coefficients :math:`Ai` which minimize
 
-                    Fcbv = Fsap - sum(Ai * CBVi)
+    .. math::
+
+        Fcbv = Fsap - \sum_{i} Ai \cdot CBV_i
 
     The corrected light curve, Fcbv, can be tailored to the needs of the user
     and their scientific objective. The user decides which combination of basis
@@ -566,6 +568,8 @@ def kepcotrend(infile, outfile, bvfile, listbv, fitmethod='llsq', fitpower=1,
     so if an iterative fit is performed these clipped values are not included
     in this calculation.
 
+    Parameters
+    ----------
     infile : str
         the input file in the FITS format obtained from MAST
     outfile : str
@@ -629,7 +633,8 @@ def kepcotrend(infile, outfile, bvfile, listbv, fitmethod='llsq', fitpower=1,
     --------
     .. code-block:: bash
 
-        $ kepcotrend kplr005110407-2009350155506_llc.fits kepcotrend.fits ~/cbv/kplr2009350155506-q03-d25_lcbv.fits
+        $ kepcotrend kplr005110407-2009350155506_llc.fits kepcotrend.fits
+        ~/cbv/kplr2009350155506-q03-d25_lcbv.fits
         '1 2 3' --plot --verbose
     """
     # log the call
@@ -780,7 +785,7 @@ def kepcotrend(infile, outfile, bvfile, listbv, fitmethod='llsq', fitpower=1,
                    'first basis vector to use must be between 1 and 9')
         kepmsg.err(logfile, message, verbose)
 
-    bvlist = np.fromstring(listbv,dtype=int,sep=separator)
+    bvlist = np.fromstring(listbv, dtype=int, sep=separator)
     if bvlist[0] == 0:
         errmsg = 'Must use at least one basis vector'
         kepmsg.err(logfile, errmsg, verbose)
