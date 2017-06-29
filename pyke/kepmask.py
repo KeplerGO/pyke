@@ -104,7 +104,7 @@ def kepmask(infile, frameno, maskfile='mask.txt', plotfile='kepmask.png',
     kepmsg.log(logfile, call + '\n', verbose)
     kepmsg.clock('KEPMASK started at', logfile, verbose)
 
-# open TPF FITS file and check whether or not frameno exists
+    # open TPF FITS file and check whether or not frameno exists
     try:
         tpf = pyfits.open(infile, mode='readonly')
     except:
@@ -120,8 +120,8 @@ def kepmask(infile, frameno, maskfile='mask.txt', plotfile='kepmask.png',
         kepmsg.err(logfile, errmsg, verbose)
 
     if frameno > naxis2:
-        errmsg = ('ERROR -- KEPMASK: frameno is too large. There are ' +
-                  str(naxis2) + ' rows in the table.')
+        errmsg = ('ERROR -- KEPMASK: frameno is too large. There are'
+                  ' {} rows in the table.'.format(naxis2))
         kepmsg.err(logfile, errmsg, verbose)
 
     tpf.close()
@@ -410,8 +410,7 @@ def kepmask_main():
     import argparse
     parser = argparse.ArgumentParser(
                    description=("Plot, create or edit custom light curve "
-                                "extraction masks for target pixel files ")
-                   )
+                                "extraction masks for target pixel files "))
     parser.add_argument('infile', help='name of input target pixel FITS file',
                         type=str)
     parser.add_argument('frameno', help='The number of the frame to plot',
@@ -428,7 +427,7 @@ def kepmask_main():
     parser.add_argument('--iscale', default='logarithmic',
                         help='type of image intensity scale',
                         type=str,
-                        choices=['linear','logarithmic','squareroot'])
+                        choices=['linear', 'logarithmic', 'squareroot'])
     parser.add_argument('--cmap', default='bone', help='image colormap',
                         type=str)
     parser.add_argument('--verbose', action='store_true',
