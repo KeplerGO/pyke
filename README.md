@@ -46,7 +46,7 @@ Publication Date: 08/2012
 ```
 
 *This package was mostly developed by [Tom Barclay](http://www.github.com/mrtommyb) and Martin Still.
-Currently, this package is being developed and maintained by [Zé](http://www.github.com/mirca), [Gully](http://www.github.com/gully), and [Geert](http://www.github.com/barentsen).*
+Currently, this package is being developed and maintained by the Kepler/K2 GO Office.*
 
 
 ## Dependencies
