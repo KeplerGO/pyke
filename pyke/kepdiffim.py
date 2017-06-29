@@ -12,9 +12,9 @@ def kepdiffim(infile, outfile, plotfile=None, imscale='logarithmic',
 
     kepdiffim plots the mean, standard deviation and chi distribution images
     for the mask contained within a target pixel file. The standard deviation
-    on each pixel is defined as [mean - flux]^2 / [N - 1]. The chi distribution
+    on each pixel is defined as :math:`[flux - mean]^2 / [N - 1]`. The chi distribution
     is sqrt({[mean - flux] / sigma} 2). If required, the data can be fed
-    through a ``boxcar``, ``gaussian`` or ``sinc`` function high bandpass
+    through a **boxcar**, **gaussian** or **sinc** function high bandpass
     filter in order to remove low frequency signal from the data. kepdiffim is
     a diagnostic tool for identifying source contaminants in the background or
     foreground of the target. It can be employed to identify pixels for
