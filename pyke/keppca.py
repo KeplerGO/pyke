@@ -45,6 +45,8 @@ def keppca(infile, outfile, maskfile='ALL', components='1-3', plotpca=False,
     This output file can be used as input for other PyKE tasks and can be e.g.
     inspected using kepdraw.
 
+    Parameters
+    ----------
     infile : str
         The name of a standard format FITS file containing Kepler or K2 target
         pixels within the first data extension.
@@ -252,8 +254,8 @@ def keppca(infile, outfile, maskfile='ALL', components='1-3', plotpca=False,
                 for work3 in range(int(work2[0]), int(work2[1]) + 1):
                     pcaout.append(work3)
             except:
-                errmsg = ('ERROR -- KEPPCA: cannot understand principal '
-                          'component list requested')
+                errmsg = ('ERROR -- KEPPCA: cannot understand principal'
+                          ' component list requested')
                 kepmsg.err(logfile, message, verbose)
 
     pcaout = set(np.sort(pcaout))
@@ -342,7 +344,7 @@ def keppca(infile, outfile, maskfile='ALL', components='1-3', plotpca=False,
     model = pcar
 
     # Re-insert nan columns as zeros
-    for i in range(0, len(nanpixels)):
+    for i in range(len(nanpixels)):
         nanpixels[i] = nanpixels[i] - i
     eigvec = np.insert(eigvec, nanpixels, 0, 1)
     pixMean = np.insert(pixMean, nanpixels, 0, 0)
@@ -359,10 +361,10 @@ def keppca(infile, outfile, maskfile='ALL', components='1-3', plotpca=False,
 
     # Subtract components by fitting them to the summed light curve
     x0 = np.tile(-1.0, 1)
-    for k in tqdm(range(0, nrem)):
+    for k in tqdm(range(nrem)):
         def f(x):
             fluxcor = pixseriessum
-            for k in range(0, len(x)):
+            for k in range(len(x)):
                 fluxcor = fluxcor - x[k]*model[:, pcarem[k]]
             return mad(fluxcor)
         if k == 0:
@@ -737,7 +739,6 @@ def keppca(infile, outfile, maskfile='ALL', components='1-3', plotpca=False,
     # stop time
     kepmsg.clock('KEPPCA ended at', logfile, verbose)
 
-
 def reject_outliers(data, m):
     """Outlier rejection for computing robust mean"""
     try:
@@ -745,7 +746,6 @@ def reject_outliers(data, m):
     except:
         print("Warning: Could not reject outliers.")
         return data
-
 
 def mad(data):
     """

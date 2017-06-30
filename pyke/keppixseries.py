@@ -20,6 +20,8 @@ def keppixseries(infile, outfile, plotfile=None, plottype='global',
     target. It can be employed to identify pixels for inclusion or exclusion
     when re-extracting a Kepler light curve from target pixel files.
 
+    Parameters
+    ----------
     infile : str
         The name of a MAST standard format FITS file containing Kepler Target
         Pixel data within the first data extension.
@@ -28,16 +30,16 @@ def keppixseries(infile, outfile, plotfile=None, plottype='global',
         The first called 'PIXELSERIES' contains a table with columns of
         barycenter-corrected time, barycenter time correction, cadence number,
         cadence quality flag and a series of photometric light curves, one for
-        each pixel within the target mask. Each pixel is labeled 'COLx_ROWy',
-        where x is the pixel column number and y is the pixel row number on the
-        CCD module/output. The second extension contains the mask definition
-        map copied directly from the input target pixel file.
+        each pixel within the target mask. Each pixel is labeled COLx_ROWy,
+        where :math:`x` is the pixel column number and :math:`y` is the pixel
+        row number on the CCD module/output. The second extension contains the
+        mask definition map copied directly from the input target pixel file.
     plotfile : str
         Name of an optional diagnostic output plot file containing the results
         of keppixseries. An example is provided in Figure 1. Typically this is
         a PNG format file. If no diagnostic file is required, plotfile can be
         'None'. The plot will be generated regardless of the value of this
-        field, but the plot will not be saved to a file if plotfile='None'.
+        field, but the plot will not be saved to a file if ``plotfile='None'``.
     plottype : str
         keppixseries can plot light curves of three types.
         The choice is made using this argument. The options are:
@@ -66,7 +68,7 @@ def keppixseries(infile, outfile, plotfile=None, plottype='global',
 
         * sinc
     cutoff : float
-        The frequency of the high pass-band cutoff in units of days^{-1}.
+        The frequency of the high pass-band cutoff in units of :math:`days^{-1}`.
     overwrite : bool
         Overwrite the output file?
     verbose : bool

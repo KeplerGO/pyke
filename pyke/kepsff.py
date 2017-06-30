@@ -1,5 +1,6 @@
 import re
 import numpy as np
+from tqdm import tqdm
 from matplotlib import pyplot as plt
 from astropy.io import fits as pyfits
 from . import kepmsg, kepio, kepkey, kepplot, kepfit, kepfunc
@@ -24,51 +25,48 @@ def kepsff(infile, outfile, datacol='DETSAP_FLUX', cenmethod='moments',
     photometric correction for K2 motion systematics provided by Vanderburg and
     Johnson (2014).The method will also work upon archived Kepler data and
     provides a relatively-simple and CPU-friendly alternative to cotrending
-    against basis-vector derived ensemble photometry (kepcotrend), pixel-level
-    principal component analysis (keppca), and PSF fitting (kepprfphot).
-    As well, as computational speed, this method has the advantage of requiring
-    no external data in order to perform corrections. All required data is
-    extracted from individual Kepler light curves stored at the archive, or K2
-    light curves constructed from archived target pixel files using the
-    kepextract task. In the example figure above, the 12th magnitude target,
-    EPIC 202093219, has a median 6.5-hour standard deviation of 60
-    parts-per-million (according to the tool kepstddev. After motion correction
-    using kepsff, this quantity is reduced to 36 parts-per-million.
+    against basis-vector derived ensemble photometry (``kepcotrend``),
+    pixel-level principal component analysis (``keppca``), and PSF fitting
+    (``kepprfphot``). As well, as computational speed, this method has the
+    advantage of requiring no external data in order to perform corrections.
+    All required data is extracted from individual Kepler light curves stored
+    at the archive, or K2 light curves constructed from archived target pixel
+    files using the kepextract task. In the example figure above, the 12th
+    magnitude target, EPIC 202093219, has a median 6.5-hour standard deviation
+    of 60 parts-per-million (according to the tool kepstddev. After motion
+    correction using ``kepsff``, this quantity is reduced to 36 parts-per-million.
 
-    The name kepsff is derived from "Self-Flat-Fielding" (SFF) and is
+    The name ``kepsff`` is derived from "Self-Flat-Fielding" (SFF) and is
     propagated from the Vanderburg and Johnson (2014) paper. However the name
     is somewhat misleading because the effects corrected for in the K2 case are
     dominated by aperture losses and source crowding rather than flat-field
-    variations. In essence, kepsff corrects motion-induced aperture-photometry
-    artifacts after constructing a position-flux relation from a detrended
-    (astrophysics-removed) version of the light curve. This tool will find
-    most-employment upon K2 data, especially in the early mission phases when
-    the data archives will contain calibrated target pixel files but no light
-    curves. As with all methods for systematic noise mitigation within Kepler
-    data, kepsff is not the "golden bullet" that solves all problems in all
-    situation. However, in line with the philosophy of the PyKE tools, kepsff
-    provides the user with a degree of customization to meet the demands of a
-    broad range of target types and science goals. The long-term goal is to
-    provide Kepler and K2 users with a range of reduction options and this
-    tool is part of that software kit. Also, in line with the PyKE philosophy,
-    these algorithms, as coded, are not perfect. We recommend and welcome
-    tinkering and further development by the community in order to make these
-    tools better. This case is also precisely what the K2 community requires
-    in the sense that the archive users, here Andrew Vanderburg and John
-    Johnson, are seeking solutions to their own data reduction needs, becoming
-    self-sufficient, and reporting their findings and methods to us all.
+    variations. In essence, ``kepsff`` corrects motion-induced
+    aperture-photometry artifacts after constructing a position-flux relation
+    from a detrended (astrophysics-removed) version of the light curve. This
+    tool will find most-employment upon K2 data, especially in the early
+    mission phases when the data archives will contain calibrated target pixel
+    files but no light curves. However, in line with the philosophy of the PyKE
+    tools, ``kepsff`` provides the user with a degree of customization to meet
+    the demands of a broad range of target types and science goals. The
+    long-term goal is to provide Kepler and K2 users with a range of reduction
+    options and this tool is part of that software kit. Also, in line with the
+    PyKE philosophy, these algorithms, as coded, are not perfect. We recommend
+    and welcome tinkering and further development by the community in order to
+    make these tools better. This case is also precisely what the K2 community
+    requires in the sense that the archive users, here Andrew Vanderburg and
+    John Johnson, are seeking solutions to their own data reduction needs,
+    becoming self-sufficient, and reporting their findings and methods to us
+    all.
 
     Preparation work is required before kepsff can provide a good correction.
     First, a light curve needs to be extracted a from Target Pixel File
-    (kepextract) using a user-customized pixel aperture defined within kepmask.
-    The resulting light curve also needs to be detrended, i.e. the astrophysics
-    needs to be removed as much as possible (kepflatten) in order for the
-    correction to be as precise as possible. Note that the astrophysics is not
-    removed permanently, but care has to be taken to prepare the data this way
-    before confidence in the correction can be built for individual light
-    curves on a case-by-case basis. A walkthrough example (Example E), starting
-    from a Target Pixel File and ending at a light curve mitigated for motion
-    systematics, is provided.
+    (``kepextract``) using a user-customized pixel aperture defined within
+    ``kepmask``. The resulting light curve also needs to be detrended, i.e. the
+    astrophysics needs to be removed as much as possible (kepflatten) in order
+    for the correction to be as precise as possible. Note that the astrophysics
+    is not removed permanently, but care has to be taken to prepare the data
+    this way before confidence in the correction can be built for individual
+    light curves on a case-by-case basis.
 
     Parameters
     ----------
@@ -80,7 +78,7 @@ def kepsff(infile, outfile, datacol='DETSAP_FLUX', cenmethod='moments',
         properties are provided in archived light curves from the Kepler
         mission, but need to be calculated for the K2 mission. The PyKE tool
         kepextract calculates all these properties and provides an input file
-        suitable for kepsff. In addition, the input file also requires a
+        suitable for ``kepsff``. In addition, the input file also requires a
         column of detrended data, where long-term astrophysics and
         orbit-related systematics have been removed. The PyKE tool kepflatten
         performs this pre-step, producing a FITS column of detrended data (at
@@ -167,7 +165,7 @@ def kepsff(infile, outfile, datacol='DETSAP_FLUX', cenmethod='moments',
         attempting to characterize. These points are not thrown away, they are
         corrected in the final calculation with the rest of the data, but they
         play no further part in the calibration of the correlation.
-    npoly_ardx = integer
+    npoly_ardx : int
         Step 2 (top-middle panel) is the determination of the relatively small
         deviation of centroid motion from linear. Here, in the rotated frame,
         we fit a high-order polynomial to the centroid data filtered and
@@ -183,7 +181,7 @@ def kepsff(infile, outfile, datacol='DETSAP_FLUX', cenmethod='moments',
         calculation has, so far, not proved to be critical - the path length
         integral is very close to linear, so cleaning this calculation up is
         low-priority currently.
-    npoly_dsdt = integer
+    npoly_dsdt : int
         The third step (lower-left panel) is a prescription to filter out
         exposures collected during thruster firings. Firing occur typically on
         a 6-hr cadence and occur when the spacecraft has rolled far enough to
@@ -192,9 +190,9 @@ def kepsff(infile, outfile, datacol='DETSAP_FLUX', cenmethod='moments',
         motion-flux correlation calculation and so that they can be documented
         within the quality flags of the output file. A low-order polynomial is
         fit to the time derivative along the path length (ds/dt) using 3-sigma
-        iterative clipping. This parameter, npoly_dsdt provides the user with
-        flexibility to choose the polynomial order. In the plot, the best fit
-        is shown as a red, solid line.
+        iterative clipping. ``npoly_dsdt`` provides the user with flexibility
+        to choose the polynomial order. In the plot, the best fit is shown as a
+        red, solid line.
     sigma_dsdt : float [sigma]
         This is a threshold limit in units of 1-sigma standard deviation from
         the best-fit. Data points falling outside of the threshold are
@@ -203,17 +201,17 @@ def kepsff(infile, outfile, datacol='DETSAP_FLUX', cenmethod='moments',
         131072 and is not employed to calibrate the flux-motion relation. The
         threshold curve is plot as a red, dashed line and rejected points are
         colored red.
-    npoly_arfl : integer
+    npoly_arfl : int
         The fourth panel (lower-middle) provides the subsequent target motion
         vs aperture flux distribution. The red line is polynomial fit, the
-        order of which is chosen by the user here. Iterative σ-clipping is
-        again required - the many outliers below the best-fit are astrophysical
-        in nature (binary star eclipses) and would bias the fit if they were
-        unrecognized or simply allowed to. The user has flexibility to change
-        the order and clipping threshold in order to provide the most robust
-        fit and there is a degree of objectivity in this process. A low
-        polynomial is generally adequate, this example employs a 3rd order
-        function.
+        order of which is chosen by the user here. Iterative
+        :math:`\sigma`-clipping is again required - the many outliers below
+        the best-fit are astrophysical in nature (binary star eclipses) and
+        would bias the fit if they were unrecognized or simply allowed to.
+        The user has flexibility to change the order and clipping threshold
+        in order to provide the most robust fit and there is a degree of
+        objectivity in this process. A low polynomial is generally adequate,
+        this example employs a 3rd order function.
     sigma_arfl : float [sigma]
         This is the threshold limit in units of 1-sigma standard deviation from
         the best-fit polynomial to the motion-flux relation. Data points
@@ -236,8 +234,9 @@ def kepsff(infile, outfile, datacol='DETSAP_FLUX', cenmethod='moments',
         is named filename.fits then each PNG file will be named
         filename_nn.png, where nn is a sequential number beginning with 1.
     overwrite : bool
-        Overwrite the output FITS file? if overwrite = False and an existing file
-        has the same name as outfile then the task will stop with an error.
+        Overwrite the output FITS file? if **overwrite** is **False** and an
+        existing file has the same name as outfile then the task will stop with
+        an error.
     verbose : bool
         Print informative messages and warnings to the shell and logfile?
     logfile : str
@@ -272,7 +271,8 @@ def kepsff(infile, outfile, datacol='DETSAP_FLUX', cenmethod='moments',
     if overwrite:
         kepio.overwrite(outfile, logfile, verbose)
     if kepio.fileexists(outfile):
-        errmsg = 'ERROR -- KEPSFF: {} exists. Use overwrite=True'.format(outfile)
+        errmsg = ('ERROR -- KEPSFF: {} exists. Use overwrite=True'
+                  .format(outfile))
         kepmsg.err(logfile, errmsg, verbose)
     # open input file
     instr = pyfits.open(infile, 'readonly')
@@ -305,7 +305,7 @@ def kepsff(infile, outfile, datacol='DETSAP_FLUX', cenmethod='moments',
     elif len(table.field('TIME')) < winedge[-1]:
         winedge[-1] = len(table.field('TIME'))
     # step through the time windows
-    for iw in range(1, len(winedge)):
+    for iw in tqdm(range(1, len(winedge))):
         t1 = winedge[iw - 1]
         t2 = winedge[iw]
         # filter input data table
@@ -381,7 +381,7 @@ def kepsff(infile, outfile, datacol='DETSAP_FLUX', cenmethod='moments',
                                 [centr2_good] - np.mean(centr2_good)])
         covar = np.cov(centr)
         # eigenvector eigenvalues of covariance matrix
-        [eval, evec] = np.linalg.eigh(covar)
+        [_, evec] = np.linalg.eigh(covar)
         ex = np.arange(-10.0, 10.0, 0.1)
         epar = evec[1, 1] / evec[0, 1] * ex
         enor = evec[1, 0] / evec[0, 0] * ex
@@ -664,9 +664,7 @@ def kepsff(infile, outfile, datacol='DETSAP_FLUX', cenmethod='moments',
         plt.grid()
         # render plot
         if plotres:
-            kepplot.render(cmdLine)
-        # save plot to file
-        if plotres:
+            plt.show()
             plt.savefig(re.sub('.fits','_%d.png' % (iw + 1),outfile))
 
         # correct fluxes within the output file

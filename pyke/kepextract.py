@@ -27,12 +27,12 @@ def kepextract(infile, outfile, maskfile='ALL', bkg=False, overwrite=False,
         * Use of all pixels in the aperture
 
         * The pipeline does not produce a light curve for sources observed with
-        custom or dedicated pixel masks. The user can create a light curve for
-        these sources using kepextract.
+          custom or dedicated pixel masks. The user can create a light curve for
+          these sources using kepextract.
 
         * Construction of pixel light curves, in which the time series for a single
-        pixel can be examined. Light curves for extended sources which may be
-        poorly sampled by the optimal aperture.
+          pixel can be examined. Light curves for extended sources which may be
+          poorly sampled by the optimal aperture.
 
     Parameters
     ----------

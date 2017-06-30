@@ -15,7 +15,7 @@ from scipy.ndimage import interpolation
 __all__ = ['kepprf']
 
 
-def kepprf(infile, plotfile, frameno, columns, rows, fluxes, prfdir,
+def kepprf(infile, plotfile, prfdir, frameno, columns, rows, fluxes,
            background=False, border=1, focus=False, xtol=1e-4, ftol=1.,
            plot=False, imscale='linear', cmap='YlOrBr', apercol='#ffffff',
            verbose=False, logfile='kepprf.log'):
@@ -38,6 +38,10 @@ def kepprf(infile, plotfile, frameno, columns, rows, fluxes, prfdir,
         which case the plot will be generated but the plot will not be saved
         to a file. Any existing file with this name will be automatically
         overwritten.
+    prfdir : str
+        The full or relative directory path to a folder containing the Kepler
+        PSF calibration. Calibration files can be downloaded from the Kepler
+        focal plane characteristics page at the MAST.
     frameno : int
         The cadence number in the input file data containing the pixels to
         plot. If the chosen observation has a non-zero quality flag set or the
@@ -111,9 +115,8 @@ def kepprf(infile, plotfile, frameno, columns, rows, fluxes, prfdir,
 
     .. code-block:: bash
 
-        $ kepprf kplr008256049-2010174085026_lpd-targ.fits prf.png --frameno 1000
-          --columns 830 831 --rows 242 241 --fluxes 1.0 0.1 --prfdir ../kplr2011265_prf/
-          --plot --verbose
+        $ kepprf kplr008256049-2010174085026_lpd-targ.fits prf.png prfdir ~/kplr2011265_prf/
+        --frameno 1000 --columns 830 831 --rows 242 241 --fluxes 1.0 0.1 --plot --verbose
 
               KepID: 8256049
                 BJD: 2455296.903574196
@@ -570,18 +573,21 @@ def kepprf_main():
                         type=str)
     parser.add_argument('plotfile', help='Name of output PNG plot file',
                         type=str)
-    parser.add_argument('--frameno',
+    parser.add_argument('prfdir',
+                        help=("Folder containing Point Response Function "
+                              "FITS files"), type=str)
+    parser.add_argument('frameno',
                         help='Cadence number of image stored in infile',
                         type=int)
-    parser.add_argument('--columns',
+    parser.add_argument('columns',
                         help=("Initial guesses for the center of each source "
                               "on the x-axis"),
                         nargs='+', type=float)
-    parser.add_argument('--rows',
+    parser.add_argument('rows',
                         help=("Initial guesses for the center of each source "
                               "on the x-axis"),
                         nargs='+', type=float)
-    parser.add_argument('--fluxes',
+    parser.add_argument('fluxes',
                         help='Relative flux of each source to be fit',
                         nargs='+', type=float)
     parser.add_argument('--background', action='store_true',
@@ -590,9 +596,6 @@ def kepprf_main():
                         default=1, type=int)
     parser.add_argument('--focus', action='store_true',
                         help='Fit focus changes?', default=False)
-    parser.add_argument('--prfdir',
-                        help=("Folder containing Point Response Function "
-                              "FITS files"), type=str)
     parser.add_argument('--xtol', default=1.0e-4,
                         help='Fit parameter tolerance', dest='xtol',
                         type=float)
@@ -614,7 +617,7 @@ def kepprf_main():
                         help='Name of ascii log file', type=str)
     args = parser.parse_args()
 
-    kepprf(args.infile, args.plotfile, args.frameno, args.columns, args.rows,
-           args.fluxes, args.prfdir, args.background, args.border, args.focus,
+    kepprf(args.infile, args.plotfile, args.prfdir, args.frameno, args.columns,
+           args.rows, args.fluxes, args.background, args.border, args.focus,
            args.xtol, args.ftol, args.plot, args.imscale, args.cmap,
            args.apercol, args.verbose, args.logfile)

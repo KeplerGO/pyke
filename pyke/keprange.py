@@ -5,8 +5,6 @@ from matplotlib import pyplot as plt
 
 # global variables
 
-labelsize = 24; ticksize = 16; xsize = 17; ysize = 7
-lcolor = '#0000ff'; lwidth = 1.0; fcolor = '#ffff00'; falpha = 0.2
 instr = ''; cadence = 1800.0; barytime0 = 0
 nrm = 1; barytime = []; flux = []; xmin = 0; xmax = 1
 ymin = 0; ymax = 1; xr = 1; yr = 1; xlab = ''; ylab = ''
@@ -150,7 +148,7 @@ def keprange(infile, outfile, column, rinfile='', overwrite=False, verbose=False
 
     # plot new light curve
     plt.rcParams['figure.dpi'] = 80
-    plt.figure(figsize=[xsize, ysize])
+    plt.figure(figsize=[17, 7])
     plotlc()
 
 
@@ -211,12 +209,12 @@ def plotlc():
         else:
             ltime = np.array(ltime, dtype=np.float64) - barytime0
             ldata = np.array(ldata, dtype=np.float64) / 10 ** nrm
-            plt.plot(ltime,ldata,color=lcolor,linestyle='-',linewidth=lwidth)
+            plt.plot(ltime,ldata,color='#0000ff',linestyle='-',linewidth=1.0)
             ltime = []; ldata = []
     ltime = np.array(ltime, dtype=np.float64) - barytime0
     ldata = np.array(ldata, dtype=np.float64) / 10 ** nrm
-    plt.plot(ltime, ldata, color=lcolor, linestyle='-', linewidth=lwidth)
-    plt.fill(barytime, flux, fc=fcolor, linewidth=0.0, alpha=falpha)
+    plt.plot(ltime, ldata, color='#0000ff', linestyle='-', linewidth=1.0)
+    plt.fill(barytime, flux, fc='#ffff00', linewidth=0.0, alpha=0.2)
     plt.xlabel(xlab, {'color' : 'k'})
     plt.ylabel(ylab, {'color' : 'k'})
     plt.grid()
