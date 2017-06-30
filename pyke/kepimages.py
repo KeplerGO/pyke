@@ -34,24 +34,25 @@ def kepimages(infile, prefix, imtype='FLUX', ranges='0,0', overwrite=True,
     * ``RAW_CNTS`` -- uncalibrated pixel count values
 
     * ``FLUX`` -- calibrated pixel, background-subtracted, cosmic ray-removed
-      fluxes in units of e-/s
+      fluxes in units of :math:`e^{-}/s`
 
-    * ``FLUX_ERR`` -- 1-standard deviation errors on the FLUX image, as
+    * ``FLUX_ERR`` -- 1-:math:`\sigma` errors on the FLUX image, as
       propagated through the pixel calibration
 
     * ``FLUX_BKG`` -- the background that has been subtracted from the FLUX
-      image in units of e-/s
+      image in units of :math:`e^{-}/s`
 
-    * ``FLUX_BKG_ERR`` -- 1-standard deviation errors on the FLUX_BKG image, as
+    * ``FLUX_BKG_ERR`` -- 1-:math:`\sigma` errors on the FLUX_BKG image, as
       propagated through the pixel calibration
 
     * ``COSMIC_RAYS`` -- the cosmic ray map that has been subtracted from the
-      FLUX image in units of e-/s
+      FLUX image in units of :math:`e^{-}/s`
 
-    We recommend the tools ds9 and fv for the inspection of the FITS image
-    products. The intent of the kepimages tool is to convert the TPF content
-    into a form from which images can be imported into the array of public
-    photometry software available to the K2 and Kepler communities.
+    We recommend the tools [ds9](http://ds9.si.edu/) and
+    [fv](https://heasarc.gsfc.nasa.gov/ftools/fv/) for the inspection of the
+    FITS image products. The intent of the kepimages tool is to convert the
+    TPF content into a form from which images can be imported into the array
+    of public photometry software available to the K2 and Kepler communities.
 
     Parameters
     ----------
@@ -65,9 +66,9 @@ def kepimages(infile, prefix, imtype='FLUX', ranges='0,0', overwrite=True,
         The user can choose here specific time ranges of exposures from which
         to export images. Time ranges are supplied as comma-separated pairs of
         Barycentric Julian Dates (BJDs). Multiple ranges are separated by a
-        semi-colon. An example containing two time ranges is:
+        semi-colon. An example containing two time ranges is::
 
-            ``'2455641.658,2455641.740;2455671.658,2455672.740'``
+            '2455641.658,2455641.740;2455671.658,2455672.740'
     overwrite : bool
         Overwrite the output file? if overwrite is False and an existing file has
         the same name as outfile then the task will stop with an error.
@@ -81,22 +82,6 @@ def kepimages(infile, prefix, imtype='FLUX', ranges='0,0', overwrite=True,
     .. code-block: bash
 
         $ kepimages ktwo202073445-c00_lpd-targ.fits ktwo202073445-c00 --verbose
-        $ ls
-          ktwo202073445-c00_BJD2456728.5277.fits
-          ktwo202073445-c00_BJD2456728.5482.fits
-          ktwo202073445-c00_BJD2456728.5686.fits
-          ktwo202073445-c00_BJD2456728.5890.fits
-          ktwo202073445-c00_BJD2456728.6095.fits
-          ktwo202073445-c00_BJD2456728.6299.fits
-          ktwo202073445-c00_BJD2456728.6503.fits
-          ktwo202073445-c00_BJD2456728.6708.fits
-          ktwo202073445-c00_BJD2456728.6912.fits
-          ktwo202073445-c00_BJD2456728.7116.fits
-          ktwo202073445-c00_BJD2456728.7321.fits
-          ktwo202073445-c00_BJD2456728.7525.fits
-          ktwo202073445-c00_BJD2456728.7729.fits
-          ktwo202073445-c00_BJD2456728.7934.fits
-          ktwo202073445-c00_BJD2456728.8138.fits
     """
 
     # log the call
@@ -115,7 +100,7 @@ def kepimages(infile, prefix, imtype='FLUX', ranges='0,0', overwrite=True,
     kepmsg.clock('KEPIMAGES started at', logfile, verbose)
 
     # open input file
-    print (' ')
+    print(' ')
     instr = pyfits.open(infile, mode='readonly', memmap=True)
     cards0 = instr[0].header.cards
     cards1 = instr[1].header.cards

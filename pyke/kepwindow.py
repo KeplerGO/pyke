@@ -32,9 +32,8 @@ def kepwindow(infile, outfile, fcol='SAP_FLUX', fmax=1.0, nfreq=100, plot=False,
         information is required so that the task can search the fcol array for
         bad data such as instances of NaN. These will be rejected before the
         window function is calculated.
-    fmax : float
+    fmax : float [1/day]
         The maximum frequency on which the window function will be calculated.
-        The unit is 1/day.
     nfreq : int
         The number of uniform frequency steps between 0 and fmax over which the
         window function will be calculated.

@@ -60,23 +60,23 @@ def kepdetrend(infile, outfile, ranges1, ranges2, npoly1, npoly2, nsig1, nsig2,
         polynomial fit.
     datacol : str
         The column name containing data stored within extension 1 of infile.
-        This data will be detrended. Typically this name is ``SAP_FLUX`` (Simple
+        This data will be detrended. Typically this name is SAP_FLUX (Simple
         Aperture Photometry fluxes), but any data column within extension 1 of
         the FITS file can be corrected.
     errcol : str
         The uncertainty data coupled to datacol. Typically this column is
-        called ``SAP_FLUX_ERR``. If no errors are associated with datacol then
+        called SAP_FLUX_ERR. If no errors are associated with datacol then
         use ``errcol=None``.
     ranges1, ranges2 : list, list
         Time ranges are supplied as comma-separated pairs of Barycentric Julian
         Dates (BJDs). Multiple ranges are separated by a semi-colon. An example
         containing two time ranges is::
 
-            ``'2455012.48517,2455014.50072;2455022.63487,2455025.08231'``
+            '2455012.48517,2455014.50072;2455022.63487,2455025.08231'
 
-        Data within the range ``ranges1`` will be detrended by subtracting the
+        Data within the range **ranges1** will be detrended by subtracting the
         difference between the best fit to data in that range and the best fit
-        function in the range ``ranges2`` extrapolated into ranges1.
+        function in the range **ranges2** extrapolated into ranges1.
     npoly1, npoly2 : int
         The polynomial order for the function that fits the data ranges to be
         detrended.
@@ -90,7 +90,7 @@ def kepdetrend(infile, outfile, ranges1, ranges2, npoly1, npoly2, nsig1, nsig2,
     niter1, niter2 : int, int
         The polynomial fit over the data to be detrended will be iterated until
         there are no further outlier rejections or the number of iterations
-        exceeds niter1 (niter2).
+        exceeds **niter1** (**niter2**).
     popnans : bool
         Keep NaN flux values (times without a flux measurement) in the output
         FITS file. If set to no, any rows in the input FITS file containing
@@ -98,8 +98,9 @@ def kepdetrend(infile, outfile, ranges1, ranges2, npoly1, npoly2, nsig1, nsig2,
     plot : boolean
         Plot the data, the fits and the correction?
     overwrite : bool
-        Overwrite the output file? if overwrite is False and an existing file has
-        the same name as outfile then the task will stop with an error.
+        Overwrite the output file? if **overwrite** is **False** and an
+        existing file has the same name as outfile then the task will stop with
+        an error.
     verbose : bool
         Print informative messages and warnings to the shell and logfile?
     logfile : str

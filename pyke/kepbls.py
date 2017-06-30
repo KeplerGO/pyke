@@ -22,13 +22,13 @@ def kepbls(infile, outfile, datacol='DETSAP_FLUX', errcol='DETSAP_FLUX_ERR',
     ----------
     infile : str
         The name of a standard format FITS file containing a Kepler light
-        curve within the first data extension. The data in infile will
-        typically have been flattened by kepflatten. Multiple quarters can be
-        searched by appending light curves within a single file using
-        kepstitch.
+        curve within the first data extension. The data in **infile** will
+        typically have been flattened by ``kepflatten``. Multiple quarters can
+        be searched by appending light curves within a single file using
+        ``kepstitch``.
     outfile : str
-        The name of the output FITS file. ``outfile`` will be a direct copy of
-        ``infile`` but with a new extension called BLS appended containing a
+        The name of the output FITS file. **outfile** will be a direct copy of
+        **infile** but with a new extension called BLS appended containing a
         table of i) trial periods, PERIOD, ii) a reference Barycentric Julian
         Date (BJD) corresponding the center of the most transit-like structure
         in the folded light curve at the trial period, BJD0, iii) a duration
@@ -42,9 +42,9 @@ def kepbls(infile, outfile, datacol='DETSAP_FLUX', errcol='DETSAP_FLUX_ERR',
         BLS extension called SIGNRES, PERIOD, BJD0, TRANSDUR.
     datacol : str
         The column name containing data stored within FITS extension 1 of
-        infile. This data will be searched for outliers. Typically this name
-        is DETSAP_FLUX (Detrended Simple Aperture Photometry fluxes). This
-        version of the data is computed by the task ``pyke.kepflatten``.
+        **infile**. This data will be searched for outliers. Typically this
+        name is DETSAP_FLUX (Detrended Simple Aperture Photometry fluxes). This
+        version of the data is computed by the task ``kepflatten``.
         Other flux data will be accepted - SAP_FLUX (Simple Aperture
         Photometry), PDCSAP_FLUX (Pre-search Data Conditioning fluxes) or
         CBVSAP_FLUX (SAP_FLUX corrected for systematic artifacts by the PyKE
@@ -54,36 +54,34 @@ def kepbls(infile, outfile, datacol='DETSAP_FLUX', errcol='DETSAP_FLUX_ERR',
     errcol : str
         The column name containing photometric 1-sigma errors stored within
         extension 1 of infile. Typically this name is DETSAP_FLUX_ERR.
-    minper : float
+    minper : float [days]
         The shortest trial period on which to search for transits.
-        Units are days.
-    maxper : float
-        The longest trial period on which to search for transits. Units are
-        days.
-    mindur : float
+    maxper : float [days]
+        The longest trial period on which to search for transits.
+    mindur : float [hours]
         For each trial period, the BLS function will be fit to the data by
         i) iterating upon the epoch of mid-transit in the model, and
         ii) adjusting the width of the modeled transit. The width is adjusted
         systematically in step sizes equaling the cadence of the input data.
-        ``mindur`` provides a lower limit to the range of transit widths
-        tested. Units are hours.
-    maxdur : float
+        **mindur** provides a lower limit to the range of transit widths
+        tested.
+    maxdur : float [hours]
         Provides an upper limit to the range of transit widths tested over each
-        trial period. Units are hours.
+        trial period.
     nsearch : int
-        The number of trial periods to search between the lower bound minper
-        and the upper bound maxper.
+        The number of trial periods to search between the lower bound
+        **minper** and the upper bound **maxper**.
     nbins : int
         Before the BLS transit model is fit to the data, data are folded upon
         the trail orbital period and then phase binned by calculating the mean
-        flux level within each bin interval. nbins is the number of phase bins
+        flux level within each bin interval. **nbins** is the number of phase bins
         in which to store the data before each fit.
     plot : bool
         Plot the calculated Normalized Signal Residue as a function of trial
         orbital period?
     overwrite : bool
-        Overwrite the output file? if overwrite = False and an existing file has the
-        same name as outfile then the task will stop with an error.
+        Overwrite the output file? If overwrite is False and an existing file
+        has the same name as outfile then the task will stop with an error.
     verbose : bool
         Print informative messages and warnings to the shell and logfile?
     logfile : str
@@ -109,14 +107,6 @@ def kepbls(infile, outfile, datacol='DETSAP_FLUX', errcol='DETSAP_FLUX_ERR',
     .. image:: ../_static/images/api/kepbls.png
         :align: center
     """
-    # startup parameters
-    xsize = 16
-    ysize = 8
-    lcolor = '#0000ff'
-    lwidth = 1.0
-    fcolor = '#ffff00'
-    falpha = 0.2
-
     # log the call
     hashline = '----------------------------------------------------------------------------'
     kepmsg.log(logfile, hashline, verbose)
@@ -175,7 +165,7 @@ def kepbls(infile, outfile, datacol='DETSAP_FLUX', errcol='DETSAP_FLUX_ERR',
     # test whether the period range is sensible
     tr = intime[-1] - intime[0]
     if maxper > tr:
-        message = ('ERROR -- KEPBLS: maxper is larger than the time range of '
+        message = ('ERROR -- KEPBLS: maxper is larger than the time range of'
                    ' the input data')
         kepmsg.err(logfile, message, verbose)
 
@@ -278,7 +268,7 @@ def kepbls(infile, outfile, datacol='DETSAP_FLUX', errcol='DETSAP_FLUX_ERR',
 
     # plot light curve
     if plot:
-        plt.figure(figsize=[xsize, ysize])
+        plt.figure(figsize=[16, 8])
         plt.clf()
         # plot data
         ax = plt.axes([0.06,0.10,0.93,0.87])
@@ -289,9 +279,9 @@ def kepbls(infile, outfile, datacol='DETSAP_FLUX', errcol='DETSAP_FLUX_ERR',
         # rotate y labels by 90 deg
         labels = ax.get_yticklabels()
         plt.setp(labels, 'rotation', 90)
-        plt.plot(ptime[1:-1], pout[1:-1], color=lcolor, linestyle='-',
-                 linewidth=lwidth)
-        plt.fill(ptime, pout, color=fcolor, linewidth=0.0, alpha=falpha)
+        plt.plot(ptime[1:-1], pout[1:-1], color='#0000ff', linestyle='-',
+                 linewidth=1.0)
+        plt.fill(ptime, pout, color='#ffff00', linewidth=0.0, alpha=0.2)
         plt.xlabel(xlab, {'color' : 'k'})
         plt.ylabel(ylab, {'color' : 'k'})
         plt.grid()

@@ -37,6 +37,7 @@ extensions = ['sphinx.ext.autosummary',
     'sphinx.ext.todo',
     'sphinx.ext.coverage',
     'sphinx.ext.githubpages',
+    'sphinx.ext.mathjax',
     'numpydoc']
 
 # Add any paths that contain templates here, relative to this directory.

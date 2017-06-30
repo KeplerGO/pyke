@@ -14,7 +14,7 @@ def kepdynamic(infile, outfile, fcol='SAP_FLUX', pmin=0.1, pmax=10., nfreq=100,
                overwrite=False, verbose=False, logfile='kepdynamic.log'):
     """
     kepdynamic -- Construct a dynamic (time-dependent) power spectrum from
-    Kepler time series data
+    time series data
 
     Parameters
     ----------
@@ -27,18 +27,18 @@ def kepdynamic(infile, outfile, fcol='SAP_FLUX', pmin=0.1, pmax=10., nfreq=100,
     fcol : str
         The name of the FITS table column in extension 1 of infile upon which
         the sequence power spectra will be calculated.
-    pmin : float
+    pmin : float [day]
         The minimum of the period range over which the power spectra will be
-        calculated. The unit is day.
-    pmax : float
+        calculated.
+    pmax : float [day]
         The maximum of the period range over which the power spectra will be
-        calculated. The unit is day.
+        calculated.
     nfreq : int
-        The number of uniform frequency steps between 1/pmax and 1/pmin over
-        which the power spectra will be calculated.
-    deltat : float
+        The number of uniform frequency steps between :math:`1/pmax` and
+        :math:`1/pmin` over which the power spectra will be calculated.
+    deltat : float [days]
         The uniform length of each time slice from which a power spectrum will
-        be calculated. Units are days.
+        be calculated.
     nslice : int
         The number of time slices from which power spectra are calculated.
         These will be distributed uniformly across the input time series. If
@@ -65,12 +65,6 @@ def kepdynamic(infile, outfile, fcol='SAP_FLUX', pmin=0.1, pmax=10., nfreq=100,
     .. image:: ../_static/images/api/kepdynamic.png
         :align: center
     """
-
-    # startup parameters
-    lcolor = '#0000ff'
-    lwidth = 1.0
-    fcolor = '#ffff00'
-    falpha = 0.2
 
     # log the call
     hashline = '--------------------------------------------------------------'
