@@ -3,6 +3,7 @@
 
 <!-- ***Tools for working with data from NASA's Kepler & TESS Space Telescopes.*** -->
 
+
 Developed since 2012, PyKE offers a user-friendly way to inspect and analyze
 the pixels and lightcurves obtained by NASA's Kepler, K2, and TESS missions.
 
@@ -10,6 +11,7 @@ the pixels and lightcurves obtained by NASA's Kepler, K2, and TESS missions.
 
 PyKE3 is the latest generation of the toolkit.
 It provides the following key improvements:
+
 * PyKE3 is now a true Python package installable via `pip`
 * exposes true command-line tools
 * support for both Python 2 and 3
@@ -57,6 +59,7 @@ you can simply install the latest stable release of PyKE using ``pip``:
 
     $ pip install pyketools
 
+
 Alternatively, if you want to experiment with the latest development version of
 PyKE, you can install it straight from GitHub:
 
@@ -64,8 +67,7 @@ PyKE, you can install it straight from GitHub:
     $ cd PyKE
     $ pip install -e .
 
-Note: PyKE version 2 and older, which was in use between 2012 and 2016 and
-required PyRAF, is available in the branch ``py27-pyraf``.
+Note: PyKE version 2 and older, which was in use between 2012 and 2016 and required PyRAF, is available in the branch [py27-pyraf](https://github.com/KeplerGO/PyKE/tree/py27-pyraf).
 
 ## Documentation
 
