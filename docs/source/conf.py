@@ -103,7 +103,7 @@ html_theme = 'sphinx_rtd_theme'
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
 
-html_logo = '_static/images/coollogo_com-577298.gif'
+html_logo = '_static/images/pyke-white.png'
 
 
 # -- Options for HTMLHelp output ------------------------------------------
