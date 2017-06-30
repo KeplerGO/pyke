@@ -11,7 +11,7 @@ def kepdraw(infile, outfile='kepdraw.png', datacol='SAP_FLUX', ploterr=False,
             fcolor='#ffff00', falpha=0.2, labelsize=24, ticksize=16, xsize=18.,
             ysize=6., fullrange=False, chooserange=False, y1=0, y2=1e4,
             plotgrid=False, ylabel='e$^-$ s$^{-1}$', plottype='fast',
-            verbose=False, logfile='kepdraw.log'):
+            noninteractive=False, verbose=False, logfile='kepdraw.log'):
     """
     kepdraw -- Interactive plotting of time series data
 
@@ -70,6 +70,8 @@ def kepdraw(infile, outfile='kepdraw.png', datacol='SAP_FLUX', ploterr=False,
             * fast
 
             * pretty
+    non-interactive : bool
+        If True, prevents the matplotlib window to pop up.
     verbose : bool
         Print informative messages and warnings to the shell and logfile?
     logfile : str
@@ -233,10 +235,10 @@ def kepdraw(infile, outfile='kepdraw.png', datacol='SAP_FLUX', ploterr=False,
     ax.tick_params('both', length=20, width=2, which='major')
     ax.tick_params('both', length=10, width=1, which='minor')
     # save plot to file
-    if outfile.lower() != 'none':
+    if outfile is not None:
         plt.savefig(outfile)
 
-        # render plot
+    if not noninteractive:
         plt.show()
     # end time
     kepmsg.clock('KEPDRAW completed at' , logfile, verbose)
@@ -291,12 +293,17 @@ def kepdraw_main():
                         help='Plot axis label', type=str)
     parser.add_argument('--plottype', default='fast', help='plot type',
                         type=str, choices=['fast','pretty'])
+    parser.add_argument('--non-interactive', action='store_true',
+                        help='Pop up matplotlib plot window?',
+                        dest='noninteractive')
     parser.add_argument('--verbose', action='store_true',
                         help='Write to a log file?')
     parser.add_argument('--logfile', '-l', help='Name of ascii log file',
                         default='kepdraw.log', type=str)
     args = parser.parse_args()
-    kepdraw(args.infile, args.outfile, args.datacol, args.ploterr, args.errcol, args.quality,
-            args.lcolor, args.lwidth, args.fcolor, args.falpha, args.labelsize, args.ticksize,
-            args.xsize, args.ysize, args.fullrange, args.chooserange, args.ymin, args.ymax,
-            args.plotgrid, args.ylabel, args.plottype, args.verbose, args.logfile)
+    kepdraw(args.infile, args.outfile, args.datacol, args.ploterr, args.errcol,
+            args.quality, args.lcolor, args.lwidth, args.fcolor, args.falpha,
+            args.labelsize, args.ticksize, args.xsize, args.ysize,
+            args.fullrange, args.chooserange, args.ymin, args.ymax,
+            args.plotgrid, args.ylabel, args.plottype, args.noninteractive,
+            args.verbose, args.logfile)
