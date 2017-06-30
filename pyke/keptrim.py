@@ -303,12 +303,9 @@ def FOVKepID(id):
     """KIC retrieval based upon KepID"""
 
     # build mast query
-    url  = 'http://archive.stsci.edu/kepler/kepler_fov/search.php?'
-    url += 'action=Search'
-    url += '&kic_kepler_id=' + id
-    url += '&max_records=100'
-    url += '&verb=3'
-    url += '&outputformat=CSV'
+    url  = ('http://archive.stsci.edu/kepler/kepler_fov/search.php?'
+            'action=Search&kic_kepler_id={}'.format(id) + '&max_records=100'
+            '&verb=3&outputformat=CSV')
 
     # retrieve results from MAST
     out = ''

@@ -15,34 +15,36 @@ def keptrial(infile, outfile, datacol='SAP_FLUX', errcol='SAP_FLUX_ERR',
     keptrial -- Calculate best period and error estimate from time series
 
     ``keptrial`` measures the strongest period within the frequency range
-    ``fmin`` to ``fmax`` and estimates 1-standard deviation error associated
-    with that period. The error estimate is performed by constructing ntrial
-    new light curves from the original data provided in datacol and adjusting
-    each individual data point according to a random number generator and a
-    shot noise model. While a shot noise model is not uniformly applicable to
-    all Kepler targets it provides a useful 1st order estimate for most. A
-    power spectrum is calculated for each light curve using a user-specified
-    method and the highest peak in each power spectrum recorded. The
-    distribution of peaks is fit by a normal function, the centroid is adopted
-    as the best period and 1-standard deviation error is taken from the
-    standard deviation. A confidence limit is recorded as the range within
-    which all trial periods fall. While this is termed a '100%' confidence
-    limit, this only refers to the total number of trials rather than formal
-    confidence.
+    :math:`fmin` to :math:`fmax` and estimates 1-:math:`\sigma` error
+    associated with that period. The error estimate is performed by
+    constructing ntrial new light curves from the original data provided in
+    datacol and adjusting each individual data point according to a random
+    number generator and a shot noise model. While a shot noise model is not
+    uniformly applicable to all Kepler targets it provides a useful 1st order
+    estimate for most. A power spectrum is calculated for each light curve
+    using a user-specified method and the highest peak in each power spectrum
+    recorded. The distribution of peaks is fit by a normal function, the
+    centroid is adopted as the best period and 1-standard deviation error is
+    taken from the standard deviation. A confidence limit is recorded as the
+    range within which all trial periods fall. While this is termed a '100%'
+    confidence limit, this only refers to the total number of trials rather
+    than formal confidence.
 
-    The larger the number of ``ntrials``, the more robust the result. The
+    The larger the number of **ntrials**, the more robust the result. The
     values of nfreq and ntrial have to be chosen carefully to avoid excessive
-    run times. The values of ``fmin``, ``fmax`` and ``nfreq`` have to be
+    run times. The values of **fmin**, **fmax** and **nfreq** have to be
     chosen carefully in order to provide a sensible measure of period and
     error. It is recommended that ``kepft`` be used to estimate the period and
     error before attempting to use ``keptrial``. An exercise of trial and error
-    will most-likely be needed to choose a permutation of ``fmin``, ``fmax``
-    and ``nfreq`` that resolves the period distribution over a significant
+    will most-likely be needed to choose a permutation of **fmin**, **fmax**
+    and **nfreq** that resolves the period distribution over a significant
     number of frequency bins. If requested, the distribution and normal fit are
     plotted. The plot updates after every ntrial iteration, partly to relieve
     boredom, and partly for the user to assess whether they are using the
     correct permutation of input parameters.
 
+    Parameters
+    ----------
     infile : str
         The name of a MAST standard format FITS file containing a Kepler light
         curve within the first data extension.
@@ -59,12 +61,10 @@ def keptrial(infile, outfile, datacol='SAP_FLUX', errcol='SAP_FLUX_ERR',
     errcol : str
         The uncertainty data coupled to datacol. Typically this column is
         called SAP_FLUX_ERR.
-    fmin : float
+    fmin : float [1/day]
         The minimum frequency on which each power spectrum will be calculated.
-        The unit is 1/day.
-    fmax : float
+    fmax : float [1/day]
         The maximum frequency on which each power spectrum will be calculated.
-        The unit is 1/day.
     nfreq : int
         The number of uniform frequency steps between fmin and fmax over which
         the power spectrum will be calculated.
