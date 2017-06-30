@@ -16,7 +16,7 @@ from scipy.interpolate import RectBivariateSpline
 __all__ = ['kepprfphot']
 
 
-def kepprfphot(infile, outroot, columns, rows, fluxes, prfdir, border=0,
+def kepprfphot(infile, outroot, prfdir, columns, rows, fluxes, border=0,
                background=False, focus=False, ranges='0,0', xtol=1e-4,
                ftol=1e-2, qualflags=False, plot=False, overwrite=False,
                verbose=False, logfile='kepprfphot.log'):
@@ -346,8 +346,8 @@ def kepprfphot(infile, outroot, columns, rows, fluxes, prfdir, border=0,
     # interpolation function over the PRF
     splineInterpolation = RectBivariateSpline(PRFx, PRFy, prf, kx=3, ky=3)
     # construct mesh for background model
-    bx = np.arange(1., float(xdim+1))
-    by = np.arange(1., float(ydim+1))
+    bx = np.arange(1., float(xdim + 1))
+    by = np.arange(1., float(ydim + 1))
     xx, yy = np.meshgrid(np.linspace(bx.min(), bx.max(), xdim),
                          np.linspace(by.min(), by.max(), ydim))
     # Get time ranges for new photometry, flag good data
@@ -1117,16 +1117,16 @@ def kepprfphot_main():
     parser.add_argument('outroot',
                         help='Root name of output light curve files',
                         type=str)
-    parser.add_argument('--columns',
+    parser.add_argument('prfdir',
+                        help='Folder containing PRF files', dest='prfdir',
+                        type=str)
+    parser.add_argument('columns',
                         help='Column number of each source to be fit',
                         type=str)
-    parser.add_argument('--rows', help='Row number of each source to be fit',
+    parser.add_argument('rows', help='Row number of each source to be fit',
                         type=str)
-    parser.add_argument('--fluxes',
+    parser.add_argument('fluxes',
                         help='Relative flux of each source to be fit',
-                        type=str)
-    parser.add_argument('--prfdir',
-                        help='Folder containing PRF files', dest='prfdir',
                         type=str)
     parser.add_argument('--border',
                         help='Order of background polynmial fit', default=0,
@@ -1152,7 +1152,7 @@ def kepprfphot_main():
     parser.add_argument('--logfile', '-l', default='kepprfphot.log',
                         help='Name of ascii log file', type=str)
     args = parser.parse_args()
-    kepprfphot(args.infile, args.outroot, args.columns, args.rows, args.fluxes,
-               args.prfdir, args.border, args.background, args.focus,
+    kepprfphot(args.infile, args.outroot, args.prfdir, args.columns, args.rows,
+               args.fluxes, args.border, args.background, args.focus,
                args.ranges, args.xtol, args.ftol, args.qualflags, args.plot,
                args.overwrite, args.verbose, args.logfile)

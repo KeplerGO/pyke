@@ -576,18 +576,18 @@ def kepprf_main():
     parser.add_argument('prfdir',
                         help=("Folder containing Point Response Function "
                               "FITS files"), type=str)
-    parser.add_argument('--frameno',
+    parser.add_argument('frameno',
                         help='Cadence number of image stored in infile',
                         type=int)
-    parser.add_argument('--columns',
+    parser.add_argument('columns',
                         help=("Initial guesses for the center of each source "
                               "on the x-axis"),
                         nargs='+', type=float)
-    parser.add_argument('--rows',
+    parser.add_argument('rows',
                         help=("Initial guesses for the center of each source "
                               "on the x-axis"),
                         nargs='+', type=float)
-    parser.add_argument('--fluxes',
+    parser.add_argument('fluxes',
                         help='Relative flux of each source to be fit',
                         nargs='+', type=float)
     parser.add_argument('--background', action='store_true',
