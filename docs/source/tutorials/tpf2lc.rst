@@ -37,7 +37,7 @@ around the target. So, let's take a 3 x 3 mask around our target:
 This command creates a target pixel file called ``ktwo200071160-c91_trimmed_3.fits`` in our current directory with only
 the desired pixels, while preserving all the original metadata.
 
-We can then use ``kepprfphot`` to fit the Kepler PRF for every frame in our trimmed tpf:
+The MAST website contains [Pixel Response Function](https://archive.stsci.edu/pub/kepler/fpc/prf/) (PRF) calibration files for Kepler, which can be used to perform PRF photometry.  We can then use ``kepprfphot`` to fit the Kepler PRF for every frame in our trimmed tpf:
 
 .. code-block:: bash
 
