@@ -74,7 +74,8 @@ def kepprfphot(infile, outroot, columns, rows, fluxes, prfdir, border=0,
     prfdir : str
         The full or relative directory path to a folder containing the Kepler
         PSF calibration. Calibration files can be downloaded from the Kepler
-        focal plane characteristics page at the MAST.
+        focal plane characteristics page at the MAST here:
+        http://archive.stsci.edu/missions/kepler/fpc/prf/.
     border : int
         If a background is included in the fit then it is modeled as a
         two-dimensional polynomial. This parameter is the polynomial order.
@@ -98,7 +99,7 @@ def kepprfphot(infile, outroot, columns, rows, fluxes, prfdir, border=0,
         Dates (BJDs). Multiple ranges are separated by a semi-colon.
         An example containing two time ranges is::
 
-            ``'2455012.48517,2455014.50072;2455022.63487,2455025.08231'``
+            '2455012.48517,2455014.50072;2455022.63487,2455025.08231'
 
         If the user wants to correct the entire time series then providing
         ranges = '0,0' will tell the task to operate on the whole time series.
