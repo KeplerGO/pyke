@@ -44,7 +44,7 @@ entry_points = {'console_scripts': [
         'kepwindow = pyke.kepwindow:kepwindow_main',
 ]}
 
-setup(name='pyke',
+setup(name='pyketools',
       version=__version__,
       description="A backwards-incompatible, python3 compatible, pyraf-free "
                   "version of PyKE: a suite of tools to analyze Kepler/K2 "
