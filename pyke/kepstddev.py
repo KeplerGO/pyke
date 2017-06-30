@@ -85,8 +85,7 @@ def kepstddev(infile, outfile, datacol='PDCSAP_FLUX', timescale=6.5,
     kepmsg.log(logfile, call+'\n', verbose)
 
     # start time
-    kepmsg.clock('KEPSTDDEV started at',logfile,verbose)
-
+    kepmsg.clock('KEPSTDDEV started at', logfile, verbose)
 
     # overwrite output file
     if overwrite:

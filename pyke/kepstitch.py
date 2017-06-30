@@ -21,13 +21,15 @@ def kepstitch(infiles, outfile='kepstitch.fits', overwrite=False, verbose=False,
         A list of individual FITS files. Most commonly these will contain data
         from the same target obtained over different months or quarters. Short
         cadence and long cadence data can be mixed within this list.
-        Alternatively an ASCII file containing file names can parsed to this argument.
-        The ASCII file must be formatted to have one FITS filename per line.
+        Alternatively an ASCII file containing file names can parsed to this
+        argument. The ASCII file must be formatted to have one FITS filename
+        per line.
     outfile : str
         The name of the output FITS file with concatenated time series data.
     overwrite : bool
-        Overwrite the output file? if overwrite = False and an existing file has the
-        same name as outfile then the task will stop with an error.
+        Overwrite the output file? if ``overwrite = False`` and an existing
+        file has the same name as outfile then the task will stop with an
+        error.
     verbose : bool
         Print informative messages and warnings to the shell and logfile?
     logfile : str
@@ -98,17 +100,17 @@ def kepstitch(infiles, outfile='kepstitch.fits', overwrite=False, verbose=False,
 
         # start and stop times of data
         fitsvers = 1.0
-        lc_start = kepkey.get(infile,instr[1],'LC_START',logfile,verbose)
-        lc_end = kepkey.get(infile,instr[1],'LC_END',logfile,verbose)
+        lc_start = kepkey.get(infile, instr[1], 'LC_START', logfile, verbose)
+        lc_end = kepkey.get(infile, instr[1], 'LC_END', logfile, verbose)
         try:
             startbjd = instr[1].header['STARTBJD']
         except:
-            startbjd = kepkey.get(infile,instr[1],'TSTART',logfile,verbose)
+            startbjd = kepkey.get(infile, instr[1], 'TSTART', logfile, verbose)
             fitsvers = 2.0
         try:
             endbjd = instr[1].header['ENDBJD']
         except:
-            endbjd = kepkey.get(infile,instr[1],'TSTOP',logfile,verbose)
+            endbjd = kepkey.get(infile, instr[1], 'TSTOP', logfile, verbose)
             fitsvers = 2.0
         lct.append(lc_start)
         lct.append(lc_end)

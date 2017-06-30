@@ -20,6 +20,8 @@ def keppixseries(infile, outfile, plotfile=None, plottype='global',
     target. It can be employed to identify pixels for inclusion or exclusion
     when re-extracting a Kepler light curve from target pixel files.
 
+    Parameters
+    ----------
     infile : str
         The name of a MAST standard format FITS file containing Kepler Target
         Pixel data within the first data extension.
@@ -28,10 +30,10 @@ def keppixseries(infile, outfile, plotfile=None, plottype='global',
         The first called 'PIXELSERIES' contains a table with columns of
         barycenter-corrected time, barycenter time correction, cadence number,
         cadence quality flag and a series of photometric light curves, one for
-        each pixel within the target mask. Each pixel is labeled 'COLx_ROWy',
-        where x is the pixel column number and y is the pixel row number on the
-        CCD module/output. The second extension contains the mask definition
-        map copied directly from the input target pixel file.
+        each pixel within the target mask. Each pixel is labeled COLx_ROWy,
+        where :math:`x` is the pixel column number and :math:`y` is the pixel
+        row number on the CCD module/output. The second extension contains the
+        mask definition map copied directly from the input target pixel file.
     plotfile : str
         Name of an optional diagnostic output plot file containing the results
         of keppixseries. An example is provided in Figure 1. Typically this is
