@@ -1,5 +1,6 @@
 import re
 import numpy as np
+from tqdm import tqdm
 from matplotlib import pyplot as plt
 from astropy.io import fits as pyfits
 from . import kepmsg, kepio, kepkey, kepplot, kepfit, kepfunc
@@ -304,7 +305,7 @@ def kepsff(infile, outfile, datacol='DETSAP_FLUX', cenmethod='moments',
     elif len(table.field('TIME')) < winedge[-1]:
         winedge[-1] = len(table.field('TIME'))
     # step through the time windows
-    for iw in range(1, len(winedge)):
+    for iw in tqdm(range(1, len(winedge))):
         t1 = winedge[iw - 1]
         t2 = winedge[iw]
         # filter input data table
@@ -663,9 +664,7 @@ def kepsff(infile, outfile, datacol='DETSAP_FLUX', cenmethod='moments',
         plt.grid()
         # render plot
         if plotres:
-            kepplot.render(cmdLine)
-        # save plot to file
-        if plotres:
+            plt.show()
             plt.savefig(re.sub('.fits','_%d.png' % (iw + 1),outfile))
 
         # correct fluxes within the output file
