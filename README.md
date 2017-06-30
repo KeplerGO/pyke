@@ -1,20 +1,17 @@
 # PyKE3: Kepler, K2 & TESS Data Analysis Tools
 [![Build Status](https://travis-ci.org/KeplerGO/PyKE.svg?branch=dev)](https://travis-ci.org/KeplerGO/PyKE) [![Documentation Status](https://readthedocs.org/projects/pyke/badge/?version=latest)](http://pyke.readthedocs.io/en/latest/?badge=latest) <a href="http://ascl.net/1208.004"><img src="https://img.shields.io/badge/ascl-1208.004-blue.svg?colorB=262255" alt="ascl:1208.004" /></a>
 
-<!-- ***Tools for working with data from NASA's Kepler & TESS Space Telescopes.*** -->
-
-Developed since 2012, PyKE offers a user-friendly way to inspect and analyze
-the pixels and lightcurves obtained by NASA's Kepler, K2, and TESS missions.
+**Developed since 2012, PyKE offers a user-friendly way to inspect and analyze
+the pixels and lightcurves obtained by NASA's Kepler, K2, and TESS missions.**
 
 ## What's new in PyKE v3? (July 2017)
 
 PyKE3 is the latest generation of the toolkit.
 It provides the following key improvements:
-* PyKE3 is now a true Python package installable via `pip`
-* exposes true command-line tools
-* support for both Python 2 and 3
-* no dependency on PyRAF
-* TESS-ready
+* PyKE is now a true Python package installable via `pip`;
+* tasks are now added to the path as command-line tools;
+* both Python 2 and 3 are now supported;
+* PyKE3 no longer depends on PyRAF and is TESS-ready.
 
 ## Example use
 
@@ -70,7 +67,6 @@ required PyRAF, is available in the branch ``py27-pyraf``.
 ## Documentation
 
 Documentation is hosted at [readthedocs](http://pyke.rtfd.io).
-
 
 ## Acknowledgement
 If you find this code useful in your research, please consider [citing](http://adsabs.harvard.edu/abs/2012ascl.soft08004S):
