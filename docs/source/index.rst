@@ -11,14 +11,14 @@ Welcome to PyKE!
    :caption: Contents:
 
 PyKE is a set of data analysis tools, maintained by the K2 Guest Observer
-Office, for the Kepler and K2 Missions.
+Office, for Kepler, K2, TESS, and future missions.
 
 Installation
 ============
 
 The easiest way to install PyKE is through ``pip``::
 
-    pip install pyke
+    pip install pyketools
 
 Or if you would like to experiment our development version::
 
