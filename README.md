@@ -18,16 +18,36 @@ It provides the following key improvements:
 
 ## Example use
 
-TBC
+With ``pyke``, you can directly visualize frames from a target pixel file.
+That can be done with ``kepmask`` as follows:
 
 ```
-$ kepmask
+$ kepmask kplr008462852-2013098041711_lpd-targ.fits.gz 100 --maskfile tabystar.txt
 ```
 
+![kepmask](docs/source/_static/images/readme/kepmask.png)
+
+where ``100`` is the frame number.
+If you want to know all the features provided by ``kepmask``, use ``--help`` argument.
+
+``kepmask`` is an interactive tool that allows one to create an arbitrary
+aperture mask which can be subsequently be used in another ``pyke`` tool,
+such as ``kepextract``.
+
+``kepextract`` performs simple aperture photometry in the pixels given by the mask
+created by ``kepmask``:
+
 ```
-$ kepextract
+$ kepextract kplr008462852-2013098041711_lpd-targ.fits.gz tabys-lc.fits --maskfile tabystar.txt
 ```
 
+To visualize the light curve, you may want to use ``kepdraw``:
+
+```
+$ kepdraw taby-lc.fits
+```
+
+![kepdraw](docs/source/_static/images/readme/kepdraw.png)
 
 ## Installation
 

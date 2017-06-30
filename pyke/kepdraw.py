@@ -8,7 +8,7 @@ from . import kepio, kepmsg, kepkey
 
 def kepdraw(infile, outfile='kepdraw.png', datacol='SAP_FLUX', ploterr=False,
             errcol='SAP_FLUX_ERR', quality=False, lcolor='#0000ff', lwidth=1.0,
-            fcolor='#ffff00', falpha=0.2, labelsize=24, ticksize=16, xsize=18.,
+            fcolor='#ffff00', falpha=0.2, labelsize=20, ticksize=14, xsize=18.,
             ysize=6., fullrange=False, chooserange=False, y1=0, y2=1e4,
             plotgrid=False, ylabel='e$^-$ s$^{-1}$', plottype='fast',
             noninteractive=False, verbose=False, logfile='kepdraw.log'):
@@ -190,10 +190,9 @@ def kepdraw(infile, outfile='kepdraw.png', datacol='SAP_FLUX', ploterr=False,
     ax.yaxis.set_major_locator(plt.MaxNLocator(5))
     # rotate y labels by 90 deg
     labels = ax.get_yticklabels()
-    plt.setp(labels, 'rotation', 90, fontsize=ticksize)
     # ifplot type is 'fast' plot data time series as points
     if plottype == 'fast':
-        plt.plot(barytime, data, 'o', color=lcolor)
+        plt.plot(barytime, data, 'o', color=lcolor, markersize=lwidth)
     # ifplot type is 'pretty' plot data time series as an unbroken line, retaining data gaps
     else:
         ltime = np.array([], dtype='float64')
@@ -232,8 +231,6 @@ def kepdraw(infile, outfile='kepdraw.png', datacol='SAP_FLUX', ploterr=False,
         plt.ylabel(ylab1, {'color' : 'k'})
 
     ax.minorticks_on()
-    ax.tick_params('both', length=20, width=2, which='major')
-    ax.tick_params('both', length=10, width=1, which='minor')
     # save plot to file
     if outfile is not None:
         plt.savefig(outfile)
@@ -266,12 +263,12 @@ def kepdraw_main():
     parser.add_argument('--lwidth', default=1.0,
                         help='type of image intensity scale', type=float)
     parser.add_argument('--fcolor', default='#ffff00',
-                        help='HTML color of data line within plot', type=str)
-    parser.add_argument('--falpha', default=0.2,
+                        help='HTML color to fill the area below the data', type=str)
+    parser.add_argument('--falpha', default=0.1,
                         help='type of image intensity scale', type=float)
-    parser.add_argument('--labelsize', default=24.,
+    parser.add_argument('--labelsize', default=20.,
                         help='Fontsize of axis labels', type=float)
-    parser.add_argument('--ticksize', default=16.,
+    parser.add_argument('--ticksize', default=14.,
                         help='Fontsize of numeric tick labels', type=float)
     parser.add_argument('--xsize', default=18.,
                         help='X-dimension size of plot', type=float)
