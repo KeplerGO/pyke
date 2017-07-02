@@ -49,7 +49,7 @@ setup(name='pyketools',
       description="A backwards-incompatible, python3 compatible, pyraf-free "
                   "version of PyKE: a suite of tools to analyze Kepler/K2 "
                   "data",
-      long_description=open('README.md').read(),
+      long_description=open('README.rst').read(),
       author='KeplerGO',
       author_email='keplergo@mail.arc.nasa.gov',
       license='MIT',
