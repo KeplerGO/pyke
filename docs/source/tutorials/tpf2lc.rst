@@ -9,7 +9,7 @@ how they can be used for data exploration and analysis.
 The specific goal of this tutorial is to show to the user how to create a light curve
 based on psf photometry from a target pixel file using PyKE.
 
-First, let's download a target pixel file from [Campaign 9a](https://keplerscience.arc.nasa.gov/k2-c9.html):
+First, let's download a target pixel file from `Campaign 9a <https://keplerscience.arc.nasa.gov/k2-c9.html>`_:
 
 .. code-block:: bash
 
@@ -37,7 +37,7 @@ around the target. So, let's take a 3 x 3 mask around our target:
 This command creates a target pixel file called ``ktwo200071160-c91_trimmed_3.fits`` in our current directory with only
 the desired pixels, while preserving all the original metadata.
 
-We can then use ``kepprfphot`` to fit the Kepler PRF for every frame in our trimmed tpf:
+We can then use ``kepprfphot`` [#]_ to fit the Kepler PRF for every frame in our trimmed tpf:
 
 .. code-block:: bash
 
@@ -62,4 +62,6 @@ We can then write a small python script to see how the light curve looks like
 .. image:: ../_static/images/tutorials/tpf2lc/lc.png
     :align: center
 
-The low frequency components of our light curve can be removed with ``pyke.kepflatten.kepflatten``.
+The low frequency components of our light curve can be removed with ``kepflatten``.
+
+.. [#] Note that this tool requires the calibration files from the Kepler focal plane characteristics, which can downloaded here: http://archive.stsci.edu/missions/kepler/fpc/prf/
