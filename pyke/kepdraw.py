@@ -6,6 +6,9 @@ from astropy.io import fits as pyfits
 from . import kepio, kepmsg, kepkey
 
 
+__all__ = ['kepdraw']
+
+
 def kepdraw(infile, outfile='kepdraw.png', datacol='SAP_FLUX', ploterr=False,
             errcol='SAP_FLUX_ERR', quality=False, lcolor='#0000ff', lwidth=1.0,
             fcolor='#ffff00', falpha=0.2, labelsize=20, ticksize=14, xsize=18.,
@@ -193,7 +196,8 @@ def kepdraw(infile, outfile='kepdraw.png', datacol='SAP_FLUX', ploterr=False,
     # ifplot type is 'fast' plot data time series as points
     if plottype == 'fast':
         plt.plot(barytime, data, 'o', color=lcolor, markersize=lwidth)
-    # ifplot type is 'pretty' plot data time series as an unbroken line, retaining data gaps
+    # ifplot type is 'pretty' plot data time series as an unbroken line,
+    # retaining data gaps
     else:
         ltime = np.array([], dtype='float64')
         ldata = np.array([], dtype='float32')
@@ -245,7 +249,8 @@ def kepdraw_main():
     import argparse
 
     parser = argparse.ArgumentParser(
-            description='Interactive plotting of Kepler time series data')
+             description='Interactive plotting of Kepler time series data',
+             formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('infile', help='Name of input file', type=str)
     parser.add_argument('--outfile', default='kepdraw.png',
                         help='name of output PNG file', type=str)

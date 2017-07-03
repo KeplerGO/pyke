@@ -1,4 +1,3 @@
-from . import kepio, kepmsg, kepplot, kepfunc, kepstat
 import numpy as np
 import time
 import math
@@ -10,6 +9,7 @@ from scipy import interpolate, optimize, ndimage, stats
 from scipy.optimize import fmin_powell
 from scipy.interpolate import RectBivariateSpline
 from scipy.ndimage import interpolation
+from . import kepio, kepmsg, kepplot, kepfunc, kepstat
 
 
 __all__ = ['kepprf']
@@ -567,8 +567,9 @@ def plotimage(imgflux_pl, zminfl, zmaxfl, plmode, row, column,
 def kepprf_main():
     import argparse
 
-    parser = argparse.ArgumentParser(description=("Fitting PRF model to "
-                                                  "Target Pixel image"))
+    parser = argparse.ArgumentParser(
+             description="Fitting PRF model to Target Pixel image",
+             formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('infile', help='Name of input target pixel file',
                         type=str)
     parser.add_argument('plotfile', help='Name of output PNG plot file',

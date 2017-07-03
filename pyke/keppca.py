@@ -757,7 +757,8 @@ def mad(data):
 def keppca_main():
     import argparse
     parser = argparse.ArgumentParser(
-       description=('Pixel-level principal component analysis of time series'))
+       description='Pixel-level principal component analysis of time series',
+       formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('infile', help='Name of input target pixel FITS file',
                         type=str)
     parser.add_argument('outfile', help='Name of output FITS file', type=str)

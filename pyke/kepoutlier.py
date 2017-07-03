@@ -1,8 +1,12 @@
-from . import kepio, kepmsg, kepkey, kepfit, kepstat, kepfunc
 import numpy as np
 from astropy.io import fits as pyfits
 from matplotlib import pyplot as plt
 from tqdm import tqdm
+from . import kepio, kepmsg, kepkey, kepfit, kepstat, kepfunc
+
+
+__all__ = ['kepoutlier']
+
 
 def kepoutlier(infile, outfile, datacol, nsig=3.0, stepsize=1.0, npoly=3,
                niter=1, operation='remove', ranges='0,0', plot=False,
@@ -305,7 +309,8 @@ def kepoutlier(infile, outfile, datacol, nsig=3.0, stepsize=1.0, npoly=3,
 def kepoutlier_main():
     import argparse
     parser = argparse.ArgumentParser(
-            description='Remove or replace data outliers from a time series')
+             description='Remove or replace data outliers from a time series',
+             formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('infile', help='Name of input file', type=str)
     parser.add_argument('outfile', help='Name of FITS file to output',
                         type=str)

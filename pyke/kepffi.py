@@ -625,8 +625,9 @@ def clicker6(event):
 def kepffi_main():
     import argparse
     parser = argparse.ArgumentParser(
-            description='Plot sub-areas of Kepler Full Frame Images and define'
-                        ' custom target apertures')
+             description=('Plot sub-areas of Kepler Full Frame Images and'
+                          ' define custom target apertures'),
+             formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('ffifile', help='name of input FFI FITS file',
                         type=str)
     parser.add_argument('--kepid', default='',

@@ -1,7 +1,11 @@
-from . import kepio, kepmsg, kepkey, kepstat, kepfourier
 import numpy as np
 from astropy.io import fits as pyfits
 from matplotlib import pyplot as plt
+from . import kepio, kepmsg, kepkey, kepstat, kepfourier
+
+
+__all__ = ['kepwindow']
+
 
 def kepwindow(infile, outfile, fcol='SAP_FLUX', fmax=1.0, nfreq=100, plot=False,
               overwrite=False, verbose=False, logfile='kepwindow.log'):
@@ -177,8 +181,9 @@ def kepwindow(infile, outfile, fcol='SAP_FLUX', fmax=1.0, nfreq=100, plot=False,
 def kepwindow_main():
     import argparse
     parser = argparse.ArgumentParser(
-            description=("Calculate and store the window function for a"
-                         " Kepler time series"))
+             description=("Calculate and store the window function for a"
+                          " Kepler time series"),
+             formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('infile', help='Name of input file', type=str)
     parser.add_argument('outfile', help='Name of output file', type=str)
     parser.add_argument('--datacol', default='SAP_FLUX',

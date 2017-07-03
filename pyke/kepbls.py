@@ -108,7 +108,7 @@ def kepbls(infile, outfile, datacol='DETSAP_FLUX', errcol='DETSAP_FLUX_ERR',
         :align: center
     """
     # log the call
-    hashline = '----------------------------------------------------------------------------'
+    hashline = '--------------------------------------------------------------'
     kepmsg.log(logfile, hashline, verbose)
     call = ('KEPBLS -- '
             + ' infile={}'.format(infile)
@@ -337,8 +337,8 @@ def kepbls(infile, outfile, datacol='DETSAP_FLUX', errcol='DETSAP_FLUX_ERR',
 def kepbls_main():
     import argparse
     parser = argparse.ArgumentParser(
-            description=('Remove or replace data '
-                         'outliers from a time series'))
+            description='Remove or replace data outliers from a time series',
+            formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('infile', help='Name of input file', type=str)
     parser.add_argument('outfile', help='Name of FITS file to output', type=str)
     parser.add_argument('--datacol', default='DETSAP_FLUX',

@@ -1,8 +1,8 @@
-from . import kepmsg
 import math
 import random
 import numpy as np
 from scipy import linalg
+from . import kepmsg
 
 
 def mean_err(array):

@@ -410,7 +410,8 @@ def kepmask_main():
     import argparse
     parser = argparse.ArgumentParser(
                    description=("Plot, create or edit custom light curve "
-                                "extraction masks for target pixel files "))
+                                "extraction masks for target pixel files "),
+                   formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('infile', help='name of input target pixel FITS file',
                         type=str)
     parser.add_argument('frameno', help='The number of the frame to plot',

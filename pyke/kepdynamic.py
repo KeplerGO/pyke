@@ -233,7 +233,8 @@ def kepdynamic_main():
     import argparse
     parser = argparse.ArgumentParser(
             description=('Construct a dynamic (time-dependent) power spectrum '
-                         'from Kepler time series data'))
+                         'from Kepler time series data'),
+             formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('infile', help='Name of input file', type=str)
     parser.add_argument('outfile', help='Name of FITS file to output',
                         type=str)

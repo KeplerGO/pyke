@@ -1,7 +1,7 @@
-from . import kepio, kepmsg
 import numpy as np
 import matplotlib.pyplot as plt
 from astropy.io import fits as pyfits
+from . import kepio, kepmsg
 
 
 __all__ = ['keptimefix']
@@ -116,7 +116,8 @@ def keptimefix(infile, outfile, overwrite, verbose, logfile):
 def keptimefix_main():
     import argparse
     parser = argparse.ArgumentParser(
-            description=('Fix the time error in the target pixel files'))
+             description='Fix the time error in the target pixel files',
+             formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('infile', help='Name of FITS input target pixel file',
                         type=str)
     parser.add_argument('outfile',

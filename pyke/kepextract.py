@@ -567,12 +567,14 @@ def kepextract_main():
 
     parser = argparse.ArgumentParser(
             description=('Derive a light curve from a target pixel file, with'
-                         ' user-defined apertures'))
+                         ' user-defined apertures'),
+             formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('infile', help='Name of input target pixel file',
                         type=str)
     parser.add_argument('outfile', help='Name of output light curve FITS file',
                         type=str)
-    parser.add_argument('--maskfile', default='ALL', help='Name of mask defintion ASCII file',
+    parser.add_argument('--maskfile', default='ALL',
+                        help='Name of mask defintion ASCII file',
                         type=str)
     parser.add_argument('--bkg', action='store_true',
                         help='Subtract background from data?')

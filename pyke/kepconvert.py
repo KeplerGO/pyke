@@ -337,7 +337,8 @@ def kepconvert_main():
     import argparse
     parser = argparse.ArgumentParser(
             description=('Convert Kepler FITS time series to or from a'
-                         ' different file format'))
+                         ' different file format'),
+            formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('infile', help='Name of input file', type=str)
     parser.add_argument('outfile', help='Name of output file', type=str)
     parser.add_argument('conversion', help='Type of data conversion', type=str,

@@ -8,7 +8,6 @@ from tqdm import tqdm
 __all__ = ['kepclip']
 
 
-
 def kepclip(infile, outfile, ranges, datacol='SAP_FLUX', plot=False,
             overwrite=False, verbose=False, logfile='kepclip.log'):
     """
@@ -50,7 +49,7 @@ def kepclip(infile, outfile, ranges, datacol='SAP_FLUX', plot=False,
     """
 
     # log the call
-    hashline = '----------------------------------------------------------------------------'
+    hashline = '--------------------------------------------------------------'
     kepmsg.log(logfile, hashline, verbose)
     call = ('KEPCLIP -- '
             + 'infile={}'.format(infile)
@@ -202,8 +201,10 @@ def kepclip(infile, outfile, ranges, datacol='SAP_FLUX', plot=False,
 
 def kepclip_main():
     import argparse
-    parser = argparse.ArgumentParser(description='Remove unwanted time '
-                                     'ranges from Kepler time series data')
+    parser = argparse.ArgumentParser(
+             description=('Remove unwanted time'
+                          ' ranges from Kepler time series data'),
+             formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('infile', help='Name of input file', type=str)
     parser.add_argument('outfile', help='Name of FITS file to output',
                         type=str)

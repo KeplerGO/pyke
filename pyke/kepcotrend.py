@@ -638,7 +638,7 @@ def kepcotrend(infile, outfile, bvfile, listbv, fitmethod='llsq', fitpower=1,
         '1 2 3' --plot --verbose
     """
     # log the call
-    hashline = '----------------------------------------------------------------------------'
+    hashline = '--------------------------------------------------------------'
     kepmsg.log(logfile, hashline, verbose)
     call = ('KEPCOTREND -- '
             + ' infile='.format(infile)
@@ -907,8 +907,9 @@ def kepcotrend(infile, outfile, bvfile, listbv, fitmethod='llsq', fitpower=1,
 def kepcotrend_main():
     import argparse
     parser = argparse.ArgumentParser(
-            description=('Remove systematic trends in photometry using'
-                         ' cotrending basis vectors (CBV)'))
+             description=('Remove systematic trends in photometry using'
+                          ' cotrending basis vectors (CBV)'),
+             formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('infile', help='Name of input file', type=str)
     parser.add_argument('outfile', help='Name of FITS file to output',
                         type=str)

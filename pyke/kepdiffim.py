@@ -4,6 +4,9 @@ from matplotlib import pyplot as plt
 from astropy.io import fits as pyfits
 
 
+__all__ = ['kepdiffim']
+
+
 def kepdiffim(infile, outfile, plotfile=None, imscale='logarithmic',
               colmap='PuBu', filterlc=False, function='boxcar', cutoff=1.0,
               overwrite=False, verbose=False, logfile='kepdiffim.log'):
@@ -376,7 +379,8 @@ def kepdiffim_main():
 
     import argparse
     parser = argparse.ArgumentParser(
-            description=('Difference imaging of pixels within a target mask'))
+             description=('Difference imaging of pixels within a target mask'),
+             formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('infile', help='Name of input file', type=str)
     parser.add_argument('outfile', help='Name of FITS file to output', type=str)
     parser.add_argument('--plotfile', default='None',
