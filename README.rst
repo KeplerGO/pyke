@@ -1,9 +1,16 @@
-PyKE3: Kepler, K2 & TESS Data Analysis Tools |ci-badge| |doc-badge| |bib-badge|
-===============================================================================
-
+PyKE3: Kepler, K2 & TESS Data Analysis Tools 
+============================================
+|pypi-badge| |ci-badge| |doc-badge| |bib-badge|
+       
+.. |pypi-badge| image:: https://img.shields.io/pypi/v/pyketools.svg
+                :target: https://pypi.python.org/pypi/pyketools
 .. |ci-badge| image:: https://travis-ci.org/KeplerGO/PyKE.svg?branch=master
+              :target: https://travis-ci.org/KeplerGO/PyKE
 .. |doc-badge| image:: https://readthedocs.org/projects/pyke/badge/?version=latest
-.. |bib-badge| image:: https://img.shields.io/badge/ascl-1208.004-blue.svg?colorB=262255
+              :target: https://pyke.readthedocs.io
+.. |bib-badge| image:: https://img.shields.io/badge/NASA%20ADS-2012ascl.soft08004S-brightgreen.svg
+              :target: http://adsabs.harvard.edu/abs/2012ascl.soft08004S
+
 
 **Developed since 2012, PyKE offers a user-friendly way to inspect and analyze
 the pixels and lightcurves obtained by NASA's Kepler, K2, and TESS missions.**
@@ -74,7 +81,7 @@ PyKE2 within PyRAF, we recommend getting it through the `AstroConda channel <htt
 Acknowledgement
 ---------------
 
-If you find this code useful in your research, please consider [citing](http://adsabs.harvard.edu/abs/2012ascl.soft08004S)::
+If you find this code useful in your research, please consider `citing <http://adsabs.harvard.edu/abs/2012ascl.soft08004S>`_::
 
     Title: PyKE: Reduction and analysis of Kepler Simple Aperture Photometry data
     Authors: Still, Martin; Barclay, Tom
@@ -86,5 +93,5 @@ If you find this code useful in your research, please consider [citing](http://a
 Contributing
 ------------
 
-Users are welcome to open [issues](https://github.com/KeplerGO/PyKE/issues) or [pull requests](https://github.com/KeplerGO/PyKE/pulls).
+Users are welcome to open `issues <https://github.com/KeplerGO/PyKE/issues>`_ or `pull requests <https://github.com/KeplerGO/PyKE/pulls>`_.
 You can also contact the development team via keplergo@mail.arc.nasa.gov
