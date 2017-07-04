@@ -1,3 +1,4 @@
+from .utils import PyKEArgumentHelpFormatter
 import math
 import numpy as np
 from matplotlib import pyplot as plt
@@ -156,7 +157,7 @@ def kepft_main():
     parser = argparse.ArgumentParser(
              description=('Calculate and store a Fourier Transform from a'
                           ' Kepler time series.'),
-             formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+             formatter_class=PyKEArgumentHelpFormatter)
     parser.add_argument('infile', help='Name of input file', type=str)
     parser.add_argument('outfile', help='Name of FITS file to output',
                         type=str)

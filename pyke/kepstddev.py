@@ -1,3 +1,4 @@
+from .utils import PyKEArgumentHelpFormatter
 import math
 import numpy as np
 from astropy.io import fits as pyfits
@@ -246,7 +247,7 @@ def kepstddev_main():
     parser = argparse.ArgumentParser(
              description=('Calculate Combined Differential Photometric'
                           ' Precision for a time series light curve'),
-             formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+             formatter_class=PyKEArgumentHelpFormatter)
     parser.add_argument('infile', help='Name of input FITS file', type=str)
     parser.add_argument('outfile', help='Name of output FITS file', type=str)
     parser.add_argument('--datacol', default='PDCSAP_FLUX',

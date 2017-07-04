@@ -1,3 +1,4 @@
+from .utils import PyKEArgumentHelpFormatter
 import sys
 import os
 import urllib
@@ -627,7 +628,7 @@ def kepffi_main():
     parser = argparse.ArgumentParser(
              description=('Plot sub-areas of Kepler Full Frame Images and'
                           ' define custom target apertures'),
-             formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+             formatter_class=PyKEArgumentHelpFormatter)
     parser.add_argument('ffifile', help='name of input FFI FITS file',
                         type=str)
     parser.add_argument('--kepid', default='',

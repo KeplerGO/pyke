@@ -1,3 +1,4 @@
+from .utils import PyKEArgumentHelpFormatter
 from astropy.io import fits as pyfits
 from matplotlib import pyplot as plt
 import numpy as np
@@ -247,7 +248,7 @@ def kepfilter_main():
 
     parser = argparse.ArgumentParser(
              description='Low bandpass or high bandpass signal filtering',
-             formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+             formatter_class=PyKEArgumentHelpFormatter)
     parser.add_argument('infile', help='Name of input file', type=str)
     parser.add_argument('outfile', help='Name of FITS file to output',
                         type=str)

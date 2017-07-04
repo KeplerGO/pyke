@@ -1,3 +1,4 @@
+from .utils import PyKEArgumentHelpFormatter
 import math
 import multiprocessing
 import itertools
@@ -1112,7 +1113,7 @@ def kepprfphot_main():
 
     parser = argparse.ArgumentParser(
              description='Fitting PRF model to Target Pixel time series',
-             formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+             formatter_class=PyKEArgumentHelpFormatter)
     parser.add_argument('infile', help='Name of input target pixel file',
                         type=str)
     parser.add_argument('outroot',

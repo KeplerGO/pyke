@@ -1,3 +1,4 @@
+from .utils import PyKEArgumentHelpFormatter
 from . import kepio, kepmsg, kepkey, kepplot, kepstat
 import numpy as np
 from matplotlib import pyplot as plt
@@ -380,7 +381,7 @@ def kepdiffim_main():
     import argparse
     parser = argparse.ArgumentParser(
              description=('Difference imaging of pixels within a target mask'),
-             formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+             formatter_class=PyKEArgumentHelpFormatter)
     parser.add_argument('infile', help='Name of input file', type=str)
     parser.add_argument('outfile', help='Name of FITS file to output', type=str)
     parser.add_argument('--plotfile', default='None',

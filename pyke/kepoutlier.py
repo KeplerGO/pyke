@@ -1,3 +1,4 @@
+from .utils import PyKEArgumentHelpFormatter
 import numpy as np
 from astropy.io import fits as pyfits
 from matplotlib import pyplot as plt
@@ -310,7 +311,7 @@ def kepoutlier_main():
     import argparse
     parser = argparse.ArgumentParser(
              description='Remove or replace data outliers from a time series',
-             formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+             formatter_class=PyKEArgumentHelpFormatter)
     parser.add_argument('infile', help='Name of input file', type=str)
     parser.add_argument('outfile', help='Name of FITS file to output',
                         type=str)

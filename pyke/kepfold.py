@@ -1,3 +1,4 @@
+from .utils import PyKEArgumentHelpFormatter
 from . import kepio, kepmsg, kepkey, kepstat, kepfit
 import numpy as np
 from copy import copy
@@ -573,7 +574,7 @@ def kepfold_main():
     import argparse
     parser = argparse.ArgumentParser(
              description=("Phase-fold light curve data on linear ephemeris."),
-             formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+             formatter_class=PyKEArgumentHelpFormatter)
     parser.add_argument('infile', help='Name of FITS input file', type=str)
     parser.add_argument('outfile', help='Name of FITS file to output',
                         type=str)

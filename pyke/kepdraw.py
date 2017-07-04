@@ -1,3 +1,4 @@
+from .utils import PyKEArgumentHelpFormatter
 import re
 import numpy as np
 import sys
@@ -250,7 +251,7 @@ def kepdraw_main():
 
     parser = argparse.ArgumentParser(
              description='Interactive plotting of Kepler time series data',
-             formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+             formatter_class=PyKEArgumentHelpFormatter)
     parser.add_argument('infile', help='Name of input file', type=str)
     parser.add_argument('--outfile', default='kepdraw.png',
                         help='name of output PNG file', type=str)

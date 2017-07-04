@@ -1,3 +1,4 @@
+from .utils import PyKEArgumentHelpFormatter
 from . import kepio, kepmsg, kepplot
 import numpy as np
 import math
@@ -411,7 +412,7 @@ def kepmask_main():
     parser = argparse.ArgumentParser(
                    description=("Plot, create or edit custom light curve "
                                 "extraction masks for target pixel files "),
-                   formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+                   formatter_class=PyKEArgumentHelpFormatter)
     parser.add_argument('infile', help='name of input target pixel FITS file',
                         type=str)
     parser.add_argument('frameno', help='The number of the frame to plot',

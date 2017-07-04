@@ -1,3 +1,4 @@
+from .utils import PyKEArgumentHelpFormatter
 import numpy as np
 from astropy.io import fits as pyfits
 from matplotlib import pyplot as plt
@@ -549,7 +550,7 @@ def keppixseries_main():
     parser = argparse.ArgumentParser(
              description=('Individual time series photometry for all pixels'
                           ' within a target mask'),
-             formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+             formatter_class=PyKEArgumentHelpFormatter)
     parser.add_argument('infile', help='Name of input file', type=str)
     parser.add_argument('outfile', help='Name of FITS file to output',
                         type=str)

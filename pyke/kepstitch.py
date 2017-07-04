@@ -1,3 +1,4 @@
+from .utils import PyKEArgumentHelpFormatter
 import numpy as np
 from astropy.io import fits as pyfits
 from . import kepio, kepmsg, kepkey, kepstat
@@ -156,7 +157,7 @@ def kepstitch_main():
     parser = argparse.ArgumentParser(
              description=('Append multiple month short cadence and/or'
                           ' multiple quarter long cadence data'),
-             formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+             formatter_class=PyKEArgumentHelpFormatter)
     parser.add_argument('infiles', help='List of input files', nargs='+',
                         type=str)
     parser.add_argument('--outfile', help='Name of FITS file to output',

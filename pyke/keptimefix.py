@@ -1,3 +1,4 @@
+from .utils import PyKEArgumentHelpFormatter
 import numpy as np
 import matplotlib.pyplot as plt
 from astropy.io import fits as pyfits
@@ -117,7 +118,7 @@ def keptimefix_main():
     import argparse
     parser = argparse.ArgumentParser(
              description='Fix the time error in the target pixel files',
-             formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+             formatter_class=PyKEArgumentHelpFormatter)
     parser.add_argument('infile', help='Name of FITS input target pixel file',
                         type=str)
     parser.add_argument('outfile',

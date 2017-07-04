@@ -1,3 +1,4 @@
+from .utils import PyKEArgumentHelpFormatter
 import numpy as np
 from astropy.io import fits as pyfits
 from matplotlib import pyplot as plt
@@ -183,7 +184,7 @@ def kepwindow_main():
     parser = argparse.ArgumentParser(
              description=("Calculate and store the window function for a"
                           " Kepler time series"),
-             formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+             formatter_class=PyKEArgumentHelpFormatter)
     parser.add_argument('infile', help='Name of input file', type=str)
     parser.add_argument('outfile', help='Name of output file', type=str)
     parser.add_argument('--datacol', default='SAP_FLUX',

@@ -1,3 +1,4 @@
+from .utils import PyKEArgumentHelpFormatter
 import math
 import numpy as np
 from astropy.io import fits as pyfits
@@ -568,7 +569,7 @@ def kepextract_main():
     parser = argparse.ArgumentParser(
             description=('Derive a light curve from a target pixel file, with'
                          ' user-defined apertures'),
-             formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+             formatter_class=PyKEArgumentHelpFormatter)
     parser.add_argument('infile', help='Name of input target pixel file',
                         type=str)
     parser.add_argument('outfile', help='Name of output light curve FITS file',

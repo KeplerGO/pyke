@@ -1,3 +1,4 @@
+from .utils import PyKEArgumentHelpFormatter
 import time, urllib
 import sys
 import numpy as np
@@ -327,7 +328,7 @@ def keptrim_main():
     import argparse
     parser = argparse.ArgumentParser(
              description='Trim unwanted pixels from a Target Pixel File',
-             formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+             formatter_class=PyKEArgumentHelpFormatter)
     parser.add_argument('infile', help='Name of input target pixel file',
                         type=str)
     parser.add_argument('outfile', help='Name of output target pixel file',

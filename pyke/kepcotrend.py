@@ -1,3 +1,4 @@
+from .utils import PyKEArgumentHelpFormatter
 from . import kepmsg, kepio, kepkey
 import math
 import numpy as np
@@ -909,7 +910,7 @@ def kepcotrend_main():
     parser = argparse.ArgumentParser(
              description=('Remove systematic trends in photometry using'
                           ' cotrending basis vectors (CBV)'),
-             formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+             formatter_class=PyKEArgumentHelpFormatter)
     parser.add_argument('infile', help='Name of input file', type=str)
     parser.add_argument('outfile', help='Name of FITS file to output',
                         type=str)
