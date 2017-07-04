@@ -18,7 +18,7 @@ the pixels and lightcurves obtained by NASA's Kepler, K2, and TESS missions.**
 Documentation
 -------------
 
-Documentation is hosted at `pyke.readthedocs.io <pyke.readthedocs.io>`_.
+Documentation is hosted at `pyke.readthedocs.io <https://pyke.readthedocs.io>`_.
 
 What's new in PyKE v3? (July 2017)
 ----------------------------------
