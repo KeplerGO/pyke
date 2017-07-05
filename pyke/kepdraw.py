@@ -235,6 +235,9 @@ def kepdraw(infile, outfile='kepdraw.png', datacol='SAP_FLUX', ploterr=False,
         ylab1 = '10**%d e-/s' % nrm
         plt.ylabel(ylab1, {'color' : 'k'})
 
+    if plotgrid:
+        plt.grid()
+
     ax.minorticks_on()
     # save plot to file
     if outfile is not None:
