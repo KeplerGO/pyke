@@ -1,3 +1,4 @@
+from .utils import PyKEArgumentHelpFormatter
 from . import kepio, kepmsg, kepkey, kepfit, kepstat, kepfunc
 import re
 import numpy as np
@@ -394,7 +395,8 @@ def kepflatten_main():
     import argparse
 
     parser = argparse.ArgumentParser(
-            description='Remove or replace data outliers from a time series')
+             description='Remove or replace data outliers from a time series',
+             formatter_class=PyKEArgumentHelpFormatter)
     parser.add_argument('infile', help='Name of input file', type=str)
     parser.add_argument('outfile', help='Name of FITS file to output',
                         type=str)

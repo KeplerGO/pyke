@@ -1,3 +1,4 @@
+from .utils import PyKEArgumentHelpFormatter
 from . import kepmsg, kepio, kepkey, kepplot
 import re
 import numpy as np
@@ -757,7 +758,8 @@ def mad(data):
 def keppca_main():
     import argparse
     parser = argparse.ArgumentParser(
-       description=('Pixel-level principal component analysis of time series'))
+       description='Pixel-level principal component analysis of time series',
+       formatter_class=PyKEArgumentHelpFormatter)
     parser.add_argument('infile', help='Name of input target pixel FITS file',
                         type=str)
     parser.add_argument('outfile', help='Name of output FITS file', type=str)

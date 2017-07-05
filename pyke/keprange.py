@@ -1,3 +1,4 @@
+from .utils import PyKEArgumentHelpFormatter
 from . import kepio, kepmsg, kepkey
 import numpy as np
 from astropy.io import fits as pyfits
@@ -10,6 +11,10 @@ nrm = 1; barytime = []; flux = []; xmin = 0; xmax = 1
 ymin = 0; ymax = 1; xr = 1; yr = 1; xlab = ''; ylab = ''
 mask = []; aid = None; bid = None; cid = None; did = None; eid = None; fid = None
 clobb = True; outf = ''; verb = True; logf = ''; rinf = ''
+
+
+__all__ = ['keprange']
+
 
 def keprange(infile, outfile, column, rinfile='', overwrite=False, verbose=False,
              logfile='keprange.log'):
@@ -391,7 +396,9 @@ def clicker6(event):
 def keprange_main():
     import argparse
     parser = argparse.ArgumentParser(
-            description=('Interactively define and store time ranges via a GUI'))
+             description=('Interactively define and store time ranges via a'
+                          ' GUI'),
+             formatter_class=PyKEArgumentHelpFormatter)
     parser.add_argument('infile', help='Name of input file', type=str)
     parser.add_argument('outfile',
                         help='Name of output ASCII time ranges file',

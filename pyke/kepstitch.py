@@ -1,6 +1,11 @@
-from . import kepio, kepmsg, kepkey, kepstat
+from .utils import PyKEArgumentHelpFormatter
 import numpy as np
 from astropy.io import fits as pyfits
+from . import kepio, kepmsg, kepkey, kepstat
+
+
+__all__ = ['kepstitch']
+
 
 def kepstitch(infiles, outfile='kepstitch.fits', overwrite=False, verbose=False,
               logfile='kepstich.log'):
@@ -90,7 +95,8 @@ def kepstitch(infiles, outfile='kepstitch.fits', overwrite=False, verbose=False,
                 try:
                     outtab.data.field(name)[nrows1:]=instr[1].data.field(name)
                 except:
-                    warnmsg = 'ERROR -- KEPSTITCH: column {} missing from some files.'.format(name)
+                    warnmsg = ('ERROR -- KEPSTITCH: column {} missing from'
+                               ' some files.'.format(name))
                     kepmsg.warn(logfile, warnmsg)
                     pass
             outstr[1] = outtab
@@ -149,8 +155,9 @@ def kepstitch_main():
     import argparse
 
     parser = argparse.ArgumentParser(
-    description=('Append multiple month short cadence and/or multiple quarter'
-                 ' long cadence data'))
+             description=('Append multiple month short cadence and/or'
+                          ' multiple quarter long cadence data'),
+             formatter_class=PyKEArgumentHelpFormatter)
     parser.add_argument('infiles', help='List of input files', nargs='+',
                         type=str)
     parser.add_argument('--outfile', help='Name of FITS file to output',

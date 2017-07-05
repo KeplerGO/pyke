@@ -1,3 +1,4 @@
+from .utils import PyKEArgumentHelpFormatter
 import numpy as np
 from astropy.io import fits as pyfits
 from matplotlib import pyplot as plt
@@ -126,7 +127,7 @@ def kepdetrend(infile, outfile, ranges1, ranges2, npoly1, npoly2, nsig1, nsig2,
     falpha = 0.2
 
     # log the call
-    hashline = '----------------------------------------------------------------------------'
+    hashline = '--------------------------------------------------------------'
     kepmsg.log(logfile, hashline, verbose)
     call = ('KEPDETREND -- '
             + ' infile={}'.format(infile)
@@ -363,8 +364,9 @@ def kepdetrend(infile, outfile, ranges1, ranges2, npoly1, npoly2, nsig1, nsig2,
 def kepdetrend_main():
     import argparse
     parser = argparse.ArgumentParser(
-            description=('Detrend systematic features from Simple Aperture'
-                         ' Photometry (SAP) data'))
+             description=('Detrend systematic features from Simple Aperture'
+                          ' Photometry (SAP) data'),
+             formatter_class=PyKEArgumentHelpFormatter)
     parser.add_argument('infile', help='Name of input file', type=str)
     parser.add_argument('outfile', help='Name of FITS file to output',
                         type=str)

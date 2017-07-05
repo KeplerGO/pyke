@@ -1,8 +1,13 @@
+from .utils import PyKEArgumentHelpFormatter
 import numpy as np
 from astropy.io import fits as pyfits
 from matplotlib import pyplot as plt
 from tqdm import tqdm
 from . import kepio, kepmsg, kepkey, kepfunc
+
+
+__all__ = ['kepsmooth']
+
 
 def kepsmooth(infile, outfile, datacol='SAP_FLUX', function='flat',
               fscale=1.0, plot=False, overwrite=False, verbose=False,
@@ -32,13 +37,9 @@ def kepsmooth(infile, outfile, datacol='SAP_FLUX', function='flat',
         average. The options are:
 
             * flat
-
             * hanning
-
             * hamming
-
             * bartlett
-
             * blackman
 
     fscale : float
@@ -208,8 +209,9 @@ def kepsmooth(infile, outfile, datacol='SAP_FLUX', function='flat',
 
 def kepsmooth_main():
     import argparse
-    parser = argparse.ArgumentParser(description=('Smooth Kepler light curve '
-                                                  'data by convolution'))
+    parser = argparse.ArgumentParser(
+             description='Smooth Kepler light curve data by convolution',
+             formatter_class=PyKEArgumentHelpFormatter)
     parser.add_argument('infile', help='Name of input file', type=str)
     parser.add_argument('outfile', help='Name of FITS file to output',
                         type=str)

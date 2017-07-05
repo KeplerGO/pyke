@@ -1,4 +1,4 @@
-from . import kepio, kepmsg, kepkey, kepplot, kepfit, kepfunc
+from .utils import PyKEArgumentHelpFormatter
 import math
 import multiprocessing
 import itertools
@@ -11,6 +11,7 @@ from matplotlib import pyplot as plt
 from astropy.io import fits as pyfits
 from scipy.optimize import fmin_powell
 from scipy.interpolate import RectBivariateSpline
+from . import kepio, kepmsg, kepkey, kepplot, kepfit, kepfunc
 
 
 __all__ = ['kepprfphot']
@@ -1111,7 +1112,8 @@ def kepprfphot_main():
     import argparse
 
     parser = argparse.ArgumentParser(
-            description=('Fitting PRF model to Target Pixel time series'))
+             description='Fitting PRF model to Target Pixel time series',
+             formatter_class=PyKEArgumentHelpFormatter)
     parser.add_argument('infile', help='Name of input target pixel file',
                         type=str)
     parser.add_argument('outroot',

@@ -1,8 +1,13 @@
-from . import kepio, kepmsg, kepkey, kepplot, kepstat, kepfunc
+from .utils import PyKEArgumentHelpFormatter
 import numpy as np
 from astropy.io import fits as pyfits
 from matplotlib import pyplot as plt
 from tqdm import tqdm
+from . import kepio, kepmsg, kepkey, kepplot, kepstat, kepfunc
+
+
+__all__ = ['keppixseries']
+
 
 def keppixseries(infile, outfile, plotfile=None, plottype='global',
                  filterlc=False, function='boxcar', cutoff=1.0, overwrite=False,
@@ -543,8 +548,9 @@ def keppixseries(infile, outfile, plotfile=None, plottype='global',
 def keppixseries_main():
     import argparse
     parser = argparse.ArgumentParser(
-            description=('Individual time series photometry for all pixels'
-                         ' within a target mask'))
+             description=('Individual time series photometry for all pixels'
+                          ' within a target mask'),
+             formatter_class=PyKEArgumentHelpFormatter)
     parser.add_argument('infile', help='Name of input file', type=str)
     parser.add_argument('outfile', help='Name of FITS file to output',
                         type=str)

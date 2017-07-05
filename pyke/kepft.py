@@ -1,8 +1,13 @@
+from .utils import PyKEArgumentHelpFormatter
 import math
 import numpy as np
 from matplotlib import pyplot as plt
 from astropy.io import fits as pyfits
 from . import kepio, kepmsg, kepkey, kepstat, kepfourier
+
+
+__all__ = ['kepft']
+
 
 def kepft(infile, outfile, fcol='SAP_FLUX', pmin=0.1, pmax=10., nfreq=100,
           plot=False, overwrite=False, verbose=False, logfile='kepft.log'):
@@ -37,8 +42,7 @@ def kepft(infile, outfile, fcol='SAP_FLUX', pmin=0.1, pmax=10., nfreq=100,
     plot : bool
         Plot the output Fourier spectrum?
     overwrite : bool
-        Overwrite the output file? if **overwrite** is **False** and an existing file has the
-        same name as outfile then the task will stop with an error.
+        Overwrite the output file?
     verbose : bool
         Print informative messages and warnings to the shell and logfile?
     logfile : str
@@ -151,8 +155,9 @@ def kepft(infile, outfile, fcol='SAP_FLUX', pmin=0.1, pmax=10., nfreq=100,
 def kepft_main():
     import argparse
     parser = argparse.ArgumentParser(
-            description=('Calculate and store a Fourier Transform from a'
-                         ' Kepler time series.'))
+             description=('Calculate and store a Fourier Transform from a'
+                          ' Kepler time series.'),
+             formatter_class=PyKEArgumentHelpFormatter)
     parser.add_argument('infile', help='Name of input file', type=str)
     parser.add_argument('outfile', help='Name of FITS file to output',
                         type=str)

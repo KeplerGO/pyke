@@ -1,3 +1,4 @@
+from .utils import PyKEArgumentHelpFormatter
 import sys
 import numpy as np
 from astropy.io import fits as pyfits
@@ -282,8 +283,9 @@ def kepimages(infile, prefix, imtype='FLUX', ranges='0,0', overwrite=True,
 def kepimages_main():
     import argparse
     parser = argparse.ArgumentParser(
-            description=('Export images within a Target Pixel File to a '
-                         'series of FITS image files'))
+             description=('Export images within a Target Pixel File to a'
+                          ' series of FITS image files'), 
+             formatter_class=PyKEArgumentHelpFormatter)
     parser.add_argument('infile', help='Name of input target pixel file',
                         type=str)
     parser.add_argument('prefix',

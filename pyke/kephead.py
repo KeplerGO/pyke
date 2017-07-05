@@ -1,7 +1,11 @@
+from .utils import PyKEArgumentHelpFormatter
 import numpy as np
 from matplotlib import pyplot as plt
 from astropy.io import fits as pyfits
 from . import kepio, kepmsg, kepkey
+
+
+__all__ = ['kephead']
 
 
 def kephead(infile, outfile, keyname, overwrite=False, verbose=False,
@@ -124,8 +128,9 @@ def kephead(infile, outfile, keyname, overwrite=False, verbose=False,
 def kephead_main():
     import argparse
     parser = argparse.ArgumentParser(
-            description=('Search for and list FITS keywords in Kepler data'
-                         ' files'))
+             description=('Search for and list FITS keywords in Kepler data'
+                         ' files'),
+             formatter_class=PyKEArgumentHelpFormatter)
     parser.add_argument('infile', help='Name of input file', type=str)
     parser.add_argument('outfile', help='Name of FITS file to output',
                         type=str)

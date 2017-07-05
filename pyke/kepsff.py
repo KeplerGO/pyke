@@ -1,3 +1,4 @@
+from .utils import PyKEArgumentHelpFormatter
 import re
 import numpy as np
 from tqdm import tqdm
@@ -710,7 +711,8 @@ def kepsff(infile, outfile, datacol='DETSAP_FLUX', cenmethod='moments',
 def kepsff_main():
     import argparse
     parser = argparse.ArgumentParser(
-            description='Correct aperture photmetry using target motion')
+             description='Correct aperture photmetry using target motion',
+             formatter_class=PyKEArgumentHelpFormatter)
     parser.add_argument('infile', help='Name of input FITS file', type=str)
     parser.add_argument('outfile', help='Name of output FITS file', type=str)
     parser.add_argument('--datacol', default='DETSAP_FLUX',

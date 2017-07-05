@@ -1,3 +1,4 @@
+from .utils import PyKEArgumentHelpFormatter
 import time, urllib
 import sys
 import numpy as np
@@ -6,6 +7,10 @@ from matplotlib import pyplot as plt
 from . import kepio
 from . import kepmsg
 from . import kepkey
+
+
+__all__ = ['keptrim']
+
 
 def keptrim(infile, outfile, column, row, imsize, kepid=None, overwrite=False,
             verbose=False, logfile='keptrim.log'):
@@ -312,17 +317,18 @@ def FOVKepID(id):
     lines = urllib.urlopen(url)
     for line in lines:
         line = line.strip()
-        if (len(line) > 0 and
-            'Kepler' not in line and
-            'integer' not in line and
-            'no rows found' not in line):
+        if (len(line) > 0 
+            and 'Kepler' not in line
+            and 'integer' not in line
+            and 'no rows found' not in line):
             out = line.split(',')
     return out
 
 def keptrim_main():
     import argparse
     parser = argparse.ArgumentParser(
-            description='Trim unwanted pixels from a Target Pixel File')
+             description='Trim unwanted pixels from a Target Pixel File',
+             formatter_class=PyKEArgumentHelpFormatter)
     parser.add_argument('infile', help='Name of input target pixel file',
                         type=str)
     parser.add_argument('outfile', help='Name of output target pixel file',
