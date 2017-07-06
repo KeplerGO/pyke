@@ -26,11 +26,20 @@ Or if you would like to experiment our development version::
     cd PyKE
     pip install -e .
 
-API Documentation
-=================
+Command-line Tools Documentation
+================================
+
+After PyKE has been installed, a set of command-line tools is available on your
+favorite terminal. Most of the tools can be run with the following pattern::
+
+    $ name-of-the-tool input-file output-file --options
+
+where ``input-file`` is either a light curve or a target pixel file and
+``output-file`` is a name given by the user. See the list below for detailed
+documentation.
 
 .. toctree::
-    :maxdepth: 1
+    :maxdepth: 2
 
     api/index
 

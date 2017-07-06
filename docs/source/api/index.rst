@@ -1,5 +1,5 @@
-Modules/API
-===========
+Command-line tools
+==================
 
 .. toctree::
 
