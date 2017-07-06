@@ -43,3 +43,4 @@ from .keptimefix import *
 from .keptrial import *
 from .keptrim import *
 from .kepwindow import *
+from .utils import *
