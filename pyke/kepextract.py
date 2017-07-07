@@ -11,8 +11,9 @@ from . import kepio, kepmsg, kepkey, kepstat, kepfunc
 __all__ = ['kepextract']
 
 
-def kepextract(infile, outfile, maskfile='ALL', bkg=False, overwrite=False,
-               verbose=False, logfile='kepextract.log'):
+def kepextract(infile, outfile, maskfile='ALL', bkg=False, psfphot=False,
+               moments=False, overwrite=False, verbose=False,
+               logfile='kepextract.log'):
     """
     kepextract -- create a light curve from a target pixel file by summing
     user-selected pixels
@@ -64,6 +65,11 @@ def kepextract(infile, outfile, maskfile='ALL', bkg=False, overwrite=False,
         mask that contain background and negligible source flux. Note that
         background has already been subtracted from calibrated Kepler Target
         Pixel Files, but not early campaign data from the K2 mission.
+    psfphot : bool
+        If True, performs PSF photometry using a 2D Gaussian. (May be slow in
+        short cadence data).
+    moments : bool
+        If True, performs photometry using statistical sample moments.
     overwrite : bool
         Overwrite the output file?
     verbose : bool
@@ -106,6 +112,8 @@ def kepextract(infile, outfile, maskfile='ALL', bkg=False, overwrite=False,
             + ' maskfile={}'.format(maskfile)
             + ' outfile={}'.format(outfile)
             + ' background={}'.format(bkg)
+            + ' psfphotometry={}'.format(psfphot)
+            + ' moments={}'.format(moments)
             + ' overwrite={}'.format(overwrite)
             + ' verbose={}'.format(verbose)
             + ' logfile={}'.format(logfile))
@@ -135,6 +143,8 @@ def kepextract(infile, outfile, maskfile='ALL', bkg=False, overwrite=False,
     cards2 = instr[2].header.cards
     table = instr[1].data[:]
     maskmap = copy(instr[2].data)
+
+    print("Getting information from Target Pixel File...")
 
     # input table data
     kepid, channel, skygroup, module, output, quarter, season, \
@@ -199,10 +209,14 @@ def kepextract(infile, outfile, maskfile='ALL', bkg=False, overwrite=False,
     # dummy columns for output file
     psf_centr1 = np.empty(len(time))
     psf_centr1[:] = np.nan
-    psf_centr1_err = np.empty(len(time))
-    psf_centr1_err[:] = np.nan
     psf_centr2 = np.empty(len(time))
     psf_centr2[:] = np.nan
+    mom_centr1 = np.empty(len(time))
+    mom_centr1[:] = np.nan
+    mom_centr2 = np.empty(len(time))
+    mom_centr2[:] = np.nan
+    psf_centr1_err = np.empty(len(time))
+    psf_centr1_err[:] = np.nan
     psf_centr2_err = np.empty(len(time))
     psf_centr2_err[:] = np.nan
     mom_centr1_err = np.empty(len(time))
@@ -306,6 +320,7 @@ def kepextract(infile, outfile, maskfile='ALL', bkg=False, overwrite=False,
     sap_bkg = np.array([], 'float32')
     sap_bkg_err = np.array([], 'float32')
     raw_flux = np.array([],'float32')
+    print("Aperture photometry...")
     for i in tqdm(range(len(time))):
         work1 = np.array([], 'float64')
         work2 = np.array([], 'float64')
@@ -325,79 +340,79 @@ def kepextract(infile, outfile, maskfile='ALL', bkg=False, overwrite=False,
         sap_bkg_err = np.append(sap_bkg_err, math.sqrt(np.sum(work4 * work4)))
         raw_flux = np.append(raw_flux, np.sum(work5))
 
-    # construct new table moment data
-    mom_centr1 = np.zeros(shape=(ntime))
-    mom_centr2 = np.zeros(shape=(ntime))
-    mom_centr1_err = np.zeros(shape=(ntime))
-    mom_centr2_err = np.zeros(shape=(ntime))
-    for i in range(ntime):
-        xf = np.zeros(shape=(naper))
-        yf = np.zeros(shape=(naper))
-        f = np.zeros(shape=(naper))
-        xfe = np.zeros(shape=(naper))
-        yfe = np.zeros(shape=(naper))
-        fe = np.zeros(shape=(naper))
-        k = -1
-        for j in range(len(aperb)):
-            if aperb[j] == 3:
-                k += 1
-                xf[k] = aperx[j] * flux[i, j]
-                xfe[k] = aperx[j] * flux_err[i, j]
-                yf[k] = apery[j] * flux[i, j]
-                yfe[k] = apery[j] * flux_err[i, j]
-                f[k] = flux[i, j]
-                fe[k] = flux_err[i, j]
-        xfsum = np.sum(xf)
-        yfsum = np.sum(yf)
-        fsum = np.sum(f)
-        xfsume = math.sqrt(np.sum(xfe * xfe) / naper)
-        yfsume = math.sqrt(np.sum(yfe * yfe) / naper)
-        fsume = math.sqrt(np.sum(fe * fe) / naper)
-        mom_centr1[i] = xfsum / fsum
-        mom_centr2[i] = yfsum / fsum
-        mom_centr1_err[i] = math.sqrt((xfsume / xfsum) ** 2 + ((fsume / fsum) ** 2))
-        mom_centr2_err[i] = math.sqrt((yfsume / yfsum) ** 2 + ((fsume / fsum) ** 2))
-    mom_centr1_err = mom_centr1_err * mom_centr1
-    mom_centr2_err = mom_centr2_err * mom_centr2
+    if psfphot or moments:
+        print("Sample moments...")
+        # construct new table moment data
+        for i in tqdm(range(ntime)):
+            xf = np.zeros(shape=(naper))
+            yf = np.zeros(shape=(naper))
+            f = np.zeros(shape=(naper))
+            xfe = np.zeros(shape=(naper))
+            yfe = np.zeros(shape=(naper))
+            fe = np.zeros(shape=(naper))
+            k = -1
+            for j in range(len(aperb)):
+                if aperb[j] == 3:
+                    k += 1
+                    xf[k] = aperx[j] * flux[i, j]
+                    xfe[k] = aperx[j] * flux_err[i, j]
+                    yf[k] = apery[j] * flux[i, j]
+                    yfe[k] = apery[j] * flux_err[i, j]
+                    f[k] = flux[i, j]
+                    fe[k] = flux_err[i, j]
+            xfsum = np.sum(xf)
+            yfsum = np.sum(yf)
+            fsum = np.sum(f)
+            xfsume = math.sqrt(np.sum(xfe * xfe) / naper)
+            yfsume = math.sqrt(np.sum(yfe * yfe) / naper)
+            fsume = math.sqrt(np.sum(fe * fe) / naper)
+            mom_centr1[i] = xfsum / fsum
+            mom_centr2[i] = yfsum / fsum
+            mom_centr1_err[i] = math.sqrt((xfsume / xfsum) ** 2 + ((fsume / fsum) ** 2))
+            mom_centr2_err[i] = math.sqrt((yfsume / yfsum) ** 2 + ((fsume / fsum) ** 2))
+        mom_centr1_err = mom_centr1_err * mom_centr1
+        mom_centr2_err = mom_centr2_err * mom_centr2
 
-    # construct new table PSF data
-    psf_centr1 = np.zeros(shape=(ntime))
-    psf_centr2 = np.zeros(shape=(ntime))
-    psf_centr1_err = np.zeros(shape=(ntime))
-    psf_centr2_err = np.zeros(shape=(ntime))
-    modx = np.zeros(shape=(naper))
-    mody = np.zeros(shape=(naper))
-    k = -1
-    for j in range(len(aperb)):
-        if (aperb[j] == 3):
-            k += 1
-            modx[k] = aperx[j]
-            mody[k] = apery[j]
-    for i in range(ntime):
-        modf = np.zeros(shape=(naper))
+    if psfphot:
+        print("PSF Photometry...")
+        # construct new table PSF data
+        psf_centr1 = np.zeros(shape=(ntime))
+        psf_centr2 = np.zeros(shape=(ntime))
+        psf_centr1_err = np.zeros(shape=(ntime))
+        psf_centr2_err = np.zeros(shape=(ntime))
+        modx = np.zeros(shape=(naper))
+        mody = np.zeros(shape=(naper))
         k = -1
-        guess = [mom_centr1[i], mom_centr2[i], np.nanmax(flux[i:]), 1.0, 1.0, 0.0, 0.0]
         for j in range(len(aperb)):
             if (aperb[j] == 3):
                 k += 1
-                modf[k] = flux[i,j]
-                args = (modx, mody, modf)
-        try:
-            ans = leastsq(kepfunc.PRFgauss2d, guess, args=args, xtol=1.0e-8,
-                          ftol=1.0e-4, full_output=True)
-            s_sq = (ans[2]['fvec'] ** 2).sum() / (ntime - len(guess))
-            psf_centr1[i] = ans[0][0]
-            psf_centr2[i] = ans[0][1]
-        except:
-            pass
-        try:
-            psf_centr1_err[i] = sqrt(diag(ans[1] * s_sq))[0]
-        except:
-            psf_centr1_err[i] = np.nan
-        try:
-            psf_centr2_err[i] = sqrt(diag(ans[1] * s_sq))[1]
-        except:
-            psf_centr2_err[i] = np.nan
+                modx[k] = aperx[j]
+                mody[k] = apery[j]
+        for i in tqdm(range(ntime)):
+            modf = np.zeros(shape=(naper))
+            k = -1
+            guess = [mom_centr1[i], mom_centr2[i], np.nanmax(flux[i:]), 1.0, 1.0, 0.0, 0.0]
+            for j in range(len(aperb)):
+                if (aperb[j] == 3):
+                    k += 1
+                    modf[k] = flux[i,j]
+                    args = (modx, mody, modf)
+            try:
+                ans = leastsq(kepfunc.PRFgauss2d, guess, args=args, xtol=1.0e-8,
+                              ftol=1.0e-4, full_output=True)
+                s_sq = (ans[2]['fvec'] ** 2).sum() / (ntime - len(guess))
+                psf_centr1[i] = ans[0][0]
+                psf_centr2[i] = ans[0][1]
+            except:
+                pass
+            try:
+                psf_centr1_err[i] = sqrt(diag(ans[1] * s_sq))[0]
+            except:
+                psf_centr1_err[i] = np.nan
+            try:
+                psf_centr2_err[i] = sqrt(diag(ans[1] * s_sq))[1]
+            except:
+                psf_centr2_err[i] = np.nan
 
     # construct output primary extension
     hdu0 = pyfits.PrimaryHDU()
@@ -579,6 +594,10 @@ def kepextract_main():
                         type=str)
     parser.add_argument('--bkg', action='store_true',
                         help='Subtract background from data?')
+    parser.add_argument('--psfphot', action='store_true',
+                        help='Perform PSF Photometry with 2D Gaussian?')
+    parser.add_argument('--moments', action='store_true',
+                        help='Perform sample moments photometry?')
     parser.add_argument('--overwrite', action='store_true',
                         help='Overwrite output file?')
     parser.add_argument('--verbose', action='store_true',
@@ -587,4 +606,5 @@ def kepextract_main():
                         default='kepextract.log', type=str)
     args = parser.parse_args()
     kepextract(args.infile, args.outfile, args.maskfile, args.bkg,
-               args.overwrite, args.verbose, args.logfile)
+               args.psfphot, args.moments, args.overwrite, args.verbose,
+               args.logfile)
