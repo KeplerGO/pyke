@@ -1120,7 +1120,7 @@ def kepprfphot_main():
                         help='Root name of output light curve files',
                         type=str)
     parser.add_argument('prfdir',
-                        help='Folder containing PRF files', dest='prfdir',
+                        help='Folder containing PRF files',
                         type=str)
     parser.add_argument('columns',
                         help='Column number of each source to be fit',
