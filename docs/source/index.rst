@@ -35,8 +35,13 @@ favorite terminal. Most of the tools can be run with the following pattern::
     $ name-of-the-tool input-file output-file --options
 
 where ``input-file`` is either a light curve or a target pixel file and
-``output-file`` is a name given by the user. See the list below for detailed
-documentation.
+``output-file`` is a name given by the user.
+
+And help documentation can be retrived by::
+
+    $ name-of-the-tool --help
+
+See the list below for detailed documentation.
 
 .. toctree::
     :maxdepth: 2
