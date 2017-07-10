@@ -11,8 +11,8 @@ from . import kepio, kepmsg, kepkey, kepstat, kepfunc
 __all__ = ['kepextract']
 
 
-def kepextract(infile, outfile, maskfile='ALL', bkg=False, psfphot=False,
-               moments=False, overwrite=False, verbose=False,
+def kepextract(infile, outfile, maskfile='ALL', bkg=False, psfcentroid=False,
+               overwrite=False, verbose=False,
                logfile='kepextract.log'):
     """
     kepextract -- create a light curve from a target pixel file by summing
@@ -49,15 +49,15 @@ def kepextract(infile, outfile, maskfile='ALL', bkg=False, psfphot=False,
             * 'ALL' tells the task to calculate principal components from all
             pixels within the pixel mask stored in the input file.
 
-            * 'APER' tells the task to calculate principal components from only the
-            pixels within the photometric aperture stored in the input file (e.g.
-            only those pixels summed by the Kepler pipeline to produce the light
-            curve archived at MAST.
+            * 'APER' tells the task to calculate principal components from only
+            the pixels within the photometric aperture stored in the input file
+            (e.g. only those pixels summed by the Kepler pipeline to produce
+            the light curve archived at MAST.
 
-            * A filename describing the desired photometric aperture. Such a file
-            can be constructed using the kepmask or kepffi tools, or can be
-            created manually using the format described in the documentation for
-            those tools.
+            * A filename describing the desired photometric aperture. Such a
+            file can be constructed using the kepmask or kepffi tools, or can
+            be created manually using the format described in the documentation
+            for those tools.
     bkg : bool
         Option to subtract an estimate of the background. Background is
         calculated by identifying the median pixel value for each exposure.
@@ -65,11 +65,10 @@ def kepextract(infile, outfile, maskfile='ALL', bkg=False, psfphot=False,
         mask that contain background and negligible source flux. Note that
         background has already been subtracted from calibrated Kepler Target
         Pixel Files, but not early campaign data from the K2 mission.
-    psfphot : bool
-        If True, performs PSF photometry using a 2D Gaussian. (May be slow in
-        short cadence data).
-    moments : bool
-        If True, performs photometry using statistical sample moments.
+    psfcentroid : bool
+        Measure the star's position by fitting a 2D Gaussian PSF to the pixels
+        in the mask. This will populate values for PSF_CENTR1 (column position)
+        and PSF_CENTR2 (row position) in the output file.
     overwrite : bool
         Overwrite the output file?
     verbose : bool
@@ -112,8 +111,7 @@ def kepextract(infile, outfile, maskfile='ALL', bkg=False, psfphot=False,
             + ' maskfile={}'.format(maskfile)
             + ' outfile={}'.format(outfile)
             + ' background={}'.format(bkg)
-            + ' psfphotometry={}'.format(psfphot)
-            + ' moments={}'.format(moments)
+            + ' psfcentroid={}'.format(psfcentroid)
             + ' overwrite={}'.format(overwrite)
             + ' verbose={}'.format(verbose)
             + ' logfile={}'.format(logfile))
@@ -144,7 +142,7 @@ def kepextract(infile, outfile, maskfile='ALL', bkg=False, psfphot=False,
     table = instr[1].data[:]
     maskmap = copy(instr[2].data)
 
-    print("Getting information from Target Pixel File...")
+    print("Extracting information from Target Pixel File...")
 
     # input table data
     kepid, channel, skygroup, module, output, quarter, season, \
@@ -340,41 +338,40 @@ def kepextract(infile, outfile, maskfile='ALL', bkg=False, psfphot=False,
         sap_bkg_err = np.append(sap_bkg_err, math.sqrt(np.sum(work4 * work4)))
         raw_flux = np.append(raw_flux, np.sum(work5))
 
-    if psfphot or moments:
-        print("Sample moments...")
-        # construct new table moment data
-        for i in tqdm(range(ntime)):
-            xf = np.zeros(shape=(naper))
-            yf = np.zeros(shape=(naper))
-            f = np.zeros(shape=(naper))
-            xfe = np.zeros(shape=(naper))
-            yfe = np.zeros(shape=(naper))
-            fe = np.zeros(shape=(naper))
-            k = -1
-            for j in range(len(aperb)):
-                if aperb[j] == 3:
-                    k += 1
-                    xf[k] = aperx[j] * flux[i, j]
-                    xfe[k] = aperx[j] * flux_err[i, j]
-                    yf[k] = apery[j] * flux[i, j]
-                    yfe[k] = apery[j] * flux_err[i, j]
-                    f[k] = flux[i, j]
-                    fe[k] = flux_err[i, j]
-            xfsum = np.sum(xf)
-            yfsum = np.sum(yf)
-            fsum = np.sum(f)
-            xfsume = math.sqrt(np.sum(xfe * xfe) / naper)
-            yfsume = math.sqrt(np.sum(yfe * yfe) / naper)
-            fsume = math.sqrt(np.sum(fe * fe) / naper)
-            mom_centr1[i] = xfsum / fsum
-            mom_centr2[i] = yfsum / fsum
-            mom_centr1_err[i] = math.sqrt((xfsume / xfsum) ** 2 + ((fsume / fsum) ** 2))
-            mom_centr2_err[i] = math.sqrt((yfsume / yfsum) ** 2 + ((fsume / fsum) ** 2))
-        mom_centr1_err = mom_centr1_err * mom_centr1
-        mom_centr2_err = mom_centr2_err * mom_centr2
+    print("Sample moments...")
+    # construct new table moment data
+    for i in tqdm(range(ntime)):
+        xf = np.zeros(shape=(naper))
+        yf = np.zeros(shape=(naper))
+        f = np.zeros(shape=(naper))
+        xfe = np.zeros(shape=(naper))
+        yfe = np.zeros(shape=(naper))
+        fe = np.zeros(shape=(naper))
+        k = -1
+        for j in range(len(aperb)):
+            if aperb[j] == 3:
+                k += 1
+                xf[k] = aperx[j] * flux[i, j]
+                xfe[k] = aperx[j] * flux_err[i, j]
+                yf[k] = apery[j] * flux[i, j]
+                yfe[k] = apery[j] * flux_err[i, j]
+                f[k] = flux[i, j]
+                fe[k] = flux_err[i, j]
+        xfsum = np.sum(xf)
+        yfsum = np.sum(yf)
+        fsum = np.sum(f)
+        xfsume = math.sqrt(np.sum(xfe * xfe) / naper)
+        yfsume = math.sqrt(np.sum(yfe * yfe) / naper)
+        fsume = math.sqrt(np.sum(fe * fe) / naper)
+        mom_centr1[i] = xfsum / fsum
+        mom_centr2[i] = yfsum / fsum
+        mom_centr1_err[i] = math.sqrt((xfsume / xfsum) ** 2 + ((fsume / fsum) ** 2))
+        mom_centr2_err[i] = math.sqrt((yfsume / yfsum) ** 2 + ((fsume / fsum) ** 2))
+    mom_centr1_err = mom_centr1_err * mom_centr1
+    mom_centr2_err = mom_centr2_err * mom_centr2
 
-    if psfphot:
-        print("PSF Photometry...")
+    if psfcentroid:
+        print("PSF Centroiding...")
         # construct new table PSF data
         psf_centr1 = np.zeros(shape=(ntime))
         psf_centr2 = np.zeros(shape=(ntime))
@@ -594,10 +591,12 @@ def kepextract_main():
                         type=str)
     parser.add_argument('--bkg', action='store_true',
                         help='Subtract background from data?')
-    parser.add_argument('--psfphot', action='store_true',
-                        help='Perform PSF Photometry with 2D Gaussian?')
-    parser.add_argument('--moments', action='store_true',
-                        help='Perform sample moments photometry?')
+    parser.add_argument('--psfcentroid', action='store_true',
+                        help=("Measure the star's position by fitting a 2D"
+                              " Gaussian PSF to the pixels in the mask. This"
+                              " will populate values for PSF_CENTR1 (column"
+                              " position) and PSF_CENTR2 (row position) in the"
+                              " output file."))
     parser.add_argument('--overwrite', action='store_true',
                         help='Overwrite output file?')
     parser.add_argument('--verbose', action='store_true',
@@ -606,5 +605,5 @@ def kepextract_main():
                         default='kepextract.log', type=str)
     args = parser.parse_args()
     kepextract(args.infile, args.outfile, args.maskfile, args.bkg,
-               args.psfphot, args.moments, args.overwrite, args.verbose,
+               args.psfcentroid, args.overwrite, args.verbose,
                args.logfile)
