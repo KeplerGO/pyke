@@ -77,3 +77,66 @@ Pixel File is plotted on a linear intensity scale as follows:
 
 .. image:: ../_static/images/tutorials/example_a/kepmask_target.png
     :align: center
+
+Similarly, we can create an aperture mask for the eclipsing binary:
+
+.. code-block:: bash
+
+    $ kepmask kplr002449074-2009350155506_lpd-targ.fits.gz 2177 --maskfile mask_eb.txt
+    --iscale linear
+
+.. image:: ../_static/images/tutorials/example_a/kepmask_eb.png
+    :align: center
+
+Step 5: Extract new SAP light curves from the TPF
+-------------------------------------------------
+
+The PyKE tool kepextract can be called to extract new SAP light curves from the TPF.
+We can create two new light curves as follows:
+
+.. code-block:: bash
+
+    $ kepextract kplr002449074-2009350155506_lpd-targ.fits.gz
+    kepextract_target.fits --maskfile mask_target.txt
+
+    $ kepdraw kepextract_target.fits
+
+.. image:: ../_static/images/tutorials/example_a/kepextract_target.png
+    :align: center
+
+.. code-block:: bash
+
+    $ kepextract kplr002449074-2009350155506_lpd-targ.fits.gz
+    kepextract_eb.fits --maskfile mask_eb.txt
+
+    $ kepdraw kepextract_eb.fits
+
+.. image:: ../_static/images/tutorials/example_a/kepextract_eb.png
+    :align: center
+
+Step 6: Mitigate for systematic artifacts in new SAP light curves
+-----------------------------------------------------------------
+
+The extracted light curves are constructed by simple pixel summation.
+Consequently artifacts resulting from target motion across the pixel aperture
+exist within the new light curves. Artifacts can be reduced or removed
+by fitting and subtracting the best fit ensemble of Cotrending Basis Vectors
+(CBVs). Users must ensure that they download CBVs from the MAST correctly
+corresponding to the quarter being analyzed. In the current case, the Q3 CBV is
+called *kplr2009350155506-q03-d14_lcbv.fits*. Artifact correction is performed by
+the ``kepcotrend`` tool. The corrected light curve is stored in an output file
+within a new FITS column called CBVSAP_FLUX.
+
+.. code-block:: bash
+
+    $ kepcotrend kepextract_target.fits kepcotrend_target.fits
+    ../cbv/kplr2009350155506-q03-d25_lcbv.fits 1,2,3,4,5,6 --sigmaclip 3.0 --plot
+
+    $ kepcotrend kepextract_eb.fits kepcotrend_eb.fits
+    ../cbv/kplr2009350155506-q03-d25_lcbv.fits 1,2,3,4,5,6 --sigmaclip 3.0 --plot
+
+.. image:: ../_static/images/tutorials/example_a/kepcotrend_target.png
+    :align: center
+
+.. image:: ../_static/images/tutorials/example_a/kepcotrend_eb.png
+    :align: center
