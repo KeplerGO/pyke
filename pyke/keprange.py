@@ -161,6 +161,7 @@ def plotlc():
     global aid, bid, cid, did, eid, fid, mask
 
     # load button
+    plt.clf()
     plt.axes([0.06, 0.02, 0.22, 0.1])
     plt.text(0.5, 0.5, 'LOAD', fontsize=24, weight='heavy',
              horizontalalignment='center', verticalalignment='center')
@@ -312,7 +313,6 @@ def clicker2(event):
                         txt += str(t1) + ',' + str(t2) + '\n'
                         nt += 2
                     txt = txt.strip()
-                    print(txt)
                     kepmsg.log(outf, txt, True)
                     print('\nWrote ASCII file ' + outf)
                     plotlc()
@@ -385,12 +385,6 @@ def clicker6(event):
                     else:
                         mask.append(mask[-1])
                         mask[-2] = event.xdata
-                plt.disconnect(aid)
-                plt.disconnect(bid)
-                plt.disconnect(cid)
-                plt.disconnect(did)
-                plt.disconnect(eid)
-                plt.disconnect(fid)
                 plotlc()
 
 def keprange_main():
