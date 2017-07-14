@@ -1,15 +1,13 @@
 ..
 
-From Target Pixel File to Light Curve
-=====================================
+Performing PSF photometry in a K2 cluster
+=========================================
 
-In this quick tutorial, we will take a look at a few PyKE tools and primarily
-how they can be used for data exploration and analysis.
+In this tutorial we will use PSF-fitting photometry to create a light curve
+for an object in one of the cluster superstamps observed by K2.
 
-The specific goal of this tutorial is to show to the user how to create a light curve
-based on psf photometry from a target pixel file using PyKE.
-
-First, let's download a target pixel file from `Campaign 9a <https://keplerscience.arc.nasa.gov/k2-c9.html>`_:
+For this purpose, we download on of the target pixel files which K2
+obtained towards the Lagoon Nebula (M8) during `Campaign 9a <https://keplerscience.arc.nasa.gov/k2-c9.html>`_:
 
 .. code-block:: bash
 
@@ -24,18 +22,18 @@ We can visualize one of the frames using ``kepmask``:
 .. image:: ../_static/images/tutorials/tpf2lc/kepmask.png
     :align: center
 
-We would like to create a light curve for the target located roughly at the (1013, 918) pixel in the detector.
+We would like to create a light curve for the target located near
+pixel (1013, 918) in the detector.
 
-We can use ``keptrim`` to create a target pixel file around the center of our selected target.
-For ``keptrim``, we need to provide the center of the target we want and the size of the mask
-around the target. So, let's take a 3 x 3 mask around our target:
+First, we use ``keptrim`` to create a smaller target pixel file
+by cutting a 3x3 mask around the center of our target:
 
 .. code-block:: bash
 
     $ keptrim ktwo200071160-c91_lpd-targ.fits.gz ktwo200071160-c91_trimmed_3.fits 1013 918 3
 
-This command creates a target pixel file called ``ktwo200071160-c91_trimmed_3.fits`` in our current directory with only
-the desired pixels, while preserving all the original metadata.
+This command creates a new target pixel file called ``ktwo200071160-c91_trimmed_3.fits`` in the current directory,
+which contains the desired pixels while preserving all the original metadata.
 
 We can then use ``kepprfphot`` [#]_ to fit the Kepler PRF for every frame in our trimmed tpf:
 
@@ -49,7 +47,7 @@ containing the PRF files from the Kepler focal plane available in [#]_.
 This command creates a fits file called ``ktwo200071160-c91_trimmed_3_prfphot_0.fits`` with all the results from
 the prf photometry including fitted flux and centroids.
 
-We can then write a small python script to see how the light curve looks like
+We can then write a small python script to see what the light curve looks like
 
 .. code-block:: python
 

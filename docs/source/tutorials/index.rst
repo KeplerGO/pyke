@@ -3,6 +3,6 @@ Tutorials
 
 .. toctree::
 
-    tpf2lc
-    example_e
-    example_a
+    aperture-photometry-in-k2
+    psf-photometry-in-k2
+    separating-a-background-eb

@@ -1,7 +1,7 @@
 ..
 
-Mitigate K2 Motion Artifacts by Correlating Detrended Flux with Target Centroids
-================================================================================
+Performing aperture photometry on a K2 target
+=============================================
 
 Step 1: Define a pixel extraction mask for a K2 target
 ------------------------------------------------------

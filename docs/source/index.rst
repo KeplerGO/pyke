@@ -1,7 +1,4 @@
-.. PyKE documentation master file, created by
-   sphinx-quickstart on Thu May 11 16:52:07 2017.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
+..
 
 Welcome to PyKE!
 ================
@@ -10,8 +7,7 @@ Welcome to PyKE!
    :maxdepth: 1
    :caption: Contents:
 
-PyKE is a set of data analysis tools, maintained by the K2 Guest Observer
-Office, for Kepler, K2, TESS, and future missions.
+PyKE is a set of data analysis tools which offer a user-friendly way to inspect and analyze the pixels and lightcurves obtained by NASA's Kepler, K2, and TESS missions.
 
 Installation
 ============
@@ -26,8 +22,16 @@ Or if you would like to experiment our development version::
     cd PyKE
     pip install -e .
 
-Command-line Tools Documentation
-================================
+Getting started
+===============
+
+.. toctree::
+    :maxdepth: 2
+
+    tutorials/index
+
+Command-line tools
+==================
 
 After PyKE has been installed, a set of command-line tools is available on your
 favorite terminal. Most of the tools can be run with the following pattern::
@@ -47,15 +51,6 @@ See the list below for detailed documentation.
     :maxdepth: 2
 
     api/index
-
-Tutorials
-=========
-
-.. toctree::
-    :maxdepth: 2
-
-    tutorials/index
-
 
 Indices and tables
 ==================

@@ -1,20 +1,23 @@
 ..
 
-Extract and Cotrend New Light Curves from Target Pixel Files
-============================================================
+Separating a background eclipsing binary from a foreground star
+===============================================================
 
-Let's first download the archived light curve for the target KIC 2449074:
+The likelihood of source confusion around any given target is high.
+One cannot be certain whether astrophysical variability across a Kepler light curve comes entirely from the target star.
+In order to resolve the sources of variability within a target mask,
+users should examine the Target Pixel File (TPF).
+
+Step 1: Plot archived SAP data
+------------------------------
+
+For the purposes of this example, we will examine the light curve and pixel file of KIC 2449074, which we can download from the archive as follows:
 
 .. code-block:: bash
 
     $ wget http://archive.stsci.edu/missions/kepler/lightcurves/0024/002449074/kplr002449074-2009350155506_llc.fits
 
-
-
-Step 1: Plot archived SAP data
-------------------------------
-
-We can visualize the simple aperture photometry flux using ``kepdraw``:
+We can visualize the Simple Aperture Photometry (SAP) flux measured by the Kepler pipeline using the ``kepdraw`` tool:
 
 .. code-block:: bash
 
