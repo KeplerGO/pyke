@@ -137,13 +137,19 @@ def intScale1D(image, imscale):
     if imscale == 'logarithmic':
         if zmin < 0.0:
             zmin = 100.0
-        image = np.log10(image)
+        if np.any(image <= 0):
+            image = np.log10(image + abs(image.min()))
+        else:
+            image = np.log10(image)
         zmin = math.log10(zmin)
         zmax = math.log10(zmax)
     if imscale == 'squareroot':
         if zmin < 0.0:
             zmin = 100.0
-        image = np.sqrt(image)
+        if np.any(image < 0):
+            image = np.sqrt(image + abs(image.min()))
+        else:
+            image = np.sqrt(image)
         zmin = math.sqrt(zmin)
         zmax = math.sqrt(zmax)
 

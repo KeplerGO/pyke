@@ -11,8 +11,9 @@ from . import kepio, kepmsg, kepkey, kepstat, kepfunc
 __all__ = ['kepextract']
 
 
-def kepextract(infile, outfile, maskfile='ALL', bkg=False, overwrite=False,
-               verbose=False, logfile='kepextract.log'):
+def kepextract(infile, outfile, maskfile='ALL', bkg=False, psfcentroid=False,
+               overwrite=False, verbose=False,
+               logfile='kepextract.log'):
     """
     kepextract -- create a light curve from a target pixel file by summing
     user-selected pixels
@@ -48,15 +49,15 @@ def kepextract(infile, outfile, maskfile='ALL', bkg=False, overwrite=False,
             * 'ALL' tells the task to calculate principal components from all
             pixels within the pixel mask stored in the input file.
 
-            * 'APER' tells the task to calculate principal components from only the
-            pixels within the photometric aperture stored in the input file (e.g.
-            only those pixels summed by the Kepler pipeline to produce the light
-            curve archived at MAST.
+            * 'APER' tells the task to calculate principal components from only
+            the pixels within the photometric aperture stored in the input file
+            (e.g. only those pixels summed by the Kepler pipeline to produce
+            the light curve archived at MAST.
 
-            * A filename describing the desired photometric aperture. Such a file
-            can be constructed using the kepmask or kepffi tools, or can be
-            created manually using the format described in the documentation for
-            those tools.
+            * A filename describing the desired photometric aperture. Such a
+            file can be constructed using the kepmask or kepffi tools, or can
+            be created manually using the format described in the documentation
+            for those tools.
     bkg : bool
         Option to subtract an estimate of the background. Background is
         calculated by identifying the median pixel value for each exposure.
@@ -64,6 +65,10 @@ def kepextract(infile, outfile, maskfile='ALL', bkg=False, overwrite=False,
         mask that contain background and negligible source flux. Note that
         background has already been subtracted from calibrated Kepler Target
         Pixel Files, but not early campaign data from the K2 mission.
+    psfcentroid : bool
+        Measure the star's position by fitting a 2D Gaussian PSF to the pixels
+        in the mask. This will populate values for PSF_CENTR1 (column position)
+        and PSF_CENTR2 (row position) in the output file.
     overwrite : bool
         Overwrite the output file?
     verbose : bool
@@ -106,6 +111,7 @@ def kepextract(infile, outfile, maskfile='ALL', bkg=False, overwrite=False,
             + ' maskfile={}'.format(maskfile)
             + ' outfile={}'.format(outfile)
             + ' background={}'.format(bkg)
+            + ' psfcentroid={}'.format(psfcentroid)
             + ' overwrite={}'.format(overwrite)
             + ' verbose={}'.format(verbose)
             + ' logfile={}'.format(logfile))
@@ -135,6 +141,8 @@ def kepextract(infile, outfile, maskfile='ALL', bkg=False, overwrite=False,
     cards2 = instr[2].header.cards
     table = instr[1].data[:]
     maskmap = copy(instr[2].data)
+
+    print("Extracting information from Target Pixel File...")
 
     # input table data
     kepid, channel, skygroup, module, output, quarter, season, \
@@ -199,10 +207,14 @@ def kepextract(infile, outfile, maskfile='ALL', bkg=False, overwrite=False,
     # dummy columns for output file
     psf_centr1 = np.empty(len(time))
     psf_centr1[:] = np.nan
-    psf_centr1_err = np.empty(len(time))
-    psf_centr1_err[:] = np.nan
     psf_centr2 = np.empty(len(time))
     psf_centr2[:] = np.nan
+    mom_centr1 = np.empty(len(time))
+    mom_centr1[:] = np.nan
+    mom_centr2 = np.empty(len(time))
+    mom_centr2[:] = np.nan
+    psf_centr1_err = np.empty(len(time))
+    psf_centr1_err[:] = np.nan
     psf_centr2_err = np.empty(len(time))
     psf_centr2_err[:] = np.nan
     mom_centr1_err = np.empty(len(time))
@@ -306,6 +318,7 @@ def kepextract(infile, outfile, maskfile='ALL', bkg=False, overwrite=False,
     sap_bkg = np.array([], 'float32')
     sap_bkg_err = np.array([], 'float32')
     raw_flux = np.array([],'float32')
+    print("Aperture photometry...")
     for i in tqdm(range(len(time))):
         work1 = np.array([], 'float64')
         work2 = np.array([], 'float64')
@@ -325,12 +338,9 @@ def kepextract(infile, outfile, maskfile='ALL', bkg=False, overwrite=False,
         sap_bkg_err = np.append(sap_bkg_err, math.sqrt(np.sum(work4 * work4)))
         raw_flux = np.append(raw_flux, np.sum(work5))
 
+    print("Sample moments...")
     # construct new table moment data
-    mom_centr1 = np.zeros(shape=(ntime))
-    mom_centr2 = np.zeros(shape=(ntime))
-    mom_centr1_err = np.zeros(shape=(ntime))
-    mom_centr2_err = np.zeros(shape=(ntime))
-    for i in range(ntime):
+    for i in tqdm(range(ntime)):
         xf = np.zeros(shape=(naper))
         yf = np.zeros(shape=(naper))
         f = np.zeros(shape=(naper))
@@ -360,44 +370,46 @@ def kepextract(infile, outfile, maskfile='ALL', bkg=False, overwrite=False,
     mom_centr1_err = mom_centr1_err * mom_centr1
     mom_centr2_err = mom_centr2_err * mom_centr2
 
-    # construct new table PSF data
-    psf_centr1 = np.zeros(shape=(ntime))
-    psf_centr2 = np.zeros(shape=(ntime))
-    psf_centr1_err = np.zeros(shape=(ntime))
-    psf_centr2_err = np.zeros(shape=(ntime))
-    modx = np.zeros(shape=(naper))
-    mody = np.zeros(shape=(naper))
-    k = -1
-    for j in range(len(aperb)):
-        if (aperb[j] == 3):
-            k += 1
-            modx[k] = aperx[j]
-            mody[k] = apery[j]
-    for i in range(ntime):
-        modf = np.zeros(shape=(naper))
+    if psfcentroid:
+        print("PSF Centroiding...")
+        # construct new table PSF data
+        psf_centr1 = np.zeros(shape=(ntime))
+        psf_centr2 = np.zeros(shape=(ntime))
+        psf_centr1_err = np.zeros(shape=(ntime))
+        psf_centr2_err = np.zeros(shape=(ntime))
+        modx = np.zeros(shape=(naper))
+        mody = np.zeros(shape=(naper))
         k = -1
-        guess = [mom_centr1[i], mom_centr2[i], np.nanmax(flux[i:]), 1.0, 1.0, 0.0, 0.0]
         for j in range(len(aperb)):
             if (aperb[j] == 3):
                 k += 1
-                modf[k] = flux[i,j]
-                args = (modx, mody, modf)
-        try:
-            ans = leastsq(kepfunc.PRFgauss2d, guess, args=args, xtol=1.0e-8,
-                          ftol=1.0e-4, full_output=True)
-            s_sq = (ans[2]['fvec'] ** 2).sum() / (ntime - len(guess))
-            psf_centr1[i] = ans[0][0]
-            psf_centr2[i] = ans[0][1]
-        except:
-            pass
-        try:
-            psf_centr1_err[i] = sqrt(diag(ans[1] * s_sq))[0]
-        except:
-            psf_centr1_err[i] = np.nan
-        try:
-            psf_centr2_err[i] = sqrt(diag(ans[1] * s_sq))[1]
-        except:
-            psf_centr2_err[i] = np.nan
+                modx[k] = aperx[j]
+                mody[k] = apery[j]
+        for i in tqdm(range(ntime)):
+            modf = np.zeros(shape=(naper))
+            k = -1
+            guess = [mom_centr1[i], mom_centr2[i], np.nanmax(flux[i:]), 1.0, 1.0, 0.0, 0.0]
+            for j in range(len(aperb)):
+                if (aperb[j] == 3):
+                    k += 1
+                    modf[k] = flux[i,j]
+                    args = (modx, mody, modf)
+            try:
+                ans = leastsq(kepfunc.PRFgauss2d, guess, args=args, xtol=1.0e-8,
+                              ftol=1.0e-4, full_output=True)
+                s_sq = (ans[2]['fvec'] ** 2).sum() / (ntime - len(guess))
+                psf_centr1[i] = ans[0][0]
+                psf_centr2[i] = ans[0][1]
+            except:
+                pass
+            try:
+                psf_centr1_err[i] = sqrt(diag(ans[1] * s_sq))[0]
+            except:
+                psf_centr1_err[i] = np.nan
+            try:
+                psf_centr2_err[i] = sqrt(diag(ans[1] * s_sq))[1]
+            except:
+                psf_centr2_err[i] = np.nan
 
     # construct output primary extension
     hdu0 = pyfits.PrimaryHDU()
@@ -579,6 +591,12 @@ def kepextract_main():
                         type=str)
     parser.add_argument('--bkg', action='store_true',
                         help='Subtract background from data?')
+    parser.add_argument('--psfcentroid', action='store_true',
+                        help=("Measure the star's position by fitting a 2D"
+                              " Gaussian PSF to the pixels in the mask. This"
+                              " will populate values for PSF_CENTR1 (column"
+                              " position) and PSF_CENTR2 (row position) in the"
+                              " output file."))
     parser.add_argument('--overwrite', action='store_true',
                         help='Overwrite output file?')
     parser.add_argument('--verbose', action='store_true',
@@ -587,4 +605,5 @@ def kepextract_main():
                         default='kepextract.log', type=str)
     args = parser.parse_args()
     kepextract(args.infile, args.outfile, args.maskfile, args.bkg,
-               args.overwrite, args.verbose, args.logfile)
+               args.psfcentroid, args.overwrite, args.verbose,
+               args.logfile)

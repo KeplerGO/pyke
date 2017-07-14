@@ -1,7 +1,7 @@
-PyKE3: Kepler, K2 & TESS Data Analysis Tools 
+PyKE3: Kepler, K2 & TESS Data Analysis Tools
 ============================================
 |pypi-badge| |ci-badge| |doc-badge| |bib-badge|
-       
+
 .. |pypi-badge| image:: https://img.shields.io/pypi/v/pyketools.svg
                 :target: https://pypi.python.org/pypi/pyketools
 .. |ci-badge| image:: https://travis-ci.org/KeplerGO/PyKE.svg?branch=master
