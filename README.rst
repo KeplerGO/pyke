@@ -26,9 +26,8 @@ What's new in PyKE v3? (July 2017)
 PyKE3 is the latest generation of the Kepler/K2/TESS toolkit.
 It provides the following key improvements:
 
-* PyKE is now a true Python package installable via `pip`;
-* tasks are now added to the path as unix-style command-line tools;
-* both Python 2 and 3 are now supported;
+* PyKE is now a `pip`-installable package and supports both Python 2 and 3;
+* tasks are now available both as command-line tools and Python functions;
 * PyKE no longer depends on PyRAF and is TESS-ready.
 
 Example use
