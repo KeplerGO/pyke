@@ -318,12 +318,11 @@ def kepsff(infile, outfile, datacol='DETSAP_FLUX', cenmethod='moments',
                           table.field('PSF_CENTR1')[t1:t2],
                           table.field('PSF_CENTR2')[t1:t2],
                           table.field('SAP_QUALITY')[t1:t2]],'float64')
-        work1 = np.rot90(work1, 3)
-        work2 = work1[~np.isnan(work1).any(1)]
+        work2 = np.rot90(work1, 3)
         work2 = work2[(work2[:, 0] == 0.0) | (work2[:, 0] > 1e5)]
 
         # assign table columns
-        intime = work2[:,7] + bjdref
+        intime = work2[:, 7] + bjdref
         cadenceno = work2[:, 6].astype(int)
         indata = work2[:,5]
         mom_centr1 = work2[:, 4]
@@ -354,14 +353,15 @@ def kepsff(infile, outfile, datacol='DETSAP_FLUX', cenmethod='moments',
                 cfit += coeffs[j] * np.power(centr1, j)
                 csig[:] = sigma
         except:
-            errmsg = ('ERROR -- KEPSFF: could not fit centroid data with'
-                      ' polynomial. There are no data points within the'
-                      ' range of input rows {} - {}. Either increase the'
-                      ' stepsize (with an appreciation of the effects on'
-                      ' light curve quality this will have!), or better yet'
-                      ' - cut the timeseries up to remove large gaps in the'
-                      ' input light curve using kepclip.'.format(t1, t2))
-            kepmsg.err(logfile, errmsg, verbose)
+            warnmsg = ('WARNING -- KEPSFF: could not fit centroid data with'
+                       ' polynomial. There are no data points within the'
+                       ' range of input rows {} - {}. Either increase the'
+                       ' stepsize (with an appreciation of the effects on'
+                       ' light curve quality this will have!), or better yet'
+                       ' - cut the timeseries up to remove large gaps in the'
+                       ' input light curve using kepclip.'.format(t1, t2))
+            kepmsg.warn(logfile, warnmsg)
+            continue
 
         # reject outliers
         time_good = np.array([], 'float64')
@@ -406,9 +406,10 @@ def kepsff(infile, outfile, datacol='DETSAP_FLUX', cenmethod='moments',
                                centr_rot[0, :], None, 100.0, 100.0, 1, logfile,
                                verbose)
         except:
-            errmsg = ('ERROR -- KEPSFF: could not fit rotated centroid data'
+            warnmsg = ('WARNING -- KEPSFF: could not fit rotated centroid data'
                       ' with polynomial')
-            kepmsg.err(logfile, errmsg, verbose)
+            kepmsg.warn(logfile, warnmsg)
+            continue
         rx = np.linspace(np.nanmin(centr_rot[1, :]),
                          np.nanmax(centr_rot[1, :]), 100)
         ry = np.zeros((len(rx)))
@@ -434,9 +435,10 @@ def kepsff(infile, outfile, datacol='DETSAP_FLUX', cenmethod='moments',
                 kepfit.lsqclip(functype, pinit, rx, s, None, 100.0, 100.0, 100,
                                logfile, verbose)
         except:
-            errmsg = ('ERROR -- KEPSFF: could not fit arclength data'
-                      ' with polynomial')
-            kepmsg.err(logfile, message, verbose)
+            warnmsg = ('WARNING -- KEPSFF: could not fit arclength data'
+                       ' with polynomial')
+            kepmsg.warn(logfile, warnmsg)
+            continue
 
         # correlate arclength with detrended flux
         t = np.copy(time_good)
@@ -449,8 +451,8 @@ def kepsff(infile, outfile, datacol='DETSAP_FLUX', cenmethod='moments',
 
         # calculate time derivative of arclength s
         dx = np.zeros((len(x)))
-        for i in range(1,len(x)):
-            dx[i] = (x[i] - x[i-1]) / (t[i] - t[i-1])
+        for i in range(1, len(x)):
+            dx[i] = (x[i] - x[i - 1]) / (t[i] - t[i - 1])
         dx[0] = dx[1]
 
         # fit polynomial to derivative and flag outliers (thruster firings)
@@ -466,9 +468,10 @@ def kepsff(infile, outfile, datacol='DETSAP_FLUX', cenmethod='moments',
                 kepfit.lsqclip(functype, pinit, t, dx, None, 3.0, 3.0, 10,
                                logfile, verbose)
         except:
-            errmsg = ('ERROR -- KEPSFF: could not fit arclength derivative'
-                      ' with polynomial.')
-            kepmsg.err(logfile, errmsg, verbose)
+            warnmsg = ('WARNING -- KEPSFF: could not fit arclength derivative'
+                       ' with polynomial.')
+            kepmsg.warn(logfile, warnmsg)
+            continue
         for i in range(len(dcoeffs)):
             dfit = dfit + dcoeffs[i] * np.power(t, i)
         centr1_pnt = np.array([], 'float32')
@@ -509,9 +512,10 @@ def kepsff(infile, outfile, datacol='DETSAP_FLUX', cenmethod='moments',
                 kepfit.lsqclip(functype, pinit, s_pnt, flux_pnt, None,
                                sigma_arfl, sigma_arfl, 100, logfile, verbose)
         except:
-            errmsg = ('ERROR -- KEPSFF: could not fit arclength-flux'
-                      ' correlation with polynomial')
-            kepmsg.err(logfile, message, verbose)
+            warnmsg = ('WARNING -- KEPSFF: could not fit arclength-flux'
+                       ' correlation with polynomial')
+            kepmsg.warn(logfile, warnmsg)
+            continue
 
         # correction factors for unfiltered data
         centr = np.concatenate([[centr1] - np.mean(centr1_good),
