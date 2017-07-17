@@ -591,8 +591,8 @@ def kepcotrend(infile, outfile, bvfile, listbv, fitmethod='llsq', fitpower=1,
         which weights outliers less
     fitpower : float
         if using a simplex you can chose your own power in the metir function
-        - i.e. the merit function minimises abs(Obs - Mod)^P. P=2 is least
-        squares, P = 1 minimises least absolutes
+        - i.e. the merit function minimises :math:`abs(Obs - Mod)^P`.
+        :math:`P = 2` is least squares, :math:`P = 1` minimises least absolutes
     iterate : bool
         should the program fit the basis vectors to the light curve data then
         remove data points further than 'sigma' from the fit and then refit
