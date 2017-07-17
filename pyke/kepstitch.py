@@ -52,7 +52,7 @@ def kepstitch(infiles, outfile='kepstitch.fits', overwrite=False, verbose=False,
     .. image:: ../_static/images/api/kepstitch/kplr012557548-2012004120508_llc.png
         :align: center
 
-    .. image:: ../_static/images/api/kepstich/kplr012557548-stitch.png
+    .. image:: ../_static/images/api/kepstitch/kplr012557548-stitch.png
         :align: center
 
     """
