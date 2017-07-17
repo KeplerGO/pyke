@@ -540,13 +540,12 @@ def kepfold(infile, outfile, period, bjd0, bindata=False,
 
     # plot new light curve
     if plottype != 'none':
-        plt.figure(figsize=[17, 7])
+        plt.figure()
         plt.clf()
         ax = plt.axes([0.06, 0.11, 0.93, 0.86])
         plt.gca().xaxis.set_major_formatter(plt.ScalarFormatter(useOffset=False))
         plt.gca().yaxis.set_major_formatter(plt.ScalarFormatter(useOffset=False))
         labels = ax.get_yticklabels()
-        plt.setp(labels, 'rotation', 90)
         if bindata:
             plt.fill(ptime2, pout2, color='#ffff00', linewidth=0.0, alpha=0.2)
         else:

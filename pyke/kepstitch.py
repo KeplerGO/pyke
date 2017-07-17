@@ -44,7 +44,17 @@ def kepstitch(infiles, outfile='kepstitch.fits', overwrite=False, verbose=False,
     --------
     .. code-block:: bash
 
-        $ kepstitch kplr010544976-2009201121230_slc.fits kplr012557548-2011177032512_llc.fits --verbose
+        $ kepstitch kplr012557548-2011271113734_llc.fits kplr012557548-2012004120508_llc.fits
+
+    .. image:: ../_static/images/api/kepstitch/kplr012557548-2011271113734_llc.png
+        :align: center
+
+    .. image:: ../_static/images/api/kepstitch/kplr012557548-2012004120508_llc.png
+        :align: center
+
+    .. image:: ../_static/images/api/kepstich/kplr012557548-stitch.png
+        :align: center
+
     """
 
     # startup parameters
