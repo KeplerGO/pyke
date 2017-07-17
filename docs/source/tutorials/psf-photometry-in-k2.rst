@@ -35,7 +35,7 @@ by cutting a 3x3 mask around the center of our target:
 This command creates a new target pixel file called ``ktwo200071160-c91_trimmed_3.fits`` in the current directory,
 which contains the desired pixels while preserving all the original metadata.
 
-We can then use ``kepprfphot`` [#]_ to fit the Kepler PRF for every frame in our trimmed tpf:
+We can then use ``kepprfphot`` to fit the Kepler PRF for every frame in our trimmed tpf:
 
 .. code-block:: bash
 

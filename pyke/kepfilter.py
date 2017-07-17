@@ -68,20 +68,15 @@ def kepfilter(infile, outfile, passband, datacol='SAP_FLUX', function='boxcar',
 
     Examples
     --------
-    ..code-block :: bash
+
+    .. code-block :: bash
 
         $ kepfilter kplr002436324-2009259160929_llc.fits kepfilter.fits --datacol 'SAP_FLUX' --function 'boxcar'
         --plot --verbose --overwrite
 
-    ..image :: ../_static/images/api/kepfilter.png
+    .. image :: ../_static/images/api/kepfilter.png
         :align: center
     """
-    ## startup parameters
-    lcolor = '#0000ff'
-    lwidth = 1.0
-    fcolor = '#ffff00'
-    falpha = 0.2
-
     ## log the call
     hashline = '--------------------------------------------------------------'
     kepmsg.log(logfile, hashline, verbose)
@@ -215,15 +210,15 @@ def kepfilter(infile, outfile, passband, datacol='SAP_FLUX', function='boxcar',
         ax = plt.axes([0.06, 0.1, 0.93, 0.87])
         plt.gca().xaxis.set_major_formatter(plt.ScalarFormatter(useOffset=False))
         plt.gca().yaxis.set_major_formatter(plt.ScalarFormatter(useOffset=False))
-        plt.plot(ptime, pout, color='#ff9900', linestyle='-', linewidth=lwidth)
-        plt.fill(ptime, pout, color=fcolor, linewidth=0.0, alpha=falpha)
+        plt.plot(ptime, pout, color='#ff9900', linestyle='-', linewidth=1.0)
+        plt.fill(ptime, pout, color='#ffff00', linewidth=0.0, alpha=0.2)
         if passband == 'low':
-            plt.plot(ptime[1:-1], pout2[1:-1], color=lcolor, linestyle='-',
-                     linewidth=lwidth)
+            plt.plot(ptime[1:-1], pout2[1:-1], color='#0000ff', linestyle='-',
+                     linewidth=1.0)
         else:
-            plt.plot(ptime, pout2, color=lcolor, linestyle='-',
-                     linewidth=lwidth)
-            plt.fill(ptime, pout2, color=lcolor, linewidth=0.0, alpha=falpha)
+            plt.plot(ptime, pout2, color='#0000ff', linestyle='-',
+                     linewidth=1.0)
+            plt.fill(ptime, pout2, color='#0000ff', linewidth=0.0, alpha=0.2)
         plt.xlabel(xlab, {'color' : 'k'})
         plt.ylabel(ylab, {'color' : 'k'})
         plt.xlim(xmin-xr*0.01,xmax+xr*0.01)
