@@ -125,6 +125,7 @@ def intScale1D(image, imscale):
     """intensity scale limits of 1d array"""
 
     nstat = 2; work2 = []
+    image = np.ma.array(image, mask=np.isnan(image))
     work1 = np.array(np.sort(image), dtype=np.float32)
     for i in range(len(work1)):
         if 'nan' not in str(work1[i]).lower():
@@ -138,7 +139,7 @@ def intScale1D(image, imscale):
         if zmin < 0.0:
             zmin = 100.0
         if np.any(image <= 0):
-            image = np.log10(image + abs(image.min()))
+            image = np.log10(image + abs(image.min()) + 1)
         else:
             image = np.log10(image)
         zmin = math.log10(zmin)
