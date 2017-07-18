@@ -8,7 +8,8 @@ from . import kepio, kepmsg
 __all__ = ['keptimefix']
 
 
-def keptimefix(infile, outfile, overwrite, verbose, logfile):
+def keptimefix(infile, outfile, overwrite=False, verbose=False,
+               logfile='keptimefix.log'):
     """
     keptimefix -- Correct a time stamp error in the target pixel files
 
