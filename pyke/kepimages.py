@@ -49,8 +49,8 @@ def kepimages(infile, prefix, imtype='FLUX', ranges='0,0', overwrite=True,
     * ``COSMIC_RAYS`` -- the cosmic ray map that has been subtracted from the
       FLUX image in units of :math:`e^{-}/s`
 
-    We recommend the tools [ds9](http://ds9.si.edu/) and
-    [fv](https://heasarc.gsfc.nasa.gov/ftools/fv/) for the inspection of the
+    We recommend the tools `ds9 <http://ds9.si.edu/>`_ and
+    `fv <https://heasarc.gsfc.nasa.gov/ftools/fv/>`_ for the inspection of the
     FITS image products. The intent of the kepimages tool is to convert the
     TPF content into a form from which images can be imported into the array
     of public photometry software available to the K2 and Kepler communities.
@@ -284,7 +284,7 @@ def kepimages_main():
     import argparse
     parser = argparse.ArgumentParser(
              description=('Export images within a Target Pixel File to a'
-                          ' series of FITS image files'), 
+                          ' series of FITS image files'),
              formatter_class=PyKEArgumentHelpFormatter)
     parser.add_argument('infile', help='Name of input target pixel file',
                         type=str)
