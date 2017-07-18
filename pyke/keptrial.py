@@ -37,12 +37,12 @@ def keptrial(infile, outfile, datacol='SAP_FLUX', errcol='SAP_FLUX_ERR',
     chosen carefully in order to provide a sensible measure of period and
     error. It is recommended that ``kepft`` be used to estimate the period and
     error before attempting to use ``keptrial``. An exercise of trial and error
-    will most-likely be needed to choose a permutation of **fmin**, **fmax**
-    and **nfreq** that resolves the period distribution over a significant
-    number of frequency bins. If requested, the distribution and normal fit are
-    plotted. The plot updates after every ntrial iteration, partly to relieve
-    boredom, and partly for the user to assess whether they are using the
-    correct permutation of input parameters.
+    will most-likely be needed to choose a permutation of :math:`fmin`,
+    :math:`fmax` and :math:`nfreq` that resolves the period distribution over a
+    significant number of frequency bins. If requested, the distribution and
+    normal fit are plotted. The plot updates after every ntrial iteration,
+    partly to relieve boredom, and partly for the user to assess whether they
+    are using the correct permutation of input parameters.
 
     Parameters
     ----------
