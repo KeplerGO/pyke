@@ -34,10 +34,9 @@ Example use
 -----------
 
 With PyKE, you can directly visualize frames from a target pixel file.
-For example, let's visualize the frame number 100 for target KIC008462852
-(a.k.a. Taby's Star)::
+For example, let's visualize target KIC008462852 (a.k.a. Taby's Star)::
 
-    $ kepmask kplr008462852-2013098041711_lpd-targ.fits.gz 100 --maskfile tabystar.txt
+    $ kepmask kplr008462852-2013098041711_lpd-targ.fits.gz --maskfile tabystar.txt
 
 .. image:: docs/source/_static/images/readme/kepmask.png
 

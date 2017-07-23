@@ -17,7 +17,7 @@ We can visualize one of the frames using ``kepmask``:
 
 .. code-block:: bash
 
-    $ kepmask ktwo200071160-c91_lpd-targ.fits.gz 0
+    $ kepmask ktwo200071160-c91_lpd-targ.fits.gz
 
 .. image:: ../_static/images/tutorials/tpf2lc/kepmask.png
     :align: center

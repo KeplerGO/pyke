@@ -75,7 +75,7 @@ Pixel File is plotted on a linear intensity scale as follows:
 
 .. code-block:: bash
 
-    $ kepmask kplr002449074-2009350155506_lpd-targ.fits.gz 2177 --maskfile mask_target.txt
+    $ kepmask kplr002449074-2009350155506_lpd-targ.fits.gz --frameno 2177 --maskfile mask_target.txt
     --iscale linear
 
 .. image:: ../_static/images/tutorials/example_a/kepmask_target.png
@@ -85,7 +85,7 @@ Similarly, we can create an aperture mask for the eclipsing binary:
 
 .. code-block:: bash
 
-    $ kepmask kplr002449074-2009350155506_lpd-targ.fits.gz 2177 --maskfile mask_eb.txt
+    $ kepmask kplr002449074-2009350155506_lpd-targ.fits.gz --frameno 2177 --maskfile mask_eb.txt
     --iscale linear
 
 .. image:: ../_static/images/tutorials/example_a/kepmask_eb.png

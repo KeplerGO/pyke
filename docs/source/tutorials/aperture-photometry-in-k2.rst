@@ -15,7 +15,7 @@ The required arguments for this tool are the name of the target pixel file
 
 .. code-block:: bash
 
-    $ kepmask ktwo202073445-c00_lpd-targ.fits.gz 3000
+    $ kepmask ktwo202073445-c00_lpd-targ.fits.gz --frameno 3000
 
 .. image:: ../_static/images/tutorials/example_e/kepmask.png
 

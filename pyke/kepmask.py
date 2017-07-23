@@ -21,7 +21,7 @@ pra = None; pdec = None
 __all__ = ['kepmask']
 
 
-def kepmask(infile, frameno, maskfile='mask.txt', plotfile='kepmask.png',
+def kepmask(infile, frameno=100, maskfile='mask.txt', plotfile='kepmask.png',
             imin=None, imax=None, iscale='logarithmic', cmap='bone',
             verbose=False, logfile='kepmask.log'):
     """
@@ -415,7 +415,8 @@ def kepmask_main():
                    formatter_class=PyKEArgumentHelpFormatter)
     parser.add_argument('infile', help='name of input target pixel FITS file',
                         type=str)
-    parser.add_argument('frameno', help='The number of the frame to plot',
+    parser.add_argument('--frameno', default=100,
+                        help='The number of the frame to plot',
                         type=int)
     parser.add_argument('--maskfile', default='maskfile.txt',
                          help='name of ASCII custom aperture definition file',
