@@ -21,7 +21,7 @@ Calling tasks from a terminal
 
 For convenience, many of PyKE's tasks are installed as command-line utilities on your system during installation.  This allows you to perform common tasks from your favorite terminal without having to open a Python interpreter. For example, the above task can be executed using::
 
-    kepextract target-pixel-file.fits output-lightcurve.fits 
+    kepextract target-pixel-file.fits output-lightcurve.fits
 
 And its help documentation can can be retrieved using::
 

@@ -1,6 +1,3 @@
-List of all PyKE Tasks
-======================
-
 .. toctree::
 
     kepbls

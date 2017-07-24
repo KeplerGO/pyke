@@ -32,9 +32,9 @@ Tutorials
 
     tutorials/index
 
-
+**************
 Acknowledgment
---------------
+**************
 
 PyKE is maintained by the Kepler/K2 Guest Observer Office.
 Issues and contributions are welcome via the `GitHub repository <https://github.com/KeplerGO/PyKE>`_.
