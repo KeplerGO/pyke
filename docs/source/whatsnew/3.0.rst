@@ -1,0 +1,15 @@
+.. _whatsnew-3.0:
+
+=======================
+What's new in PyKE 3.0?
+=======================
+
+PyKE 3.0, first released in July 2017, is a major release which provides the following key improvements:
+
+* PyKE is now a `pip`-installable package and supports both Python 2 and 3;
+* tasks are now available both as command-line tools and Python functions;
+* PyKE no longer depends on PyRAF and is TESS-ready.
+
+.. note::
+
+    Previous releases of PyKE (v2 and older) contained a strong dependency on PyRAF which has now been removed.  If you want to continue using PyKE within PyRAF, you can obtain the previous version of PyKE through the `AstroConda channel <http://astroconda.readthedocs.io/en/latest/installation.html#iraf-install>`_.  It is also available via the KeplerGO/PyKE repository on GitHub in the ``py27-pyraf`` branch.  Note however that this older version is no longer actively developed or supported.

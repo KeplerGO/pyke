@@ -1,5 +1,5 @@
-Command-line tools
-==================
+List of all PyKE Tasks
+======================
 
 .. toctree::
 

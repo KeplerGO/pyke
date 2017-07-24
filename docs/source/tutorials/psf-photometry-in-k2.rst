@@ -1,6 +1,6 @@
 ..
 
-Performing PSF photometry in a K2 cluster
+Example 2: PSF photometry in a K2 cluster
 =========================================
 
 In this tutorial we will use PSF-fitting photometry to create a light curve

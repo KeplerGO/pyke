@@ -1,7 +1,7 @@
 ..
 
-Separating a background eclipsing binary from a foreground star
-===============================================================
+Example 3: Separating a background EB from a foreground star
+============================================================
 
 The likelihood of source confusion around any given target is high.
 One cannot be certain whether astrophysical variability across a Kepler light curve comes entirely from the target star.

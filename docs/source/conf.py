@@ -54,7 +54,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'PyKE'
-copyright = '2017, Kepler/K2 Guest Observer Office'
+copyright = 'Kepler/K2 Guest Observer Office'
 author = 'Kepler/K2 Guest Observer Office'
 
 # The version info for the project you're documenting, acts as replacement for

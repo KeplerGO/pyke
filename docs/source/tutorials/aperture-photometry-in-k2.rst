@@ -1,6 +1,6 @@
 ..
 
-Performing aperture photometry on a K2 target
+Example 1: Aperture photometry on a K2 target
 =============================================
 
 Step 1: Define a pixel extraction mask for a K2 target

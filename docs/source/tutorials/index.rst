@@ -1,7 +1,8 @@
-Tutorials
-=========
+Photometry tutorials
+====================
 
 .. toctree::
+    :maxdepth: 1
 
     aperture-photometry-in-k2
     psf-photometry-in-k2
