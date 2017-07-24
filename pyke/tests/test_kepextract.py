@@ -1,3 +1,4 @@
+import pytest
 from astropy.io import fits as pyfits
 from astropy.utils.data import get_pkg_data_filename
 from ..kepextract import kepextract
@@ -10,26 +11,17 @@ tpf_one_center = get_pkg_data_filename("data/test-tpf-non-zero-center.fits")
 # mask file selecting the [1, 1] pixel
 maskfile = get_pkg_data_filename("data/center-mask.txt")
 
-def test_kepextract_all_zeros():
-    kepextract(tpf_all_zeros, "all-zeros-lc.fits")
-    f = pyfits.open("all-zeros-lc.fits")
-    assert f[1].data['SAP_FLUX'].all() == 0
-    delete("all-zeros-lc.fits", "test_kepextract_all_zeros.txt", False)
-
-def test_kepextract_all_zeros_with_mask():
-    kepextract(tpf_all_zeros, "all-zeros-lc.fits", maskfile=maskfile)
-    f = pyfits.open("all-zeros-lc.fits")
-    assert f[1].data['SAP_FLUX'].all() == 0
-    delete("all-zeros-lc.fits", "test_kepextract_all_zeros_with_mask.txt", False)
-
-def test_kepextract_one_center():
-    kepextract(tpf_one_center, "center-ones-lc.fits")
-    f = pyfits.open("center-ones-lc.fits")
-    assert f[1].data['SAP_FLUX'].all() == 1
-    delete("center-ones-lc.fits", "test_kepextract_one_center.txt", False)
-
-def test_kepextract_one_center_with_mask():
-    kepextract(tpf_one_center, "center-ones-lc.fits", maskfile=maskfile)
-    f = pyfits.open("center-ones-lc.fits")
-    assert f[1].data['SAP_FLUX'].all() == 1
-    delete("center-ones-lc.fits", "test_kepextract_one_center_with_mask.txt", False)
+@pytest.mark.parametrize("tpf, maskfile, bkg, answer",
+                         [(tpf_all_zeros, 'ALL', False, 0),
+                          (tpf_all_zeros, 'ALL', True, 0),
+                          (tpf_all_zeros, maskfile, False, 0),
+                          (tpf_all_zeros, maskfile, True, 0),
+                          (tpf_one_center, 'ALL', False, 1),
+                          (tpf_one_center, 'ALL', True, 1),
+                          (tpf_one_center, maskfile, False, 1),
+                          (tpf_one_center, maskfile, True, 1)])
+def test_kepextract(tpf, maskfile, bkg, answer):
+    kepextract(tpf, "lc.fits", maskfile=maskfile, bkg=bkg, overwrite=True)
+    f = pyfits.open("lc.fits")
+    assert f[1].data['SAP_FLUX'].all() == answer
+    delete("lc.fits", "log_kepextract.txt", False)
