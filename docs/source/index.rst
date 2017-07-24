@@ -22,6 +22,7 @@ Documentation
    quickstart
    install
    overview
+   contributing
 
 *********
 Tutorials
