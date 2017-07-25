@@ -183,7 +183,6 @@ def kepbls(infile, outfile, datacol='DETSAP_FLUX', errcol='DETSAP_FLUX_ERR',
     complete = 0
     print(' ')
     for trialPeriod in tqdm(trialPeriods):
-        fracComplete = float(complete) / float(len(trialPeriods) - 1) * 100.0
         complete += 1
         srMax = np.append(srMax, 0.0)
         transitDuration = np.append(transitDuration, np.nan)
