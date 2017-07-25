@@ -1,6 +1,6 @@
 PyKE3: Kepler, K2 & TESS Data Analysis Tools
 ============================================
-|pypi-badge| |ci-badge| |doc-badge| |bib-badge|
+|pypi-badge| |ci-badge| |doc-badge| |cov-badge| |bib-badge|
 
 .. |pypi-badge| image:: https://img.shields.io/pypi/v/pyketools.svg
                 :target: https://pypi.python.org/pypi/pyketools
@@ -10,6 +10,8 @@ PyKE3: Kepler, K2 & TESS Data Analysis Tools
               :target: https://pyke.readthedocs.io
 .. |bib-badge| image:: https://img.shields.io/badge/NASA%20ADS-2012ascl.soft08004S-brightgreen.svg
               :target: http://adsabs.harvard.edu/abs/2012ascl.soft08004S
+.. |cov-badge| image:: https://codecov.io/gh/KeplerGO/PyKE/branch/master/graph/badge.svg
+              :target: https://codecov.io/gh/KeplerGO/PyKE
 
 
 **Developed since 2012, PyKE offers a user-friendly way to inspect and analyze
