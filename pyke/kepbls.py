@@ -178,7 +178,7 @@ def kepbls(infile, outfile, datacol='DETSAP_FLUX', errcol='DETSAP_FLUX_ERR',
     srMax = np.array([], dtype='float32')
     transitDuration = np.array([], dtype='float32')
     transitPhase = np.array([], dtype='float32')
-    dPeriod = (maxper - minper) / nsearch
+    dPeriod = (maxper - minper) / float(nsearch)
     trialPeriods = np.arange(minper, maxper + dPeriod, dPeriod, dtype='float32')
     complete = 0
     print(' ')
