@@ -9,22 +9,22 @@ you can simply install the latest stable release of PyKE using ``pip``::
 
 With PyKE installed, you can directly visualize frames from a target pixel file.
 For example, let's visualize the pixels of Kepler target KIC008462852
-(a.k.a. Taby's Star)::
+(a.k.a. Tabby's Star)::
 
-    $ kepmask kplr008462852-2013098041711_lpd-targ.fits.gz --maskfile tabystar.txt
+    $ kepmask kplr008462852-2013098041711_lpd-targ.fits.gz --maskfile mask.txt
 
 .. image:: _static/images/readme/kepmask.png
 
-``kepmask`` is an interactive tool that allows one to create an arbitrary
-aperture mask which can subsequently be used in another ``pyke`` tool,
-such as ``kepextract``.
+``kepmask`` is an interactive tool used to create a custom
+aperture mask which can subsequently be used in other PyKE tasks.
 
-``kepextract`` performs simple aperture photometry in the pixels given by the mask created by ``kepmask``::
+For example, we can now use the ``kepextract`` task to perform aperture photometry using the pixels defined using ``kepmask`` above::
 
-    $ kepextract kplr008462852-2013098041711_lpd-targ.fits.gz tabys-lc.fits --maskfile tabystar.txt
+    $ kepextract kplr008462852-2013098041711_lpd-targ.fits.gz lightcurve.fits --maskfile mask.txt
 
-To visualize the light curve, we can use ``kepdraw``::
+This creates a file called ``lightcurve.fits`` which contains a lightcurve in a format similar to those found in the official archive.
+To visualize the resulting light curve, we can use ``kepdraw``::
 
-    $ kepdraw taby-lc.fits
+    $ kepdraw lightcurve.fits
 
 .. image:: _static/images/readme/kepdraw.png
