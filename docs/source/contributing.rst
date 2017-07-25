@@ -12,6 +12,6 @@ If you would like to contribute a patch for a bugfix, please go ahead and open a
 If you want to make a more significant change, such as adding a new tool or feature,
 we recommend discussing the change in advance by opening a GitHub issue.
 
-If in doubt on how to open a pull request, we recommend Astropy's tutorial called
-"`How to make a code contribution by Astropy <http://docs.astropy.org/en/stable/development/workflow/development_workflow.html>`_".
+If in doubt on how to open a pull request, we recommend Astropy's 
+"`How to make a code contribution <http://docs.astropy.org/en/stable/development/workflow/development_workflow.html>`_" tutorial.
 
