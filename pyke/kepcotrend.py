@@ -812,7 +812,7 @@ def kepcotrend(infile, outfile, bvfile, listbv, fitmethod='llsq', fitpower=1,
         n_flux_masked = np.copy(n_flux)
         lc_cad_masked = np.copy(lc_cad)
         n_err_masked = np.copy(n_err)
-        maskdata = np.atleast_2d(genfromtxt(maskfile, delimiter=','))
+        maskdata = np.atleast_2d(np.genfromtxt(maskfile, delimiter=','))
         mask = np.zeros(len(lc_date_masked)) == 0.
         for maskrange in maskdata:
             if version == 1:
@@ -821,7 +821,7 @@ def kepcotrend(infile, outfile, bvfile, listbv, fitmethod='llsq', fitpower=1,
             elif version == 2:
                 start = maskrange[0] - 2454833.
                 end = maskrange[1] - 2454833.
-            masknew = logical_xor(lc_date < start, lc_date > end)
+            masknew = np.logical_xor(lc_date < start, lc_date > end)
             mask = np.logical_and(mask,masknew)
         lc_date_masked = lc_date_masked[mask]
         n_flux_masked = n_flux_masked[mask]
