@@ -465,7 +465,7 @@ def kepprfphot(infile, outroot, prfdir, columns, rows, fluxes, border=0,
             p.close()
             p.join()
             cad1 += 50; cad2 += 50
-            ans = array([array(item) for item in zip(*model)])
+            ans = np.array([np.array(item) for item in zip(*model)])
             try:
                 anslist = np.concatenate((anslist, ans.transpose()), axis=0)
             except:
