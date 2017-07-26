@@ -49,7 +49,7 @@ def kepprfphot(infile, outroot, prfdir, columns, rows, fluxes, border=0,
         The table column PSF_RESIDUAL provides the sum of all mask pixels
         after the best-fit model has been subtracted from the data. PSF_CHI2
         delivers the best-fit chi-squred statistic for each observation.
-    columns : float or list
+    columns : str or list
         A starting guess for the CCD column position(s) of the source(s) that
         are to be fit. The model is unlikely to converge if the guess is too
         far away from the correct location. A rule of thumb is to provide a
@@ -57,7 +57,7 @@ def kepprfphot(infile, outroot, prfdir, columns, rows, fluxes, border=0,
         is being modeled then the column positions of each are separated by a
         comma. The same number of sources in the columns, rows and fluxes field
         is a requirement of this task.
-    rows : float or list
+    rows : str or list
         A starting guess for the CCD row position(s) of the source(s) that are
         to be fit. The model is unlikely to converge if the guess is too far
         away from the correct location. A rule of thumb is to provide a guess
@@ -65,7 +65,7 @@ def kepprfphot(infile, outroot, prfdir, columns, rows, fluxes, border=0,
         being modeled then the row positions of each are separated by a comma.
         The same number of sources in the columns, rows and fluxes field is a
         requirement of this task.
-    fluxes : float or list
+    fluxes : str or list
         A starting guess for the flux(es) of the source(s) that are to be fit.
         Fit convergence is not particularly reliant on the accuracy of these
         guesses, but the fit will converge faster the more accurate the guess.
