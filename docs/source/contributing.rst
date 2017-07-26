@@ -1,9 +1,10 @@
+============
 Contributing
-------------
+============
 
 PyKE is actively developed on its `GitHub repository <https://github.com/KeplerGO/PyKE>`_.
 
-If you encounter a problem with PyKE, we encourage you to open an issue on the GitHub repository
+If you encounter a problem with PyKE, we encourage you to `open an issue on the GitHub repository <https://github.com/KeplerGO/PyKE/issues>`_
 or to e-mail the Kepler/K2 office at keplergo@mail.arc.nasa.gov.
 We also welcome suggestions for enhancements or new features in this way.
 
@@ -12,11 +13,13 @@ If you would like to contribute a patch for a bugfix, please go ahead and open a
 If you want to make a more significant change, such as adding a new tool or feature,
 we recommend discussing the change in advance by opening a GitHub issue.
 
+
+Proposing a change or bugfix to PyKE using a GitHub pull request
+----------------------------------------------------------------
+
 If in doubt on how to open a pull request, we recommend Astropy's
 "`How to make a code contribution <http://docs.astropy.org/en/stable/development/workflow/development_workflow.html>`_" tutorial.
-
-Short GitHub Tutorial
----------------------
+An example is shown below.
 
 1. Fork KeplerGO/PyKE by going to https://github.com/KeplerGO/PyKE and clicking on "Fork"
 
