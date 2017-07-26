@@ -337,7 +337,8 @@ def kepbls(infile, outfile, datacol='DETSAP_FLUX', errcol='DETSAP_FLUX_ERR',
 def kepbls_main():
     import argparse
     parser = argparse.ArgumentParser(
-            description='Remove or replace data outliers from a time series',
+            description=('Perform Box-Least Square searches for periodic'
+                         ' exoplanet transits'),
             formatter_class=PyKEArgumentHelpFormatter)
     parser.add_argument('infile', help='Name of input file', type=str)
     parser.add_argument('outfile', help='Name of FITS file to output', type=str)
