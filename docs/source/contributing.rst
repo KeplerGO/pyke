@@ -12,6 +12,39 @@ If you would like to contribute a patch for a bugfix, please go ahead and open a
 If you want to make a more significant change, such as adding a new tool or feature,
 we recommend discussing the change in advance by opening a GitHub issue.
 
-If in doubt on how to open a pull request, we recommend Astropy's 
+If in doubt on how to open a pull request, we recommend Astropy's
 "`How to make a code contribution <http://docs.astropy.org/en/stable/development/workflow/development_workflow.html>`_" tutorial.
 
+Short GitHub Tutorial
+---------------------
+
+1. Fork KeplerGO/PyKE by going to https://github.com/KeplerGO/PyKE and clicking on "Fork"
+
+2. Clone your fork to your computer:
+    $ git clone https://github.com/your-gh-handle/PyKE.git
+
+3. Add the KeplerGO remote to your github enviroment:
+    $ cd PyKE
+    $ git remote add upstream https://github.com/KeplerGO/PyKE.git
+
+4. Let's make sure everything is good, do:
+    $ git remote -v
+
+You should see something like:
+    origin	https://github.com/mirca/PyKE.git (fetch)
+    origin	https://github.com/mirca/PyKE.git (push)
+    upstream	https://github.com/KeplerGO/PyKE.git (fetch)
+    upstream	https://github.com/KeplerGO/PyKE.git (push)
+
+5. Now you are ready to start contributing; make a branch and check out to it
+    $ git branch name-of-my-branch
+    $ git checkout name-of-my-branch
+
+6. Do the changes you want and add them:
+    $ git add .
+
+7. Commit and push your changes:
+    $ git commit -m "that's my changes y'all"
+    $ git push origin name-of-my-branch
+
+8. That's it!! =) Go to https://github.com/KeplerGO/PyKE and you should see a button "Compare and open a pull request" =)
