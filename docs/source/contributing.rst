@@ -26,11 +26,14 @@ An example is shown below.
 2. Clone your fork to your computer:
     $ git clone https://github.com/your-gh-handle/PyKE.git
 
-3. Add the KeplerGO remote to your github enviroment:
+3. Install the development version of PyKE:
     $ cd PyKE
+    $ pip install -e .
+
+4. Add the KeplerGO remote to your github enviroment:
     $ git remote add upstream https://github.com/KeplerGO/PyKE.git
 
-4. Let's make sure everything is good, do:
+5. Let's make sure everything is good, do:
     $ git remote -v
 
 You should see something like:
@@ -39,15 +42,15 @@ You should see something like:
     upstream	https://github.com/KeplerGO/PyKE.git (fetch)
     upstream	https://github.com/KeplerGO/PyKE.git (push)
 
-5. Now you are ready to start contributing; make a branch and check out to it
+6. Now you are ready to start contributing; make a branch and check out to it
     $ git branch name-of-my-branch
     $ git checkout name-of-my-branch
 
-6. Do the changes you want and add them:
+7. Do the changes you want and add them:
     $ git add .
 
-7. Commit and push your changes:
+8. Commit and push your changes:
     $ git commit -m "that's my changes y'all"
     $ git push origin name-of-my-branch
 
-8. That's it!! =) Go to https://github.com/KeplerGO/PyKE and you should see a button "Compare and open a pull request" =)
+9. That's it!! =) Go to https://github.com/KeplerGO/PyKE and you should see a button "Compare and open a pull request" =)
