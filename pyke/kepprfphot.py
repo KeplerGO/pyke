@@ -1119,15 +1119,15 @@ def kepprfphot_main():
     parser.add_argument('outroot',
                         help='Root name of output light curve files',
                         type=str)
-    parser.add_argument('prfdir',
+    parser.add_argument('--prfdir',
                         help='Folder containing PRF files',
                         type=str)
-    parser.add_argument('columns',
+    parser.add_argument('--columns',
                         help='Column number of each source to be fit',
                         type=str)
-    parser.add_argument('rows', help='Row number of each source to be fit',
+    parser.add_argument('--rows', help='Row number of each source to be fit',
                         type=str)
-    parser.add_argument('fluxes',
+    parser.add_argument('--fluxes',
                         help='Relative flux of each source to be fit',
                         type=str)
     parser.add_argument('--border',
