@@ -116,7 +116,7 @@ def kepprf(infile, plotfile, prfdir, frameno, columns, rows, fluxes,
 
     .. code-block:: bash
 
-        $ kepprf kplr008256049-2010174085026_lpd-targ.fits prf.png prfdir ~/kplr2011265_prf/
+        $ kepprf kplr008256049-2010174085026_lpd-targ.fits prf.png --prfdir ~/kplr2011265_prf/
         --frameno 1000 --columns 830 831 --rows 242 241 --fluxes 1.0 0.1 --plot --verbose
 
               KepID: 8256049
@@ -575,21 +575,21 @@ def kepprf_main():
                         type=str)
     parser.add_argument('plotfile', help='Name of output PNG plot file',
                         type=str)
-    parser.add_argument('prfdir',
+    parser.add_argument('--prfdir',
                         help=("Folder containing Point Response Function "
                               "FITS files"), type=str)
-    parser.add_argument('frameno',
+    parser.add_argument('--frameno',
                         help='Cadence number of image stored in infile',
                         type=int)
-    parser.add_argument('columns',
+    parser.add_argument('--columns',
                         help=("Initial guesses for the center of each source "
                               "on the x-axis"),
                         nargs='+', type=float)
-    parser.add_argument('rows',
+    parser.add_argument('--rows',
                         help=("Initial guesses for the center of each source "
                               "on the x-axis"),
                         nargs='+', type=float)
-    parser.add_argument('fluxes',
+    parser.add_argument('--fluxes',
                         help='Relative flux of each source to be fit',
                         nargs='+', type=float)
     parser.add_argument('--background', action='store_true',
