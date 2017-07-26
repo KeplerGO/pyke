@@ -395,7 +395,8 @@ def kepflatten_main():
     import argparse
 
     parser = argparse.ArgumentParser(
-             description='Remove or replace data outliers from a time series',
+             description=('Remove low frequency variability from time-series,'
+                          'preserve transits and flares'),
              formatter_class=PyKEArgumentHelpFormatter)
     parser.add_argument('infile', help='Name of input file', type=str)
     parser.add_argument('outfile', help='Name of FITS file to output',
