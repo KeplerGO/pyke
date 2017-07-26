@@ -39,7 +39,7 @@ We can then use ``kepprfphot`` to fit the Kepler PRF for every frame in our trim
 
 .. code-block:: bash
 
-    $ kepprfphot ktwo200071160-c91_trimmed_3.fits  ktwo200071160-c91_trimmed_3_prfphot --columns 1013 --rows 918 --fluxes 18000 --prfdir prf_dir --background --clobber --verbose
+    $ kepprfphot ktwo200071160-c91_trimmed_3.fits  ktwo200071160-c91_trimmed_3_prfphot --columns 1013 --rows 918 --fluxes 18000 --prfdir prf_dir --background --overwrite --verbose
 
 Note that `prf_dir` is either a relative or absolute path to a directory
 containing the PRF files from the Kepler focal plane available in [#]_.
