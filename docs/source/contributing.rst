@@ -1,5 +1,5 @@
 Contributing
-------------
+============
 
 PyKE is actively developed on its `GitHub repository <https://github.com/KeplerGO/PyKE>`_.
 
