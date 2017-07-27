@@ -21,7 +21,7 @@ First we check what the SAP light curve looks like by plotting it with ``kepdraw
 
     $ kepdraw kplr003749404-2009350155506_llc.fits
 
-.. image:: kepdraw_SAP.png
+.. image:: ../_static/images/tutorials/example_e/kepdraw_SAP.png
 
 
 Step 2: Plot archived PDCSAP data
@@ -33,7 +33,7 @@ basis vectors have been fit and subtracted by the PDC module to largely remove s
 
     $ kepdraw kplr003749404-2009350155506_llc.fits --datacol 'PDCSAP_FLUX'
 
-.. image:: kepdraw_PDC.png
+.. image:: ../_static/images/tutorials/example_e/kepdraw_PDC.png
 
 Step 3: Fit and subtract 2 basis vectors from SAP light curv
 -----------------------------------------------------------
@@ -50,7 +50,7 @@ The llsq method requires kepcotrend to perform a linear least-squares fit and su
 The full content of the input light curve file is copied to the output file and a new column called CBVSAP_FLUX is appended to 
 the FITS table containing the best-fit, CBV-subtracted light curve. 
 
-.. image:: kepcotrend12.png
+.. image:: ../_static/images/tutorials/example_e/kepcotrend12.png
 
 The result shown yields an improvement over the photometric quality of the SAP light curve. The long-term trend has been greatly 
 reduced, but there are still higher-frequency features that are most likely systematic, and the fit can be improved further.
@@ -64,7 +64,7 @@ Now we perform another fit using five basis vectors. Overwrite any pre-existing 
 
     $ kepcotrend kplr003749404-2009350155506_llc.fits kepcotrend.fits kplr2009350155506-q03-d25_lcbv.fits 1,2,3,4,5 --sigmaclip 3.0 --plot --overwrite
 
-.. image:: kepcotrend12345.png
+.. image:: ../_static/images/tutorials/example_e/kepcotrend12345.png
 
 This new result is a qualitative improvement compared to the two-CBV fit, but the solution is still does not approach the 
 orbit-repeatibility found in the archived PDCSAP light curve.
@@ -79,7 +79,7 @@ Now we perform a further fit the SAP data, this time using eight basis vectors.
 
     $ kepcotrend kplr003749404-2009350155506_llc.fits kepcotrend.fits kplr2009350155506-q03-d25_lcbv.fits 1,2,3,4,5,6,7,8 --sigmaclip 3.0 --plot --overwrite
 
-.. image:: kepcotrend12345678.png
+.. image:: ../_static/images/tutorials/example_e/kepcotrend12345678.png
 
 The result appears to be less optimal than the 5 basis vector fit. Anomalous structure has been added to the resulting time series 
 by high-order CBVs. Least-square fitted CBVs never approach the archived PDCSAP data regardless of the number of CBVs in the fit 
@@ -101,7 +101,7 @@ to 'TkAgg'. This is accomplished by editing the file matplotlibrc in your site-p
 
     $ keprange kplr003749404-2009350155506_llc.fits keprange.txt --column SAP_FLUX
 
-.. image:: keprange.png
+.. image:: ../_static/images/tutorials/example_e/keprange.png
 
 We masked four ranges in this example and these ranges will be saved to a text file after clicking the ‘SAVE’ button on the interactive GUI.
 
@@ -115,7 +115,7 @@ We perform the eight basis vector fit one last time, excluding from the fit the 
 
     $ kepcotrend kplr003749404-2009350155506_llc.fits kepcotrend.fits kplr2009350155506-q03-d25_lcbv.fits 1,2,3,4,5,6,7,8 --sigmaclip 3.0 --maskfile keprange.txt --plot --overwrite
 
-.. image:: kepcotrend12345678_filter.png
+.. image:: ../_static/images/tutorials/example_e/kepcotrend12345678_filter.png
 
 In terms of repeatibility, an individually-filtered call to `kepcotrend` has provided an improvement in quality over the pipeline's 
 PDC module. The most conspicuous remaining artifacts coincide with the thermal settling events after each of the three Earth-points 
