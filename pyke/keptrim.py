@@ -12,8 +12,8 @@ from . import kepkey
 __all__ = ['keptrim']
 
 
-def keptrim(infile, outfile, column, row, imsize, kepid=None, overwrite=False,
-            verbose=False, logfile='keptrim.log'):
+def keptrim(infile, column, row, imsize, outfile=None, kepid=None,
+            overwrite=False, verbose=False, logfile='keptrim.log'):
     """
     keptrim -- trim pixels from Target Pixel Files
 
@@ -28,9 +28,6 @@ def keptrim(infile, outfile, column, row, imsize, kepid=None, overwrite=False,
     ----------
     infile : str
         Filename for the input Target Pixel File.
-    outfile : str
-        Filename for the output Target Pixel File. This product will be written
-        to the same FITS format as archived light curves.
     kepid : None or int
         If the target is catalogued within the Kepler Input Catalog (KIC), then
         the pixel row and column location will be extracted from the KIC
@@ -43,6 +40,9 @@ def keptrim(infile, outfile, column, row, imsize, kepid=None, overwrite=False,
     imsize : int
         The pixel size of the subimage along either the row or column
         dimension. The subimage will be square.
+    outfile : str
+        Filename for the output Target Pixel File. This product will be written
+        to the same FITS format as archived light curves.
     overwrite : bool
         Overwrite the output file?
     verbose : bool
@@ -55,13 +55,15 @@ def keptrim(infile, outfile, column, row, imsize, kepid=None, overwrite=False,
     --------
     .. code-block:: bash
 
-        $ keptrim ktwo251248961-c112_lpd-targ.fits keptrim.fits 14 770 --imsize 3
+        $ keptrim ktwo251248961-c112_lpd-targ.fits 14 770 --imsize 3
         --overwrite --verbose
 
     .. image:: ../_static/images/api/keptrim.png
         :align: center
     """
 
+    if outfile is None:
+        outfile = infile[:-5] + "-{}.fits".format(__all__[0])
     # log the call
     hashline = '--------------------------------------------------------------'
     kepmsg.log(logfile, hashline, verbose)
@@ -331,17 +333,16 @@ def keptrim_main():
              formatter_class=PyKEArgumentHelpFormatter)
     parser.add_argument('infile', help='Name of input target pixel file',
                         type=str)
-    parser.add_argument('outfile', help='Name of output target pixel file',
-                        type=str)
     parser.add_argument('column', help='CCD column number of the target',
                         type=int)
     parser.add_argument('row', help='CCD row number of the target', type=int)
     parser.add_argument('imsize',
                         help=('Number of pixels to extract in both row and'
                               ' column dimensions'), type=int)
+    parser.add_argument('--outfile', help='Name of output target pixel file',
+                        default=None)
     parser.add_argument('--kepid', type=int,
                         help='Kepler ID number from the Kepler Input Catalog')
-
     parser.add_argument('--overwrite', action='store_true',
                         help='Overwrite output file?')
     parser.add_argument('--verbose', action='store_true',
@@ -349,5 +350,5 @@ def keptrim_main():
     parser.add_argument('--logfile', '-l', help='Name of ascii log file',
                         default='keptrim.log', type=str)
     args = parser.parse_args()
-    keptrim(args.infile, args.outfile, args.column, args.row, args.imsize,
+    keptrim(args.infile, args.column, args.row, args.imsize, args.outfile,
             args.kepid, args.overwrite, args.verbose, args.logfile)

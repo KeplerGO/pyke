@@ -8,7 +8,7 @@ from . import kepio, kepmsg
 __all__ = ['keptimefix']
 
 
-def keptimefix(infile, outfile, overwrite=False, verbose=False,
+def keptimefix(infile, outfile=None, overwrite=False, verbose=False,
                logfile='keptimefix.log'):
     """
     keptimefix -- Correct a time stamp error in the target pixel files
@@ -37,7 +37,8 @@ def keptimefix(infile, outfile, overwrite=False, verbose=False,
     logfile : str
         Name of the logfile containing error and warning messages.
     """
-
+    if outfile is None:
+        outfile = infile[:-5] + "-{}.fits".format(__all__[0])
     # log the call
     hashline = '--------------------------------------------------------------'
     kepmsg.log(logfile, hashline, verbose)
@@ -122,9 +123,9 @@ def keptimefix_main():
              formatter_class=PyKEArgumentHelpFormatter)
     parser.add_argument('infile', help='Name of FITS input target pixel file',
                         type=str)
-    parser.add_argument('outfile',
+    parser.add_argument('--outfile',
                         help='Name of FITS target pixel file to output',
-                        type=str)
+                        default=None)
     parser.add_argument('--overwrite', action='store_true',
                         help='overwrite a file with the same name as outfile?')
     parser.add_argument('--verbose', action='store_true',

@@ -14,7 +14,7 @@ from . import kepkey
 __all__ = ['kepstddev']
 
 
-def kepstddev(infile, outfile, datacol='PDCSAP_FLUX', timescale=6.5,
+def kepstddev(infile, outfile=None, datacol='PDCSAP_FLUX', timescale=6.5,
               overwrite=False, verbose=False, logfile='kepstddev.log'):
     """
     kepstddev -- Calculate Combined Differential Photometric Precision for a
@@ -61,10 +61,11 @@ def kepstddev(infile, outfile, datacol='PDCSAP_FLUX', timescale=6.5,
 
     .. code-block:: bash
 
-        $ kepstddev kplr002437145-2009350155506_llc.fits.fits kepstddev.fits --datacol DETSAP_FLUX
+        $ kepstddev kplr002437145-2009350155506_llc.fits --datacol DETSAP_FLUX
         --verbose
         --------------------------------------------------------------
-        KEPSTDDEV --  infile=kplr002437145-2009350155506_llc.fits.fits outfile=kepstddev.fits datacol=DETSAP_FLUX
+        KEPSTDDEV --  infile=kplr002437145-2009350155506_llc.fits
+        outfile=kplr002437145-2009350155506_llc-kepstddev.fits datacol=DETSAP_FLUX
         timescale=6.5 overwrite=False verbose=True logfile=kepstddev.log
 
         Standard deviation = 1295.0731328136349 ppm
@@ -72,6 +73,8 @@ def kepstddev(infile, outfile, datacol='PDCSAP_FLUX', timescale=6.5,
            RMS 6.5hr CDPP = 329 ppm
     """
 
+    if outfile is None:
+        outfile = infile[:-5] + "-{}.fits".format(__all__[0])
     # log the call
     hashline = '--------------------------------------------------------------'
     kepmsg.log(logfile, hashline, verbose)
@@ -249,7 +252,8 @@ def kepstddev_main():
                           ' Precision for a time series light curve'),
              formatter_class=PyKEArgumentHelpFormatter)
     parser.add_argument('infile', help='Name of input FITS file', type=str)
-    parser.add_argument('outfile', help='Name of output FITS file', type=str)
+    parser.add_argument('--outfile', help='Name of output FITS file',
+                        default=None)
     parser.add_argument('--datacol', default='PDCSAP_FLUX',
                         help='Name of data column to plot', type=str)
     parser.add_argument('--timescale', '-t', default=6.5,

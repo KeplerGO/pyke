@@ -10,7 +10,7 @@ from . import kepmsg, kepio, kepkey, kepplot, kepfit, kepfunc
 __all__ = ['kepsff']
 
 
-def kepsff(infile, outfile, datacol='DETSAP_FLUX', cenmethod='moments',
+def kepsff(infile, outfile=None, datacol='DETSAP_FLUX', cenmethod='moments',
            stepsize=4.0, npoly_cxcy=1, sigma_cxcy=6.0, npoly_ardx=6,
            npoly_dsdt=2, sigma_dsdt=3.0, npoly_arfl=3, sigma_arfl=3.0,
            plotres=False, overwrite=False, verbose=False, logfile='kepsff.log'):
@@ -243,6 +243,10 @@ def kepsff(infile, outfile, datacol='DETSAP_FLUX', cenmethod='moments',
     logfile : str
         Name of the logfile containing error and warning messages.
     """
+
+    if outfile is None:
+        outfile = infile[:-5] + "-{}.fits".format(__all__[0])
+
     # log the call
     hashline = '--------------------------------------------------------------'
     kepmsg.log(logfile,hashline,verbose)
@@ -718,7 +722,8 @@ def kepsff_main():
              description='Correct aperture photmetry using target motion',
              formatter_class=PyKEArgumentHelpFormatter)
     parser.add_argument('infile', help='Name of input FITS file', type=str)
-    parser.add_argument('outfile', help='Name of output FITS file', type=str)
+    parser.add_argument('--outfile', help='Name of output FITS file',
+                        default=None)
     parser.add_argument('--datacol', default='DETSAP_FLUX',
                         help='Name of data column', type=str)
     parser.add_argument('--cenmethod', default='moments',

@@ -16,8 +16,8 @@ clobb = True; outf = ''; verb = True; logf = ''; rinf = ''
 __all__ = ['keprange']
 
 
-def keprange(infile, outfile, column, rinfile='', overwrite=False, verbose=False,
-             logfile='keprange.log'):
+def keprange(infile, outfile=None, datacol='SAP_FLUX', rinfile='',
+             overwrite=False, verbose=False, logfile='keprange.log'):
     """
     keprange -- Define time ranges interactively for use with other PyKE tasks.
 
@@ -43,8 +43,8 @@ def keprange(infile, outfile, column, rinfile='', overwrite=False, verbose=False
         for a new set of time ranges. This argument is optional and is not
         prompted for automatically. If no ascii file will be input then
         rinfile=None will clear the argument buffer after a previous use.
-    column : str
-        The column name containing data stored within extension 1 of infile.
+    datacol : str
+        The datacol name containing data stored within extension 1 of infile.
         This data will be plotted against time so that the user can choose
         appropriate time ranges.
     overwrite : bool
@@ -58,11 +58,14 @@ def keprange(infile, outfile, column, rinfile='', overwrite=False, verbose=False
     --------
     .. code-block:: bash
 
-        $ keprange kplr002436324-2009259160929_llc.fits keprange.txt --verbose
+        $ keprange kplr002436324-2009259160929_llc.fits --verbose
 
     .. image:: ../_static/images/api/keprange.png
         :align: center
     """
+
+    if outfile is None:
+        outfile = infile[:-5] + "-{}.txt".format(__all__[0])
 
     # startup parameters
     global instr, cadence, barytime0, nrm, barytime, flux
@@ -76,7 +79,7 @@ def keprange(infile, outfile, column, rinfile='', overwrite=False, verbose=False
             + ' infile={}'.format(infile)
             + ' outfile={}'.format(outfile)
             + ' rinfile={}'.format(rinfile)
-            + ' column={}'.format(column)
+            + ' datacol={}'.format(datacol)
             + ' overwrite={}'.format(overwrite)
             + ' verbose={}'.format(verbose)
             + ' logfile={}'.format(logfile))
@@ -115,12 +118,12 @@ def keprange(infile, outfile, column, rinfile='', overwrite=False, verbose=False
 
     # filter out NaNs
     work1 = []; work2 = []
-    col = column
+    col = datacol
     barytime = kepio.readtimecol(infile, table, logfile, verbose)
     try:
         flux = instr[1].data.field(col)
     except:
-        errmsg = ('ERROR -- KEPRANGE: no column named {} in table {} [1]'
+        errmsg = ('ERROR -- KEPRANGE: no datacol named {} in table {} [1]'
                   .format(col, infile))
         kepmsg.err(infile, message, verbose)
     for i in range(len(barytime)):
@@ -394,10 +397,10 @@ def keprange_main():
                           ' GUI'),
              formatter_class=PyKEArgumentHelpFormatter)
     parser.add_argument('infile', help='Name of input file', type=str)
-    parser.add_argument('outfile',
+    parser.add_argument('--outfile',
                         help='Name of output ASCII time ranges file',
-                        type=str)
-    parser.add_argument('--column', default='SAP_FLUX',
+                        default=None)
+    parser.add_argument('--datacol', default='SAP_FLUX',
                         help='Name of diagnostic FITS column', type=str)
     parser.add_argument('--rinfile', default='',
                         help='Name of input ASCII time ranges file')
@@ -408,5 +411,5 @@ def keprange_main():
     parser.add_argument('--logfile', '-l', help='Name of ascii log file',
                         default='keprange.log', dest='logfile', type=str)
     args = parser.parse_args()
-    keprange(args.infile, args.outfile, args.column, args.rinfile,
+    keprange(args.infile, args.outfile, args.datacol, args.rinfile,
              args.overwrite, args.verbose, args.logfile)

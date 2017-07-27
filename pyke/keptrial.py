@@ -9,9 +9,10 @@ from . import kepio, kepmsg, kepkey, kepfit, kepfunc, kepstat, kepfourier
 __all__ = ['keptrial']
 
 
-def keptrial(infile, outfile, datacol='SAP_FLUX', errcol='SAP_FLUX_ERR',
+def keptrial(infile, outfile=None, datacol='SAP_FLUX', errcol='SAP_FLUX_ERR',
              fmin=0.1, fmax=50, nfreq=100, method='ft', ntrials=1000,
-             plot=False, overwrite=False, verbose=False, logfile='keptrial.log'):
+             plot=False, overwrite=False, verbose=False,
+             logfile='keptrial.log'):
     """
     keptrial -- Calculate best period and error estimate from time series
 
@@ -84,15 +85,9 @@ def keptrial(infile, outfile, datacol='SAP_FLUX', errcol='SAP_FLUX_ERR',
     logfile : str
         Name of the logfile containing error and warning messages.
     """
-    # startup parameters
-    labelsize = 24
-    ticksize = 16
-    xsize = 18
-    ysize = 6
-    lcolor = '#0000ff'
-    lwidth = 1.0
-    fcolor = '#ffff00'
-    falpha = 0.2
+
+    if outfile is None:
+        outfile = infile[:-5] + "-{}.fits".format(__all__[0])
 
     # log the call
     hashline = '--------------------------------------------------------------'
@@ -281,8 +276,8 @@ def keptrial_main():
                           ' Fourier transform'),
              formatter_class=PyKEArgumentHelpFormatter)
     parser.add_argument('infile', help='Name of input file', type=str)
-    parser.add_argument('outfile', help='Name of FITS file to output',
-                        type=str)
+    parser.add_argument('--outfile', help='Name of FITS file to output',
+                        default=None)
     parser.add_argument('--datacol', default='SAP_FLUX',
                         help='Name of data column', type=str)
     parser.add_argument('--errcol', default='SAP_FLUX_ERR',
