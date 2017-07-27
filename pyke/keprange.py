@@ -65,7 +65,7 @@ def keprange(infile, outfile=None, datacol='SAP_FLUX', rinfile='',
     """
 
     if outfile is None:
-        outfile = infile[:-5] + "-{}.txt".format(__all__[0])
+        outfile = infile.split('.')[0] + "-{}.txt".format(__all__[0])
 
     # startup parameters
     global instr, cadence, barytime0, nrm, barytime, flux

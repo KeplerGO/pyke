@@ -152,7 +152,7 @@ def kepprfphot(infile, prfdir, columns, rows, fluxes, border=0,
     """
 
     if outfile is None:
-        outfile = infile[:-5] + "-{}".format(__all__[0])
+        outfile = infile.split('.')[0] + "-{}".format(__all__[0])
 
     # log the call
     hashline = '--------------------------------------------------------------'

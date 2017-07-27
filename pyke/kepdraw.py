@@ -93,7 +93,7 @@ def kepdraw(infile, outfile=None, datacol='SAP_FLUX', ploterr=False,
     """
 
     if outfile is None:
-        outfile = infile[:-5] + "-{}.png".format(__all__[0])
+        outfile = infile.split('.')[0] + "-{}.png".format(__all__[0])
 
     hashline = '--------------------------------------------------------------'
     kepmsg.log(logfile, hashline, verbose)

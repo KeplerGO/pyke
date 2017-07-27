@@ -87,7 +87,7 @@ def keptrial(infile, outfile=None, datacol='SAP_FLUX', errcol='SAP_FLUX_ERR',
     """
 
     if outfile is None:
-        outfile = infile[:-5] + "-{}.fits".format(__all__[0])
+        outfile = infile.split('.')[0] + "-{}.fits".format(__all__[0])
 
     # log the call
     hashline = '--------------------------------------------------------------'

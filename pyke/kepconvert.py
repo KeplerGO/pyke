@@ -58,9 +58,9 @@ def kepconvert(infile, conversion, columns, outfile=None, baddata=True,
 
     if outfile is None:
         if conversion == "fits2asc":
-            outfile = infile[:-5] + "-{}.txt".format(__all__[0])
+            outfile = infile.split('.')[0] + "-{}.txt".format(__all__[0])
         elif conversion == "asc2fits":
-            outfile = infile[:-4] + "-{}.fits".format(__all__[0])
+            outfile = infile.split('.')[0] + "-{}.fits".format(__all__[0])
 
     hashline = '--------------------------------------------------------------'
     kepmsg.log(logfile, hashline, verbose)

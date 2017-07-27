@@ -97,7 +97,7 @@ def kepoutlier(infile, outfile=None, datacol='SAP_FLUX', nsig=3.0, stepsize=1.0,
     """
 
     if outfile is None:
-        outfile = infile[:-5] + "-{}.fits".format(__all__[0])
+        outfile = infile.split('.')[0] + "-{}.fits".format(__all__[0])
     
     # log the call
     hashline = '--------------------------------------------------------------'

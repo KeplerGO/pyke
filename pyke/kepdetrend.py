@@ -121,7 +121,7 @@ def kepdetrend(infile, ranges1, ranges2, npoly1, npoly2, nsig1, nsig2,
     """
 
     if outfile is None:
-        outfile = infile[:-5] + "-{}.fits".format(__all__[0])
+        outfile = infile.split('.')[0] + "-{}.fits".format(__all__[0])
 
     # log the call
     hashline = '--------------------------------------------------------------'

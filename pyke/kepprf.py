@@ -151,7 +151,7 @@ def kepprf(infile, prfdir, frameno, columns, rows, fluxes, background=False,
     """
 
     if outfile is None:
-        outfile = infile[:-5] + "-{}.png".format(__all__[0])
+        outfile = infile.split('.')[0] + "-{}.png".format(__all__[0])
 
     # log the call
     hashline = '--------------------------------------------------------------'

@@ -103,7 +103,7 @@ def kepextract(infile, outfile=None, maskfile='ALL', bkg=False, psfcentroid=Fals
         :align: center
     """
     if outfile is None:
-        outfile = infile[:-5] + "-{}.fits".format(__all__[0])
+        outfile = infile.split('.')[0] + "-{}.fits".format(__all__[0])
     # log the call
     hashline = '--------------------------------------------------------------'
     kepmsg.log(logfile, hashline, verbose)
@@ -586,7 +586,7 @@ def kepextract_main():
              formatter_class=PyKEArgumentHelpFormatter)
     parser.add_argument('infile', help='Name of input target pixel file',
                         type=str)
-    parser.add_argument('outfile', help='Name of output light curve FITS file',
+    parser.add_argument('--outfile', help='Name of output light curve FITS file',
                         type=str)
     parser.add_argument('--maskfile', default='ALL',
                         help='Name of mask defintion ASCII file',

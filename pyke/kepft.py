@@ -60,7 +60,7 @@ def kepft(infile, outfile=None, fcol='SAP_FLUX', pmin=0.1, pmax=10., nfreq=100,
     """
 
     if outfile is None:
-        outfile = infile[:-5] + "-{}.fits".format(__all__[0])
+        outfile = infile.split('.')[0] + "-{}.fits".format(__all__[0])
     ## log the call
     hashline = '--------------------------------------------------------------'
     kepmsg.log(logfile, hashline, verbose)

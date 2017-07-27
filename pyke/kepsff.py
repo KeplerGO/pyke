@@ -245,7 +245,7 @@ def kepsff(infile, outfile=None, datacol='DETSAP_FLUX', cenmethod='moments',
     """
 
     if outfile is None:
-        outfile = infile[:-5] + "-{}.fits".format(__all__[0])
+        outfile = infile.split('.')[0] + "-{}.fits".format(__all__[0])
 
     # log the call
     hashline = '--------------------------------------------------------------'

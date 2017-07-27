@@ -72,7 +72,7 @@ def kephead(infile, keyname, outfile=None, overwrite=False, verbose=False,
     """
 
     if outfile is None:
-        outfile = infile[:-5] + "-{}.txt".format(__all__[0])
+        outfile = infile.split('.')[0] + "-{}.txt".format(__all__[0])
     # log the call
     hashline = '--------------------------------------------------------------'
     kepmsg.log(logfile, hashline, verbose)
