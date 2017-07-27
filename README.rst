@@ -1,4 +1,4 @@
-PyKE3: Kepler, K2 & TESS Data Analysis Tools
+PyKE: Kepler, K2 & TESS Data Analysis Tools
 ============================================
 |pypi-badge| |ci-badge| |doc-badge| |cov-badge| |bib-badge|
 
@@ -25,40 +25,18 @@ Documentation is hosted at `pyke.readthedocs.io <https://pyke.readthedocs.io>`_.
 What's new in PyKE v3? (July 2017)
 ----------------------------------
 
+
 PyKE3 is the latest generation of the Kepler/K2/TESS toolkit.
 It provides the following key improvements:
 
-* PyKE is now a `pip`-installable package and supports both Python 2 and 3;
-* tasks are now available both as command-line tools and Python functions;
+* PyKE is now a `pip-installable <http://pyke.readthedocs.io/en/latest/install.html#installing-pyke>`_ package and supports both Python 2 and 3;
+* `tasks <http://pyke.readthedocs.io/en/latest/overview.html>`_ are now available both as command-line tools and Python functions;
 * PyKE no longer depends on PyRAF and is TESS-ready.
+* documentation and tutorials are now generated using Sphinx;
+* the development has been moved to GitHub to encourage `user contributions <http://pyke.readthedocs.io/en/latest/contributing.html>`_.
 
-Example use
------------
-
-With PyKE, you can directly visualize frames from a target pixel file.
-For example, let's visualize target KIC008462852 (a.k.a. Taby's Star)::
-
-    $ kepmask kplr008462852-2013098041711_lpd-targ.fits.gz --maskfile tabystar.txt
-
-.. image:: docs/source/_static/images/readme/kepmask.png
-
-``kepmask`` is an interactive tool that allows one to create an arbitrary
-aperture mask which can be subsequently be used in another ``pyke`` tool,
-such as ``kepextract``.
-
-``kepextract`` performs simple aperture photometry in the pixels given by the mask
-created by ``kepmask``::
-
-    $ kepextract kplr008462852-2013098041711_lpd-targ.fits.gz tabys-lc.fits --maskfile tabystar.txt
-
-To visualize the light curve, you may want to use ``kepdraw``::
-
-    $ kepdraw taby-lc.fits
-
-.. image:: docs/source/_static/images/readme/kepdraw.png
-
-Installation
-------------
+Quickstart
+----------
 
 If you have a working version of Python 2 or 3 on your system
 (we recommend `Anaconda Python <https://www.continuum.io/downloads>`_),
@@ -66,16 +44,27 @@ you can simply install the latest stable release of PyKE using ``pip``::
 
     $ pip install pyketools
 
-Alternatively, if you want to experiment with the latest development version of
-PyKE, you can install it straight from GitHub::
+With PyKE installed, you can directly visualize frames from a target pixel file.
+For example, let's visualize the pixels of Kepler target KIC008462852
+(a.k.a. Tabby's Star)::
 
-    $ git clone https://github.com/KeplerGO/PyKE.git
-    $ cd PyKE
-    $ pip install -e .
+    $ kepmask kplr008462852-2013098041711_lpd-targ.fits.gz --maskfile mask.txt
 
-Note: PyKE version 2 and older, which was in use between 2012 and 2016 and
-required PyRAF, is available in the branch ``py27-pyraf``. If you want to use
-PyKE2 within PyRAF, we recommend getting it through the `AstroConda channel <http://astroconda.readthedocs.io/en/latest/installation.html#iraf-install>`_.
+.. image:: http://pyke.readthedocs.io/en/latest/_images/kepmask1.png
+
+``kepmask`` is an interactive tool used to create a custom
+aperture mask which can subsequently be used in other PyKE tasks.
+
+For example, we can now use the ``kepextract`` task to perform aperture photometry using the pixels defined using ``kepmask`` above::
+
+    $ kepextract kplr008462852-2013098041711_lpd-targ.fits.gz lightcurve.fits --maskfile mask.txt
+
+This creates a file called ``lightcurve.fits`` which contains a lightcurve in a format similar to those found in the official archive.
+To visualize the resulting light curve, we can use ``kepdraw``::
+
+    $ kepdraw lightcurve.fits
+
+.. image:: http://pyke.readthedocs.io/en/latest/_images/kepdraw1.png
 
 
 Acknowledgement
