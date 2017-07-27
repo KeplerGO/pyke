@@ -185,7 +185,10 @@ def kepwindow_main():
              description=("Calculate and store the window function for a"
                           " Kepler time series"),
              formatter_class=PyKEArgumentHelpFormatter)
-    parser.add_argument('infile', help='Name of input file', type=str)
+    parser.add_argument('infile',
+                        help=('The name of a MAST standard format FITS'
+                              ' file containing a Kepler light curve'),
+                        type=str)
     parser.add_argument('outfile', help='Name of output file', type=str)
     parser.add_argument('--datacol', default='SAP_FLUX',
                         help='Name of data column', type=str,
