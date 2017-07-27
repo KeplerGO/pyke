@@ -16,7 +16,8 @@ For example, let's visualize the pixels of Kepler target KIC008462852
 .. image:: _static/images/readme/kepmask.png
 
 ``kepmask`` is an interactive tool used to create a custom
-aperture mask which can subsequently be used in other PyKE tasks.
+aperture mask (by clicking on the desired pixels and hitting DUMP)
+which can subsequently be used in other PyKE tasks.
 
 For example, we can now use the ``kepextract`` task to perform aperture photometry using the pixels defined using ``kepmask`` above::
 
