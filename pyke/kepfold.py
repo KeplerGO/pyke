@@ -470,6 +470,7 @@ def kepfold(infile, period, bjd0, outfile=None, bindata=False,
                                          'max number of sigma-clipping iterations')
 
     # history keyword in output file
+    print("Writing output file {}...".format(outfile))
     kepkey.history(call, instr[0], outfile, logfile, verbose)
     instr.writeto(outfile)
 

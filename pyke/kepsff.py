@@ -710,6 +710,7 @@ def kepsff(infile, outfile=None, datacol='DETSAP_FLUX', cenmethod='moments',
             if cadenceno[i] in thr_cadence:
                 instr[1].data.field('SAP_QUALITY')[t1 + i] += 131072
     # write output file
+    print("Writing output file {}...".format(outfile))
     instr.writeto(outfile)
     # close input file
     instr.close()

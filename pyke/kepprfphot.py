@@ -233,6 +233,7 @@ def kepprfphot(infile, prfdir, columns, rows, fluxes, border=0,
     # overwrite output file
     for i in range(nsrc):
         outfile = '{0}_{1}.fits'.format(outfile, i)
+        print("Writing output file {}...".format(outfile))
         if overwrite:
             kepio.overwrite(outfile, logfile, verbose)
         if kepio.fileexists(outfile):

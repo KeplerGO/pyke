@@ -232,7 +232,8 @@ def kepfilter(infile, passband, outfile=None, datacol='SAP_FLUX', function='boxc
         # render plot
         plt.show()
     ## write output file
-    for i in range(len(outdata)):
+    print("Writing output file {}...".format(outfile))
+    for i in tqdm(range(len(outdata))):
         instr[1].data.field(datacol)[i] = outdata[i]
     instr.writeto(outfile)
     ## close input file

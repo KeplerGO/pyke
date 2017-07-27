@@ -121,7 +121,7 @@ def kepdetrend(infile, ranges1, ranges2, npoly1, npoly2, nsig1, nsig2,
     """
 
     if outfile is None:
-        outfile = infile + "-{}.fits".format(__all__[0])
+        outfile = infile[:-5] + "-{}.fits".format(__all__[0])
 
     # log the call
     hashline = '--------------------------------------------------------------'
@@ -341,6 +341,7 @@ def kepdetrend(infile, ranges1, ranges2, npoly1, npoly2, nsig1, nsig2,
     # render plot
     plt.show()
     # write output file
+    print("Writing output file {}...".format(outfile))
     if popnans:
         instr[1].data.field(datacol)[good_data] = outdata
         instr[1].data.field(errcol)[good_data] = outerr

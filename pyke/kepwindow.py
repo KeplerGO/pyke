@@ -144,6 +144,7 @@ def kepwindow(infile, outfile=None, fcol='SAP_FLUX', fmax=1.0, nfreq=100,
     instr[-1].header['EXTNAME'] = ('WINDOW FUNCTION', 'extension name')
 
     ## comment keyword in output file
+    print("Writing output file {}...".format(outfile))
     kepkey.comment(call, instr[0], outfile, logfile, verbose)
     instr.writeto(outfile)
 

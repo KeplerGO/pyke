@@ -263,6 +263,7 @@ def keptrial(infile, outfile=None, datacol='SAP_FLUX', errcol='SAP_FLUX_ERR',
     except:
         raise KeyError("Could not write NTRIALS to the header of the output"
                        " file")
+    print("Writing output file {}...".format(outfile))
     instr.writeto(outfile)
     # close input file
     instr.close()

@@ -883,6 +883,7 @@ def kepcotrend(infile, bvfile, listbv, outfile=None, fitmethod='llsq',
         do_plot(lc_date, lc_flux, flux_after, bvsum_un_norm, lc_cad,
                 bad_data, lc_cad_o, version)
 
+    print("Writing output file {}...".format(outfile))
     make_outfile(instr, outfile, flux_after_nans, bvsum_nans, version)
     # close input file
     instr.close()

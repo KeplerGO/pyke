@@ -526,6 +526,7 @@ def kepprf(infile, prfdir, frameno, columns, rows, fluxes, background=False,
     barwin.yaxis.set_major_formatter(ticker.FormatStrFormatter('%.1f'))
 
     # render plot
+    print("Writing output file {}...".format(outfile))
     plt.savefig(outfile)
     if plot:
         plt.draw()

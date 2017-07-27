@@ -374,6 +374,7 @@ def kepflatten(infile, outfile=None, datacol='PDCSAP_FLUX',
 
     # write output file
     try:
+        print("Writing output file {}...".format(outfile))
         col1 = pyfits.Column(name='DETSAP_FLUX',format='E13.7',array=work1)
         col2 = pyfits.Column(name='DETSAP_FLUX_ERR',format='E13.7',array=work2)
         cols = instr[1].data.columns + col1 + col2

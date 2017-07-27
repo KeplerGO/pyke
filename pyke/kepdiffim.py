@@ -90,7 +90,7 @@ def kepdiffim(infile, outfile=None, plotfile=None, imscale='logarithmic',
     """
 
     if outfile is None:
-        outfile = infile + "-{}.fits".format(__all__[0])
+        outfile = infile[:-5] + "-{}.fits".format(__all__[0])
     # log the call
     hashline = '--------------------------------------------------------------'
     kepmsg.log(logfile,hashline,verbose)
@@ -286,6 +286,7 @@ def kepdiffim(infile, outfile=None, plotfile=None, imscale='logarithmic',
             n += 1
 
     # construct output file
+    print("Writing output file {}...".format(outfile))
     instruct = pyfits.open(infile)
     kepkey.history(call, instruct[0], outfile, logfile, verbose)
     hdulist = pyfits.HDUList(instruct[0])

@@ -1,3 +1,7 @@
+from . import kepio
+from . import kepmsg
+from . import kepstat
+from . import kepkey
 from .utils import PyKEArgumentHelpFormatter
 import math
 import numpy as np
@@ -5,10 +9,7 @@ from astropy.io import fits as pyfits
 from matplotlib import pyplot as plt
 from scipy import stats
 from copy import copy
-from . import kepio
-from . import kepmsg
-from . import kepstat
-from . import kepkey
+from tqdm import tqdm
 
 
 __all__ = ['kepstddev']
@@ -218,7 +219,7 @@ def kepstddev(infile, outfile=None, datacol='PDCSAP_FLUX', timescale=6.5,
     work1 = np.array([], dtype='float32')
     instr = pyfits.open(infile)
     table = kepio.readfitstab(infile, instr[1], logfile, verbose)
-    for i in range(len(table.field(0))):
+    for i in tqdm(range(len(table.field(0)))):
         if np.isfinite(table.field('time')[i]) and np.isfinite(table.field(datacol)[i]):
             work1 = np.append(work1, cdpp[n])
             n += 1
@@ -226,6 +227,7 @@ def kepstddev(infile, outfile=None, datacol='PDCSAP_FLUX', timescale=6.5,
             work1 = np.append(work1, np.nan)
 
     # write output file
+    print("Writing output file {}...".format(outfile))
     kepkey.new('MCDPP%d' % (timescale * 10.0), medcdpp[0],
                'Median %.1fhr CDPP (ppm)' % timescale,
                instr[1], outfile, logfile, verbose)

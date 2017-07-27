@@ -633,6 +633,7 @@ def keppca(infile, outfile=None, maskfile='ALL', components='1-3', plotpca=False
     outstr.append(hdu3)
 
     # write output file
+    print("Writing output file {}...".format(outfile))
     outstr.writeto(outfile)
     # close input structure
     instr.close()

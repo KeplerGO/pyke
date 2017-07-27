@@ -169,6 +169,7 @@ def kepdynamic(infile, outfile=None, fcol='SAP_FLUX', pmin=0.1, pmax=10., nfreq=
     dynam.shape = len(t1), len(power)
 
     # write output file
+    print("Writing output file {}...".format(outfile))
     instr.append(pyfits.ImageHDU())
     instr[-1].data = dynam.transpose()
     instr[-1].header['EXTNAME'] = ('DYNAMIC FT', 'extension name')

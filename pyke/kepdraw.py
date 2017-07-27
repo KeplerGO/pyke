@@ -251,6 +251,7 @@ def kepdraw(infile, outfile=None, datacol='SAP_FLUX', ploterr=False,
     ax.minorticks_on()
     # save plot to file
     if outfile is not None:
+        print("Writing output file {}...".format(outfile))
         plt.savefig(outfile)
 
     if not noninteractive:

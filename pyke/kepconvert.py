@@ -126,7 +126,8 @@ def kepconvert(infile, conversion, columns, outfile=None, baddata=True,
         # close input file
         instr.close()
         ## write output file
-        np.savetxt(outfile,np.array(work).T)
+        print("Writing output file {}...".format(outfile))
+        np.savetxt(outfile, np.array(work).T)
     ## open and read ASCII input file
     if conversion == 'asc2fits':
         table = kepio.openascii(infile,'r',logfile,verbose)
@@ -336,6 +337,7 @@ def kepconvert(infile, conversion, columns, outfile=None, baddata=True,
                                 outfile, logfile, verbose)
 
         ## write output FITS file
+        print("Writing output file {}...".format(outfile))
         hdulist.writeto(outfile, checksum=True)
     ## end time
     kepmsg.clock('KEPCONVERT completed at', logfile, verbose)

@@ -115,6 +115,7 @@ def kepft(infile, outfile=None, fcol='SAP_FLUX', pmin=0.1, pmax=10., nfreq=100,
     cols = pyfits.ColDefs([col1, col2])
     instr.append(pyfits.BinTableHDU.from_columns(cols))
     instr[-1].header['EXTNAME'] = ('POWER SPECTRUM', 'extension name')
+    print("Writing output file {}...".format(outfile))
     instr.writeto(outfile)
     ## history keyword in output file
     kepkey.history(call, instr[0], outfile, logfile, verbose)

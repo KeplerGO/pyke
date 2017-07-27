@@ -570,6 +570,7 @@ def kepextract(infile, outfile=None, maskfile='ALL', bkg=False, psfcentroid=Fals
     outstr.append(hdu2)
 
     # write output file
+    print("Writing output file {}...".format(outfile))
     outstr.writeto(outfile, checksum=True)
     # close input structure
     instr.close()

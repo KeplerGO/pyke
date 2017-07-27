@@ -300,6 +300,7 @@ def keptrim(infile, column, row, imsize, outfile=None, kepid=None,
     outstr.append(hdu2)
 
     # write output file
+    print("Writing output file {}...".format(outfile))
     outstr.writeto(outfile,checksum=True)
     # close input structure
     instr.close()

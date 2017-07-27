@@ -46,9 +46,9 @@ def kephead(infile, keyname, outfile=None, overwrite=False, verbose=False,
     --------
     .. code-block:: bash
 
-        $ kephead kplr002436324-2009259160929_llc.fits kephead.txt 'mag' --verbose --overwrite
+        $ kephead kplr002436324-2009259160929_llc.fits 'mag' --verbose --overwrite
         --------------------------------------------------------------
-        KEPHEAD --  infile=kplr002436324-2009259160929_llc.fits outfile=kephead.txt keyname=mag
+        KEPHEAD --  infile=kplr002436324-2009259160929_llc.fits outfile=.txt keyname=mag
         overwrite=True verbose=True logfile=kephead.log
 
         KEPHEAD started at: : Tue Jun 13 15:26:58 2017
@@ -99,7 +99,8 @@ def kephead(infile, keyname, outfile=None, overwrite=False, verbose=False,
     nhdu = kepkey.HDUnum(instr)
     # loop through each HDU in infile
     kepmsg.log(outfile, '', True)
-    for hdu in range(nhdu):
+    print("Writing output file {}...".format(outfile))
+    for hdu in tqdm(range(nhdu)):
         # how many keywords in the HDU?
         keylist = instr[hdu].header.cards
         nkeys = len(keylist)
@@ -136,7 +137,8 @@ def kephead_main():
              formatter_class=PyKEArgumentHelpFormatter)
     parser.add_argument('infile', help='Name of input file', type=str)
     parser.add_argument('keyname', help='Snippet of keyword name', type=str)
-    parser.add_argument('--outfile', help='Name of FITS file to output',
+    parser.add_argument('--outfile',
+                        help='The name of the output ASCII file for storing search results',
                         default=None)
     parser.add_argument('--overwrite', action='store_true',
                         help='Overwrite output file?')

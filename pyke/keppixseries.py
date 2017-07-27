@@ -228,6 +228,7 @@ def keppixseries(infile, outfile=None, plotfile=None, plottype='global',
                 pixseries[i, j, :] = pixseries[i, j, :] - outdata + outmedian
 
     # construct output file
+    print("Writing output file {}...".format(outfile))
     if ydim * xdim < 1000:
         instruct = pyfits.open(infile, 'readonly')
         kepkey.history(call, instruct[0], outfile, logfile, verbose)

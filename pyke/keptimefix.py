@@ -111,6 +111,7 @@ def keptimefix(infile, outfile=None, overwrite=False, verbose=False,
     #get the date-obs
     dstart = instr[1].header['DATE-OBS']
     dend = instr[1].header['DATE-END']
+    print("Writing output file {}...".format(outfile))
     instr.writeto(outfile)
     # end time
     kepmsg.clock('KEPTIMEFIX completed at', logfile, verbose)

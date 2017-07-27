@@ -158,6 +158,7 @@ def kepstitch(infiles, outfile=None, overwrite=False, verbose=False,
     # comment keyword in output file
     kepkey.comment(call, outstr[0], outfile, logfile, verbose)
     # close output file
+    print("Writing output file {}...".format(outfile))
     outstr.writeto(outfile)
     outstr.close()
     ## end time

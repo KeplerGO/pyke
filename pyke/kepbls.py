@@ -324,6 +324,7 @@ def kepbls(infile, outfile=None, datacol='DETSAP_FLUX',
     instr[-1].header['TRANSDUR'] = (transitDuration[bestTrial], 'transit duration [hours]')
     instr[-1].header['SIGNRES' ] = (srMax[bestTrial] * bestSr, 'maximum signal residue')
     # history keyword in output file
+    print("Writing output file {}...".format(outfile))
     kepkey.history(call, instr[0], outfile, logfile, verbose)
     instr.writeto(outfile)
     # close input file

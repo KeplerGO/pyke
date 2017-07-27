@@ -306,6 +306,7 @@ def kepoutlier(infile, outfile=None, datacol='SAP_FLUX', nsig=3.0, stepsize=1.0,
     # render plot
     plt.show()
     # write output file
+    print("Writing output file {}...".format(outfile))
     instr.writeto(outfile)
     # close input file
     instr.close()

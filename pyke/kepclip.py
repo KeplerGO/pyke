@@ -121,8 +121,8 @@ def kepclip(infile, ranges, outfile=None, datacol='SAP_FLUX', plot=False,
                 naxis2 += 1
 
     # comment keyword in output file
+    print("Writing output file {}...".format(outfile))
     kepkey.history(call, instr[0], outfile, logfile, verbose)
-
     # write output file
     instr[1].data = table[:naxis2]
     comment = 'NaN cadences removed from data'
