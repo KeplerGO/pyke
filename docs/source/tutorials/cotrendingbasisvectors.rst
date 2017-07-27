@@ -1,12 +1,12 @@
 ..
 
 Example 1: Use cotrending basis vectors to remove systematic artifacts
+======================================================================
 
 In this example we will reduce the systematic trends present in the quarter 3 SAP time-series of an eccentric ('heartbeat') 
 binary star, KIC 3749404. The presence of substantial astrophysical variability requires a careful (and somewhat
 subjective) attention to the cotrending process.
 
-=============================================
 
 Step 1: Plot archived SAP data
 ------------------------------------------------------
