@@ -68,7 +68,7 @@ def kepdynamic(infile, outfile=None, fcol='SAP_FLUX', pmin=0.1, pmax=10., nfreq=
     """
 
     if outfile is None:
-        outfile = infile + "-{}.fits".format(__all__[0])
+        outfile = infile[:-5] + "-{}.fits".format(__all__[0])
 
     # log the call
     hashline = '--------------------------------------------------------------'

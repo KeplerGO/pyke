@@ -17,9 +17,9 @@ from . import kepio, kepmsg, kepkey, kepplot, kepfit, kepfunc
 __all__ = ['kepprfphot']
 
 
-def kepprfphot(infile, outroot, prfdir, columns, rows, fluxes, border=0,
+def kepprfphot(infile, prfdir, columns, rows, fluxes, border=0,
                background=False, focus=False, ranges='0,0', xtol=1e-4,
-               ftol=1e-2, qualflags=False, plot=False, overwrite=False,
+               ftol=1e-2, qualflags=False, outfile=None, plot=False, overwrite=False,
                verbose=False, logfile='kepprfphot.log'):
     """
     kepprfphot -- Fit a PSF model to time series observations within a Target
@@ -30,25 +30,6 @@ def kepprfphot(infile, outroot, prfdir, columns, rows, fluxes, border=0,
     nfile : str
         The name of a MAST standard format FITS file containing Kepler Target
         Pixel data within the first data extension.
-    outroot : str
-        kepprfphot creates two types of output file containing fit results and
-        diagnostics. ``outroot.png`` contains a time series plot of fit
-        parameters, residuals and chi-squared. ``outroot.fits`` contains a
-        table of the same properties, consistent with Kepler archive light
-        curve files. The FITS column PSF_FLUX contains the flux time-series in
-        units of e-/s derived by integrating under the best-fit PRF model.
-        PSF_BKG provides the best-fit background (if calculated) averaged over
-        all mask pixels in units of e-/s/pixel. PSF_CENTR1 provides the
-        best-fit PSF centroid position in the CCD column direction, in CCD
-        pixel units. Similarly, PSF_CENTR2 provides the best-fit PSF centroid
-        position in the CCD row direction, in CCD pixel units. If calculated,
-        PSF_FOCUS1 and PSF_FOCUS2 provide scale factors in the column and row
-        dimensions by which the CCD pixel scale is adjusted to approximate
-        focus variation. PSF_ROTATION provides the angle by which the scaled
-        PSF model was rotated on the focal plane in order to yield a best fit.
-        The table column PSF_RESIDUAL provides the sum of all mask pixels
-        after the best-fit model has been subtracted from the data. PSF_CHI2
-        delivers the best-fit chi-squred statistic for each observation.
     columns : str or list
         A starting guess for the CCD column position(s) of the source(s) that
         are to be fit. The model is unlikely to converge if the guess is too
@@ -113,6 +94,25 @@ def kepprfphot(infile, outroot, prfdir, columns, rows, fluxes, border=0,
     qualflags : bool
         If qualflags is ``False``, archived observations flagged with any
         quality issue will not be fit.
+    outfile : str
+        kepprfphot creates two types of output file containing fit results and
+        diagnostics. ``outfile.png`` contains a time series plot of fit
+        parameters, residuals and chi-squared. ``outfile.fits`` contains a
+        table of the same properties, consistent with Kepler archive light
+        curve files. The FITS column PSF_FLUX contains the flux time-series in
+        units of e-/s derived by integrating under the best-fit PRF model.
+        PSF_BKG provides the best-fit background (if calculated) averaged over
+        all mask pixels in units of e-/s/pixel. PSF_CENTR1 provides the
+        best-fit PSF centroid position in the CCD column direction, in CCD
+        pixel units. Similarly, PSF_CENTR2 provides the best-fit PSF centroid
+        position in the CCD row direction, in CCD pixel units. If calculated,
+        PSF_FOCUS1 and PSF_FOCUS2 provide scale factors in the column and row
+        dimensions by which the CCD pixel scale is adjusted to approximate
+        focus variation. PSF_ROTATION provides the angle by which the scaled
+        PSF model was rotated on the focal plane in order to yield a best fit.
+        The table column PSF_RESIDUAL provides the sum of all mask pixels
+        after the best-fit model has been subtracted from the data. PSF_CHI2
+        delivers the best-fit chi-squred statistic for each observation.
     plot : bool
         Plot fit results to the screen?
     verbose : bool
@@ -124,13 +124,13 @@ def kepprfphot(infile, outroot, prfdir, columns, rows, fluxes, border=0,
     --------
     .. code-block:: bash
 
-        $ kepprfphot kplr012557548-2012004120508_lpd-targ.fits.gz photometry --columns 95
+        $ kepprfphot kplr012557548-2012004120508_lpd-targ.fits.gz --columns 95
           --rows 1020 --fluxes 1.0 --border 0 --prfdir ../kplr2011265_prf --xtol 1e-7 --ftol 1e-7
           --plot --verbose
 
           --------------------------------------------------------------
           KEPPRFPHOT --  infile=kplr012557548-2012004120508_lpd-targ.fits.gz
-          outroot=photometry columns=95 rows=1020 fluxes=1.0 border=0 background=False
+          columns=95 rows=1020 fluxes=1.0 border=0 background=False
           focus=False prfdir=../kplr2011265_prf ranges=0,0 xtol=1e-07 ftol=1e-07
           qualflags=False plot=True overwrite=True verbose=True logfile=kepprfphot.log
 
@@ -151,12 +151,15 @@ def kepprfphot(infile, outroot, prfdir, columns, rows, fluxes, border=0,
     .. image:: ../_static/images/api/kepprfphot.png
     """
 
+    if outfile is None:
+        outfile = infile[:-5] + "-{}".format(__all__[0])
+
     # log the call
     hashline = '--------------------------------------------------------------'
-    kepmsg.log(logfile,hashline,verbose)
+    kepmsg.log(logfile, hashline, verbose)
     call = ('KEPPRFPHOT -- '
             + ' infile={}'.format(infile)
-            + ' outroot={}'.format(outroot)
+            + ' outfile={}'.format(outfile)
             + ' columns={}'.format(columns)
             + ' rows={}'.format(rows)
             + ' fluxes={}'.format(fluxes)
@@ -229,7 +232,7 @@ def kepprfphot(infile, outroot, prfdir, columns, rows, fluxes, border=0,
 
     # overwrite output file
     for i in range(nsrc):
-        outfile = '{0}_{1}.fits'.format(outroot, i)
+        outfile = '{0}_{1}.fits'.format(outfile, i)
         if overwrite:
             kepio.overwrite(outfile, logfile, verbose)
         if kepio.fileexists(outfile):
@@ -667,7 +670,7 @@ def kepprfphot(infile, outroot, prfdir, columns, rows, fluxes, border=0,
                 hdu2.header.cards[cards2[i].keyword].comment = cards2[i].comment
         outstr.append(hdu2)
         # write output file
-        outstr.writeto(outroot + '_' + str(j) + '.fits',checksum=True)
+        outstr.writeto(outfile + '_' + str(j) + '.fits',checksum=True)
         # close input structure
         struct.close()
 
@@ -1051,7 +1054,7 @@ def kepprfphot(infile, outroot, prfdir, columns, rows, fluxes, border=0,
         plt.grid()
 
         # render plot
-        plt.savefig(outroot + '_' + str(i) + '.png')
+        plt.savefig(outfile + '_' + str(i) + '.png')
         plt.show()
 
     # stop time
@@ -1116,9 +1119,6 @@ def kepprfphot_main():
              formatter_class=PyKEArgumentHelpFormatter)
     parser.add_argument('infile', help='Name of input target pixel file',
                         type=str)
-    parser.add_argument('outroot',
-                        help='Root name of output light curve files',
-                        type=str)
     parser.add_argument('--prfdir',
                         help='Folder containing PRF files',
                         type=str)
@@ -1145,6 +1145,9 @@ def kepprfphot_main():
                         help='Fit minimization tolerance', type=float)
     parser.add_argument('--qualflags', action='store_true',
                         help='Fit data that have quality flags?')
+    parser.add_argument('--outfile',
+                        help='Root name of output light curve files',
+                        default=None)
     parser.add_argument('--plot', action='store_true',
                         help='Plot fit results?')
     parser.add_argument('--overwrite', action='store_true',
@@ -1154,7 +1157,7 @@ def kepprfphot_main():
     parser.add_argument('--logfile', '-l', default='kepprfphot.log',
                         help='Name of ascii log file', type=str)
     args = parser.parse_args()
-    kepprfphot(args.infile, args.outroot, args.prfdir, args.columns, args.rows,
-               args.fluxes, args.border, args.background, args.focus,
-               args.ranges, args.xtol, args.ftol, args.qualflags, args.plot,
+    kepprfphot(args.infile, args.prfdir, args.columns, args.rows, args.fluxes,
+               args.border, args.background, args.focus, args.ranges,
+               args.xtol, args.ftol, args.qualflags, args.outfile, args.plot,
                args.overwrite, args.verbose, args.logfile)

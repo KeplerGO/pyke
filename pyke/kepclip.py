@@ -50,7 +50,7 @@ def kepclip(infile, ranges, outfile=None, datacol='SAP_FLUX', plot=False,
     """
 
     if outfile is None:
-        outfile = infile + "-{}.fits".format(__all__[0])
+        outfile = infile[:-5] + "-{}.fits".format(__all__[0])
 
     # log the call
     hashline = '--------------------------------------------------------------'

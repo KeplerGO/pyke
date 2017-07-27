@@ -9,7 +9,7 @@ from . import kepio, kepmsg, kepkey, kepstat, kepfourier
 __all__ = ['kepft']
 
 
-def kepft(infile, outfile, fcol='SAP_FLUX', pmin=0.1, pmax=10., nfreq=100,
+def kepft(infile, outfile=None, fcol='SAP_FLUX', pmin=0.1, pmax=10., nfreq=100,
           plot=False, overwrite=False, verbose=False, logfile='kepft.log'):
     """
     kepft -- Calculate and store a Fourier Transform from a Kepler time series
@@ -52,12 +52,15 @@ def kepft(infile, outfile, fcol='SAP_FLUX', pmin=0.1, pmax=10., nfreq=100,
     --------
     .. code-block:: bash
 
-        $ kepft kplr002436324-2009259160929_llc.fits kepout.fits --pmin 0.5 -pmax 100 --nfreq 1000 --plot
-          --verbose
+        $ kepft kplr002436324-2009259160929_llc.fits kepout.fits --pmin 0.5
+          --pmax 100 --nfreq 1000 --plot --verbose
 
     .. image:: ../_static/images/api/kepft.png
         :align: center
     """
+
+    if outfile is None:
+        outfile = infile[:-5] + "-{}.fits".format(__all__[0])
     ## log the call
     hashline = '--------------------------------------------------------------'
     kepmsg.log(logfile, hashline, verbose)
@@ -159,8 +162,8 @@ def kepft_main():
                           ' Kepler time series.'),
              formatter_class=PyKEArgumentHelpFormatter)
     parser.add_argument('infile', help='Name of input file', type=str)
-    parser.add_argument('outfile', help='Name of FITS file to output',
-                        type=str)
+    parser.add_argument('--outfile', help='Name of FITS file to output',
+                        default=None)
     parser.add_argument('--datacol', default='SAP_FLUX',
                         help='Name of data column to plot', type=str)
     parser.add_argument('--pmin', default=0.1,

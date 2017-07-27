@@ -11,7 +11,7 @@ from tqdm import tqdm
 __all__ = ['kepflatten']
 
 
-def kepflatten(infile, outfile, datacol='PDCSAP_FLUX',
+def kepflatten(infile, outfile=None, datacol='PDCSAP_FLUX',
                errcol='PDCSAP_FLUX_ERR', nsig=3., stepsize=0.5, winsize=5.0,
                npoly=3, niter=1, ranges='0,0', plot=False, overwrite=False,
                verbose=False, logfile='kepflatten.log'):
@@ -109,6 +109,9 @@ def kepflatten(infile, outfile, datacol='PDCSAP_FLUX',
     .. image:: ../_static/images/api/kepflatten.png
         :align: center
     """
+    
+    if outfile is None:
+        outfile = infile[:-5] + "-{}.fits".format(__all__[0])
     # log the call
     hashline = '--------------------------------------------------------------'
     kepmsg.log(logfile, hashline, verbose)
@@ -399,8 +402,8 @@ def kepflatten_main():
                           'preserve transits and flares'),
              formatter_class=PyKEArgumentHelpFormatter)
     parser.add_argument('infile', help='Name of input file', type=str)
-    parser.add_argument('outfile', help='Name of FITS file to output',
-                        type=str)
+    parser.add_argument('--outfile', help='Name of FITS file to output',
+                        default=None)
     parser.add_argument('--datacol', default='PDCSAP_FLUX',
                         help='Name of data column to plot', type=str)
     parser.add_argument('--errcol', default='PDCSAP_FLUX_ERR',
