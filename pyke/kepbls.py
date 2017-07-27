@@ -12,10 +12,10 @@ from tqdm import tqdm
 __all__ = ['kepbls']
 
 
-def kepbls(infile, outfile, datacol='DETSAP_FLUX', errcol='DETSAP_FLUX_ERR',
-           minper=1.0, maxper=30, mindur=0.5, maxdur=12, nsearch=1000,
-           nbins=1000, plot=False, overwrite=False, verbose=False,
-           logfile='kepbls.log'):
+def kepbls(infile, outfile=None, datacol='DETSAP_FLUX',
+           errcol='DETSAP_FLUX_ERR', minper=1.0, maxper=30, mindur=0.5,
+           maxdur=12, nsearch=1000, nbins=1000, plot=False, overwrite=False,
+           verbose=False, logfile='kepbls.log'):
     """
     kepbls -- Perform Box-Least Square searches for periodic exoplanet transits
 
@@ -96,9 +96,9 @@ def kepbls(infile, outfile, datacol='DETSAP_FLUX', errcol='DETSAP_FLUX_ERR',
 
     .. code-block:: bash
 
-        $ kepbls kepflatten.fits kepbls.fits --datacol DETSAP_FLUX
-        --errcol DETSAP_FLUX_ERR --minper 0.8 --maxper 1.0 --mindur 1.0
-        --maxdur 12.0 --nsearch 1000 --nbins 1000 --plot --verbose
+        $ kepbls kepflatten.fits --datacol DETSAP_FLUX --errcol DETSAP_FLUX_ERR
+        --minper 0.8 --maxper 1.0 --mindur 1.0 --maxdur 12.0 --nsearch 1000
+        --nbins 1000 --plot --verbose
 
              Best trial period = 0.8375062346458435 days
            Time of mid-transit = BJD 2455093.5457274746
@@ -109,6 +109,9 @@ def kepbls(infile, outfile, datacol='DETSAP_FLUX', errcol='DETSAP_FLUX_ERR',
         :align: center
     """
     # log the call
+    if outfile is None:
+        outfile = infile[:-5] + "-{}.fits".format(__all__[0])
+
     hashline = '--------------------------------------------------------------'
     kepmsg.log(logfile, hashline, verbose)
     call = ('KEPBLS -- '
@@ -341,7 +344,8 @@ def kepbls_main():
                          ' exoplanet transits'),
             formatter_class=PyKEArgumentHelpFormatter)
     parser.add_argument('infile', help='Name of input file', type=str)
-    parser.add_argument('outfile', help='Name of FITS file to output', type=str)
+    parser.add_argument('--outfile', help='Name of FITS file to output',
+                        default=None)
     parser.add_argument('--datacol', default='DETSAP_FLUX',
                         help='Name of data column to plot', type=str)
     parser.add_argument('--errcol', default='DETSAP_FLUX_ERR',

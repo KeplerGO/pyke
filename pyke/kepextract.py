@@ -11,7 +11,7 @@ from . import kepio, kepmsg, kepkey, kepstat, kepfunc
 __all__ = ['kepextract']
 
 
-def kepextract(infile, outfile, maskfile='ALL', bkg=False, psfcentroid=False,
+def kepextract(infile, outfile=None, maskfile='ALL', bkg=False, psfcentroid=False,
                overwrite=False, verbose=False,
                logfile='kepextract.log'):
     """
@@ -81,7 +81,7 @@ def kepextract(infile, outfile, maskfile='ALL', bkg=False, psfcentroid=False,
     --------
     .. code-block:: bash
 
-        $ kepextract kplr008256049-2010174085026_lpd-targ.fits outlc.fits --maskfile ALL
+        $ kepextract kplr008256049-2010174085026_lpd-targ.fits --maskfile ALL
 
     One further can plot the resulted light curve by doing
 
@@ -102,7 +102,8 @@ def kepextract(infile, outfile, maskfile='ALL', bkg=False, psfcentroid=False,
     .. image:: ../_static/images/api/kepextract.png
         :align: center
     """
-
+    if outfile is None:
+        outfile = infile[:-5] + "-{}.fits".format(__all__[0])
     # log the call
     hashline = '--------------------------------------------------------------'
     kepmsg.log(logfile, hashline, verbose)

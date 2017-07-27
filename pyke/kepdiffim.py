@@ -8,7 +8,7 @@ from astropy.io import fits as pyfits
 __all__ = ['kepdiffim']
 
 
-def kepdiffim(infile, outfile, plotfile=None, imscale='logarithmic',
+def kepdiffim(infile, outfile=None, plotfile=None, imscale='logarithmic',
               colmap='PuBu', filterlc=False, function='boxcar', cutoff=1.0,
               overwrite=False, verbose=False, logfile='kepdiffim.log'):
     """
@@ -88,6 +88,9 @@ def kepdiffim(infile, outfile, plotfile=None, imscale='logarithmic',
     .. image:: ../_static/images/api/kepdiffim.png
         :align: center
     """
+
+    if outfile is None:
+        outfile = infile + "-{}.fits".format(__all__[0])
     # log the call
     hashline = '--------------------------------------------------------------'
     kepmsg.log(logfile,hashline,verbose)
@@ -383,7 +386,8 @@ def kepdiffim_main():
              description=('Difference imaging of pixels within a target mask'),
              formatter_class=PyKEArgumentHelpFormatter)
     parser.add_argument('infile', help='Name of input file', type=str)
-    parser.add_argument('outfile', help='Name of FITS file to output', type=str)
+    parser.add_argument('--outfile', help='Name of FITS file to output',
+                        default=None)
     parser.add_argument('--plotfile', default='None',
                         help='name of output PNG plot file', type=str)
     parser.add_argument('--imscale', default='logarithmic',

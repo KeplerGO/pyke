@@ -452,9 +452,9 @@ def split_on_nans(bad_data, cad):
             blocks.append(cad[-1])
     return blocks
 
-def kepcotrend(infile, outfile, bvfile, listbv, fitmethod='llsq', fitpower=1,
-               iterate=False, sigma=None, maskfile='', scinterp='linear',
-               plot=False, overwrite=False, verbose=False,
+def kepcotrend(infile, bvfile, listbv, outfile=None, fitmethod='llsq',
+               fitpower=1, iterate=False, sigma=None, maskfile='',
+               scinterp='linear', plot=False, overwrite=False, verbose=False,
                logfile='kepcotrend.log'):
     """
     kepcotrend -- Remove systematic trends Kepler light curves using
@@ -635,10 +635,12 @@ def kepcotrend(infile, outfile, bvfile, listbv, fitmethod='llsq', fitpower=1,
     --------
     .. code-block:: bash
 
-        $ kepcotrend kplr005110407-2009350155506_llc.fits kepcotrend.fits
-        ~/cbv/kplr2009350155506-q03-d25_lcbv.fits
+        $ kepcotrend kplr005110407-2009350155506_llc.fits ~/cbv/kplr2009350155506-q03-d25_lcbv.fits
         '1 2 3' --plot --verbose
     """
+
+    if outfile is None:
+        outfile = infile + "-{}.fits".format(__all__[0])
     # log the call
     hashline = '--------------------------------------------------------------'
     kepmsg.log(logfile, hashline, verbose)
@@ -913,11 +915,11 @@ def kepcotrend_main():
                           ' cotrending basis vectors (CBV)'),
              formatter_class=PyKEArgumentHelpFormatter)
     parser.add_argument('infile', help='Name of input file', type=str)
-    parser.add_argument('outfile', help='Name of FITS file to output',
-                        type=str)
     parser.add_argument('cbvfile', help='Name of file containing the CBVs',
                         type=str)
     parser.add_argument('listbv', help='The CBVs to use', type=str)
+    parser.add_argument('--outfile', help='Name of FITS file to output',
+                        default=None)
     parser.add_argument('--method', '-m', help='Fitting method',
                         default='llsq', dest='fitmethod', type=str,
                         choices=['llsq', 'simplex', 'lst_sq'])
@@ -946,7 +948,7 @@ def kepcotrend_main():
     parser.add_argument('--logfile', '-l', help='Name of ascii log file',
                         default='kepcotrend.log', type=str)
     args = parser.parse_args()
-    kepcotrend(args.infile, args.outfile, args.cbvfile, args.listbv,
+    kepcotrend(args.infile, args.cbvfile, args.listbv, args.outfile,
                args.fitmethod, args.fitpower, args.iterate, args.sigma,
                args.maskfile, args.scinterp, args.plot, args.overwrite,
                args.verbose, args.logfile)

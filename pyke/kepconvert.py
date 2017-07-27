@@ -10,7 +10,7 @@ from . import kepio, kepmsg, kepkey
 __all__ = ['kepconvert']
 
 
-def kepconvert(infile, outfile, conversion, columns, baddata=True,
+def kepconvert(infile, conversion, columns, outfile=None, baddata=True,
                overwrite=False, verbose=False, logfile='kepconvert.log'):
     """
     kepconvert -- Convert Kepler FITS time series to or from a different file
@@ -52,9 +52,15 @@ def kepconvert(infile, outfile, conversion, columns, baddata=True,
     --------
     .. code-block:: bash
 
-        $ kepconvert kplr002436324-2009259160929_llc.fits kepconvert.txt fits2asc
+        $ kepconvert kplr002436324-2009259160929_llc.fits fits2asc
           --columns TIME,SAP_FLUX,SAP_FLUX_ERR,SAP_QUALITY --verbose
     """
+
+    if outfile is None:
+        if conversion == "fits2asc":
+            outfile = infile + "-{}.txt".format(__all__[0])
+        elif conversion == "asc2fits":
+            outfile = infile + "-{}.fits".format(__all__[0])
 
     hashline = '--------------------------------------------------------------'
     kepmsg.log(logfile, hashline, verbose)
@@ -341,12 +347,12 @@ def kepconvert_main():
                          ' different file format'),
             formatter_class=PyKEArgumentHelpFormatter)
     parser.add_argument('infile', help='Name of input file', type=str)
-    parser.add_argument('outfile', help='Name of output file', type=str)
     parser.add_argument('conversion', help='Type of data conversion', type=str,
                         choices=['fits2asc','asc2fits'])
     parser.add_argument('--columns', '-c', default='TIME,SAP_FLUX,SAP_FLUX_ERR',
                         dest='columns', help='Comma-delimited list of data columns',
                         type=str)
+    parser.add_argument('--outfile', help='Name of output file', default=None)
     parser.add_argument('--baddata', action='store_false',
                         help='Output rows which have been flagged as questionable')
     parser.add_argument('--overwrite', action='store_true',
@@ -356,5 +362,5 @@ def kepconvert_main():
     parser.add_argument('--logfile', '-l', help='Name of ascii log file',
                         default='kepconvert.log', dest='logfile', type=str)
     args = parser.parse_args()
-    kepconvert(args.infile, args.outfile, args.conversion, args.columns,
+    kepconvert(args.infile, args.conversion, args.columns, args.outfile,
                args.baddata, args.overwrite, args.verbose, args.logfile)
