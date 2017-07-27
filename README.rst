@@ -20,7 +20,7 @@ the pixels and lightcurves obtained by NASA's Kepler, K2, and TESS missions.**
 Documentation
 -------------
 
-Documentation is hosted at `pyke.keplerscience.org <https://pyke.keplerscience.org>`_.
+Documentation is hosted at `pyke.keplerscience.org <http://pyke.keplerscience.org>`_.
 
 What's new in PyKE v3? (July 2017)
 ----------------------------------
@@ -29,11 +29,11 @@ What's new in PyKE v3? (July 2017)
 PyKE3 is the latest generation of the Kepler/K2/TESS toolkit.
 It provides the following key improvements:
 
-* PyKE is now a `pip-installable <http://pyke.readthedocs.io/en/latest/install.html#installing-pyke>`_ package and supports both Python 2 and 3;
-* `tasks <http://pyke.readthedocs.io/en/latest/overview.html>`_ are now available both as command-line tools and Python functions;
+* PyKE is now a `pip-installable <http://pyke.keplerscience.org/en/latest/install.html#installing-pyke>`_ package and supports both Python 2 and 3;
+* `tasks <http://pyke.keplerscience.org/en/latest/overview.html>`_ are now available both as command-line tools and Python functions;
 * PyKE no longer depends on PyRAF and is TESS-ready.
 * documentation and tutorials are now generated using Sphinx;
-* the development has been moved to GitHub to encourage `user contributions <http://pyke.readthedocs.io/en/latest/contributing.html>`_.
+* the development has been moved to GitHub to encourage `user contributions <http://pyke.keplerscience.org/en/latest/contributing.html>`_.
 
 Quickstart
 ----------
@@ -50,7 +50,7 @@ For example, let's visualize the pixels of Kepler target KIC008462852
 
     $ kepmask kplr008462852-2013098041711_lpd-targ.fits.gz --maskfile mask.txt
 
-.. image:: http://pyke.readthedocs.io/en/latest/_images/kepmask1.png
+.. image:: http://pyke.keplerscience.org/en/latest/_images/kepmask1.png
 
 ``kepmask`` is an interactive tool used to create a custom
 aperture mask which can subsequently be used in other PyKE tasks.
@@ -64,7 +64,7 @@ To visualize the resulting light curve, we can use ``kepdraw``::
 
     $ kepdraw lightcurve.fits
 
-.. image:: http://pyke.readthedocs.io/en/latest/_images/kepdraw1.png
+.. image:: http://pyke.keplerscience.org/en/latest/_images/kepdraw1.png
 
 
 Acknowledgement
