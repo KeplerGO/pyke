@@ -1,17 +1,17 @@
 PyKE: Kepler, K2 & TESS Data Analysis Tools
 ============================================
-|pypi-badge| |ci-badge| |doc-badge| |cov-badge| |bib-badge|
+|pypi-badge| |ci-badge| |doc-badge| |cov-badge| |doi-badge|
 
 .. |pypi-badge| image:: https://img.shields.io/pypi/v/pyketools.svg
                 :target: https://pypi.python.org/pypi/pyketools
 .. |ci-badge| image:: https://travis-ci.org/KeplerGO/PyKE.svg?branch=master
               :target: https://travis-ci.org/KeplerGO/PyKE
 .. |doc-badge| image:: https://readthedocs.org/projects/pyke/badge/?version=latest
-              :target: https://pyke.readthedocs.io
-.. |bib-badge| image:: https://img.shields.io/badge/NASA%20ADS-2012ascl.soft08004S-brightgreen.svg
-              :target: http://adsabs.harvard.edu/abs/2012ascl.soft08004S
+              :target: https://pyke.keplerscience.org
 .. |cov-badge| image:: https://codecov.io/gh/KeplerGO/PyKE/branch/master/graph/badge.svg
               :target: https://codecov.io/gh/KeplerGO/PyKE
+.. |doi-badge| image:: https://zenodo.org/badge/DOI/10.5281/zenodo.835584.svg
+              :target: https://doi.org/10.5281/zenodo.835584
 
 
 **Developed since 2012, PyKE offers a user-friendly way to inspect and analyze
@@ -67,20 +67,43 @@ To visualize the resulting light curve, we can use ``kepdraw``::
 .. image:: http://pyke.keplerscience.org/en/latest/_images/kepdraw1.png
 
 
-Acknowledgement
----------------
-
-If you find this code useful in your research, please consider `citing <http://adsabs.harvard.edu/abs/2012ascl.soft08004S>`_::
-
-    Title: PyKE: Reduction and analysis of Kepler Simple Aperture Photometry data
-    Authors: Still, Martin; Barclay, Tom
-    Publication: Astrophysics Source Code Library, record ascl:1208.004
-    Publication Date: 08/2012
-
-*This package is developed by Martin Still, Tom Barclay, Ze Vinicius, Geert Barentsen, Michael Gully-Santiago, Ann Marie Cody, and Christine Hedges for the Kepler/K2 GO Office.*
-
 Contributing
 ------------
 
 Users are welcome to open `issues <https://github.com/KeplerGO/PyKE/issues>`_ or `pull requests <https://github.com/KeplerGO/PyKE/pulls>`_.
 You can also contact the development team via keplergo@mail.arc.nasa.gov
+
+
+Citing
+------
+
+If you find this code useful in your research,
+please cite both (Vinícius et al. 2017) and (Still & Barclay, 2012)
+using the BibTeX provided below::
+
+    @misc{pyke3,
+      author       = {Zé Vinícius and
+                      Geert Barentsen and
+                      Michael Gully-Santiago and
+                      Ann Marie Cody and
+                      Christina Hedges and
+                      Martin Still and
+                      Tom Barclay},
+      title        = {KeplerGO/PyKE},
+      month        = jul,
+      year         = 2017,
+      doi          = {10.5281/zenodo.835583},
+      url          = {https://doi.org/10.5281/zenodo.835583}
+    }
+
+    @misc{2012ascl.soft08004S,
+      author       = {{Still}, M. and {Barclay}, T.},
+      title        = "{PyKE: Reduction and analysis of Kepler Simple Aperture Photometry data}",
+      keywords     = {Software},
+      howpublished = {Astrophysics Source Code Library},
+      year         = 2012,
+      month        = aug,
+      archivePrefix= "ascl",
+      eprint       = {1208.004},
+      adsurl       = {http://adsabs.harvard.edu/abs/2012ascl.soft08004S}
+    }
