@@ -340,7 +340,9 @@ def keptrim_main():
     parser.add_argument('imsize',
                         help=('Number of pixels to extract in both row and'
                               ' column dimensions'), type=int)
-    parser.add_argument('--outfile', help='Name of output target pixel file',
+    parser.add_argument('--outfile',
+                        help=('Name of FITS file to output.'
+                              ' If None, outfile is infile-keptrim.'),
                         default=None)
     parser.add_argument('--kepid', type=int,
                         help='Kepler ID number from the Kepler Input Catalog')

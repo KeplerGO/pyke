@@ -766,7 +766,9 @@ def keppca_main():
        formatter_class=PyKEArgumentHelpFormatter)
     parser.add_argument('infile', help='Name of input target pixel FITS file',
                         type=str)
-    parser.add_argument('--outfile', help='Name of output FITS file',
+    parser.add_argument('--outfile',
+                        help=('Name of FITS file to output.'
+                              ' If None, outfile is infile-keppca.'),
                         default=None)
     parser.add_argument('--maskfile', help='Name of mask defintion ASCII file',
                         default='ALL', type=str)

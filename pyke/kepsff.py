@@ -723,7 +723,9 @@ def kepsff_main():
              description='Correct aperture photmetry using target motion',
              formatter_class=PyKEArgumentHelpFormatter)
     parser.add_argument('infile', help='Name of input FITS file', type=str)
-    parser.add_argument('--outfile', help='Name of output FITS file',
+    parser.add_argument('--outfile',
+                        help=('Name of FITS file to output.'
+                              ' If None, outfile is infile-kepsff.'),
                         default=None)
     parser.add_argument('--datacol', default='DETSAP_FLUX',
                         help='Name of data column', type=str)

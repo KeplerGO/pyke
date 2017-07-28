@@ -345,7 +345,9 @@ def kepbls_main():
                          ' exoplanet transits'),
             formatter_class=PyKEArgumentHelpFormatter)
     parser.add_argument('infile', help='Name of input file', type=str)
-    parser.add_argument('--outfile', help='Name of FITS file to output',
+    parser.add_argument('--outfile',
+                        help=('Name of FITS file to output.'
+                              ' If None, outfile is infile-kepbls.'),
                         default=None)
     parser.add_argument('--datacol', default='DETSAP_FLUX',
                         help='Name of data column to plot', type=str)

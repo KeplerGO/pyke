@@ -919,7 +919,9 @@ def kepcotrend_main():
     parser.add_argument('cbvfile', help='Name of file containing the CBVs',
                         type=str)
     parser.add_argument('listbv', help='The CBVs to use', type=str)
-    parser.add_argument('--outfile', help='Name of FITS file to output',
+    parser.add_argument('--outfile',
+                        help=('Name of FITS file to output.'
+                              ' If None, outfile is infile-kepcotrend.'),
                         default=None)
     parser.add_argument('--method', '-m', help='Fitting method',
                         default='llsq', dest='fitmethod', type=str,

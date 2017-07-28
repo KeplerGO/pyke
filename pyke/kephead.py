@@ -138,7 +138,8 @@ def kephead_main():
     parser.add_argument('infile', help='Name of input file', type=str)
     parser.add_argument('keyname', help='Snippet of keyword name', type=str)
     parser.add_argument('--outfile',
-                        help='The name of the output ASCII file for storing search results',
+                        help=('The name of the output ASCII file for storing search results.'
+                              ' If None, outfile is infile-kephead.'),
                         default=None)
     parser.add_argument('--overwrite', action='store_true',
                         help='Overwrite output file?')

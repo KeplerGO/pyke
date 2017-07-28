@@ -125,7 +125,8 @@ def keptimefix_main():
     parser.add_argument('infile', help='Name of FITS input target pixel file',
                         type=str)
     parser.add_argument('--outfile',
-                        help='Name of FITS target pixel file to output',
+                        help=('Name of FITS target pixel file to output.'
+                              ' If None, outfile is infile-keptimefix.'),
                         default=None)
     parser.add_argument('--overwrite', action='store_true',
                         help='overwrite a file with the same name as outfile?')

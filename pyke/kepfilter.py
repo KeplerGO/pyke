@@ -250,7 +250,9 @@ def kepfilter_main():
     parser.add_argument('infile', help='Name of input file', type=str)
     parser.add_argument('--passband', help='low- or high-bandpass filter',
                         type=str, choices=['low','high'])
-    parser.add_argument('--outfile', help='Name of FITS file to output',
+    parser.add_argument('--outfile',
+                        help=('Name of FITS file to output.'
+                              ' If None, outfile is infile-kepfilter.'),
                         default=None)
     parser.add_argument('--datacol', default='SAP_FLUX',
                         help='Name of data column', type=str)

@@ -213,7 +213,9 @@ def kepclip_main():
     parser.add_argument('ranges',
                         help='List of time domain ranges to be excluded',
                         type=str)
-    parser.add_argument('--outfile', help='Name of FITS file to output',
+    parser.add_argument('--outfile',
+                        help=('Name of FITS file to output.'
+                              ' If None, outfile is infile-kepclip.'),
                         default=None)
     parser.add_argument('--datacol', help='Data column to plot',
                         default='SAP_FLUX', type=str)

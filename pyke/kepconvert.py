@@ -354,7 +354,10 @@ def kepconvert_main():
     parser.add_argument('--columns', '-c', default='TIME,SAP_FLUX,SAP_FLUX_ERR',
                         dest='columns', help='Comma-delimited list of data columns',
                         type=str)
-    parser.add_argument('--outfile', help='Name of output file', default=None)
+    parser.add_argument('--outfile',
+                        help=('Name of file to output.'
+                              ' If None, outfile is infile-kepconvert.'),
+                        default=None)
     parser.add_argument('--baddata', action='store_false',
                         help='Output rows which have been flagged as questionable')
     parser.add_argument('--overwrite', action='store_true',

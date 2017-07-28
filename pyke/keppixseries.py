@@ -554,7 +554,9 @@ def keppixseries_main():
                           ' within a target mask'),
              formatter_class=PyKEArgumentHelpFormatter)
     parser.add_argument('infile', help='Name of input file', type=str)
-    parser.add_argument('--outfile', help='Name of FITS file to output',
+    parser.add_argument('--outfile',
+                        help=('Name of FITS file to output.'
+                              ' If None, outfile is infile-keppixseries.'),
                         default=None)
     parser.add_argument('--plotfile', default='None',
                         help='name of output PNG plot file', type=str)

@@ -109,7 +109,7 @@ def kepflatten(infile, outfile=None, datacol='PDCSAP_FLUX',
     .. image:: ../_static/images/api/kepflatten.png
         :align: center
     """
-    
+
     if outfile is None:
         outfile = infile.split('.')[0] + "-{}.fits".format(__all__[0])
     # log the call
@@ -403,7 +403,9 @@ def kepflatten_main():
                           'preserve transits and flares'),
              formatter_class=PyKEArgumentHelpFormatter)
     parser.add_argument('infile', help='Name of input file', type=str)
-    parser.add_argument('--outfile', help='Name of FITS file to output',
+    parser.add_argument('--outfile',
+                        help=('Name of FITS file to output.'
+                              ' If None, outfile is infile-kepflatten.'),
                         default=None)
     parser.add_argument('--datacol', default='PDCSAP_FLUX',
                         help='Name of data column to plot', type=str)

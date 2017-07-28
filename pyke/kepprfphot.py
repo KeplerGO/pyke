@@ -1147,7 +1147,8 @@ def kepprfphot_main():
     parser.add_argument('--qualflags', action='store_true',
                         help='Fit data that have quality flags?')
     parser.add_argument('--outfile',
-                        help='Root name of output light curve files',
+                        help=('Root name of output light curve FITS files.'
+                              ' If None, root name is infile-kepprfphot.'),
                         default=None)
     parser.add_argument('--plot', action='store_true',
                         help='Plot fit results?')

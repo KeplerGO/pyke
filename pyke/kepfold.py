@@ -586,7 +586,9 @@ def kepfold_main():
     parser.add_argument('bjd0',
                         help='time of zero phase for the folded period [BJD]',
                         type=float)
-    parser.add_argument('--outfile', help='Name of FITS file to output',
+    parser.add_argument('--outfile',
+                        help=('Name of FITS file to output.'
+                              ' If None, outfile is infile-kepfold.'),
                         default=None)
     parser.add_argument('--bindata', action='store_true',
                         help='Bin output data?')

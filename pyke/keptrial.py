@@ -277,7 +277,9 @@ def keptrial_main():
                           ' Fourier transform'),
              formatter_class=PyKEArgumentHelpFormatter)
     parser.add_argument('infile', help='Name of input file', type=str)
-    parser.add_argument('--outfile', help='Name of FITS file to output',
+    parser.add_argument('--outfile',
+                        help=('Name of FITS file to output.'
+                              ' If None, outfile is infile-keptrial.'),
                         default=None)
     parser.add_argument('--datacol', default='SAP_FLUX',
                         help='Name of data column', type=str)

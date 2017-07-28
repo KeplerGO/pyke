@@ -398,7 +398,8 @@ def keprange_main():
              formatter_class=PyKEArgumentHelpFormatter)
     parser.add_argument('infile', help='Name of input file', type=str)
     parser.add_argument('--outfile',
-                        help='Name of output ASCII time ranges file',
+                        help=('Name of ASCII file to output time ranges.'
+                              ' If None, outfile is infile-keprange.'),
                         default=None)
     parser.add_argument('--datacol', default='SAP_FLUX',
                         help='Name of diagnostic FITS column', type=str)

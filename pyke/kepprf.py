@@ -605,7 +605,9 @@ def kepprf_main():
     parser.add_argument('--ftol', '-f', default=1.0,
                         help='Fit minimization tolerance', dest='ftol',
                         type=float)
-    parser.add_argument('--outfile', help='Name of output PNG plot file',
+    parser.add_argument('--outfile',
+                        help=('Name of output PNG plot file.'
+                              ' If None, outfile is infile-kepprf.'),
                         default=None)
     parser.add_argument('--plot', action='store_true',
                         help='Plot fit results?', default=False)

@@ -254,7 +254,9 @@ def kepstddev_main():
                           ' Precision for a time series light curve'),
              formatter_class=PyKEArgumentHelpFormatter)
     parser.add_argument('infile', help='Name of input FITS file', type=str)
-    parser.add_argument('--outfile', help='Name of output FITS file',
+    parser.add_argument('--outfile',
+                        help=('Name of FITS file to output.'
+                              ' If None, outfile is infile-kepstddev.'),
                         default=None)
     parser.add_argument('--datacol', default='PDCSAP_FLUX',
                         help='Name of data column to plot', type=str)

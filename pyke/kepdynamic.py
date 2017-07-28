@@ -241,7 +241,9 @@ def kepdynamic_main():
                          'from Kepler time series data'),
              formatter_class=PyKEArgumentHelpFormatter)
     parser.add_argument('infile', help='Name of input file', type=str)
-    parser.add_argument('--outfile', help='Name of FITS file to output',
+    parser.add_argument('--outfile',
+                        help=('Name of FITS file to output.'
+                              ' If None, outfile is infile-kepdynamic.'),
                         default=None)
     parser.add_argument('--fcol', default='SAP_FLUX',
                         help='Name of data column to plot', type=str)
