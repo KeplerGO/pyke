@@ -50,7 +50,7 @@ operating upon the TPF *kplr002449074-2009350155506_lpd-targ.fits*, as follows:
 
 .. code-block:: bash
 
-    $ keppixseries kplr002449074-2009350155506_lpd-targ.fits.gz keppixseries.fits
+    $ keppixseries kplr002449074-2009350155506_lpd-targ.fits.gz
     --plotfile keppixseries.png --plottype local
 
 .. image:: ../_static/images/tutorials/example_a/keppixseries.png
@@ -100,7 +100,7 @@ We can create two new light curves as follows:
 .. code-block:: bash
 
     $ kepextract kplr002449074-2009350155506_lpd-targ.fits.gz
-    kepextract_target.fits --maskfile mask_target.txt
+    --outfile kepextract_target.fits --maskfile mask_target.txt
 
     $ kepdraw kepextract_target.fits
 
@@ -110,7 +110,7 @@ We can create two new light curves as follows:
 .. code-block:: bash
 
     $ kepextract kplr002449074-2009350155506_lpd-targ.fits.gz
-    kepextract_eb.fits --maskfile mask_eb.txt
+    --outfile kepextract_eb.fits --maskfile mask_eb.txt
 
     $ kepdraw kepextract_eb.fits
 
@@ -132,10 +132,10 @@ within a new FITS column called CBVSAP_FLUX.
 
 .. code-block:: bash
 
-    $ kepcotrend kepextract_target.fits kepcotrend_target.fits
+    $ kepcotrend kepextract_target.fits --outfile kepcotrend_target.fits
     ../cbv/kplr2009350155506-q03-d25_lcbv.fits 1,2,3,4,5,6 --sigmaclip 3.0 --plot
 
-    $ kepcotrend kepextract_eb.fits kepcotrend_eb.fits
+    $ kepcotrend kepextract_eb.fits --outfile kepcotrend_eb.fits
     ../cbv/kplr2009350155506-q03-d25_lcbv.fits 1,2,3,4,5,6 --sigmaclip 3.0 --plot
 
 .. image:: ../_static/images/tutorials/example_a/kepcotrend_target.png
