@@ -86,8 +86,8 @@ def get_pcomp_list_newformat(bvdat,pcomplist,newcad,short,scinterp):
                 pcomp[i] = np.where(np.isnan(intpl(newcad)),0,intpl(newcad))
                 mid_pt = np.floor(np.median(np.arange(len(pcomp[i]))))
                 p_len = len(pcomp[i])
-                lower = [np.logical_and(arange(p_len) < mid_pt,pcomp[i] == 0)]
-                upper = [np.logical_and(arange(p_len) > mid_pt,pcomp[i] == 0)]
+                lower = [np.logical_and(np.arange(p_len) < mid_pt,pcomp[i] == 0)]
+                upper = [np.logical_and(np.arange(p_len) > mid_pt,pcomp[i] == 0)]
                 pcomp[i][lower] = bv_data[0]
                 pcomp[i][upper] = bv_data[-1]
         else:
