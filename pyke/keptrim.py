@@ -28,11 +28,6 @@ def keptrim(infile, column, row, imsize, outfile=None, kepid=None,
     ----------
     infile : str
         Filename for the input Target Pixel File.
-    kepid : None or int
-        If the target is catalogued within the Kepler Input Catalog (KIC), then
-        the pixel row and column location will be extracted from the KIC
-        provided the Kepler ID is provided. The user must be online for this
-        feature to execute. If provieded. kepid will override column and row.
     column : int
         The CCD column number on which to center the output subimage.
     row : int
@@ -43,6 +38,11 @@ def keptrim(infile, column, row, imsize, outfile=None, kepid=None,
     outfile : str
         Filename for the output Target Pixel File. This product will be written
         to the same FITS format as archived light curves.
+    kepid : None or int
+        If the target is catalogued within the Kepler Input Catalog (KIC), then
+        the pixel row and column location will be extracted from the KIC
+        provided the Kepler ID is provided. The user must be online for this
+        feature to execute. If provided kepid will override column and row.
     overwrite : bool
         Overwrite the output file?
     verbose : bool
@@ -320,7 +320,7 @@ def FOVKepID(id):
     lines = urllib.urlopen(url)
     for line in lines:
         line = line.strip()
-        if (len(line) > 0 
+        if (len(line) > 0
             and 'Kepler' not in line
             and 'integer' not in line
             and 'no rows found' not in line):
