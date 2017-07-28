@@ -13,7 +13,7 @@ __all__ = ['kepsff']
 def kepsff(infile, outfile=None, datacol='DETSAP_FLUX', cenmethod='moments',
            stepsize=4.0, npoly_cxcy=1, sigma_cxcy=6.0, npoly_ardx=6,
            npoly_dsdt=2, sigma_dsdt=3.0, npoly_arfl=3, sigma_arfl=3.0,
-           plotres=False, overwrite=False, verbose=False, logfile='kepsff.log'):
+           plot=False, overwrite=False, verbose=False, logfile='kepsff.log'):
     """
     kepsff -- remove motion-correlated noise from aperture light curve data
 
@@ -132,7 +132,7 @@ def kepsff(infile, outfile=None, datacol='DETSAP_FLUX', cenmethod='moments',
         and filter the input data in order to produce a flux-motion correlation
         curve. The following sequence of fit parameters is therefore quite
         dis-orienting until some familiarity is gained with hands-on
-        experience. The diagnostic plots, provided when plotres=True provide
+        experience. The diagnostic plots, provided when plot=True provide
         significant help here with the four fits delivered in the four
         left-most panels (figure 1). The first fit is to the centroid
         coordinates selected by cenmethod. These data points are provided in
@@ -228,7 +228,7 @@ def kepsff(infile, outfile=None, datacol='DETSAP_FLUX', cenmethod='moments',
         lower-right on the same plotting scale as above. The red points are
         those flagged as potential thruster firing and their 6-hr cadence
         suggests these events have generally been flagged well.
-    plotres : bool
+    plot : bool
         If true, diagnostic plots identical to figure 1 above will be rendered
         and also saved as PNG files. There will be a different plot for every
         time window defined by the stepsize parameters. If the output FITS file
@@ -263,7 +263,7 @@ def kepsff(infile, outfile=None, datacol='DETSAP_FLUX', cenmethod='moments',
             + ' sigma_dsdt={}'.format(sigma_dsdt)
             + ' npoly_arfl={}'.format(npoly_arfl)
             + ' sigma_arfl={}'.format(sigma_arfl)
-            + ' plotres={}'.format(plotres)
+            + ' plot={}'.format(plot)
             + ' overwrite={}'.format(overwrite)
             + ' verbose={}'.format(verbose)
             + ' logfile={}'.format(logfile))
@@ -672,7 +672,7 @@ def kepsff(infile, outfile=None, datacol='DETSAP_FLUX', cenmethod='moments',
         kepplot.labels(xlab,re.sub('Flux','Corrected Flux',ylab),'k',16)
         plt.grid()
         # render plot
-        if plotres:
+        if plot:
             plt.show()
             plt.savefig(re.sub('.fits','_%d.png' % (iw + 1),outfile))
 
@@ -756,7 +756,7 @@ def kepsff_main():
                         help=('Sigma-clipping threshold for arclength-flux'
                               ' calibration [sigma]'),
                         type=float)
-    parser.add_argument('--plotres', action='store_true',
+    parser.add_argument('--plot', action='store_true',
                         help='Save hardcopies of the plots?')
     parser.add_argument('--overwrite', action='store_true',
                         help='Overwrite output file?')
@@ -768,5 +768,5 @@ def kepsff_main():
     kepsff(args.infile, args.outfile, args.datacol, args.cenmethod,
            args.stepsize, args.npoly_cxcy, args.sigma_cxcy, args.npoly_ardx,
            args.npoly_dsdt, args.sigma_dsdt, args.npoly_arfl,
-           args.sigma_arfl, args.plotres, args.overwrite, args.verbose,
+           args.sigma_arfl, args.plot, args.overwrite, args.verbose,
            args.logfile)

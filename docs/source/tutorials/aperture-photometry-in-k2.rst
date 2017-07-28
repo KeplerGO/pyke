@@ -30,8 +30,8 @@ to pass our mask created in the previous step.
 
 .. code-block:: bash
 
-    $ kepextract ktwo202073445-c00_lpd-targ.fits.gz ktwo202073445.fits --bkg --maskfile maskfile.txt
-    $ kepdraw ktwo202073445.fits
+    $ kepextract ktwo202073445-c00_lpd-targ.fits.gz --bkg --maskfile maskfile.txt
+    $ kepdraw ktwo202073445-c00_lpd-targ-kepextract.fits
 
 .. image:: ../_static/images/tutorials/example_e/kepextract.png
 
@@ -44,11 +44,11 @@ light curve, we can use the ``kepflatten`` tool as follows:
 
 .. code-block:: bash
 
-    $ kepclip ktwo202073445.fits ktwo202073445_clipped.fits 2456728.4110787315, 2456771.907224878
+    $ kepclip ktwo202073445-c00_lpd-targ-kepextract.fits 2456728.4110787315, 2456771.907224878
 
-    $ kepflatten ktwo202073445_clipped.fits ktwo202073445_flatten.fits --datacol SAP_FLUX --errcol SAP_FLUX_ERR --stepsize 0.2 --winsize 3.0 --npoly 2 --niter 10 --plot --verbose
+    $ kepflatten ktwo202073445-c00_lpd-targ-kepextract-kepclip.fits --datacol SAP_FLUX --errcol SAP_FLUX_ERR --stepsize 0.2 --winsize 3.0 --npoly 2 --niter 10 --plot --verbose
 
-    $ kepdraw ktwo202073445_flatten.fits --datacol DETSAP_FLUX
+    $ kepdraw ktwo202073445-c00_lpd-targ-kepextract-kepclip-kepflatten.fits --datacol DETSAP_FLUX
 
 .. image:: ../_static/images/tutorials/example_e/kepflatten.png
 
@@ -65,13 +65,13 @@ correction factors.
 
 .. code-block:: bash
 
-    $ kepsff ktwo202073445_flatten.fits ktwo202073445_sff.fits --datacol DETSAP_FLUX --stepsize 5. --npoly_ardx 4 --sigma_dsdt 10. --overwrite
+    $ kepsff ktwo202073445-c00_lpd-targ-kepextract-kepclip-kepflatten.fits --datacol DETSAP_FLUX --stepsize 5. --npoly_ardx 4 --sigma_dsdt 10. --overwrite
 
-    $ kepdraw ktwo202073445_sff.fits --datacol DETSAP_FLUX
+    $ kepdraw ktwo202073445-c00_lpd-targ-kepextract-kepclip-kepflatten-kepsff.fits--datacol DETSAP_FLUX
 
 .. image:: ../_static/images/tutorials/example_e/kepsff_lc.png
 
-If the option ``--plotres`` is used in ``kepsff``, a plot like the below is
+If the option ``--plot`` is used in ``kepsff``, a plot like the below is
 generated.
 
 .. image:: ../_static/images/tutorials/example_e/kepsff.png
