@@ -750,7 +750,7 @@ def kepsff_main():
                         help=('Sigma-clipping threshold for thruster firing'
                               ' detection [sigma]'), type=float)
     parser.add_argument('--npoly_arfl', default=3,
-                        help=('Order of ploynomial for for arclength-flux'
+                        help=('Order of ploynomial for arclength-flux'
                               ' calibration'), type=int)
     parser.add_argument('--sigma_arfl', default=3.0,
                         help=('Sigma-clipping threshold for arclength-flux'
