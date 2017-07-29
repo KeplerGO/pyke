@@ -97,7 +97,7 @@ def kepconvert(infile, outfile, conversion, columns, baddata=True,
 
         supported_conversions = {
             'fits2csv': {'comment': '', 'delimiter': ','},
-            'fits2asc': {'comment': ' ', 'delimiter': ' '},
+            'fits2asc': {'comment': '', 'delimiter': ' '},
         }
 
         if conversion not in supported_conversions:
