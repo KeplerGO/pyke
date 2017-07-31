@@ -27,11 +27,14 @@ def kepconvert(infile, outfile, conversion, columns, baddata=True,
         containing a Kepler light curve within the first data extension,
         or an ASCII table.
     outfile : str
-        The name of the output file, e.g. a FITS structure or ASCII table.
+        The name of the output file, e.g. a FITS structure, ASCII table
+        or CSV file.
     conversion : str
         Define the type of file conversion:
 
         * fits2asc
+
+        * fits2csv
 
         * asc2fits
     columns : str
@@ -90,7 +93,18 @@ def kepconvert(infile, outfile, conversion, columns, baddata=True,
                    .format(outfile))
         kepmsg.err(logfile, message, verbose)
     # open FITS input file
-    if conversion == 'fits2asc':
+    if conversion.startswith('fits2', 0, 5):
+
+        supported_conversions = {
+            'fits2csv': {'comment': '', 'delimiter': ','},
+            'fits2asc': {'comment': '', 'delimiter': ' '},
+        }
+
+        if conversion not in supported_conversions:
+            errmsg = (
+                'ERROR -- KEPCONVERT: conversion not supported: {}'.format(conversion))
+            kepmsg.err(logfile, errmsg, verbose)
+
         instr = pyfits.open(infile, 'readonly')
         tstart, tstop, bjdref, cadence = kepio.timekeys(instr, infile,
                                                         logfile, verbose)
@@ -120,7 +134,10 @@ def kepconvert(infile, outfile, conversion, columns, baddata=True,
         # close input file
         instr.close()
         ## write output file
-        np.savetxt(outfile,np.array(work).T)
+        np.savetxt(fname=outfile, X=np.array(work).T,
+                   delimiter=supported_conversions[conversion]['delimiter'],
+                   header=columns,
+                   comments=supported_conversions[conversion]['comment'])
     ## open and read ASCII input file
     if conversion == 'asc2fits':
         table = kepio.openascii(infile,'r',logfile,verbose)
@@ -343,7 +360,7 @@ def kepconvert_main():
     parser.add_argument('infile', help='Name of input file', type=str)
     parser.add_argument('outfile', help='Name of output file', type=str)
     parser.add_argument('conversion', help='Type of data conversion', type=str,
-                        choices=['fits2asc','asc2fits'])
+                        choices=['fits2asc', 'fits2csv', 'asc2fits'], default='fits2asc')
     parser.add_argument('--columns', '-c', default='TIME,SAP_FLUX,SAP_FLUX_ERR',
                         dest='columns', help='Comma-delimited list of data columns',
                         type=str)
