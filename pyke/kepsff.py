@@ -322,13 +322,13 @@ def kepsff(infile, outfile=None, datacol='DETSAP_FLUX', cenmethod='moments',
                           table.field('PSF_CENTR1')[t1:t2],
                           table.field('PSF_CENTR2')[t1:t2],
                           table.field('SAP_QUALITY')[t1:t2]],'float64')
-        work2 = np.rot90(work1, 3)
-        work2 = work2[(work2[:, 0] == 0.0) | (work2[:, 0] > 1e5)]
+        work1 = np.rot90(work1, 3)
+        work2 = work1[(work1[:, 0] == 0.0) | (work1[:, 0] > 1e5)]
 
         # assign table columns
         intime = work2[:, 7] + bjdref
         cadenceno = work2[:, 6].astype(int)
-        indata = work2[:,5]
+        indata = work2[:, 5]
         mom_centr1 = work2[:, 4]
         mom_centr2 = work2[:, 3]
         psf_centr1 = work2[:, 2]
