@@ -4,27 +4,28 @@ from astropy.utils.data import get_pkg_data_filename
 from pyke import kepconvert
 from ..kepio import delete
 
-# fake light curve with transits of period = 2.02 days
-# and duration 0.18 days
 fake_lc = get_pkg_data_filename("data/golden-lc.fits")
 
 def test_kepconvert():
 
     with pytest.raises(Exception,
-                       message="ERROR -- KEPCONVERT: input file myfile.fits does not exist"):
+                       message=("ERROR -- KEPCONVERT: input file myfile.fits"
+                                " does not exist")):
 
-        kepconvert("myfile.fits", "output.txt", "fits2excel",
-                   "TIME,SAP_FLUX,SAP_FLUX_ERR,SAP_QUALITY", True, True)
+        kepconvert("myfile.fits", "fits2excel",
+                   "TIME,SAP_FLUX,SAP_FLUX_ERR,SAP_QUALITY", "output.txt",
+                   True, True)
 
     with pytest.raises(Exception,
-                       message="ERROR -- KEPCONVERT: conversion not supported: fits2excel"):
+                       message=("ERROR -- KEPCONVERT: conversion not supported"
+                                ": fits2excel")):
 
-        kepconvert(fake_lc, "output.txt",
-                   "fits2excel", "TIME,SAP_FLUX,SAP_FLUX_ERR,SAP_QUALITY", True, True)
+        kepconvert(fake_lc, "fits2excel",
+                   "TIME,SAP_FLUX,SAP_FLUX_ERR,SAP_QUALITY", "output.txt",
+                   True, True)
 
     # convert to csv
-    kepconvert(fake_lc, "fake_lc.csv",
-               "fits2csv", "TIME,SAP_FLUX", True, True)
+    kepconvert(fake_lc, "fits2csv", "TIME,SAP_FLUX", "fake_lc.csv", True, True)
 
     with open('fake_lc.csv', 'r') as csvfile:
         # check header
@@ -36,8 +37,7 @@ def test_kepconvert():
     delete("fake_lc.csv", "kepconvert.log", False)
 
     # convert to ascii
-    kepconvert(fake_lc, "fake_lc.txt",
-               "fits2asc", "TIME,SAP_FLUX", True, True)
+    kepconvert(fake_lc, "fits2asc", "TIME,SAP_FLUX", "fake_lc.txt", True, True)
 
     with open('fake_lc.txt', 'r') as asciifile:
         first_line = asciifile.readline()
