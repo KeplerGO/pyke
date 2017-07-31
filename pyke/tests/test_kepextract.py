@@ -13,6 +13,11 @@ tpf_one_center = get_pkg_data_filename("data/test-tpf-non-zero-center.fits")
 # 1 1 1
 # 0 1 0
 tpf_star = get_pkg_data_filename("data/test-tpf-star.fits")
+# 3 x 3 tpf as follows:
+# 0   1   0
+# 1  nan  1
+# 0   1   0
+tpf_nans = get_pkg_data_filename("data/test-tpf-with-nans.fits")
 # mask file selecting pixel [1, 1]
 maskfile = get_pkg_data_filename("data/center-mask.txt")
 
@@ -28,9 +33,11 @@ maskfile = get_pkg_data_filename("data/center-mask.txt")
                           (tpf_star, 'ALL', False, 5),
                           (tpf_star, 'ALL', True, -4),
                           (tpf_star, maskfile, False, 1),
-                          (tpf_star, maskfile, True, 0)])
+                          (tpf_star, maskfile, True, 0),
+                          (tpf_nans, 'ALL', False, 4),
+                          (tpf_nans, 'ALL', True, 0)])
 def test_kepextract(tpf, maskfile, bkg, answer):
-    kepextract(tpf, "lc.fits", maskfile=maskfile, bkg=bkg, overwrite=True)
+    kepextract(tpf, outfile="lc.fits", maskfile=maskfile, bkg=bkg, overwrite=True)
     f = pyfits.open("lc.fits")
     assert (f[1].data['SAP_FLUX'] == answer).all()
     delete("lc.fits", "log_kepextract.txt", False)
