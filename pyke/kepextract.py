@@ -303,7 +303,7 @@ def kepextract(infile, outfile=None, maskfile='ALL', bkg=False, psfcentroid=Fals
     sky = np.zeros(len(time), 'float32')
     if bkg:
         for i in range(len(time)):
-            sky[i] = np.median(flux[i, :])
+            sky[i] = np.nanmedian(flux[i, :])
 
     # legal mask defined?
     if len(aperb) == 0:
