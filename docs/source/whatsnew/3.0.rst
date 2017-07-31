@@ -9,7 +9,7 @@ PyKE 3.0, first released in July 2017, is a major release which provides the fol
 * PyKE is now a :ref:`pip-installable <installation>` package and supports both Python 2 and 3;
 * :ref:`tasks <tasks>` are now available both as command-line tools and Python functions;
 * PyKE no longer depends on PyRAF and is TESS-ready;
-* documentation and tutorials are now generated using Sphinx;
+* the tutorials have been updated for K2 and the `documentation <http://pyke.keplerscience.org>`_ is now generated using Sphinx;
 * the development has been moved to GitHub to encourage :ref:`user contributions<contributing>`.
 
 
