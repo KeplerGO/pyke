@@ -8,8 +8,9 @@ from . import kepio, kepmsg, kepkey, kepstat, kepfourier
 __all__ = ['kepwindow']
 
 
-def kepwindow(infile, outfile, fcol='SAP_FLUX', fmax=1.0, nfreq=100, plot=False,
-              overwrite=False, verbose=False, logfile='kepwindow.log'):
+def kepwindow(infile, outfile=None, fcol='SAP_FLUX', fmax=1.0, nfreq=100,
+              plot=False, overwrite=False, verbose=False,
+              logfile='kepwindow.log'):
     """
     kepwindow -- Calculate and store the window function for a Kepler time
     series
@@ -55,13 +56,15 @@ def kepwindow(infile, outfile, fcol='SAP_FLUX', fmax=1.0, nfreq=100, plot=False,
     --------
     .. code-block:: bash
 
-        $ kepwindow kplr002436324-2009259160929_llc.fits kepwindow.fits --datacol SAP_FLUX
+        $ kepwindow kplr002436324-2009259160929_llc.fits --datacol SAP_FLUX
         --fmax 0.7 --nfreq 500 --plot --verbose
 
     .. image:: ../_static/images/api/kepwindow.png
         :align: center
     """
 
+    if outfile is None:
+        outfile = infile.split('.')[0] + "-{}.fits".format(__all__[0])
     ## log the call
     hashline = '--------------------------------------------------------------'
     kepmsg.log(logfile, hashline, verbose)
@@ -141,6 +144,7 @@ def kepwindow(infile, outfile, fcol='SAP_FLUX', fmax=1.0, nfreq=100, plot=False,
     instr[-1].header['EXTNAME'] = ('WINDOW FUNCTION', 'extension name')
 
     ## comment keyword in output file
+    print("Writing output file {}...".format(outfile))
     kepkey.comment(call, instr[0], outfile, logfile, verbose)
     instr.writeto(outfile)
 
@@ -189,7 +193,10 @@ def kepwindow_main():
                         help=('The name of a MAST standard format FITS'
                               ' file containing a Kepler light curve'),
                         type=str)
-    parser.add_argument('outfile', help='Name of output file', type=str)
+    parser.add_argument('--outfile',
+                        help=('Name of FITS file to output.'
+                              ' If None, outfile is infile-kepwindow.'),
+                        default=None)
     parser.add_argument('--datacol', default='SAP_FLUX',
                         help='Name of data column', type=str,
                         dest='fcol')

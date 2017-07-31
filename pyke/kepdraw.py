@@ -10,7 +10,7 @@ from . import kepio, kepmsg, kepkey
 __all__ = ['kepdraw']
 
 
-def kepdraw(infile, outfile='kepdraw.png', datacol='SAP_FLUX', ploterr=False,
+def kepdraw(infile, outfile=None, datacol='SAP_FLUX', ploterr=False,
             errcol='SAP_FLUX_ERR', quality=False, lcolor='#363636', lwidth=1.0,
             fcolor='#a8a7a7', falpha=0.2, labelsize=20, ticksize=14, xsize=18.,
             ysize=6., fullrange=False, chooserange=False, y1=0, y2=1e4,
@@ -91,6 +91,9 @@ def kepdraw(infile, outfile='kepdraw.png', datacol='SAP_FLUX', ploterr=False,
     .. image:: ../_static/images/api/kepdraw.png
         :align: center
     """
+
+    if outfile is None:
+        outfile = infile.split('.')[0] + "-{}.png".format(__all__[0])
 
     hashline = '--------------------------------------------------------------'
     kepmsg.log(logfile, hashline, verbose)
@@ -248,6 +251,7 @@ def kepdraw(infile, outfile='kepdraw.png', datacol='SAP_FLUX', ploterr=False,
     ax.minorticks_on()
     # save plot to file
     if outfile is not None:
+        print("Writing output file {}...".format(outfile))
         plt.savefig(outfile)
 
     if not noninteractive:
@@ -263,8 +267,8 @@ def kepdraw_main():
              description='Interactive plotting of Kepler time series data',
              formatter_class=PyKEArgumentHelpFormatter)
     parser.add_argument('infile', help='Name of input file', type=str)
-    parser.add_argument('--outfile', default='kepdraw.png',
-                        help='name of output PNG file', type=str)
+    parser.add_argument('--outfile', default=None,
+                        help='name of output PNG file')
     parser.add_argument('--datacol', default='SAP_FLUX',
                         help='Name of data column to plot', type=str)
     parser.add_argument('--ploterr', action='store_true',

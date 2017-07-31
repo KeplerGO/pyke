@@ -24,7 +24,7 @@ def delete(filename, logfile, verbose):
     try:
         os.remove(filename)
     except:
-        message = 'ERROR -- KEPIO.DELETE: could not delete ' + filename
+        message = 'ERROR -- KEPIO.OBLITERATE: could not delete ' + filename
         kepmsg.err(logfile, message, verbose)
 
 def overwrite(filename, logfile, verbose):

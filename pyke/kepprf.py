@@ -16,10 +16,10 @@ from . import kepio, kepmsg, kepplot, kepfunc, kepstat
 __all__ = ['kepprf']
 
 
-def kepprf(infile, plotfile, prfdir, frameno, columns, rows, fluxes,
-           background=False, border=1, focus=False, xtol=1e-4, ftol=1.,
-           plot=False, imscale='linear', cmap='YlOrBr', apercol='#ffffff',
-           verbose=False, logfile='kepprf.log'):
+def kepprf(infile, prfdir, frameno, columns, rows, fluxes, background=False,
+           border=1, focus=False, xtol=1e-4, ftol=1., outfile=None, plot=False,
+           imscale='linear', cmap='YlOrBr', apercol='#ffffff', verbose=False,
+           logfile='kepprf.log'):
     """
     kepprf -- Fit a PSF model to a specific image within a Target Pixel File
 
@@ -32,13 +32,6 @@ def kepprf(infile, plotfile, prfdir, frameno, columns, rows, fluxes,
     infile : str
         The name of a MAST standard format FITS file containing Kepler Target
         Pixel data within the first data extension.
-    plotfile : str
-        Name of an optional output plot file containing the results of kepprf.
-        An example is provided in Figure 1. Typically this is a PNG format
-        file. If no file is required, plotfile can be 'None' or blank, in
-        which case the plot will be generated but the plot will not be saved
-        to a file. Any existing file with this name will be automatically
-        overwritten.
     prfdir : str
         The full or relative directory path to a folder containing the Kepler
         PSF calibration. Calibration files can be downloaded from the Kepler
@@ -71,10 +64,6 @@ def kepprf(infile, plotfile, prfdir, frameno, columns, rows, fluxes,
         If more than one source is being modeled then the row positions of
         each are separated by a comma. The same number of sources in the
         columns, rows and fluxes field is a requirement of this task.
-    border : int
-        If a background is included in the fit then it is modeled as a
-        two-dimensional polynomial. This parameter is the polynomial order. A
-        zero-order polynomial is generally recommended.
     background : boolean
         Whether to include a background component in the model. If `True` then
         the background will be represented by a two-dimensional polynomial of
@@ -82,6 +71,10 @@ def kepprf(infile, plotfile, prfdir, frameno, columns, rows, fluxes,
         eye upon potential background gradients across large masks or on those
         detectors more prone to pattern noise. Generally it is recommended to
         set background as `False`.
+    border : int
+        If a background is included in the fit then it is modeled as a
+        two-dimensional polynomial. This parameter is the polynomial order. A
+        zero-order polynomial is generally recommended.
     focus : boolean
         Whether to incude pixel scale and focus rotation with the fit
         parameters of the model. This is also an experimental function. This
@@ -93,6 +86,15 @@ def kepprf(infile, plotfile, prfdir, frameno, columns, rows, fluxes,
     ftol : float
         The dimensionless, relative model residual convergence criterion for
         the fit algorithm.
+    outfile : str
+        Name of an optional output plot file containing the results of kepprf.
+        An example is provided in Figure 1. Typically this is a PNG format
+        file. If no file is required, outfile can be 'None' or blank, in
+        which case the plot will be generated but the plot will not be saved
+        to a file. Any existing file with this name will be automatically
+        overwritten.
+    plot : boolean
+        Plot fit results to the screen?
     imscale : str
         kepprf can plot images with three choices of image scales. The choice
         is made using this argument.
@@ -102,8 +104,6 @@ def kepprf(infile, plotfile, prfdir, frameno, columns, rows, fluxes,
         * squareroot
     cmap : str
         matplotlib's color map
-    plot : boolean
-        Plot fit results to the screen?
     verbose : boolean
         Print informative messages and warnings to the shell and logfile?
     logfile : string
@@ -116,7 +116,7 @@ def kepprf(infile, plotfile, prfdir, frameno, columns, rows, fluxes,
 
     .. code-block:: bash
 
-        $ kepprf kplr008256049-2010174085026_lpd-targ.fits prf.png --prfdir ~/kplr2011265_prf/
+        $ kepprf kplr008256049-2010174085026_lpd-targ.fits --prfdir ~/kplr2011265_prf/
         --frameno 1000 --columns 830 831 --rows 242 241 --fluxes 1.0 0.1 --plot --verbose
 
               KepID: 8256049
@@ -149,13 +149,15 @@ def kepprf(infile, plotfile, prfdir, frameno, columns, rows, fluxes,
     .. image:: ../_static/images/api/kepprf.png
         :align: center
     """
-    # log the call
 
+    if outfile is None:
+        outfile = infile.split('.')[0] + "-{}.png".format(__all__[0])
+
+    # log the call
     hashline = '--------------------------------------------------------------'
     kepmsg.log(logfile, hashline, verbose)
     call = ('KEPPRF -- '
             + ' infile={}'.format(infile)
-            + ' plotfile={}'.format(plotfile)
             + ' frameno={}'.format(frameno)
             + ' columns={}'.format(columns)
             + ' rows={}'.format(rows)
@@ -166,6 +168,7 @@ def kepprf(infile, plotfile, prfdir, frameno, columns, rows, fluxes,
             + ' focus={}'.format(focus)
             + ' xtol={}'.format(xtol)
             + ' ftol={}'.format(xtol)
+            + ' outfile={}'.format(outfile)
             + ' plot={}'.format(plot)
             + ' imscale={}'.format(imscale)
             + ' cmap={}'.format(cmap)
@@ -523,8 +526,8 @@ def kepprf(infile, plotfile, prfdir, frameno, columns, rows, fluxes,
     barwin.yaxis.set_major_formatter(ticker.FormatStrFormatter('%.1f'))
 
     # render plot
-    if len(plotfile) > 0 and plotfile.lower() != 'none':
-        plt.savefig(plotfile)
+    print("Writing output file {}...".format(outfile))
+    plt.savefig(outfile)
     if plot:
         plt.draw()
         plt.show()
@@ -573,8 +576,6 @@ def kepprf_main():
              formatter_class=PyKEArgumentHelpFormatter)
     parser.add_argument('infile', help='Name of input target pixel file',
                         type=str)
-    parser.add_argument('plotfile', help='Name of output PNG plot file',
-                        type=str)
     parser.add_argument('--prfdir',
                         help=("Folder containing Point Response Function "
                               "FITS files"), type=str)
@@ -604,6 +605,10 @@ def kepprf_main():
     parser.add_argument('--ftol', '-f', default=1.0,
                         help='Fit minimization tolerance', dest='ftol',
                         type=float)
+    parser.add_argument('--outfile',
+                        help=('Name of output PNG plot file.'
+                              ' If None, outfile is infile-kepprf.'),
+                        default=None)
     parser.add_argument('--plot', action='store_true',
                         help='Plot fit results?', default=False)
     parser.add_argument('--imscale', help='Type of image intensity scale',
@@ -619,7 +624,7 @@ def kepprf_main():
                         help='Name of ascii log file', type=str)
     args = parser.parse_args()
 
-    kepprf(args.infile, args.plotfile, args.prfdir, args.frameno, args.columns,
+    kepprf(args.infile, args.prfdir, args.frameno, args.columns,
            args.rows, args.fluxes, args.background, args.border, args.focus,
-           args.xtol, args.ftol, args.plot, args.imscale, args.cmap,
+           args.xtol, args.ftol, args.outfile, args.plot, args.imscale, args.cmap,
            args.apercol, args.verbose, args.logfile)

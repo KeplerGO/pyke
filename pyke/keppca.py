@@ -12,7 +12,7 @@ import random
 __all__ = ['keppca']
 
 
-def keppca(infile, outfile, maskfile='ALL', components='1-3', plotpca=False,
+def keppca(infile, outfile=None, maskfile='ALL', components='1-3', plotpca=False,
            nmaps=10, overwrite=False, verbose=False, logfile='keppca.log'):
     """
     keppca -- Perform principal component analysis upon a target pixel file
@@ -103,13 +103,16 @@ def keppca(infile, outfile, maskfile='ALL', components='1-3', plotpca=False,
     --------
     .. code-block:: bash
 
-        $ keppca ktwo202073445-c00_lpd-targ.fits.gz keppca.fits --plotpca
+        $ keppca ktwo202073445-c00_lpd-targ.fits.gz --plotpca
 
     .. image:: ../_static/images/api/keppca.png
         :align: center
     """
+
     import mdp
 
+    if outfile is None:
+        outfile = infile.split('.')[0] + "-{}.fits".format(__all__[0])
     # log the call
     hashline = '--------------------------------------------------------------'
     kepmsg.log(logfile, hashline, verbose)
@@ -630,6 +633,7 @@ def keppca(infile, outfile, maskfile='ALL', components='1-3', plotpca=False,
     outstr.append(hdu3)
 
     # write output file
+    print("Writing output file {}...".format(outfile))
     outstr.writeto(outfile)
     # close input structure
     instr.close()
@@ -762,7 +766,10 @@ def keppca_main():
        formatter_class=PyKEArgumentHelpFormatter)
     parser.add_argument('infile', help='Name of input target pixel FITS file',
                         type=str)
-    parser.add_argument('outfile', help='Name of output FITS file', type=str)
+    parser.add_argument('--outfile',
+                        help=('Name of FITS file to output.'
+                              ' If None, outfile is infile-keppca.'),
+                        default=None)
     parser.add_argument('--maskfile', help='Name of mask defintion ASCII file',
                         default='ALL', type=str)
     parser.add_argument('--components', default='1-3',

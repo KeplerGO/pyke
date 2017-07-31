@@ -10,7 +10,7 @@ from . import kepio, kepmsg, kepkey, kepstat, kepfourier
 __all__ = ['kepdynamic']
 
 
-def kepdynamic(infile, outfile, fcol='SAP_FLUX', pmin=0.1, pmax=10., nfreq=100,
+def kepdynamic(infile, outfile=None, fcol='SAP_FLUX', pmin=0.1, pmax=10., nfreq=100,
                deltat=10., nslice=10, plot=False, plotscale='log', cmap='PuBu',
                overwrite=False, verbose=False, logfile='kepdynamic.log'):
     """
@@ -60,12 +60,15 @@ def kepdynamic(infile, outfile, fcol='SAP_FLUX', pmin=0.1, pmax=10., nfreq=100,
     --------
     .. code-block:: bash
 
-        $ kepdynamic kplr002436324-2009259160929_llc.fits kepdynamic.fits --fcol SAP_FLUX
+        $ kepdynamic kplr002436324-2009259160929_llc.fits --fcol SAP_FLUX
         --pmin 0.08 --pmax 0.1 --nfreq 500 --deltat 5.0 --nslice 500 --plot --verbose
 
     .. image:: ../_static/images/api/kepdynamic.png
         :align: center
     """
+
+    if outfile is None:
+        outfile = infile.split('.')[0] + "-{}.fits".format(__all__[0])
 
     # log the call
     hashline = '--------------------------------------------------------------'
@@ -166,6 +169,7 @@ def kepdynamic(infile, outfile, fcol='SAP_FLUX', pmin=0.1, pmax=10., nfreq=100,
     dynam.shape = len(t1), len(power)
 
     # write output file
+    print("Writing output file {}...".format(outfile))
     instr.append(pyfits.ImageHDU())
     instr[-1].data = dynam.transpose()
     instr[-1].header['EXTNAME'] = ('DYNAMIC FT', 'extension name')
@@ -237,8 +241,10 @@ def kepdynamic_main():
                          'from Kepler time series data'),
              formatter_class=PyKEArgumentHelpFormatter)
     parser.add_argument('infile', help='Name of input file', type=str)
-    parser.add_argument('outfile', help='Name of FITS file to output',
-                        type=str)
+    parser.add_argument('--outfile',
+                        help=('Name of FITS file to output.'
+                              ' If None, outfile is infile-kepdynamic.'),
+                        default=None)
     parser.add_argument('--fcol', default='SAP_FLUX',
                         help='Name of data column to plot', type=str)
     parser.add_argument('--pmin', default=0.1,
