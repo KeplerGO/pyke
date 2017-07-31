@@ -44,7 +44,7 @@ light curve, we can use the ``kepflatten`` tool as follows:
 
 .. code-block:: bash
 
-    $ kepclip ktwo202073445-c00_lpd-targ-kepextract.fits 2456728.4110787315, 2456771.907224878
+    $ kepclip ktwo202073445-c00_lpd-targ-kepextract.fits 2456728.4110787315,2456771.907224878
 
     $ kepflatten ktwo202073445-c00_lpd-targ-kepextract-kepclip.fits --datacol SAP_FLUX --errcol SAP_FLUX_ERR --stepsize 0.2 --winsize 3.0 --npoly 2 --niter 10 --plot --verbose
 
