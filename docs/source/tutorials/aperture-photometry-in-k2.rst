@@ -30,7 +30,7 @@ to pass our mask created in the previous step.
 
 .. code-block:: bash
 
-    $ kepextract ktwo202073445-c00_lpd-targ.fits.gz --bkg --maskfile maskfile.txt
+    $ kepextract ktwo202073445-c00_lpd-targ.fits.gz --maskfile maskfile.txt
     $ kepdraw ktwo202073445-c00_lpd-targ-kepextract.fits
 
 .. image:: ../_static/images/tutorials/example_e/kepextract.png
