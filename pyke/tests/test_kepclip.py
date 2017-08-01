@@ -14,13 +14,11 @@ def test_kepclip_lc():
 	Uses cycle 8 of Tabby's star.
 	Clips out the large dip and saves it to out.fits
 	'''
+
 	h = fits.open(LC_filename)
 	t = h[1].data['TIME'][200:400]
 	ranges = '{}'.format(t[0] + 2454833) + ',{}'.format(t[-1] + 2454833)
-	kepclip(infile = LC_filename,
-	   		outfile = 'data/out.fits',
-	    	ranges = ranges,
-	    	overwrite = True)
+	kepclip(infile = LC_filename, outfile = 'data/out.fits', ranges = ranges, overwrite = True)
 	j = fits.open('data/out.fits')
 
 	#The new file should be smaller
@@ -35,18 +33,17 @@ def test_kepclip_lc():
 	assert len(h) == len(j)
 
 def test_kepclip_tpf():
+	
 	'''
-	Test the tpf clipping
+	Test the TPF clipping
 	Uses a clipped TPF of Tabby's star.
 	'''
+
 	h = fits.open(TPF_filename)
 	t = h[1].data['TIME'][0:2]
 	ranges = '{0:.15f}'.format(t[0] + 2454833) + ',{0:.15f}'.format(t[-1] + 2454833)
 	
-	kepclip(infile = TPF_filename,
-			outfile = 'data/out.fits',
-			ranges = ranges,
-			overwrite = True)
+	kepclip(infile = TPF_filename, outfile = 'data/out.fits', ranges = ranges, overwrite = True)
 	j = fits.open('data/out.fits')
 	#The new file should be smaller
 	assert os.path.getsize(TPF_filename)>os.path.getsize('data/out.fits')
@@ -61,10 +58,7 @@ def test_kepclip_tpf():
 	t = h[1].data['TIME'][4:15]
 	ranges = '{0:.15f}'.format(t[0] + 2454833) + ',{0:.15f}'.format(t[-1] + 2454833)
 	
-	kepclip(infile = TPF_filename,
-			outfile = 'data/out.fits',
-			ranges = ranges,
-			overwrite = True)
+	kepclip(infile = TPF_filename, outfile = 'data/out.fits', ranges = ranges, overwrite = True)
 	j = fits.open('data/out.fits')
 
 	#The middle frame should be identical
