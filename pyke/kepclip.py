@@ -1,5 +1,5 @@
-from pyke.utils import PyKEArgumentHelpFormatter
-from pyke import kepio, kepmsg, kepkey
+from .utils import PyKEArgumentHelpFormatter
+from . import kepio, kepmsg, kepkey
 import numpy as np
 from astropy.io import fits as pyfits
 from matplotlib import pyplot as plt
