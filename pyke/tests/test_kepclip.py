@@ -18,7 +18,7 @@ def test_kepclip_lc():
 
 	h = fits.open(LC_filename)
 	t = h[1].data['TIME'][200:400]
-	ranges = '{}'.format(t[0] + 2454833) + ', {}'.format(t[-1] + 2454833)
+	ranges = '{:12.12f}'.format(t[0] + 2454833.) + ', {:12.12f}'.format(t[-1] + 2454833.)
 	kepclip(infile = LC_filename, outfile = OUT_filename, ranges = ranges, overwrite = True)
 	j = fits.open(OUT_filename)
 
@@ -28,8 +28,8 @@ def test_kepclip_lc():
 	assert np.min(h[1].data['SAP_FLUX']) == np.min(j[1].data['SAP_FLUX'])
 	#The median of the new file should be lower, as we are clipping out the dip.
 	assert np.median(h[1].data['SAP_FLUX']) > np.median(j[1].data['SAP_FLUX'])
-	#New file should have 199 entries
-	assert len(j[1].data) == 199
+	#New file should have 200 entries
+	assert len(j[1].data) == 200
 	#Fits files should be the same shape
 	assert len(h) == len(j)
 
@@ -42,7 +42,7 @@ def test_kepclip_tpf():
 
 	h = fits.open(TPF_filename)
 	t = h[1].data['TIME'][0:2]
-	ranges = '{0:.15f}'.format(t[0] + 2454833) + ', {0:.15f}'.format(t[-1] + 2454833)
+	ranges = '{:12.12f}'.format(t[0] + 2454833.) + ', {:12.12f}'.format(t[-1] + 2454833.)
 	
 	kepclip(infile = TPF_filename, outfile = OUT_filename, ranges = ranges, overwrite = True)
 	j = fits.open(OUT_filename)
@@ -57,7 +57,7 @@ def test_kepclip_tpf():
 
 	#Test if we clip out the middle file it also works
 	t = h[1].data['TIME'][4:15]
-	ranges = '{0:.15f}'.format(t[0] + 2454833) + ', {0:.15f}'.format(t[-1] + 2454833)
+	ranges = '{:12.12f}'.format(t[0] + 2454833.) + ', {:12.12f}'.format(t[-1] + 2454833.)
 	
 	kepclip(infile = TPF_filename, outfile = OUT_filename, ranges = ranges, overwrite = True)
 	j = fits.open(OUT_filename)
