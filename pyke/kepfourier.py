@@ -26,6 +26,9 @@ def ft(x, y, f1, f2, df, verbose):
         Power spectrum
     """
 
+    x = x[~np.isnan(x)]
+    y = y[~np.isnan(y)]
+
     ft_real, ft_imag, power, fr = [], [], [], []
     nstep = 0
     len_x = len(x)
