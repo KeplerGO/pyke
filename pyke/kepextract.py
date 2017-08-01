@@ -11,7 +11,7 @@ from . import kepio, kepmsg, kepkey, kepstat, kepfunc
 __all__ = ['kepextract']
 
 
-def kepextract(infile, outfile, maskfile='ALL', bkg=False, psfcentroid=False,
+def kepextract(infile, outfile=None, maskfile='ALL', bkg=False, psfcentroid=False,
                overwrite=False, verbose=False,
                logfile='kepextract.log'):
     """
@@ -81,7 +81,7 @@ def kepextract(infile, outfile, maskfile='ALL', bkg=False, psfcentroid=False,
     --------
     .. code-block:: bash
 
-        $ kepextract kplr008256049-2010174085026_lpd-targ.fits outlc.fits --maskfile ALL
+        $ kepextract kplr008256049-2010174085026_lpd-targ.fits --maskfile ALL
 
     One further can plot the resulted light curve by doing
 
@@ -102,7 +102,8 @@ def kepextract(infile, outfile, maskfile='ALL', bkg=False, psfcentroid=False,
     .. image:: ../_static/images/api/kepextract.png
         :align: center
     """
-
+    if outfile is None:
+        outfile = infile.split('.')[0] + "-{}.fits".format(__all__[0])
     # log the call
     hashline = '--------------------------------------------------------------'
     kepmsg.log(logfile, hashline, verbose)
@@ -302,7 +303,7 @@ def kepextract(infile, outfile, maskfile='ALL', bkg=False, psfcentroid=False,
     sky = np.zeros(len(time), 'float32')
     if bkg:
         for i in range(len(time)):
-            sky[i] = np.median(flux[i, :])
+            sky[i] = np.nanmedian(flux[i, :])
 
     # legal mask defined?
     if len(aperb) == 0:
@@ -332,11 +333,11 @@ def kepextract(infile, outfile, maskfile='ALL', bkg=False, psfcentroid=False,
                 work3 = np.append(work3, flux_bkg[i, j])
                 work4 = np.append(work4, flux_bkg_err[i, j])
                 work5 = np.append(work5, raw_cnts[i, j])
-        sap_flux = np.append(sap_flux, np.sum(work1))
-        sap_flux_err = np.append(sap_flux_err, math.sqrt(np.sum(work2 * work2)))
-        sap_bkg = np.append(sap_bkg, np.sum(work3))
-        sap_bkg_err = np.append(sap_bkg_err, math.sqrt(np.sum(work4 * work4)))
-        raw_flux = np.append(raw_flux, np.sum(work5))
+        sap_flux = np.append(sap_flux, np.nansum(work1))
+        sap_flux_err = np.append(sap_flux_err, math.sqrt(np.nansum(work2 * work2)))
+        sap_bkg = np.append(sap_bkg, np.nansum(work3))
+        sap_bkg_err = np.append(sap_bkg_err, math.sqrt(np.nansum(work4 * work4)))
+        raw_flux = np.append(raw_flux, np.nansum(work5))
 
     print("Sample moments...")
     # construct new table moment data
@@ -357,12 +358,12 @@ def kepextract(infile, outfile, maskfile='ALL', bkg=False, psfcentroid=False,
                 yfe[k] = apery[j] * flux_err[i, j]
                 f[k] = flux[i, j]
                 fe[k] = flux_err[i, j]
-        xfsum = np.sum(xf)
-        yfsum = np.sum(yf)
-        fsum = np.sum(f)
-        xfsume = math.sqrt(np.sum(xfe * xfe) / naper)
-        yfsume = math.sqrt(np.sum(yfe * yfe) / naper)
-        fsume = math.sqrt(np.sum(fe * fe) / naper)
+        xfsum = np.nansum(xf)
+        yfsum = np.nansum(yf)
+        fsum = np.nansum(f)
+        xfsume = math.sqrt(np.nansum(xfe * xfe) / naper)
+        yfsume = math.sqrt(np.nansum(yfe * yfe) / naper)
+        fsume = math.sqrt(np.nansum(fe * fe) / naper)
         mom_centr1[i] = xfsum / fsum
         mom_centr2[i] = yfsum / fsum
         mom_centr1_err[i] = math.sqrt((xfsume / xfsum) ** 2 + ((fsume / fsum) ** 2))
@@ -569,6 +570,7 @@ def kepextract(infile, outfile, maskfile='ALL', bkg=False, psfcentroid=False,
     outstr.append(hdu2)
 
     # write output file
+    print("Writing output file {}...".format(outfile))
     outstr.writeto(outfile, checksum=True)
     # close input structure
     instr.close()
@@ -584,8 +586,10 @@ def kepextract_main():
              formatter_class=PyKEArgumentHelpFormatter)
     parser.add_argument('infile', help='Name of input target pixel file',
                         type=str)
-    parser.add_argument('outfile', help='Name of output light curve FITS file',
-                        type=str)
+    parser.add_argument('--outfile',
+                        help=('Name of FITS file to output.'
+                              ' If None, outfile is infile-kepextract.'),
+                        default=None)
     parser.add_argument('--maskfile', default='ALL',
                         help='Name of mask defintion ASCII file',
                         type=str)

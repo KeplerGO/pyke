@@ -30,21 +30,21 @@ by cutting a 3x3 mask around the center of our target:
 
 .. code-block:: bash
 
-    $ keptrim ktwo200071160-c91_lpd-targ.fits.gz ktwo200071160-c91_trimmed_3.fits 1013 918 3
+    $ keptrim ktwo200071160-c91_lpd-targ.fits.gz 1013 918 3
 
-This command creates a new target pixel file called ``ktwo200071160-c91_trimmed_3.fits`` in the current directory,
+This command creates a new target pixel file called ``ktwo200071160-c91_lpd-targ-keptrim.fits`` in the current directory,
 which contains the desired pixels while preserving all the original metadata.
 
 We can then use ``kepprfphot`` to fit the Kepler PRF for every frame in our trimmed tpf:
 
 .. code-block:: bash
 
-    $ kepprfphot ktwo200071160-c91_trimmed_3.fits  ktwo200071160-c91_trimmed_3_prfphot --columns 1013 --rows 918 --fluxes 18000 --prfdir prf_dir --background --overwrite --verbose
+    $ kepprfphot ktwo200071160-c91_lpd-targ-keptrim.fits --columns 1013 --rows 918 --fluxes 18000 --prfdir ~/github/pyke_files/kplr2011265_prf/ --background --overwrite --verbose
 
 Note that `prf_dir` is either a relative or absolute path to a directory
 containing the PRF files from the Kepler focal plane available in [#]_.
 
-This command creates a fits file called ``ktwo200071160-c91_trimmed_3_prfphot_0.fits`` with all the results from
+This command creates a fits file called ``ktwo200071160-c91_lpd-targ-keptrim-kepprfphot_0.fits`` with all the results from
 the prf photometry including fitted flux and centroids.
 
 We can then write a small python script to see what the light curve looks like
@@ -54,7 +54,7 @@ We can then write a small python script to see what the light curve looks like
     from matplotlib import pyplot as plt
     from astropy.io import fits
 
-    f = fits.open('ktwo200071160-c91_trimmed_3_prfphot_0.fits')
+    f = fits.open('ktwo200071160-c91_lpd-targ-keptrim-kepprfphot_0.fits')
     plt.plot(f[1].data['TIME'], f[1].data['PSF_FLUX'], 'ko', markersize=1)
     plt.xlabel(r'Time')
     plt.ylabel(r'Flux $e^{-} s^{-1}$')

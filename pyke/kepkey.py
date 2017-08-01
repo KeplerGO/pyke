@@ -3,7 +3,7 @@ import numpy as np
 from astropy.io import fits as pyfits
 
 
-__all__ = ['get', 'delete', 'new', 'comment', 'history', 'change', 'cadence',
+__all__ = ['get', 'remove', 'new', 'comment', 'history', 'change', 'cadence',
            'getWCSp', 'getWCSs', 'wcs', 'emptykeys']
 
 
@@ -18,12 +18,12 @@ def get(filename, hdu, keyword, logfile, verbose):
     return value
 
 
-def delete(keyword, hdu, filename, logfile, verbose):
+def remove(keyword, hdu, filename, logfile, verbose):
     """delete keyword"""
     try:
         del hdu.header[keyword]
     except:
-        message = ('ERROR -- KEPKEY.DELETE: Cannot delete keyword '
+        message = ('ERROR -- KEPKEY.REMOVE: Cannot delete keyword '
                    + keyword + ' in ' + filename)
         kepmsg.err(logfile, message, verbose)
 

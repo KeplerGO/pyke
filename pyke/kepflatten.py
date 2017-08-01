@@ -11,7 +11,7 @@ from tqdm import tqdm
 __all__ = ['kepflatten']
 
 
-def kepflatten(infile, outfile, datacol='PDCSAP_FLUX',
+def kepflatten(infile, outfile=None, datacol='PDCSAP_FLUX',
                errcol='PDCSAP_FLUX_ERR', nsig=3., stepsize=0.5, winsize=5.0,
                npoly=3, niter=1, ranges='0,0', plot=False, overwrite=False,
                verbose=False, logfile='kepflatten.log'):
@@ -109,6 +109,9 @@ def kepflatten(infile, outfile, datacol='PDCSAP_FLUX',
     .. image:: ../_static/images/api/kepflatten.png
         :align: center
     """
+
+    if outfile is None:
+        outfile = infile.split('.')[0] + "-{}.fits".format(__all__[0])
     # log the call
     hashline = '--------------------------------------------------------------'
     kepmsg.log(logfile, hashline, verbose)
@@ -371,6 +374,7 @@ def kepflatten(infile, outfile, datacol='PDCSAP_FLUX',
 
     # write output file
     try:
+        print("Writing output file {}...".format(outfile))
         col1 = pyfits.Column(name='DETSAP_FLUX',format='E13.7',array=work1)
         col2 = pyfits.Column(name='DETSAP_FLUX_ERR',format='E13.7',array=work2)
         cols = instr[1].data.columns + col1 + col2
@@ -395,11 +399,14 @@ def kepflatten_main():
     import argparse
 
     parser = argparse.ArgumentParser(
-             description='Remove or replace data outliers from a time series',
+             description=('Remove low frequency variability from time-series,'
+                          'preserve transits and flares'),
              formatter_class=PyKEArgumentHelpFormatter)
     parser.add_argument('infile', help='Name of input file', type=str)
-    parser.add_argument('outfile', help='Name of FITS file to output',
-                        type=str)
+    parser.add_argument('--outfile',
+                        help=('Name of FITS file to output.'
+                              ' If None, outfile is infile-kepflatten.'),
+                        default=None)
     parser.add_argument('--datacol', default='PDCSAP_FLUX',
                         help='Name of data column to plot', type=str)
     parser.add_argument('--errcol', default='PDCSAP_FLUX_ERR',

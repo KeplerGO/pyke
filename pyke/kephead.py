@@ -8,7 +8,7 @@ from . import kepio, kepmsg, kepkey
 __all__ = ['kephead']
 
 
-def kephead(infile, outfile, keyname, overwrite=False, verbose=False,
+def kephead(infile, keyname, outfile=None, overwrite=False, verbose=False,
             logfile='kephead.log'):
     """
     kephead -- search for and list FITS keywords in Kepler data files
@@ -25,8 +25,6 @@ def kephead(infile, outfile, keyname, overwrite=False, verbose=False,
     ----------
     infile : str
         The name of a standard format FITS file.
-    outfile : str
-        The name of the output ASCII file for storing search results.
     keyname : str
         The name of a keyword, value and description to print or store within
         the output file. Partial completions for the keyword are allowed. For
@@ -34,6 +32,8 @@ def kephead(infile, outfile, keyname, overwrite=False, verbose=False,
         keywords (BMAG, VMAG, KEPMAG etc) and their values within the light
         curves stored at MAST. ``keyname='all'`` will return every keyword and
         their values stored in all extensions within the input FITS file.
+    outfile : str
+        The name of the output ASCII file for storing search results.
     overwrite : bool
         Overwrite the output file? if overwrite is False and an existing file
         has the same name as outfile then the task will stop with an error.
@@ -46,9 +46,9 @@ def kephead(infile, outfile, keyname, overwrite=False, verbose=False,
     --------
     .. code-block:: bash
 
-        $ kephead kplr002436324-2009259160929_llc.fits kephead.txt 'mag' --verbose --overwrite
+        $ kephead kplr002436324-2009259160929_llc.fits 'mag' --verbose --overwrite
         --------------------------------------------------------------
-        KEPHEAD --  infile=kplr002436324-2009259160929_llc.fits outfile=kephead.txt keyname=mag
+        KEPHEAD --  infile=kplr002436324-2009259160929_llc.fits outfile=.txt keyname=mag
         overwrite=True verbose=True logfile=kephead.log
 
         KEPHEAD started at: : Tue Jun 13 15:26:58 2017
@@ -70,6 +70,9 @@ def kephead(infile, outfile, keyname, overwrite=False, verbose=False,
 
         KEPHEAD ended at: : Tue Jun 13 15:26:58 2017
     """
+
+    if outfile is None:
+        outfile = infile.split('.')[0] + "-{}.txt".format(__all__[0])
     # log the call
     hashline = '--------------------------------------------------------------'
     kepmsg.log(logfile, hashline, verbose)
@@ -96,7 +99,8 @@ def kephead(infile, outfile, keyname, overwrite=False, verbose=False,
     nhdu = kepkey.HDUnum(instr)
     # loop through each HDU in infile
     kepmsg.log(outfile, '', True)
-    for hdu in range(nhdu):
+    print("Writing output file {}...".format(outfile))
+    for hdu in tqdm(range(nhdu)):
         # how many keywords in the HDU?
         keylist = instr[hdu].header.cards
         nkeys = len(keylist)
@@ -132,9 +136,11 @@ def kephead_main():
                          ' files'),
              formatter_class=PyKEArgumentHelpFormatter)
     parser.add_argument('infile', help='Name of input file', type=str)
-    parser.add_argument('outfile', help='Name of FITS file to output',
-                        type=str)
     parser.add_argument('keyname', help='Snippet of keyword name', type=str)
+    parser.add_argument('--outfile',
+                        help=('The name of the output ASCII file for storing search results.'
+                              ' If None, outfile is infile-kephead.'),
+                        default=None)
     parser.add_argument('--overwrite', action='store_true',
                         help='Overwrite output file?')
     parser.add_argument('--verbose', action='store_true',
@@ -142,5 +148,5 @@ def kephead_main():
     parser.add_argument('--logfile', help='Name of ascii log file',
                         default='kephead.log', type=str)
     args = parser.parse_args()
-    kephead(args.infile, args.outfile, args.keyname, args.overwrite,
+    kephead(args.infile, args.keyname, args.outfile, args.overwrite,
             args.verbose, args.logfile)

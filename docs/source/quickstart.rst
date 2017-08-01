@@ -16,15 +16,16 @@ For example, let's visualize the pixels of Kepler target KIC008462852
 .. image:: _static/images/readme/kepmask.png
 
 ``kepmask`` is an interactive tool used to create a custom
-aperture mask which can subsequently be used in other PyKE tasks.
+aperture mask (by clicking on the desired pixels and hitting DUMP)
+which can subsequently be used in other PyKE tasks.
 
 For example, we can now use the ``kepextract`` task to perform aperture photometry using the pixels defined using ``kepmask`` above::
 
-    $ kepextract kplr008462852-2013098041711_lpd-targ.fits.gz lightcurve.fits --maskfile mask.txt
+    $ kepextract kplr008462852-2013098041711_lpd-targ.fits.gz --maskfile mask.txt
 
-This creates a file called ``lightcurve.fits`` which contains a lightcurve in a format similar to those found in the official archive.
+This creates a file called ``kplr008462852-2013098041711_lpd-targ-kepextract.fits`` which contains a lightcurve in a format similar to those found in the official archive.
 To visualize the resulting light curve, we can use ``kepdraw``::
 
-    $ kepdraw lightcurve.fits
+    $ kepdraw kplr008462852-2013098041711_lpd-targ-kepextract.fits
 
 .. image:: _static/images/readme/kepdraw.png

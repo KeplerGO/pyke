@@ -11,7 +11,7 @@ from tqdm import tqdm
 __all__ = ['kepfold']
 
 
-def kepfold(infile, outfile, period, bjd0, bindata=False,
+def kepfold(infile, period, bjd0, outfile=None, bindata=False,
             binmethod='median', threshold=1.0, niter=5, nbins=1000,
             rejqual=False, plottype='sap', overwrite=False, verbose=False,
             logfile="kepfold.log"):
@@ -105,6 +105,9 @@ def kepfold(infile, outfile, period, bjd0, bindata=False,
     .. image:: ../_static/images/api/kepfold.png
         :align: center
     """
+
+    if outfile is None:
+        outfile = infile.split('.')[0] + "-{}.fits".format(__all__[0])
 
     # log the call
     hashline = '--------------------------------------------------------------'
@@ -467,6 +470,7 @@ def kepfold(infile, outfile, period, bjd0, bindata=False,
                                          'max number of sigma-clipping iterations')
 
     # history keyword in output file
+    print("Writing output file {}...".format(outfile))
     kepkey.history(call, instr[0], outfile, logfile, verbose)
     instr.writeto(outfile)
 
@@ -577,13 +581,15 @@ def kepfold_main():
              description=("Phase-fold light curve data on linear ephemeris."),
              formatter_class=PyKEArgumentHelpFormatter)
     parser.add_argument('infile', help='Name of FITS input file', type=str)
-    parser.add_argument('outfile', help='Name of FITS file to output',
-                        type=str)
     parser.add_argument('period', help='Period to fold data upon [days]',
                         type=float)
     parser.add_argument('bjd0',
                         help='time of zero phase for the folded period [BJD]',
                         type=float)
+    parser.add_argument('--outfile',
+                        help=('Name of FITS file to output.'
+                              ' If None, outfile is infile-kepfold.'),
+                        default=None)
     parser.add_argument('--bindata', action='store_true',
                         help='Bin output data?')
     parser.add_argument('--binmethod', default='mean', help='Binning method',
@@ -607,7 +613,7 @@ def kepfold_main():
                         default='kepfold.log', dest='logfile', type=str)
     args = parser.parse_args()
 
-    kepfold(args.infile, args.outfile, args.period, args.bjd0, args.bindata,
+    kepfold(args.infile, args.period, args.bjd0, args.outfile, args.bindata,
             args.binmethod, args.threshold, args.niter, args.nbins,
             args.quality, args.plottype, args.overwrite, args.verbose,
             args.logfile)

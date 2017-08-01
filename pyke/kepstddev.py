@@ -1,3 +1,7 @@
+from . import kepio
+from . import kepmsg
+from . import kepstat
+from . import kepkey
 from .utils import PyKEArgumentHelpFormatter
 import math
 import numpy as np
@@ -5,16 +9,13 @@ from astropy.io import fits as pyfits
 from matplotlib import pyplot as plt
 from scipy import stats
 from copy import copy
-from . import kepio
-from . import kepmsg
-from . import kepstat
-from . import kepkey
+from tqdm import tqdm
 
 
 __all__ = ['kepstddev']
 
 
-def kepstddev(infile, outfile, datacol='PDCSAP_FLUX', timescale=6.5,
+def kepstddev(infile, outfile=None, datacol='PDCSAP_FLUX', timescale=6.5,
               overwrite=False, verbose=False, logfile='kepstddev.log'):
     """
     kepstddev -- Calculate Combined Differential Photometric Precision for a
@@ -61,10 +62,11 @@ def kepstddev(infile, outfile, datacol='PDCSAP_FLUX', timescale=6.5,
 
     .. code-block:: bash
 
-        $ kepstddev kplr002437145-2009350155506_llc.fits.fits kepstddev.fits --datacol DETSAP_FLUX
+        $ kepstddev kplr002437145-2009350155506_llc.fits --datacol DETSAP_FLUX
         --verbose
         --------------------------------------------------------------
-        KEPSTDDEV --  infile=kplr002437145-2009350155506_llc.fits.fits outfile=kepstddev.fits datacol=DETSAP_FLUX
+        KEPSTDDEV --  infile=kplr002437145-2009350155506_llc.fits
+        outfile=kplr002437145-2009350155506_llc-kepstddev.fits datacol=DETSAP_FLUX
         timescale=6.5 overwrite=False verbose=True logfile=kepstddev.log
 
         Standard deviation = 1295.0731328136349 ppm
@@ -72,6 +74,8 @@ def kepstddev(infile, outfile, datacol='PDCSAP_FLUX', timescale=6.5,
            RMS 6.5hr CDPP = 329 ppm
     """
 
+    if outfile is None:
+        outfile = infile.split('.')[0] + "-{}.fits".format(__all__[0])
     # log the call
     hashline = '--------------------------------------------------------------'
     kepmsg.log(logfile, hashline, verbose)
@@ -215,7 +219,7 @@ def kepstddev(infile, outfile, datacol='PDCSAP_FLUX', timescale=6.5,
     work1 = np.array([], dtype='float32')
     instr = pyfits.open(infile)
     table = kepio.readfitstab(infile, instr[1], logfile, verbose)
-    for i in range(len(table.field(0))):
+    for i in tqdm(range(len(table.field(0)))):
         if np.isfinite(table.field('time')[i]) and np.isfinite(table.field(datacol)[i]):
             work1 = np.append(work1, cdpp[n])
             n += 1
@@ -223,6 +227,7 @@ def kepstddev(infile, outfile, datacol='PDCSAP_FLUX', timescale=6.5,
             work1 = np.append(work1, np.nan)
 
     # write output file
+    print("Writing output file {}...".format(outfile))
     kepkey.new('MCDPP%d' % (timescale * 10.0), medcdpp[0],
                'Median %.1fhr CDPP (ppm)' % timescale,
                instr[1], outfile, logfile, verbose)
@@ -249,7 +254,10 @@ def kepstddev_main():
                           ' Precision for a time series light curve'),
              formatter_class=PyKEArgumentHelpFormatter)
     parser.add_argument('infile', help='Name of input FITS file', type=str)
-    parser.add_argument('outfile', help='Name of output FITS file', type=str)
+    parser.add_argument('--outfile',
+                        help=('Name of FITS file to output.'
+                              ' If None, outfile is infile-kepstddev.'),
+                        default=None)
     parser.add_argument('--datacol', default='PDCSAP_FLUX',
                         help='Name of data column to plot', type=str)
     parser.add_argument('--timescale', '-t', default=6.5,

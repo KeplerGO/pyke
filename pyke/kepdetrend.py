@@ -13,10 +13,10 @@ from . import kepstat
 __all__ = ['kepdetrend']
 
 
-def kepdetrend(infile, outfile, ranges1, ranges2, npoly1, npoly2, nsig1, nsig2,
-               niter1, niter2, datacol='SAP_FLUX', errcol='SAP_FLUX_ERR',
-               popnans=False, plot=False, overwrite=False, verbose=False,
-               logfile='kepdetrend.log'):
+def kepdetrend(infile, ranges1, ranges2, npoly1, npoly2, nsig1, nsig2,
+               niter1, niter2, outfile=None, datacol='SAP_FLUX',
+               errcol='SAP_FLUX_ERR', popnans=False, plot=False,
+               overwrite=False, verbose=False, logfile='kepdetrend.log'):
     """
     kepdetrend -- Detrend aperture photometry data
 
@@ -111,7 +111,7 @@ def kepdetrend(infile, outfile, ranges1, ranges2, npoly1, npoly2, nsig1, nsig2,
     --------
     .. code-block:: bash
 
-        $ kepdetrend kplr002436324-2009259160929_llc.fits new1.fits --datacol SAP_FLUX
+        $ kepdetrend kplr002436324-2009259160929_llc.fits --datacol SAP_FLUX
         --errcol SAP_FLUX_ERR --ranges1 '2455063.59357,2455066.47292' --npoly1 5
         --nsig1 3 --niter1 10 --ranges2 '2455060.57026,2455063.59357;2455066.9768,2455068.99235'
         --npoly2 5 --nsig2 3 --niter2 10 --plot --verbose
@@ -120,11 +120,8 @@ def kepdetrend(infile, outfile, ranges1, ranges2, npoly1, npoly2, nsig1, nsig2,
         :align: center
     """
 
-    # startup parameters
-    lcolor = '#0000ff'
-    lwidth = 1.0
-    fcolor = '#ffff00'
-    falpha = 0.2
+    if outfile is None:
+        outfile = infile.split('.')[0] + "-{}.fits".format(__all__[0])
 
     # log the call
     hashline = '--------------------------------------------------------------'
@@ -306,8 +303,8 @@ def kepdetrend(infile, outfile, ranges1, ranges2, npoly1, npoly2, nsig1, nsig2,
 
         # rotate y labels by 90 deg
         labels = ax.get_yticklabels()
-        plt.plot(ptime, indata, color=lcolor, linestyle='-', linewidth=lwidth)
-        plt.fill(ptime, indata, color=fcolor, linewidth=0.0, alpha=falpha)
+        plt.plot(ptime, indata, color='#0000ff', linestyle='-', linewidth=1.0)
+        plt.fill(ptime, indata, color='#ffff00', linewidth=0.0, alpha=0.2)
         plt.plot(plotx1, ploty1, color='r', linestyle='-', linewidth=2.0)
         plt.plot(plotx2, ploty2, color='g', linestyle='-', linewidth=2.0)
         plt.xlim(xmin-xr*0.01, xmax+xr*0.01)
@@ -326,8 +323,8 @@ def kepdetrend(infile, outfile, ranges1, ranges2, npoly1, npoly2, nsig1, nsig2,
 
         # rotate y labels by 90 deg
         labels = ax.get_yticklabels()
-        plt.plot(ptime, pout, color=lcolor, linestyle='-', linewidth=lwidth)
-        plt.fill(ptime, pout, color=fcolor, linewidth=0.0, alpha=falpha)
+        plt.plot(ptime, pout, color='#0000ff', linestyle='-', linewidth=1.0)
+        plt.fill(ptime, pout, color=fcolor, linewidth=0.0, alpha=0.2)
         plt.xlim(xmin-xr*0.01, xmax+xr*0.01)
         if ymin > 0.0:
             plt.ylim(omin-oo*0.01, omax+oo*0.01)
@@ -344,6 +341,7 @@ def kepdetrend(infile, outfile, ranges1, ranges2, npoly1, npoly2, nsig1, nsig2,
     # render plot
     plt.show()
     # write output file
+    print("Writing output file {}...".format(outfile))
     if popnans:
         instr[1].data.field(datacol)[good_data] = outdata
         instr[1].data.field(errcol)[good_data] = outerr
@@ -368,8 +366,10 @@ def kepdetrend_main():
                           ' Photometry (SAP) data'),
              formatter_class=PyKEArgumentHelpFormatter)
     parser.add_argument('infile', help='Name of input file', type=str)
-    parser.add_argument('outfile', help='Name of FITS file to output',
-                        type=str)
+    parser.add_argument('--outfile',
+                        help=('Name of FITS file to output.'
+                              ' If None, outfile is infile-kepdetrend.'),
+                        default=None)
     parser.add_argument('--datacol', default='SAP_FLUX',
                         help='Name of data column', type=str)
     parser.add_argument('--errcol', default='SAP_FLUX_ERR',
@@ -401,8 +401,8 @@ def kepdetrend_main():
     parser.add_argument('--logfile', help='Name of ascii log file',
                         default='kepdetrend.log', dest='logfile', type=str)
     args = parser.parse_args()
-    kepdetrend(args.infile, args.outfile, args.ranges1, args.ranges2,
+    kepdetrend(args.infile, args.ranges1, args.ranges2,
                args.npoly1, args.npoly2, args.nsig1, args.nsig2,
-               args.niter1, args.niter2, args.datacol, args.errcol,
+               args.niter1, args.niter2, args.outfile, args.datacol, args.errcol,
                args.popnans, args.plot, args.overwrite, args.verbose,
                args.logfile)

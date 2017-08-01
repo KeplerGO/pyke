@@ -9,7 +9,7 @@ from . import kepio, kepmsg, kepkey, kepplot, kepstat, kepfunc
 __all__ = ['keppixseries']
 
 
-def keppixseries(infile, outfile, plotfile=None, plottype='global',
+def keppixseries(infile, outfile=None, plotfile=None, plottype='global',
                  filterlc=False, function='boxcar', cutoff=1.0, overwrite=False,
                  verbose=False, logfile='keppixseries.log'):
     """
@@ -85,12 +85,13 @@ def keppixseries(infile, outfile, plotfile=None, plottype='global',
     --------
     .. code-block :: bash
 
-        $ keppixseries kplr008256049-2010174085026_lpd-targ.fits.gz keppixseries.fits
+        $ keppixseries kplr008256049-2010174085026_lpd-targ.fits.gz
 
     .. image:: ../_static/images/api/keppixseries.png
         :align: center
     """
-
+    if outfile is None:
+        outfile = infile.split('.')[0] + "-{}.fits".format(__all__[0])
     # log the call
     hashline = '--------------------------------------------------------------'
     kepmsg.log(logfile, hashline, verbose)
@@ -227,6 +228,7 @@ def keppixseries(infile, outfile, plotfile=None, plottype='global',
                 pixseries[i, j, :] = pixseries[i, j, :] - outdata + outmedian
 
     # construct output file
+    print("Writing output file {}...".format(outfile))
     if ydim * xdim < 1000:
         instruct = pyfits.open(infile, 'readonly')
         kepkey.history(call, instruct[0], outfile, logfile, verbose)
@@ -552,8 +554,10 @@ def keppixseries_main():
                           ' within a target mask'),
              formatter_class=PyKEArgumentHelpFormatter)
     parser.add_argument('infile', help='Name of input file', type=str)
-    parser.add_argument('outfile', help='Name of FITS file to output',
-                        type=str)
+    parser.add_argument('--outfile',
+                        help=('Name of FITS file to output.'
+                              ' If None, outfile is infile-keppixseries.'),
+                        default=None)
     parser.add_argument('--plotfile', default='None',
                         help='name of output PNG plot file', type=str)
     parser.add_argument('--plottype', default='global', help='Plotting type',

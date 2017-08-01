@@ -7,7 +7,7 @@ from . import kepio, kepmsg, kepkey, kepstat
 __all__ = ['kepstitch']
 
 
-def kepstitch(infiles, outfile='kepstitch.fits', overwrite=False, verbose=False,
+def kepstitch(infiles, outfile=None, overwrite=False, verbose=False,
               logfile='kepstich.log'):
     """
     kepstitch -- Append short cadence months and/or long cadence quarters
@@ -56,6 +56,8 @@ def kepstitch(infiles, outfile='kepstitch.fits', overwrite=False, verbose=False,
         :align: center
 
     """
+    if outfile is None:
+        outfile = infile.split('.')[0] + "-{}.fits".format(__all__[0])
 
     # startup parameters
     lct, bjd = [], []
@@ -156,6 +158,7 @@ def kepstitch(infiles, outfile='kepstitch.fits', overwrite=False, verbose=False,
     # comment keyword in output file
     kepkey.comment(call, outstr[0], outfile, logfile, verbose)
     # close output file
+    print("Writing output file {}...".format(outfile))
     outstr.writeto(outfile)
     outstr.close()
     ## end time
@@ -170,8 +173,10 @@ def kepstitch_main():
              formatter_class=PyKEArgumentHelpFormatter)
     parser.add_argument('infiles', help='List of input files', nargs='+',
                         type=str)
-    parser.add_argument('--outfile', help='Name of FITS file to output',
-                        default='kepstitch.fits', type=str)
+    parser.add_argument('--outfile',
+                        help=('Name of FITS file to output.'
+                              ' If None, outfile is infile-kepstitch.'),
+                        default=None)
     parser.add_argument('--overwrite', action='store_true',
                         help='Overwrite output file?')
     parser.add_argument('--verbose', action='store_true',

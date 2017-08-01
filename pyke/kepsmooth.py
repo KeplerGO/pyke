@@ -9,7 +9,7 @@ from . import kepio, kepmsg, kepkey, kepfunc
 __all__ = ['kepsmooth']
 
 
-def kepsmooth(infile, outfile, datacol='SAP_FLUX', function='flat',
+def kepsmooth(infile, outfile=None, datacol='SAP_FLUX', function='flat',
               fscale=1.0, plot=False, overwrite=False, verbose=False,
               logfile='kepsmooth.log'):
     """
@@ -57,12 +57,14 @@ def kepsmooth(infile, outfile, datacol='SAP_FLUX', function='flat',
     --------
     .. code-block:: bash
 
-        $ kepsmooth kplr005110407-2009259160929_llc.fits kepsmooth.fits --plot
+        $ kepsmooth kplr005110407-2009259160929_llc.fits --plot
 
     .. image:: ../_static/images/api/kepsmooth.png
         :align: center
     """
 
+    if outfile is None:
+        outfile = infile.split('.')[0] + "-{}.fits".format(__all__[0])
     ## log the call
     hashline = '--------------------------------------------------------------'
     kepmsg.log(logfile,hashline,verbose)
@@ -199,7 +201,8 @@ def kepsmooth(infile, outfile, datacol='SAP_FLUX', function='flat',
         plt.show()
 
     ## write output file
-    for i in range(len(outdata)):
+    print("Writing output file {}...".format(outfile))
+    for i in tqdm(range(len(outdata))):
         instr[1].data.field(datacol)[i] = outdata[i]
     instr.writeto(outfile)
     ## close input file
@@ -213,8 +216,10 @@ def kepsmooth_main():
              description='Smooth Kepler light curve data by convolution',
              formatter_class=PyKEArgumentHelpFormatter)
     parser.add_argument('infile', help='Name of input file', type=str)
-    parser.add_argument('outfile', help='Name of FITS file to output',
-                        type=str)
+    parser.add_argument('--outfile',
+                        help=('Name of FITS file to output.'
+                              ' If None, outfile is infile-kepsmooth.'),
+                        default=None)
     parser.add_argument('--datacol', default='SAP_FLUX',
                         help='Name of data column to plot', type=str)
     parser.add_argument('--function', default='hanning',

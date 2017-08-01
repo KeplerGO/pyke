@@ -1,3 +1,5 @@
+.. _tasks:
+
 ==========
 PyKE tasks
 ==========
@@ -34,9 +36,6 @@ More generally, most of PyKE's tasks can be run from the command-line using the 
 where ``input-file`` is either a light curve or a target pixel file and
 ``output-file`` is the destination of the output.  Click on a task in the list below to retrieve detailed documentation.
 
-
-List of all PyKE tasks
-----------------------
 
 .. toctree::
     :maxdepth: 2

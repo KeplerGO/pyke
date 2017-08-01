@@ -9,8 +9,8 @@ from . import kepio, kepmsg, kepkey, kepfit, kepstat, kepfunc
 __all__ = ['kepoutlier']
 
 
-def kepoutlier(infile, outfile, datacol, nsig=3.0, stepsize=1.0, npoly=3,
-               niter=1, operation='remove', ranges='0,0', plot=False,
+def kepoutlier(infile, outfile=None, datacol='SAP_FLUX', nsig=3.0, stepsize=1.0,
+               npoly=3, niter=1, operation='remove', ranges='0,0', plot=False,
                plotfit=False, overwrite=False, verbose=False,
                logfile='kepoutlier.log'):
     """
@@ -28,10 +28,10 @@ def kepoutlier(infile, outfile, datacol, nsig=3.0, stepsize=1.0, npoly=3,
         The name of a MAST standard format FITS file containing a Kepler light
         curve within the first data extension.
     outfile : str
-        The name of the output FITS file. outfile will be direct copy of infile
-        with either data outliers removed (i.e. the table will have fewer rows)
-        or the outliers will be corrected according to a best-fit function and
-        a noise model.
+        The name of the output FITS file. ``outfile`` will be direct copy of
+        infile with either data outliers removed (i.e. the table will have
+        fewer rows) or the outliers will be corrected according to a best-fit
+        function and a noise model.
     datacol : str
         The column name containing data stored within extension 1 of infile.
         This data will be searched for outliers. Typically this name is
@@ -88,12 +88,16 @@ def kepoutlier(infile, outfile, datacol, nsig=3.0, stepsize=1.0, npoly=3,
     --------
     .. code-block:: bash
 
-        $ kepoutlier kplr002437329-2010355172524_llc.fits kepoutlier.fits --datacol SAP_FLUX
-          --nsig 4 --stepsize 5 --npoly 2 --niter 10 --operation replace --verbose --plot --plotfit
+        $ kepoutlier kplr002437329-2010355172524_llc.fits --datacol SAP_FLUX
+        --nsig 4 --stepsize 5 --npoly 2 --niter 10 --operation replace
+        --verbose --plot --plotfit
 
     .. image:: ../_static/images/api/kepoutlier.png
         :align: center
     """
+
+    if outfile is None:
+        outfile = infile.split('.')[0] + "-{}.fits".format(__all__[0])
 
     # log the call
     hashline = '--------------------------------------------------------------'
@@ -302,6 +306,7 @@ def kepoutlier(infile, outfile, datacol, nsig=3.0, stepsize=1.0, npoly=3,
     # render plot
     plt.show()
     # write output file
+    print("Writing output file {}...".format(outfile))
     instr.writeto(outfile)
     # close input file
     instr.close()
@@ -313,8 +318,10 @@ def kepoutlier_main():
              description='Remove or replace data outliers from a time series',
              formatter_class=PyKEArgumentHelpFormatter)
     parser.add_argument('infile', help='Name of input file', type=str)
-    parser.add_argument('outfile', help='Name of FITS file to output',
-                        type=str)
+    parser.add_argument('--outfile',
+                        help=('Name of FITS file to output.'
+                              ' If None, outfile is infile-kepoutlier.'),
+                        default=None)
     parser.add_argument('--datacol', default='SAP_FLUX',
                         help='Name of data column to plot', type=str)
     parser.add_argument('--nsig', default=3.,

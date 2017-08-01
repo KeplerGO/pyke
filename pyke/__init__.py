@@ -3,6 +3,8 @@
 from __future__ import absolute_import
 import os
 PACKAGEDIR = os.path.abspath(os.path.dirname(__file__))
+import matplotlib
+matplotlib.use('TkAgg')
 
 from .version import __version__
 from .keparray import *
@@ -34,6 +36,7 @@ from .keppixseries import *
 from .kepplot import *
 from .kepprf import *
 from .kepprfphot import *
+from .keprange import *
 from .kepsff import *
 from .kepsmooth import *
 from .kepstat import *

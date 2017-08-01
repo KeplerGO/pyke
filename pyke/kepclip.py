@@ -9,7 +9,7 @@ from tqdm import tqdm
 __all__ = ['kepclip']
 
 
-def kepclip(infile, outfile, ranges, datacol='SAP_FLUX', plot=False,
+def kepclip(infile, ranges, outfile=None, datacol='SAP_FLUX', plot=False,
             overwrite=False, verbose=False, logfile='kepclip.log'):
     """
     Remove unwanted time ranges from Kepler time series data.
@@ -41,13 +41,16 @@ def kepclip(infile, outfile, ranges, datacol='SAP_FLUX', plot=False,
     --------
     .. code-block:: bash
 
-        $ kepclip kplr002436324-2009259160929_llc.fits kepclip.fits
+        $ kepclip kplr002436324-2009259160929_llc.fits
           '2455012.48517,2455018.50072;2455022.63487,2455060.08231'
           --verbose --plot --overwrite
 
     .. image:: ../_static/images/api/kepclip.png
         :align: center
     """
+
+    if outfile is None:
+        outfile = infile.split('.')[0] + "-{}.fits".format(__all__[0])
 
     # log the call
     hashline = '--------------------------------------------------------------'
@@ -95,6 +98,7 @@ def kepclip(infile, outfile, ranges, datacol='SAP_FLUX', plot=False,
 
     # read time and flux columns
     barytime = kepio.readtimecol(infile, table, logfile, verbose)
+
     barytime = barytime + bjdref   
 
     #Test file type is LC or TPF:
@@ -131,7 +135,9 @@ def kepclip(infile, outfile, ranges, datacol='SAP_FLUX', plot=False,
 
         # comment keyword in output file
         kepkey.history(call, instr[0], outfile, logfile, verbose)
-
+        # comment keyword in output file
+        print("Writing output file {}...".format(outfile))
+       
         # write output file
         instr[1].data = table[:naxis2]
         comment = 'NaN cadences removed from data'
@@ -195,16 +201,6 @@ def kepclip(infile, outfile, ranges, datacol='SAP_FLUX', plot=False,
             plt.xlim(xmin - xr * 0.01, xmax + xr * 0.01)
             if ymin - yr * 0.01 <= 0.0:
                 plt.ylim(1.0e-10, ymax + yr * 0.01)
-            else:
-                plt.ylim(ymin - yr * 0.01, ymax + yr * 0.01)
-            plt.xlabel(xlab, {'color' : 'k'})
-            plt.ylabel(ylab, {'color' : 'k'})
-            plt.grid()
-
-        # render plot
-        if plot:
-            plt.show()
-
 
     if filetype=='TPF':
         message = 'KEPCLIP clipping a Target Pixel File'
@@ -252,11 +248,13 @@ def kepclip_main():
                           ' ranges from Kepler time series data'),
              formatter_class=PyKEArgumentHelpFormatter)
     parser.add_argument('infile', help='Name of input file', type=str)
-    parser.add_argument('outfile', help='Name of FITS file to output',
-                        type=str)
     parser.add_argument('ranges',
                         help='List of time domain ranges to be excluded',
                         type=str)
+    parser.add_argument('--outfile',
+                        help=('Name of FITS file to output.'
+                              ' If None, outfile is infile-kepclip.'),
+                        default=None)
     parser.add_argument('--datacol', help='Data column to plot',
                         default='SAP_FLUX', type=str)
     parser.add_argument('--plot', action='store_true', help='Plot result?')
@@ -267,5 +265,5 @@ def kepclip_main():
     parser.add_argument('--logfile', '-l', help='Name of ascii log file',
                         default='kepclip.log', dest='logfile', type=str)
     args = parser.parse_args()
-    kepclip(args.infile, args.outfile, args.ranges, args.datacol, args.plot,
+    kepclip(args.infile, args.ranges, args.outfile, args.datacol, args.plot,
             args.overwrite, args.verbose, args.logfile)

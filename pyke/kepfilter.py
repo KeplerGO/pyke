@@ -8,7 +8,7 @@ from . import kepio, kepmsg, kepkey, kepfunc, kepstat
 __all__ = ['kepfilter']
 
 
-def kepfilter(infile, outfile, passband, datacol='SAP_FLUX', function='boxcar',
+def kepfilter(infile, passband, outfile=None, datacol='SAP_FLUX', function='boxcar',
               cutoff=1.0, plot=False, overwrite=False, verbose=False,
               logfile='kepfilter.log'):
     """
@@ -27,6 +27,15 @@ def kepfilter(infile, outfile, passband, datacol='SAP_FLUX', function='boxcar',
     infile : str
         The name of a MAST standard format FITS file containing Kepler light
         curve data within the first data extension.
+    passband : str
+        The type of filter to be applied. A low bandpass filter will suppress
+        high-frequency signal shorter than the cutoff. A high bandpass filter
+        will suppress low-frequency signal longer than the cutoff.
+        The options are:
+
+        * low
+
+        * high
     outfile : str
         The name of the output FITS file. The output file is identical in
         format to the input file. The data to be filtered will be overwritten
@@ -46,15 +55,6 @@ def kepfilter(infile, outfile, passband, datacol='SAP_FLUX', function='boxcar',
         * sinc
     cutoff : float
         The frequency of the bandpass cutoff in units of days-1.
-    passband : str
-        The type of filter to be applied. A low bandpass filter will suppress
-        high-frequency signal shorter than the cutoff. A high bandpass filter
-        will suppress low-frequency signal longer than the cutoff.
-        The options are:
-
-        * low
-
-        * high
     plot : bool
         Plot the original light curve and the result of the filter?
     overwrite : bool
@@ -77,6 +77,8 @@ def kepfilter(infile, outfile, passband, datacol='SAP_FLUX', function='boxcar',
     .. image :: ../_static/images/api/kepfilter.png
         :align: center
     """
+    if outfile is None:
+        outfile = infile.split('.')[0] + "-{}.fits".format(__all__[0])
     ## log the call
     hashline = '--------------------------------------------------------------'
     kepmsg.log(logfile, hashline, verbose)
@@ -230,7 +232,8 @@ def kepfilter(infile, outfile, passband, datacol='SAP_FLUX', function='boxcar',
         # render plot
         plt.show()
     ## write output file
-    for i in range(len(outdata)):
+    print("Writing output file {}...".format(outfile))
+    for i in tqdm(range(len(outdata))):
         instr[1].data.field(datacol)[i] = outdata[i]
     instr.writeto(outfile)
     ## close input file
@@ -245,8 +248,12 @@ def kepfilter_main():
              description='Low bandpass or high bandpass signal filtering',
              formatter_class=PyKEArgumentHelpFormatter)
     parser.add_argument('infile', help='Name of input file', type=str)
-    parser.add_argument('outfile', help='Name of FITS file to output',
-                        type=str)
+    parser.add_argument('--passband', help='low- or high-bandpass filter',
+                        type=str, choices=['low','high'])
+    parser.add_argument('--outfile',
+                        help=('Name of FITS file to output.'
+                              ' If None, outfile is infile-kepfilter.'),
+                        default=None)
     parser.add_argument('--datacol', default='SAP_FLUX',
                         help='Name of data column', type=str)
     parser.add_argument('--function', default='boxcar',
@@ -255,8 +262,6 @@ def kepfilter_main():
     parser.add_argument('--cutoff', default=1.0,
                         help='Characteristic frequency cutoff of filter [1/days]',
                         type=float)
-    parser.add_argument('--passband', help='low- or high-bandpass filter',
-                        type=str, choices=['low','high'])
     parser.add_argument('--plot', action='store_true',
                         help='Plot result?')
     parser.add_argument('--overwrite', action='store_true',
@@ -266,6 +271,6 @@ def kepfilter_main():
     parser.add_argument('--logfile', help='Name of ascii log file',
                         default='kepfilter.log', type=str)
     args = parser.parse_args()
-    kepfilter(args.infile, args.outfile, args.passband, args.datacol,
+    kepfilter(args.infile, args.passband, args.outfile, args.datacol,
               args.function, args.cutoff, args.plot, args.overwrite,
               args.verbose, args.logfile)
