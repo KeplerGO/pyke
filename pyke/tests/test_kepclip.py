@@ -17,7 +17,7 @@ def test_kepclip_lc():
 
 	h = fits.open(LC_filename)
 	t = h[1].data['TIME'][200:400]
-	ranges = '{}'.format(t[0] + 2454833) + ',{}'.format(t[-1] + 2454833)
+	ranges = '{}'.format(t[0] + 2454833) + ', {}'.format(t[-1] + 2454833)
 	kepclip(infile = LC_filename, outfile = 'data/out.fits', ranges = ranges, overwrite = True)
 	j = fits.open('data/out.fits')
 
@@ -41,26 +41,26 @@ def test_kepclip_tpf():
 
 	h = fits.open(TPF_filename)
 	t = h[1].data['TIME'][0:2]
-	ranges = '{0:.15f}'.format(t[0] + 2454833) + ',{0:.15f}'.format(t[-1] + 2454833)
+	ranges = '{0:.15f}'.format(t[0] + 2454833) + ', {0:.15f}'.format(t[-1] + 2454833)
 	
 	kepclip(infile = TPF_filename, outfile = 'data/out.fits', ranges = ranges, overwrite = True)
 	j = fits.open('data/out.fits')
 	#The new file should be smaller
-	assert os.path.getsize(TPF_filename)>os.path.getsize('data/out.fits')
+	assert os.path.getsize(TPF_filename) > os.path.getsize('data/out.fits')
 
 	#Fits files should be the same shape
 	assert len(h) == len(j)
 
 	#The first frame in both files should be identical
-	assert np.allclose(h[1].data['FLUX'][0],j[1].data['FLUX'][0])
+	assert np.allclose(h[1].data['FLUX'][0], j[1].data['FLUX'][0])
 
 	#Test if we clip out the middle file it also works
 	t = h[1].data['TIME'][4:15]
-	ranges = '{0:.15f}'.format(t[0] + 2454833) + ',{0:.15f}'.format(t[-1] + 2454833)
+	ranges = '{0:.15f}'.format(t[0] + 2454833) + ', {0:.15f}'.format(t[-1] + 2454833)
 	
 	kepclip(infile = TPF_filename, outfile = 'data/out.fits', ranges = ranges, overwrite = True)
 	j = fits.open('data/out.fits')
 
 	#The middle frame should be identical
-	assert np.allclose(h[1].data['FLUX'][4],j[1].data['FLUX'][0])
+	assert np.allclose(h[1].data['FLUX'][4], j[1].data['FLUX'][0])
 
