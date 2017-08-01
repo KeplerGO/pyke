@@ -22,7 +22,7 @@ __all__ = ['kepmask']
 
 
 def kepmask(infile, frameno=100, maskfile='mask.txt', plotfile='kepmask.png',
-            imin=None, imax=None, iscale='logarithmic', cmap='bone',
+            imin=None, imax=None, iscale='linear', cmap='bone',
             verbose=False, logfile='kepmask.log'):
     """
     kepmask - plots, creates or edits custom target masks for target pixel
@@ -427,7 +427,7 @@ def kepmask_main():
                         help='minimum of image intensity scale [e-]')
     parser.add_argument('--imax', default=None,
                         help='maximum of image intensity scale [e-]')
-    parser.add_argument('--iscale', default='logarithmic',
+    parser.add_argument('--iscale', default='linear',
                         help='type of image intensity scale',
                         type=str,
                         choices=['linear', 'logarithmic', 'squareroot'])
