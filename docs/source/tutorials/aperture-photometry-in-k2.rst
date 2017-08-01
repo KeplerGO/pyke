@@ -14,7 +14,7 @@ The required arguments for this tool are the name of the target pixel file
 (TPF) and the frame number.
 
 .. code-block:: bash
-
+    $ wget https://archive.stsci.edu/missions/k2/target_pixel_files/c0/202000000/73000/ktwo202073445-c00_lpd-targ.fits.gz
     $ kepmask ktwo202073445-c00_lpd-targ.fits.gz --frameno 3000
 
 .. image:: ../_static/images/tutorials/example_e/kepmask.png
