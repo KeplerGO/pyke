@@ -1,8 +1,10 @@
 from .utils import PyKEArgumentHelpFormatter
 import time
 import re
+import sys
 import numpy as np
 from astropy.io import fits as pyfits
+from astropy.time import Time as astropyTime
 from tqdm import tqdm
 from . import kepio, kepmsg, kepkey
 
@@ -10,7 +12,7 @@ from . import kepio, kepmsg, kepkey
 __all__ = ['kepconvert']
 
 
-def kepconvert(infile, conversion, columns, outfile=None, baddata=True,
+def kepconvert(infile, conversion, columns, timeformat='', outfile=None, baddata=True,
                overwrite=False, verbose=False, logfile='kepconvert.log'):
     """
     kepconvert -- Convert Kepler FITS time series to or from a different file
@@ -121,12 +123,30 @@ def kepconvert(infile, conversion, columns, outfile=None, baddata=True,
         for colname in tqdm(colnames):
             try:
                 if colname.lower() == 'time':
-                    work.append(table.field(colname) + bjdref)
+                    if len(timeformat) > 0:
+                        kepmsg.log(logfile, 'KEPCONVERT -- converting BJD to ' +
+                                   '{}'.format(timeformat), verbose)
+                        times = []
+                        for i in table.field(colname) + bjdref:
+                            # adding 0 as nan
+                            if np.isnan(i):
+                                times.append(0)
+                                continue
+                            cvttime = astropyTime(i, format='jd')
+                            cvttime.format = timeformat
+                            times.append(cvttime.value)
+                        work.append(times)
+                    else:
+                        work.append(table.field(colname) + bjdref)
                 else:
                     work.append(table.field(colname))
-            except:
+            except ValueError as e:
+                errmsg = ('ERROR -- KEPCONVERT: error converting time to '+
+                          '{}: {}'.format(timeformat, str(e)))
+                kepmsg.err(logfile, errmsg, verbose)
+            except KeyError:
                 errmsg = ('ERROR -- KEPCONVERT: no column {} in {}'
-                          .format(colname, infile))
+                .format(colname, infile))
                 kepmsg.err(logfile, errmsg, verbose)
         if not baddata:
             try:
@@ -368,6 +388,9 @@ def kepconvert_main():
     parser.add_argument('infile', help='Name of input file', type=str)
     parser.add_argument('conversion', help='Type of data conversion', type=str,
                         choices=['fits2asc', 'fits2csv', 'asc2fits'], default='fits2asc')
+    parser.add_argument('timeformat', dest='timeformat', default='',
+                        help="Export time into any subformat handled by astropy.Time",
+                        type=str)
     parser.add_argument('--columns', '-c', default='TIME,SAP_FLUX,SAP_FLUX_ERR',
                         dest='columns', help='Comma-delimited list of data columns',
                         type=str)
