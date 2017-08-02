@@ -153,7 +153,6 @@ def keptrial(infile, outfile=None, datacol='SAP_FLUX', errcol='SAP_FLUX_ERR',
                 f1 = fr[j]
         freq.append(f1)
     # plot stop-motion histogram
-    plt.figure()
     plt.clf()
     plt.axes([0.08, 0.08, 0.88, 0.89])
     plt.gca().xaxis.set_major_formatter(plt.ScalarFormatter(useOffset=False))
