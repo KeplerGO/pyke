@@ -72,7 +72,7 @@ You should see something like this:
 
 .. code-block:: bash
 
-    $ git add .
+    $ git add FILE-YOU-ADDED-OR-MODIFIED
 
 8. Commit and push your changes:
 
@@ -84,5 +84,5 @@ You should see something like this:
 9. Head to https://github.com/KeplerGO/PyKE and you should now see a button "Compare and open a pull request".  Click the button and submit your pull request.\
 \
 
-10. That's it!
+10. That's it! :)
 
