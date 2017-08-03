@@ -10,7 +10,7 @@ __all__ = ['keptrial']
 
 
 def keptrial(infile, outfile=None, datacol='SAP_FLUX', errcol='SAP_FLUX_ERR',
-             fmin=0.1, fmax=50, nfreq=100, method='ft', ntrials=1000,
+             fmin=0.1, fmax=50, nfreq=10, method='ft', ntrials=1000,
              plot=False, overwrite=False, verbose=False,
              logfile='keptrial.log'):
     """
