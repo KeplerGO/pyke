@@ -1,7 +1,10 @@
 import pytest
 import csv
 from astropy.utils.data import get_pkg_data_filename
+from astropy.io import fits as pyfits
+from astropy.time import Time as astropyTime
 from pyke import kepconvert
+from pyke import kepio
 from ..kepio import delete
 
 fake_lc = get_pkg_data_filename("data/golden-lc.fits")
@@ -69,3 +72,22 @@ def test_kepconvert():
         assert second_line == ['1.461334722059185982e+09', '1.500000000000000000e+01\n']
 
         delete("fake_lc.txt", "kepconvert.log", False)
+
+SUPPORTED_CONVERSION = ['jd', 'mjd', 'decimalyear', 'unix', 'cxcsec', 'gps', 'plot_date',
+                        'datetime', 'iso', 'isot', 'yday', 'fits', 'byear', 'jyear',
+                        'byear_str', 'jyear_str']
+
+def test_time_conversion():
+
+    fits = pyfits.open(fake_lc, 'readonly')
+    tstart, _, _, _ = kepio.timekeys(fits, fake_lc, "kepconvert.log", False)
+
+    for conversion in SUPPORTED_CONVERSION:
+
+        dateobs = astropyTime(fits[1].header['DATE-OBS'])
+        dateobs.format = conversion
+
+        start = astropyTime(tstart, format='jd')
+        start.format = conversion
+
+    assert start.value == dateobs.value

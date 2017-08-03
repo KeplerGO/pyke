@@ -41,6 +41,43 @@ def kepconvert(infile, conversion, columns, timeformat='', outfile=None, baddata
         * asc2fits
     columns : str
         A comma-delimited list of data column names or descriptors.
+    timeformat: str
+        You can convert the Barycentric Julian Date (BJD) given by FITS files
+        into any subformat supported by Astropy.Time:
+
+        * jd
+
+        * mjd
+
+        * decimalyear
+
+        * unix
+
+        * cxcsec
+
+        * gps
+
+        * plot_date
+
+        * datetime
+
+        * iso
+
+        * isot
+
+        * yday
+
+        * fits
+
+        * byear
+
+        * jyear
+
+        * byear_str
+
+        * jyear_str
+        Be careful that these subformat are for **Solar System Barycenter** and are not
+        Earth-centered.
     baddata : bool
         If **True**, all the rows from the input FITS file are output to an
         ascii file. If **False** then only rows with SAP_QUALITY equal to zero
