@@ -13,7 +13,7 @@ __all__ = ['kepfold']
 
 def kepfold(infile, period, bjd0, outfile=None, bindata=False,
             binmethod='median', threshold=1.0, niter=5, nbins=1000,
-            rejqual=False, plottype='sap', overwrite=False, verbose=False,
+            rejqual=False, plottype='det', overwrite=False, verbose=False,
             logfile="kepfold.log"):
     """
     kepfold: Phase-fold light curve data on linear ephemeris.
@@ -603,7 +603,7 @@ def kepfold_main():
                         type=int)
     parser.add_argument('--quality', action='store_true',
                         help='Reject bad quality timestamps?')
-    parser.add_argument('--plottype', default='sap', help='plot type',
+    parser.add_argument('--plottype', default='det', help='plot type',
                         type=str, choices=['sap', 'pdc', 'cbv', 'det','None'])
     parser.add_argument('--overwrite', action='store_true',
                         help='Overwrite output file?')
