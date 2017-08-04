@@ -57,7 +57,7 @@ def kepstitch(infiles, outfile=None, overwrite=False, verbose=False,
 
     """
     if outfile is None:
-        outfile = infile.split('.')[0] + "-{}.fits".format(__all__[0])
+        outfile = infiles[0].split('.')[0] + "-{}.fits".format(__all__[0])
 
     # startup parameters
     lct, bjd = [], []
