@@ -77,9 +77,8 @@ You can also contact the development team via keplergo@mail.arc.nasa.gov
 Citing
 ------
 
-If you find this code useful in your research,
-please cite both (Vinícius et al. 2017) and (Still & Barclay, 2012)
-using the BibTeX provided below::
+If you find this code useful in your research, please cite both (Vinícius et al. 2017) and (Still & Barclay, 2012)
+using the BibTeX provided below. Also, please give us a GitHub star!
 
     @misc{pyke3,
       author       = {Zé Vinícius and
