@@ -80,6 +80,8 @@ Citing
 If you find this code useful in your research, please cite both (Vinícius et al. 2017) and (Still & Barclay, 2012)
 using the BibTeX provided below. Also, please give us a GitHub star!
 
+::
+
     @misc{pyke3,
       author       = {Zé Vinícius and
                       Geert Barentsen and
