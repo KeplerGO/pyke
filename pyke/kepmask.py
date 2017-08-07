@@ -3,7 +3,7 @@ import math
 import os
 from matplotlib import pyplot as plt
 from astropy.io import fits as pyfits
-from astropy.visualization import (MinMaxInterval, ImageNormalize,
+from astropy.visualization import (PercentileInterval, ImageNormalize,
                                    SqrtStretch, LogStretch, LinearStretch)
 from copy import copy
 from .utils import PyKEArgumentHelpFormatter
@@ -163,12 +163,12 @@ def kepmask(infile, frameno=100, maskfile='mask.txt', plotfile='kepmask.png',
 
     # intensity scale
     if imin is None and imax is None:
-        imin, imax = MinMaxInterval().get_limits(pimg)
+        imin, imax = PercentileInterval(95.).get_limits(pimg)
     else:
         if imin is None:
-            imin, _ = MinMaxInterval().get_limits(pimg)
+            imin, _ = PercentileInterval(95.).get_limits(pimg)
         else:
-            _, imax = MinMaxInterval().get_limits(pimg)
+            _, imax = PercentileInterval(95.).get_limits(pimg)
 
     if zscale == 'sqrt':
         norm = ImageNormalize(vmin=imin, vmax=imax, stretch=SqrtStretch())
