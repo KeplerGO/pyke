@@ -1,17 +1,19 @@
-from .utils import PyKEArgumentHelpFormatter
-from . import kepio, kepmsg, kepplot
 import numpy as np
 import math
 import os
 from matplotlib import pyplot as plt
 from astropy.io import fits as pyfits
+from astropy.visualization import (PercentileInterval, ImageNormalize,
+                                   SqrtStretch, LogStretch, LinearStretch)
 from copy import copy
+from .utils import PyKEArgumentHelpFormatter
+from . import kepio, kepmsg, kepplot
 
 
 infile = False; aperfile = False; maskfile = 'mask.txt'
 plotfile = 'kepmask.png'; pxdim = 0; pydim = 0; pimg = None; mask = []
 zscale = False; xmin = 0.0; xmax = 1000.0; ymin = 0.0; ymax = 1000.0
-zmin = False; zmax = False; kepid = ''; ra = ''; dec = ''; kepmag = ''
+zmin = False; zmax = False; norm=None; kepid = ''; ra = ''; dec = ''; kepmag = ''
 season = ''; quarter = -1; skygroup = ''; channel = ''; module = ''
 output = ''; column = ''; row = ''; colmap='jet'; aid = None; bid = None
 cid = None; did = None; eid = None; fid = None; pkepmag = None; pkepid = None
@@ -59,8 +61,8 @@ def kepmask(infile, frameno=100, maskfile='mask.txt', plotfile='kepmask.png',
     iscale : str
         Type of intensity scaling for the image display.
         * linear
-        * logarithmic
-        * squareroot
+        * log
+        * sqrt
     cmap : str
         Color intensity scheme for the image display.
     verbose : bool
@@ -72,13 +74,13 @@ def kepmask(infile, frameno=100, maskfile='mask.txt', plotfile='kepmask.png',
     --------
     .. code-block:: bash
 
-        $ kepmask ktwo202933888-c02_lpd-targ.fits.gz 20
+        $ kepmask ktwo202933888-c02_lpd-targ.fits.gz
 
     .. image:: ../_static/images/api/kepmask.png
         :align: center
     """
 
-    global pimg, zscale, zmin, zmax, xmin, xmax, ymin, ymax, quarter
+    global pimg, zscale, zmin, zmax, xmin, xmax, ymin, ymax, quarter, norm
     global pxdim, pydim, kepmag, skygroup, season, channel
     global module, output, row, column, mfile, pfile
     global pkepid, pkepmag, pra, pdec, colmap
@@ -147,7 +149,7 @@ def kepmask(infile, frameno=100, maskfile='mask.txt', plotfile='kepmask.png',
     print('Dec (J2000):  {}'.format(dec))
     print('     KepMag:  {}'.format(kepmag))
     print('   SkyGroup:  {}'.format(skygroup))
-    print('     Season:  {}'.format(str(season)))
+    print('     Season:  {}'.format(season))
     print('    Channel:  {}'.format(channel))
     print('     Module:  {}'.format(module))
     print('     Output:  {}'.format(output))
@@ -160,19 +162,23 @@ def kepmask(infile, frameno=100, maskfile='mask.txt', plotfile='kepmask.png',
     xmax = xmin + xdim
 
     # intensity scale
-    pimg, imin, imax = kepplot.intScale1D(pimg, zscale)
-    if zmin and zmax and zscale=='logarithm':
-        zmin = math.log10(zmin)
-        zmax = math.log10(zmax)
-    elif zmin and zmax and zscale=='squareroot':
-        zmin = math.sqrt(zmin)
-        zmax = math.sqrt(zmax)
-    elif zmin and zmax and zscale=='linear':
-        zmin *= 1.0
-        zmax *= 1.0
+    if imin is None and imax is None:
+        imin, imax = PercentileInterval(95.).get_limits(pimg)
     else:
-        zmin = copy(imin)
-        zmax = copy(imax)
+        if imin is None:
+            imin, _ = PercentileInterval(95.).get_limits(pimg)
+        else:
+            _, imax = PercentileInterval(95.).get_limits(pimg)
+
+    if zscale == 'sqrt':
+        norm = ImageNormalize(vmin=imin, vmax=imax, stretch=SqrtStretch())
+    elif zscale == 'linear':
+        norm = ImageNormalize(vmin=imin, vmax=imax, stretch=LinearStretch())
+    elif zscale == 'log':
+        norm = ImageNormalize(vmin=imin, vmax=imax, stretch=LogStretch())
+
+    zmin = copy(imin)
+    zmax = copy(imax)
 
     # plot limits
     ymin = float(ymin) - 0.5
@@ -255,7 +261,7 @@ def plotimage():
     imgsum = pimg.reshape((pydim, pxdim))
     plt.imshow(imgsum, aspect='auto', interpolation='nearest', origin='lower',
                extent=(xmin, xmax, ymin, ymax), cmap=colmap, vmin=zmin,
-               vmax=zmax)
+               vmax=zmax, norm=norm)
     plt.gca().set_autoscale_on(False)
     plt.xlabel('Pixel Column Number', {'color' : 'k'}, fontsize=14)
     plt.ylabel('Pixel Row Number', {'color' : 'k'}, fontsize=14)
@@ -423,14 +429,14 @@ def kepmask_main():
                          type=str)
     parser.add_argument('--plotfile', default='kepmask.png',
                         help='name of output PNG plot file', type=str)
-    parser.add_argument('--imin', default=None,
+    parser.add_argument('--imin', default=None, type=float,
                         help='minimum of image intensity scale [e-]')
-    parser.add_argument('--imax', default=None,
+    parser.add_argument('--imax', default=None, type=float,
                         help='maximum of image intensity scale [e-]')
     parser.add_argument('--iscale', default='linear',
                         help='type of image intensity scale',
                         type=str,
-                        choices=['linear', 'logarithmic', 'squareroot'])
+                        choices=['linear', 'log', 'sqrt'])
     parser.add_argument('--cmap', default='bone', help='image colormap',
                         type=str)
     parser.add_argument('--verbose', action='store_true',
