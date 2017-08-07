@@ -72,7 +72,6 @@ def kepdraw(infile, outfile=None, datacol='SAP_FLUX', ploterr=False,
         build. Options:
 
             * fast
-
             * pretty
     non-interactive : bool
         If True, prevents the matplotlib window to pop up.

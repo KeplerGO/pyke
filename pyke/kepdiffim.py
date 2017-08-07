@@ -50,9 +50,7 @@ def kepdiffim(infile, outfile=None, plotfile=None, imscale='logarithmic',
         The options are:
 
         * linear
-
         * logarithmic
-
         * squareroot
     cmap : str
         color intensity scheme for the image display.
@@ -64,9 +62,7 @@ def kepdiffim(infile, outfile=None, plotfile=None, imscale='logarithmic',
         The functional form of the high pass-band filter. The options are:
 
         * boxcar
-
         * gauss
-
         * sinc
     cutoff : float [days]
         The frequency of the high pass-band cutoff.
@@ -81,7 +77,7 @@ def kepdiffim(infile, outfile=None, plotfile=None, imscale='logarithmic',
     --------
     .. code-block:: bash
 
-        $ kepdiffim kplr011390659-2010355172524_lpd-targ.fits.gz kepdiffim.fits
+        $ kepdiffim kplr011390659-2010355172524_lpd-targ.fits.gz
         --filter --function boxcar --cutoff 0.1 --plotfile kepdiffim.png
         --cmap YlOrBr --imscale linear --verbose
 

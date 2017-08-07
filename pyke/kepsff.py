@@ -106,7 +106,6 @@ def kepsff(infile, outfile=None, datacol='DETSAP_FLUX', cenmethod='moments',
           (alternatively known as the zeroth-moment of the flux distribution
           over the pixels). These two arrays, the X and Y centroid over time,
           are stored in FITS columns MOM_CENTR1 and MOM_CENTR2.
-
         * ``psf`` -- the PSF-fitting method, the X and Y locations of best-fit
           PSF models to the aperture pixels. These are rarely available within
           archived Kepler data but can be stored in PSF_CENTR1 and PSF_CENTR2.

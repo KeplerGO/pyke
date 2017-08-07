@@ -612,15 +612,10 @@ def kepcotrend(infile, bvfile, listbv, outfile=None, fitmethod='llsq',
         The options available are:
 
         * linear
-
         * nearest
-
         * zero
-
         * slinear
-
         * quadratic
-
         * cubic
     plot : bool
         Plot the data and result?
