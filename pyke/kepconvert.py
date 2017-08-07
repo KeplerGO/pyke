@@ -35,9 +35,7 @@ def kepconvert(infile, conversion, columns, timeformat='', outfile=None, baddata
         Define the type of file conversion:
 
         * fits2asc
-
         * fits2csv
-
         * asc2fits
     columns : str
         A comma-delimited list of data column names or descriptors.
@@ -46,36 +44,22 @@ def kepconvert(infile, conversion, columns, timeformat='', outfile=None, baddata
         into any subformat supported by Astropy.Time:
 
         * jd
-
         * mjd
-
         * decimalyear
-
         * unix
-
         * cxcsec
-
         * gps
-
         * plot_date
-
         * datetime
-
         * iso
-
         * isot
-
         * yday
-
         * fits
-
         * byear
-
         * jyear
-
         * byear_str
-
         * jyear_str
+
         Be careful that these subformat are for **Solar System Barycenter** and are not
         Earth-centered.
     baddata : bool
@@ -425,7 +409,7 @@ def kepconvert_main():
     parser.add_argument('infile', help='Name of input file', type=str)
     parser.add_argument('conversion', help='Type of data conversion', type=str,
                         choices=['fits2asc', 'fits2csv', 'asc2fits'], default='fits2asc')
-    parser.add_argument('timeformat', dest='timeformat', default='',
+    parser.add_argument('--timeformat', dest='timeformat', default='',
                         help="Export time into any subformat handled by astropy.Time",
                         type=str)
     parser.add_argument('--columns', '-c', default='TIME,SAP_FLUX,SAP_FLUX_ERR',
