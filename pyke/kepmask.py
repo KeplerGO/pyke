@@ -162,8 +162,14 @@ def kepmask(infile, frameno=100, maskfile='mask.txt', plotfile='kepmask.png',
     xmax = xmin + xdim
 
     # intensity scale
-    if imin is None or imax is None:
+    if imin is None and imax is None:
         imin, imax = MinMaxInterval().get_limits(pimg)
+    else:
+        if imin is None:
+            imin, _ = MinMaxInterval().get_limits(pimg)
+        else:
+            _, imax = MinMaxInterval().get_limits(pimg)
+
     if zscale == 'sqrt':
         norm = ImageNormalize(vmin=imin, vmax=imax, stretch=SqrtStretch())
     elif zscale == 'linear':
