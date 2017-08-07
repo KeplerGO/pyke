@@ -98,7 +98,7 @@ def kepfold(infile, period, bjd0, outfile=None, bindata=False,
     --------
     .. code-block:: bash
 
-        $ kepfold kplr010544976-2009201121230_slc.fits kepfold.fits
+        $ kepfold kplr010544976-2009201121230_slc.fits
           0.350471 2455002.825 --bindata --binmethod median --threshold 3.0
           --niter 1000 --plottype sap --verbose
 

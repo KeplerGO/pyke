@@ -57,7 +57,6 @@ def kepoutlier(infile, outfile=None, datacol='SAP_FLUX', nsig=3.0, stepsize=1.0,
 
         * ``remove`` throws away outliers. The output data table will smaller
           or equal in size to the input table.
-
         * ``replace`` replaces outliers with a value that is consistent with
           the best-fit polynomial function and a random component defined by the
           rms of the data relative to the fit and calculated using the inverse
