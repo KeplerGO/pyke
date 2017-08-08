@@ -50,6 +50,8 @@ For example, let's visualize the pixels of Kepler target KIC008462852
 
     $ kepmask kplr008462852-2013098041711_lpd-targ.fits.gz --maskfile mask.txt
 
+.. we should use full url addresses for images henceforth, so that they will be correctly captured by PYPI
+
 .. image:: http://pyke.keplerscience.org/en/latest/_images/kepmask1.png
 
 ``kepmask`` is an interactive tool used to create a custom
