@@ -53,6 +53,6 @@ Now, we can apply ``kepfold`` to fold our final light curve:
 
 .. code-block:: bash
 
-    $ kepfold kplr012557548-kepstitch-kepflatten.fits --nsig 3 --stepsize 1 --npoly 2 --niter 10 --plot
+    $ kepfold kplr012557548-kepstitch-kepflatten.fits 0.653534 2455372.883 --threshold 3. --niter 5 --bindata --binmethod median --nbins 100 --plottype det
 
 .. image:: ../_static/images/tutorials/kplr012557548-kepstitch-kepdraw-kepflatten-kepfold.png
