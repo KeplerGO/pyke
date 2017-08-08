@@ -50,7 +50,7 @@ For example, let's visualize the pixels of Kepler target KIC008462852
 
     $ kepmask kplr008462852-2013098041711_lpd-targ.fits.gz --maskfile mask.txt
 
-.. image:: docs/source/_static/images/readme/kepmask.png
+.. image:: http://pyke.keplerscience.org/en/latest/_images/kepmask1.png
 
 ``kepmask`` is an interactive tool used to create a custom
 aperture mask which can subsequently be used in other PyKE tasks.
@@ -64,7 +64,7 @@ To visualize the resulting light curve, we can use ``kepdraw``::
 
     $ kepdraw lightcurve.fits
 
-.. image:: docs/source/_static/images/readme/kepdraw.png
+.. image:: http://pyke.keplerscience.org/en/latest/_images/kepdraw1.png
 
 
 Contributing
