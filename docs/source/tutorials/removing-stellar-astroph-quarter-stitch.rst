@@ -28,8 +28,8 @@ We can visualize the stitched light curve using kepdraw:
     $ kepdraw kplr012557548-kepstitch.fits
     $ kepdraw kplr012557548-kepstitch.fits --datacol PDCSAP_FLUX
 
-.. image:: ../_static/images/tutorials/kplr012557548-kepstitch-kepdraw.png
-.. image:: ../_static/images/tutorials/kplr012557548-kepstitch-kepdraw-pdcsap.png
+.. image:: ../_static/images/tutorials/example_d/kplr012557548-kepstitch-kepdraw.png
+.. image:: ../_static/images/tutorials/example_d/kplr012557548-kepstitch-kepdraw-pdcsap.png
 
 With systematic artifacts already mostly-removed, the light curves need to be
 flattened but in a way that does not radically contaminate the transit
@@ -46,7 +46,7 @@ columns, DETSAP_FLUX and DETSAP_ERR_FLUX.
 
     $ kepflatten kplr012557548-kepstitch.fits --nsig 3 --stepsize 1 --npoly 2 --niter 10 --plot
 
-.. image:: ../_static/images/tutorials/kplr012557548-kepstitch-kepdraw-kepflatten.png
+.. image:: ../_static/images/tutorials/example_d/kplr012557548-kepstitch-kepdraw-kepflatten.png
 
 
 Now, we can apply ``kepfold`` to fold our final light curve:
@@ -55,4 +55,4 @@ Now, we can apply ``kepfold`` to fold our final light curve:
 
     $ kepfold kplr012557548-kepstitch-kepflatten.fits 0.653534 2455372.883 --threshold 3. --niter 5 --bindata --binmethod median --nbins 100 --plottype det
 
-.. image:: ../_static/images/tutorials/kplr012557548-kepstitch-kepdraw-kepflatten-kepfold.png
+.. image:: ../_static/images/tutorials/example_d/kplr012557548-kepstitch-kepdraw-kepflatten-kepfold.png
