@@ -25,9 +25,9 @@ Installing PyKE
 Using pip
 ---------
 
-The easiest way to install PyKE is with ``pip``, simply run::
+The easiest way to install or upgrade PyKE is with ``pip``, simply run::
 
-    pip install --no-deps pyketools
+    pip install pyketools --upgrade --no-deps
 
 
 .. note::
