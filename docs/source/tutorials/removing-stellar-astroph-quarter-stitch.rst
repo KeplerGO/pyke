@@ -3,7 +3,7 @@
 Example 4: Removing Stellar Astrophysics and Quarter Stitching
 ==============================================================
 
-The purpose of this tutorial is to flatten both systamtic artifacts and
+The purpose of this tutorial is to flatten both systematic artifacts and
 astrophysical signal in order to fold candidate planet transits successfully
 upon their orbital period and characterize them with a physical model.
 
