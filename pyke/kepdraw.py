@@ -10,7 +10,7 @@ from . import kepio, kepmsg, kepkey
 __all__ = ['kepdraw']
 
 
-def kepdraw(infile, outfile=None, datacol='SAP_FLUX', ploterr=False,
+def kepdraw(infile, outfile=None, datacol=None, ploterr=False,
             errcol='SAP_FLUX_ERR', quality=False, lcolor='#363636', lwidth=1.0,
             fcolor='#a8a7a7', falpha=0.2, labelsize=20, ticksize=14, xsize=18.,
             ysize=6., fullrange=False, chooserange=False, y1=0, y2=1e4,
@@ -136,6 +136,25 @@ def kepdraw(infile, outfile=None, datacol='SAP_FLUX', ploterr=False,
 
     # read table columns
     intime = kepio.readtimecol(infile, table, logfile, verbose) + bjdref
+
+    if datacol is None:
+        default_priority_columns = ['DETSAP_FLUX', 'PDCSAP_FLUX', 'SAP_FLUX']
+        flux_columns_found = [c for c in struct[1].data.columns.names
+                              if 'FLUX' in c]
+
+        if len(flux_columns_found) == 0:
+            raise ValueError("No flux columns found.")
+        print("Found the following flux columns: {}".format(", ".join(flux_columns_found)))
+
+        for colname in default_priority_columns:
+            if colname in flux_columns_found:
+                datacol = colname
+                print("Using data column {} on the plot...".format(datacol))
+                break
+        else:
+            datacol = flux_columns_found[0]
+            print("Using data column {} on the plot...".format(datacol))
+
     indata = kepio.readfitscol(infile, table, datacol, logfile, verbose)
     indataerr = kepio.readfitscol(infile, table, errcol, logfile, verbose)
     qualty = kepio.readfitscol(infile, table, 'SAP_QUALITY', logfile, verbose)
@@ -268,8 +287,8 @@ def kepdraw_main():
     parser.add_argument('infile', help='Name of input file', type=str)
     parser.add_argument('--outfile', default=None,
                         help='name of output PNG file')
-    parser.add_argument('--datacol', default='SAP_FLUX',
-                        help='Name of data column to plot', type=str)
+    parser.add_argument('--datacol', default=None,
+                        help='Name of data column to plot')
     parser.add_argument('--ploterr', action='store_true',
                         help='Plot data error bars?')
     parser.add_argument('--errcol', default='SAP_FLUX_ERR',
