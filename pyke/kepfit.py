@@ -177,7 +177,7 @@ def fitPRF(flux, ydim, xdim, column, row, prfn, crval1p, crval2p, cdelt1p,
         if prfWeight[i] == 0.0:
             prfWeight[i] = 1.0e6
         prf = prf + prfn[i] / prfWeight[i]
-        prf = prf / nansum(prf)
+        prf = prf / np.nansum(prf)
 
     # dimensions of data image
     datDimY = np.shape(imgflux)[0]
@@ -238,7 +238,7 @@ def fitMultiPRF(flux, ydim, xdim, column, row, prfn, crval1p, crval2p,
         if prfWeight[i] == 0.0:
             prfWeight[i] = 1.0e6
         prf = prf + prfn[i] / prfWeight[i]
-        prf = prf / nansum(prf)
+        prf = prf / np.nansum(prf)
 
     # dimensions of data image
     datDimY = np.shape(imgflux)[0]
@@ -415,7 +415,7 @@ def fitFocusMultiPRF(flux, ydim, xdim, column, row, prfn, crval1p, crval2p,
         if prfWeight[i] == 0.0:
             prfWeight[i] = 1.0e6
         prf = prf + prfn[i] / prfWeight[i]
-        prf = prf / nansum(prf)
+        prf = prf / np.nansum(prf)
 
     # dimensions of data image
     datDimY = np.shape(imgflux)[0]
