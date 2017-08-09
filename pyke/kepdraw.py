@@ -144,7 +144,7 @@ def kepdraw(infile, outfile=None, datacol=None, ploterr=False,
 
         if len(flux_columns_found) == 0:
             raise ValueError("No flux columns found.")
-        print("Found the following flux columns: {}".format(flux_columns_found))
+        print("Found the following flux columns: {}".format(", ".join(flux_columns_found)))
 
         for colname in default_priority_columns:
             if colname in flux_columns_found:
