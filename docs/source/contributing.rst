@@ -86,3 +86,9 @@ You should see something like this:
 
 10. That's it! :)
 
+
+Coding and documentation guidelines
+-----------------------------------
+
+PyKE adopts AstroPy's coding guidelines and standards,
+as documented in `AstroPy's Development Documentation <http://docs.astropy.org/en/stable/index.html#developer-documentation>`_. 
