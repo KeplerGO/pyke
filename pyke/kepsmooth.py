@@ -87,7 +87,7 @@ def kepsmooth(infile, outfile=None, datacol='SAP_FLUX', function='flat',
     if overwrite:
         kepio.overwrite(outfile, logfile, verbose)
     if kepio.fileexists(outfile):
-        errmsg = 'ERROR -- KEPSMOOTH: {} exists. Use overwrite=True'.format(oufile)
+        errmsg = 'ERROR -- KEPSMOOTH: {} exists. Use overwrite=True'.format(outfile)
         kepmsg.err(logfile, errmsg, verbose)
 
     ## open input file

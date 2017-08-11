@@ -34,7 +34,6 @@ def kepfilter(infile, passband, outfile=None, datacol='SAP_FLUX', function='boxc
         The options are:
 
         * low
-
         * high
     outfile : str
         The name of the output FITS file. The output file is identical in
@@ -49,9 +48,7 @@ def kepfilter(infile, passband, outfile=None, datacol='SAP_FLUX', function='boxc
         The options are:
 
         * boxcar
-
         * gauss
-
         * sinc
     cutoff : float
         The frequency of the bandpass cutoff in units of days-1.
@@ -71,7 +68,7 @@ def kepfilter(infile, passband, outfile=None, datacol='SAP_FLUX', function='boxc
 
     .. code-block :: bash
 
-        $ kepfilter kplr002436324-2009259160929_llc.fits kepfilter.fits --datacol 'SAP_FLUX' --function 'boxcar'
+        $ kepfilter kplr002436324-2009259160929_llc.fits --datacol 'SAP_FLUX' --function 'boxcar'
         --plot --verbose --overwrite
 
     .. image :: ../_static/images/api/kepfilter.png

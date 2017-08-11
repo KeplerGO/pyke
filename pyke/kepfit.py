@@ -9,20 +9,19 @@ from scipy.ndimage.interpolation import shift
 
 def leastsquares(fitfunc, pinit, xdata, ydata, yerr, logfile, verbose):
     """linear least square polynomial fit using scipy"""
-    errfunc = lambda p, x, y, err: (y - fitfunc(p, x)) / err
+    errfunc = lambda p, x, y, err: np.sum(((y - fitfunc(p, x)) / err) ** 2)
 
     if yerr is None:
         yerr = np.ones(len(ydata))
     # fit data
     try:
-        out = optimize.leastsq(errfunc, pinit, args=(xdata, ydata, yerr),
-                               full_output=1)
+        out = optimize.minimize(errfunc, pinit, args=(xdata, ydata, yerr))
     except:
         errmsg = 'ERROR -- KEPFIT.LEASTSQUARES: failed to fit data'
         kepmsg.err(logfile, errmsg, verbose)
 
-    coeffs = out[0]
-    covar = out[1]
+    coeffs = out.x
+    covar = out.hess_inv
 
     # calculate 1-sigma error on coefficients
     if covar is None:
@@ -178,7 +177,7 @@ def fitPRF(flux, ydim, xdim, column, row, prfn, crval1p, crval2p, cdelt1p,
         if prfWeight[i] == 0.0:
             prfWeight[i] = 1.0e6
         prf = prf + prfn[i] / prfWeight[i]
-        prf = prf / nansum(prf)
+        prf = prf / np.nansum(prf)
 
     # dimensions of data image
     datDimY = np.shape(imgflux)[0]
@@ -239,7 +238,7 @@ def fitMultiPRF(flux, ydim, xdim, column, row, prfn, crval1p, crval2p,
         if prfWeight[i] == 0.0:
             prfWeight[i] = 1.0e6
         prf = prf + prfn[i] / prfWeight[i]
-        prf = prf / nansum(prf)
+        prf = prf / np.nansum(prf)
 
     # dimensions of data image
     datDimY = np.shape(imgflux)[0]
@@ -416,7 +415,7 @@ def fitFocusMultiPRF(flux, ydim, xdim, column, row, prfn, crval1p, crval2p,
         if prfWeight[i] == 0.0:
             prfWeight[i] = 1.0e6
         prf = prf + prfn[i] / prfWeight[i]
-        prf = prf / nansum(prf)
+        prf = prf / np.nansum(prf)
 
     # dimensions of data image
     datDimY = np.shape(imgflux)[0]

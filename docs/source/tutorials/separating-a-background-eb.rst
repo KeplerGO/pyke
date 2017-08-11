@@ -50,6 +50,8 @@ operating upon the TPF *kplr002449074-2009350155506_lpd-targ.fits*, as follows:
 
 .. code-block:: bash
 
+    $ wget https://archive.stsci.edu/missions/kepler/target_pixel_files/0024/002449074/kplr002449074-2009350155506_lpd-targ.fits.gz
+
     $ keppixseries kplr002449074-2009350155506_lpd-targ.fits.gz
     --plotfile keppixseries.png --plottype local
 

@@ -50,21 +50,23 @@ For example, let's visualize the pixels of Kepler target KIC008462852
 
     $ kepmask kplr008462852-2013098041711_lpd-targ.fits.gz --maskfile mask.txt
 
-.. image:: docs/source/_static/images/readme/kepmask.png
+.. we should use full url addresses for images henceforth, so that they will be correctly captured by PYPI
+
+.. image:: http://pyke.keplerscience.org/en/latest/_images/kepmask1.png
 
 ``kepmask`` is an interactive tool used to create a custom
 aperture mask which can subsequently be used in other PyKE tasks.
 
 For example, we can now use the ``kepextract`` task to perform aperture photometry using the pixels defined using ``kepmask`` above::
 
-    $ kepextract kplr008462852-2013098041711_lpd-targ.fits.gz lightcurve.fits --maskfile mask.txt
+    $ kepextract kplr008462852-2013098041711_lpd-targ.fits.gz --outfile lightcurve.fits --maskfile mask.txt
 
 This creates a file called ``lightcurve.fits`` which contains a lightcurve in a format similar to those found in the official archive.
 To visualize the resulting light curve, we can use ``kepdraw``::
 
     $ kepdraw lightcurve.fits
 
-.. image:: docs/source/_static/images/readme/kepdraw.png
+.. image:: http://pyke.keplerscience.org/en/latest/_images/kepdraw1.png
 
 
 Contributing
@@ -77,9 +79,10 @@ You can also contact the development team via keplergo@mail.arc.nasa.gov
 Citing
 ------
 
-If you find this code useful in your research,
-please cite both (Vinícius et al. 2017) and (Still & Barclay, 2012)
-using the BibTeX provided below::
+If you find this code useful in your research, please cite both (Vinícius et al. 2017) and (Still & Barclay, 2012)
+using the BibTeX provided below. Also, please give us a GitHub star!
+
+::
 
     @misc{pyke3,
       author       = {Zé Vinícius and

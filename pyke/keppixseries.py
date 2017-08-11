@@ -51,12 +51,10 @@ def keppixseries(infile, outfile=None, plotfile=None, plottype='global',
 
         * local - All individual pixel light curves are scaled separately to
           provide the most dynamic range for each pixel.
-
         * global - All pixel light curves are scaled between zero and the
           maximum flux attained by the brightest pixel in the mask. This option
           provides the relative contribution to the archived light curve by each
           pixel.
-
         * full - All pixels light curves are scaled between zero and the
           maximum flux attained by that pixel. This provides the fraction of
           variability within each individual pixel.
@@ -68,9 +66,7 @@ def keppixseries(infile, outfile=None, plotfile=None, plottype='global',
         The functional form of the high pass-band filter:
 
         * boxcar
-
         * gauss
-
         * sinc
     cutoff : float
         The frequency of the high pass-band cutoff in units of :math:`days^{-1}`.

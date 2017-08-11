@@ -102,7 +102,7 @@ def kepflatten(infile, outfile=None, datacol='PDCSAP_FLUX',
     --------
     .. code-block:: bash
 
-        $ kepflatten kplr012557548-2011177032512_llc.fits kepflatten.fits
+        $ kepflatten kplr012557548-2011177032512_llc.fits
         --nsig 3 --stepsize 1.0 --winsize 3.0 --npoly 3 --niter 10 --plot
         --overwrite --verbose
 

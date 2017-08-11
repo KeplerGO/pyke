@@ -33,19 +33,14 @@ def kepimages(infile, prefix, imtype='FLUX', ranges='0,0', overwrite=True,
     The user can choose from six different images to extract:
 
     * ``RAW_CNTS`` -- uncalibrated pixel count values
-
     * ``FLUX`` -- calibrated pixel, background-subtracted, cosmic ray-removed
       fluxes in units of :math:`e^{-}/s`
-
     * ``FLUX_ERR`` -- 1-:math:`\sigma` errors on the FLUX image, as
       propagated through the pixel calibration
-
     * ``FLUX_BKG`` -- the background that has been subtracted from the FLUX
       image in units of :math:`e^{-}/s`
-
     * ``FLUX_BKG_ERR`` -- 1-:math:`\sigma` errors on the FLUX_BKG image, as
       propagated through the pixel calibration
-
     * ``COSMIC_RAYS`` -- the cosmic ray map that has been subtracted from the
       FLUX image in units of :math:`e^{-}/s`
 
@@ -173,7 +168,7 @@ def kepimages(infile, prefix, imtype='FLUX', ranges='0,0', overwrite=True,
         outstr = pyfits.HDUList(hdu0)
 
         # construct output image extension
-        hdu1 = pyfits.ImageHDU(flux[cadence])
+        hdu1 = pyfits.ImageHDU(outim[cadence])
         for i in range(len(cards2)):
             try:
                 if cards2[i].keyword not in hdu1.header.keys():

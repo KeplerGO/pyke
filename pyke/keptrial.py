@@ -10,7 +10,7 @@ __all__ = ['keptrial']
 
 
 def keptrial(infile, outfile=None, datacol='SAP_FLUX', errcol='SAP_FLUX_ERR',
-             fmin=0.1, fmax=50, nfreq=100, method='ft', ntrials=1000,
+             fmin=0.1, fmax=50, nfreq=10, method='ft', ntrials=1000,
              plot=False, overwrite=False, verbose=False,
              logfile='keptrial.log'):
     """
@@ -137,7 +137,7 @@ def keptrial(infile, outfile=None, datacol='SAP_FLUX', errcol='SAP_FLUX_ERR',
         incols = [barytime, signal, err]
         [barytime, signal, err] = kepstat.removeinfinlc(signal, incols)
     # frequency steps and Monte Carlo iterations
-    deltaf = (fmax - fmin) / nfreq
+    deltaf = (fmax - fmin) / float(nfreq)
     freq, pmax, trial = [], [], []
     for i in tqdm(range(ntrials)):
         trial.append(i + 1)
@@ -164,13 +164,13 @@ def keptrial(infile, outfile=None, datacol='SAP_FLUX', errcol='SAP_FLUX_ERR',
     # fit normal distribution to histogram
     x = np.zeros(len(bins))
     for j in range(1, len(bins)):
-        x[j] = (bins[j] + bins[j - 1]) / 2
+        x[j] = (bins[j] + bins[j - 1]) / 2.
     pinit = np.array([float(i), freq[-1], deltaf])
     n = np.array(n, dtype='float32')
     coeffs, errors, covar, sigma, chi2, dof, fit, plotx, ploty = \
             kepfit.leastsquares(kepfunc.gauss, pinit, x[1:], n, None,
                                 logfile, verbose)
-    f = np.arange(fmin, fmax, (fmax - fmin) /100)
+    f = np.arange(fmin, fmax, (fmax - fmin) / 100.)
     fit = kepfunc.gauss(coeffs, f)
     plt.plot(f, fit, 'r-', linewidth=2)
     plt.xlabel(r'Frequency (1/d)', {'color' : 'k'})

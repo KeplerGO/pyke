@@ -11,7 +11,7 @@ __all__ = ['kepsff']
 
 
 def kepsff(infile, outfile=None, datacol='DETSAP_FLUX', cenmethod='moments',
-           stepsize=4.0, npoly_cxcy=1, sigma_cxcy=6.0, npoly_ardx=6,
+           stepsize=0.5, npoly_cxcy=1, sigma_cxcy=6.0, npoly_ardx=6,
            npoly_dsdt=2, sigma_dsdt=3.0, npoly_arfl=3, sigma_arfl=3.0,
            plot=False, overwrite=False, verbose=False, logfile='kepsff.log'):
     """
@@ -106,7 +106,6 @@ def kepsff(infile, outfile=None, datacol='DETSAP_FLUX', cenmethod='moments',
           (alternatively known as the zeroth-moment of the flux distribution
           over the pixels). These two arrays, the X and Y centroid over time,
           are stored in FITS columns MOM_CENTR1 and MOM_CENTR2.
-
         * ``psf`` -- the PSF-fitting method, the X and Y locations of best-fit
           PSF models to the aperture pixels. These are rarely available within
           archived Kepler data but can be stored in PSF_CENTR1 and PSF_CENTR2.
@@ -732,7 +731,7 @@ def kepsff_main():
     parser.add_argument('--cenmethod', default='moments',
                         help='Centroid method', type=str,
                         choices=['moments','psf'])
-    parser.add_argument('--stepsize', default=4.0,
+    parser.add_argument('--stepsize', default=.5,
                         help='Stepsize over which to calibrate data [days]',
                         type=float)
     parser.add_argument('--npoly_cxcy', default=1,
