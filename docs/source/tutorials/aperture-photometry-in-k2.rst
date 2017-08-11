@@ -68,7 +68,7 @@ correction factors.
 
     $ kepsff ktwo202073445-c00_lpd-targ-kepextract-kepclip-kepflatten.fits --datacol DETSAP_FLUX --stepsize 5. --npoly_ardx 4 --sigma_dsdt 10. --overwrite
 
-    $ kepdraw ktwo202073445-c00_lpd-targ-kepextract-kepclip-kepflatten-kepsff.fits--datacol DETSAP_FLUX
+    $ kepdraw ktwo202073445-c00_lpd-targ-kepextract-kepclip-kepflatten-kepsff.fits --datacol DETSAP_FLUX
 
 .. image:: ../_static/images/tutorials/example_e/kepsff_lc.png
 

@@ -27,11 +27,12 @@ def kepextract(infile, outfile=None, maskfile='ALL', bkg=False, psfcentroid=Fals
     alter the summed pixel set. Applications include:
 
         * Use of all pixels in the aperture
-        * The pipeline does not produce a light curve for sources observed with
+        * The Kepler pipeline does not produce a light curve for sources observed with
           custom or dedicated pixel masks. The user can create a light curve for
           these sources using kepextract.
         * Construction of pixel light curves, in which the time series for a single
-          pixel can be examined. Light curves for extended sources which may be
+          pixel can be examined.
+        * Light curves for extended sources which may be
           poorly sampled by the optimal aperture.
 
     Parameters
@@ -42,7 +43,7 @@ def kepextract(infile, outfile=None, maskfile='ALL', bkg=False, psfcentroid=Fals
         Filename for the output light curve. This product will be written to
         the same FITS format as archived light curves.
     maskfile : str
-        This string can be one of three options::
+        This string can be one of three options:
 
             * 'ALL' tells the task to calculate principal components from all
               pixels within the pixel mask stored in the input file.
@@ -57,7 +58,7 @@ def kepextract(infile, outfile=None, maskfile='ALL', bkg=False, psfcentroid=Fals
     bkg : bool
         Option to subtract an estimate of the background. Background is
         calculated by identifying the median pixel value for each exposure.
-        This method requires an adequate number of pixels in within the target
+        This method requires an adequate number of pixels within the target
         mask that contain background and negligible source flux. Note that
         background has already been subtracted from calibrated Kepler Target
         Pixel Files, but not early campaign data from the K2 mission.
@@ -68,8 +69,8 @@ def kepextract(infile, outfile=None, maskfile='ALL', bkg=False, psfcentroid=Fals
     overwrite : bool
         Overwrite the output file?
     verbose : bool
-        Option for verbose mode, in which informative messages and warnings to
-        the shell and a logfile.
+        Option for verbose mode, in which informative messages and warnings
+        print to the shell and a logfile.
     logfile : str
         Name of the logfile containing error and warning messages.
 
@@ -139,7 +140,7 @@ def kepextract(infile, outfile=None, maskfile='ALL', bkg=False, psfcentroid=Fals
     table = instr[1].data[:]
     maskmap = copy(instr[2].data)
 
-    print("Extracting information from Target Pixel File...")
+    kepmsg.log(logfile,"Extracting information from Target Pixel File...",verbose)
 
     # input table data
     kepid, channel, skygroup, module, output, quarter, season, \
@@ -315,7 +316,7 @@ def kepextract(infile, outfile=None, maskfile='ALL', bkg=False, psfcentroid=Fals
     sap_bkg = np.array([], 'float32')
     sap_bkg_err = np.array([], 'float32')
     raw_flux = np.array([],'float32')
-    print("Aperture photometry...")
+    kepmsg.log(logfile,"Aperture photometry...",verbose)
     for i in tqdm(range(len(time))):
         work1 = np.array([], 'float64')
         work2 = np.array([], 'float64')
@@ -335,7 +336,7 @@ def kepextract(infile, outfile=None, maskfile='ALL', bkg=False, psfcentroid=Fals
         sap_bkg_err = np.append(sap_bkg_err, math.sqrt(np.nansum(work4 * work4)))
         raw_flux = np.append(raw_flux, np.nansum(work5))
 
-    print("Sample moments...")
+    kepmsg.log(logfile,"Sample moments...",verbose)
     # construct new table moment data
     for i in tqdm(range(ntime)):
         xf = np.zeros(shape=(naper))
@@ -368,7 +369,7 @@ def kepextract(infile, outfile=None, maskfile='ALL', bkg=False, psfcentroid=Fals
     mom_centr2_err = mom_centr2_err * mom_centr2
 
     if psfcentroid:
-        print("PSF Centroiding...")
+        kepmsg.log(logfile,"PSF Centroiding...",verbose)
         # construct new table PSF data
         psf_centr1 = np.zeros(shape=(ntime))
         psf_centr2 = np.zeros(shape=(ntime))
@@ -566,7 +567,7 @@ def kepextract(infile, outfile=None, maskfile='ALL', bkg=False, psfcentroid=Fals
     outstr.append(hdu2)
 
     # write output file
-    print("Writing output file {}...".format(outfile))
+    kepmsg.log(logfile,"Writing output file {}...".format(outfile),verbose)
     outstr.writeto(outfile, checksum=True)
     # close input structure
     instr.close()

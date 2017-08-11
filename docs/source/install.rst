@@ -65,12 +65,12 @@ Building documentation
     Building the documentation is in general not necessary unless you
     are writing new documentation or do not have internet access, because
     the latest (and archive) versions of PyKE's documentation should
-    be available at `pyke.readthedocs.io <http://pyke.readthedocs.io>`_ .
+    be available at `pyke.keplerscience.org/ <http://pyke.keplerscience.org/>`_ .
 
 To build the documentation, you can do::
 
     cd docs
     make html
 
-The documentation will be built in the ``docs/_build/html`` directory, and can
-be read by pointing a web browser to ``docs/_build/html/index.html``.
+The documentation will be built in the ``docs/build/html`` directory, and can
+be read by pointing a web browser to ``docs/build/html/index.html``.
