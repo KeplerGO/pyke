@@ -168,7 +168,7 @@ def kepimages(infile, prefix, imtype='FLUX', ranges='0,0', overwrite=True,
         outstr = pyfits.HDUList(hdu0)
 
         # construct output image extension
-        hdu1 = pyfits.ImageHDU(flux[cadence])
+        hdu1 = pyfits.ImageHDU(outim[cadence])
         for i in range(len(cards2)):
             try:
                 if cards2[i].keyword not in hdu1.header.keys():
