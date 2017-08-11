@@ -140,7 +140,7 @@ def kepextract(infile, outfile=None, maskfile='ALL', bkg=False, psfcentroid=Fals
     table = instr[1].data[:]
     maskmap = copy(instr[2].data)
 
-    print("Extracting information from Target Pixel File...")
+    kepmsg.log(logfile,"Extracting information from Target Pixel File...",verbose)
 
     # input table data
     kepid, channel, skygroup, module, output, quarter, season, \
@@ -316,7 +316,7 @@ def kepextract(infile, outfile=None, maskfile='ALL', bkg=False, psfcentroid=Fals
     sap_bkg = np.array([], 'float32')
     sap_bkg_err = np.array([], 'float32')
     raw_flux = np.array([],'float32')
-    print("Aperture photometry...")
+    kepmsg.log(logfile,"Aperture photometry...",verbose)
     for i in tqdm(range(len(time))):
         work1 = np.array([], 'float64')
         work2 = np.array([], 'float64')
@@ -336,7 +336,7 @@ def kepextract(infile, outfile=None, maskfile='ALL', bkg=False, psfcentroid=Fals
         sap_bkg_err = np.append(sap_bkg_err, math.sqrt(np.nansum(work4 * work4)))
         raw_flux = np.append(raw_flux, np.nansum(work5))
 
-    print("Sample moments...")
+    kepmsg.log(logfile,"Sample moments...",verbose)
     # construct new table moment data
     for i in tqdm(range(ntime)):
         xf = np.zeros(shape=(naper))
@@ -369,7 +369,7 @@ def kepextract(infile, outfile=None, maskfile='ALL', bkg=False, psfcentroid=Fals
     mom_centr2_err = mom_centr2_err * mom_centr2
 
     if psfcentroid:
-        print("PSF Centroiding...")
+        kepmsg.log(logfile,"PSF Centroiding...",verbose)
         # construct new table PSF data
         psf_centr1 = np.zeros(shape=(ntime))
         psf_centr2 = np.zeros(shape=(ntime))
@@ -567,7 +567,7 @@ def kepextract(infile, outfile=None, maskfile='ALL', bkg=False, psfcentroid=Fals
     outstr.append(hdu2)
 
     # write output file
-    print("Writing output file {}...".format(outfile))
+    kepmsg.log(logfile,"Writing output file {}...".format(outfile),verbose)
     outstr.writeto(outfile, checksum=True)
     # close input structure
     instr.close()
