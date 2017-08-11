@@ -4,7 +4,7 @@ Example 4a: Seamlessly stitch together different quarters of a Kepler light curv
 ======================================================================
 
 In this example we will examine KIC 9603833. We can download the data for each quarter from the
-`MAST archive <http://archive.stsci.edu/kepler/preview.php?type=lc&dsn=KPLR009603833-2011271113734`_.
+`MAST archive <http://archive.stsci.edu/kepler/preview.php?type=lc&dsn=KPLR009603833-2011271113734>`_.
 
 MAST gives the option to download all the light curves via a wget script, like so:
 
