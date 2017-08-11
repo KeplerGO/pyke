@@ -1,1 +1,1 @@
-Contributions guidelines are briefly stated on http://pyke.keplerscience.org/en/latest/contributing.html
+PyKE's contribution guidelines may be found at http://pyke.keplerscience.org/en/latest/contributing.html
