@@ -227,7 +227,7 @@ def emptykeys(struct, filename, logfile, verbose):
         for keyword in struct[hdu].header.keys():
             head = struct[hdu].header[keyword]
             if 'pyfits' in str(head) and 'Undefined' in str(head):
-                delete(keyword, struct[hdu], filename, logfile, verbose)
+                remove(keyword, struct[hdu], filename, logfile, verbose)
     return struct
 
 def HDUnum(struct):
