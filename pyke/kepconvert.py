@@ -12,7 +12,7 @@ from . import kepio, kepmsg, kepkey
 __all__ = ['kepconvert']
 
 
-def kepconvert(infile, conversion, columns, timeformat='', outfile=None, baddata=True,
+def kepconvert(infile, conversion, columns, timeformat='jd', outfile=None, baddata=True,
                overwrite=False, verbose=False, logfile='kepconvert.log'):
     """
     kepconvert -- Convert Kepler FITS time series to or from a different file
@@ -144,7 +144,7 @@ def kepconvert(infile, conversion, columns, timeformat='', outfile=None, baddata
         for colname in tqdm(colnames):
             try:
                 if colname.lower() == 'time':
-                    if len(timeformat) > 0:
+                    if timeformat != "jd":
                         kepmsg.log(logfile, 'KEPCONVERT -- converting BJD to ' +
                                    '{}'.format(timeformat), verbose)
                         times = []
@@ -409,8 +409,8 @@ def kepconvert_main():
     parser.add_argument('infile', help='Name of input file', type=str)
     parser.add_argument('conversion', help='Type of data conversion', type=str,
                         choices=['fits2asc', 'fits2csv', 'asc2fits'], default='fits2asc')
-    parser.add_argument('--timeformat', dest='timeformat', default='',
-                        help="Export time into any subformat handled by astropy.Time",
+    parser.add_argument('--timeformat', dest='timeformat', default='jd',
+                        help="Export time into any subformat handled by astropy.Time (e.g. mjd, iso, decimalyear)",
                         type=str)
     parser.add_argument('--columns', '-c', default='TIME,SAP_FLUX,SAP_FLUX_ERR',
                         dest='columns', help='Comma-delimited list of data columns',
