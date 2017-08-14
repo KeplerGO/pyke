@@ -317,7 +317,7 @@ def kepextract(infile, outfile=None, maskfile='ALL', bkg=False, psfcentroid=Fals
     sap_bkg_err = np.array([], 'float32')
     raw_flux = np.array([],'float32')
     kepmsg.log(logfile,"Aperture photometry...",verbose)
-    for i in tqdm(range(len(time))):
+    for i in tqdm(range(len(time)), desc="Aperture photometry"):
         work1 = np.array([], 'float64')
         work2 = np.array([], 'float64')
         work3 = np.array([], 'float64')
@@ -338,7 +338,7 @@ def kepextract(infile, outfile=None, maskfile='ALL', bkg=False, psfcentroid=Fals
 
     kepmsg.log(logfile,"Sample moments...",verbose)
     # construct new table moment data
-    for i in tqdm(range(ntime)):
+    for i in tqdm(range(ntime), desc="Computing moments"):
         xf = np.zeros(shape=(naper))
         yf = np.zeros(shape=(naper))
         f = np.zeros(shape=(naper))
@@ -361,10 +361,12 @@ def kepextract(infile, outfile=None, maskfile='ALL', bkg=False, psfcentroid=Fals
         xfsume = math.sqrt(np.nansum(xfe * xfe) / naper)
         yfsume = math.sqrt(np.nansum(yfe * yfe) / naper)
         fsume = math.sqrt(np.nansum(fe * fe) / naper)
-        mom_centr1[i] = xfsum / fsum
-        mom_centr2[i] = yfsum / fsum
-        mom_centr1_err[i] = math.sqrt((xfsume / xfsum) ** 2 + ((fsume / fsum) ** 2))
-        mom_centr2_err[i] = math.sqrt((yfsume / yfsum) ** 2 + ((fsume / fsum) ** 2))
+        # Ignore "RuntimeWarning: invalid value encountered in double_scalars"
+        with np.errstate(divide='ignore', invalid='ignore'):
+            mom_centr1[i] = xfsum / fsum
+            mom_centr2[i] = yfsum / fsum
+            mom_centr1_err[i] = math.sqrt((xfsume / xfsum) ** 2 + ((fsume / fsum) ** 2))
+            mom_centr2_err[i] = math.sqrt((yfsume / yfsum) ** 2 + ((fsume / fsum) ** 2))
     mom_centr1_err = mom_centr1_err * mom_centr1
     mom_centr2_err = mom_centr2_err * mom_centr2
 
