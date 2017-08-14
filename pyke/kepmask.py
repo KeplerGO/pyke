@@ -189,10 +189,6 @@ def kepmask(infile, frameno=100, maskfile='mask.txt', plotfile='kepmask.png',
     # plot style
     plt.rcParams['figure.dpi'] = 80
     plt.figure(figsize=[10, 7])
-    plotimage()
-
-# plot channel image
-def plotimage():
 
     global aid, bid, cid, did, eid, fid
 
@@ -266,20 +262,7 @@ def plotimage():
     plt.xlabel('Pixel Column Number', {'color' : 'k'}, fontsize=14)
     plt.ylabel('Pixel Row Number', {'color' : 'k'}, fontsize=14)
     plt.tick_params(labelsize=12)
-    # plot the mask
-    if colmap in ['Greys','binary','bone','gist_gray','gist_yarg',
-                'gray','pink','RdGy']:
-        sqcol = 'g'
-        alpha = 0.5
-    else:
-        sqcol = '#ffffee'
-        alpha = 0.8
-    for pixel in mask:
-        m = int(pixel.split(',')[0])
-        n = int(pixel.split(',')[1])
-        x = [m - 0.5, m + 0.5, m + 0.5, m - 0.5, m - 0.5]
-        y = [n - 0.5, n - 0.5, n + 0.5, n + 0.5, n - 0.5]
-        plt.fill(x, y, sqcol, alpha=alpha, ec=sqcol)
+
     fid = plt.connect('button_press_event', clicker6)
     # render plot
     plt.draw()
@@ -304,7 +287,7 @@ def clicker1(event):
                 plt.disconnect(fid)
                 mask = []
                 plt.clf()
-                plotimage()
+                plt.draw()
     return
 
 # -----------------------------------------------------------
@@ -337,7 +320,7 @@ def clicker2(event):
                             x = int(work[i].split(',')[1]) + x0
                             mask.append(str(x) + ',' + str(y))
                         plt.clf()
-                        plotimage()
+                        plt.draw()
                 except:
                     errmsg = ('ERROR -- KEPMASK: Cannot open or read mask '
                               'file ' + mfile)
@@ -393,13 +376,6 @@ def clicker6(event):
         if event.button == 1:
             if (event.x > 75 and event.x < 580 and
                 event.y > 53 and event.y < 550):
-                if colmap in ['Greys', 'binary', 'bone', 'gist_gray',
-                              'gist_yarg', 'gray', 'pink', 'RdGy']:
-                    sqcol = 'g'
-                    alpha = 0.5
-                else:
-                    sqcol = '#ffffee'
-                    alpha = 0.8
                 m = event.xdata + 0.5
                 n = event.ydata + 0.5
                 txt = str(int(m)) + ',' + str(int(n))
@@ -411,7 +387,18 @@ def clicker6(event):
                     mask = tmpmask
                 else:
                     mask.append(txt)
-                plotimage()
+                if colmap in ['Greys','binary','bone','gist_gray','gist_yarg',
+                            'gray','pink','RdGy']:
+                    sqcol = 'g'
+                else:
+                    sqcol = '#ffffee'
+                for pixel in mask:
+                    m = int(pixel.split(',')[0])
+                    n = int(pixel.split(',')[1])
+                    x = [m - 0.5, m + 0.5, m + 0.5, m - 0.5, m - 0.5]
+                    y = [n - 0.5, n - 0.5, n + 0.5, n + 0.5, n - 0.5]
+                    plt.fill(x, y, sqcol, ec=sqcol)
+                plt.draw()
 
 def kepmask_main():
     import argparse
