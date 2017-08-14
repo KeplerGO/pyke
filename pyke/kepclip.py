@@ -1,9 +1,9 @@
-from .utils import PyKEArgumentHelpFormatter
-from . import kepio, kepmsg, kepkey
 import numpy as np
 from astropy.io import fits as pyfits
 from matplotlib import pyplot as plt
 from tqdm import tqdm
+from .utils import PyKEArgumentHelpFormatter
+from . import kepio, kepmsg, kepkey
 
 
 __all__ = ['kepclip']
@@ -91,7 +91,7 @@ def kepclip(infile, ranges, outfile=None, datacol='SAP_FLUX', plot=False,
         cadenom = cadence
 
     # fudge non-compliant FITS keywords with no values
-    instr = kepkey.emptykeys(instr, infile, logfile, verbose)
+    #instr = kepkey.emptykeys(instr, infile, logfile, verbose)
 
     # input data
     table = instr[1].data
@@ -215,7 +215,7 @@ def kepclip_main():
                         type=str)
     parser.add_argument('--outfile',
                         help=('Name of FITS file to output.'
-                              ' If None, outfile is infile-kepclip.'),
+                              ' If None, outfile is infile-kepclip.fits'),
                         default=None)
     parser.add_argument('--datacol', help='Data column to plot',
                         default='SAP_FLUX', type=str)
