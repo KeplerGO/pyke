@@ -16,9 +16,9 @@ zscale = False; xmin = 0.0; xmax = 1000.0; ymin = 0.0; ymax = 1000.0
 zmin = False; zmax = False; norm=None; kepid = ''; ra = ''; dec = ''; kepmag = ''
 season = ''; quarter = -1; skygroup = ''; channel = ''; module = ''
 output = ''; column = ''; row = ''; colmap='jet'; aid = None; bid = None
-cid = None; did = None; eid = None; fid = None; pkepmag = None; pkepid = None
+cid = None; fid = None; pkepmag = None; pkepid = None
 pra = None; pdec = None
-
+i = 0;
 
 __all__ = ['kepmask']
 
@@ -84,6 +84,7 @@ def kepmask(infile, frameno=100, maskfile='mask.txt', plotfile='kepmask.png',
     global pxdim, pydim, kepmag, skygroup, season, channel
     global module, output, row, column, mfile, pfile
     global pkepid, pkepmag, pra, pdec, colmap
+    global pxdim, pydim
 
     # input arguments
     zmin = imin; zmax = imax; zscale = iscale; colmap = cmap
@@ -190,10 +191,18 @@ def kepmask(infile, frameno=100, maskfile='mask.txt', plotfile='kepmask.png',
     plt.rcParams['figure.dpi'] = 80
     plt.figure(figsize=[10, 7])
 
-    global aid, bid, cid, did, eid, fid
+    global mask, aid, bid, cid, did, fid
 
-    # print image and source location data on plot
-    plt.draw()
+    aid = plt.connect('button_press_event', clicker1)
+    bid = plt.connect('button_press_event', clicker2)
+    cid = plt.connect('button_press_event', clicker3)
+    did = plt.connect('button_press_event', clicker4)
+    fid = plt.connect('button_press_event', clicker6)
+
+    redraw()
+    plt.show()
+
+def redraw():
     plt.clf()
     plt.axes([0.73, 0.09, 0.25, 0.4])
     plt.text(0.1, 1.0,'      KepID: {}'.format(pkepid, fontsize=12))
@@ -219,7 +228,6 @@ def kepmask(infile, frameno=100, maskfile='mask.txt', plotfile='kepmask.png',
     plt.fill([0.0, 1.0, 1.0, 0.0, 0.0], [0.0, 0.0, 1.0, 1.0, 0.0], '#ffffee')
     plt.xlim(0.0, 1.0)
     plt.ylim(0.0, 1.0)
-    aid = plt.connect('button_press_event', clicker1)
     # load mask button
     plt.axes([0.73, 0.74, 0.25, 0.11])
     plt.text(0.5, 0.5, 'LOAD', fontsize=24,
@@ -228,7 +236,6 @@ def kepmask(infile, frameno=100, maskfile='mask.txt', plotfile='kepmask.png',
     plt.fill([0.0, 1.0, 1.0, 0.0, 0.0],[0.0, 0.0, 1.0, 1.0, 0.0], '#ffffee')
     plt.xlim(0.0, 1.0)
     plt.ylim(0.0, 1.0)
-    bid = plt.connect('button_press_event', clicker2)
     # dump custom aperture to file button
     plt.axes([0.73, 0.62, 0.25, 0.11])
     plt.text(0.5, 0.5, 'DUMP', fontsize=24,
@@ -237,7 +244,6 @@ def kepmask(infile, frameno=100, maskfile='mask.txt', plotfile='kepmask.png',
     plt.fill([0.0, 1.0, 1.0, 0.0, 0.0], [0.0, 0.0, 1.0, 1.0, 0.0], '#ffffee')
     plt.xlim(0.0, 1.0)
     plt.ylim(0.0, 1.0)
-    cid = plt.connect('button_press_event', clicker3)
     # print window to png file button
     plt.axes([0.73, 0.50, 0.25, 0.11])
     plt.text(0.5, 0.5, 'PRINT', fontsize=24,
@@ -246,7 +252,6 @@ def kepmask(infile, frameno=100, maskfile='mask.txt', plotfile='kepmask.png',
     plt.fill([0.0, 1.0, 1.0, 0.0, 0.0], [0.0, 0.0, 1.0, 1.0, 0.0], '#ffffee')
     plt.xlim(0.0, 1.0)
     plt.ylim(0.0, 1.0)
-    did = plt.connect('button_press_event', clicker4)
     # set the image window location and size
     ax = plt.axes([0.07, 0.09, 0.63, 0.88])
     # force tick labels to be absolute rather than relative
@@ -263,50 +268,38 @@ def kepmask(infile, frameno=100, maskfile='mask.txt', plotfile='kepmask.png',
     plt.ylabel('Pixel Row Number', {'color' : 'k'}, fontsize=14)
     plt.tick_params(labelsize=12)
 
-    fid = plt.connect('button_press_event', clicker6)
-    # render plot
     plt.draw()
-    plt.show()
 
 # -----------------------------------------------------------
 # clear all pixels from pixel mask
 def clicker1(event):
-
-    global mask, aid, bid, cid, did, eid, fid
-
+    global mask
     if event.inaxes:
         if event.button == 1:
             if (event.x > 601 and event.x < 801 and
                 event.y > 492 and event.y < 522):
                 print("Masked pixels cleared!")
-                plt.disconnect(aid)
-                plt.disconnect(bid)
-                plt.disconnect(cid)
-                plt.disconnect(did)
-                plt.disconnect(eid)
-                plt.disconnect(fid)
                 mask = []
-                plt.clf()
-                plt.draw()
+                redraw()
     return
 
 # -----------------------------------------------------------
 # load mask from file
 def clicker2(event):
+    global mask, mfile, colmap
 
-    global mask, aid, bid, cid, did, eid, fid, done
+    if colmap in ['Greys','binary','bone','gist_gray','gist_yarg',
+                'gray','pink','RdGy']:
+        sqcol = 'g'
+    else:
+        sqcol = '#ffffee'
 
     if event.inaxes:
         if event.button == 1:
             if (event.x > 601 and event.x < 801 and
                 event.y > 422 and event.y < 482):
-                print("Mask definition loaded successfully!")
-                plt.disconnect(aid)
-                plt.disconnect(bid)
-                plt.disconnect(cid)
-                plt.disconnect(did)
-                plt.disconnect(eid)
-                plt.disconnect(fid)
+                plt.clf()
+                redraw()
                 try:
                     lines = kepio.openascii(mfile, 'r', None, False)
                     for line in lines:
@@ -316,11 +309,14 @@ def clicker2(event):
                         x0 = int(work[4])
                         work = work[5].split(';')
                         for i in range(len(work)):
-                            y = int(work[i].split(',')[0]) + y0
-                            x = int(work[i].split(',')[1]) + x0
-                            mask.append(str(x) + ',' + str(y))
-                        plt.clf()
-                        plt.draw()
+                            n = int(work[i].split(',')[0]) + y0
+                            m = int(work[i].split(',')[1]) + x0
+                            mask.append(str(m) + ',' + str(n))
+                            x = [m - 0.5, m + 0.5, m + 0.5, m - 0.5, m - 0.5]
+                            y = [n - 0.5, n - 0.5, n + 0.5, n + 0.5, n - 0.5]
+                            plt.fill(x, y, sqcol, ec=sqcol)
+                    plt.draw()
+                    print("Mask definition loaded successfully!")
                 except:
                     errmsg = ('ERROR -- KEPMASK: Cannot open or read mask '
                               'file ' + mfile)
@@ -330,8 +326,7 @@ def clicker2(event):
 # -----------------------------------------------------------
 # dump custom aperture definition file
 def clicker3(event):
-
-    global aid, bid, cid, did, eid, fid
+    global mfile
 
     if event.inaxes:
         if event.button == 1:
@@ -369,13 +364,14 @@ def clicker4(event):
 # -----------------------------------------------------------
 # this function will be called with every click of the mouse
 def clicker6(event):
-
-    global mask, aid, bid, cid, did, eid, fid
-
+    global mask, i
+    i += 1
+    print(i)
     if event.inaxes:
         if event.button == 1:
             if (event.x > 75 and event.x < 580 and
                 event.y > 53 and event.y < 550):
+                redraw()
                 m = event.xdata + 0.5
                 n = event.ydata + 0.5
                 txt = str(int(m)) + ',' + str(int(n))
