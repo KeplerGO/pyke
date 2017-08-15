@@ -1,9 +1,9 @@
-from .utils import PyKEArgumentHelpFormatter
-from . import kepio, kepmsg, kepkey
 import numpy as np
 from astropy.io import fits as pyfits
 from matplotlib import pyplot as plt
 from tqdm import tqdm
+from .utils import PyKEArgumentHelpFormatter
+from . import kepio, kepmsg, kepkey
 
 
 __all__ = ['kepclip']
@@ -90,9 +90,6 @@ def kepclip(infile, ranges, outfile=None, datacol='SAP_FLUX', plot=False,
     except:
         cadenom = cadence
 
-    # fudge non-compliant FITS keywords with no values
-    instr = kepkey.emptykeys(instr, infile, logfile, verbose)
-
     # input data
     table = instr[1].data
 
@@ -104,27 +101,18 @@ def kepclip(infile, ranges, outfile=None, datacol='SAP_FLUX', plot=False,
         flux = flux / cadenom
 
     # filter input data table
-    naxis2 = 0
-    work1 = np.array([], 'float64')
-    work2 = np.array([], 'float32')
-    for i in tqdm(range(len(barytime))):
-        if (np.isfinite(barytime[i]) and np.isfinite(flux[i])
-            and flux[i] != 0.0):
-            reject = False
-            for j in range(len(t1)):
-                if (barytime[i] >= t1[j] and barytime[i] <= t2[j]):
-                    reject = True
-            if not reject:
-                table[naxis2] = table[i]
-                work1 = np.append(work1, barytime[i])
-                work2 = np.append(work2, flux[i])
-                naxis2 += 1
+    accept_time_mask = np.ones_like(barytime, dtype=bool)
+    for i in range(len(t1)):
+        accept_time_mask[(barytime >= t1[i]) & (barytime <= t2[i])] = False
+    work1 = barytime[accept_time_mask]
+    work2 = flux[accept_time_mask]
+    table = table[accept_time_mask]
 
     # comment keyword in output file
     print("Writing output file {}...".format(outfile))
     kepkey.history(call, instr[0], outfile, logfile, verbose)
     # write output file
-    instr[1].data = table[:naxis2]
+    instr[1].data = table
     comment = 'NaN cadences removed from data'
     kepkey.new('NANCLEAN', True, comment, instr[1], outfile, logfile, verbose)
     instr.writeto(outfile)
@@ -191,9 +179,6 @@ def kepclip(infile, ranges, outfile=None, datacol='SAP_FLUX', plot=False,
         plt.xlabel(xlab, {'color' : 'k'})
         plt.ylabel(ylab, {'color' : 'k'})
         plt.grid()
-
-    # render plot
-    if plot:
         plt.show()
 
     # close input file
@@ -215,7 +200,7 @@ def kepclip_main():
                         type=str)
     parser.add_argument('--outfile',
                         help=('Name of FITS file to output.'
-                              ' If None, outfile is infile-kepclip.'),
+                              ' If None, outfile is infile-kepclip.fits'),
                         default=None)
     parser.add_argument('--datacol', help='Data column to plot',
                         default='SAP_FLUX', type=str)
