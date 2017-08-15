@@ -2,6 +2,7 @@ import numpy as np
 import math
 import os
 from matplotlib import pyplot as plt
+from matplotlib import patches as patches
 from astropy.io import fits as pyfits
 from astropy.visualization import (PercentileInterval, ImageNormalize,
                                    SqrtStretch, LogStretch, LinearStretch)
@@ -10,7 +11,7 @@ from .utils import PyKEArgumentHelpFormatter
 from . import kepio, kepmsg, kepplot
 
 
-infile = False; aperfile = False; maskfile = 'mask.txt'
+infile = False; aperfile = False; maskfile = 'maskfile.txt'
 plotfile = 'kepmask.png'; pxdim = 0; pydim = 0; pimg = None; mask = []
 zscale = False; xmin = 0.0; xmax = 1000.0; ymin = 0.0; ymax = 1000.0
 zmin = False; zmax = False; norm=None; kepid = ''; ra = ''; dec = ''; kepmag = ''
@@ -18,11 +19,12 @@ season = ''; quarter = -1; skygroup = ''; channel = ''; module = ''
 output = ''; column = ''; row = ''; colmap='jet'; aid = None; bid = None
 cid = None; fid = None; pkepmag = None; pkepid = None
 pra = None; pdec = None
+ax = None
 
 __all__ = ['kepmask']
 
 
-def kepmask(infile, frameno=100, maskfile='mask.txt', plotfile='kepmask.png',
+def kepmask(infile, frameno=100, maskfile='maskfile.txt', plotfile='kepmask.png',
             imin=None, imax=None, iscale='linear', cmap='bone',
             verbose=False, logfile='kepmask.log'):
     """
@@ -202,6 +204,8 @@ def kepmask(infile, frameno=100, maskfile='mask.txt', plotfile='kepmask.png',
     plt.show()
 
 def redraw():
+    global ax
+
     plt.clf()
     plt.axes([0.73, 0.09, 0.25, 0.4])
     plt.text(0.1, 1.0,'      KepID: {}'.format(pkepid, fontsize=12))
@@ -313,7 +317,9 @@ def clicker2(event):
                             mask.append(str(m) + ',' + str(n))
                             x = [m - 0.5, m + 0.5, m + 0.5, m - 0.5, m - 0.5]
                             y = [n - 0.5, n - 0.5, n + 0.5, n + 0.5, n - 0.5]
-                            plt.fill(x, y, sqcol, ec=sqcol)
+                            ax.add_patch(patches.Rectangle((x[0], y[0]), 1, 1,
+                                                           color='red', lw=3,
+                                                           fill=False))
                     plt.draw()
                     print("Mask definition loaded successfully!")
                 except:
@@ -390,7 +396,7 @@ def clicker6(event):
                     n = int(pixel.split(',')[1])
                     x = [m - 0.5, m + 0.5, m + 0.5, m - 0.5, m - 0.5]
                     y = [n - 0.5, n - 0.5, n + 0.5, n + 0.5, n - 0.5]
-                    plt.fill(x, y, sqcol, ec=sqcol)
+                    ax.add_patch(patches.Rectangle((x[0], y[0]), 1, 1, color='red', lw=3, fill=False))
                 plt.draw()
 
 def kepmask_main():
