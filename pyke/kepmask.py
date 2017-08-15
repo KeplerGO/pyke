@@ -18,7 +18,6 @@ season = ''; quarter = -1; skygroup = ''; channel = ''; module = ''
 output = ''; column = ''; row = ''; colmap='jet'; aid = None; bid = None
 cid = None; fid = None; pkepmag = None; pkepid = None
 pra = None; pdec = None
-i = 0;
 
 __all__ = ['kepmask']
 
@@ -364,9 +363,7 @@ def clicker4(event):
 # -----------------------------------------------------------
 # this function will be called with every click of the mouse
 def clicker6(event):
-    global mask, i
-    i += 1
-    print(i)
+    global mask
     if event.inaxes:
         if event.button == 1:
             if (event.x > 75 and event.x < 580 and
