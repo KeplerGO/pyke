@@ -101,10 +101,9 @@ def kepclip(infile, ranges, outfile=None, datacol='SAP_FLUX', plot=False,
         flux = flux / cadenom
 
     # filter input data table
-    reject_time_mask = np.zeros_like(barytime, dtype=bool)
+    accept_time_mask = np.ones_like(barytime, dtype=bool)
     for i in range(len(t1)):
-        reject_time_mask += np.array(((barytime >= t1[i]) * (barytime <= t2[i])).reshape(-1))
-    accept_time_mask = ~reject_time_mask
+        accept_time_mask[(barytime >= t1[i]) & (barytime <= t2[i])] = False
     work1 = barytime[accept_time_mask]
     work2 = flux[accept_time_mask]
     table = table[accept_time_mask]
