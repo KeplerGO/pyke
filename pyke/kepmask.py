@@ -318,8 +318,8 @@ def clicker2(event):
                             x = [m - 0.5, m + 0.5, m + 0.5, m - 0.5, m - 0.5]
                             y = [n - 0.5, n - 0.5, n + 0.5, n + 0.5, n - 0.5]
                             ax.add_patch(patches.Rectangle((x[0], y[0]), 1, 1,
-                                                           color='red', lw=3,
-                                                           fill=False))
+                                                           color='red', lw=4,
+                                                           fill=True, alpha=0.3))
                     plt.draw()
                     print("Mask definition loaded successfully!")
                 except:
@@ -396,7 +396,9 @@ def clicker6(event):
                     n = int(pixel.split(',')[1])
                     x = [m - 0.5, m + 0.5, m + 0.5, m - 0.5, m - 0.5]
                     y = [n - 0.5, n - 0.5, n + 0.5, n + 0.5, n - 0.5]
-                    ax.add_patch(patches.Rectangle((x[0], y[0]), 1, 1, color='red', lw=3, fill=False))
+                    ax.add_patch(patches.Rectangle((x[0], y[0]), 1, 1,
+                                                    color='red', lw=4,
+                                                    fill=True, alpha=0.3))
                 plt.draw()
 
 def kepmask_main():
