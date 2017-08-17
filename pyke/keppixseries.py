@@ -467,7 +467,7 @@ def keppixseries(infile, outfile=None, plotfile=None, plottype='global',
     else:
         warnmsg = ('WARNING -- KEPPIXSERIES: output FITS file requires > 999'
                    'columns. Non-compliant with FITS convention.')
-        kepmsg.warn(logfile, warnmsg)
+        kepmsg.warn(logfile, warnmsg, verbose)
 
     # plot pixel array
     fmin = 1.0e33

@@ -1,4 +1,3 @@
-from .utils import PyKEArgumentHelpFormatter
 import numpy as np
 import time
 import math
@@ -11,6 +10,7 @@ from scipy.optimize import fmin_powell
 from scipy.interpolate import RectBivariateSpline
 from scipy.ndimage import interpolation
 from . import kepio, kepmsg, kepplot, kepfunc, kepstat
+from .utils import PyKEArgumentHelpFormatter
 
 
 __all__ = ['kepprf']

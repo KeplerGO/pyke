@@ -174,7 +174,7 @@ def kepflatten(infile, outfile=None, datacol='PDCSAP_FLUX',
     except:
         errmsg = ('WARNING -- KEPFLATTEN: cannot find or read error column {}'
                   .format(errcol))
-        kepmsg.warn(logfile, errmsg)
+        kepmsg.warn(logfile, errmsg, verbose)
         errcol = 'None'
     if errcol.lower() == 'none' or errcol == 'PSF_FLUX_ERR':
         err = datac * cadence
@@ -287,7 +287,7 @@ def kepflatten(infile, outfile=None, datacol='PDCSAP_FLUX',
         except:
             message  = ('WARNING -- KEPFLATTEN: could not fit range '
                         + str(intime[cstep1[i]]) + '-' + str(intime[cstep2[i]]))
-            kepmsg.warn(None, message)
+            kepmsg.warn(logfile, message, verbose)
 
     # find mean fit for each timestamp
     for i in range(len(indata)):

@@ -140,12 +140,12 @@ def kepbls(infile, outfile=None, datacol='DETSAP_FLUX',
         message = ('WARNING -- KEPBLS: {}'
                    ' hours transit duration < 1 phase bin when P = {} days.'
                    .format(maxdur, maxper))
-        kepmsg.warn(logfile, message)
+        kepmsg.warn(logfile, message, verbose)
 
     if overwrite:
         kepio.overwrite(outfile, logfile, verbose)
     if kepio.fileexists(outfile):
-        message = 'ERROR -- KEPBLS: ' + outfile + ' exists. Use overwrite=True'
+        message = 'ERROR -- KEPBLS: {} exists. Use overwrite=True'.format(outfile)
         kepmsg.err(logfile, message, verbose)
 
     # open input file

@@ -215,7 +215,7 @@ def kepfold(infile, period, bjd0, outfile=None, bindata=False,
         quality = np.zeros(len(table.field(0)))
         if qualflag:
             txt = 'WARNING -- KEPFOLD: Cannot find a QUALITY data column'
-            kepmsg.warn(logfile, txt)
+            kepmsg.warn(logfile, txt, verbose)
     barytime = kepio.readtimecol(infile, table, logfile, verbose)
     barytime1 = copy(barytime)
 
@@ -470,7 +470,7 @@ def kepfold(infile, period, bjd0, outfile=None, bindata=False,
                                          'max number of sigma-clipping iterations')
 
     # history keyword in output file
-    print("Writing output file {}...".format(outfile))
+    kepmsg.log(logfile, "Writing output file {}...".format(outfile), True)
     kepkey.history(call, instr[0], outfile, logfile, verbose)
     instr.writeto(outfile)
 

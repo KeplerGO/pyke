@@ -193,17 +193,20 @@ def kepimages(infile, prefix, imtype='FLUX', ranges='0,0', overwrite=True,
             int_time = cards1['INT_TIME'].value
         except:
             kepmsg.warn(logfile,
-                        'WARNING -- KEPIMAGES: cannot find INT_TIME keyword')
+                        'WARNING -- KEPIMAGES: cannot find INT_TIME keyword',
+                        verbose)
         try:
             frametim = cards1['FRAMETIM'].value
         except:
             kepmsg.warn(logfile,
-                        'WARNING -- KEPIMAGES: cannot find FRAMETIM keyword')
+                        'WARNING -- KEPIMAGES: cannot find FRAMETIM keyword',
+                        verbose)
         try:
             num_frm = cards1['NUM_FRM'].value
         except:
             kepmsg.warn(logfile,
-                        'WARNING -- KEPIMAGES: cannot find NUM_FRM keyword')
+                        'WARNING -- KEPIMAGES: cannot find NUM_FRM keyword',
+                        verbose)
 
         hdu1.header['EXTNAME'] = ('IMAGE','name of extension')
 

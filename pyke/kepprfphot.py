@@ -1,4 +1,3 @@
-from .utils import PyKEArgumentHelpFormatter
 import math
 import multiprocessing
 import itertools
@@ -12,6 +11,7 @@ from astropy.io import fits as pyfits
 from scipy.optimize import fmin_powell
 from scipy.interpolate import RectBivariateSpline
 from . import kepio, kepmsg, kepkey, kepplot, kepfit, kepfunc
+from .utils import PyKEArgumentHelpFormatter
 
 
 __all__ = ['kepprfphot']

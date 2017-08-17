@@ -272,7 +272,7 @@ def kepoutlier(infile, outfile=None, datacol='SAP_FLUX', nsig=3.0, stepsize=1.0,
                 mastersigma[j] = 1.0e10
             message = ('WARNING -- KEPOUTLIER: could not fit range '
                        + str(intime[cstep1[i]]) + '-' + str(intime[cstep2[i]]))
-            kepmsg.warn(None, message)
+            kepmsg.warn(logfile, message, verbose)
 
     # reject outliers
     rejtime, rejdata = [], []

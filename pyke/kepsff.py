@@ -363,7 +363,7 @@ def kepsff(infile, outfile=None, datacol='DETSAP_FLUX', cenmethod='moments',
                        ' light curve quality this will have!), or better yet'
                        ' - cut the timeseries up to remove large gaps in the'
                        ' input light curve using kepclip.'.format(t1, t2))
-            kepmsg.warn(logfile, warnmsg)
+            kepmsg.warn(logfile, warnmsg, verbose)
             continue
 
         # reject outliers
@@ -411,7 +411,7 @@ def kepsff(infile, outfile=None, datacol='DETSAP_FLUX', cenmethod='moments',
         except:
             warnmsg = ('WARNING -- KEPSFF: could not fit rotated centroid data'
                       ' with polynomial')
-            kepmsg.warn(logfile, warnmsg)
+            kepmsg.warn(logfile, warnmsg, verbose)
             continue
         rx = np.linspace(np.nanmin(centr_rot[1, :]),
                          np.nanmax(centr_rot[1, :]), 100)
@@ -440,7 +440,7 @@ def kepsff(infile, outfile=None, datacol='DETSAP_FLUX', cenmethod='moments',
         except:
             warnmsg = ('WARNING -- KEPSFF: could not fit arclength data'
                        ' with polynomial')
-            kepmsg.warn(logfile, warnmsg)
+            kepmsg.warn(logfile, warnmsg, verbose)
             continue
 
         # correlate arclength with detrended flux
@@ -473,7 +473,7 @@ def kepsff(infile, outfile=None, datacol='DETSAP_FLUX', cenmethod='moments',
         except:
             warnmsg = ('WARNING -- KEPSFF: could not fit arclength derivative'
                        ' with polynomial.')
-            kepmsg.warn(logfile, warnmsg)
+            kepmsg.warn(logfile, warnmsg, verbose)
             continue
         for i in range(len(dcoeffs)):
             dfit = dfit + dcoeffs[i] * np.power(t, i)
@@ -517,7 +517,7 @@ def kepsff(infile, outfile=None, datacol='DETSAP_FLUX', cenmethod='moments',
         except:
             warnmsg = ('WARNING -- KEPSFF: could not fit arclength-flux'
                        ' correlation with polynomial')
-            kepmsg.warn(logfile, warnmsg)
+            kepmsg.warn(logfile, warnmsg, verbose)
             continue
 
         # correction factors for unfiltered data
@@ -668,12 +668,12 @@ def kepsff(infile, outfile=None, datacol='DETSAP_FLUX', cenmethod='moments',
             plt.plot(px, py,color='#980000',markersize=5,marker='D',ls='')
         except:
             pass
-        kepplot.labels(xlab,re.sub('Flux','Corrected Flux',ylab),'k',16)
+        kepplot.labels(xlab,re.sub('Flux', 'Corrected Flux', ylab), 'k', 16)
         plt.grid()
         # render plot
         if plot:
             plt.show()
-            plt.savefig(re.sub('.fits','_%d.png' % (iw + 1),outfile))
+            plt.savefig(re.sub('.fits','_%d.png' % (iw + 1), outfile))
 
         # correct fluxes within the output file
         intime = work1[:, 7] + bjdref
@@ -693,9 +693,9 @@ def kepsff(infile, outfile=None, datacol='DETSAP_FLUX', cenmethod='moments',
         xx = np.zeros((len(zz)))
         cfac = np.zeros((len(zz)))
         for i in range(len(acoeffs)):
-            xx = xx + acoeffs[i] * np.power(zz,i)
+            xx = xx + acoeffs[i] * np.power(zz, i)
         for i in range(len(ccoeffs)):
-            cfac = cfac + ccoeffs[i] * np.power(xx,i)
+            cfac = cfac + ccoeffs[i] * np.power(xx, i)
         out_detsap = yy / cfac
         instr[1].data.field('SAP_FLUX')[t1:t2] /= cfac
         instr[1].data.field('PDCSAP_FLUX')[t1:t2] /= cfac
@@ -709,7 +709,7 @@ def kepsff(infile, outfile=None, datacol='DETSAP_FLUX', cenmethod='moments',
             if cadenceno[i] in thr_cadence:
                 instr[1].data.field('SAP_QUALITY')[t1 + i] += 131072
     # write output file
-    print("Writing output file {}...".format(outfile))
+    kepmsg.log(logfile, "Writing output file {}...".format(outfile), True)
     instr.writeto(outfile)
     # close input file
     instr.close()
