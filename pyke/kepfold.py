@@ -551,12 +551,12 @@ def kepfold(infile, period, bjd0, outfile=None, bindata=False,
         plt.gca().yaxis.set_major_formatter(plt.ScalarFormatter(useOffset=False))
         labels = ax.get_yticklabels()
         if bindata:
-            plt.fill(ptime2, pout2, color='#ffff00', linewidth=0.0, alpha=0.2)
+            plt.fill(ptime2, pout2, color='#a8a7a7', linewidth=0.0, alpha=0.2)
         else:
             if 'det' in plottype:
-                plt.fill(ptime1, pout1, color='#ffff00', linewidth=0.0,
+                plt.fill(ptime1, pout1, color='#a8a7a7', linewidth=0.0,
                          alpha=0.2)
-        plt.plot(ptime1, pout1, color='#0000ff', linestyle='', linewidth=2.0,
+        plt.plot(ptime1, pout1, color='#363636', linestyle='', linewidth=2.0,
                  marker='.')
         if bindata:
             plt.plot(ptime2[1:-1], pout2[1:-1], color='r', linestyle='-',
