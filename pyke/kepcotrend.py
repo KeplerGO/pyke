@@ -123,7 +123,7 @@ def get_pcomp_list(pcompdata, pcomplist, newcad):
         pcomp[i] = dat[np.in1d(pcompdata[..., 1], newcad)]
     return pcomp
 
-def do_lsq_uhat(pcomps, cad, flux, orthog=True):
+def do_lsq_uhat(pcomps, flux, orthog=True):
     """
     does a linear least squares fit of the basis vectors to the light curve
     using the 'matrix' method - U(transpose) * y = coeffs
@@ -146,7 +146,7 @@ def do_lsq_uhat(pcomps, cad, flux, orthog=True):
 
     return coeffs
 
-def do_lsq_nlin(pcomps, cad, flux):
+def do_lsq_nlin(pcomps, flux):
     """
     does a linear least squares fit of the basis vectors to the light curve
     using the 'lst_sq' method - this performs a Levenberg-Marquart least
@@ -154,10 +154,10 @@ def do_lsq_nlin(pcomps, cad, flux):
     """
 
     guess = np.append(np.array([1.]), np.zeros(len(pcomps) - 1))
-    t = leastsq(fitfunct, guess, args=(pcomps, cad, flux), full_output=0)
+    t = leastsq(fitfunct, guess, args=(pcomps, flux), full_output=0)
     return - np.array(t[0])
 
-def do_lsq_fmin(pcomps, cad, flux):
+def do_lsq_fmin(pcomps, flux):
     """
     performs a simplex fit of the basis vectors to the light curve.
     Initial guess is an array with 1. as the first element and zero as the
@@ -165,10 +165,10 @@ def do_lsq_fmin(pcomps, cad, flux):
     """
 
     guess = np.append(np.array([1.]), np.zeros(len(pcomps) - 1))
-    t = effmin(fitfunct_fmin, guess, args=(pcomps, cad, flux))
+    t = effmin(fitfunct_fmin, guess, args=(pcomps, flux))
     return -np.array(t)
 
-def do_lsq_fmin_pow(pcomps, cad, flux, order):
+def do_lsq_fmin_pow(pcomps, flux, order):
     """
     performs a simplex fit of the basis vectors to the light curve.
     Initial guess is an array with 1. as the first element and zero as the
@@ -176,53 +176,28 @@ def do_lsq_fmin_pow(pcomps, cad, flux, order):
     """
 
     guess = np.array([1, 0])
-    initial = effmin(fitfunct_fmin_pow, guess, args=(pcomps[0:2], cad, flux,
+    initial = effmin(fitfunct_fmin_pow, guess, args=(pcomps[0:2], flux,
                                                      order))
     guess = np.append(initial, np.zeros(len(pcomps) - 2))
-    t = effmin(fitfunct_fmin_pow, guess, args=(pcomps, cad, flux, order))
+    t = effmin(fitfunct_fmin_pow, guess, args=(pcomps, flux, order))
     return - np.array(t)
 
-def fitfunct_fmin(scale, pcomp, date, zeroflux):
+def fitfunct_fmin(scale, pcomp, zeroflux):
     outflux = np.copy(zeroflux)
-    for i in range(np.shape(pcomp)[0]):
-        outflux -= scale[i] * pcomp[i]
+    outflux = outflux - np.dot(scale, pcomp)
     sumsq = sum(abs(np.array(outflux)))
     return sumsq
 
-def fitfunct_fmin_pow(scale, pcomp, date, zeroflux, order):
+def fitfunct_fmin_pow(scale, pcomp, zeroflux, order):
     outflux = np.copy(zeroflux)
-    for i in range(np.shape(pcomp)[0]):
-        outflux -= scale[i] * pcomp[i]
-    sumsq = sum(power(abs(np.array(outflux)), order))
+    outflux = outflux - np.dot(scale, pcomp)
+    sumsq = sum(np.power(abs(np.array(outflux)), order))
     return sumsq
 
-def fitfunct(scale, pcomp, date, zeroflux):
+def fitfunct(scale, pcomp, zeroflux):
     outflux = np.copy(zeroflux)
-    for i in range(np.shape(pcomp)[0]):
-        outflux -= scale[i] * pcomp[i]
+    outflux = outflux - np.dot(scale, pcomp)
     return outflux
-
-def get_newflux(oldflux, pcomps, s):
-    """
-    uses the coefficients found by the fitting of the basis vectors to the
-    light curve to correct the flux in the light curve
-    Each basis vector is multiplid by a coefficient and then subtracted from
-    the light curve
-    """
-    newflux = np.copy(oldflux)
-    for i in range(len(s)):
-        newflux += s[i] * pcomps[i]
-    return newflux
-
-def get_pcompsum(pcomps, s):
-    """
-    calculates the sum of basis vectors which are to be subtracted from the
-    light curve to produce the corrected data.
-    """
-    pcompsum = 0.
-    for i in range(len(s)):
-        pcompsum += s[i] * pcomps[i]
-    return pcompsum
 
 def chi2_gtf(obs, expect, err, dof):
     """
@@ -238,12 +213,12 @@ def chi2_gtf(obs, expect, err, dof):
     chisqu = chisqu * (1.0 / float(dof))
     return chisqu
 
-def rms(O, E):
+def rms(model, data):
     """
     calculates a root mean square of the model fit to the data
     """
 
-    rms = math.sqrt(np.sum((O - E) ** 2) / len(O))
+    rms = math.sqrt(np.sum((model - data) ** 2) / len(model))
     return rms
 
 def do_lst_iter(bvs, cad, flux, nsigma, niter, method, order):
@@ -258,16 +233,16 @@ def do_lst_iter(bvs, cad, flux, nsigma, niter, method, order):
     lcnew = np.copy(cad)
     bvsnew = np.copy(bvs)
     if method == 'matrix':
-        t = do_lsq_uhat(bvsnew, lcnew, fluxnew, False)
+        t = do_lsq_uhat(bvsnew, fluxnew, False)
     elif method == 'lst_sq':
-        t = do_lsq_nlin(bvsnew, lcnew, fluxnew)
+        t = do_lsq_nlin(bvsnew, fluxnew)
     elif method == 'simplex':
-        t = do_lsq_fmin_pow(bvsnew, lcnew, fluxnew, order)
+        t = do_lsq_fmin_pow(bvsnew, fluxnew, order)
     elif method == 'simplex_abs':
-        t = do_lsq_fmin_pow(bvsnew, lcnew, fluxnew)
+        t = do_lsq_fmin_pow(bvsnew, fluxnew)
     elif method == 'llsq':
-        t = do_lsq_uhat(bvsnew, lcnew, fluxnew, False)
-    bvsum = get_pcompsum(bvsnew, t)
+        t = do_lsq_uhat(bvsnew, fluxnew, False)
+    bvsum = np.dot(bvsnew, t)
     while (iiter < niter):
         iiter += 1
         matchrange = 1.4826 * nsigma * MAD_model(np.subtract(fluxnew, bvsum))
@@ -283,14 +258,14 @@ def do_lst_iter(bvs, cad, flux, nsigma, niter, method, order):
         for i in range(np.shape(bvsnew)[0]):
             bvsnew2[i] = bvsnew[i][mask]
         if method == 'matrix':
-            t = do_lsq_uhat(bvsnew2, lcnew, fluxnew, False)
+            t = do_lsq_uhat(bvsnew2, fluxnew, False)
         elif method == 'lst_sq':
             t = do_lsq_nlin(bvsnew2, lcnew, fluxnew)
         elif method == 'simplex':
             t = do_lsq_fmin_pow(bvsnew2, lcnew, fluxnew, order)
         elif method == 'simplex_abs':
             t = do_lsq_fmin_pow(bvsnew2, lcnew, fluxnew)
-        bvsum = get_pcompsum(bvsnew2, t)
+        bvsum = np.dot(bvsnew2, t)
 
     return t, mask
 
@@ -866,11 +841,10 @@ def kepcotrend(infile, bvfile, listbv, outfile=None, fitmethod='llsq',
 
     coeffs = np.asarray(coeffs)
 
-    flux_after = (get_newflux(n_flux, bvectors, coeffs) + 1) * medflux
-    flux_after_masked = ((get_newflux(n_flux_masked, bvectors_masked,
-                                      coeffs) + 1) * medflux)
-    bvsum = get_pcompsum(bvectors, coeffs)
-    bvsum_masked = get_pcompsum(bvectors_masked, coeffs)
+    flux_after = (n_flux + np.dot(bvectors, coeffs) + 1) * medflux
+    flux_after_masked = (n_flux_masked + np.dot(bvectors_masked,coeffs) + 1) * medflux
+    bvsum = np.dot(bvectors, coeffs)
+    bvsum_masked = np.dot(bvectors_masked, coeffs)
     bvsum_nans = put_in_nans(good_data, bvsum)
     flux_after_nans = put_in_nans(good_data, flux_after)
 
@@ -897,7 +871,7 @@ def kepcotrend(infile, bvfile, listbv, outfile=None, fitmethod='llsq',
 
     print('reduced chi2: {}'.format(chi2_gtf(flux_fit, sum_fit, err_fit,
                                              len(flux_fit) - len(coeffs))))
-    print('rms: {}'.format(medflux*rms(flux_fit, sum_fit)))
+    print('rms: {}'.format(medflux * rms(flux_fit, sum_fit)))
 
     for i in range(len(coeffs)):
         print('Coefficient of CBV #{0}: {1}'.format(i + 1, coeffs[i]))
