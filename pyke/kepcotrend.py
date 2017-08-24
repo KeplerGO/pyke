@@ -16,21 +16,16 @@ __all__ = ['kepcotrend']
 
 def cut_bad_data(cad, date, flux, err):
     """
-    this function finds cadences with bad data in and removes them
-    returning only cadences which contain good data
+    this function finds cadences with good data and returns them
     """
-    date2 = date[np.logical_and(np.logical_and(np.isfinite(date),
-                 np.isfinite(flux)),flux != 0.0)]
-    cad2 = cad[np.logical_and(np.logical_and(np.isfinite(date),
-               np.isfinite(flux)),flux != 0.0)]
-    flux2 = flux[np.logical_and(np.logical_and(np.isfinite(date),
-                 np.isfinite(flux)),flux != 0.0)]
-    err2 = err[np.logical_and(np.logical_and(np.isfinite(date),
-               np.isfinite(flux)),flux != 0.0)]
-    bad_data = np.logical_and(np.logical_and(np.isfinite(date),
-                              np.isfinite(flux)),flux != 0.0)
 
-    return cad2, date2, flux2, err2, bad_data
+    good_data_mask = np.logical_and(np.isfinite(date), np.isfinite(flux))
+    date = date[good_data_mask]
+    cad = cad[good_data_mask]
+    flux = flux[good_data_mask]
+    err = err[good_data_mask]
+
+    return cad, date, flux, err, good_data_mask
 
 def put_in_nans(bad_data, flux):
     """

@@ -5,8 +5,8 @@ from numpy.testing import assert_array_almost_equal
 from ..kepcotrend import kepcotrend
 from ..kepio import delete
 
-lc = download_file("https://archive.stsci.edu/missions/kepler/lightcurves/0051/005110407/kplr005110407-2009350155506_llc.fits")
-cbv = download_file("https://archive.stsci.edu/pub/kepler/cbv/kplr2009350155506-q03-d25_lcbv.fits")
+lc = download_file("https://archive.stsci.edu/missions/kepler/lightcurves/0051/005110407/kplr005110407-2009350155506_llc.fits", cache=True)
+cbv = download_file("https://archive.stsci.edu/pub/kepler/cbv/kplr2009350155506-q03-d25_lcbv.fits", cache=True)
 lc_cot = get_pkg_data_filename("data/kplr005110407-2009350155506_llc-kepcotrend.fits")
 print(cbv)
 
