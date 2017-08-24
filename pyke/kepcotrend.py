@@ -34,14 +34,10 @@ def put_in_nans(good_data, flux):
     This function is used when writing data to a FITS files.
     good_data == True means the datapoint is good!!
     """
-    newflux = np.zeros(len(good_data))
-    j = 0
-    for i in range(len(good_data)):
-        if good_data[i]:
-            newflux[i] = flux[j]
-            j += 1
-        else:
-            newflux[i] = np.nan
+    newflux = np.empty(len(good_data))
+    newflux[:] = np.nan
+    newflux[good_data] = flux
+
     return newflux
 
 def get_pcomp_list_newformat(bvdat, pcomplist, newcad, short, scinterp):
