@@ -15,7 +15,7 @@ and as command-line utilities. For example, PyKE provides the ``kepextract`` tas
 
 If you are using an interactive IPython shell, you can learn about the use of the task and its optional parameters by adding a question mark behind the function name and hitting return::
 
-    >>> kepextract?
+    In [1]: kepextract?
 
 
 Calling tasks from a terminal
