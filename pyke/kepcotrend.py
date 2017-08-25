@@ -225,14 +225,10 @@ def do_lst_iter(bvs, cad, flux, nsigma, niter, method, order):
     fluxnew = np.copy(flux)
     lcnew = np.copy(cad)
     bvsnew = np.copy(bvs)
-    if method == 'matrix':
-        t = do_lsq_uhat(bvsnew, fluxnew)
-    elif method == 'lst_sq':
+    if method == 'lst_sq':
         t = do_lsq_nlin(bvsnew, fluxnew)
     elif method == 'simplex':
         t = do_lsq_fmin_pow(bvsnew, fluxnew, order)
-    elif method == 'simplex_abs':
-        t = do_lsq_fmin_pow(bvsnew, lcnew, fluxnew)
     elif method == 'llsq':
         t = do_lsq_uhat(bvsnew, fluxnew)
 
@@ -251,14 +247,12 @@ def do_lst_iter(bvs, cad, flux, nsigma, niter, method, order):
         bvsnew2 = newpcompsarray(bvsnew, mask)
         for i in range(np.shape(bvsnew)[0]):
             bvsnew2[i] = bvsnew[i][mask]
-        if method == 'matrix':
+        if method == 'llsq':
             t = do_lsq_uhat(bvsnew2, fluxnew)
         elif method == 'lst_sq':
             t = do_lsq_nlin(bvsnew2, fluxnew)
         elif method == 'simplex':
             t = do_lsq_fmin_pow(bvsnew2, fluxnew, order)
-        elif method == 'simplex_abs':
-            t = do_lsq_fmin_pow(bvsnew2, lcnew, fluxnew)
         bvsum = np.dot(t.T, bvsnew2).reshape(-1)
 
     return t, mask
@@ -807,14 +801,8 @@ def kepcotrend(infile, bvfile, listbv, outfile=None, fitmethod='llsq',
                                          n_flux_masked, sigma, 50., fitmethod,
                                          fitpower)
     else:
-        if fitmethod == 'matrix' and domasking:
-            coeffs = do_lsq_uhat(bvectors_masked, n_flux_masked)
-        elif fitmethod == 'llsq' and domasking:
-            coeffs = do_lsq_uhat(bvectors_masked, n_flux_masked)
-        elif fitmethod == 'lst_sq':
+        if fitmethod == 'lst_sq':
             coeffs = do_lsq_nlin(bvectors_masked, n_flux_masked)
-        elif fitmethod == 'simplex_abs':
-            coeffs = do_lsq_fmin(bvectors_masked, lc_cad_masked, n_flux_masked)
         elif fitmethod == 'simplex':
             coeffs = do_lsq_fmin_pow(bvectors_masked, n_flux_masked, fitpower)
         else:
