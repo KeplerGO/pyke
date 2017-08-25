@@ -193,28 +193,6 @@ def fitfunct(scale, pcomp, date, zeroflux):
     outflux -= np.dot(scale, pcomp)
     return outflux
 
-def get_newflux(oldflux, pcomps, s):
-    """
-    uses the coefficients found by the fitting of the basis vectors to the
-    light curve to correct the flux in the light curve
-    Each basis vector is multiplid by a coefficient and then subtracted from
-    the light curve
-    """
-    newflux = np.copy(oldflux)
-    for i in range(len(s)):
-        newflux += s[i] * pcomps[i]
-    return newflux
-
-def get_pcompsum(pcomps, s):
-    """
-    calculates the sum of basis vectors which are to be subtracted from the
-    light curve to produce the corrected data.
-    """
-    pcompsum = 0.
-    for i in range(len(s)):
-        pcompsum += s[i] * pcomps[i]
-    return pcompsum
-
 def chi2_gtf(obs, expect, err, dof):
     """
     calculates a chi squared of the model fit to the data
@@ -225,16 +203,16 @@ def chi2_gtf(obs, expect, err, dof):
     expect  = expect
     err = err
     for i in range(len(obs)):
-        chisqu += ((1.0/(err[i])) * ((obs[i] - expect[i])))**2
-    chisqu = chisqu * (1.0 / float(dof))
+        chisqu += ((obs[i] - expect[i]) / err[i]) ** 2
+    chisqu = chisqu / float(dof)
     return chisqu
 
-def rms(O, E):
+def rms(model, data):
     """
     calculates a root mean square of the model fit to the data
     """
 
-    rms = math.sqrt(np.sum((O - E) ** 2) / len(O))
+    rms = math.sqrt(np.sum((model - data) ** 2) / len(model))
     return rms
 
 def do_lst_iter(bvs, cad, flux, nsigma, niter, method, order):
@@ -258,7 +236,8 @@ def do_lst_iter(bvs, cad, flux, nsigma, niter, method, order):
         t = do_lsq_fmin_pow(bvsnew, lcnew, fluxnew)
     elif method == 'llsq':
         t = do_lsq_uhat(bvsnew, lcnew, fluxnew, False)
-    bvsum = get_pcompsum(bvsnew, t)
+
+    bvsum = np.dot(t.T, bvsnew).reshape(-1)
     while (iiter < niter):
         iiter += 1
         matchrange = 1.4826 * nsigma * MAD_model(np.subtract(fluxnew, bvsum))
@@ -281,7 +260,7 @@ def do_lst_iter(bvs, cad, flux, nsigma, niter, method, order):
             t = do_lsq_fmin_pow(bvsnew2, lcnew, fluxnew, order)
         elif method == 'simplex_abs':
             t = do_lsq_fmin_pow(bvsnew2, lcnew, fluxnew)
-        bvsum = get_pcompsum(bvsnew2, t)
+        bvsum = np.dot(t.T, bvsnew2).reshape(-1)
 
     return t, mask
 
@@ -291,12 +270,12 @@ def newpcompsarray(pcomp, mask):
 
 
 def MAD_model(xx, minSd=1E-16):
-  """Median Absolute Deviation"""
-  absdev = abs(xx)
-  mad = np.median(absdev, 0)
-  mad = np.maximum(mad, np.multiply(np.ones(mad.shape, np.float32), (minSd / 1.48)))
-  mad = np.asarray(mad)
-  return mad
+    """Median Absolute Deviation"""
+    absdev = abs(xx)
+    mad = np.median(absdev, 0)
+    mad = np.maximum(mad, np.multiply(np.ones(mad.shape, np.float32), (minSd / 1.48)))
+    mad = np.asarray(mad)
+    return mad
 
 
 def make_outfile(fitsfile, outfile, flux_new, bvsum, version):
@@ -851,8 +830,8 @@ def kepcotrend(infile, bvfile, listbv, outfile=None, fitmethod='llsq',
     coeffs = np.asarray(coeffs)
     flux_after = medflux * (n_flux + np.dot(coeffs.T, bvectors) + 1).reshape(-1)
     flux_after_masked = medflux * (n_flux_masked + np.dot(coeffs.T, bvectors_masked) + 1).reshape(-1)
-    bvsum = get_pcompsum(bvectors, coeffs)
-    bvsum_masked = get_pcompsum(bvectors_masked, coeffs)
+    bvsum = np.dot(coeffs.T, bvectors).reshape(-1)
+    bvsum_masked = np.dot(coeffs.T, bvectors_masked).reshape(-1)
     bvsum_nans = put_in_nans(good_data, bvsum)
     flux_after_nans = put_in_nans(good_data, flux_after)
 
@@ -879,7 +858,7 @@ def kepcotrend(infile, bvfile, listbv, outfile=None, fitmethod='llsq',
 
     print('reduced chi2: {}'.format(chi2_gtf(flux_fit, sum_fit, err_fit,
                                              len(flux_fit) - len(coeffs))))
-    print('rms: {}'.format(medflux*rms(flux_fit, sum_fit)))
+    print('rms: {}'.format(medflux * rms(flux_fit, sum_fit)))
 
     for i in range(len(coeffs)):
         print('Coefficient of CBV #{0}: {1}'.format(i + 1, coeffs[i]))
