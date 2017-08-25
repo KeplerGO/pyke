@@ -179,22 +179,18 @@ def do_lsq_fmin_pow(pcomps, cad, flux, order):
     return - np.array(t)
 
 def fitfunct_fmin(scale, pcomp, date, zeroflux):
-    outflux = np.copy(zeroflux)
-    outflux = outflux - np.dot(scale, pcomp)
-
+    outflux = fitfunct(scale, pcomp, date, zeroflux)
+    sumsq = np.sum(np.abs(outflux))
     return sumsq
 
 def fitfunct_fmin_pow(scale, pcomp, date, zeroflux, order):
-    outflux = np.copy(zeroflux)
-    for i in range(np.shape(pcomp)[0]):
-        outflux -= scale[i] * pcomp[i]
-    sumsq = np.sum(np.power(np.abs(np.array(outflux)), order))
+    outflux = fitfunct(scale, pcomp, date, zeroflux)
+    sumsq = np.sum(np.power(np.abs(outflux), order))
     return sumsq
 
 def fitfunct(scale, pcomp, date, zeroflux):
     outflux = np.copy(zeroflux)
-    for i in range(np.shape(pcomp)[0]):
-        outflux -= scale[i] * pcomp[i]
+    outflux -= np.dot(scale, pcomp)
     return outflux
 
 def get_newflux(oldflux, pcomps, s):
@@ -780,10 +776,10 @@ def kepcotrend(infile, bvfile, listbv, outfile=None, fitmethod='llsq',
         kepmsg.err(logfile, errmsg, verbose)
     if short:
         bvdata.field('CADENCENO')[:] = ((((bvdata.field('CADENCENO')[:] +
-                                        (7.5/15.) )* 30.) - 11540.).round())
+                                        (7.5 / 15.) ) * 30.) - 11540.).round())
     bvectors = get_pcomp_list_newformat(bvdata, bvlist, lc_cad, short, scinterp)
     medflux = np.median(lc_flux)
-    n_flux = (lc_flux /medflux)-1
+    n_flux = (lc_flux / medflux) - 1
     n_err = np.sqrt(lc_err * lc_err / (medflux * medflux))
 
     if maskfile != '':
@@ -853,10 +849,8 @@ def kepcotrend(infile, bvfile, listbv, outfile=None, fitmethod='llsq',
                                  n_flux_masked)
 
     coeffs = np.asarray(coeffs)
-
-    flux_after = (get_newflux(n_flux, bvectors, coeffs) + 1) * medflux
-    flux_after_masked = ((get_newflux(n_flux_masked, bvectors_masked,
-                                      coeffs) + 1) * medflux)
+    flux_after = medflux * (n_flux + np.dot(coeffs.T, bvectors) + 1).reshape(-1)
+    flux_after_masked = medflux * (n_flux_masked + np.dot(coeffs.T, bvectors_masked) + 1).reshape(-1)
     bvsum = get_pcompsum(bvectors, coeffs)
     bvsum_masked = get_pcompsum(bvectors_masked, coeffs)
     bvsum_nans = put_in_nans(good_data, bvsum)
