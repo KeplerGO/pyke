@@ -142,7 +142,7 @@ def do_lsq_uhat(pcomps, flux):
 
     return coeffs
 
-def do_lsq_nlin(pcomps, cad, flux):
+def do_lsq_nlin(pcomps, flux):
     """
     does a linear least squares fit of the basis vectors to the light curve
     using the 'lst_sq' method - this performs a Levenberg-Marquart least
@@ -150,7 +150,7 @@ def do_lsq_nlin(pcomps, cad, flux):
     """
 
     guess = np.append(np.array([1.]), np.zeros(len(pcomps) - 1))
-    t = leastsq(fitfunct, guess, args=(pcomps, cad, flux), full_output=0)
+    t = leastsq(fitfunct, guess, args=(pcomps, flux), full_output=0)
     return - np.array(t[0])
 
 def do_lsq_fmin(pcomps, cad, flux):
@@ -179,16 +179,16 @@ def do_lsq_fmin_pow(pcomps, cad, flux, order):
     return - np.array(t)
 
 def fitfunct_fmin(scale, pcomp, date, zeroflux):
-    outflux = fitfunct(scale, pcomp, date, zeroflux)
+    outflux = fitfunct(scale, pcomp, zeroflux)
     sumsq = np.sum(np.abs(outflux))
     return sumsq
 
 def fitfunct_fmin_pow(scale, pcomp, date, zeroflux, order):
-    outflux = fitfunct(scale, pcomp, date, zeroflux)
+    outflux = fitfunct(scale, pcomp, zeroflux)
     sumsq = np.sum(np.power(np.abs(outflux), order))
     return sumsq
 
-def fitfunct(scale, pcomp, date, zeroflux):
+def fitfunct(scale, pcomp, zeroflux):
     outflux = np.copy(zeroflux)
     outflux -= np.dot(scale, pcomp)
     return outflux
@@ -229,7 +229,7 @@ def do_lst_iter(bvs, cad, flux, nsigma, niter, method, order):
     if method == 'matrix':
         t = do_lsq_uhat(bvsnew, fluxnew)
     elif method == 'lst_sq':
-        t = do_lsq_nlin(bvsnew, lcnew, fluxnew)
+        t = do_lsq_nlin(bvsnew, fluxnew)
     elif method == 'simplex':
         t = do_lsq_fmin_pow(bvsnew, lcnew, fluxnew, order)
     elif method == 'simplex_abs':
@@ -255,7 +255,7 @@ def do_lst_iter(bvs, cad, flux, nsigma, niter, method, order):
         if method == 'matrix':
             t = do_lsq_uhat(bvsnew2, fluxnew)
         elif method == 'lst_sq':
-            t = do_lsq_nlin(bvsnew2, lcnew, fluxnew)
+            t = do_lsq_nlin(bvsnew2, fluxnew)
         elif method == 'simplex':
             t = do_lsq_fmin_pow(bvsnew2, lcnew, fluxnew, order)
         elif method == 'simplex_abs':
@@ -813,8 +813,7 @@ def kepcotrend(infile, bvfile, listbv, outfile=None, fitmethod='llsq',
         elif fitmethod == 'llsq' and domasking:
             coeffs = do_lsq_uhat(bvectors_masked, n_flux_masked)
         elif fitmethod == 'lst_sq':
-            coeffs = do_lsq_nlin(bvectors_masked, lc_cad_masked,
-                                 n_flux_masked)
+            coeffs = do_lsq_nlin(bvectors_masked, n_flux_masked)
         elif fitmethod == 'simplex_abs':
             coeffs = do_lsq_fmin(bvectors_masked, lc_cad_masked,
                                  n_flux_masked)
