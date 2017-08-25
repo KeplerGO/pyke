@@ -21,7 +21,7 @@ def test_kepcotrend(fitmethod):
                                    "-kepcotrend-{}.fits".format(fitmethod))
     g = pyfits.open(lc_cot)
     np.testing.assert_allclose(f[1].data['CBVSAP_FLUX'],
-                               g[1].data['CBVSAP_FLUX'], rtol=1e-4)
+                               g[1].data['CBVSAP_FLUX'], rtol=1e-5)
     assert_array_almost_equal(f[1].data['CBVSAP_MODL'],
-                              g[1].data['CBVSAP_MODL'], decimal=4)
+                              g[1].data['CBVSAP_MODL'], decimal=5)
     delete("kepcotrend.fits", "log_kepcotrend.txt", False)

@@ -407,13 +407,13 @@ def do_plot(date, flux_old, flux_new, bvsum, cad, good_data, cad_nans, version):
 
 def split_on_nans(good_data, cad):
     blocks = []
-    time_of_nans = cad[good_data == False]
-    if good_data[0] == True:
+    time_of_nans = cad[~good_data]
+    if good_data[0]:
         blocks.append(cad[0])
-    for i in range(1,len(time_of_nans)):
+    for i in range(1, len(time_of_nans)):
         if time_of_nans[i] - time_of_nans[i - 1] > 1:
             blocks.append(time_of_nans[i])
-        if good_data[-1] == True:
+        if good_data[-1]:
             blocks.append(cad[-1])
     return blocks
 
@@ -775,7 +775,7 @@ def kepcotrend(infile, bvfile, listbv, outfile=None, fitmethod='llsq',
         lc_cad_masked = np.copy(lc_cad)
         n_err_masked = np.copy(n_err)
         maskdata = np.atleast_2d(np.genfromtxt(maskfile, delimiter=','))
-        mask = np.zeros(len(lc_date_masked)) == 0.
+        mask = np.ones(len(lc_date_masked), dtype=bool)
         for maskrange in maskdata:
             if version == 1:
                 start = maskrange[0] - 2400000.0
