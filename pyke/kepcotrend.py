@@ -5,7 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.cbook import is_numlike
 from scipy.optimize import leastsq
-from scipy.optimize import fmin as effmin
+from scipy.optimize import fmin
 from scipy.interpolate import interp1d
 from astropy.io import fits as pyfits
 from tqdm import tqdm
@@ -128,11 +128,6 @@ def do_lsq_uhat(pcomps, flux):
     effect what I have is my U is already transposed and y need to be
     transposed to used. First I convert to what is expected in leasts
     squares fitting
-
-    Orthog is a boolean saying if the basis vectors are orthogonal - they
-    are not orthogonal if there has been masking or iterative fitting
-    -> now changed to force the fitting to always be a generic least squares
-    fit instead of relying on any orthogonality
     """
 
     U_hat = np.matrix(pcomps).transpose()
@@ -161,7 +156,7 @@ def do_lsq_fmin(pcomps, flux):
     """
 
     guess = np.append(np.array([1.]), np.zeros(len(pcomps) - 1))
-    t = effmin(fitfunct_fmin, guess, args=(pcomps, flux))
+    t = fmin(fitfunct_fmin, guess, args=(pcomps, flux))
     return -np.array(t)
 
 def do_lsq_fmin_pow(pcomps, flux, order):
@@ -172,9 +167,9 @@ def do_lsq_fmin_pow(pcomps, flux, order):
     """
 
     guess = np.array([1, 0])
-    initial = effmin(fitfunct_fmin_pow, guess, args=(pcomps[0:2], flux, order))
+    initial = fmin(fitfunct_fmin_pow, guess, args=(pcomps[0:2], flux, order))
     guess = np.append(initial, np.zeros(len(pcomps) - 2))
-    t = effmin(fitfunct_fmin_pow, guess, args=(pcomps, flux, order))
+    t = fmin(fitfunct_fmin_pow, guess, args=(pcomps, flux, order))
     return - np.array(t)
 
 def fitfunct_fmin(scale, pcomp, zeroflux):
