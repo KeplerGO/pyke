@@ -48,13 +48,13 @@ def get_pcomp_list_newformat(bvdat, pcomplist, newcad, short, scinterp):
     pcomp = np.zeros((len(pcomplist), len(newcad)))
     for i in range(len(np.array(pcomplist))):
         j = int(np.array(pcomplist)[i])
-        dat = bvdat.field('VECTOR_{}'.format(j))[np.isnan(bvdat.field('CADENCENO')) == False]
-        bvcadfull = bvdat.field('CADENCENO')[np.isnan(bvdat.field('CADENCENO')) == False]
+        dat = bvdat.field('VECTOR_{}'.format(j))[~np.isnan(bvdat.field('CADENCENO'))]
+        bvcadfull = bvdat.field('CADENCENO')[~np.isnan(bvdat.field('CADENCENO'))]
         #try:
         if short:
             #if the data is short cadence the interpolate the basis vectors
-            bv_data = dat[np.in1d(bvdat.field('CADENCENO'),newcad)]
-            bv_cad = bvcadfull[np.in1d(bvdat.field('CADENCENO'),newcad)]
+            bv_data = dat[np.in1d(bvdat.field('CADENCENO'), newcad)]
+            bv_cad = bvcadfull[np.in1d(bvdat.field('CADENCENO'), newcad)]
             #funny things happen why I use interp1d for linear interpolation
             #so I have opted to use the numpy interp function for linear
             if scinterp == 'linear':
@@ -64,11 +64,11 @@ def get_pcomp_list_newformat(bvdat, pcomplist, newcad, short, scinterp):
             else:
                 intpl = interp1d(bv_cad, bv_data, kind=scinterp,
                                  bounds_error=False, fill_value=None)
-                pcomp[i] = np.where(np.isnan(intpl(newcad)), 0,intpl(newcad))
+                pcomp[i] = np.where(np.isnan(intpl(newcad)), 0, intpl(newcad))
                 mid_pt = np.floor(np.median(np.arange(len(pcomp[i]))))
                 p_len = len(pcomp[i])
-                lower = [np.logical_and(np.arange(p_len) < mid_pt,pcomp[i] == 0)]
-                upper = [np.logical_and(np.arange(p_len) > mid_pt,pcomp[i] == 0)]
+                lower = [np.logical_and(np.arange(p_len) < mid_pt, pcomp[i] == 0)]
+                upper = [np.logical_and(np.arange(p_len) > mid_pt, pcomp[i] == 0)]
                 pcomp[i][lower] = bv_data[0]
                 pcomp[i][upper] = bv_data[-1]
         else:
