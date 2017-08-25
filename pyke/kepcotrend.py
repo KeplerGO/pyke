@@ -119,7 +119,7 @@ def get_pcomp_list(pcompdata, pcomplist, newcad):
         pcomp[i] = dat[np.in1d(pcompdata[..., 1], newcad)]
     return pcomp
 
-def do_lsq_uhat(pcomps, cad, flux, orthog=True):
+def do_lsq_uhat(pcomps, flux):
     """
     does a linear least squares fit of the basis vectors to the light curve
     using the 'matrix' method - U(transpose) * y = coeffs
@@ -227,7 +227,7 @@ def do_lst_iter(bvs, cad, flux, nsigma, niter, method, order):
     lcnew = np.copy(cad)
     bvsnew = np.copy(bvs)
     if method == 'matrix':
-        t = do_lsq_uhat(bvsnew, lcnew, fluxnew, False)
+        t = do_lsq_uhat(bvsnew, fluxnew)
     elif method == 'lst_sq':
         t = do_lsq_nlin(bvsnew, lcnew, fluxnew)
     elif method == 'simplex':
@@ -235,7 +235,7 @@ def do_lst_iter(bvs, cad, flux, nsigma, niter, method, order):
     elif method == 'simplex_abs':
         t = do_lsq_fmin_pow(bvsnew, lcnew, fluxnew)
     elif method == 'llsq':
-        t = do_lsq_uhat(bvsnew, lcnew, fluxnew, False)
+        t = do_lsq_uhat(bvsnew, fluxnew)
 
     bvsum = np.dot(t.T, bvsnew).reshape(-1)
     while (iiter < niter):
@@ -253,7 +253,7 @@ def do_lst_iter(bvs, cad, flux, nsigma, niter, method, order):
         for i in range(np.shape(bvsnew)[0]):
             bvsnew2[i] = bvsnew[i][mask]
         if method == 'matrix':
-            t = do_lsq_uhat(bvsnew2, lcnew, fluxnew, False)
+            t = do_lsq_uhat(bvsnew2, fluxnew)
         elif method == 'lst_sq':
             t = do_lsq_nlin(bvsnew2, lcnew, fluxnew)
         elif method == 'simplex':
@@ -809,11 +809,9 @@ def kepcotrend(infile, bvfile, listbv, outfile=None, fitmethod='llsq',
                                          fitpower)
     else:
         if fitmethod == 'matrix' and domasking:
-            coeffs = do_lsq_uhat(bvectors_masked, lc_cad_masked,
-                                 n_flux_masked, False)
+            coeffs = do_lsq_uhat(bvectors_masked, n_flux_masked)
         elif fitmethod == 'llsq' and domasking:
-            coeffs = do_lsq_uhat(bvectors_masked, lc_cad_masked,
-                                 n_flux_masked, False)
+            coeffs = do_lsq_uhat(bvectors_masked, n_flux_masked)
         elif fitmethod == 'lst_sq':
             coeffs = do_lsq_nlin(bvectors_masked, lc_cad_masked,
                                  n_flux_masked)
@@ -824,8 +822,7 @@ def kepcotrend(infile, bvfile, listbv, outfile=None, fitmethod='llsq',
             coeffs = do_lsq_fmin_pow(bvectors_masked,lc_cad_masked,
                                      n_flux_masked, fitpower)
         else:
-            coeffs = do_lsq_uhat(bvectors_masked,lc_cad_masked,
-                                 n_flux_masked)
+            coeffs = do_lsq_uhat(bvectors_masked, n_flux_masked)
 
     coeffs = np.asarray(coeffs)
     flux_after = medflux * (n_flux + np.dot(coeffs.T, bvectors) + 1).reshape(-1)
