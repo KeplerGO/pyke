@@ -178,12 +178,12 @@ def do_lsq_fmin_pow(pcomps, cad, flux, order):
     t = effmin(fitfunct_fmin_pow, guess, args=(pcomps, cad, flux, order))
     return - np.array(t)
 
-def fitfunct_fmin(scale, pcomp, date, zeroflux):
+def fitfunct_fmin(scale, pcomp, zeroflux):
     outflux = fitfunct(scale, pcomp, zeroflux)
     sumsq = np.sum(np.abs(outflux))
     return sumsq
 
-def fitfunct_fmin_pow(scale, pcomp, date, zeroflux, order):
+def fitfunct_fmin_pow(scale, pcomp, zeroflux, order):
     outflux = fitfunct(scale, pcomp, zeroflux)
     sumsq = np.sum(np.power(np.abs(outflux), order))
     return sumsq
