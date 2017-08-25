@@ -180,16 +180,15 @@ def do_lsq_fmin_pow(pcomps, cad, flux, order):
 
 def fitfunct_fmin(scale, pcomp, date, zeroflux):
     outflux = np.copy(zeroflux)
-    for i in range(np.shape(pcomp)[0]):
-        outflux -= scale[i] * pcomp[i]
-    sumsq = sum(abs(np.array(outflux)))
+    outflux = outflux - np.dot(scale, pcomp)
+
     return sumsq
 
 def fitfunct_fmin_pow(scale, pcomp, date, zeroflux, order):
     outflux = np.copy(zeroflux)
     for i in range(np.shape(pcomp)[0]):
         outflux -= scale[i] * pcomp[i]
-    sumsq = sum(power(abs(np.array(outflux)), order))
+    sumsq = np.sum(np.power(np.abs(np.array(outflux)), order))
     return sumsq
 
 def fitfunct(scale, pcomp, date, zeroflux):
@@ -848,7 +847,7 @@ def kepcotrend(infile, bvfile, listbv, outfile=None, fitmethod='llsq',
                                  n_flux_masked)
         elif fitmethod == 'simplex':
             coeffs = do_lsq_fmin_pow(bvectors_masked,lc_cad_masked,
-                                     n_flux_masked,fitpower)
+                                     n_flux_masked, fitpower)
         else:
             coeffs = do_lsq_uhat(bvectors_masked,lc_cad_masked,
                                  n_flux_masked)
