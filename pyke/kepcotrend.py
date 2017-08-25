@@ -27,21 +27,17 @@ def cut_bad_data(cad, date, flux, err):
 
     return cad, date, flux, err, good_data_mask
 
-def put_in_nans(bad_data, flux):
+def put_in_nans(good_data, flux):
     """
     Function finds the cadences where the data has been removed using
     cut_bad_data() and puts data back in. The flux data put back in is nan.
     This function is used when writing data to a FITS files.
-    bad_data == True means the datapoint is good!!
+    good_data == True means the datapoint is good!!
     """
-    newflux = np.zeros(len(bad_data))
-    j = 0
-    for i in range(len(bad_data)):
-        if bad_data[i] == True:
-            newflux[i] = flux[j]
-            j += 1
-        elif bad_data[i] == False:
-            newflux[i] = np.nan
+    newflux = np.empty(len(good_data))
+    newflux[:] = np.nan
+    newflux[good_data] = flux
+
     return newflux
 
 def get_pcomp_list_newformat(bvdat, pcomplist, newcad, short, scinterp):
@@ -330,7 +326,7 @@ def make_outfile(fitsfile, outfile, flux_new, bvsum, version):
                                                   header=fitsfile[1].header)
     fitsfile.writeto(outfile)
 
-def do_plot(date, flux_old, flux_new, bvsum, cad, bad_data, cad_nans, version):
+def do_plot(date, flux_old, flux_new, bvsum, cad, good_data, cad_nans, version):
     plt.figure(figsize=[15, 8])
     plt.clf()
 
@@ -370,7 +366,7 @@ def do_plot(date, flux_old, flux_new, bvsum, cad, bad_data, cad_nans, version):
 
     ax1 = plt.subplot(211)
 
-    blocks = split_on_nans(bad_data,cad_nans)
+    blocks = split_on_nans(good_data,cad_nans)
     for i in range(len(blocks)):
         if i == 0:
             block = [blocks[0], blocks[i]]
@@ -435,15 +431,15 @@ def do_plot(date, flux_old, flux_new, bvsum, cad, bad_data, cad_nans, version):
     plt.savefig("kepcotrend.png")
     plt.show()
 
-def split_on_nans(bad_data, cad):
+def split_on_nans(good_data, cad):
     blocks = []
-    time_of_nans = cad[bad_data == False]
-    if bad_data[0] == True:
+    time_of_nans = cad[good_data == False]
+    if good_data[0] == True:
         blocks.append(cad[0])
     for i in range(1,len(time_of_nans)):
         if time_of_nans[i] - time_of_nans[i - 1] > 1:
             blocks.append(time_of_nans[i])
-        if bad_data[-1] == True:
+        if good_data[-1] == True:
             blocks.append(cad[-1])
     return blocks
 
@@ -766,7 +762,7 @@ def kepcotrend(infile, bvfile, listbv, outfile=None, fitmethod='llsq',
         kepmsg.err(logfile, errmsg, verbose)
 
     #cut out infinites and zero flux columns
-    lc_cad, lc_date, lc_flux, lc_err, bad_data = cut_bad_data(lc_cad_o,
+    lc_cad, lc_date, lc_flux, lc_err, good_data = cut_bad_data(lc_cad_o,
                                       lc_date_o, lc_flux_o, lc_err_o)
     #get a list of basis vectors to use from the list given
     #accept different seperators
@@ -864,14 +860,14 @@ def kepcotrend(infile, bvfile, listbv, outfile=None, fitmethod='llsq',
                                       coeffs) + 1) * medflux)
     bvsum = get_pcompsum(bvectors, coeffs)
     bvsum_masked = get_pcompsum(bvectors_masked, coeffs)
-    bvsum_nans = put_in_nans(bad_data, bvsum)
-    flux_after_nans = put_in_nans(bad_data, flux_after)
+    bvsum_nans = put_in_nans(good_data, bvsum)
+    flux_after_nans = put_in_nans(good_data, flux_after)
 
     if plot:
         newmedflux = np.median(flux_after + 1)
         bvsum_un_norm = newmedflux * (1 - bvsum)
         do_plot(lc_date, lc_flux, flux_after, bvsum_un_norm, lc_cad,
-                bad_data, lc_cad_o, version)
+                good_data, lc_cad_o, version)
 
     print("Writing output file {}...".format(outfile))
     make_outfile(instr, outfile, flux_after_nans, bvsum_nans, version)
