@@ -155,7 +155,7 @@ def kepbls(infile, outfile=None, datacol='DETSAP_FLUX',
     # fudge non-compliant FITS keywords with no values
     instr = kepkey.emptykeys(instr, infile, logfile, verbose)
     # read table structure
-    table = kepio.readfitstab(infile,instr[1],logfile,verbose)
+    table = kepio.readfitstab(infile, instr[1], logfile, verbose)
     # filter input data table
     work1 = np.array([table.field('time'), table.field(datacol),
                       table.field(errcol)])
@@ -183,10 +183,8 @@ def kepbls(infile, outfile=None, datacol='DETSAP_FLUX',
     transitPhase = np.array([], dtype='float32')
     dPeriod = (maxper - minper) / float(nsearch)
     trialPeriods = np.arange(minper, maxper + dPeriod, dPeriod, dtype='float32')
-    complete = 0
     print(' ')
     for trialPeriod in tqdm(trialPeriods):
-        complete += 1
         srMax = np.append(srMax, 0.0)
         transitDuration = np.append(transitDuration, np.nan)
         transitPhase = np.append(transitPhase, np.nan)
