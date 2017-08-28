@@ -11,7 +11,8 @@ This mask will be later used to define a photometric extraction aperture.
 The information about the aperture is stored in an ASCII file called
 ``maskfile.txt`` (this name can be changed using the ``--maskfile`` option).
 The required arguments for this tool are the name of the target pixel file
-(TPF) and the frame number.
+(TPF) and the frame number. Let's go ahead, open a terminal session, download
+a TPF using ``wget``, and visualizing the 3000th cadence using ``kepmask``:
 
 .. code-block:: bash
 
