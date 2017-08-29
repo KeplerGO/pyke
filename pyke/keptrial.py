@@ -142,9 +142,9 @@ def keptrial(infile, outfile=None, datacol='SAP_FLUX', errcol='SAP_FLUX_ERR',
     for i in tqdm(range(ntrials)):
         trial.append(i + 1)
         # adjust data within the error bars
-        work1 = kepstat.randarray(signal, err)
+        #work1 = kepstat.randarray(signal, err)
         # determine FT power
-        fr, power = kepfourier.ft(barytime, work1, fmin, fmax, deltaf, False)
+        fr, power = kepfourier.ft(barytime, signal, fmin, fmax, deltaf, False)
         # determine peak in FT
         pmax.append(-1.0e30)
         for j in range(len(fr)):
