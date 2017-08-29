@@ -25,9 +25,9 @@ def ft(x, y, f1, f2, df, verbose):
     power : ndarray
         Power spectrum
     """
-
-    x = x[~np.isnan(x)]
-    y = y[~np.isnan(y)]
+    notnans = (~np.isnan(x)) & (~np.isnan(y))
+    x = x[notnans]
+    y = y[notnans]
 
     ft_real, ft_imag, power, fr = [], [], [], []
     nstep = 0
