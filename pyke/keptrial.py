@@ -288,7 +288,7 @@ def keptrial_main():
     parser.add_argument('--fmin', default=0.1,
                         help='Minimum search frequency [1/day]', type=float)
     parser.add_argument('--fmax', default=50.,
-                        help='Minimum search frequency [1/day]', type=float)
+                        help='Maximum search frequency [1/day]', type=float)
     parser.add_argument('--nfreq', default=100,
                         help='Number of frequency intervals', type=int)
     parser.add_argument('--method', default='ft',
