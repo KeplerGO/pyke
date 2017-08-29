@@ -125,7 +125,7 @@ def kepoutlier(infile, outfile=None, datacol='SAP_FLUX', nsig=3.0, stepsize=1.0,
     if kepio.fileexists(outfile):
         errmsg = ('ERROR -- KEPOUTLIER: {} exists. Use overwrite=True'
                   .format(outfile))
-        kepmsg.err(logfile, message, verbose)
+        kepmsg.err(logfile, errmsg, verbose)
 
     # open input file
     instr = pyfits.open(infile)
