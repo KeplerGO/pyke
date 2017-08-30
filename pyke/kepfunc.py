@@ -313,7 +313,8 @@ def PRF2DET(flux, OBJx, OBJy, DATx, DATy, wx, wy, a, splineInterpolation):
                 yy = y - INTy + FRCy
                 dx = xx * cosa - yy * sina
                 dy = xx * sina + yy * cosa
-                PRFfit[j, k] += PRFfit[j,k] + splineInterpolation(dy * wy, dx * wx) * flux[i]
+                PRFfit[j, k] = PRFfit[j, k] + splineInterpolation(dy * wy, dx * wx) * flux[i]
+
     return PRFfit
 
 def PRF(params, *args):
