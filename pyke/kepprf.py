@@ -435,11 +435,11 @@ def kepprf(infile, prfdir, frameno, columns, rows, fluxes, background=False,
     kepmsg.log(logfile, "            Total flux in aperture = {0} e-/s"
             .format(FluxInAperAll), True)
     kepmsg.log(logfile, "           Target flux in aperture = {0} e-/s"
-            .format(FluxInAperOne),True)
+            .format(FluxInAperOne), True)
     kepmsg.log(logfile, "  Target flux fraction in aperture = {0} %"
-            .format(FluxFraction * 100.0),True)
+            .format(FluxFraction * 100.0), True)
     kepmsg.log(logfile, "Contamination fraction in aperture = {0} %"
-            .format(Contamination * 100.0),True)
+            .format(Contamination * 100.0), True)
 
     # construct model PRF in detector coordinates
     PRFfit = PRFall + 0.0
