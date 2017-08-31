@@ -11,7 +11,7 @@ from . import kepio, kepmsg, kepkey, kepstat, kepfunc
 __all__ = ['kepextract']
 
 
-def kepextract(infile, outfile=None, maskfile='ALL', bkg=False, psfcentroid=False,
+def kepextract(infile, outfile=None, qual=False, maskfile='ALL', bkg=False, psfcentroid=False,
                overwrite=False, verbose=False,
                logfile='kepextract.log'):
     """
@@ -42,6 +42,9 @@ def kepextract(infile, outfile=None, maskfile='ALL', bkg=False, psfcentroid=Fals
     outfile : str
         Filename for the output light curve. This product will be written to
         the same FITS format as archived light curves.
+    qual : bool
+        If True, only good quality (QUALITY == 0) cadences and cadences with
+        finite time measureaments will be used to create the lightcurve.
     maskfile : str
         This string can be one of three options:
 
@@ -140,7 +143,8 @@ def kepextract(infile, outfile=None, maskfile='ALL', bkg=False, psfcentroid=Fals
     table = instr[1].data[:]
     maskmap = copy(instr[2].data)
 
-    kepmsg.log(logfile,"Extracting information from Target Pixel File...",verbose)
+    kepmsg.log(logfile, "Extracting information from Target Pixel File...",
+               verbose)
 
     # input table data
     kepid, channel, skygroup, module, output, quarter, season, \
@@ -198,6 +202,23 @@ def kepextract(infile, outfile=None, maskfile='ALL', bkg=False, psfcentroid=Fals
         pos_corr2 = np.empty(len(time))
         # ---temporary before FITS wave #2
         pos_corr2[:] = np.nan
+
+    if qual:
+        time_mask = ~np.isnan(time)
+        quality_mask = quality == 0
+        good_quality = quality_mask & time_mask
+        pos_corr1 = pos_corr1[good_quality]
+        pos_corr2 = pos_corr2[good_quality]
+        time = time[good_quality]
+        timecorr = timecorr[good_quality]
+        cadenceno = cadenceno[good_quality]
+        raw_cnts = raw_cnts[good_quality]
+        flux = flux[good_quality]
+        flux_err = flux_err[good_quality]
+        flux_bkg = flux_bkg[good_quality]
+        flux_bkg_err = flux_bkg_err[good_quality]
+        cosmic_rays = cosmic_rays[good_quality]
+        quality = quality[good_quality]
 
     # dummy columns for output file
     psf_centr1 = np.empty(len(time))
@@ -566,7 +587,7 @@ def kepextract(infile, outfile=None, maskfile='ALL', bkg=False, psfcentroid=Fals
     outstr.append(hdu2)
 
     # write output file
-    kepmsg.log(logfile,"Writing output file {}...".format(outfile),verbose)
+    kepmsg.log(logfile, "Writing output file {}...".format(outfile), verbose)
     outstr.writeto(outfile, checksum=True)
     # close input structure
     instr.close()
@@ -586,6 +607,10 @@ def kepextract_main():
                         help=('Name of FITS file to output.'
                               ' If None, outfile is infile-kepextract.'),
                         default=None)
+    parser.add_argument('--qual',
+                        action='store_true',
+                        help=('Use only good quality (QUALITY == 0) cadences'
+                              ' and cadences with finite time measurements.'))
     parser.add_argument('--maskfile', default='ALL',
                         help='Name of mask defintion ASCII file',
                         type=str)
@@ -604,6 +629,6 @@ def kepextract_main():
     parser.add_argument('--logfile', '-l', help='Name of ascii log file',
                         default='kepextract.log', type=str)
     args = parser.parse_args()
-    kepextract(args.infile, args.outfile, args.maskfile, args.bkg,
+    kepextract(args.infile, args.outfile, args.qual, args.maskfile, args.bkg,
                args.psfcentroid, args.overwrite, args.verbose,
                args.logfile)
