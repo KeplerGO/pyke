@@ -256,33 +256,6 @@ def PRFgauss2d(params, *args):
     return res
 
 
-def PRF2DET2(flux, OBJx, OBJy, DATx, DATy, splineInterpolation):
-    """
-    PRF interpolation function
-    """
-    # where in the pixel is the source position?
-    PRFfit = np.zeros((np.size(DATy), np.size(DATx)))
-    for i in range(len(flux)):
-        FRCx, INTx = modf(OBJx[i])
-        FRCy, INTy = modf(OBJy[i])
-        if FRCx > 0.5:
-            FRCx -= 1.0
-            INTx += 1.0
-        if FRCy > 0.5:
-            FRCy -= 1.0
-            INTy += 1.0
-        FRCx = -FRCx
-        FRCy = -FRCy
-
-    # constuct model PRF in detector coordinates
-        for (j, y) in enumerate(DATy):
-            for (k, x) in enumerate(DATx):
-                dy = y - INTy + FRCy
-                dx = x - INTx + FRCx
-                PRFfit[j, k] = PRFfit[j, k] + splineInterpolation(dy, dx) * flux[i]
-    return PRFfit
-
-
 def PRF2DET(flux, OBJx, OBJy, DATx, DATy, wx, wy, a, splineInterpolation):
     """
     PRF interpolation function
@@ -313,7 +286,8 @@ def PRF2DET(flux, OBJx, OBJy, DATx, DATy, wx, wy, a, splineInterpolation):
                 yy = y - INTy + FRCy
                 dx = xx * cosa - yy * sina
                 dy = xx * sina + yy * cosa
-                PRFfit[j, k] += PRFfit[j,k] + splineInterpolation(dy * wy, dx * wx) * flux[i]
+                PRFfit[j, k] = PRFfit[j, k] + splineInterpolation(dy * wy, dx * wx) * flux[i]
+
     return PRFfit
 
 def PRF(params, *args):
