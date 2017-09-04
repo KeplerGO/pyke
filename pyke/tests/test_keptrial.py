@@ -12,5 +12,5 @@ def test_keptrial():
     keptrial(fake_lc, "keptrial.fits", datacol='SAP_FLUX', errcol='SAP_FLUX_ERR',
              fmin=0.4, fmax=0.67, ntrials=50, nfreq=10, overwrite=True)
     f = pyfits.open("keptrial.fits")
-    assert abs(f[3].header['PERIOD'] - 2.02) < 0.1
+    assert abs(f[3].header['PERIOD'] - 2.02) < 1e-3
     delete("keptrial.fits", "log_keptrial.txt", False)
