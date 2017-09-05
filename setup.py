@@ -56,6 +56,8 @@ setup(name='pyketools',
       packages=['pyke'],
       install_requires=['numpy>=1.11', 'astropy>=1.3', 'scipy>=0.17.0',
                         'matplotlib>=1.5.3', 'tqdm'],
+      setup_requires=['pytest-runner'],
+      tests_require=['pytest'],
       entry_points=entry_points,
       include_package_data=True,
       classifiers=[
