@@ -16,4 +16,6 @@ def test_kepbls():
     g_len = len(g[1].data['PDCSAP_FLUX'])
     assert (f[1].data['PDCSAP_FLUX'][:g_len] == g[1].data['PDCSAP_FLUX']).all() == True
     assert (f[1].data['PDCSAP_FLUX'][g_len:] == g[1].data['PDCSAP_FLUX']).all() == True
+    f.close()
+    g.close()
     delete("kepstitch.fits", "log_kepstitch.txt", False)

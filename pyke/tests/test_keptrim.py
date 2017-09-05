@@ -12,4 +12,5 @@ def test_keptrim():
     f = pyfits.open('tpf.fits')
     assert (f[1].data['FLUX'] == 1).all()
     assert f[1].data['FLUX'].shape == (len(f[1].data['FLUX']), 1, 1)
+    f.close()
     delete("tpf.fits", "log_keptrim.txt", False)

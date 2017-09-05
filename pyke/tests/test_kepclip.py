@@ -17,4 +17,6 @@ def test_kepclip():
                               g[1].data['PDCSAP_FLUX'])
     assert_array_almost_equal(f[1].data['TIME'],
                               g[1].data['TIME'])
+    f.close()
+    g.close()
     delete("kepclip.fits", "log_kepclip.txt", False)

@@ -15,4 +15,6 @@ def test_kepsmooth():
     f = pyfits.open("kepsmooth.fits")
     g = pyfits.open(fake_lc)
     assert_array_equal(f[1].data['SAP_FLUX'], g[1].data['SAP_FLUX'])
+    f.close()
+    g.close()
     delete("kepsmooth.fits", "log_kepsmooth.txt", False)

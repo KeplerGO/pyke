@@ -13,4 +13,5 @@ def test_keptrial():
              fmin=0.4, fmax=0.67, ntrials=50, nfreq=10, overwrite=True)
     f = pyfits.open("keptrial.fits")
     assert abs(f[3].header['PERIOD'] - 2.02) < 1e-3
+    f.close()
     delete("keptrial.fits", "log_keptrial.txt", False)
