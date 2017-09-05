@@ -63,7 +63,6 @@ def test_kepextract(tpf, maskfile, bkg, qual, answer):
                overwrite=True)
     f = pyfits.open("lc.fits")
     assert (f[1].data['SAP_FLUX'] == answer).all()
-    f.close()
 
     if qual:
         len_ans = full_mask.sum()
@@ -76,4 +75,5 @@ def test_kepextract(tpf, maskfile, bkg, qual, answer):
         assert_array_equal(mask_time_ans, mask_time_des)
         assert_array_equal(time_ans[~mask_time_ans], f[1].data['TIME'][~mask_time_des])
 
+    f.close()
     delete("lc.fits", "log_kepextract.txt", False)
