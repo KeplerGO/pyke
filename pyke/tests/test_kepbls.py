@@ -15,4 +15,5 @@ def test_kepbls():
     f = pyfits.open("kepbls.fits")
     assert abs(f[3].header['PERIOD'] - 2.02) < 0.1
     assert abs(f[3].header['TRANSDUR'] - 0.18) < 0.01
+    f.close()
     delete("kepbls.fits", "log_kepextract.txt", False)
