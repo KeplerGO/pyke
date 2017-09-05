@@ -146,12 +146,10 @@ def kepextract(infile, outfile=None, maskfile='ALL', bkg=False, psfcentroid=Fals
     kepid, channel, skygroup, module, output, quarter, season, \
     ra, dec, column, row, kepmag, xdim, ydim, time = \
         kepio.readTPF(infile, 'TIME', logfile, verbose)
-    time = np.array(time, dtype='float64')
 
     kepid, channel, skygroup, module, output, quarter, season, \
     ra, dec, column, row, kepmag, xdim, ydim, timecorr = \
         kepio.readTPF(infile, 'TIMECORR', logfile, verbose)
-    timecorr = np.array(timecorr, dtype='float32')
 
     kepid, channel, skygroup, module, output, quarter, season, \
     ra, dec, column, row, kepmag, xdim, ydim, cadenceno = \
@@ -185,7 +183,6 @@ def kepextract(infile, outfile=None, maskfile='ALL', bkg=False, psfcentroid=Fals
     kepid, channel, skygroup, module, output, quarter, season, \
     ra, dec, column, row, kepmag, xdim, ydim, quality = \
         kepio.readTPF(infile, 'QUALITY', logfile, verbose)
-    quality = np.array(quality, dtype='int')
 
     try:
         #  ---for FITS wave #2

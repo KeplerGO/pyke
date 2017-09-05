@@ -130,7 +130,7 @@ def kepbls(infile, outfile=None, datacol='DETSAP_FLUX',
             + ' verbose={}'.format(verbose)
             + ' logfile={}'.format(logfile))
 
-    kepmsg.log(logfile,call+'\n',verbose)
+    kepmsg.log(logfile, call+'\n', verbose)
 
     # start time
     kepmsg.clock('KEPBLS started at', logfile, verbose)
