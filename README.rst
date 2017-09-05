@@ -1,11 +1,12 @@
 PyKE: Kepler, K2 & TESS Data Analysis Tools
 ============================================
-|pypi-badge| |ci-badge| |doc-badge| |cov-badge| |doi-badge|
+|pypi-badge| |ci-badge| |appveyor-badge| |doc-badge| |cov-badge| |doi-badge|
 
 .. |pypi-badge| image:: https://img.shields.io/pypi/v/pyketools.svg
                 :target: https://pypi.python.org/pypi/pyketools
 .. |ci-badge| image:: https://travis-ci.org/KeplerGO/PyKE.svg?branch=master
               :target: https://travis-ci.org/KeplerGO/PyKE
+.. |appveyor-badge| image:: https://ci.appveyor.com/api/projects/status/github/keplergo/pyke?branch=master&svg=true
 .. |doc-badge| image:: https://readthedocs.org/projects/pyke/badge/?version=latest
               :target: https://pyke.keplerscience.org
 .. |cov-badge| image:: https://codecov.io/gh/KeplerGO/PyKE/branch/master/graph/badge.svg
