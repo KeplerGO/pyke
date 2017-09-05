@@ -17,11 +17,14 @@ def test_kepcotrend(fitmethod):
     kepcotrend(lc, cbv, '1 2 3', outfile="kepcotrend.fits",
                fitmethod=fitmethod)
     f = pyfits.open("kepcotrend.fits")
-    lc_cot = get_pkg_data_filename("data/kplr005110407-2009350155506_llc"
-                                   "-kepcotrend-{}.fits".format(fitmethod))
-    g = pyfits.open(lc_cot)
+    g = pyfits.open(
+            get_pkg_data_filename("data/kplr005110407-2009350155506_llc"
+                                  "-kepcotrend-{}.fits".format(fitmethod))
+                   )
     np.testing.assert_allclose(f[1].data['CBVSAP_FLUX'],
                                g[1].data['CBVSAP_FLUX'], rtol=1e-4)
     assert_array_almost_equal(f[1].data['CBVSAP_MODL'],
                               g[1].data['CBVSAP_MODL'], decimal=5)
+    f.close()
+    g.close()
     delete("kepcotrend.fits", "log_kepcotrend.txt", False)

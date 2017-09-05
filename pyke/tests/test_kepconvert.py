@@ -66,7 +66,7 @@ def test_kepconvert():
         second_line = second_line.split(',')
         assert second_line == (['1.461334722059185982e+09',
                                 '1.500000000000000000e+01\n'])
-        delete("fake_lc.txt", "kepconvert.log", False)
+    delete("fake_lc.txt", "kepconvert.log", False)
 
 SUPPORTED_CONVERSION = ['jd', 'mjd', 'decimalyear', 'unix', 'cxcsec', 'gps',
                         'plot_date', 'datetime', 'iso', 'isot', 'yday', 'fits',
@@ -82,5 +82,5 @@ def test_time_conversion():
         dateobs.format = conversion
         start = astropyTime(tstart, format='jd')
         start.format = conversion
-
+    fits.close()
     assert start.value == dateobs.value

@@ -40,4 +40,5 @@ def test_kepextract(tpf, maskfile, bkg, answer):
     kepextract(tpf, outfile="lc.fits", maskfile=maskfile, bkg=bkg, overwrite=True)
     f = pyfits.open("lc.fits")
     assert (f[1].data['SAP_FLUX'] == answer).all()
+    f.close()
     delete("lc.fits", "log_kepextract.txt", False)
