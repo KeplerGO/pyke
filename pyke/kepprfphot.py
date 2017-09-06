@@ -10,7 +10,7 @@ from matplotlib import pyplot as plt
 from astropy.io import fits as pyfits
 from scipy.optimize import fmin_powell
 from scipy.interpolate import RectBivariateSpline
-from . import kepio, kepmsg, kepkey, kepplot, kepfit, kepfunc, kepprfint
+from . import kepio, kepmsg, kepkey, kepplot, kepfit, kepfunc
 from .utils import PyKEArgumentHelpFormatter
 
 
@@ -302,10 +302,10 @@ def kepprfphot(infile, prfdir, columns, rows, fluxes, border=0,
         print('')
 
     # read PRF file and interpolate
-    result = kepprfint.read_and_interpolate_prf(prfdir=prfdir, module=module, 
-                                               output=output, column=column, 
-                                               row=row, xdim=xdim, ydim=ydim,
-                                               verbose=verbose, logfile=logfile)
+    result = kepfunc.read_and_interpolate_prf(prfdir=prfdir, module=module, 
+                                              output=output, column=column, 
+                                              row=row, xdim=xdim, ydim=ydim,
+                                              verbose=verbose, logfile=logfile)
     splineInterpolation = result[0]
     DATx = result[1]
     DATy = result[2]

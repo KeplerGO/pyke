@@ -9,7 +9,7 @@ from scipy import interpolate, optimize, ndimage, stats
 from scipy.optimize import fmin_powell
 from scipy.interpolate import RectBivariateSpline
 from scipy.ndimage import interpolation
-from . import kepio, kepmsg, kepplot, kepfunc, kepstat, kepprfint
+from . import kepio, kepmsg, kepplot, kepfunc, kepstat
 from .utils import PyKEArgumentHelpFormatter
 
 
@@ -269,7 +269,7 @@ def kepprf(infile, prfdir, frameno, columns, rows, fluxes, background=False,
 
     # read and interpolate PRF
     (splineInterpolation, DATx, DATy, prf, _, _, PRFx0, PRFy0, cdelt1p, 
-        cdelt2p, prfDimX, prfDimY) = kepprfint.read_and_interpolate_prf(
+        cdelt2p, prfDimX, prfDimY) = kepfunc.read_and_interpolate_prf(
         prfdir=prfdir, module=module, output=output, column=column, row=row, 
         xdim=xdim, ydim=ydim, verbose=verbose, logfile=logfile)
 
