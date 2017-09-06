@@ -25,7 +25,7 @@ We can visualize the stitched light curve using kepdraw:
 
 .. code-block:: bash
 
-    $ kepdraw kplr012557548-kepstitch.fits
+    $ kepdraw kplr012557548-kepstitch.fits --datacol SAP_FLUX
     $ kepdraw kplr012557548-kepstitch.fits --datacol PDCSAP_FLUX
 
 .. image:: ../_static/images/tutorials/example_d/kplr012557548-kepstitch-kepdraw.png
@@ -39,7 +39,7 @@ user of iterative σ-clipping that removes statistical outliers from a best-fit
 before refitting until no more time-stamps are rejected. In this way, transits
 profiles are conserved during the fit process and subsequent normalization by
 the final best-fit. The flattened are written to the output file in two new
-columns, DETSAP_FLUX and DETSAP_ERR_FLUX.
+columns, ``DETSAP_FLUX`` and ``DETSAP_ERR_FLUX``.
 
 
 .. code-block:: bash

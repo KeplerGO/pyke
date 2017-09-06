@@ -6,8 +6,9 @@ Example 2: PSF photometry in a K2 cluster
 In this tutorial we will use PSF-fitting photometry to create a light curve
 for an object in one of the cluster superstamps observed by K2.
 
-For this purpose, we download on of the target pixel files which K2
-obtained towards the Lagoon Nebula (M8) during `Campaign 9a <https://keplerscience.arc.nasa.gov/k2-c9.html>`_:
+For this purpose, we download one of the target pixel files which K2
+obtained towards the Lagoon Nebula (M8) during
+`Campaign 9a <https://keplerscience.arc.nasa.gov/k2-c9.html>`_:
 
 .. code-block:: bash
 
@@ -32,8 +33,8 @@ by cutting a 3x3 mask around the center of our target:
 
     $ keptrim ktwo200071160-c91_lpd-targ.fits.gz 1013 918 3
 
-This command creates a new target pixel file called ``ktwo200071160-c91_lpd-targ-keptrim.fits`` in the current directory,
-which contains the desired pixels while preserving all the original metadata.
+This command creates a new target pixel file called ``ktwo200071160-c91_lpd-targ-keptrim.fits``
+in the current directory, which contains the desired pixels while preserving all the original metadata.
 
 We can then use ``kepprfphot`` to fit the Kepler PRF for every frame in our trimmed tpf:
 
@@ -44,8 +45,8 @@ We can then use ``kepprfphot`` to fit the Kepler PRF for every frame in our trim
 Note that `prf_dir` is either a relative or absolute path to a directory
 containing the PRF files from the Kepler focal plane available in [#]_.
 
-This command creates a fits file called ``ktwo200071160-c91_lpd-targ-keptrim-kepprfphot_0.fits`` with all the results from
-the prf photometry including fitted flux and centroids.
+This command creates a fits file called ``ktwo200071160-c91_lpd-targ-keptrim-kepprfphot_0.fits``
+with all the results from the prf photometry including fitted flux and centroids.
 
 We can then write a small python script to see what the light curve looks like
 

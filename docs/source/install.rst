@@ -7,7 +7,8 @@ Installation
 Requirements
 ============
 
-PyKE has the following requirements, all of which tend to be available by default in a modern installation of Python:
+PyKE has the following requirements, all of which tend to be available by
+default in a modern installation of Python:
 
 - Python: 2.7, 3.5, 3.6 or later.
 - Astropy: 1.3 or later.
@@ -15,26 +16,29 @@ PyKE has the following requirements, all of which tend to be available by defaul
 - Scipy: 0.17 or later.
 - Matplotlib: 1.5.3 or later.
 
-If you do not have Python installed, we recommend using the `Anaconda Python <https://www.continuum.io/downloads>`_ distribution, which will install Python in your user directory alongside its most common scientific packages, including all those listed above.
+We strongly recommend using the `Anaconda Python <https://www.continuum.io/downloads>`_
+distribution, which will install Python alongside its most common scientific
+packages, including all those listed above.
 
 
 
 Installing PyKE
 ===============
 
-Using pip
----------
+Stable version
+--------------
 
-The easiest way to install or upgrade PyKE is with ``pip``, simply run::
+The easiest way to install or upgrade PyKE is with ``pip``, simply run the
+following command on a terminal window::
 
-    pip install pyketools --upgrade --no-deps
+    $ pip install pyketools --upgrade --no-deps
 
 
 .. note::
 
     The ``--no-deps`` flag is optional, but highly recommended if you already
-    have Numpy installed, since otherwise pip will sometimes try to "help" you
-    by upgrading your Numpy installation, which may not always be desired.
+    have Numpy installed, since otherwise pip will sometimes try to upgrade
+    your Numpy installation, which may not always be desired.
 
 .. note::
 
@@ -46,8 +50,8 @@ The easiest way to install or upgrade PyKE is with ``pip``, simply run::
     <http://www.pip-installer.org/en/1.2.1/other-tools.html#using-pip-with-the-user-scheme>`_.
 
 
-Using the development version
------------------------------
+Development version
+-------------------
 
 Alternatively, if you want to experiment with the latest development version of
 PyKE, you can install it straight from GitHub::
@@ -62,12 +66,12 @@ Building documentation
 
 .. note::
 
-    Building the documentation is in general not necessary unless you
-    are writing new documentation or do not have internet access, because
-    the latest (and archive) versions of PyKE's documentation should
-    be available at `pyke.keplerscience.org/ <http://pyke.keplerscience.org/>`_ .
+    In general, building the documentation is not necessary unless you are
+    writing new documentation or do not have internet access, because the
+    latest (and archive) versions of PyKE's documentation should be available
+    at `pyke.keplerscience.org/ <http://pyke.keplerscience.org/>`_ .
 
-To build the documentation, you can do::
+To build the documentation to HTML format, you can do::
 
     cd docs
     make html

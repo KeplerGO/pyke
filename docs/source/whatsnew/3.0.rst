@@ -11,6 +11,7 @@ PyKE 3.0, first released in July 2017, is a major release which provides the fol
 * PyKE no longer depends on PyRAF and is TESS-ready;
 * the tutorials have been updated for K2 and the `documentation <http://pyke.keplerscience.org>`_ is now generated using Sphinx;
 * the development has been moved to GitHub to encourage :ref:`user contributions<contributing>`.
+* the core code has been majorly rewritten to become developer-friendly;
 
 
 .. note::

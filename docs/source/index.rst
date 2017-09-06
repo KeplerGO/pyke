@@ -4,9 +4,13 @@
 PyKE: Kepler, K2 & TESS Data Analysis Tools
 ===========================================
 
-Welcome to the PyKE documentation! PyKE is a set of data analysis tools which offer a user-friendly way to inspect and analyze the pixels and lightcurves obtained by NASA's Kepler, K2, and TESS missions.
+Welcome to the PyKE documentation!
 
-.. image:: _static/images/pyke-overview.png
+PyKE is a set of data analysis tools which offer a user-friendly way to inspect
+and analyze pixels and lightcurves obtained by NASA's Kepler, K2, and TESS
+missions.
+
+.. .. image:: _static/images/pyke-overview.png
 
 *******************
 :doc:`whatsnew/3.0`
