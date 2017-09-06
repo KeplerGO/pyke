@@ -866,9 +866,11 @@ def read_and_interpolate_prf(prfdir, module, output, column, row, xdim, ydim,
     # interpolate the calibrated PRF shape to the target position
     prf = np.zeros(np.shape(prfn[0]), dtype='float32')
     prfWeight = np.zeros(n_hdu, dtype='float32')
+    ref_column = column + (xdim - 1.) / 2.
+    ref_row = row + (ydim - 1.) / 2.
     for i in range(n_hdu):
         prfWeight[i] = math.sqrt(
-            (column - crval1p[i])**2 + (row - crval2p[i])**2)
+            (ref_column - crval1p[i])**2 + (ref_row - crval2p[i])**2)
         if prfWeight[i] < minimum_prf_weight:
             prfWeight[i] = minimum_prf_weight
         prf += prfn[i] / prfWeight[i]
