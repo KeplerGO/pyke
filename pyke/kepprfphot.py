@@ -10,7 +10,7 @@ from matplotlib import pyplot as plt
 from astropy.io import fits as pyfits
 from scipy.optimize import fmin_powell
 from scipy.interpolate import RectBivariateSpline
-from . import kepio, kepmsg, kepkey, kepplot, kepfit, kepfunc
+from . import kepio, kepmsg, kepkey, kepplot, kepfit, kepfunc, kepprfint
 from .utils import PyKEArgumentHelpFormatter
 
 
@@ -301,55 +301,17 @@ def kepprfphot(infile, prfdir, columns, rows, fluxes, border=0,
         print('     Output: {}'.format(output))
         print('')
 
-    # determine suitable PRF calibration file
-    if int(module) < 10:
-        prefix = 'kplr0'
-    else:
-        prefix = 'kplr'
-    prfglob = prfdir + '/' + prefix + str(module) + '.' + str(output) + '*' + '_prf.fits'
-    try:
-        prffile = glob.glob(prfglob)[0]
-    except:
-        message = 'ERROR -- KEPPRFPHOT: No PRF file found in ' + prfdir
-        kepmsg.err(logfile, message, verbose)
+    # read PRF file and interpolate
+    result = kepprfint.read_and_interpolate_prf(prfdir=prfdir, module=module, 
+                                               output=output, column=column, 
+                                               row=row, xdim=xdim, ydim=ydim,
+                                               verbose=verbose, logfile=logfile)
+    splineInterpolation = result[0]
+    DATx = result[1]
+    DATy = result[2]
+    PRFx = result[4]
+    PRFy = result[5]
 
-    # read PRF images
-    prfn = [0, 0, 0, 0, 0]
-    crpix1p = np.zeros(5, dtype='float32')
-    crpix2p = np.zeros(5, dtype='float32')
-    crval1p = np.zeros(5, dtype='float32')
-    crval2p = np.zeros(5, dtype='float32')
-    cdelt1p = np.zeros(5, dtype='float32')
-    cdelt2p = np.zeros(5, dtype='float32')
-    for i in range(5):
-        prfn[i], crpix1p[i], crpix2p[i], crval1p[i], crval2p[i], cdelt1p[i], cdelt2p[i] \
-            = kepio.readPRFimage(prffile, i+1, logfile, verbose)
-    PRFx = np.arange(0.5, np.shape(prfn[0])[1] + 0.5)
-    PRFy = np.arange(0.5, np.shape(prfn[0])[0] + 0.5)
-    PRFx = (PRFx - np.size(PRFx) / 2) * cdelt1p[0]
-    PRFy = (PRFy - np.size(PRFy) / 2) * cdelt2p[0]
-
-    # interpolate the calibrated PRF shape to the target position
-    prf = np.zeros(np.shape(prfn[0]), dtype='float32')
-    prfWeight = np.zeros(5, dtype='float32')
-    for i in range(5):
-        prfWeight[i] = math.sqrt((column - crval1p[i]) ** 2 + (row - crval2p[i]) ** 2)
-        if prfWeight[i] == 0.0:
-            prfWeight[i] = 1.0e6
-        prf = prf + prfn[i] / prfWeight[i]
-    prf = prf / np.nansum(prf)
-    prf = prf / cdelt1p[0] / cdelt2p[0]
-
-    # location of the data image centered on the PRF image (in PRF pixel units)
-    prfDimY = ydim / cdelt1p[0]
-    prfDimX = xdim / cdelt2p[0]
-    PRFy0 = (np.shape(prf)[0] - prfDimY) / 2
-    PRFx0 = (np.shape(prf)[1] - prfDimX) / 2
-    # construct input pixel image
-    DATx = np.arange(column, column + xdim)
-    DATy = np.arange(row, row + ydim)
-    # interpolation function over the PRF
-    splineInterpolation = RectBivariateSpline(PRFx, PRFy, prf, kx=3, ky=3)
     # construct mesh for background model
     bx = np.arange(1., float(xdim + 1))
     by = np.arange(1., float(ydim + 1))
