@@ -71,6 +71,10 @@ Building documentation
     latest (and archive) versions of PyKE's documentation should be available
     at `pyke.keplerscience.org/ <http://pyke.keplerscience.org/>`_ .
 
+.. note::
+    PyKE documentation requires the `numpydoc sphinx extension <https://github.com/numpy/numpydoc>`_
+    which can be installed with ``pip install numpydoc``.
+
 To build the documentation to HTML format, you can do::
 
     cd docs
