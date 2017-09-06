@@ -2,6 +2,8 @@ from .keparray import rebin2D
 import math
 import numpy as np
 import sys
+import os
+import glob
 from math import modf, cos, sin, radians, exp
 from scipy import ndimage, interpolate
 from scipy.ndimage import interpolation
