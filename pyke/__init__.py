@@ -35,6 +35,7 @@ from .keppca import *
 from .keppixseries import *
 from .kepplot import *
 from .kepprf import *
+from .kepprfint import *
 from .kepprfphot import *
 from .keprange import *
 from .kepsff import *
