@@ -272,8 +272,8 @@ def kepprfphot(infile, prfdir, columns, rows, fluxes, border=0,
         print('')
 
     # read PRF file and interpolate
-    result = kepfunc.read_and_interpolate_prf(prfdir=prfdir, module=module, 
-                                              output=output, column=column, 
+    result = kepfunc.read_and_interpolate_prf(prfdir=prfdir, module=module,
+                                              output=output, column=column,
                                               row=row, xdim=xdim, ydim=ydim,
                                               verbose=verbose, logfile=logfile)
     splineInterpolation = result[0]
@@ -433,13 +433,13 @@ def kepprfphot(infile, prfdir, columns, rows, fluxes, border=0,
     flux, OBJx, OBJy = [], [], []
     na = np.shape(ans)[1]
     for i in range(nsrc):
-        flux.append(ans[i,:])
+        flux.append(ans[i, :])
         OBJx.append(ans[nsrc + i, :])
         OBJy.append(ans[nsrc * 2 + i, :])
     try:
         bterms = border + 1
         if bterms == 1:
-            b = ans[nsrc*3,:]
+            b = ans[nsrc * 3, :]
         else:
             b = np.array([])
             bkg = []
