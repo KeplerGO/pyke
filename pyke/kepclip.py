@@ -101,6 +101,10 @@ def kepclip(infile, ranges, outfile=None, datacol='SAP_FLUX', plot=False,
         flux = flux / cadenom
 
     # filter input data table
+    finite_data_mask = np.isfinite(barytime) & np.isfinite(flux) & (flux != 0)
+    barytime = barytime[finite_data_mask]
+    flux = flux[finite_data_mask]
+    table = table[finite_data_mask]
     accept_time_mask = np.ones_like(barytime, dtype=bool)
     for i in range(len(t1)):
         accept_time_mask[(barytime >= t1[i]) & (barytime <= t2[i])] = False
