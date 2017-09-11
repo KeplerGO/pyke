@@ -290,8 +290,8 @@ def kepextract(infile, outfile=None, maskfile='ALL', bkg=False, psfcentroid=Fals
         for i in range(maskmap.shape[0]):
             for j in range(maskmap.shape[1]):
                 aperb = np.append(aperb, maskmap[i, j])
-                aperx = np.append(aperx,crval1p + (j + 1 - crpix1p) * cdelt1p)
-                apery = np.append(apery,crval2p + (i + 1 - crpix2p) * cdelt2p)
+                aperx = np.append(aperx, crval1p + (j + 1 - crpix1p) * cdelt1p)
+                apery = np.append(apery, crval2p + (i + 1 - crpix2p) * cdelt2p)
 
     # subtract median pixel value for background?
     sky = np.zeros(len(time), 'float32')
