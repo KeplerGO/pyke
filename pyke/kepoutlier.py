@@ -291,19 +291,20 @@ def kepoutlier(infile, outfile=None, datacol='SAP_FLUX', nsig=3.0, stepsize=1.0,
             table[naxis2] = table[i]
             naxis2 += 1
     instr[1].data = table[:naxis2]
-    rejtime = np.array(rejtime, dtype='float64')
-    rejdata = np.array(rejdata, dtype='float32')
-    plt.plot(rejtime - intime0, rejdata / 10 ** nrm, 'ro')
 
-    # plot ranges
-    plt.xlim(xmin - xr * 0.01, xmax + xr * 0.01)
-    if ymin >= 0.0:
-        plt.ylim(ymin - yr * 0.01, ymax + yr * 0.01)
-    else:
-        plt.ylim(1.0e-10, ymax + yr * 0.01)
+    if plot:
+        rejtime = np.array(rejtime, dtype='float64')
+        rejdata = np.array(rejdata, dtype='float32')
+        plt.plot(rejtime - intime0, rejdata / 10 ** nrm, 'ro')
+        # plot ranges
+        plt.xlim(xmin - xr * 0.01, xmax + xr * 0.01)
+        if ymin >= 0.0:
+            plt.ylim(ymin - yr * 0.01, ymax + yr * 0.01)
+        else:
+            plt.ylim(1.0e-10, ymax + yr * 0.01)
 
-    # render plot
-    plt.show()
+        # render plot
+        plt.show()
     # write output file
     print("Writing output file {}...".format(outfile))
     instr.writeto(outfile)
