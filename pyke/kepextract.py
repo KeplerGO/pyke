@@ -382,7 +382,7 @@ def kepextract(infile, outfile=None, maskfile='ALL', bkg=False, psfcentroid=Fals
                 k += 1
                 modx[k] = aperx[j]
                 mody[k] = apery[j]
-        for i in tqdm(range(ntime)):
+        for i in tqdm(range(ntime), desc='PSF centroiding'):
             modf = np.zeros(shape=(naper))
             k = -1
             guess = [mom_centr1[i], mom_centr2[i], np.nanmax(flux[i:]), 1.0, 1.0, 0.0, 0.0]
