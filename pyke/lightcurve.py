@@ -26,6 +26,9 @@ class LightCurve(object):
         else:
             return FirstDifferenceDetrender().detrend(self.time, self.flux, **kwargs)
 
+    def to_pandas(self):
+        raise NotImplementedError("@gully")
+
 class Detrender(object):
     """
     """

@@ -119,6 +119,10 @@ class KeplerTargetPixelFile(TargetPixelFile):
         """Returns the quality flag integer of every cadence."""
         return self.get_data(keyword='QUALITY', ext=1)
 
+    def to_fits(self):
+        """Save the TPF to fits"""
+        raise NotImplementedError
+
     def aperture_mask(self, snr_threshold=5, margin=4):
         """Returns an aperture photometry mask.
 
@@ -179,8 +183,9 @@ class KeplerTargetPixelFile(TargetPixelFile):
 
         for i in range(self.n_cadences):
             total_flux = self.flux[i][aperture_mask].sum()
-            xc[i] = (self.flux[i][aperture_mask] * x).sum() / total_flux
-            yc[i] = (self.flux[i][aperture_mask] * y).sum() / total_flux
+            flux_i = self.flux[i][aperture_mask]
+            xc[i] = (flux_i * x).sum() / total_flux
+            yc[i] = (flux_i * y).sum() / total_flux
 
         return xc, yc
 
@@ -190,12 +195,10 @@ class KeplerTargetPixelFile(TargetPixelFile):
 
         if aperture_mask is None:
             aperture_mask = self.aperture_mask()
-        lc = np.zeros(self.n_cadences)
-        for i in range(self.n_cadences):
-            lc[i] = self.flux[i][aperture_mask].sum()
+
         if method is None:
-            lc = LightCurve(flux=lc, time=self.time)
+            return LightCurve(flux=self.flux[aperture_mask].sum(axis=(1, 2)),
+                              time=self.time)
         else:
-            lc = LightCurve(flux=lc, time=self.time).detrend(method=method,
-                                                 **kwargs)
-        return lc
+            return LightCurve(flux=self.flux[aperture_mask].sum(axis=(1, 2)),
+                              time=self.time).detrend(method=method, **kwargs)
