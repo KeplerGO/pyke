@@ -145,15 +145,17 @@ def kepextract(infile, outfile=None, maskfile='ALL', bkg=False, psfcentroid=Fals
 
     # input table data
     tpf = KeplerTargetPixelFile(infile, max_quality=10000000000000)
-    timecorr = tpf.get_data(keyword='TIMECORR')
-    cadenceno = tpf.get_data(keyword='CADENCENO')
-    raw_cnts = tpf.get_data(keyword='RAW_CNTS')
-    flux_err = tpf.get_data(keyword='FLUX_ERR')
-    flux_bkg = tpf.get_data(keyword='FLUX_BKG')
-    flux_bkg_err = tpf.get_data(keyword='FLUX_BKG_ERR')
-    cosmic_rays = tpf.get_data(keyword='COSMIC_RAYS')
+    timecorr = tpf.get_data('TIMECORR')
+    cadenceno = tpf.get_data('CADENCENO')
+    raw_cnts = tpf.get_data('RAW_CNTS')
+    newshape = (len(cadenceno), raw_cnts.shape[1] * raw_cnts.shape[2])
+    raw_cnts = raw_cnts.reshape(newshape)
+    flux_err = tpf.get_data('FLUX_ERR').reshape(newshape)
+    flux_bkg = tpf.get_data('FLUX_BKG').reshape(newshape)
+    flux_bkg_err = tpf.get_data('FLUX_BKG_ERR').reshape(newshape)
+    cosmic_rays = tpf.get_data('COSMIC_RAYS')
     time = tpf.time
-    flux = tpf.flux
+    flux = tpf.flux.reshape(newshape)
     quality = tpf.quality
 
     try:

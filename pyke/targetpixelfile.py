@@ -86,6 +86,11 @@ class KeplerTargetPixelFile(TargetPixelFile):
         return self.good_quality_mask().sum()
 
     @property
+    def shape(self):
+        """Return the cube dimension shape."""
+        raise NotImplementedError
+
+    @property
     def time(self):
         """Returns the time for all good-quality cadences."""
         return self.get_data(keyword='TIME',
