@@ -1,10 +1,11 @@
-from .utils import PyKEArgumentHelpFormatter
 import math
 import numpy as np
 from astropy.io import fits as pyfits
 from scipy.optimize import leastsq
 from copy import copy
 from tqdm import tqdm
+from .utils import PyKEArgumentHelpFormatter
+from .targetpixelfile import KeplerTargetPixelFile
 from . import kepio, kepmsg, kepkey, kepstat, kepfunc
 
 
@@ -143,46 +144,17 @@ def kepextract(infile, outfile=None, maskfile='ALL', bkg=False, psfcentroid=Fals
     kepmsg.log(logfile,"Extracting information from Target Pixel File...",verbose)
 
     # input table data
-    kepid, channel, skygroup, module, output, quarter, season, \
-    ra, dec, column, row, kepmag, xdim, ydim, time = \
-        kepio.readTPF(infile, 'TIME', logfile, verbose)
-
-    kepid, channel, skygroup, module, output, quarter, season, \
-    ra, dec, column, row, kepmag, xdim, ydim, timecorr = \
-        kepio.readTPF(infile, 'TIMECORR', logfile, verbose)
-
-    kepid, channel, skygroup, module, output, quarter, season, \
-    ra, dec, column, row, kepmag, xdim, ydim, cadenceno = \
-        kepio.readTPF(infile, 'CADENCENO', logfile, verbose)
-    cadenceno = np.array(cadenceno, dtype='int')
-
-    kepid, channel, skygroup, module, output, quarter, season, \
-    ra, dec, column, row, kepmag, xdim, ydim, raw_cnts = \
-        kepio.readTPF(infile, 'RAW_CNTS', logfile, verbose)
-
-    kepid, channel, skygroup, module, output, quarter, season, \
-    ra, dec, column, row, kepmag, xdim, ydim, flux = \
-        kepio.readTPF(infile, 'FLUX', logfile, verbose)
-
-    kepid, channel, skygroup, module, output, quarter, season, \
-    ra, dec, column, row, kepmag, xdim, ydim, flux_err = \
-        kepio.readTPF(infile, 'FLUX_ERR', logfile, verbose)
-
-    kepid, channel, skygroup, module, output, quarter, season, \
-    ra, dec, column, row, kepmag, xdim, ydim, flux_bkg = \
-        kepio.readTPF(infile, 'FLUX_BKG', logfile, verbose)
-
-    kepid, channel, skygroup, module, output, quarter, season, \
-    ra, dec, column, row, kepmag, xdim, ydim, flux_bkg_err = \
-        kepio.readTPF(infile, 'FLUX_BKG_ERR', logfile, verbose)
-
-    kepid, channel, skygroup, module, output, quarter, season, \
-    ra, dec, column, row, kepmag, xdim, ydim, cosmic_rays = \
-        kepio.readTPF(infile, 'COSMIC_RAYS', logfile, verbose)
-
-    kepid, channel, skygroup, module, output, quarter, season, \
-    ra, dec, column, row, kepmag, xdim, ydim, quality = \
-        kepio.readTPF(infile, 'QUALITY', logfile, verbose)
+    tpf = KeplerTargetPixelFile(infile, max_quality=10000000000000)
+    timecorr = tpf.get_data(keyword='TIMECORR')
+    cadenceno = tpf.get_data(keyword='CADENCENO')
+    raw_cnts = tpf.get_data(keyword='RAW_CNTS')
+    flux_err = tpf.get_data(keyword='FLUX_ERR')
+    flux_bkg = tpf.get_data(keyword='FLUX_BKG')
+    flux_bkg_err = tpf.get_data(keyword='FLUX_BKG_ERR')
+    cosmic_rays = tpf.get_data(keyword='COSMIC_RAYS')
+    time = tpf.time
+    flux = tpf.flux
+    quality = tpf.quality
 
     try:
         #  ---for FITS wave #2
