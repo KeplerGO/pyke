@@ -267,7 +267,7 @@ def kepoutlier(infile, outfile=None, datacol='SAP_FLUX', nsig=3.0, stepsize=1.0,
     # reject outliers
     rejtime, rejdata = [], []
     naxis2 = 0
-    for i in range(len(masterfit)):
+    for i in tqdm(range(len(masterfit))):
         if (abs(indata[i] - masterfit[i]) > nsig * mastersigma[i]
             and i in cadencelis):
             rejtime.append(intime[i])
