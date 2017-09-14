@@ -75,7 +75,7 @@ class KeplerTargetPixelFile(TargetPixelFile):
         """Returns the data for a given keyword for a given extension."""
         return self.hdu[ext].data[keyword]
 
-    def good_quality_mask(self, max_quality=None):
+    def good_quality_cadences(self, max_quality=None):
         """Returns a boolean mask flagging cadences whose quality is at most
         `max_quality`.
 
@@ -103,7 +103,7 @@ class KeplerTargetPixelFile(TargetPixelFile):
     @property
     def n_cadences(self):
         """Returns the number of good-quality cadences."""
-        return self.good_quality_mask().sum()
+        return self.good_quality_cadences().sum()
 
     @property
     def shape(self):
@@ -114,7 +114,7 @@ class KeplerTargetPixelFile(TargetPixelFile):
     def time(self):
         """Returns the time for all good-quality cadences."""
         return self.get_data(keyword='TIME',
-                             ext=1)[self.good_quality_mask()]
+                             ext=1)[self.good_quality_cadences()]
 
     @property
     def nan_time_mask(self):
@@ -125,7 +125,7 @@ class KeplerTargetPixelFile(TargetPixelFile):
     def flux(self):
         """Returns the flux for all good-quality cadences."""
         return self.get_data(keyword='FLUX',
-                             ext=1)[self.good_quality_mask(), :, :]
+                             ext=1)[self.good_quality_cadences(), :, :]
 
     @property
     def quality(self):
