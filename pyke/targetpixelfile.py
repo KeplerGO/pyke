@@ -11,8 +11,15 @@ __all__ = ['KeplerTargetPixelFile']
 
 class TargetPixelFile(object):
     """
-    Abstract TargetPixelFile class
+    TargetPixelFile class
     """
+
+    def open(self, **kwargs):
+        pass
+
+    def get_data(self):
+        pass
+
     def to_lightcurve(self, aperture_mask=None, method=None, **kwargs):
         """Returns a raw light curve of the TPF.
 
@@ -32,7 +39,6 @@ class TargetPixelFile(object):
             Array containing the summed or detrended flux within the aperture
             for each cadence.
         """
-
         pass
 
 
@@ -68,7 +74,8 @@ class KeplerTargetPixelFile(TargetPixelFile):
         return self.hdu[ext].data[keyword]
 
     def good_quality_mask(self, max_quality=None):
-        """Returns a boolean mask flagging the good-quality cadences.
+        """Returns a boolean mask flagging cadences whose quality is at most
+        `max_quality`.
 
         Parameters
         ----------
@@ -95,6 +102,11 @@ class KeplerTargetPixelFile(TargetPixelFile):
         """Returns the time for all good-quality cadences."""
         return self.get_data(keyword='TIME',
                              ext=1)[self.good_quality_mask()]
+
+    @property
+    def nan_time_mask(self):
+        """Returns a boolean mask flagging cadences whose time is `nan`."""
+        return ~np.isfinite(self.time)
 
     @property
     def flux(self):
@@ -137,14 +149,8 @@ class KeplerTargetPixelFile(TargetPixelFile):
 
         # Which label corresponds to the brightest pixel?
         regnum = labels[centralpix[0] - margin + bpixy, centralpix[1] - margin + bpixx]
-        if regnum == 0:
-            warnings.warn('No star were found in light curve {}, '
-                          'light curve will be junk!'.format(self.path),
-                          UserWarning)
 
-        aperture_mask = labels == regnum
-
-        return aperture_mask
+        return labels == regnum
 
     def centroids(self, aperture_mask=None):
         """Returns the centroids for every cadence under a given aperture
@@ -167,13 +173,14 @@ class KeplerTargetPixelFile(TargetPixelFile):
 
         xc = np.zeros(self.n_cadences)
         yc = np.zeros(self.n_cadences)
-
         y, x = np.mgrid[:img.shape[0], :img.shape[1]]
+        x = x[aperture_mask]
+        y = y[aperture_mask]
 
         for i in range(self.n_cadences):
-            total_flux = self.flux[i].sum()
-            xc[i] = (self.flux[i] * x).sum() / total_flux
-            yc[i] = (self.flux[i] * y).sum() / total_flux
+            total_flux = self.flux[i][aperture_mask].sum()
+            xc[i] = (self.flux[i][aperture_mask] * x).sum() / total_flux
+            yc[i] = (self.flux[i][aperture_mask] * y).sum() / total_flux
 
         return xc, yc
 
