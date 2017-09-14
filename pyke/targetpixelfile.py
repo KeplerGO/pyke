@@ -1,4 +1,3 @@
-import warnings
 import numpy as np
 from astropy.io import fits
 from astropy.stats.funcs import median_absolute_deviation
