@@ -61,9 +61,11 @@ class KeplerTargetPixelFile(TargetPixelFile):
         http://archive.stsci.edu/kepler/manuals/archive_manual.pdf
     """
 
-    def __init__(self, path, max_quality=1, **kwargs):
+    def __init__(self, path, max_quality=1, aperture_mask=None, **kwargs):
         self.path = path
         self.max_quality = max_quality
+        self.aperture_mask = None
+        self._aperture_flux = None
         self.open(**kwargs)
 
     def open(self, **kwargs):
@@ -86,6 +88,17 @@ class KeplerTargetPixelFile(TargetPixelFile):
         if max_quality is None:
             max_quality = self.max_quality
         return self.quality < max_quality
+
+    @property
+    def aperture_mask(self):
+        return self._aperture_mask
+
+    @aperture_mask.setter
+    def aperture_mask(self, mask):
+        if mask is not None:
+            self._aperture_mask = mask
+        else:
+            self._aperture_mask = self.make_aperture_mask()
 
     @property
     def n_cadences(self):
@@ -123,7 +136,7 @@ class KeplerTargetPixelFile(TargetPixelFile):
         """Save the TPF to fits"""
         raise NotImplementedError
 
-    def aperture_mask(self, snr_threshold=5, margin=4):
+    def make_aperture_mask(self, snr_threshold=5, margin=4):
         """Returns an aperture photometry mask.
 
         Parameters
@@ -156,15 +169,12 @@ class KeplerTargetPixelFile(TargetPixelFile):
 
         return labels == regnum
 
-    def centroids(self, aperture_mask=None):
+    def centroids(self):
         """Returns the centroids for every cadence under a given aperture
         mask.
 
         Attributes
         ----------
-        aperture_mask: boolean ndarray or None
-            Aperture mask under which centroids will be computed. If ``None``,
-            then an aperture is computed using ``aperture_mask``.
 
         Returns
         -------
@@ -172,33 +182,35 @@ class KeplerTargetPixelFile(TargetPixelFile):
             centroid positions for every cadence
         """
 
-        if aperture_mask is None:
-            aperture_mask = self.aperture_mask()
-
         xc = np.zeros(self.n_cadences)
         yc = np.zeros(self.n_cadences)
         y, x = np.mgrid[:img.shape[0], :img.shape[1]]
-        x = x[aperture_mask]
-        y = y[aperture_mask]
+
+        x = x[self.aperture_mask]
+        y = y[self.aperture_mask]
+
+        if self._aperture_flux is None:
+            self._aperture_flux = self._get_aperture_flux(self.aperture_mask)
 
         for i in range(self.n_cadences):
-            total_flux = self.flux[i][aperture_mask].sum()
-            flux_i = self.flux[i][aperture_mask]
-            xc[i] = (flux_i * x).sum() / total_flux
-            yc[i] = (flux_i * y).sum() / total_flux
+            flux_i = self.flux[i][self.aperture_mask]
+            xc[i] = np.nansum(flux_i * x) / self._aperture_flux[i]
+            yc[i] = np.nansum(flux_i * y) / self._aperture_flux[i]
 
         return xc, yc
 
-    def to_lightcurve(self, aperture_mask=None, method=None, **kwargs):
+    def _get_aperture_flux(self):
+        return np.nansum(self.flux[self.aperture_mask], axis=(1, 2))
+
+    def to_lightcurve(self, method=None, **kwargs):
         """Performs aperture photometry and optionally detrends the lightcurve.
         """
 
-        if aperture_mask is None:
-            aperture_mask = self.aperture_mask()
+        if self._aperture_flux is None:
+            self._aperture_flux = self._get_aperture_flux(self.aperture_mask)
 
         if method is None:
-            return LightCurve(flux=self.flux[aperture_mask].sum(axis=(1, 2)),
-                              time=self.time)
+            return LightCurve(flux=self._aperture_flux, time=self.time)
         else:
-            return LightCurve(flux=self.flux[aperture_mask].sum(axis=(1, 2)),
+            return LightCurve(flux=self._aperture_flux,
                               time=self.time).detrend(method=method, **kwargs)
