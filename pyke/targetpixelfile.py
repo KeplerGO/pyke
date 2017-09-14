@@ -63,10 +63,10 @@ class KeplerTargetPixelFile(TargetPixelFile):
 
     def __init__(self, path, max_quality=1, aperture_mask=None, **kwargs):
         self.path = path
+        self.open(**kwargs)
         self.max_quality = max_quality
         self.aperture_mask = None
         self._aperture_flux = None
-        self.open(**kwargs)
 
     def open(self, **kwargs):
         self.hdu = fits.open(self.path, **kwargs)
