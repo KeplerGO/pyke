@@ -127,7 +127,9 @@ def kepextract(infile, outfile=None, maskfile='ALL', bkg=False, psfcentroid=Fals
         kepmsg.err(logfile, errmsg, verbose)
 
     # open input file
-    instr = pyfits.open(infile, mode='readonly', memmap=True)
+    tpf = KeplerTargetPixelFile(infile, max_quality=10000000000000,
+                                mode='readonly', memmap=True)
+    instr = tpf.hdu
     tstart, tstop, bjdref, cadence = kepio.timekeys(instr, infile,
                                                     logfile, verbose)
 
@@ -144,7 +146,6 @@ def kepextract(infile, outfile=None, maskfile='ALL', bkg=False, psfcentroid=Fals
     kepmsg.log(logfile,"Extracting information from Target Pixel File...",verbose)
 
     # input table data
-    tpf = KeplerTargetPixelFile(infile, max_quality=10000000000000)
     timecorr = tpf.get_data('TIMECORR')
     cadenceno = tpf.get_data('CADENCENO')
     newshape = (tpf.shape[0], tpf.shape[1] * tpf.shape[2])
