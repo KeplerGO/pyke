@@ -94,7 +94,11 @@ class KeplerTargetPixelFile(TargetPixelFile):
 
     @aperture_mask.setter
     def aperture_mask(self, mask):
-        self._aperture_mask = mask
+        if mask is not None:
+            self._aperture_mask = mask
+        else:
+            self._aperture_mask = np.ones((self.shape[1], self.shape[2]),
+                                          dtype=bool)
 
     @property
     def n_cadences(self):
@@ -122,6 +126,12 @@ class KeplerTargetPixelFile(TargetPixelFile):
         """Returns the flux for all good-quality cadences."""
         return self.get_data(keyword='FLUX',
                              ext=1)[self.good_quality_cadences()]
+
+    @property
+    def bkg(self):
+        """Returns the median value of the fluxes for every cadence as an
+        estimate for the background."""
+        return np.nanmedian(self.flux[:, self.aperture_mask], axis=1)
 
     @property
     def quality(self):
@@ -186,7 +196,7 @@ class KeplerTargetPixelFile(TargetPixelFile):
         y = y[self.aperture_mask]
 
         if self._aperture_flux is None:
-            self._aperture_flux = self._get_aperture_flux(self.aperture_mask)
+            self._aperture_flux = self._get_aperture_flux()
 
         for i in range(self.n_cadences):
             flux_i = self.flux[i][self.aperture_mask]
@@ -196,14 +206,19 @@ class KeplerTargetPixelFile(TargetPixelFile):
         return xc, yc
 
     def _get_aperture_flux(self):
-        return np.nansum(self.flux[self.aperture_mask], axis=(1, 2))
+        return np.nansum(self.flux[:, self.aperture_mask], axis=1)
 
-    def to_lightcurve(self, method=None, **kwargs):
+    def to_lightcurve(self, method=None, subtract_bkg=False, **kwargs):
         """Performs aperture photometry and optionally detrends the lightcurve.
         """
 
         if self._aperture_flux is None:
-            self._aperture_flux = self._get_aperture_flux(self.aperture_mask)
+            self._aperture_flux = self._get_aperture_flux()
+
+        if subtract_bkg:
+            # number of pixels in the aperture
+            npix = self.aperture_mask.sum()
+            self._aperture_flux = self._aperture_flux - npix * self.bkg
 
         if method is None:
             return LightCurve(flux=self._aperture_flux, time=self.time)
