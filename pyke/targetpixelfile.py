@@ -94,10 +94,7 @@ class KeplerTargetPixelFile(TargetPixelFile):
 
     @aperture_mask.setter
     def aperture_mask(self, mask):
-        if mask is not None:
-            self._aperture_mask = mask
-        else:
-            self._aperture_mask = self.make_aperture_mask()
+        self._aperture_mask = mask
 
     @property
     def n_cadences(self):
@@ -107,7 +104,7 @@ class KeplerTargetPixelFile(TargetPixelFile):
     @property
     def shape(self):
         """Return the cube dimension shape."""
-        raise NotImplementedError
+        return self.flux.shape
 
     @property
     def time(self):
@@ -124,7 +121,7 @@ class KeplerTargetPixelFile(TargetPixelFile):
     def flux(self):
         """Returns the flux for all good-quality cadences."""
         return self.get_data(keyword='FLUX',
-                             ext=1)[self.good_quality_cadences(), :, :]
+                             ext=1)[self.good_quality_cadences()]
 
     @property
     def quality(self):
