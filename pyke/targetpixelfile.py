@@ -62,17 +62,11 @@ class KeplerTargetPixelFile(TargetPixelFile):
 
     def __init__(self, path, max_quality=1, aperture_mask=None, **kwargs):
         self.path = path
-        self.open(**kwargs)
+        self.hdu = fits.open(self.path, **kwargs)
         self.max_quality = max_quality
         self.aperture_mask = None
         self._aperture_flux = None
-
-    def open(self, **kwargs):
-        self.hdu = fits.open(self.path, **kwargs)
-
-    def get_data(self, keyword, ext=1):
-        """Returns the data for a given keyword for a given extension."""
-        return self.hdu[ext].data[keyword]
+        self._good_quality_cadences = self.good_quality_cadences()
 
     def good_quality_cadences(self, max_quality=None):
         """Returns a boolean mask flagging cadences whose quality is at most
@@ -89,6 +83,14 @@ class KeplerTargetPixelFile(TargetPixelFile):
         return self.quality < max_quality
 
     @property
+    def module(self):
+        return self.hdu[0].header['MODULE']
+
+    @property
+    def channel(self):
+        return self.hdu[0].header['CHANNEL']
+
+    @property
     def aperture_mask(self):
         return self._aperture_mask
 
@@ -103,7 +105,7 @@ class KeplerTargetPixelFile(TargetPixelFile):
     @property
     def n_cadences(self):
         """Returns the number of good-quality cadences."""
-        return self.good_quality_cadences().sum()
+        return self.good_quality_cadences.sum()
 
     @property
     def shape(self):
@@ -113,8 +115,7 @@ class KeplerTargetPixelFile(TargetPixelFile):
     @property
     def time(self):
         """Returns the time for all good-quality cadences."""
-        return self.get_data(keyword='TIME',
-                             ext=1)[self.good_quality_cadences()]
+        return self.hdu[1].data['TIME'][self.good_quality_cadences]
 
     @property
     def nan_time_mask(self):
@@ -124,8 +125,7 @@ class KeplerTargetPixelFile(TargetPixelFile):
     @property
     def flux(self):
         """Returns the flux for all good-quality cadences."""
-        return self.get_data(keyword='FLUX',
-                             ext=1)[self.good_quality_cadences()]
+        return self.hdu[1].data['FLUX'][self.good_quality_cadences]
 
     @property
     def bkg(self):
@@ -136,7 +136,7 @@ class KeplerTargetPixelFile(TargetPixelFile):
     @property
     def quality(self):
         """Returns the quality flag integer of every cadence."""
-        return self.get_data(keyword='QUALITY', ext=1)
+        return self.hdu[1]['QUALITY']
 
     def to_fits(self):
         """Save the TPF to fits"""
