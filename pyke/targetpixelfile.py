@@ -13,12 +13,6 @@ class TargetPixelFile(object):
     TargetPixelFile class
     """
 
-    def open(self, **kwargs):
-        pass
-
-    def get_data(self):
-        pass
-
     def to_lightcurve(self, aperture_mask=None, method=None, **kwargs):
         """Returns a raw light curve of the TPF.
 
@@ -105,7 +99,7 @@ class KeplerTargetPixelFile(TargetPixelFile):
     @property
     def n_cadences(self):
         """Returns the number of good-quality cadences."""
-        return self.good_quality_cadences.sum()
+        return self._good_quality_cadences.sum()
 
     @property
     def shape(self):
@@ -115,7 +109,7 @@ class KeplerTargetPixelFile(TargetPixelFile):
     @property
     def time(self):
         """Returns the time for all good-quality cadences."""
-        return self.hdu[1].data['TIME'][self.good_quality_cadences]
+        return self.hdu[1].data['TIME'][self._good_quality_cadences]
 
     @property
     def nan_time_mask(self):
@@ -125,7 +119,7 @@ class KeplerTargetPixelFile(TargetPixelFile):
     @property
     def flux(self):
         """Returns the flux for all good-quality cadences."""
-        return self.hdu[1].data['FLUX'][self.good_quality_cadences]
+        return self.hdu[1].data['FLUX'][self._good_quality_cadences]
 
     @property
     def bkg(self):
