@@ -146,14 +146,14 @@ def kepextract(infile, outfile=None, maskfile='ALL', bkg=False, psfcentroid=Fals
     kepmsg.log(logfile,"Extracting information from Target Pixel File...",verbose)
 
     # input table data
-    timecorr = tpf.get_data('TIMECORR')
-    cadenceno = tpf.get_data('CADENCENO')
+    timecorr = tpf.hdu[1].data['TIMECORR']
+    cadenceno = tpf.hdu[1].data['CADENCENO']
     newshape = (tpf.shape[0], tpf.shape[1] * tpf.shape[2])
-    raw_cnts = tpf.get_data('RAW_CNTS').reshape(newshape)
-    flux_err = tpf.get_data('FLUX_ERR').reshape(newshape)
-    flux_bkg = tpf.get_data('FLUX_BKG').reshape(newshape)
-    flux_bkg_err = tpf.get_data('FLUX_BKG_ERR').reshape(newshape)
-    cosmic_rays = tpf.get_data('COSMIC_RAYS')
+    raw_cnts = tpf.hdu[1].data['RAW_CNTS'].reshape(newshape)
+    flux_err = tpf.hdu[1].data['FLUX_ERR'].reshape(newshape)
+    flux_bkg = tpf.hdu[1].data['FLUX_BKG'].reshape(newshape)
+    flux_bkg_err = tpf.hdu[1].data['FLUX_BKG_ERR'].reshape(newshape)
+    cosmic_rays = tpf.hdu[1].data['COSMIC_RAYS']
     time = tpf.time
     flux = tpf.flux.reshape(newshape)
     quality = tpf.quality
