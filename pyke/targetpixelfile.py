@@ -12,15 +12,11 @@ class TargetPixelFile(object):
     """
     TargetPixelFile class
     """
-
-    def to_lightcurve(self, aperture_mask=None, method=None, **kwargs):
+    def to_lightcurve(self, method=None, subtract_bkg=False, **kwargs):
         """Returns a raw light curve of the TPF.
 
         Attributes
         ----------
-        aperture_mask: boolean ndarray or None
-            Aperture under which the flux will be summed up. If ``None``,
-            then an aperture is computed using ``aperture_mask``.
         method : str or None
             Method to detrend the light curve.
         kwargs : dict
@@ -83,6 +79,10 @@ class KeplerTargetPixelFile(TargetPixelFile):
     @property
     def channel(self):
         return self.hdu[0].header['CHANNEL']
+
+    @property
+    def output(self):
+        return self.hdu[0].header['OUTPUT']
 
     @property
     def aperture_mask(self):
@@ -203,7 +203,20 @@ class KeplerTargetPixelFile(TargetPixelFile):
         return np.nansum(self.flux[:, self.aperture_mask], axis=1)
 
     def to_lightcurve(self, method=None, subtract_bkg=False, **kwargs):
-        """Performs aperture photometry and optionally detrends the lightcurve.
+        """Performs apperture photometry and optionally detrends the lightcurve.
+
+        Attributes
+        ----------
+        method : str or None
+            Method to detrend the light curve.
+        kwargs : dict
+            Keyword arguments passed to the detrending method.
+
+        Returns
+        -------
+        lc : LightCurve object
+            Array containing the summed or detrended flux within the aperture
+            for each cadence.
         """
 
         if self._aperture_flux is None:
