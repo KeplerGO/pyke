@@ -130,7 +130,7 @@ class KeplerTargetPixelFile(TargetPixelFile):
     @property
     def quality(self):
         """Returns the quality flag integer of every cadence."""
-        return self.hdu[1]['QUALITY']
+        return self.hdu[1].data['QUALITY']
 
     def to_fits(self):
         """Save the TPF to fits"""
