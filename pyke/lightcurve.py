@@ -51,7 +51,7 @@ class KeplerLightCurveFile(LightCurve):
         return [n for n in  self.hdu[1].data.columns.names if 'FLUX' in n]
 
     def get_flux(self, flux_type):
-        if flux_type is in self._flux_types():
+        if flux_type in self._flux_types():
             return self.hdu[1].data[flux_type]
         else:
             raise KeyError("{} is not a valid flux type. Available types are: {}".
