@@ -58,9 +58,9 @@ class KeplerTargetPixelFile(TargetPixelFile):
         self.path = path
         self.hdu = fits.open(self.path, **kwargs)
         self.max_quality = max_quality
+        self._good_quality_cadences = self.good_quality_cadences()
         self.aperture_mask = None
         self._aperture_flux = None
-        self._good_quality_cadences = self.good_quality_cadences()
 
     def good_quality_cadences(self, max_quality=None):
         """Returns a boolean mask flagging cadences whose quality is at most
