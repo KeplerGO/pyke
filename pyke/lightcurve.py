@@ -38,14 +38,6 @@ class Detrender(object):
         """
         pass
 
-class SystematicsCorrector(object):
-    """
-    """
-    def correct(**kwargs):
-        """
-        """
-        pass
-
 class FirstDifferenceDetrender(Detrender):
     """
     First difference detrending
