@@ -51,7 +51,7 @@ entry_points = {'console_scripts': [
 setup(name='pyketools',
       version=__version__,
       description="Tools to inspect and analyze the pixels and lightcurves "
-                  "obtained by NASA’s Kepler, K2, and TESS space telescopes.",
+                  "obtained by NASA's Kepler, K2, and TESS space telescopes.",
       long_description=open('README.rst').read(),
       author='KeplerGO',
       author_email='keplergo@mail.arc.nasa.gov',
