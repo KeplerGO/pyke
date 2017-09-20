@@ -85,6 +85,14 @@ class KeplerTargetPixelFile(TargetPixelFile):
         return self.hdu[0].header['OUTPUT']
 
     @property
+    def column(self):
+        return self.hdu['TARGETTABLES'].header['1CRV5P']
+
+    @property
+    def row(self):
+        return self.hdu['TARGETTABLES'].header['2CRV5P']
+
+    @property
     def aperture_mask(self):
         return self._aperture_mask
 

@@ -268,9 +268,9 @@ def kepprf(infile, prfdir, frameno, columns, rows, fluxes, background=False,
             n += 1
 
     # read and interpolate PRF
-    (splineInterpolation, DATx, DATy, prf, _, _, PRFx0, PRFy0, cdelt1p, 
+    (splineInterpolation, DATx, DATy, prf, _, _, PRFx0, PRFy0, cdelt1p,
         cdelt2p, prfDimX, prfDimY) = kepfunc.read_and_interpolate_prf(
-        prfdir=prfdir, module=module, output=output, column=column, row=row, 
+        prfdir=prfdir, module=module, output=output, column=column, row=row,
         xdim=xdim, ydim=ydim, verbose=verbose, logfile=logfile)
 
     # construct mesh for background model
