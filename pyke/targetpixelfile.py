@@ -1,4 +1,5 @@
 import numpy as np
+import matplotlib.pyplot as plt
 from astropy.io import fits
 from astropy.stats.funcs import median_absolute_deviation
 import scipy.ndimage
@@ -73,6 +74,10 @@ class KeplerTargetPixelFile(TargetPixelFile):
         return self.quality < max_quality
 
     @property
+    def keplerid(self):
+        return self.hdu[0].header['KEPLERID']
+
+    @property
     def module(self):
         return self.hdu[0].header['MODULE']
 
@@ -91,6 +96,15 @@ class KeplerTargetPixelFile(TargetPixelFile):
     @property
     def row(self):
         return self.hdu['TARGETTABLES'].header['2CRV5P']
+
+    def plot(self, nframe):
+        plt.imshow(self.flux[nframe],
+                   extent=(self.column, self.column + self.shape[1],
+                           self.row, self.row + self.shape[2]))
+        plt.xlabel('Pixel Column Number')
+        plt.ylabel('Pixel Row Number')
+        plt.title('Kepler ID: {}'.format(self.keplerid))
+        plt.colorbar()
 
     @property
     def aperture_mask(self):
