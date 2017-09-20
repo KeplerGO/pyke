@@ -1,6 +1,56 @@
 import numpy as np
 from argparse import HelpFormatter, SUPPRESS, OPTIONAL, ZERO_OR_MORE
 
+# Dictionary describing the meaning of the various Kepler QUALITY flags,
+# as documented in the Kepler Archive Manual (Table 2.3).
+KEPLER_QUALITY_FLAGS = {
+    1: "Attitude tweak",
+    2: "Safe mode",
+    4: "Coarse point",
+    8: "Earth point",
+    16: "Zero crossing",
+    32: "Desaturation event",
+    64: "Argabrightening",
+    128: "Cosmic ray in optimal aperture",
+    256: "Manual exclude",
+    1024: "Sudden sensitivity dropout",
+    2048: "Impulsive outlier",
+    4096: "Argabrightening",
+    8192: "Cosmic ray in collateral data",
+    16384: "Detector anomaly",
+    32768: "No fine point",
+    65536: "No data",
+    131072: "Rolling band in optimal aperture",
+    262144: "Rolling band in full mask",
+    524288: "Possible thruster firing",
+    1048576: "Thruster firing"
+}
+
+
+def parse_kepler_quality_flags(quality):
+    """Converts a Kepler QUALITY value into a list of human-readable strings.
+
+    This function takes the QUALITY bitstring that can be found for each
+    cadence in Kepler/K2's pixel and light curve files and converts into
+    a list of human-readable strings explaining the flags raised (if any).
+
+    Parameters
+    ----------
+    quality : int
+        Value from the 'QUALITY' column of a Kepler/K2 pixel or lightcurve file.
+
+    Returns
+    -------
+    flags : list of str
+        List of human-readable strings giving a short description of the
+        quality flags raised.  Returns an empty list if no flags raised.
+    """
+    flags = []
+    for flag in KEPLER_QUALITY_FLAGS.keys():
+        if quality & flag > 0:
+            flags.append(KEPLER_QUALITY_FLAGS[flag])
+    return flags
+
 
 class PyKEArgumentHelpFormatter(HelpFormatter):
     """Help message formatter which adds default values to argument help,
