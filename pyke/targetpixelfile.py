@@ -97,7 +97,7 @@ class KeplerTargetPixelFile(TargetPixelFile):
     def row(self):
         return self.hdu['TARGETTABLES'].header['2CRV5P']
 
-    def plot(self, nframe):
+    def plot(self, nframe=100):
         plt.imshow(self.flux[nframe],
                    extent=(self.column, self.column + self.shape[1],
                            self.row, self.row + self.shape[2]))
