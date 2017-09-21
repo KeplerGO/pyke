@@ -117,7 +117,7 @@ class KeplerTargetPixelFile(TargetPixelFile):
         plt.xlabel('Pixel Column Number')
         plt.ylabel('Pixel Row Number')
         plt.title('Kepler ID: {}'.format(self.keplerid))
-        plt.colorbar()
+        plt.colorbar(norm=norm)
 
     @property
     def aperture_mask(self):
