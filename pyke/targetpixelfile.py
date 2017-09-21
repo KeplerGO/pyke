@@ -132,6 +132,11 @@ class KeplerTargetPixelFile(TargetPixelFile):
                                           dtype=bool)
 
     @property
+    def npix(self):
+    """Number of pixels in the aperture"""
+        return self.aperture_mask.sum()
+
+    @property
     def n_cadences(self):
         """Returns the number of good-quality cadences."""
         return self._good_quality_cadences.sum()
@@ -259,8 +264,7 @@ class KeplerTargetPixelFile(TargetPixelFile):
 
         if subtract_bkg:
             # number of pixels in the aperture
-            npix = self.aperture_mask.sum()
-            self._aperture_flux = self._aperture_flux - npix * self.bkg
+            self._aperture_flux = self._aperture_flux - self.npix * self.bkg
 
         if method is None:
             return LightCurve(flux=self._aperture_flux, time=self.time)
