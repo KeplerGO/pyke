@@ -133,7 +133,7 @@ class KeplerTargetPixelFile(TargetPixelFile):
 
     @property
     def npix(self):
-    """Number of pixels in the aperture"""
+        """Number of pixels in the aperture"""
         return self.aperture_mask.sum()
 
     @property
