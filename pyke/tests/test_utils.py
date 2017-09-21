@@ -3,6 +3,7 @@ import argparse
 
 from ..utils import PyKEArgumentHelpFormatter
 from ..utils import module_output_to_channel, channel_to_module_output
+from ..utils import KEPLER_QUALITY_FLAGS, parse_kepler_quality_flags
 
 
 def test_PyKEArgumentHelpFormatter():
@@ -36,3 +37,13 @@ def test_module_output_to_channel():
     assert module_output_to_channel(13, 2) == 42
     assert module_output_to_channel(24, 4) == 84
     assert module_output_to_channel(11, 1) == 33
+
+
+def test_parse_kepler_quality_flags():
+    flags = list(KEPLER_QUALITY_FLAGS.items())
+    # Can we recover each individual quality flag?
+    for key, value in flags:
+        assert parse_kepler_quality_flags(key)[0] == value
+    # Can we recover combinations of flags?
+    assert parse_kepler_quality_flags(flags[5][0] + flags[7][0]) == [flags[5][1], flags[7][1]]
+    assert parse_kepler_quality_flags(flags[3][0] + flags[4][0] + flags[5][0]) == [flags[3][1], flags[4][1], flags[5][1]]
