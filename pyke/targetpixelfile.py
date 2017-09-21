@@ -2,6 +2,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from astropy.io import fits
 from astropy.stats.funcs import median_absolute_deviation
+from astropy.visualization import (PercentileInterval, ImageNormalize,
+                                   SqrtStretch, LogStretch, LinearStretch)
 import scipy.ndimage
 from .lightcurve import LightCurve
 
@@ -97,8 +99,19 @@ class KeplerTargetPixelFile(TargetPixelFile):
     def row(self):
         return self.hdu['TARGETTABLES'].header['2CRV5P']
 
-    def plot(self, nframe=100):
-        plt.imshow(self.flux[nframe],
+    def plot(self, nframe=100, scale='linear'):
+        pflux = self.flux[nframe]
+        vmin, vmax = PercentileInterval(95.).get_limits(pflux)
+        if scale == 'linear':
+            norm = ImageNormalize(vmin=vmin, vmax=vmax, stretch=LinearStretch())
+        elif scale == 'sqrt':
+            norm = ImageNormalize(vmin=vmin, vmax=vmax, stretch=SqrtStretch())
+        elif scale == 'log':
+            norm = ImageNormalize(vmin=vmin, vmax=vmax, stretch=LogStretch())
+        else:
+            raise ValueError("scale {} is not available.".format(scale))
+
+        plt.imshow(pflux, origin='lower', norm=norm,
                    extent=(self.column, self.column + self.shape[1],
                            self.row, self.row + self.shape[2]))
         plt.xlabel('Pixel Column Number')
