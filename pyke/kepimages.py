@@ -130,6 +130,8 @@ def kepimages(infile, prefix, imtype='FLUX', ranges='0,0', overwrite=True,
         outim = flux_bkg_err
     elif imtype.lower() == 'cosmic_rays':
         outim = cosmic_rays
+    elif imtype.lower() == 'flux_plus_bkg':
+        outim = flux + flux_bkg
     else:
         outim = flux
 
@@ -292,7 +294,7 @@ def kepimages_main():
     parser.add_argument('--imtype', default='FLUX', dest='imtype',
                         help='Image type', type=str,
                         choices=['RAW_CNTS', 'FLUX', 'FLUX_ERR', 'FLUX_BKG',
-                                 'FLUX_BKG_ERR','COSMIC_RAYS'])
+                                 'FLUX_BKG_ERR', 'FLUX_PLUS_BKG', 'COSMIC_RAYS'])
     parser.add_argument('--ranges', help='Time ranges for output [BJD]',
                         default='0,0', type=str)
     parser.add_argument('--overwrite', action='store_true',
