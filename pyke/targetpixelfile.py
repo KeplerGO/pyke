@@ -1,14 +1,91 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from astropy.io import fits
-from astropy.stats.funcs import median_absolute_deviation
 from astropy.visualization import (PercentileInterval, ImageNormalize,
                                    SqrtStretch, LogStretch, LinearStretch)
-import scipy.ndimage
+
 from .lightcurve import LightCurve
 
 
-__all__ = ['KeplerTargetPixelFile']
+__all__ = ['KeplerTargetPixelFile', 'KeplerQualityFlags']
+
+
+class KeplerQualityFlags:
+    """This clsas encodes the meaning of the various Kepler QUALITY bitmask flags,
+    as documented in the Kepler Archive Manual (Table 2.3)."""
+    AttitudeTweak = 1
+    SafeMode = 2
+    CoarsePoint = 4
+    EarthPoint = 8
+    ZeroCrossing = 16
+    Desat = 32
+    Argabrightening = 64
+    ApertureCosmic = 128
+    ManualExclude = 256
+    SensitivityDropout = 1024
+    ImpulsiveOutlier = 2048
+    ArgabrighteningOnCCD = 4096
+    CollateralCosmic = 8192
+    DetectorAnomaly = 16384
+    NoFinePoint = 32768
+    NoData = 65536
+    RollingBandInAperture = 131072
+    RollingBandInMask = 262144
+    PossibleThrusterFiring = 524288
+    ThrusterFiring = 1048576
+
+    # Which is the recommended QUALITY mask?
+    default_bitmask = (AttitudeTweak | SafeMode | CoarsePoint | EarthPoint | \
+                       Desat | ApertureCosmic | ManualExclude | NoData | ThrusterFiring)
+
+    # Pretty string descriptions for each flag
+    flags = {
+        1: "Attitude tweak",
+        2: "Safe mode",
+        4: "Coarse point",
+        8: "Earth point",
+        16: "Zero crossing",
+        32: "Desaturation event",
+        64: "Argabrightening",
+        128: "Cosmic ray in optimal aperture",
+        256: "Manual exclude",
+        1024: "Sudden sensitivity dropout",
+        2048: "Impulsive outlier",
+        4096: "Argabrightening on CCD",
+        8192: "Cosmic ray in collateral data",
+        16384: "Detector anomaly",
+        32768: "No fine point",
+        65536: "No data",
+        131072: "Rolling band in optimal aperture",
+        262144: "Rolling band in full mask",
+        524288: "Possible thruster firing",
+        1048576: "Thruster firing"
+    }
+
+    @classmethod
+    def parse(cls, quality):
+        """Converts a Kepler QUALITY value into a list of human-readable strings.
+
+        This function takes the QUALITY bitstring that can be found for each
+        cadence in Kepler/K2's pixel and light curve files and converts into
+        a list of human-readable strings explaining the flags raised (if any).
+
+        Parameters
+        ----------
+        quality : int
+            Value from the 'QUALITY' column of a Kepler/K2 pixel or lightcurve file.
+
+        Returns
+        -------
+        flags : list of str
+            List of human-readable strings giving a short description of the
+            quality flags raised.  Returns an empty list if no flags raised.
+        """
+        result = []
+        for flag in cls.flags.keys():
+            if quality & flag > 0:
+                result.append(cls.flags[flag])
+        return result
 
 
 class TargetPixelFile(object):
@@ -44,8 +121,8 @@ class KeplerTargetPixelFile(TargetPixelFile):
     path : str
         Path to fits file.
 
-    max_quality : int
-        Maximum tolerated quality for the cadences.
+    quality_bitmask : int
+        Bitmask specifying quality flags of cadences that should be ignored.
 
     References
     ----------
@@ -53,27 +130,25 @@ class KeplerTargetPixelFile(TargetPixelFile):
         http://archive.stsci.edu/kepler/manuals/archive_manual.pdf
     """
 
-    def __init__(self, path, max_quality=1, aperture_mask=None, **kwargs):
+    def __init__(self, path, aperture_mask=None,
+                 quality_bitmask=KeplerQualityFlags.default_bitmask,
+                 **kwargs):
         self.path = path
         self.hdu = fits.open(self.path, **kwargs)
-        self.max_quality = max_quality
-        self._good_quality_cadences = self.good_quality_cadences()
+        self.quality_bitmask = quality_bitmask
+        self.quality_mask = self._quality_mask(quality_bitmask)
         self.aperture_mask = None
         self._aperture_flux = None
 
-    def good_quality_cadences(self, max_quality=None):
-        """Returns a boolean mask flagging cadences whose quality is at most
-        `max_quality`.
+    def _quality_mask(self, quality_bitmask):
+        """Returns a boolean mask which flags all good-quality cadences.
 
         Parameters
         ----------
-        max_quality : int or None
-            Maximum tolerated quality. See ref. [1], table 2-3.
+        quality_bitmask : int
+            Bitmask. See ref. [1], table 2-3.
         """
-
-        if max_quality is None:
-            max_quality = self.max_quality
-        return self.quality < max_quality
+        return self.hdu[1].data['QUALITY'] & quality_bitmask > 0
 
     @property
     def keplerid(self):
@@ -132,14 +207,14 @@ class KeplerTargetPixelFile(TargetPixelFile):
                                           dtype=bool)
 
     @property
-    def npix(self):
+    def aperture_npix(self):
         """Number of pixels in the aperture"""
         return self.aperture_mask.sum()
 
     @property
-    def n_cadences(self):
+    def n_good_cadences(self):
         """Returns the number of good-quality cadences."""
-        return self._good_quality_cadences.sum()
+        return self.quality_mask.sum()
 
     @property
     def shape(self):
@@ -149,7 +224,7 @@ class KeplerTargetPixelFile(TargetPixelFile):
     @property
     def time(self):
         """Returns the time for all good-quality cadences."""
-        return self.hdu[1].data['TIME'][self._good_quality_cadences]
+        return self.hdu[1].data['TIME'][self.quality_mask]
 
     @property
     def nan_time_mask(self):
@@ -159,7 +234,7 @@ class KeplerTargetPixelFile(TargetPixelFile):
     @property
     def flux(self):
         """Returns the flux for all good-quality cadences."""
-        return self.hdu[1].data['FLUX'][self._good_quality_cadences]
+        return self.hdu[1].data['FLUX'][self.quality_mask]
 
     @property
     def bkg(self):
@@ -169,8 +244,8 @@ class KeplerTargetPixelFile(TargetPixelFile):
 
     @property
     def quality(self):
-        """Returns the quality flag integer of every cadence."""
-        return self.hdu[1].data['QUALITY']
+        """Returns the quality flag integer of every good cadence."""
+        return self.hdu[1].data['QUALITY'][self.quality_mask]
 
     def to_fits(self):
         """Save the TPF to fits"""
