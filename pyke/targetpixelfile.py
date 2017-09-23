@@ -99,7 +99,7 @@ class KeplerTargetPixelFile(TargetPixelFile):
     def row(self):
         return self.hdu['TARGETTABLES'].header['2CRV5P']
 
-    def plot(self, nframe=100, scale='linear'):
+    def plot(self, nframe=100, scale='linear', **kwargs):
         pflux = self.flux[nframe]
         vmin, vmax = PercentileInterval(95.).get_limits(pflux)
         if scale == 'linear':
@@ -113,7 +113,7 @@ class KeplerTargetPixelFile(TargetPixelFile):
 
         plt.imshow(pflux, origin='lower', norm=norm,
                    extent=(self.column, self.column + self.shape[2],
-                           self.row, self.row + self.shape[1]))
+                           self.row, self.row + self.shape[1]), **kwargs)
         plt.xlabel('Pixel Column Number')
         plt.ylabel('Pixel Row Number')
         plt.title('Kepler ID: {}'.format(self.keplerid))
