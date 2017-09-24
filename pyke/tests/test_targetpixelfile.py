@@ -23,6 +23,8 @@ def test_tpf_zeros():
     assert len(lc.time) == len(lc.flux)
     assert np.all(lc.time == tpf.time)
     assert np.all(lc.flux == 0)
+    # The default QUALITY bitmask should have removed all NaNs in the TIME
+    assert ~np.any(np.isnan(tpf.time))
 
 
 def test_tpf_ones():
