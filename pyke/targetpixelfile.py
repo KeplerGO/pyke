@@ -148,7 +148,7 @@ class KeplerTargetPixelFile(TargetPixelFile):
         quality_bitmask : int
             Bitmask. See ref. [1], table 2-3.
         """
-        return self.hdu[1].data['QUALITY'] & quality_bitmask > 0
+        return (self.hdu[1].data['QUALITY'] & quality_bitmask) == 0
 
     @property
     def keplerid(self):
@@ -237,15 +237,19 @@ class KeplerTargetPixelFile(TargetPixelFile):
         return self.hdu[1].data['FLUX'][self.quality_mask]
 
     @property
-    def bkg(self):
-        """Returns the median value of the fluxes for every cadence as an
-        estimate for the background."""
-        return np.nanmedian(self.flux[:, self.aperture_mask], axis=1)
+    def flux_err(self):
+        """Returns the flux for all good-quality cadences."""
+        return self.hdu[1].data['FLUX_ERR'][self.quality_mask]
 
     @property
     def quality(self):
         """Returns the quality flag integer of every good cadence."""
         return self.hdu[1].data['QUALITY'][self.quality_mask]
+
+    def estimate_background(self):
+        """Returns the median value of the fluxes for every cadence as an
+        estimate for the background."""
+        return np.nanmedian(self.flux[:, self.aperture_mask], axis=1)
 
     def to_fits(self):
         """Save the TPF to fits"""
