@@ -11,8 +11,10 @@ __all__ = ['KeplerTargetPixelFile', 'KeplerQualityFlags']
 
 
 class KeplerQualityFlags:
-    """This clsas encodes the meaning of the various Kepler QUALITY bitmask flags,
-    as documented in the Kepler Archive Manual (Table 2.3)."""
+    """
+    This class encodes the meaning of the various Kepler QUALITY bitmask flags,
+    as documented in the Kepler Archive Manual (Table 2.3).
+    """
     AttitudeTweak = 1
     SafeMode = 2
     CoarsePoint = 4
@@ -34,12 +36,12 @@ class KeplerQualityFlags:
     PossibleThrusterFiring = 524288
     ThrusterFiring = 1048576
 
-    # Which is the recommended QUALITY mask?
-    default_bitmask = (AttitudeTweak | SafeMode | CoarsePoint | EarthPoint |
+    # Which is the recommended QUALITY mask to identify bad data?
+    DEFAULT_BITMASK = (AttitudeTweak | SafeMode | CoarsePoint | EarthPoint |
                        Desat | ApertureCosmic | ManualExclude | NoData | ThrusterFiring)
 
     # Pretty string descriptions for each flag
-    flags = {
+    STRINGS = {
         1: "Attitude tweak",
         2: "Safe mode",
         4: "Coarse point",
@@ -82,9 +84,9 @@ class KeplerQualityFlags:
             quality flags raised.  Returns an empty list if no flags raised.
         """
         result = []
-        for flag in cls.flags.keys():
+        for flag in cls.STRINGS.keys():
             if quality & flag > 0:
-                result.append(cls.flags[flag])
+                result.append(cls.STRINGS[flag])
         return result
 
 
@@ -131,7 +133,7 @@ class KeplerTargetPixelFile(TargetPixelFile):
     """
 
     def __init__(self, path, aperture_mask=None,
-                 quality_bitmask=KeplerQualityFlags.default_bitmask,
+                 quality_bitmask=KeplerQualityFlags.DEFAULT_BITMASK,
                  **kwargs):
         self.path = path
         self.hdu = fits.open(self.path, **kwargs)

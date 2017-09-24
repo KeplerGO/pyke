@@ -34,7 +34,7 @@ def test_tpf_ones():
 
 def test_parse_kepler_quality_flags():
     """Can the QUALITY flags be parsed correctly?"""
-    flags = list(KeplerQualityFlags.flags.items())
+    flags = list(KeplerQualityFlags.STRINGS.items())
     for key, value in flags:
         assert KeplerQualityFlags.parse(key)[0] == value
     # Can we recover combinations of flags?
