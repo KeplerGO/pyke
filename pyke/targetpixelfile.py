@@ -65,7 +65,7 @@ class KeplerQualityFlags:
     }
 
     @classmethod
-    def parse(cls, quality):
+    def decode(cls, quality):
         """Converts a Kepler QUALITY value into a list of human-readable strings.
 
         This function takes the QUALITY bitstring that can be found for each

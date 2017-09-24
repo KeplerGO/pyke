@@ -34,12 +34,12 @@ def test_tpf_ones():
     assert np.all(lc.flux == 1)
 
 
-def test_parse_kepler_quality_flags():
+def test_quality_flag_decoding():
     """Can the QUALITY flags be parsed correctly?"""
     flags = list(KeplerQualityFlags.STRINGS.items())
     for key, value in flags:
-        assert KeplerQualityFlags.parse(key)[0] == value
+        assert KeplerQualityFlags.decode(key)[0] == value
     # Can we recover combinations of flags?
-    assert KeplerQualityFlags.parse(flags[5][0] + flags[7][0]) == [flags[5][1], flags[7][1]]
-    assert KeplerQualityFlags.parse(flags[3][0] + flags[4][0] + flags[5][0]) \
+    assert KeplerQualityFlags.decode(flags[5][0] + flags[7][0]) == [flags[5][1], flags[7][1]]
+    assert KeplerQualityFlags.decode(flags[3][0] + flags[4][0] + flags[5][0]) \
         == [flags[3][1], flags[4][1], flags[5][1]]
