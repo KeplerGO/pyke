@@ -35,7 +35,7 @@ class KeplerQualityFlags:
     ThrusterFiring = 1048576
 
     # Which is the recommended QUALITY mask?
-    default_bitmask = (AttitudeTweak | SafeMode | CoarsePoint | EarthPoint | \
+    default_bitmask = (AttitudeTweak | SafeMode | CoarsePoint | EarthPoint |
                        Desat | ApertureCosmic | ManualExclude | NoData | ThrusterFiring)
 
     # Pretty string descriptions for each flag
