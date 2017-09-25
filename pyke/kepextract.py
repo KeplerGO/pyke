@@ -5,16 +5,16 @@ from scipy.optimize import leastsq
 from copy import copy
 from tqdm import tqdm
 from .utils import PyKEArgumentHelpFormatter
-from .targetpixelfile import KeplerTargetPixelFile
+from .targetpixelfile import KeplerTargetPixelFile, KeplerQualityFlags
 from . import kepio, kepmsg, kepkey, kepstat, kepfunc
 
 
 __all__ = ['kepextract']
 
 
-def kepextract(infile, outfile=None, qual=False, maskfile='ALL', bkg=False, psfcentroid=False,
-               overwrite=False, verbose=False,
-               logfile='kepextract.log'):
+def kepextract(infile, outfile=None, bitmask=KeplerQualityFlags.DEFAULT_BITMASK,
+               maskfile='ALL', bkg=False, psfcentroid=False, overwrite=False,
+               verbose=False, logfile='kepextract.log'):
     """
     kepextract -- create a light curve from a target pixel file by summing
     user-selected pixels
@@ -43,9 +43,8 @@ def kepextract(infile, outfile=None, qual=False, maskfile='ALL', bkg=False, psfc
     outfile : str
         Filename for the output light curve. This product will be written to
         the same FITS format as archived light curves.
-    qual : bool
-        If True, only good quality (QUALITY == 0) cadences and cadences with
-        finite time measureaments will be used to create the lightcurve.
+    bitmask : int
+        QUALITY bitmask used to reject poor-quality cadences.
     maskfile : str
         This string can be one of three options:
 
@@ -130,7 +129,7 @@ def kepextract(infile, outfile=None, qual=False, maskfile='ALL', bkg=False, psfc
         kepmsg.err(logfile, errmsg, verbose)
 
     # open input file
-    tpf = KeplerTargetPixelFile(infile, max_quality=10000000000000,
+    tpf = KeplerTargetPixelFile(infile, quality_bitmask=bitmask,
                                 mode='readonly', memmap=True)
     instr = tpf.hdu
     tstart, tstop, bjdref, cadence = kepio.timekeys(instr, infile,
@@ -150,49 +149,32 @@ def kepextract(infile, outfile=None, qual=False, maskfile='ALL', bkg=False, psfc
                verbose)
 
     # input table data
-    timecorr = tpf.hdu[1].data['TIMECORR']
-    cadenceno = tpf.hdu[1].data['CADENCENO']
+    timecorr = tpf.hdu[1].data['TIMECORR'][tpf.quality_mask]
+    cadenceno = tpf.hdu[1].data['CADENCENO'][tpf.quality_mask]
     newshape = (tpf.shape[0], tpf.shape[1] * tpf.shape[2])
-    raw_cnts = tpf.hdu[1].data['RAW_CNTS'].reshape(newshape)
-    flux_err = tpf.hdu[1].data['FLUX_ERR'].reshape(newshape)
-    flux_bkg = tpf.hdu[1].data['FLUX_BKG'].reshape(newshape)
-    flux_bkg_err = tpf.hdu[1].data['FLUX_BKG_ERR'].reshape(newshape)
-    cosmic_rays = tpf.hdu[1].data['COSMIC_RAYS']
-    time = tpf.time
-    flux = tpf.flux.reshape(newshape)
-    quality = tpf.quality
+    raw_cnts = tpf.hdu[1].data['RAW_CNTS'][tpf.quality_mask].reshape(newshape)
+    flux_err = tpf.hdu[1].data['FLUX_ERR'][tpf.quality_mask].reshape(newshape)
+    flux_bkg = tpf.hdu[1].data['FLUX_BKG'][tpf.quality_mask].reshape(newshape)
+    flux_bkg_err = tpf.hdu[1].data['FLUX_BKG_ERR'][tpf.quality_mask].reshape(newshape)
+    cosmic_rays = tpf.hdu[1].data['COSMIC_RAYS'][tpf.quality_mask]
+    time = tpf.hdu[1].data['TIME'][tpf.quality_mask]
+    flux = tpf.hdu[1].data['FLUX'][tpf.quality_mask].reshape(newshape)
+    quality = tpf.hdu[1].data['QUALITY'][tpf.quality_mask]
 
     try:
         #  ---for FITS wave #2
-        pos_corr1 = np.array(table.field('POS_CORR1'), dtype='float64')
+        pos_corr1 = np.array(tpf.hdu[1].data['POS_CORR1'][tpf.quality_mask], dtype='float64')
     except:
         pos_corr1 = np.empty(len(time))
         # ---temporary before FITS wave #2
         pos_corr1[:] = np.nan
     try:
         #  ---for FITS wave #2
-        pos_corr2 = np.array(table.field('POS_CORR2'), dtype='float64')
+        pos_corr2 = np.array(tpf.hdu[1].data['POS_CORR2'][tpf.quality_mask], dtype='float64')
     except:
         pos_corr2 = np.empty(len(time))
         # ---temporary before FITS wave #2
         pos_corr2[:] = np.nan
-
-    if qual:
-        time_mask = ~np.isnan(time)
-        quality_mask = quality == 0
-        good_quality = quality_mask & time_mask
-        pos_corr1 = pos_corr1[good_quality]
-        pos_corr2 = pos_corr2[good_quality]
-        time = time[good_quality]
-        timecorr = timecorr[good_quality]
-        cadenceno = cadenceno[good_quality]
-        raw_cnts = raw_cnts[good_quality]
-        flux = flux[good_quality]
-        flux_err = flux_err[good_quality]
-        flux_bkg = flux_bkg[good_quality]
-        flux_bkg_err = flux_bkg_err[good_quality]
-        cosmic_rays = cosmic_rays[good_quality]
-        quality = quality[good_quality]
 
     # dummy columns for output file
     psf_centr1 = np.empty(len(time))
@@ -581,10 +563,11 @@ def kepextract_main():
                         help=('Name of FITS file to output.'
                               ' If None, outfile is infile-kepextract.'),
                         default=None)
-    parser.add_argument('--qual',
-                        action='store_true',
-                        help=('Use only good quality (QUALITY == 0) cadences'
-                              ' and cadences with finite time measurements.'))
+    parser.add_argument('--bitmask', type=int,
+                        default=KeplerQualityFlags.DEFAULT_BITMASK,
+                        help=('QUALITY bitmask used to reject cadences'
+                              ' with poor-quality data (default: {}).'.format(
+                                        KeplerQualityFlags.DEFAULT_BITMASK)))
     parser.add_argument('--maskfile', default='ALL',
                         help='Name of mask defintion ASCII file',
                         type=str)
@@ -603,6 +586,6 @@ def kepextract_main():
     parser.add_argument('--logfile', '-l', help='Name of ascii log file',
                         default='kepextract.log', type=str)
     args = parser.parse_args()
-    kepextract(args.infile, args.outfile, args.qual, args.maskfile, args.bkg,
-               args.psfcentroid, args.overwrite, args.verbose,
-               args.logfile)
+    kepextract(args.infile, outfile=args.outfile, bitmask=args.bitmask,
+               maskfile=args.maskfile, bkg=args.bkg, psfcentroid=args.psfcentroid, 
+               overwrite=args.overwrite, verbose=args.verbose, logfile=args.logfile)
