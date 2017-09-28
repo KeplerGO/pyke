@@ -40,6 +40,9 @@ class KeplerQualityFlags(object):
     DEFAULT_BITMASK = (AttitudeTweak | SafeMode | CoarsePoint | EarthPoint |
                        Desat | ApertureCosmic | ManualExclude | NoData | ThrusterFiring)
 
+    # Using this bitmask only QUALITY == 0 cadences will remain
+    QUALITY_ZERO_BITMASK = 2096639
+
     # Pretty string descriptions for each flag
     STRINGS = {
         1: "Attitude tweak",
