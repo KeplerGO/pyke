@@ -10,7 +10,7 @@ from .lightcurve import LightCurve
 __all__ = ['KeplerTargetPixelFile', 'KeplerQualityFlags']
 
 
-class KeplerQualityFlags:
+class KeplerQualityFlags(object):
     """
     This class encodes the meaning of the various Kepler QUALITY bitmask flags,
     as documented in the Kepler Archive Manual (Table 2.3).
