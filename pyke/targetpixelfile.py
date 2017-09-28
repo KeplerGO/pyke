@@ -282,7 +282,7 @@ class KeplerTargetPixelFile(TargetPixelFile):
 
         if subtract_bkg:
             # number of pixels in the aperture
-            self._aperture_flux = self._aperture_flux - self.npix * self.bkg
+            self._aperture_flux = self._aperture_flux - self.aperture_npix * self.estimate_background
 
         if method is None:
             return LightCurve(flux=self._aperture_flux, time=self.time)
