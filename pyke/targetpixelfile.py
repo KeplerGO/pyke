@@ -251,10 +251,15 @@ class KeplerTargetPixelFile(TargetPixelFile):
         """Returns the quality flag integer of every good cadence."""
         return self.hdu[1].data['QUALITY'][self.quality_mask]
 
-    def estimate_background(self):
+    def estimate_background(self, method='median'):
         """Returns the median value of the fluxes for every cadence as an
         estimate for the background."""
-        return np.nanmedian(self.flux[:, self.aperture_mask], axis=1)
+        if method == 'median':
+            return np.nanmedian(self.flux[:, self.aperture_mask], axis=1)
+        elif method == 'mean':
+            return np.nanmean(self.flux[:, self.aperture_mask], axis=1)
+        else:
+            raise ValueError("method {} is not available".format(method))
 
     def to_fits(self):
         """Save the TPF to fits"""
