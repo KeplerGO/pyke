@@ -1,4 +1,5 @@
 from . import DEFAULT_PRFDIR
+from .utils import channel_to_module_output
 from abc import ABC, abstractmethod
 import os
 import glob
@@ -8,7 +9,6 @@ import numpy as np
 from astropy.io import fits as pyfits
 from oktopus.models import get_initial_guesses
 from oktopus.likelihood import PoissonLikelihood
-from pyke.utils import channel_to_module_output
 
 
 __all__ = ['KeplerPRFPhotometry', 'KeplerPRF']
