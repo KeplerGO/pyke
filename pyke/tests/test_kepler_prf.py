@@ -3,11 +3,7 @@ import math
 import numpy as np
 from astropy.io import fits
 from astropy.utils.data import get_pkg_data_filename
-from .. import models
-from ..likelihood import PoissonLikelihood
-from ..posterior import PoissonPosterior
-from ..prior import UniformPrior, GaussianPrior, JointPrior
-from .. import core
+from oktopus import models, PoissonPosterior, UniformPrior, GaussianPrior, JointPrior
 from ..kepler_prf import KeplerPRF
 
 
@@ -31,7 +27,7 @@ def test_prf_vs_aperture_photometry():
     prf = KeplerPRF(channel=tpf[0].header['CHANNEL'],
                     column=col, row=row,
                     shape=tpf[1].data.shape)
-    fluxo, colo, rowo, sigmao = models.get_initial_guesses(data=tpf[1].data,
+    fluxo, colo, rowo, _ = models.get_initial_guesses(data=tpf[1].data,
                                                            X=prf.x,
                                                            Y=prf.y)
     bkgo = np.mean(tpf[1].data)
@@ -42,7 +38,6 @@ def test_prf_vs_aperture_photometry():
                        GaussianPrior(mean=bkgo, var=bkgo))
     logL = PoissonPosterior(tpf[1].data, prf.evaluate, prior=prior)
     fitresult = logL.fit((fluxo, colo, rowo, bkgo))
-    print(fitresult)
     prf_flux, prf_col, prf_row, prf_bkg = fitresult.x
     assert np.isclose(prf_col, col+9, rtol=1e-3)
     assert np.isclose(prf_row, row+9, rtol=1e-3)
