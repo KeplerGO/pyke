@@ -243,8 +243,13 @@ class KeplerTargetPixelFile(TargetPixelFile):
 
     @property
     def flux_err(self):
-        """Returns the flux for all good-quality cadences."""
+        """Returns the flux uncertainty for all good-quality cadences."""
         return self.hdu[1].data['FLUX_ERR'][self.quality_mask]
+
+    @property
+    def flux_bkg(self):
+        """Returns the flux on the background for all good-quality cadences."""
+        return self.hdu[1].data['FLUX_BKG'][self.quality_mask]
 
     @property
     def quality(self):
