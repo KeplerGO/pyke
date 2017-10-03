@@ -143,7 +143,6 @@ class KeplerTargetPixelFile(TargetPixelFile):
         self.quality_bitmask = quality_bitmask
         self.quality_mask = self._quality_mask(quality_bitmask)
         self.aperture_mask = None
-        self._aperture_flux = None
 
     def _quality_mask(self, quality_bitmask):
         """Returns a boolean mask which flags all good-quality cadences.
@@ -290,15 +289,11 @@ class KeplerTargetPixelFile(TargetPixelFile):
             for each cadence.
         """
 
-        if self._aperture_flux is None:
-            self._aperture_flux = self._get_aperture_flux()
-
+        aperture_flux = self._get_aperture_flux()
         if subtract_bkg:
-            # number of pixels in the aperture
-            self._aperture_flux = self._aperture_flux - self.aperture_npix * self.estimate_background()
-
+            aperture_flux = aperture_flux - self.aperture_npix * self.estimate_background()
         if method is None:
-            return LightCurve(flux=self._aperture_flux, time=self.time)
+            return LightCurve(flux=aperture_flux, time=self.time)
         else:
-            return LightCurve(flux=self._aperture_flux,
+            return LightCurve(flux=aperture_flux,
                               time=self.time).detrend(method=method, **kwargs)
