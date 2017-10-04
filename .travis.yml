@@ -5,7 +5,6 @@ python:
   - 3.6
 before_install:
   - sudo apt-get install -y python-numpy python-scipy
-  - pip install --no-deps oktopus
   - pip install codecov
   - pip install pytest-cov
 install:
