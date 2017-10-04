@@ -1,0 +1,374 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>kepffi: display a portion of a Full Frame Image (FFI) and define custom target apertures &mdash; PyKE 3.0.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../genindex.html"/>
+        <link rel="search" title="Search" href="../search.html"/>
+    <link rel="top" title="PyKE 3.0.0 documentation" href="../index.html"/>
+        <link rel="up" title="List of PyKE tools" href="index.html"/>
+        <link rel="next" title="kepfilter: bandpass filtering of Kepler light curve data" href="kepfilter.html"/>
+        <link rel="prev" title="kepextract: create a light curve from a target pixel file by summing user-selected pixels" href="kepextract.html"/> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> PyKE
+          
+
+          
+            
+            <img src="../_static/pyke-white.png" class="logo" />
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                3.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../install.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../overview.html">PyKE tasks</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../overview.html#calling-tasks-from-python">Calling tasks from Python</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../overview.html#calling-tasks-from-a-terminal">Calling tasks from a terminal</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="index.html">List of PyKE tools</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="kepbls.html"><strong>kepbls</strong>: perform Box-Least Square searches for periodic exoplanet transits</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kepclip.html"><strong>kepclip</strong>: remove unwanted time ranges from Kepler time series data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kepconvert.html"><strong>kepconvert</strong>: convert Kepler FITS time series to or from a different file format</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kepcotrend.html"><strong>kepcotrend</strong>: remove systematic trends Kepler light curves using cotrending basis vectors</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kepdetrend.html"><strong>kepdetrend</strong>: detrend aperture photometry data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kepdiffim.html"><strong>kepdiffim</strong>: difference imaging of pixels within a target mask</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kepdraw.html"><strong>kepdraw</strong>: interactive plotting of Kepler time series data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kepdynamic.html"><strong>kepdynamic</strong>: construct a dynamic power spectrum from Kepler time series data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kepextract.html"><strong>kepextract</strong>: create a light curve from a target pixel file by summing user-selected pixels</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#"><strong>kepffi</strong>: display a portion of a Full Frame Image (FFI) and define custom target apertures</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kepfilter.html"><strong>kepfilter</strong>: bandpass filtering of Kepler light curve data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kepflatten.html"><strong>kepflatten</strong>: remove low frequency variability from time-series, preserve transits and flares</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kepfold.html"><strong>kepfold</strong>: phase-fold light curve data on linear ephemeris</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kepft.html"><strong>kepft</strong>: calculate and store a Fourier Transform from a Kepler time series</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kephead.html"><strong>kephead</strong>: search for and list FITS keywords in Kepler data files</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kepimages.html"><strong>kepimages</strong>: create a series of separate FITS image files from a Target Pixel File</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kepmask.html"><strong>kepmask</strong>: plot, create or edit custom target masks for target pixel files</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kepoutlier.html"><strong>kepoutlier</strong>: remove or replace statistical outliers from time series data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="keppca.html"><strong>keppca</strong>: perform principal component analysis upon a target pixel file</a></li>
+<li class="toctree-l4"><a class="reference internal" href="keppixseries.html"><strong>keppixseries</strong>: individual time series photometry for all pixels within a target mask</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kepprf.html"><strong>kepprf</strong>: fit a PSF model to a specific image within a Target Pixel File</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kepprfphot.html"><strong>kepprfphot</strong>: fit a PSF model to time series observations within a Target Pixel File</a></li>
+<li class="toctree-l4"><a class="reference internal" href="keprange.html"><strong>keprange</strong>: define time ranges interactively for use with other PyKE tasks</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kepsff.html"><strong>kepsff</strong>: remove motion-correlated noise from aperture light curve data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kepsmooth.html"><strong>kepsmooth</strong>: smooth light curves by convolution with a choice of analytical function</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kepstddev.html"><strong>kepstddev</strong>: calculate Combined Differential Photometric Precision for a time series light curve</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kepstitch.html"><strong>kepstitch</strong>: append short cadence months and/or long cadence quarters</a></li>
+<li class="toctree-l4"><a class="reference internal" href="keptimefix.html"><strong>keptimefix</strong>: correct a time stamp error in the target pixel files</a></li>
+<li class="toctree-l4"><a class="reference internal" href="keptrial.html"><strong>keptrial</strong>: calculate best period and error estimate from time series</a></li>
+<li class="toctree-l4"><a class="reference internal" href="keptrim.html"><strong>keptrim</strong>: trim pixels from Target Pixel Files</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kepwindow.html"><strong>kepwindow</strong>: calculate and store the window function for a Kepler time series</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../citing.html">Citing</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/index.html">Photometry tutorials</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">PyKE</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../overview.html">PyKE tasks</a> &raquo;</li>
+        
+          <li><a href="index.html">List of PyKE tools</a> &raquo;</li>
+        
+      <li><strong>kepffi</strong>: display a portion of a Full Frame Image (FFI) and define custom target apertures</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/api/kepffi.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="kepffi-display-a-portion-of-a-full-frame-image-ffi-and-define-custom-target-apertures">
+<h1><strong>kepffi</strong>: display a portion of a Full Frame Image (FFI) and define custom target apertures<a class="headerlink" href="#kepffi-display-a-portion-of-a-full-frame-image-ffi-and-define-custom-target-apertures" title="Permalink to this headline">¶</a></h1>
+<dl class="function">
+<dt id="pyke.kepffi.kepffi">
+<code class="descclassname">pyke.kepffi.</code><code class="descname">kepffi</code><span class="sig-paren">(</span><em>ffifile</em>, <em>kepid</em>, <em>ra</em>, <em>dec</em>, <em>aperfile</em>, <em>imin</em>, <em>imax</em>, <em>iscale</em>, <em>cmap</em>, <em>npix</em>, <em>verbose=False</em>, <em>logfile='kepffi.log'</em><span class="sig-paren">)</span><a class="headerlink" href="#pyke.kepffi.kepffi" title="Permalink to this definition">¶</a></dt>
+<dd><p>kepffi – Display a portion of a Full Frame Image (FFI) and define custom
+target apertures</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>ffifile</strong> : str</p>
+<blockquote>
+<div><p>The name of a MAST standard format Full Frame Image (FFI) FITS file
+containing a Kepler channel image within each data extension.</p>
+</div></blockquote>
+<p><strong>kepid</strong> : str</p>
+<blockquote>
+<div><p>The numerical Kepler identification number for a specific source,
+obtained from the MAST Target Search page.</p>
+</div></blockquote>
+<p><strong>ra</strong> : str</p>
+<blockquote>
+<div><p>The J2000 Right Ascension of a target in decimal degrees or sexadecimal
+hours (hh:mm:ss.ss). In conjunction with dec, this parameter overrides
+the content of kepid.</p>
+</div></blockquote>
+<p><strong>dec</strong> : str</p>
+<blockquote>
+<div><p>The J2000 Declination of a target in decimal degrees or sexadecimal
+degrees (dd:mm:ss.s). In conjunction with ra, this parameter argument
+overrides the content of kepid.</p>
+</div></blockquote>
+<p><strong>aperfile</strong> : str</p>
+<blockquote>
+<div><p>The (directory path and) name of an existing custom aperture definition
+file. If provided, this aperture will be plotted over the displayed
+image.</p>
+</div></blockquote>
+<p><strong>imin</strong> : float</p>
+<blockquote>
+<div><p>Sets the minimum intensity range for the image display. The user can
+select the minimum level (in electrons per cadence) with this
+parameter. The default minimum intensity level is the median of the
+faintest 10% of pixels in the image.</p>
+</div></blockquote>
+<p><strong>imax</strong> : float</p>
+<blockquote>
+<div><p>Sets the maximum intensity range for the image display. The user can
+select the maximum level (in electrons per cadence) with this
+parameter. The default maximum intensity level is the median of the
+brightest 10% of pixels in the image.</p>
+</div></blockquote>
+<p><strong>iscale</strong> : str</p>
+<blockquote>
+<div><p>The type of intensity scaling for the image display.
+Options:</p>
+<ul class="simple">
+<li>linear</li>
+<li>logarithmic</li>
+<li>squareroot</li>
+</ul>
+</div></blockquote>
+<p><strong>cmap</strong> : str</p>
+<blockquote>
+<div><p>Color intensity scheme for the image display.</p>
+</div></blockquote>
+<p><strong>npix</strong> : int</p>
+<blockquote>
+<div><p>The pixel size of the square subimage extracted from the FFI for
+display.</p>
+</div></blockquote>
+<p><strong>verbose</strong> : bool</p>
+<blockquote>
+<div><p>Print informative messages and warnings to the shell and logfile?</p>
+</div></blockquote>
+<p><strong>logfile</strong> : str</p>
+<blockquote class="last">
+<div><p>Name of the logfile containing error and warning messages.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="kepfilter.html" class="btn btn-neutral float-right" title="kepfilter: bandpass filtering of Kepler light curve data" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="kepextract.html" class="btn btn-neutral" title="kepextract: create a light curve from a target pixel file by summing user-selected pixels" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright PyKE Developers and Contributors.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'3.0.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

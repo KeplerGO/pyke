@@ -1,0 +1,303 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Example 2: PSF photometry in a K2 cluster &mdash; PyKE 3.0.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../genindex.html"/>
+        <link rel="search" title="Search" href="../search.html"/>
+    <link rel="top" title="PyKE 3.0.0 documentation" href="../index.html"/>
+        <link rel="up" title="Photometry tutorials" href="index.html"/>
+        <link rel="next" title="Example 3: Separating a background EB from a foreground star" href="separating-a-background-eb.html"/>
+        <link rel="prev" title="Example 1: Aperture photometry on a K2 target" href="aperture-photometry-in-k2.html"/> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> PyKE
+          
+
+          
+            
+            <img src="../_static/pyke-white.png" class="logo" />
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                3.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../overview.html">PyKE tasks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../citing.html">Citing</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Photometry tutorials</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="aperture-photometry-in-k2.html">Example 1: Aperture photometry on a K2 target</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Example 2: PSF photometry in a K2 cluster</a></li>
+<li class="toctree-l2"><a class="reference internal" href="separating-a-background-eb.html">Example 3: Separating a background EB from a foreground star</a></li>
+<li class="toctree-l2"><a class="reference internal" href="removing-stellar-astroph-quarter-stitch.html">Example 4: Removing Stellar Astrophysics and Quarter Stitching</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">PyKE</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="index.html">Photometry tutorials</a> &raquo;</li>
+        
+      <li>Example 2: PSF photometry in a K2 cluster</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/tutorials/psf-photometry-in-k2.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="example-2-psf-photometry-in-a-k2-cluster">
+<h1>Example 2: PSF photometry in a K2 cluster<a class="headerlink" href="#example-2-psf-photometry-in-a-k2-cluster" title="Permalink to this headline">¶</a></h1>
+<p>In this tutorial we will use PSF-fitting photometry to create a light curve
+for an object in one of the cluster superstamps observed by K2.</p>
+<p>For this purpose, we download one of the target pixel files which K2
+obtained towards the Lagoon Nebula (M8) during
+<a class="reference external" href="https://keplerscience.arc.nasa.gov/k2-c9.html">Campaign 9a</a>:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>$ wget http://archive.stsci.edu/missions/k2/target_pixel_files/c91/200000000/71000/ktwo200071160-c91_lpd-targ.fits.gz
+</pre></div>
+</div>
+<p>We can visualize one of the frames using <code class="docutils literal"><span class="pre">kepmask</span></code>:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>$ kepmask ktwo200071160-c91_lpd-targ.fits.gz
+</pre></div>
+</div>
+<img alt="../_images/kepmask3.png" class="align-center" src="../_images/kepmask3.png" />
+<p>We would like to create a light curve for the target located near
+pixel (1013, 918) in the detector.</p>
+<p>First, we use <code class="docutils literal"><span class="pre">keptrim</span></code> to create a smaller target pixel file
+by cutting a 3x3 mask around the center of our target:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>$ keptrim ktwo200071160-c91_lpd-targ.fits.gz <span class="m">1013</span> <span class="m">918</span> <span class="m">3</span>
+</pre></div>
+</div>
+<p>This command creates a new target pixel file called <code class="docutils literal"><span class="pre">ktwo200071160-c91_lpd-targ-keptrim.fits</span></code>
+in the current directory, which contains the desired pixels while preserving all the original metadata.</p>
+<p>We can then use <code class="docutils literal"><span class="pre">kepprfphot</span></code> to fit the Kepler PRF for every frame in our trimmed tpf:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>$ kepprfphot ktwo200071160-c91_lpd-targ-keptrim.fits --columns <span class="m">1013</span> --rows <span class="m">918</span> --fluxes <span class="m">18000</span> --prfdir ~/github/pyke_files/kplr2011265_prf/ --background --overwrite --verbose
+</pre></div>
+</div>
+<p>Note that <cite>prf_dir</cite> is either a relative or absolute path to a directory
+containing the PRF files from the Kepler focal plane available in <a class="footnote-reference" href="#id2" id="id1">[1]</a>.</p>
+<p>This command creates a fits file called <code class="docutils literal"><span class="pre">ktwo200071160-c91_lpd-targ-keptrim-kepprfphot_0.fits</span></code>
+with all the results from the prf photometry including fitted flux and centroids.</p>
+<p>We can then write a small python script to see what the light curve looks like</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">pyplot</span> <span class="k">as</span> <span class="n">plt</span>
+<span class="kn">from</span> <span class="nn">astropy.io</span> <span class="kn">import</span> <span class="n">fits</span>
+
+<span class="n">f</span> <span class="o">=</span> <span class="n">fits</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s1">&#39;ktwo200071160-c91_lpd-targ-keptrim-kepprfphot_0.fits&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">f</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;TIME&#39;</span><span class="p">],</span> <span class="n">f</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;PSF_FLUX&#39;</span><span class="p">],</span> <span class="s1">&#39;ko&#39;</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;Time&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;Flux $e^{-} s^{-1}$&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<img alt="../_images/lc.png" class="align-center" src="../_images/lc.png" />
+<p>The low frequency components of our light curve can be removed with <code class="docutils literal"><span class="pre">kepflatten</span></code>.</p>
+<table class="docutils footnote" frame="void" id="id2" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id1">[1]</a></td><td>Note that this tool requires the calibration files from the Kepler focal plane characteristics, which can downloaded here: <a class="reference external" href="http://archive.stsci.edu/missions/kepler/fpc/prf/">http://archive.stsci.edu/missions/kepler/fpc/prf/</a></td></tr>
+</tbody>
+</table>
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="separating-a-background-eb.html" class="btn btn-neutral float-right" title="Example 3: Separating a background EB from a foreground star" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="aperture-photometry-in-k2.html" class="btn btn-neutral" title="Example 1: Aperture photometry on a K2 target" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright PyKE Developers and Contributors.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'3.0.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

@@ -1,0 +1,420 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>kepdetrend: detrend aperture photometry data &mdash; PyKE 3.0.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../genindex.html"/>
+        <link rel="search" title="Search" href="../search.html"/>
+    <link rel="top" title="PyKE 3.0.0 documentation" href="../index.html"/>
+        <link rel="up" title="List of PyKE tools" href="index.html"/>
+        <link rel="next" title="kepdiffim: difference imaging of pixels within a target mask" href="kepdiffim.html"/>
+        <link rel="prev" title="kepcotrend: remove systematic trends Kepler light curves using cotrending basis vectors" href="kepcotrend.html"/> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> PyKE
+          
+
+          
+            
+            <img src="../_static/pyke-white.png" class="logo" />
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                3.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../install.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../overview.html">PyKE tasks</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../overview.html#calling-tasks-from-python">Calling tasks from Python</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../overview.html#calling-tasks-from-a-terminal">Calling tasks from a terminal</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="index.html">List of PyKE tools</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="kepbls.html"><strong>kepbls</strong>: perform Box-Least Square searches for periodic exoplanet transits</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kepclip.html"><strong>kepclip</strong>: remove unwanted time ranges from Kepler time series data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kepconvert.html"><strong>kepconvert</strong>: convert Kepler FITS time series to or from a different file format</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kepcotrend.html"><strong>kepcotrend</strong>: remove systematic trends Kepler light curves using cotrending basis vectors</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#"><strong>kepdetrend</strong>: detrend aperture photometry data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kepdiffim.html"><strong>kepdiffim</strong>: difference imaging of pixels within a target mask</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kepdraw.html"><strong>kepdraw</strong>: interactive plotting of Kepler time series data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kepdynamic.html"><strong>kepdynamic</strong>: construct a dynamic power spectrum from Kepler time series data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kepextract.html"><strong>kepextract</strong>: create a light curve from a target pixel file by summing user-selected pixels</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kepffi.html"><strong>kepffi</strong>: display a portion of a Full Frame Image (FFI) and define custom target apertures</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kepfilter.html"><strong>kepfilter</strong>: bandpass filtering of Kepler light curve data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kepflatten.html"><strong>kepflatten</strong>: remove low frequency variability from time-series, preserve transits and flares</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kepfold.html"><strong>kepfold</strong>: phase-fold light curve data on linear ephemeris</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kepft.html"><strong>kepft</strong>: calculate and store a Fourier Transform from a Kepler time series</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kephead.html"><strong>kephead</strong>: search for and list FITS keywords in Kepler data files</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kepimages.html"><strong>kepimages</strong>: create a series of separate FITS image files from a Target Pixel File</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kepmask.html"><strong>kepmask</strong>: plot, create or edit custom target masks for target pixel files</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kepoutlier.html"><strong>kepoutlier</strong>: remove or replace statistical outliers from time series data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="keppca.html"><strong>keppca</strong>: perform principal component analysis upon a target pixel file</a></li>
+<li class="toctree-l4"><a class="reference internal" href="keppixseries.html"><strong>keppixseries</strong>: individual time series photometry for all pixels within a target mask</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kepprf.html"><strong>kepprf</strong>: fit a PSF model to a specific image within a Target Pixel File</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kepprfphot.html"><strong>kepprfphot</strong>: fit a PSF model to time series observations within a Target Pixel File</a></li>
+<li class="toctree-l4"><a class="reference internal" href="keprange.html"><strong>keprange</strong>: define time ranges interactively for use with other PyKE tasks</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kepsff.html"><strong>kepsff</strong>: remove motion-correlated noise from aperture light curve data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kepsmooth.html"><strong>kepsmooth</strong>: smooth light curves by convolution with a choice of analytical function</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kepstddev.html"><strong>kepstddev</strong>: calculate Combined Differential Photometric Precision for a time series light curve</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kepstitch.html"><strong>kepstitch</strong>: append short cadence months and/or long cadence quarters</a></li>
+<li class="toctree-l4"><a class="reference internal" href="keptimefix.html"><strong>keptimefix</strong>: correct a time stamp error in the target pixel files</a></li>
+<li class="toctree-l4"><a class="reference internal" href="keptrial.html"><strong>keptrial</strong>: calculate best period and error estimate from time series</a></li>
+<li class="toctree-l4"><a class="reference internal" href="keptrim.html"><strong>keptrim</strong>: trim pixels from Target Pixel Files</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kepwindow.html"><strong>kepwindow</strong>: calculate and store the window function for a Kepler time series</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../citing.html">Citing</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/index.html">Photometry tutorials</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">PyKE</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../overview.html">PyKE tasks</a> &raquo;</li>
+        
+          <li><a href="index.html">List of PyKE tools</a> &raquo;</li>
+        
+      <li><strong>kepdetrend</strong>: detrend aperture photometry data</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/api/kepdetrend.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="kepdetrend-detrend-aperture-photometry-data">
+<h1><strong>kepdetrend</strong>: detrend aperture photometry data<a class="headerlink" href="#kepdetrend-detrend-aperture-photometry-data" title="Permalink to this headline">¶</a></h1>
+<dl class="function">
+<dt id="pyke.kepdetrend.kepdetrend">
+<code class="descclassname">pyke.kepdetrend.</code><code class="descname">kepdetrend</code><span class="sig-paren">(</span><em>infile</em>, <em>ranges1</em>, <em>ranges2</em>, <em>npoly1</em>, <em>npoly2</em>, <em>nsig1</em>, <em>nsig2</em>, <em>niter1</em>, <em>niter2</em>, <em>outfile=None</em>, <em>datacol='SAP_FLUX'</em>, <em>errcol='SAP_FLUX_ERR'</em>, <em>popnans=False</em>, <em>plot=False</em>, <em>overwrite=False</em>, <em>verbose=False</em>, <em>logfile='kepdetrend.log'</em><span class="sig-paren">)</span><a class="headerlink" href="#pyke.kepdetrend.kepdetrend" title="Permalink to this definition">¶</a></dt>
+<dd><p>kepdetrend – Detrend aperture photometry data</p>
+<p>Simple Aperture Photometry (SAP) data can contain a series of systematic
+trends associated with the spacecraft, detector and environment rather than
+the target. Within the Kepler pipeline these contaminants are treated
+during Pre-search Data Conditioning (PDC) and cleaned data are provided in
+the archived files as the PDCSAP_FLUX data. See the Kepler Data
+Characteristics Handbook for more precise descriptions of systematics. The
+Kepler pipeline attempts to remove systematics with a combination of data
+detrending and cotrending against weighted cotrending basis vectors derived
+from the time series structure most-common to all neighbors of the
+scientific target. These processes are imperfect but tackled within the
+pipeline in the spirit of correcting as many targets as possible with
+enough accuracy for the mission to meet exoplanet detection specifications.
+This approach is, however, not optimized for individual targets. Users of
+the Kepler archive may well find that individually-tailored detrending and
+cotrending yields corrected light curves more suited to their science. The
+purpose of kepdetrend is to provide a detrending algorithm that can be
+tailored for individual targets. We stress that an absolute correction is
+often impossible for Kepler data. We also recommend the use of kepcotrend
+instead of kepdetrend for systematic removal in most Kepler targets.</p>
+<p>The current version of this task asks the user to define data ranges that
+are free of a systematic feature that needs to be removed and can be
+well-characterized by a single polynomial function. This function is what
+the task attempts to correct data to. The user then defines a data range
+that needs correcting and fits this with a second polynomial. The
+correction is the subtraction of one polynomial from the other in the data
+range to be detrended. The examples plotted below show the piecemeal
+correction of three systematic features within a Q2 light curve. These
+three corrections are provided in the task examples below.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>infile</strong> : str</p>
+<blockquote>
+<div><p>The name of a MAST standard format FITS file containing a Kepler light
+curve within the first data extension.</p>
+</div></blockquote>
+<p><strong>outfile</strong> : str</p>
+<blockquote>
+<div><p>The name of the output FITS file. outfile will be an amended version of
+infile with specified time ranges detrended by subtraction of a
+polynomial fit.</p>
+</div></blockquote>
+<p><strong>datacol</strong> : str</p>
+<blockquote>
+<div><p>The column name containing data stored within extension 1 of infile.
+This data will be detrended. Typically this name is SAP_FLUX (Simple
+Aperture Photometry fluxes), but any data column within extension 1 of
+the FITS file can be corrected.</p>
+</div></blockquote>
+<p><strong>errcol</strong> : str</p>
+<blockquote>
+<div><p>The uncertainty data coupled to datacol. Typically this column is
+called SAP_FLUX_ERR. If no errors are associated with datacol then
+use <code class="docutils literal"><span class="pre">errcol=None</span></code>.</p>
+</div></blockquote>
+<p><strong>ranges1, ranges2</strong> : list, list</p>
+<blockquote>
+<div><p>Time ranges are supplied as comma-separated pairs of Barycentric Julian
+Dates (BJDs). Multiple ranges are separated by a semi-colon. An example
+containing two time ranges is:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="s1">&#39;2455012.48517,2455014.50072;2455022.63487,2455025.08231&#39;</span>
+</pre></div>
+</div>
+<p>Data within the range <strong>ranges1</strong> will be detrended by subtracting the
+difference between the best fit to data in that range and the best fit
+function in the range <strong>ranges2</strong> extrapolated into ranges1.</p>
+</div></blockquote>
+<p><strong>npoly1, npoly2</strong> : int</p>
+<blockquote>
+<div><p>The polynomial order for the function that fits the data ranges to be
+detrended.</p>
+</div></blockquote>
+<p><strong>nsig1, nsig2</strong> : float, float</p>
+<blockquote>
+<div><p>The data to be detrended is fit by a polynomial using an iterative
+scheme. After a best fit is found, those data points deviating from the
+fit by more than this specified amount are rejected and the remaining
+data are fit again, etc, until there are no further rejections. This
+threshold is in units of the standard deviation of the data about the
+best fit function.</p>
+</div></blockquote>
+<p><strong>niter1, niter2</strong> : int, int</p>
+<blockquote>
+<div><p>The polynomial fit over the data to be detrended will be iterated until
+there are no further outlier rejections or the number of iterations
+exceeds <strong>niter1</strong> (<strong>niter2</strong>).</p>
+</div></blockquote>
+<p><strong>popnans</strong> : bool</p>
+<blockquote>
+<div><p>Keep NaN flux values (times without a flux measurement) in the output
+FITS file. If set to no, any rows in the input FITS file containing
+NaNs will no be in the output file.</p>
+</div></blockquote>
+<p><strong>plot</strong> : boolean</p>
+<blockquote>
+<div><p>Plot the data, the fits and the correction?</p>
+</div></blockquote>
+<p><strong>overwrite</strong> : bool</p>
+<blockquote>
+<div><p>Overwrite the output file? if <strong>overwrite</strong> is <strong>False</strong> and an
+existing file has the same name as outfile then the task will stop with
+an error.</p>
+</div></blockquote>
+<p><strong>verbose</strong> : bool</p>
+<blockquote>
+<div><p>Print informative messages and warnings to the shell and logfile?</p>
+</div></blockquote>
+<p><strong>logfile</strong> : str</p>
+<blockquote class="last">
+<div><p>Name of the logfile containing error and warning messages.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>$ kepdetrend kplr002436324-2009259160929_llc.fits --datacol SAP_FLUX
+--errcol SAP_FLUX_ERR --ranges1 <span class="s1">&#39;2455063.59357,2455066.47292&#39;</span> --npoly1 <span class="m">5</span>
+--nsig1 <span class="m">3</span> --niter1 <span class="m">10</span> --ranges2 <span class="s1">&#39;2455060.57026,2455063.59357;2455066.9768,2455068.99235&#39;</span>
+--npoly2 <span class="m">5</span> --nsig2 <span class="m">3</span> --niter2 <span class="m">10</span> --plot --verbose
+</pre></div>
+</div>
+<img alt="../_images/kepdetrend.png" class="align-center" src="../_images/kepdetrend.png" />
+</dd></dl>
+
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="kepdiffim.html" class="btn btn-neutral float-right" title="kepdiffim: difference imaging of pixels within a target mask" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="kepcotrend.html" class="btn btn-neutral" title="kepcotrend: remove systematic trends Kepler light curves using cotrending basis vectors" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright PyKE Developers and Contributors.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'3.0.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

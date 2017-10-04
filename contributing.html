@@ -1,0 +1,325 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Contributing &mdash; PyKE 3.0.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="PyKE 3.0.0 documentation" href="index.html"/>
+        <link rel="next" title="Citing" href="citing.html"/>
+        <link rel="prev" title="kepwindow: calculate and store the window function for a Kepler time series" href="api/kepwindow.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> PyKE
+          
+
+          
+            
+            <img src="_static/pyke-white.png" class="logo" />
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                3.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="overview.html">PyKE tasks</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Contributing</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#proposing-changes-to-pyke-using-github-pull-requests">Proposing changes to PyKE using GitHub pull requests</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#coding-and-documentation-guidelines">Coding and documentation guidelines</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="citing.html">Citing</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="tutorials/index.html">Photometry tutorials</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">PyKE</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>Contributing</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/contributing.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="contributing">
+<span id="id1"></span><h1>Contributing<a class="headerlink" href="#contributing" title="Permalink to this headline">¶</a></h1>
+<p>PyKE is actively developed on its <a class="reference external" href="https://github.com/KeplerGO/PyKE">GitHub repository</a>.</p>
+<p>If you encounter a problem with PyKE, we encourage you to
+<a class="reference external" href="https://github.com/KeplerGO/PyKE/issues">open an issue on the GitHub repository</a>
+or to e-mail the Kepler/K2 Guest Observer Office at <a class="reference external" href="mailto:keplergo&#37;&#52;&#48;mail&#46;arc&#46;nasa&#46;gov">keplergo<span>&#64;</span>mail<span>&#46;</span>arc<span>&#46;</span>nasa<span>&#46;</span>gov</a>.</p>
+<p>If you would like to contribute a patch for a bugfix, please go ahead and open a pull request.</p>
+<div class="section" id="proposing-changes-to-pyke-using-github-pull-requests">
+<h2>Proposing changes to PyKE using GitHub pull requests<a class="headerlink" href="#proposing-changes-to-pyke-using-github-pull-requests" title="Permalink to this headline">¶</a></h2>
+<p>We welcome suggestions for enhancements or new features to PyKE via GitHub.</p>
+<p>If you want to make a significant change such as adding a new feature, we recommend opening a GitHub issue to discuss the changes.
+Once you are ready to propose the changes, please go ahead and open a pull request.</p>
+<p>If in doubt on how to open a pull request, we recommend Astropy’s
+“<a class="reference external" href="http://docs.astropy.org/en/stable/development/workflow/development_workflow.html">How to make a code contribution</a>” tutorial.
+In brief, the steps are as follows:</p>
+<p>1. Fork the main PyKE repository by logging into GitHub, browsing to <code class="docutils literal"><span class="pre">https://github.com/KeplerGO/PyKE</span></code> and clicking on <code class="docutils literal"><span class="pre">Fork</span></code> in the top right corner.</p>
+<ol class="arabic simple" start="2">
+<li>Clone your fork to your computer:</li>
+</ol>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>$ git clone https://github.com/YOUR-GITHUB-USERNAME/PyKE.git
+</pre></div>
+</div>
+<ol class="arabic simple" start="3">
+<li>Install the development version of PyKE:</li>
+</ol>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>$ <span class="nb">cd</span> PyKE
+$ pip install -e .
+</pre></div>
+</div>
+<ol class="arabic simple" start="4">
+<li>Add the KeplerGO remote to your GitHub enviroment:</li>
+</ol>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>$ git remote add upstream https://github.com/KeplerGO/PyKE.git
+</pre></div>
+</div>
+<ol class="arabic simple" start="5">
+<li>Let’s make sure everything is setup correctly. Execute:</li>
+</ol>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>$ git remote -v
+</pre></div>
+</div>
+<p>You should see something like this:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>origin      https://github.com/YOUR-GITHUB-USERNAME/PyKE.git <span class="o">(</span>fetch<span class="o">)</span>
+origin      https://github.com/YOUR-GITHUB-USERNAME/PyKE.git <span class="o">(</span>push<span class="o">)</span>
+upstream    https://github.com/KeplerGO/PyKE.git <span class="o">(</span>fetch<span class="o">)</span>
+upstream    https://github.com/KeplerGO/PyKE.git <span class="o">(</span>push<span class="o">)</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="6">
+<li>Now you are ready to start contributing; make a new branch with a name of your choice and checkout:</li>
+</ol>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>$ git branch name-of-your-branch
+$ git checkout name-of-your-branch
+</pre></div>
+</div>
+<ol class="arabic simple" start="7">
+<li>Do the changes you want and add them:</li>
+</ol>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>$ git add FILE-YOU-ADDED-OR-MODIFIED
+</pre></div>
+</div>
+<ol class="arabic simple" start="8">
+<li>Commit and push your changes:</li>
+</ol>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>$ git commit -m <span class="s2">&quot;description of changes&quot;</span>
+$ git push origin name-of-my-branch
+</pre></div>
+</div>
+<p>9. Head to <a class="reference external" href="https://github.com/KeplerGO/PyKE">https://github.com/KeplerGO/PyKE</a> and you should now see a button “Compare and open a pull request”.  Click the button and submit your pull request.</p>
+<ol class="arabic simple" start="10">
+<li>That’s it! :)</li>
+</ol>
+</div>
+<div class="section" id="coding-and-documentation-guidelines">
+<h2>Coding and documentation guidelines<a class="headerlink" href="#coding-and-documentation-guidelines" title="Permalink to this headline">¶</a></h2>
+<p>PyKE adopts AstroPy’s coding guidelines and standards,
+as documented in <a class="reference external" href="http://docs.astropy.org/en/stable/index.html#developer-documentation">AstroPy’s Development Documentation</a>.</p>
+</div>
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="citing.html" class="btn btn-neutral float-right" title="Citing" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="api/kepwindow.html" class="btn btn-neutral" title="kepwindow: calculate and store the window function for a Kepler time series" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright PyKE Developers and Contributors.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'3.0.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

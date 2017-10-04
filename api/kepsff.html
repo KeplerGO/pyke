@@ -1,0 +1,556 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>kepsff: remove motion-correlated noise from aperture light curve data &mdash; PyKE 3.0.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../genindex.html"/>
+        <link rel="search" title="Search" href="../search.html"/>
+    <link rel="top" title="PyKE 3.0.0 documentation" href="../index.html"/>
+        <link rel="up" title="List of PyKE tools" href="index.html"/>
+        <link rel="next" title="kepsmooth: smooth light curves by convolution with a choice of analytical function" href="kepsmooth.html"/>
+        <link rel="prev" title="keprange: define time ranges interactively for use with other PyKE tasks" href="keprange.html"/> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> PyKE
+          
+
+          
+            
+            <img src="../_static/pyke-white.png" class="logo" />
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                3.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../install.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../overview.html">PyKE tasks</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../overview.html#calling-tasks-from-python">Calling tasks from Python</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../overview.html#calling-tasks-from-a-terminal">Calling tasks from a terminal</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="index.html">List of PyKE tools</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="kepbls.html"><strong>kepbls</strong>: perform Box-Least Square searches for periodic exoplanet transits</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kepclip.html"><strong>kepclip</strong>: remove unwanted time ranges from Kepler time series data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kepconvert.html"><strong>kepconvert</strong>: convert Kepler FITS time series to or from a different file format</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kepcotrend.html"><strong>kepcotrend</strong>: remove systematic trends Kepler light curves using cotrending basis vectors</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kepdetrend.html"><strong>kepdetrend</strong>: detrend aperture photometry data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kepdiffim.html"><strong>kepdiffim</strong>: difference imaging of pixels within a target mask</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kepdraw.html"><strong>kepdraw</strong>: interactive plotting of Kepler time series data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kepdynamic.html"><strong>kepdynamic</strong>: construct a dynamic power spectrum from Kepler time series data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kepextract.html"><strong>kepextract</strong>: create a light curve from a target pixel file by summing user-selected pixels</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kepffi.html"><strong>kepffi</strong>: display a portion of a Full Frame Image (FFI) and define custom target apertures</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kepfilter.html"><strong>kepfilter</strong>: bandpass filtering of Kepler light curve data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kepflatten.html"><strong>kepflatten</strong>: remove low frequency variability from time-series, preserve transits and flares</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kepfold.html"><strong>kepfold</strong>: phase-fold light curve data on linear ephemeris</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kepft.html"><strong>kepft</strong>: calculate and store a Fourier Transform from a Kepler time series</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kephead.html"><strong>kephead</strong>: search for and list FITS keywords in Kepler data files</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kepimages.html"><strong>kepimages</strong>: create a series of separate FITS image files from a Target Pixel File</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kepmask.html"><strong>kepmask</strong>: plot, create or edit custom target masks for target pixel files</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kepoutlier.html"><strong>kepoutlier</strong>: remove or replace statistical outliers from time series data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="keppca.html"><strong>keppca</strong>: perform principal component analysis upon a target pixel file</a></li>
+<li class="toctree-l4"><a class="reference internal" href="keppixseries.html"><strong>keppixseries</strong>: individual time series photometry for all pixels within a target mask</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kepprf.html"><strong>kepprf</strong>: fit a PSF model to a specific image within a Target Pixel File</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kepprfphot.html"><strong>kepprfphot</strong>: fit a PSF model to time series observations within a Target Pixel File</a></li>
+<li class="toctree-l4"><a class="reference internal" href="keprange.html"><strong>keprange</strong>: define time ranges interactively for use with other PyKE tasks</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#"><strong>kepsff</strong>: remove motion-correlated noise from aperture light curve data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kepsmooth.html"><strong>kepsmooth</strong>: smooth light curves by convolution with a choice of analytical function</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kepstddev.html"><strong>kepstddev</strong>: calculate Combined Differential Photometric Precision for a time series light curve</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kepstitch.html"><strong>kepstitch</strong>: append short cadence months and/or long cadence quarters</a></li>
+<li class="toctree-l4"><a class="reference internal" href="keptimefix.html"><strong>keptimefix</strong>: correct a time stamp error in the target pixel files</a></li>
+<li class="toctree-l4"><a class="reference internal" href="keptrial.html"><strong>keptrial</strong>: calculate best period and error estimate from time series</a></li>
+<li class="toctree-l4"><a class="reference internal" href="keptrim.html"><strong>keptrim</strong>: trim pixels from Target Pixel Files</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kepwindow.html"><strong>kepwindow</strong>: calculate and store the window function for a Kepler time series</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../citing.html">Citing</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/index.html">Photometry tutorials</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">PyKE</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../overview.html">PyKE tasks</a> &raquo;</li>
+        
+          <li><a href="index.html">List of PyKE tools</a> &raquo;</li>
+        
+      <li><strong>kepsff</strong>: remove motion-correlated noise from aperture light curve data</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/api/kepsff.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="kepsff-remove-motion-correlated-noise-from-aperture-light-curve-data">
+<h1><strong>kepsff</strong>: remove motion-correlated noise from aperture light curve data<a class="headerlink" href="#kepsff-remove-motion-correlated-noise-from-aperture-light-curve-data" title="Permalink to this headline">¶</a></h1>
+<dl class="function">
+<dt id="pyke.kepsff.kepsff">
+<code class="descclassname">pyke.kepsff.</code><code class="descname">kepsff</code><span class="sig-paren">(</span><em>infile</em>, <em>outfile=None</em>, <em>datacol='DETSAP_FLUX'</em>, <em>cenmethod='moments'</em>, <em>stepsize=5.0</em>, <em>npoly_cxcy=1</em>, <em>sigma_cxcy=10.0</em>, <em>npoly_ardx=6</em>, <em>npoly_dsdt=2</em>, <em>sigma_dsdt=3.0</em>, <em>npoly_arfl=3</em>, <em>sigma_arfl=3.0</em>, <em>plot=False</em>, <em>overwrite=False</em>, <em>verbose=False</em>, <em>logfile='kepsff.log'</em><span class="sig-paren">)</span><a class="headerlink" href="#pyke.kepsff.kepsff" title="Permalink to this definition">¶</a></dt>
+<dd><p>kepsff – remove motion-correlated noise from aperture light curve data</p>
+<p>The systematic noise within aperture-constructed K2 photometry is dominated
+by the effects of boresight roll under the force of solar pressure. Roll is
+minimized by orienting the spacecraft in pointing directions that minimize
+spacecraft structure asymmetry normal to the Sun-vector and compensated for
+over campaign durations by regular thruster firings, typically every 6
+hours. kepsff provides an open source python implementation of the
+photometric correction for K2 motion systematics provided by Vanderburg and
+Johnson (2014).The method will also work upon archived Kepler data and
+provides a relatively-simple and CPU-friendly alternative to cotrending
+against basis-vector derived ensemble photometry (<code class="docutils literal"><span class="pre">kepcotrend</span></code>),
+pixel-level principal component analysis (<code class="docutils literal"><span class="pre">keppca</span></code>), and PSF fitting
+(<code class="docutils literal"><span class="pre">kepprfphot</span></code>). As well, as computational speed, this method has the
+advantage of requiring no external data in order to perform corrections.
+All required data is extracted from individual Kepler light curves stored
+at the archive, or K2 light curves constructed from archived target pixel
+files using the kepextract task. In the example figure above, the 12th
+magnitude target, EPIC 202093219, has a median 6.5-hour standard deviation
+of 60 parts-per-million (according to the tool kepstddev. After motion
+correction using <code class="docutils literal"><span class="pre">kepsff</span></code>, this quantity is reduced to 36 parts-per-million.</p>
+<p>The name <code class="docutils literal"><span class="pre">kepsff</span></code> is derived from “Self-Flat-Fielding” (SFF) and is
+propagated from the Vanderburg and Johnson (2014) paper. However the name
+is somewhat misleading because the effects corrected for in the K2 case are
+dominated by aperture losses and source crowding rather than flat-field
+variations. In essence, <code class="docutils literal"><span class="pre">kepsff</span></code> corrects motion-induced
+aperture-photometry artifacts after constructing a position-flux relation
+from a detrended (astrophysics-removed) version of the light curve. This
+tool will find most-employment upon K2 data, especially in the early
+mission phases when the data archives will contain calibrated target pixel
+files but no light curves. However, in line with the philosophy of the PyKE
+tools, <code class="docutils literal"><span class="pre">kepsff</span></code> provides the user with a degree of customization to meet
+the demands of a broad range of target types and science goals. The
+long-term goal is to provide Kepler and K2 users with a range of reduction
+options and this tool is part of that software kit. Also, in line with the
+PyKE philosophy, these algorithms, as coded, are not perfect. We recommend
+and welcome tinkering and further development by the community in order to
+make these tools better. This case is also precisely what the K2 community
+requires in the sense that the archive users, here Andrew Vanderburg and
+John Johnson, are seeking solutions to their own data reduction needs,
+becoming self-sufficient, and reporting their findings and methods to us
+all.</p>
+<p>Preparation work is required before kepsff can provide a good correction.
+First, a light curve needs to be extracted a from Target Pixel File
+(<code class="docutils literal"><span class="pre">kepextract</span></code>) using a user-customized pixel aperture defined within
+<code class="docutils literal"><span class="pre">kepmask</span></code>. The resulting light curve also needs to be detrended, i.e. the
+astrophysics needs to be removed as much as possible (kepflatten) in order
+for the correction to be as precise as possible. Note that the astrophysics
+is not removed permanently, but care has to be taken to prepare the data
+this way before confidence in the correction can be built for individual
+light curves on a case-by-case basis.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>nfile</strong> : str</p>
+<blockquote>
+<div><p>The name of an input light curve FITS file. This file needs to contain
+a minimum set of information: Mid-exposure times, cadence numbers,
+simple-aperture flux, moment-derived and/or PSF-derived target
+centroids, quality flags and Kepler standard keywords. All of these
+properties are provided in archived light curves from the Kepler
+mission, but need to be calculated for the K2 mission. The PyKE tool
+kepextract calculates all these properties and provides an input file
+suitable for <code class="docutils literal"><span class="pre">kepsff</span></code>. In addition, the input file also requires a
+column of detrended data, where long-term astrophysics and
+orbit-related systematics have been removed. The PyKE tool kepflatten
+performs this pre-step, producing a FITS column of detrended data (at
+low-frequencies) called DETSAP_FLUX.</p>
+</div></blockquote>
+<p><strong>outfile</strong> : str</p>
+<blockquote>
+<div><p>The name of the output light curve FITS file. This file has the same
+structure as the input file with three content changes. The aperture
+photometry, DETSAP_FLUX, and detrended photometry, DETSAP_FLUX are
+corrected for motion-correlated noise. The quality flag column,
+SAP_QUALITY, includes a new bit-flag of value 131072 that identifies
+exposures collected during on-board thruster firings, typically
+occurring on a 6-hr cadence.</p>
+</div></blockquote>
+<p><strong>datacol</strong> : str</p>
+<blockquote>
+<div><p>The name of the FITS data column containing detrended flux data (i.e.
+low-frequency structure removed). If the input file is a product of
+kepflatten then this column is named DETSAP_FLUX.</p>
+</div></blockquote>
+<p><strong>cenmethod</strong> : str</p>
+<blockquote>
+<div><p>kepsff requires target position data on the CCD detector in order to
+correlate spacecraft boresight motion with systematic signal within the
+flux time-series. The typical Kepler/K2 light curve files have
+place-holders for two different measures of source centroid:</p>
+<ul class="simple">
+<li><code class="docutils literal"><span class="pre">moments</span></code> – center-of-light within the pixel aperture
+(alternatively known as the zeroth-moment of the flux distribution
+over the pixels). These two arrays, the X and Y centroid over time,
+are stored in FITS columns MOM_CENTR1 and MOM_CENTR2.</li>
+<li><code class="docutils literal"><span class="pre">psf</span></code> – the PSF-fitting method, the X and Y locations of best-fit
+PSF models to the aperture pixels. These are rarely available within
+archived Kepler data but can be stored in PSF_CENTR1 and PSF_CENTR2.
+Both sets of centroids are provided in the output from kepextract,
+where the moments data is generally preferred over the PSF data which
+derives from the simplifying assumptions that sources are not
+confused and are well-characterized by symmetric Gaussian profiles.</li>
+</ul>
+</div></blockquote>
+<p><strong>stepsize</strong> : float [days]</p>
+<blockquote>
+<div><p>Ultimately, kepsff will construct a time-series of flux-correction
+factors based upon a correlation curve between spacecraft boresight
+motion and aperture-flux variation. Perhaps due to differential
+velocity aberration, this calibration is not stable over time. The
+somewhat clunky solution to this in the current version of the tool is
+re-calibrate the correlation and apply the subsequent correction over a
+series of discrete time windows. stepsize identifies the length of
+these windows in units of days. Some trial and error is required to
+optimize light curve correction. Window sizes of 4-6 days often provide
+the optimal correction, but astrophysical structure on these timescales
+can lead the user to adopt longer or shorter step sizes in order to
+reduce the unwanted impact of astrophysics on the correction.</p>
+</div></blockquote>
+<p><strong>npoly_cxcy</strong> : int</p>
+<blockquote>
+<div><p>There is a sequence of four polynomial fits required to characterize
+and filter the input data in order to produce a flux-motion correlation
+curve. The following sequence of fit parameters is therefore quite
+dis-orienting until some familiarity is gained with hands-on
+experience. The diagnostic plots, provided when plot=True provide
+significant help here with the four fits delivered in the four
+left-most panels (figure 1). The first fit is to the centroid
+coordinates selected by cenmethod. These data points are provided in
+the top-left panel of the figure and generally trace very-close to a
+linear path across the detector. Fine-point motion is dominated by roll
+around the boresight and therefore small-angle, near-linear behavior is
+unsurprising. The two black lines represent the eigenvectors of the
+covariance matrix of the centroids. These eigenvectors are used to
+rotate the centroid distribution so that the direction of motion (x’)
+is aligned to the x-axis of the rotated system. The rotation
+functionality requires user-optimization in one aspect. Obvious
+outliers need to be removed from the sample before the eigenvectors are
+calculated. We achieve this iterative sigma-clipping. The user defines
+the order of a polynomial fit (1st order is recommended) and a
+threshold distance from the best fit where data points outside that
+threshold are removed before the remaining data are re-fit. Iterations
+continue until no additional data points are rejected. The rejection
+threshold is provided by the argument sigma_cxcy. Points lying below
+the rejection threshold are plotted as green symbols whereas data
+points rejected by this process will be plotted red. In the example
+above, no data points are rejected. The most likely cause of outliers
+is data obtained while the spacecraft is not guiding on reference
+stars. We predict such occasions to be rare during optimal operations,
+but such observations were common during the engineering tests,
+including the first half of campaign 0.</p>
+</div></blockquote>
+<p><strong>sigma_cxcy</strong> : float [sigma]</p>
+<blockquote>
+<div><p>Threshold for rejecting centroid data. The threshold is the number of
+1-sigma standard deviation distances from the best-fit. Points further
+from the best-fit than the threshold provided will be considered
+unrepresentative of the flux-motion correlation that the tool is
+attempting to characterize. These points are not thrown away, they are
+corrected in the final calculation with the rest of the data, but they
+play no further part in the calibration of the correlation.</p>
+</div></blockquote>
+<p><strong>npoly_ardx</strong> : int</p>
+<blockquote>
+<div><p>Step 2 (top-middle panel) is the determination of the relatively small
+deviation of centroid motion from linear. Here, in the rotated frame,
+we fit a high-order polynomial to the centroid data filtered and
+rotated in the first step. The green curve is the integrated path
+length along that curve (s) minus the linear term. The calculation is
+provided by equation 4 of Vanderburg and Johnson (2014). The red curve
+is a polynomial fit to the integral which subsequently allows us to
+cheaply calculate the absolute motion of the centroids relative to
+linear location along the dominant eigenvector in the unrotated frame.
+Producing a ‘fit of a fit’ is somewhat inelegant and open source
+developers could be challenged here to add some additional
+mathematical rigor to this step. However this section of the
+calculation has, so far, not proved to be critical - the path length
+integral is very close to linear, so cleaning this calculation up is
+low-priority currently.</p>
+</div></blockquote>
+<p><strong>npoly_dsdt</strong> : int</p>
+<blockquote>
+<div><p>The third step (lower-left panel) is a prescription to filter out
+exposures collected during thruster firings. Firing occur typically on
+a 6-hr cadence and occur when the spacecraft has rolled far enough to
+trigger a pointing adjustment. These data cannot be corrected using the
+current method. They are flagged here so that they do not bias the
+motion-flux correlation calculation and so that they can be documented
+within the quality flags of the output file. A low-order polynomial is
+fit to the time derivative along the path length (ds/dt) using 3-sigma
+iterative clipping. <code class="docutils literal"><span class="pre">npoly_dsdt</span></code> provides the user with flexibility
+to choose the polynomial order. In the plot, the best fit is shown as a
+red, solid line.</p>
+</div></blockquote>
+<p><strong>sigma_dsdt</strong> : float [sigma]</p>
+<blockquote>
+<div><p>This is a threshold limit in units of 1-sigma standard deviation from
+the best-fit. Data points falling outside of the threshold are
+more-likely-than-not collected during thruster firings. These points
+are flagged in the SAP_QUALITY column of the output file with the bit
+131072 and is not employed to calibrate the flux-motion relation. The
+threshold curve is plot as a red, dashed line and rejected points are
+colored red.</p>
+</div></blockquote>
+<p><strong>npoly_arfl</strong> : int</p>
+<blockquote>
+<div><p>The fourth panel (lower-middle) provides the subsequent target motion
+vs aperture flux distribution. The red line is polynomial fit, the
+order of which is chosen by the user here. Iterative
+<span class="math">\(\sigma\)</span>-clipping is again required - the many outliers below
+the best-fit are astrophysical in nature (binary star eclipses) and
+would bias the fit if they were unrecognized or simply allowed to.
+The user has flexibility to change the order and clipping threshold
+in order to provide the most robust fit and there is a degree of
+objectivity in this process. A low polynomial is generally adequate,
+this example employs a 3rd order function.</p>
+</div></blockquote>
+<p><strong>sigma_arfl</strong> : float [sigma]</p>
+<blockquote>
+<div><p>This is the threshold limit in units of 1-sigma standard deviation from
+the best-fit polynomial to the motion-flux relation. Data points
+falling outside of the threshold are in effect rejected from the
+calibration. Such points potentially contain astrophysical signal that
+would both bias the calculation and damp the astrophysical signal
+within the data after the correction has been made. The best-fit red
+line provides the correction factors within the data window. For each
+point along the aperture-derived flux curve (upper-right), the position
+along the arc can be calculated and the multiplicative correction
+factor to the flux can determined directly from the best-fit
+motion-flux relation. The subsequent corrected light curve is provided
+lower-right on the same plotting scale as above. The red points are
+those flagged as potential thruster firing and their 6-hr cadence
+suggests these events have generally been flagged well.</p>
+</div></blockquote>
+<p><strong>plot</strong> : bool</p>
+<blockquote>
+<div><p>If true, diagnostic plots identical to figure 1 above will be rendered
+and also saved as PNG files. There will be a different plot for every
+time window defined by the stepsize parameters. If the output FITS file
+is named filename.fits then each PNG file will be named
+filename_nn.png, where nn is a sequential number beginning with 1.</p>
+</div></blockquote>
+<p><strong>overwrite</strong> : bool</p>
+<blockquote>
+<div><p>Overwrite the output FITS file? if <strong>overwrite</strong> is <strong>False</strong> and an
+existing file has the same name as outfile then the task will stop with
+an error.</p>
+</div></blockquote>
+<p><strong>verbose</strong> : bool</p>
+<blockquote>
+<div><p>Print informative messages and warnings to the shell and logfile?</p>
+</div></blockquote>
+<p><strong>logfile</strong> : str</p>
+<blockquote class="last">
+<div><p>Name of the logfile containing error and warning messages.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="kepsmooth.html" class="btn btn-neutral float-right" title="kepsmooth: smooth light curves by convolution with a choice of analytical function" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="keprange.html" class="btn btn-neutral" title="keprange: define time ranges interactively for use with other PyKE tasks" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright PyKE Developers and Contributors.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'3.0.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

@@ -1,0 +1,365 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Example 3: Separating a background EB from a foreground star &mdash; PyKE 3.0.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../genindex.html"/>
+        <link rel="search" title="Search" href="../search.html"/>
+    <link rel="top" title="PyKE 3.0.0 documentation" href="../index.html"/>
+        <link rel="up" title="Photometry tutorials" href="index.html"/>
+        <link rel="next" title="Example 4: Removing Stellar Astrophysics and Quarter Stitching" href="removing-stellar-astroph-quarter-stitch.html"/>
+        <link rel="prev" title="Example 2: PSF photometry in a K2 cluster" href="psf-photometry-in-k2.html"/> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> PyKE
+          
+
+          
+            
+            <img src="../_static/pyke-white.png" class="logo" />
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                3.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../overview.html">PyKE tasks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../citing.html">Citing</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Photometry tutorials</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="aperture-photometry-in-k2.html">Example 1: Aperture photometry on a K2 target</a></li>
+<li class="toctree-l2"><a class="reference internal" href="psf-photometry-in-k2.html">Example 2: PSF photometry in a K2 cluster</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Example 3: Separating a background EB from a foreground star</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#step-1-plot-archived-sap-data">Step 1: Plot archived SAP data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#step-2-plot-archived-pdcsap-data">Step 2: Plot archived PDCSAP data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#step-3-plot-archived-photometric-time-series-for-individual-target-pixels">Step 3: Plot archived photometric time-series for individual target pixels</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#step-4-define-new-optimal-apertures-for-target-and-background-binary-star">Step 4: Define new optimal apertures for target and background binary star</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#step-5-extract-new-sap-light-curves-from-the-tpf">Step 5: Extract new SAP light curves from the TPF</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#step-6-mitigate-for-systematic-artifacts-in-new-sap-light-curves">Step 6: Mitigate for systematic artifacts in new SAP light curves</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="removing-stellar-astroph-quarter-stitch.html">Example 4: Removing Stellar Astrophysics and Quarter Stitching</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">PyKE</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="index.html">Photometry tutorials</a> &raquo;</li>
+        
+      <li>Example 3: Separating a background EB from a foreground star</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/tutorials/separating-a-background-eb.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="example-3-separating-a-background-eb-from-a-foreground-star">
+<h1>Example 3: Separating a background EB from a foreground star<a class="headerlink" href="#example-3-separating-a-background-eb-from-a-foreground-star" title="Permalink to this headline">¶</a></h1>
+<p>The likelihood of source confusion around any given target is high.
+One cannot be certain whether astrophysical variability across a Kepler light curve comes entirely from the target star.
+In order to resolve the sources of variability within a target mask,
+users should examine the Target Pixel File (TPF).</p>
+<div class="section" id="step-1-plot-archived-sap-data">
+<h2>Step 1: Plot archived SAP data<a class="headerlink" href="#step-1-plot-archived-sap-data" title="Permalink to this headline">¶</a></h2>
+<p>For the purposes of this example, we will examine the light curve and pixel file of KIC 2449074, which we can download from the archive as follows:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>$ wget http://archive.stsci.edu/missions/kepler/lightcurves/0024/002449074/kplr002449074-2009350155506_llc.fits
+</pre></div>
+</div>
+<p>We can visualize the Simple Aperture Photometry (SAP) flux measured by the Kepler pipeline using the <code class="docutils literal"><span class="pre">kepdraw</span></code> tool:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>$ kepdraw kplr002449074-2009350155506_llc.fits
+</pre></div>
+</div>
+<img alt="../_images/kepdraw_sap.png" class="align-center" src="../_images/kepdraw_sap.png" />
+</div>
+<div class="section" id="step-2-plot-archived-pdcsap-data">
+<h2>Step 2: Plot archived PDCSAP data<a class="headerlink" href="#step-2-plot-archived-pdcsap-data" title="Permalink to this headline">¶</a></h2>
+<p>Kepler’s pipeline is able to remove systematic artifacts thorugh the Presearch
+Data Conditioning (PDC). The corrected light curve can be visualized with
+<code class="docutils literal"><span class="pre">kepdraw</span></code> by passing the desired keyword through <code class="docutils literal"><span class="pre">--datacol</span></code> argument:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>$ kepdraw kplr002449074-2009350155506_llc.fits --datacol PDCSAP_FLUX
+</pre></div>
+</div>
+<img alt="../_images/kepdraw_pdcsap.png" class="align-center" src="../_images/kepdraw_pdcsap.png" />
+</div>
+<div class="section" id="step-3-plot-archived-photometric-time-series-for-individual-target-pixels">
+<h2>Step 3: Plot archived photometric time-series for individual target pixels<a class="headerlink" href="#step-3-plot-archived-photometric-time-series-for-individual-target-pixels" title="Permalink to this headline">¶</a></h2>
+<p>The next figure shows a calibrated flux time series of each target mask pixel
+collected over Q3. This figure was produced with the PyKE task <code class="docutils literal"><span class="pre">keppixseries</span></code>
+operating upon the TPF <code class="docutils literal"><span class="pre">kplr002449074-2009350155506_lpd-targ.fits</span></code>, as follows:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>$ wget https://archive.stsci.edu/missions/kepler/target_pixel_files/0024/002449074/kplr002449074-2009350155506_lpd-targ.fits.gz
+
+$ keppixseries kplr002449074-2009350155506_lpd-targ.fits.gz
+--plotfile keppixseries.png --plottype <span class="nb">local</span>
+</pre></div>
+</div>
+<img alt="../_images/keppixseries1.png" class="align-center" src="../_images/keppixseries1.png" />
+<p>The figure reveals unambiguously that the target star is not the source of the
+“transit” features. A background eclipsing binary star is situated 10 arcsec
+from the target star (2.5 pixels to the left of KIC 2449074 on the figure) and
+is leaking into the optimal aperture.</p>
+</div>
+<div class="section" id="step-4-define-new-optimal-apertures-for-target-and-background-binary-star">
+<h2>Step 4: Define new optimal apertures for target and background binary star<a class="headerlink" href="#step-4-define-new-optimal-apertures-for-target-and-background-binary-star" title="Permalink to this headline">¶</a></h2>
+<p>By extracting the light curve manually using different pixels, we can either
+reduce the contaminating flux from the eclipsing binary in the target light
+curve or, alternatively, extract a separate light curve from the eclipsing
+binary. New mask files are created interactively from the TPF
+<code class="docutils literal"><span class="pre">kplr002449074-2009350155506_lpd-targ.fits</span></code> using the <code class="docutils literal"><span class="pre">kepmask</span></code> tool.
+The primary output from <code class="docutils literal"><span class="pre">kepmask</span></code> is an ASCII file defining the selected
+pixel aperture. The image associated with the 2,177th timestamp in the Target
+Pixel File is plotted on a linear intensity scale as follows:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>$ kepmask kplr002449074-2009350155506_lpd-targ.fits.gz --frameno <span class="m">2177</span> --maskfile mask_target.txt
+--iscale linear
+</pre></div>
+</div>
+<img alt="../_images/kepmask_target.png" class="align-center" src="../_images/kepmask_target.png" />
+<p>Similarly, we can create an aperture mask for the eclipsing binary:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>$ kepmask kplr002449074-2009350155506_lpd-targ.fits.gz --frameno <span class="m">2177</span> --maskfile mask_eb.txt
+--iscale linear
+</pre></div>
+</div>
+<img alt="../_images/kepmask_eb.png" class="align-center" src="../_images/kepmask_eb.png" />
+</div>
+<div class="section" id="step-5-extract-new-sap-light-curves-from-the-tpf">
+<h2>Step 5: Extract new SAP light curves from the TPF<a class="headerlink" href="#step-5-extract-new-sap-light-curves-from-the-tpf" title="Permalink to this headline">¶</a></h2>
+<p>The PyKE tool kepextract can be called to extract new SAP light curves from the TPF.
+We can create two new light curves as follows:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>$ kepextract kplr002449074-2009350155506_lpd-targ.fits.gz --outfile kepextract_target.fits --maskfile mask_target.txt
+
+$ kepdraw kepextract_target.fits
+</pre></div>
+</div>
+<img alt="../_images/kepextract_target.png" class="align-center" src="../_images/kepextract_target.png" />
+<div class="highlight-bash"><div class="highlight"><pre><span></span>$ kepextract kplr002449074-2009350155506_lpd-targ.fits.gz --outfile kepextract_eb.fits --maskfile mask_eb.txt
+
+$ kepdraw kepextract_eb.fits
+</pre></div>
+</div>
+<img alt="../_images/kepextract_eb.png" class="align-center" src="../_images/kepextract_eb.png" />
+</div>
+<div class="section" id="step-6-mitigate-for-systematic-artifacts-in-new-sap-light-curves">
+<h2>Step 6: Mitigate for systematic artifacts in new SAP light curves<a class="headerlink" href="#step-6-mitigate-for-systematic-artifacts-in-new-sap-light-curves" title="Permalink to this headline">¶</a></h2>
+<p>The extracted light curves are constructed by simple pixel summation.
+Consequently artifacts resulting from target motion across the pixel aperture
+exist within the new light curves. Artifacts can be reduced or removed
+by fitting and subtracting the best fit ensemble of Cotrending Basis Vectors
+(CBVs). Users must ensure that they download CBVs from the MAST correctly
+corresponding to the quarter being analyzed. In the current case, the Q3 CBV is
+called <code class="docutils literal"><span class="pre">kplr2009350155506-q03-d14_lcbv.fits</span></code>. Artifact correction is performed by
+the <code class="docutils literal"><span class="pre">kepcotrend</span></code> tool. The corrected light curve is stored in an output file
+within a new FITS column called CBVSAP_FLUX.</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>$ kepcotrend kepextract_target.fits --outfile kepcotrend_target.fits
+../cbv/kplr2009350155506-q03-d25_lcbv.fits <span class="m">1</span>,2,3,4,5,6 --sigmaclip <span class="m">3</span>.0 --plot
+
+$ kepcotrend kepextract_eb.fits --outfile kepcotrend_eb.fits
+../cbv/kplr2009350155506-q03-d25_lcbv.fits <span class="m">1</span>,2,3,4,5,6 --sigmaclip <span class="m">3</span>.0 --plot
+</pre></div>
+</div>
+<img alt="../_images/kepcotrend_target.png" class="align-center" src="../_images/kepcotrend_target.png" />
+<img alt="../_images/kepcotrend_eb.png" class="align-center" src="../_images/kepcotrend_eb.png" />
+</div>
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="removing-stellar-astroph-quarter-stitch.html" class="btn btn-neutral float-right" title="Example 4: Removing Stellar Astrophysics and Quarter Stitching" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="psf-photometry-in-k2.html" class="btn btn-neutral" title="Example 2: PSF photometry in a K2 cluster" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright PyKE Developers and Contributors.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'3.0.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

@@ -1,0 +1,289 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Example 4: Removing Stellar Astrophysics and Quarter Stitching &mdash; PyKE 3.0.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../genindex.html"/>
+        <link rel="search" title="Search" href="../search.html"/>
+    <link rel="top" title="PyKE 3.0.0 documentation" href="../index.html"/>
+        <link rel="up" title="Photometry tutorials" href="index.html"/>
+        <link rel="prev" title="Example 3: Separating a background EB from a foreground star" href="separating-a-background-eb.html"/> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> PyKE
+          
+
+          
+            
+            <img src="../_static/pyke-white.png" class="logo" />
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                3.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../overview.html">PyKE tasks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../citing.html">Citing</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Photometry tutorials</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="aperture-photometry-in-k2.html">Example 1: Aperture photometry on a K2 target</a></li>
+<li class="toctree-l2"><a class="reference internal" href="psf-photometry-in-k2.html">Example 2: PSF photometry in a K2 cluster</a></li>
+<li class="toctree-l2"><a class="reference internal" href="separating-a-background-eb.html">Example 3: Separating a background EB from a foreground star</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Example 4: Removing Stellar Astrophysics and Quarter Stitching</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">PyKE</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="index.html">Photometry tutorials</a> &raquo;</li>
+        
+      <li>Example 4: Removing Stellar Astrophysics and Quarter Stitching</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/tutorials/removing-stellar-astroph-quarter-stitch.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="example-4-removing-stellar-astrophysics-and-quarter-stitching">
+<h1>Example 4: Removing Stellar Astrophysics and Quarter Stitching<a class="headerlink" href="#example-4-removing-stellar-astrophysics-and-quarter-stitching" title="Permalink to this headline">¶</a></h1>
+<p>The purpose of this tutorial is to flatten both systematic artifacts and
+astrophysical signal in order to fold candidate planet transits successfully
+upon their orbital period and characterize them with a physical model.</p>
+<p>For this purpose, we download quarter 10 and 11 of
+<a class="reference external" href="http://archive.stsci.edu/kepler/preview.php?type=lc&amp;dsn=KPLR012557548-2011271113734">KIC 12557548</a>:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>$ wget http://archive.stsci.edu/missions/kepler/lightcurves/0125/012557548/kplr012557548-2011271113734_llc.fits
+$ wget http://archive.stsci.edu/missions/kepler/lightcurves/0125/012557548/kplr012557548-2012004120508_llc.fits
+</pre></div>
+</div>
+<p>We can use <code class="docutils literal"><span class="pre">kepstitch</span></code> to stitch those light curves together:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>$ kepstitch kplr012557548-2011271113734_llc.fits kplr012557548-2012004120508_llc.fits --outfile kplr012557548-kepstitch.fits
+</pre></div>
+</div>
+<p>We can visualize the stitched light curve using kepdraw:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>$ kepdraw kplr012557548-kepstitch.fits --datacol SAP_FLUX
+$ kepdraw kplr012557548-kepstitch.fits --datacol PDCSAP_FLUX
+</pre></div>
+</div>
+<img alt="../_images/kplr012557548-kepstitch-kepdraw.png" src="../_images/kplr012557548-kepstitch-kepdraw.png" />
+<img alt="../_images/kplr012557548-kepstitch-kepdraw-pdcsap.png" src="../_images/kplr012557548-kepstitch-kepdraw-pdcsap.png" />
+<p>With systematic artifacts already mostly-removed, the light curves need to be
+flattened but in a way that does not radically contaminate the transit
+profile with new systematic structure. The PyKE tool kepflatten fits piecemeal
+low-order polynomials on small timeslices aross the time-series. Fitting makes
+user of iterative σ-clipping that removes statistical outliers from a best-fit
+before refitting until no more time-stamps are rejected. In this way, transits
+profiles are conserved during the fit process and subsequent normalization by
+the final best-fit. The flattened are written to the output file in two new
+columns, <code class="docutils literal"><span class="pre">DETSAP_FLUX</span></code> and <code class="docutils literal"><span class="pre">DETSAP_ERR_FLUX</span></code>.</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>$ kepflatten kplr012557548-kepstitch.fits --nsig <span class="m">3</span> --stepsize <span class="m">1</span> --npoly <span class="m">2</span> --niter <span class="m">10</span> --plot
+</pre></div>
+</div>
+<img alt="../_images/kplr012557548-kepstitch-kepdraw-kepflatten.png" src="../_images/kplr012557548-kepstitch-kepdraw-kepflatten.png" />
+<p>Now, we can apply <code class="docutils literal"><span class="pre">kepfold</span></code> to fold our final light curve:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>$ kepfold kplr012557548-kepstitch-kepflatten.fits <span class="m">0</span>.653534 <span class="m">2455372</span>.883 --threshold <span class="m">3</span>. --niter <span class="m">5</span> --bindata --binmethod median --nbins <span class="m">100</span> --plottype det
+</pre></div>
+</div>
+<img alt="../_images/kplr012557548-kepstitch-kepdraw-kepflatten-kepfold.png" src="../_images/kplr012557548-kepstitch-kepdraw-kepflatten-kepfold.png" />
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+      
+        <a href="separating-a-background-eb.html" class="btn btn-neutral" title="Example 3: Separating a background EB from a foreground star" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright PyKE Developers and Contributors.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'3.0.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>
