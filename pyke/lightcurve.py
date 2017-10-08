@@ -1,5 +1,7 @@
 import numpy as np
 from astropy.io import fits
+from scipy import linalg
+from oktopus import L1Norm
 
 __all__ = ['LightCurve', 'KeplerLightCurveFile']
 
@@ -29,8 +31,11 @@ class LightCurve(object):
         """
         """
         if method == 'arclength':
-            return ArcLengthDetrender().detrend(time=self.time, flux=self.flux,
-                                                flux_err=self.flux_err, **kwargs)
+            return ArcLengthDetrender().detrend(time=self.time,
+                                                flux=self.flux,
+                                                flux_err=self.flux_err,
+                                                centroid_col=self.centroid_col,
+                                                centroid_row=self.centroid_row)
         else:
             return FirstDifferenceDetrender().detrend(time=self.time, flux=self.flux,
                                                       flux_err=self.flux_err, **kwargs)
@@ -87,7 +92,7 @@ class FirstDifferenceDetrender(Detrender):
     First difference detrending
     """
     def detrend(time, flux):
-        return LightCurve(time, flux - np.append(0, flux[1:]))
+        return LightCurve(time, np.append(flux[1:], 0) - flux)
 
 class LinearDetrender(Detrender):
     """
@@ -97,8 +102,34 @@ class LinearDetrender(Detrender):
         pass
 
 class ArcLengthDetrender(Detrender):
-    def detrend(time, flux):
+    def detrend(time, flux, centroid_col, centroid_row):
+        centroids = self._rotate_centroids(centroid_col, centroid_row)
+
+        # fit a polynomial to rotated centroids
+
+        # compute the length of the curve of this polynomial
+
+        #-----
+
+        # fit B-splines to the light curve
+
+        # divide raw light curve by B-splines
+
+        # fit polynomial to flux as a function of arclength
+
+        # divide the raw light curve by the polynomial fit
+
+        # iterate between fitting a B-spline to the light curve and
+        # a polynomial to flux as a function of arclength
         pass
+
+    def _rotate_centroids(centroid_col, centroid_row):
+        centroids = np.array([centroid_col, centroid_row])
+        _, eig_vec = linalg.eigh(np.cov(centroids))
+        return np.dot(eig_vec, centroids)
+
+    def _remove_centroid_outliers(centroid_col, centroid_row):
+
 
 class EMDDetrender(Detrender):
     """
