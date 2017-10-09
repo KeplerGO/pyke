@@ -129,9 +129,10 @@ class KeplerPRF(object):
         self.shape = shape
         self.column = column
         self.row = row
-        self._prepare_prf()
+        self.col_coord, self.row_coord, self.interpolate = self._prepare_prf()
 
-    def prf_to_detector(self, params):
+    def prf_to_detector(self, flux, centroid_col, centroid_row, stretch_col=1,
+                        stretch_row=1, rotation_radians=0):
         """
         Interpolates the PRF model onto detector coordinates.
 
@@ -150,22 +151,18 @@ class KeplerPRF(object):
             Two dimensional array representing the PRF values parametrized
             by `params`.
         """
-        nsrcs = len(params) // 3
-        if nsrcs > 1:
-            F, xo, yo, self.prf_model = np.zeros(nsrcs), np.zeros(nsrcs), np.zeros(nsrcs), []
-            for i in range(nsrcs):
-                F[i] = params[i]
-                xo[i] = params[i + nsrcs]
-                yo[i] = params[i + 2 * nsrcs]
-                self.prf_model.append(F[i] * self.interpolate(self.y - yo[i], self.x - xo[i]))
-            return np.sum(self.prf_model, axis=0)
-        else:
-            F, xo, yo = params
-            self.prf_model = F * self.interpolate(self.y - yo, self.x - xo)
-            return self.prf_model
+        cos_rot = math.cos(rotation_radians)
+        sin_rot = math.sin(rotation_radians)
+        delta_col = self.col_coord - centroid_col
+        delta_row = self.row_coord - centroid_row
+        rot_col = delta_col * cos_rot - delta_row[0] * sin_rot
+        rot_row = delta_col[0] * sin_rot + delta_row * cos_rot
+        self.prf_model = flux * self.interpolate(delta_row * stretch_row,
+                                                 delta_col * stretch_col)
+        return self.prf_model
 
-    def evaluate(self, *params):
-        return self.prf_to_detector(params[:-1]) + params[-1]
+    def evaluate(self, *args, **kwargs):
+        return self.prf_to_detector(*args, **kwargs)
 
     def _read_prf_calibration_file(self, path, ext):
         prf_cal_file = pyfits.open(path)
@@ -200,17 +197,17 @@ class KeplerPRF(object):
         for i in range(n_hdu):
             prfn[i], crval1p[i], crval2p[i], cdelt1p[i], cdelt2p[i] = self._read_prf_calibration_file(prffile, i+1)
         prfn = np.array(prfn)
-        PRFx = np.arange(0.5, np.shape(prfn[0])[1] + 0.5)
-        PRFy = np.arange(0.5, np.shape(prfn[0])[0] + 0.5)
-        PRFx = (PRFx - np.size(PRFx) / 2) * cdelt1p[0]
-        PRFy = (PRFy - np.size(PRFy) / 2) * cdelt2p[0]
+        PRFcol = np.arange(0.5, np.shape(prfn[0])[1] + 0.5)
+        PRFrow = np.arange(0.5, np.shape(prfn[0])[0] + 0.5)
+        PRFcol = (PRFcol - np.size(PRFcol) / 2) * cdelt1p[0]
+        PRFrow = (PRFrow - np.size(PRFrow) / 2) * cdelt2p[0]
 
         # interpolate the calibrated PRF shape to the target position
-        ydim, xdim = self.shape[0], self.shape[1]
+        rowdim, coldim = self.shape[0], self.shape[1]
         prf = np.zeros(np.shape(prfn[0]), dtype='float32')
         prfWeight = np.zeros(n_hdu, dtype='float32')
-        ref_column = self.column + (xdim - 1.) / 2.
-        ref_row = self.row + (ydim - 1.) / 2.
+        ref_column = self.column + (coldim - 1.) / 2.
+        ref_row = self.row + (rowdim - 1.) / 2.
         for i in range(n_hdu):
             prfWeight[i] = math.sqrt((ref_column - crval1p[i]) ** 2
                                      + (ref_row - crval2p[i]) ** 2)
@@ -220,6 +217,8 @@ class KeplerPRF(object):
         prf /= (np.nansum(prf) * cdelt1p[0] * cdelt2p[0])
 
         # location of the data image centered on the PRF image (in PRF pixel units)
-        self.x = np.arange(self.column + .5, self.column + xdim + .5)
-        self.y = np.arange(self.row + .5, self.row + ydim + .5)
-        self.interpolate = scipy.interpolate.RectBivariateSpline(PRFx, PRFy, prf)
+        col_coord = np.arange(self.column + .5, self.column + coldim + .5)
+        row_coord = np.arange(self.row + .5, self.row + rowdim + .5)
+        interpolate = scipy.interpolate.RectBivariateSpline(PRFcol, PRFrow, prf)
+
+        return col_coord, row_coord, interpolate

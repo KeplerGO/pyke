@@ -28,16 +28,15 @@ def test_prf_vs_aperture_photometry():
                     column=col, row=row,
                     shape=tpf[1].data.shape)
     fluxo, colo, rowo, _ = models.get_initial_guesses(data=tpf[1].data,
-                                                           X=prf.x,
-                                                           Y=prf.y)
-    bkgo = np.mean(tpf[1].data)
+                                                           X=prf.col_coord,
+                                                           Y=prf.row_coord)
+    bkgo = np.median(tpf[1].data)
     aperture_flux = tpf[1].data.sum() - bkgo
     prior = JointPrior(GaussianPrior(mean=fluxo, var=math.sqrt(fluxo)),
-                       UniformPrior(lb=prf.x[0], ub=prf.x[-1]),
-                       UniformPrior(lb=prf.y[0], ub=prf.y[-1]),
-                       GaussianPrior(mean=bkgo, var=bkgo))
+                       UniformPrior(lb=prf.col_coord[0], ub=prf.col_coord[-1]),
+                       UniformPrior(lb=prf.row_coord[0], ub=prf.row_coord[-1]))
     logL = PoissonPosterior(tpf[1].data, prf.evaluate, prior=prior)
-    fitresult = logL.fit((fluxo, colo, rowo, bkgo))
+    fitresult = logL.fit((fluxo, colo, rowo))
     prf_flux, prf_col, prf_row, prf_bkg = fitresult.x
     assert np.isclose(prf_col, col+9, rtol=1e-3)
     assert np.isclose(prf_row, row+9, rtol=1e-3)
