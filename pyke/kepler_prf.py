@@ -223,3 +223,36 @@ class KeplerPRF(object):
         self.x = np.arange(self.column + .5, self.column + xdim + .5)
         self.y = np.arange(self.row + .5, self.row + ydim + .5)
         self.interpolate = scipy.interpolate.RectBivariateSpline(PRFx, PRFy, prf)
+
+
+def estimate_initial_guesses(data, ref_col, ref_row):
+    """
+    Compute the initial guesses for total flux, centroids position, and PSF
+    width using the sample moments of the data.
+
+    Parameters
+    ----------
+    data : 2D array-like
+        Image data
+    ref_col, ref_row : scalars
+        Reference column and row (coordinates of the bottom left corner)
+
+    Return
+    ------
+    flux0, col0, row0, sigma0: floats
+        Inital guesses for flux, centroid position, and width
+    """
+
+    flux0 = np.nansum(data)
+    yy, xx = np.indices(data.shape)
+    yy = ref_row + yy
+    xx = ref_col + xx
+    col0 = np.nansum(xx * data) / flux0
+    row0 = np.nansum(yy * data) / flux0
+    marg_col = data[:, int(np.round(col0 - ref_col))]
+    marg_row = data[int(np.round(row0 - ref_row)), :]
+    sigma_y = math.sqrt(np.abs((np.arange(marg_row.size) - row0) ** 2 * marg_row).sum() / marg_row.sum())
+    sigma_x = math.sqrt(np.abs((np.arange(marg_col.size) - col0) ** 2 * marg_col).sum() / marg_col.sum())
+    sigma0 = math.sqrt((sigma_x**2 + sigma_y**2)/2.0)
+
+    return flux0, col0, row0, sigma0
