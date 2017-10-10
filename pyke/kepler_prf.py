@@ -7,7 +7,6 @@ import math
 import scipy
 import numpy as np
 from astropy.io import fits as pyfits
-from oktopus.models import get_initial_guesses
 from oktopus.likelihood import PoissonLikelihood
 
 
