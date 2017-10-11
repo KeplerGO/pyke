@@ -33,6 +33,26 @@ class LightCurve(object):
         self.centroid_col = centroid_col
         self.centroid_row = centroid_row
 
+    def stitch(self, *others):
+        time = self.time
+        flux = self.flux
+        flux_err = self.flux_err
+        quality = self.quality
+        centroid_col = self.centroid_col
+        centroid_row = self.centroid_row
+
+        for i in range(len(others)):
+            time = np.append(time, others[i].time)
+            flux = np.append(flux, others[i].flux)
+            flux_err = np.append(flux_err, others[i].flux_err)
+            quality = np.append(quality, others[i].quality)
+            centroid_col = np.append(centroid_col, others[i].centroid_col)
+            centroid_row = np.append(centroid_row, others[i].centroid_row)
+
+        return LightCurve(time=time, flux=flux, flux_err=flux_err,
+                          quality=quality, centroid_col=centroid_col,
+                          centroid_row=centroid_row)
+
     def flatten(self, window_length=101, polyorder=3, **kwargs):
         """
         Removes low frequency trend using a Savitzky-Golar filter.
@@ -59,7 +79,7 @@ class LightCurve(object):
                 LightCurve(time=self.time, flux=self.flux/trend))
 
     def fold(self, phase, period):
-        return LightCurve(((self.time - phase) / period) % 1, self.flux)
+        return LightCurve(((self.time - phase + 0.5 * period) / period) % 1 - 0.5, self.flux)
 
     def draw(self):
         raise NotImplementedError("Should we implement a LightCurveDrawer class?")
