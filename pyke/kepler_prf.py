@@ -7,7 +7,6 @@ import math
 import scipy
 import numpy as np
 from astropy.io import fits as pyfits
-from oktopus.models import get_initial_guesses
 from oktopus.likelihood import PoissonLikelihood
 
 
@@ -222,3 +221,36 @@ class KeplerPRF(object):
         interpolate = scipy.interpolate.RectBivariateSpline(PRFcol, PRFrow, prf)
 
         return col_coord, row_coord, interpolate
+
+
+def estimate_initial_guesses(data, ref_col, ref_row):
+    """
+    Compute the initial guesses for total flux, centroids position, and PSF
+    width using the sample moments of the data.
+
+    Parameters
+    ----------
+    data : 2D array-like
+        Image data
+    ref_col, ref_row : scalars
+        Reference column and row (coordinates of the bottom left corner)
+
+    Return
+    ------
+    flux0, col0, row0, sigma0: floats
+        Inital guesses for flux, centroid position, and width
+    """
+
+    flux0 = np.nansum(data)
+    yy, xx = np.indices(data.shape)
+    yy = ref_row + yy
+    xx = ref_col + xx
+    col0 = np.nansum(xx * data) / flux0
+    row0 = np.nansum(yy * data) / flux0
+    marg_col = data[:, int(np.round(col0 - ref_col))]
+    marg_row = data[int(np.round(row0 - ref_row)), :]
+    sigma_y = math.sqrt(np.abs((np.arange(marg_row.size) - row0) ** 2 * marg_row).sum() / marg_row.sum())
+    sigma_x = math.sqrt(np.abs((np.arange(marg_col.size) - col0) ** 2 * marg_col).sum() / marg_col.sum())
+    sigma0 = math.sqrt((sigma_x**2 + sigma_y**2)/2.0)
+
+    return flux0, col0, row0, sigma0
