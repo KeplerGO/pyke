@@ -1,5 +1,7 @@
 import numpy as np
+from scipy import signal
 from astropy.io import fits
+from tqdm import tqdm
 
 __all__ = ['LightCurve', 'KeplerLightCurveFile']
 
@@ -8,12 +10,18 @@ class LightCurve(object):
     """
     Implements a basic time-series class for a generic lightcurve.
 
-    Parameters
+    Attributes
     ----------
-    time : numpy array-like
-        Time-line.
-    flux : numpy array-like
-        Data flux for every time point.
+    time : array-like
+        Time-line
+    flux : array-like
+        Data flux for every time point
+    flux_err : array-like
+        Uncertainty in each flux data point
+    quality : array-like
+        Array indicating the quality of each data point
+    centroid_col, centroid_row : array-like, array-like
+        Centroid column and row coordinates as a function of time
     """
 
     def __init__(self, time, flux, flux_err=None, quality=None, centroid_col=None,
@@ -25,15 +33,33 @@ class LightCurve(object):
         self.centroid_col = centroid_col
         self.centroid_row = centroid_row
 
-    def detrend(self, method='arclength', **kwargs):
+    def flatten(self, window_length=101, polyorder=3, **kwargs):
         """
+        Removes low frequency trend using a Savitzky-Golar filter.
+
+        Parameters
+        ----------
+        deg : array-like
+            Degree of the polynomial.
+            If None, a 3rd-degree polynomial will be used.
+        winsize : scalar
+            If scalar, then the data is fitted into batches using a sliding
+            window. If None, the data is fitted at once.
+        **kwargs : dict
+            Dictionary of arguments to be passed to `scipy.signal.savgol_filter`.
+
+        Returns
+        -------
+        trend : LightCurve object
+        flatten : LightCurve object
         """
-        if method == 'arclength':
-            return ArcLengthDetrender().detrend(time=self.time, flux=self.flux,
-                                                flux_err=self.flux_err, **kwargs)
-        else:
-            return FirstDifferenceDetrender().detrend(time=self.time, flux=self.flux,
-                                                      flux_err=self.flux_err, **kwargs)
+        trend = signal.savgol_filter(x=self.flux, window_length=window_length,
+                                     polyorder=polyorder, **kwargs)
+        return (LightCurve(time=self.time, flux=trend),
+                LightCurve(time=self.time, flux=self.flux/trend))
+
+    def fold(self, phase, period):
+        return LightCurve(((self.time - phase) / period) % 1, self.flux)
 
     def draw(self):
         raise NotImplementedError("Should we implement a LightCurveDrawer class?")
@@ -82,33 +108,7 @@ class Detrender(object):
         """
         pass
 
-class FirstDifferenceDetrender(Detrender):
-    """
-    First difference detrending
-    """
-    def detrend(time, flux):
-        return LightCurve(time, flux - np.append(0, flux[1:]))
-
-class LinearDetrender(Detrender):
-    """
-    """
-    @staticmethod
-    def detrend(time, flux):
-        pass
 
 class ArcLengthDetrender(Detrender):
-    def detrend(time, flux):
-        pass
-
-class EMDDetrender(Detrender):
-    """
-    Empirical Mode Decomposition Detrender
-    """
-    def detrend(time, flux):
-        pass
-
-class PolynomialDetrender(Detrender):
-    """
-    """
     def detrend(time, flux):
         pass
