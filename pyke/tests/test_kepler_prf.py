@@ -1,4 +1,4 @@
-import os
+import pytest
 import math
 import numpy as np
 from astropy.io import fits
