@@ -35,6 +35,19 @@ class LightCurve(object):
         self.centroid_row = centroid_row
 
     def stitch(self, *others):
+        """
+        Stitches LightCurve objects.
+
+        Parameters
+        ----------
+        *others : LightCurve objects
+            Light curves to be stitched.
+
+        Returns
+        -------
+        stitched_lc : LightCurve object
+            Stitched light curve.
+        """
         time = self.time
         flux = self.flux
         flux_err = self.flux_err
