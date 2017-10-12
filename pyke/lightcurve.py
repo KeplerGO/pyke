@@ -140,3 +140,28 @@ class Detrender(object):
 class ArcLengthDetrender(Detrender):
     def detrend(time, flux):
         pass
+
+
+class EverestDetrender(Detrender):
+    """
+    Implements the first order Pixel Level Decorrelation.
+
+    References
+    ----------
+    [1] Luger et. al.
+    """
+
+    def __init__(self, tpf_time, tpf_flux):
+        self.tpf_time = tpf_time
+        self.tpf_flux = tpf_flux
+
+    def detrend(self):
+        pixels_series = self.tpf_flux.reshape((self.tpf_flux.shape[0], -1))
+        lc = np.sum(pixels_series, axis=1).reshape(-1, 1)
+        # design matrix
+        X = pixels_series / lc
+        opt_weights = np.linalg.solve(np.dot(X.T, X), np.dot(X.T, lc))
+        model = np.dot(X, opt_weights)
+        flux_detrended = lc - model + np.nanmedian(lc)
+
+        return LightCurve(self.tpf_time, flux_detrended)
