@@ -1,6 +1,6 @@
 from . import DEFAULT_PRFDIR
 from .utils import channel_to_module_output
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 import os
 import glob
 import math
@@ -13,7 +13,7 @@ from oktopus.likelihood import PoissonLikelihood
 __all__ = ['KeplerPRFPhotometry', 'KeplerPRF']
 
 
-class PRFPhotometry(ABC):
+class PRFPhotometry(object):
     """An abstract base class for a general PRF/PSF photometry algorithm
     for target pixel files."""
 
@@ -38,7 +38,7 @@ class PRFPhotometry(ABC):
         pass
 
 
-class PRFModel(ABC):
+class PRFModel(object):
     """An abstract base class for a general PRF/PSF parametric model."""
 
     @abstractmethod
@@ -224,7 +224,7 @@ class KeplerPRF(object):
         self.interpolate = scipy.interpolate.RectBivariateSpline(PRFx, PRFy, prf)
 
 
-def estimate_initial_guesses(data, ref_col, ref_row):
+def get_initial_guesses(data, ref_col, ref_row):
     """
     Compute the initial guesses for total flux, centroids position, and PSF
     width using the sample moments of the data.
