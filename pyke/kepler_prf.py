@@ -224,7 +224,7 @@ class KeplerPRF(object):
         self.interpolate = scipy.interpolate.RectBivariateSpline(PRFx, PRFy, prf)
 
 
-def estimate_initial_guesses(data, ref_col, ref_row):
+def get_initial_guesses(data, ref_col, ref_row):
     """
     Compute the initial guesses for total flux, centroids position, and PSF
     width using the sample moments of the data.

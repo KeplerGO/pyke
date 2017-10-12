@@ -3,8 +3,8 @@ import math
 import numpy as np
 from astropy.io import fits
 from astropy.utils.data import get_pkg_data_filename
-from oktopus import models, PoissonPosterior, UniformPrior, GaussianPrior, JointPrior
-from ..kepler_prf import KeplerPRF
+from oktopus import PoissonPosterior, UniformPrior, GaussianPrior, JointPrior
+from ..kepler_prf import KeplerPRF, get_initial_guesses
 
 
 def test_prf_normalization():
@@ -27,9 +27,9 @@ def test_prf_vs_aperture_photometry():
     prf = KeplerPRF(channel=tpf[0].header['CHANNEL'],
                     column=col, row=row,
                     shape=tpf[1].data.shape)
-    fluxo, colo, rowo, _ = models.get_initial_guesses(data=tpf[1].data,
-                                                           X=prf.x,
-                                                           Y=prf.y)
+    fluxo, colo, rowo, _ = get_initial_guesses(data=tpf[1].data,
+                                               ref_col=prf.x[0],
+                                               ref_row=prf.y[0])
     bkgo = np.mean(tpf[1].data)
     aperture_flux = tpf[1].data.sum() - bkgo
     prior = JointPrior(GaussianPrior(mean=fluxo, var=math.sqrt(fluxo)),
