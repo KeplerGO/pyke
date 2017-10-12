@@ -145,12 +145,13 @@ class ArcLengthDetrender(Detrender):
 class SimplePixelLevelDecorrelationDetrender(Detrender):
     r"""
     Implements the basic first order Pixel Level Decorrelation proposed by
-    Deming et. al. [1] and Luger et. al. [2], [3].
+    Deming et. al. [1]_ and Luger et. al. [2]_, [3]_.
 
     Notes
     -----
     This code serves only as a quick look into the PLD technique.
-    Users are encouraged to check out the GitHub repos `everest <http://www.github.com/rodluger/everest>`_
+    Users are encouraged to check out the GitHub repos
+    `everest <http://www.github.com/rodluger/everest>`_
     and `everest3 <http://www.github.com/rodluger/everest3>`_.
 
     References
