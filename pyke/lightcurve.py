@@ -147,6 +147,13 @@ class SimplePixelLevelDecorrelationDetrender(Detrender):
     Implements the basic first order Pixel Level Decorrelation proposed by
     Deming et. al. [1]_ and Luger et. al. [2]_, [3]_.
 
+    Attributes
+    ----------
+    time : array-like
+        Time array
+    tpf_flux : array-like
+        Pixel values series
+
     Notes
     -----
     This code serves only as a quick look into the PLD technique.
@@ -163,17 +170,20 @@ class SimplePixelLevelDecorrelationDetrender(Detrender):
            saturated stars, and Kepler-like photometry down to K_p = 15.
     """
 
-    def __init__(self, tpf_time, tpf_flux):
-        self.tpf_time = tpf_time
+    def __init__(self, time, tpf_flux):
+        self.time = time
         self.tpf_flux = tpf_flux
 
-    def detrend(self):
-        pixels_series = self.tpf_flux.reshape((self.tpf_flux.shape[0], -1))
-        lc = np.sum(pixels_series, axis=1).reshape(-1, 1)
-        # design matrix
-        X = pixels_series / lc
-        opt_weights = np.linalg.solve(np.dot(X.T, X), np.dot(X.T, lc))
-        model = np.dot(X, opt_weights)
-        flux_detrended = lc - model + np.nanmedian(lc)
+    def detrend(self, window_length=None):
+        n_windows = int(len(self.time) / window_length)
 
-        return LightCurve(self.tpf_time, flux_detrended)
+        for n in range(n_windows):
+            pixels_series = self.tpf_flux.reshape((self.tpf_flux.shape[0], -1))
+            lightcurve = np.sum(pixels_series, axis=1).reshape(-1, 1)
+            # design matrix
+            X = pixels_series / lightcurve
+            opt_weights = np.linalg.solve(np.dot(X.T, X), np.dot(X.T, lightcurve))
+            model = np.dot(X, opt_weights)
+            flux_detrended = lightcurve - model + np.nanmedian(lightcurve)
+
+        return LightCurve(self.time, flux_detrended)
