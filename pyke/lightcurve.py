@@ -142,13 +142,24 @@ class ArcLengthDetrender(Detrender):
         pass
 
 
-class EverestDetrender(Detrender):
-    """
-    Implements the first order Pixel Level Decorrelation.
+class SimplePixelLevelDecorrelationDetrender(Detrender):
+    r"""
+    Implements the basic first order Pixel Level Decorrelation proposed by
+    Deming et. al. [1] and Luger et. al. [2], [3].
+
+    Notes
+    -----
+    This code serves only as a quick look into the PLD technique.
+    Users are encouraged to check out the GitHub repos `everest <http://www.github.com/rodluger/everest>`_
+    and `everest3 <http://www.github.com/rodluger/everest3>`_.
 
     References
     ----------
-    [1] Luger et. al.
+    .. [1] Deming et. al. Spitzer Secondary Eclipses of the Dense, \
+           Modestly-irradiated, Giant Exoplanet HAT-P-20b using Pixel-Level Decorrelation.
+    .. [2] Luger et. al. EVEREST: Pixel Level Decorrelation of K2 Light Curves.
+    .. [3] Luger et. al. An Update to the EVEREST K2 Pipeline: short cadence, \
+           saturated stars, and Kepler-like photometry down to K_p = 15.
     """
 
     def __init__(self, tpf_time, tpf_flux):
