@@ -144,7 +144,7 @@ class ArcLengthDetrender(Detrender):
 
 class SimplePixelLevelDecorrelationDetrender(Detrender):
     r"""
-    Implements the basic first order Pixel Level Decorrelation proposed by
+    Implements the basic first order Pixel Level Decorrelation (PLD) proposed by
     Deming et. al. [1]_ and Luger et. al. [2]_, [3]_.
 
     Attributes
@@ -175,15 +175,25 @@ class SimplePixelLevelDecorrelationDetrender(Detrender):
         self.tpf_flux = tpf_flux
 
     def detrend(self, window_length=None):
-        n_windows = int(len(self.time) / window_length)
-
-        for n in range(n_windows):
-            pixels_series = self.tpf_flux.reshape((self.tpf_flux.shape[0], -1))
-            lightcurve = np.sum(pixels_series, axis=1).reshape(-1, 1)
-            # design matrix
-            X = pixels_series / lightcurve
-            opt_weights = np.linalg.solve(np.dot(X.T, X), np.dot(X.T, lightcurve))
-            model = np.dot(X, opt_weights)
-            flux_detrended = lightcurve - model + np.nanmedian(lightcurve)
-
+        k = window_length
+        if not k:
+            k = len(self.time)
+        n_windows = int(len(self.time) / k)
+        flux_detrended = np.array([])
+        for n in range(1, n_windows + 1):
+            flux_detrended = np.append(flux_detrended,
+                                       self._pld(self.tpf_flux[(n - 1) * k:n * k]))
+        flux_detrended = np.append(flux_detrended, self._pld(self.tpf_flux[n * k:]))
         return LightCurve(self.time, flux_detrended)
+
+    def _pld(self, tpf_flux):
+        if len(tpf_flux) == 0:
+            return np.array([])
+        pixels_series = tpf_flux.reshape((tpf_flux.shape[0], -1))
+        lightcurve = np.sum(pixels_series, axis=1).reshape(-1, 1)
+        # design matrix
+        X = pixels_series / lightcurve
+        opt_weights = np.linalg.solve(np.dot(X.T, X), np.dot(X.T, lightcurve))
+        model = np.dot(X, opt_weights)
+        flux_detrended = lightcurve - model + np.nanmedian(lightcurve)
+        return flux_detrended
