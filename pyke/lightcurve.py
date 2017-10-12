@@ -1,3 +1,4 @@
+import copy
 import numpy as np
 from scipy import signal
 from astropy.io import fits
@@ -55,28 +56,35 @@ class LightCurve(object):
 
     def flatten(self, window_length=101, polyorder=3, **kwargs):
         """
-        Removes low frequency trend using a Savitzky-Golar filter.
+        Removes low frequency trend using scipy's Savitzky-Golay filter.
 
         Parameters
         ----------
-        deg : array-like
-            Degree of the polynomial.
-            If None, a 3rd-degree polynomial will be used.
-        winsize : scalar
-            If scalar, then the data is fitted into batches using a sliding
-            window. If None, the data is fitted at once.
+        window_length : int
+            The length of the filter window (i.e. the number of coefficients).
+            ``window_length`` must be a positive odd integer.
+        polyorder : int
+            The order of the polynomial used to fit the samples. ``polyorder``
+            must be less than window_length.
         **kwargs : dict
             Dictionary of arguments to be passed to `scipy.signal.savgol_filter`.
 
         Returns
         -------
-        trend : LightCurve object
         flatten : LightCurve object
+            Flattened lightcurve
+        trend : LightCurve object
+            Trend in the lightcurve data
         """
         trend = signal.savgol_filter(x=self.flux, window_length=window_length,
                                      polyorder=polyorder, **kwargs)
-        return (LightCurve(time=self.time, flux=trend),
-                LightCurve(time=self.time, flux=self.flux/trend))
+        flatten = copy.copy(self)
+        flatten.flux = self.flux / trend
+        flatten.flux_err = self.flux_err / trend
+        trend = copy.copy(self)
+        trend.flux = trend
+
+        return flatten, trend
 
     def fold(self, phase, period):
         return LightCurve(((self.time - phase + 0.5 * period) / period) % 1 - 0.5, self.flux)
