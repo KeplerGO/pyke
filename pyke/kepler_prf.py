@@ -1,6 +1,6 @@
 from . import DEFAULT_PRFDIR
 from .utils import channel_to_module_output
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 import os
 import glob
 import math
@@ -13,7 +13,7 @@ from oktopus.likelihood import PoissonLikelihood
 __all__ = ['KeplerPRFPhotometry', 'KeplerPRF']
 
 
-class PRFPhotometry(ABC):
+class PRFPhotometry(object):
     """An abstract base class for a general PRF/PSF photometry algorithm
     for target pixel files."""
 
@@ -38,7 +38,7 @@ class PRFPhotometry(ABC):
         pass
 
 
-class PRFModel(ABC):
+class PRFModel(object):
     """An abstract base class for a general PRF/PSF parametric model."""
 
     @abstractmethod
