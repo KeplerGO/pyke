@@ -71,20 +71,21 @@ class LightCurve(object):
 
         Returns
         -------
-        flatten : LightCurve object
+        flatten_lc : LightCurve object
             Flattened lightcurve
-        trend : LightCurve object
+        trend_lc : LightCurve object
             Trend in the lightcurve data
         """
-        trend = signal.savgol_filter(x=self.flux, window_length=window_length,
-                                     polyorder=polyorder, **kwargs)
-        flatten = copy.copy(self)
-        flatten.flux = self.flux / trend
-        flatten.flux_err = self.flux_err / trend
-        trend = copy.copy(self)
-        trend.flux = trend
+        trend_signal = signal.savgol_filter(x=self.flux, window_length=window_length,
+                                            polyorder=polyorder, **kwargs)
+        flatten_lc = copy.copy(self)
+        flatten_lc.flux = self.flux / trend_signal
+        if self.flux_err is not None:
+            flatten_lc.flux_err = self.flux_err / trend_signal
+        trend_lc = copy.copy(self)
+        trend_lc.flux = trend_signal
 
-        return flatten, trend
+        return flatten_lc, trend_lc
 
     def fold(self, phase, period):
         return LightCurve(((self.time - phase + 0.5 * period) / period) % 1 - 0.5, self.flux)
