@@ -174,26 +174,27 @@ class SimplePixelLevelDecorrelationDetrender(Detrender):
         self.time = time
         self.tpf_flux = tpf_flux
 
-    def detrend(self, window_length=None):
+    def detrend(self, window_length=None, polyorder=2):
         k = window_length
         if not k:
-            k = len(self.time)
+            k = int(len(self.time) / 2)
         n_windows = int(len(self.time) / k)
         flux_detrended = np.array([])
         for n in range(1, n_windows + 1):
             flux_detrended = np.append(flux_detrended,
-                                       self._pld(self.tpf_flux[(n - 1) * k:n * k]))
-        flux_detrended = np.append(flux_detrended, self._pld(self.tpf_flux[n * k:]))
-        return LightCurve(self.time, flux_detrended)
+                                       self._pld(self.tpf_flux[(n - 1) * k:n * k], polyorder))
+        flux_detrended = np.append(flux_detrended, self._pld(self.tpf_flux[n * k:], polyorder))
+        return LightCurve(self.time, flux_detrended + np.nanmedian(self.tpf_flux.sum(axis=(1, 2))))
 
-    def _pld(self, tpf_flux):
+    def _pld(self, tpf_flux, polyorder=2):
         if len(tpf_flux) == 0:
             return np.array([])
         pixels_series = tpf_flux.reshape((tpf_flux.shape[0], -1))
         lightcurve = np.sum(pixels_series, axis=1).reshape(-1, 1)
         # design matrix
         X = pixels_series / lightcurve
+        X = np.hstack((X, np.array([np.linspace(0, 1, tpf_flux.shape[0]) ** n for n in range(polyorder+1)]).T))
         opt_weights = np.linalg.solve(np.dot(X.T, X), np.dot(X.T, lightcurve))
         model = np.dot(X, opt_weights)
-        flux_detrended = lightcurve - model + np.nanmedian(lightcurve)
+        flux_detrended = lightcurve - model
         return flux_detrended
