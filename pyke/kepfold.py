@@ -11,7 +11,7 @@ from tqdm import tqdm
 __all__ = ['kepfold']
 
 
-def kepfold(infile, period, bjd0, outfile=None, bindata=False,
+def kepfold(infile, period=None, bjd0=None, outfile=None, bindata=False,
             binmethod='median', threshold=1.0, niter=5, nbins=1000,
             rejqual=False, plottype='det', overwrite=False, verbose=False,
             logfile="kepfold.log"):
@@ -108,6 +108,19 @@ def kepfold(infile, period, bjd0, outfile=None, bindata=False,
 
     if outfile is None:
         outfile = infile.split('.')[0] + "-{}.fits".format(__all__[0])
+    # check if there is period or BJD0 information
+    if np.any([(period is None),(bjd0 is None)]):
+        # open input file
+        instr = pyfits.open(infile, 'readonly')
+        try:
+            period = instr[3].header['PERIOD']
+            bjd0 = instr[3].header['BJD0']
+            kepmsg.log(logfile,'Using period and BJD0 from KEPBLS',verbose)
+        except:
+            errmsg = ('ERROR -- KEPFOLD: No period information found. Either specify \
+            period and BJD0 or run KEPBLS.'
+                      .format(outfile))
+            kepmsg.err(logfile, errmsg, verbose)
 
     # log the call
     hashline = '--------------------------------------------------------------'
@@ -143,6 +156,7 @@ def kepfold(infile, period, bjd0, outfile=None, bindata=False,
 
     # open input file
     instr = pyfits.open(infile, 'readonly')
+
     tstart, tstop, bjdref, cadence = kepio.timekeys(instr, infile, logfile,
                                                     verbose)
     try:
@@ -266,9 +280,13 @@ def kepfold(infile, period, bjd0, outfile=None, bindata=False,
     det = np.array(work8, dtype='float32') / cadenom
     deterr = np.array(work9, dtype='float32') / cadenom
 
+
     # calculate phase
     if bjd0 < bjdref:
         bjd0 += bjdref
+
+
+
     date1 = (barytime1 + bjdref - bjd0)
     phase1 = (date1 / period) - np.floor(date1/period)
     date2 = (barytime + bjdref - bjd0)
@@ -581,11 +599,11 @@ def kepfold_main():
              description=("Phase-fold light curve data on linear ephemeris."),
              formatter_class=PyKEArgumentHelpFormatter)
     parser.add_argument('infile', help='Name of FITS input file', type=str)
-    parser.add_argument('period', help='Period to fold data upon [days]',
-                        type=float)
-    parser.add_argument('bjd0',
+    parser.add_argument('--period', help='Period to fold data upon [days]',
+                        type=float, default=None)
+    parser.add_argument('--bjd0',
                         help='time of zero phase for the folded period [BJD]',
-                        type=float)
+                        type=float, default=None)
     parser.add_argument('--outfile',
                         help=('Name of FITS file to output.'
                               ' If None, outfile is infile-kepfold.'),
