@@ -113,14 +113,18 @@ def kepfold(infile, period=None, bjd0=None, outfile=None, bindata=False,
     # check if there is period or BJD0 information
     if np.any([(period is None),(bjd0 is None)]):
         # open input file
+        kepmsg.log(logfile,'KEPFOLD -- Searching for periods in headers.',verbose)
         instr = pyfits.open(infile, 'readonly')
-        try:
-            if period is None:
-                period = instr[3].header['PERIOD']
-            if bjd0 is None:
-                bjd0 = instr[3].header['BJD0']
-            kepmsg.log(logfile,'Using period and BJD0 from KEPBLS',verbose)
-        except:
+        if period is None:
+            for i in instr:
+                if 'PERIOD' in i.header:
+                    period = i.header['PERIOD']
+        if bjd0 is None:
+            for i in instr:
+                if 'BJD0' in i.header:
+                    bjd0 = i.header['BJD0']
+
+        if np.all([(period is None),(bjd0 is None)]):
             errmsg = ('ERROR -- KEPFOLD: No period information found. Either specify'
             'period and BJD0 or run KEPBLS.')
             kepmsg.err(logfile, errmsg, verbose)
