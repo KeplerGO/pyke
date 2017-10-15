@@ -107,7 +107,10 @@ def kepft(infile, outfile=None, fcol='SAP_FLUX', pmin=0.1, pmax=10., nfreq=100,
     fmax = 1.0 / pmin
     deltaf = (fmax - fmin) / nfreq
     ## loop through frequency steps; determine FT power
-    fr, power = kepfourier.ft(barytime, signal, fmin, fmax, deltaf, True)
+    fr, power = kepfourier.ft(barytime, signal, fmin, fmax, deltaf, verbose)
+    #find highest power period
+    period=1./(fr[power.argmax()])
+
     ## write output file
     col1 = pyfits.Column(name='FREQUENCY', format='E', unit='1/day',
                          array=fr)
@@ -115,7 +118,9 @@ def kepft(infile, outfile=None, fcol='SAP_FLUX', pmin=0.1, pmax=10., nfreq=100,
     cols = pyfits.ColDefs([col1, col2])
     instr.append(pyfits.BinTableHDU.from_columns(cols))
     instr[-1].header['EXTNAME'] = ('POWER SPECTRUM', 'extension name')
-    print("Writing output file {}...".format(outfile))
+    instr[-1].header['PERIOD'  ] = (period, 'most significant trial period [d]')
+
+    kepmsg.log(logfile,"Writing output file {}...".format(outfile),verbose)
     instr.writeto(outfile)
     ## history keyword in output file
     kepkey.history(call, instr[0], outfile, logfile, verbose)

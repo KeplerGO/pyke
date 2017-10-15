@@ -2,6 +2,7 @@ from .utils import PyKEArgumentHelpFormatter
 import re
 import numpy as np
 from astropy.io import fits as pyfits
+from astropy.stats import LombScargle
 from matplotlib import pyplot as plt
 from tqdm import tqdm
 from . import kepio, kepmsg, kepkey, kepstat, kepfourier
@@ -160,7 +161,13 @@ def kepdynamic(infile, outfile=None, fcol='SAP_FLUX', pmin=0.1, pmax=10., nfreq=
         y = y - np.median(y)
 
         # determine FT power
-        fr, power = kepfourier.ft(x, y, fmin, fmax, deltaf, False)
+        fr = np.linspace(fmin,fmax,nfreq)
+        power = LombScargle(x, y,y.max()-y.min()).power(fr)
+
+
+
+
+#        fr, power = kepfourier.ft(x, y, fmin, fmax, deltaf, False)
         for j in range(len(power)):
             dynam.append(power[j])
 
