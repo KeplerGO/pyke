@@ -84,20 +84,21 @@ class LightCurve(object):
 
         Returns
         -------
-        flatten : LightCurve object
+        flatten_lc : LightCurve object
             Flattened lightcurve
-        trend : LightCurve object
+        trend_lc : LightCurve object
             Trend in the lightcurve data
         """
-        trend = signal.savgol_filter(x=self.flux, window_length=window_length,
-                                     polyorder=polyorder, **kwargs)
-        flatten = copy.copy(self)
-        flatten.flux = self.flux / trend
-        flatten.flux_err = self.flux_err / trend
-        trend = copy.copy(self)
-        trend.flux = trend
+        trend_signal = signal.savgol_filter(x=self.flux, window_length=window_length,
+                                            polyorder=polyorder, **kwargs)
+        flatten_lc = copy.copy(self)
+        flatten_lc.flux = self.flux / trend_signal
+        if self.flux_err is not None:
+            flatten_lc.flux_err = self.flux_err / trend_signal
+        trend_lc = copy.copy(self)
+        trend_lc.flux = trend_signal
 
-        return flatten, trend
+        return flatten_lc, trend_lc
 
     def fold(self, phase, period):
         return LightCurve(((self.time - phase + 0.5 * period) / period) % 1 - 0.5, self.flux)
@@ -153,3 +154,61 @@ class Detrender(object):
 class ArcLengthDetrender(Detrender):
     def detrend(time, flux):
         pass
+
+
+class SimplePixelLevelDecorrelationDetrender(Detrender):
+    r"""
+    Implements the basic first order Pixel Level Decorrelation (PLD) proposed by
+    Deming et. al. [1]_ and Luger et. al. [2]_, [3]_.
+
+    Attributes
+    ----------
+    time : array-like
+        Time array
+    tpf_flux : array-like
+        Pixel values series
+
+    Notes
+    -----
+    This code serves only as a quick look into the PLD technique.
+    Users are encouraged to check out the GitHub repos
+    `everest <http://www.github.com/rodluger/everest>`_
+    and `everest3 <http://www.github.com/rodluger/everest3>`_.
+
+    References
+    ----------
+    .. [1] Deming et. al. Spitzer Secondary Eclipses of the Dense, \
+           Modestly-irradiated, Giant Exoplanet HAT-P-20b using Pixel-Level Decorrelation.
+    .. [2] Luger et. al. EVEREST: Pixel Level Decorrelation of K2 Light Curves.
+    .. [3] Luger et. al. An Update to the EVEREST K2 Pipeline: short cadence, \
+           saturated stars, and Kepler-like photometry down to K_p = 15.
+    """
+
+    def __init__(self, time, tpf_flux):
+        self.time = time
+        self.tpf_flux = tpf_flux
+
+    def detrend(self, window_length=None, polyorder=2):
+        k = window_length
+        if not k:
+            k = int(len(self.time) / 2)
+        n_windows = int(len(self.time) / k)
+        flux_detrended = np.array([])
+        for n in range(1, n_windows + 1):
+            flux_detrended = np.append(flux_detrended,
+                                       self._pld(self.tpf_flux[(n - 1) * k:n * k], polyorder))
+        flux_detrended = np.append(flux_detrended, self._pld(self.tpf_flux[n * k:], polyorder))
+        return LightCurve(self.time, flux_detrended + np.nanmedian(self.tpf_flux.sum(axis=(1, 2))))
+
+    def _pld(self, tpf_flux, polyorder=2):
+        if len(tpf_flux) == 0:
+            return np.array([])
+        pixels_series = tpf_flux.reshape((tpf_flux.shape[0], -1))
+        lightcurve = np.sum(pixels_series, axis=1).reshape(-1, 1)
+        # design matrix
+        X = pixels_series / lightcurve
+        X = np.hstack((X, np.array([np.linspace(0, 1, tpf_flux.shape[0]) ** n for n in range(polyorder+1)]).T))
+        opt_weights = np.linalg.solve(np.dot(X.T, X), np.dot(X.T, lightcurve))
+        model = np.dot(X, opt_weights)
+        flux_detrended = lightcurve - model
+        return flux_detrended
