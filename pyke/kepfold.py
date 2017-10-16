@@ -117,11 +117,12 @@ def kepfold(infile, period=None, bjd0=None, outfile=None, bindata=False,
         try:
             if period is None:
                 period = instr[3].header['PERIOD']
+                kepmsg.log(logfile,'Using previously found period.',verbose)
             if bjd0 is None:
                 bjd0 = instr[3].header['BJD0']
-            kepmsg.log(logfile,'Using period and BJD0 from KEPBLS',verbose)
+                kepmsg.log(logfile,'Using previously found BJD0.',verbose)
         except:
-            errmsg = ('ERROR -- KEPFOLD: No period information found. Either specify'
+            errmsg = ('ERROR -- KEPFOLD: Period or BJD0 not found. Either specify'
             'period and BJD0 or run KEPBLS.')
             kepmsg.err(logfile, errmsg, verbose)
 
@@ -491,7 +492,7 @@ def kepfold(infile, period=None, bjd0=None, outfile=None, bindata=False,
                                          'max number of sigma-clipping iterations')
 
     # history keyword in output file
-    kepmsg.log(logfile, "Writing output file {}...".format(outfile), True)
+    kepmsg.log(logfile, "Writing output file {}...".format(outfile), verbose)
     kepkey.history(call, instr[0], outfile, logfile, verbose)
     instr.writeto(outfile)
 

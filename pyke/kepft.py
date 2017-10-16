@@ -9,7 +9,7 @@ from astropy.stats import LombScargle
 __all__ = ['kepft']
 
 
-def kepft(infile, outfile=None, datacol='PDCSAP_FLUX', pmin=0.1, pmax=10., nfreq=100,
+def kepft(infile, outfile=None, datacol='PDCSAP_FLUX', pmin=0.1, pmax=10., nfreq=2000,
           plot=False, overwrite=False, verbose=False, logfile='kepft.log'):
     """
     kepft -- Calculate and store a Fourier Transform from a Kepler time series
@@ -121,6 +121,7 @@ def kepft(infile, outfile=None, datacol='PDCSAP_FLUX', pmin=0.1, pmax=10., nfreq
     instr[-1].header['EXTNAME'] = ('POWER SPECTRUM', 'extension name')
     instr[-1].header['PERIOD'] = (period, 'most significant trial period [d]')
 
+    kepmsg.log(logfile,"KEPFT - best period found: {}".format(period),verbose)
     kepmsg.log(logfile,"Writing output file {}...".format(outfile),verbose)
     instr.writeto(outfile)
     ## history keyword in output file
@@ -179,7 +180,7 @@ def kepft_main():
                         help='Minimum search period [days]', type=float)
     parser.add_argument('--pmax', default=10.,
                         help='Maximum search period [days]', type=float)
-    parser.add_argument('--nfreq', default=100,
+    parser.add_argument('--nfreq', default=2000,
                         help='Number of frequency intervals', type=int)
     parser.add_argument('--plot', action='store_true', help='Plot result?')
     parser.add_argument('--overwrite', action='store_true',
