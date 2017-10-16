@@ -3,13 +3,13 @@ import math
 import numpy as np
 from matplotlib import pyplot as plt
 from astropy.io import fits as pyfits
-from . import kepio, kepmsg, kepkey, kepstat, kepfourier
-
+from . import kepio, kepmsg, kepkey, kepstat
+from astropy.stats import LombScargle
 
 __all__ = ['kepft']
 
 
-def kepft(infile, outfile=None, fcol='SAP_FLUX', pmin=0.1, pmax=10., nfreq=100,
+def kepft(infile, outfile=None, datacol='PDCSAP_FLUX', pmin=0.1, pmax=10., nfreq=100,
           plot=False, overwrite=False, verbose=False, logfile='kepft.log'):
     """
     kepft -- Calculate and store a Fourier Transform from a Kepler time series
@@ -27,7 +27,7 @@ def kepft(infile, outfile=None, fcol='SAP_FLUX', pmin=0.1, pmax=10., nfreq=100,
     outfile : str
         The name of the output FITS file with a new extension containing the
         Fourier spectrum.
-    fcol : str
+    datacol : str
         The name of the FITS table column in extension 1 of infile upon which
         the Fourier transform will be calculated.
     pmin : float [day]
@@ -67,7 +67,7 @@ def kepft(infile, outfile=None, fcol='SAP_FLUX', pmin=0.1, pmax=10., nfreq=100,
     call = ('KEPFT -- '
             + ' infile={}'.format(infile)
             + ' outfile={}'.format(outfile)
-            + ' fcol={}'.format(fcol)
+            + ' datacol={}'.format(datacol)
             + ' pmin={}'.format(pmin)
             + ' pmax={}'.format(pmax)
             + ' nfreq={}'.format(nfreq)
@@ -96,7 +96,7 @@ def kepft(infile, outfile=None, fcol='SAP_FLUX', pmin=0.1, pmax=10., nfreq=100,
     except:
         barytime = kepio.readfitscol(infile, instr[1].data, 'time', logfile,
                                      verbose) + bjdref
-    signal = kepio.readfitscol(infile, instr[1].data, fcol, logfile, verbose)
+    signal = kepio.readfitscol(infile, instr[1].data, datacol, logfile, verbose)
     ## remove infinite data from time series
     incols = [barytime, signal]
     outcols = kepstat.removeinfinlc(signal, incols)
@@ -107,9 +107,10 @@ def kepft(infile, outfile=None, fcol='SAP_FLUX', pmin=0.1, pmax=10., nfreq=100,
     fmax = 1.0 / pmin
     deltaf = (fmax - fmin) / nfreq
     ## loop through frequency steps; determine FT power
-    fr, power = kepfourier.ft(barytime, signal, fmin, fmax, deltaf, verbose)
+    fr = np.linspace(fmin,fmax,nfreq)
+    power = LombScargle(barytime, signal, deltaf).power(fr)
     #find highest power period
-    period=1./(fr[power.argmax()])
+    period = 1. / fr[power.argmax()]
 
     ## write output file
     col1 = pyfits.Column(name='FREQUENCY', format='E', unit='1/day',
@@ -118,7 +119,7 @@ def kepft(infile, outfile=None, fcol='SAP_FLUX', pmin=0.1, pmax=10., nfreq=100,
     cols = pyfits.ColDefs([col1, col2])
     instr.append(pyfits.BinTableHDU.from_columns(cols))
     instr[-1].header['EXTNAME'] = ('POWER SPECTRUM', 'extension name')
-    instr[-1].header['PERIOD'  ] = (period, 'most significant trial period [d]')
+    instr[-1].header['PERIOD'] = (period, 'most significant trial period [d]')
 
     kepmsg.log(logfile,"Writing output file {}...".format(outfile),verbose)
     instr.writeto(outfile)
@@ -172,7 +173,7 @@ def kepft_main():
                         help=('Name of FITS file to output.'
                               ' If None, outfile is infile-kepft.'),
                         default=None)
-    parser.add_argument('--datacol', default='SAP_FLUX',
+    parser.add_argument('--datacol', default='PDCSAP_FLUX',
                         help='Name of data column to plot', type=str)
     parser.add_argument('--pmin', default=0.1,
                         help='Minimum search period [days]', type=float)

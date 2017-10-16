@@ -4,7 +4,7 @@ from astropy.io import fits as pyfits
 from matplotlib import pyplot as plt
 from astropy.stats import LombScargle
 from tqdm import tqdm
-from . import kepio, kepmsg, kepkey, kepfit, kepfunc, kepstat, kepfourier
+from . import kepio, kepmsg, kepkey, kepfit, kepfunc, kepstat
 
 
 __all__ = ['keptrial']
@@ -148,7 +148,6 @@ def keptrial(infile, outfile=None, datacol='SAP_FLUX', errcol='SAP_FLUX_ERR',
         fr = np.linspace(fmin,fmax,nfreq)
         power = LombScargle(barytime, signal,signal.max()-signal.min()).power(fr)
 
-#        fr, power = kepfourier.ft(barytime, signal, fmin, fmax, deltaf, False)
         # determine peak in FT
         pmax.append(-1.0e30)
         for j in range(len(fr)):
