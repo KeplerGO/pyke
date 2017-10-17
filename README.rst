@@ -55,7 +55,7 @@ For example, let's visualize the pixels of Kepler target KIC008462852
 
 .. we should use full url addresses for images henceforth, so that they will be correctly captured by PYPI
 
-.. image:: http://pyke.keplerscience.org/en/latest/_images/kepmask1.png
+.. image:: http://pyke.keplerscience.org/_images/kepmask1.png
 
 ``kepmask`` is an interactive tool used to create a custom
 aperture mask which can subsequently be used in other PyKE tasks.
@@ -69,7 +69,7 @@ To visualize the resulting light curve, we can use ``kepdraw``::
 
     $ kepdraw lightcurve.fits
 
-.. image:: http://pyke.keplerscience.org/en/latest/_images/kepdraw1.png
+.. image:: http://pyke.keplerscience.org/_images/kepdraw1.png
 
 
 Contributing

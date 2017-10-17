@@ -1,5 +1,8 @@
+import copy
 import numpy as np
+from scipy import signal
 from astropy.io import fits
+from tqdm import tqdm
 
 __all__ = ['LightCurve', 'KeplerLightCurveFile']
 
@@ -8,12 +11,18 @@ class LightCurve(object):
     """
     Implements a basic time-series class for a generic lightcurve.
 
-    Parameters
+    Attributes
     ----------
-    time : numpy array-like
-        Time-line.
-    flux : numpy array-like
-        Data flux for every time point.
+    time : array-like
+        Time-line
+    flux : array-like
+        Data flux for every time point
+    flux_err : array-like
+        Uncertainty in each flux data point
+    quality : array-like
+        Array indicating the quality of each data point
+    centroid_col, centroid_row : array-like, array-like
+        Centroid column and row coordinates as a function of time
     """
 
     def __init__(self, time, flux, flux_err=None, quality=None, centroid_col=None,
@@ -25,15 +34,74 @@ class LightCurve(object):
         self.centroid_col = centroid_col
         self.centroid_row = centroid_row
 
-    def detrend(self, method='arclength', **kwargs):
+    def stitch(self, *others):
         """
+        Stitches LightCurve objects.
+
+        Parameters
+        ----------
+        *others : LightCurve objects
+            Light curves to be stitched.
+
+        Returns
+        -------
+        stitched_lc : LightCurve object
+            Stitched light curve.
         """
-        if method == 'arclength':
-            return ArcLengthDetrender().detrend(time=self.time, flux=self.flux,
-                                                flux_err=self.flux_err, **kwargs)
-        else:
-            return FirstDifferenceDetrender().detrend(time=self.time, flux=self.flux,
-                                                      flux_err=self.flux_err, **kwargs)
+        time = self.time
+        flux = self.flux
+        flux_err = self.flux_err
+        quality = self.quality
+        centroid_col = self.centroid_col
+        centroid_row = self.centroid_row
+
+        for i in range(len(others)):
+            time = np.append(time, others[i].time)
+            flux = np.append(flux, others[i].flux)
+            flux_err = np.append(flux_err, others[i].flux_err)
+            quality = np.append(quality, others[i].quality)
+            centroid_col = np.append(centroid_col, others[i].centroid_col)
+            centroid_row = np.append(centroid_row, others[i].centroid_row)
+
+        return LightCurve(time=time, flux=flux, flux_err=flux_err,
+                          quality=quality, centroid_col=centroid_col,
+                          centroid_row=centroid_row)
+
+    def flatten(self, window_length=101, polyorder=3, **kwargs):
+        """
+        Removes low frequency trend using scipy's Savitzky-Golay filter.
+
+        Parameters
+        ----------
+        window_length : int
+            The length of the filter window (i.e. the number of coefficients).
+            ``window_length`` must be a positive odd integer.
+        polyorder : int
+            The order of the polynomial used to fit the samples. ``polyorder``
+            must be less than window_length.
+        **kwargs : dict
+            Dictionary of arguments to be passed to `scipy.signal.savgol_filter`.
+
+        Returns
+        -------
+        flatten_lc : LightCurve object
+            Flattened lightcurve
+        trend_lc : LightCurve object
+            Trend in the lightcurve data
+        """
+        trend_signal = signal.savgol_filter(x=self.flux, window_length=window_length,
+                                            polyorder=polyorder, **kwargs)
+        flatten_lc = copy.copy(self)
+        flatten_lc.flux = self.flux / trend_signal
+        if self.flux_err is not None:
+            flatten_lc.flux_err = self.flux_err / trend_signal
+        trend_lc = copy.copy(self)
+        trend_lc.flux = trend_signal
+
+        return flatten_lc, trend_lc
+
+    def fold(self, phase, period):
+        return LightCurve(((self.time - phase + 0.5 * period) / period) % 1 - 0.5, self.flux)
 
     def draw(self):
         raise NotImplementedError("Should we implement a LightCurveDrawer class?")
@@ -82,33 +150,65 @@ class Detrender(object):
         """
         pass
 
-class FirstDifferenceDetrender(Detrender):
-    """
-    First difference detrending
-    """
-    def detrend(time, flux):
-        return LightCurve(time, flux - np.append(0, flux[1:]))
-
-class LinearDetrender(Detrender):
-    """
-    """
-    @staticmethod
-    def detrend(time, flux):
-        pass
 
 class ArcLengthDetrender(Detrender):
     def detrend(time, flux):
         pass
 
-class EMDDetrender(Detrender):
-    """
-    Empirical Mode Decomposition Detrender
-    """
-    def detrend(time, flux):
-        pass
 
-class PolynomialDetrender(Detrender):
+class SimplePixelLevelDecorrelationDetrender(Detrender):
+    r"""
+    Implements the basic first order Pixel Level Decorrelation (PLD) proposed by
+    Deming et. al. [1]_ and Luger et. al. [2]_, [3]_.
+
+    Attributes
+    ----------
+    time : array-like
+        Time array
+    tpf_flux : array-like
+        Pixel values series
+
+    Notes
+    -----
+    This code serves only as a quick look into the PLD technique.
+    Users are encouraged to check out the GitHub repos
+    `everest <http://www.github.com/rodluger/everest>`_
+    and `everest3 <http://www.github.com/rodluger/everest3>`_.
+
+    References
+    ----------
+    .. [1] Deming et. al. Spitzer Secondary Eclipses of the Dense, \
+           Modestly-irradiated, Giant Exoplanet HAT-P-20b using Pixel-Level Decorrelation.
+    .. [2] Luger et. al. EVEREST: Pixel Level Decorrelation of K2 Light Curves.
+    .. [3] Luger et. al. An Update to the EVEREST K2 Pipeline: short cadence, \
+           saturated stars, and Kepler-like photometry down to K_p = 15.
     """
-    """
-    def detrend(time, flux):
-        pass
+
+    def __init__(self, time, tpf_flux):
+        self.time = time
+        self.tpf_flux = tpf_flux
+
+    def detrend(self, window_length=None, polyorder=2):
+        k = window_length
+        if not k:
+            k = int(len(self.time) / 2)
+        n_windows = int(len(self.time) / k)
+        flux_detrended = np.array([])
+        for n in range(1, n_windows + 1):
+            flux_detrended = np.append(flux_detrended,
+                                       self._pld(self.tpf_flux[(n - 1) * k:n * k], polyorder))
+        flux_detrended = np.append(flux_detrended, self._pld(self.tpf_flux[n * k:], polyorder))
+        return LightCurve(self.time, flux_detrended + np.nanmedian(self.tpf_flux.sum(axis=(1, 2))))
+
+    def _pld(self, tpf_flux, polyorder=2):
+        if len(tpf_flux) == 0:
+            return np.array([])
+        pixels_series = tpf_flux.reshape((tpf_flux.shape[0], -1))
+        lightcurve = np.sum(pixels_series, axis=1).reshape(-1, 1)
+        # design matrix
+        X = pixels_series / lightcurve
+        X = np.hstack((X, np.array([np.linspace(0, 1, tpf_flux.shape[0]) ** n for n in range(polyorder+1)]).T))
+        opt_weights = np.linalg.solve(np.dot(X.T, X), np.dot(X.T, lightcurve))
+        model = np.dot(X, opt_weights)
+        flux_detrended = lightcurve - model
+        return flux_detrended
