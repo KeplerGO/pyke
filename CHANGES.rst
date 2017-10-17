@@ -1,6 +1,8 @@
 3.1 (unreleased)
 ================
 
+- [#130] kepfold API updated to include optional keywords for period and BJD0.
+  kepfold will otherwise search for period and BJD0 keywords in the input fits file.
 
 3.0 (2017-09-18)
 ================
@@ -22,4 +24,3 @@ PyKE 3.0.0 is a major release which provides the following key improvements:
   [user contributions](http://pyke.keplerscience.org/en/latest/contributing.html#contributing).
 
 - The core code has been refactored to become more developer-friendly.
-
