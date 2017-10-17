@@ -10,7 +10,7 @@ fake_lc = get_pkg_data_filename("data/golden-lc.fits")
 
 def test_keptrial():
     keptrial(fake_lc, "keptrial.fits", datacol='SAP_FLUX', errcol='SAP_FLUX_ERR',
-             fmin=0.4, fmax=0.67, ntrials=50, nfreq=10, overwrite=True)
+             fmin=0.4, fmax=0.67, ntrials=50, nfreq=10, overwrite=True, plot=True)
     f = pyfits.open("keptrial.fits")
     assert abs(f[3].header['PERIOD'] - 2.02) < 1e-3
     f.close()
