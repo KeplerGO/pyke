@@ -145,9 +145,8 @@ def keptrial(infile, outfile=None, datacol='SAP_FLUX', errcol='SAP_FLUX_ERR',
         # adjust data within the error bars
         #work1 = kepstat.randarray(signal, err)
         # determine FT power
-        fr = np.linspace(fmin,fmax,nfreq)
+        fr = np.arange(fmin,fmax,deltaf)
         power = LombScargle(barytime, signal,signal.max()-signal.min()).power(fr)
-
         # determine peak in FT
         pmax.append(-1.0e30)
         for j in range(len(fr)):

@@ -11,7 +11,7 @@ from . import kepio, kepmsg, kepkey, kepstat
 __all__ = ['kepdynamic']
 
 
-def kepdynamic(infile, outfile=None, fcol='SAP_FLUX', pmin=0.1, pmax=10., nfreq=100,
+def kepdynamic(infile, outfile=None, fcol='SAP_FLUX', pmin=0.1, pmax=10., nfreq=2000,
                deltat=10., nslice=10, plot=False, plotscale='log', cmap='PuBu',
                overwrite=False, verbose=False, logfile='kepdynamic.log'):
     """
@@ -257,7 +257,7 @@ def kepdynamic_main():
                         help='Minimum search period [days]', type=float)
     parser.add_argument('--pmax', default=10.,
                         help='Maximum search period [days]', type=float)
-    parser.add_argument('--nfreq', default=100,
+    parser.add_argument('--nfreq', default=2000,
                         help='Number of frequency intervals', type=int)
     parser.add_argument('--deltat', default=10.,
                         help='Length of time slice [days]', type=float)
