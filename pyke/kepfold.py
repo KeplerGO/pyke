@@ -284,12 +284,9 @@ def kepfold(infile, period=None, bjd0=None, outfile=None, bindata=False,
     det = np.array(work8, dtype='float32') / cadenom
     deterr = np.array(work9, dtype='float32') / cadenom
 
-
     # calculate phase
     if bjd0 < bjdref:
         bjd0 += bjdref
-
-
 
     date1 = (barytime1 + bjdref - bjd0)
     phase1 = (date1 / period) - np.floor(date1/period)
