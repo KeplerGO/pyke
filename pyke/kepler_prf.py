@@ -70,7 +70,8 @@ class KeplerPRFPhotometry(PRFPhotometry):
     # Let's borrow as much as possible from photutils here. Ideally,
     # this could be a child class from BasicPSFPhotometry.
 
-    def __init__(self, prf_model, loss_function=PoissonLikelihood):
+    def __init__(self, prf_model, bkg_model=lambda bkg: np.array([bkg]),
+                 loss_function=PoissonLikelihood):
         self.prf_model = prf_model
         self.loss_function = loss_function
         self.opt_params = []
@@ -99,13 +100,64 @@ class KeplerPRFPhotometry(PRFPhotometry):
         pass
 
 
+class KeplerSceneModel(object):
+    """
+    This class builds a generic model for a Kepler scene.
+
+    Attributes
+    ----------
+    prf_model : instance of KeplerPRF
+        An instance of the KeplerPRF class
+    n_sources : int
+        Number of sources to be modeled with ``prf_model``
+    bkg_model : callable
+        A function that models the background variation.
+        Default is a constant background
+    """
+
+    def __init__(self, prf_model, n_sources, bkg_model=lambda bkg: np.array([bkg])):
+        self.prf_model = prf_model
+        self.n_sources = n_sources
+        self.bkg_model = bkg_model
+
+    def __call__(self, *args):
+        return self.evaluate(*args)
+
+    def evaluate(self, flux, centroid_col, centroid_row, scale_col,
+                 scale_row, bkg_params):
+        """
+        Parameters
+        ----------
+        flux : scalar or array-like
+            Total integrated flux of the PRF model
+        centroid_col, centroid_row : scalar or array-like
+            Column and row coordinates of the centroid
+        scale_col, scale_row : scalar or array-like
+            Pixel scale in the column and row directions
+        bkg_params : scalar or array-like
+            Parameters for the background model
+        """
+        flux = np.asarray([flux])
+        centroid_col, centroid_row = np.asarray([centroid_col]), np.asarray([centroid_row])
+        scale_col, scale_row = np.asarray([scale_col]), np.asarray([scale_row])
+
+        self.mixture_prf_model = []
+        for i in range(self.n_sources):
+            self.mixture_prf_model.append(self.prf_model(flux[i],
+                                                         centroid_col[i], centroid_row[i],
+                                                         scale_col[i], scale_row[i]))
+        self.scene_model = np.sum(self.mixture_prf_model, axis=0) + self.bkg_model(bkg_params)
+
+        return self.scene_model
+
+
 class KeplerPRF(object):
     """
     Kepler's Pixel Response Function
 
-    This class provides the necessary interface to load Kepler PSF
+    This class provides the necessary interface to load Kepler PRF
     calibration files and to create a model that can be fit as a function
-    of flux and centroid position.
+    of flux, centroid positions, width, and rotation angle.
 
     Attributes
     ----------
@@ -130,8 +182,11 @@ class KeplerPRF(object):
         self.row = row
         self.col_coord, self.row_coord, self.interpolate = self._prepare_prf()
 
-    def prf_to_detector(self, flux, centroid_col, centroid_row, stretch_col=1,
-                        stretch_row=1, rotation_radians=0):
+    def __call__(self, *args):
+        return self.evaluate(*args)
+
+    def prf_to_detector(self, flux, centroid_col, centroid_row, scale_col,
+                        scale_row):
         """
         Interpolates the PRF model onto detector coordinates.
 
@@ -139,10 +194,10 @@ class KeplerPRF(object):
         ----------
         flux : float or array-like
             Total integrated flux of the PRF
-        centroid_col : float or array-like
-            Column coordinate of the centroid
-        centroid_row : float or array-like
-            Row coordinate of the centroid
+        centroid_col, centroid_row : float or array-like
+            Column and row coordinates of the centroid
+        scale_col, scale_row : float or array-like
+            Pixel scale in the column and row directions
 
         Returns
         -------
@@ -150,18 +205,14 @@ class KeplerPRF(object):
             Two dimensional array representing the PRF values parametrized
             by `params`.
         """
-        cos_rot = math.cos(rotation_radians)
-        sin_rot = math.sin(rotation_radians)
         delta_col = self.col_coord - centroid_col
         delta_row = self.row_coord - centroid_row
-        rot_col = delta_col * cos_rot - delta_row[0] * sin_rot
-        rot_row = delta_col[0] * sin_rot + delta_row * cos_rot
-        self.prf_model = flux * self.interpolate(delta_row * stretch_row,
-                                                 delta_col * stretch_col)
+        self.prf_model = flux * self.interpolate(delta_row * scale_row,
+                                                 delta_col * scale_col)
         return self.prf_model
 
-    def evaluate(self, *args, **kwargs):
-        return self.prf_to_detector(*args, **kwargs)
+    def evaluate(self, *args):
+        return self.prf_to_detector(*args)
 
     def _read_prf_calibration_file(self, path, ext):
         prf_cal_file = pyfits.open(path)
@@ -172,6 +223,7 @@ class KeplerPRF(object):
         cdelt1p = prf_cal_file[ext].header['CDELT1P']
         cdelt2p = prf_cal_file[ext].header['CDELT2P']
         prf_cal_file.close()
+
         return data, crval1p, crval2p, cdelt1p, cdelt2p
 
     def _prepare_prf(self):
