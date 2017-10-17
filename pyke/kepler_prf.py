@@ -103,7 +103,7 @@ class KeplerPRF(object):
     """
     Kepler's Pixel Response Function
 
-    This class provides the necessary interface to load Kepler PSF
+    This class provides the necessary interface to load Kepler PRF
     calibration files and to create a model that can be fit as a function
     of flux and centroid position.
 
@@ -120,6 +120,10 @@ class KeplerPRF(object):
         KeplerTargetPixelFile.column
     row : int
         KeplerTargetPixelFile.row
+
+    Notes
+    -----
+    The PRF calibration files can be downloaded here: http://archive.stsci.edu/missions/kepler/fpc/prf/
     """
 
     def __init__(self, channel, shape, column, row, prf_files_dir=DEFAULT_PRFDIR):
