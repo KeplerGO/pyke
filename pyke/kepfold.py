@@ -6,15 +6,15 @@ from scipy import stats
 from astropy.io import fits as pyfits
 from matplotlib import pyplot as plt
 from tqdm import tqdm
-
+import re
 
 __all__ = ['kepfold']
 
 
-def kepfold(infile, period, bjd0, outfile=None, bindata=False,
+def kepfold(infile, period=None, bjd0=None, outfile=None, bindata=False,
             binmethod='median', threshold=1.0, niter=5, nbins=1000,
-            rejqual=False, plottype='det', overwrite=False, verbose=False,
-            logfile="kepfold.log"):
+            rejqual=False, plottype='det',noninteractive=False, overwrite=False,
+            verbose=False, logfile="kepfold.log"):
     """
     kepfold: Phase-fold light curve data on linear ephemeris.
 
@@ -87,6 +87,8 @@ def kepfold(infile, period, bjd0, outfile=None, bindata=False,
         * ``det`` data has been detrended using piecemeal polynomials with the
           kepflatten tool. DET data is stored in the column DETSAP_FLUX.
 
+    non-interactive : bool
+        If True, prevents the matplotlib window to pop up.
     overwrite : bool
         Overwrite the output file?
     verbose : bool
@@ -108,6 +110,24 @@ def kepfold(infile, period, bjd0, outfile=None, bindata=False,
 
     if outfile is None:
         outfile = infile.split('.')[0] + "-{}.fits".format(__all__[0])
+    # check if there is period or BJD0 information
+    if np.any([(period is None),(bjd0 is None)]):
+        # open input file
+        kepmsg.log(logfile,'KEPFOLD -- Searching for periods in headers.',verbose)
+        instr = pyfits.open(infile, 'readonly')
+        if period is None:
+            for i in instr:
+                if 'PERIOD' in i.header:
+                    period = i.header['PERIOD']
+        if bjd0 is None:
+            for i in instr:
+                if 'BJD0' in i.header:
+                    bjd0 = i.header['BJD0']
+
+        if np.all([(period is None),(bjd0 is None)]):
+            errmsg = ('ERROR -- KEPFOLD: No period information found. Either specify'
+            'period and BJD0 or run KEPBLS.')
+            kepmsg.err(logfile, errmsg, verbose)
 
     # log the call
     hashline = '--------------------------------------------------------------'
@@ -143,6 +163,7 @@ def kepfold(infile, period, bjd0, outfile=None, bindata=False,
 
     # open input file
     instr = pyfits.open(infile, 'readonly')
+
     tstart, tstop, bjdref, cadence = kepio.timekeys(instr, infile, logfile,
                                                     verbose)
     try:
@@ -266,9 +287,13 @@ def kepfold(infile, period, bjd0, outfile=None, bindata=False,
     det = np.array(work8, dtype='float32') / cadenom
     deterr = np.array(work9, dtype='float32') / cadenom
 
+
     # calculate phase
     if bjd0 < bjdref:
         bjd0 += bjdref
+
+
+
     date1 = (barytime1 + bjdref - bjd0)
     phase1 = (date1 / period) - np.floor(date1/period)
     date2 = (barytime + bjdref - bjd0)
@@ -569,7 +594,10 @@ def kepfold(infile, period, bjd0, outfile=None, bindata=False,
         else:
             plt.ylim(1.0e-10, ymax + yr * 0.01)
         plt.grid()
-        plt.show()
+        plt.savefig(re.sub('.fits', '.png', outfile),bbox_inches='tight')
+        if not noninteractive:
+            plt.show()
+
     # close input file
     instr.close()
     # stop time
@@ -581,11 +609,11 @@ def kepfold_main():
              description=("Phase-fold light curve data on linear ephemeris."),
              formatter_class=PyKEArgumentHelpFormatter)
     parser.add_argument('infile', help='Name of FITS input file', type=str)
-    parser.add_argument('period', help='Period to fold data upon [days]',
-                        type=float)
-    parser.add_argument('bjd0',
+    parser.add_argument('--period', help='Period to fold data upon [days]',
+                        type=float, default=None)
+    parser.add_argument('--bjd0',
                         help='time of zero phase for the folded period [BJD]',
-                        type=float)
+                        type=float, default=None)
     parser.add_argument('--outfile',
                         help=('Name of FITS file to output.'
                               ' If None, outfile is infile-kepfold.'),
@@ -605,6 +633,9 @@ def kepfold_main():
                         help='Reject bad quality timestamps?')
     parser.add_argument('--plottype', default='det', help='plot type',
                         type=str, choices=['sap', 'pdc', 'cbv', 'det','None'])
+    parser.add_argument('--non-interactive', action='store_true',
+                        help='Pop up matplotlib plot window?',
+                        dest='noninteractive')
     parser.add_argument('--overwrite', action='store_true',
                         help='Overwrite output file?')
     parser.add_argument('--verbose', action='store_true',
@@ -615,5 +646,5 @@ def kepfold_main():
 
     kepfold(args.infile, args.period, args.bjd0, args.outfile, args.bindata,
             args.binmethod, args.threshold, args.niter, args.nbins,
-            args.quality, args.plottype, args.overwrite, args.verbose,
+            args.quality, args.plottype, args.noninteractive, args.overwrite, args.verbose,
             args.logfile)
