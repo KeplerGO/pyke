@@ -2,7 +2,20 @@
 ================
 
 - [#130] kepfold API updated to include optional keywords for period and BJD0.
-  kepfold will otherwise search for period and BJD0 keywords in the input fits file.
+         kepfold will otherwise search for period and BJD0 keywords in the input
+         fits file.
+- [#130] kepfold now includes the 'non-interactive' keyword
+- [#133] kepfourier has been removed. All instances have been replaced with astropy's
+  Lomb-Scargle method
+- [#133] kepft has been renamed kepperiodogram
+- [#133] kepft (kepperiodogram) now uses astropy's Lomb-Scargle to find periods
+- [#133] kepft (kepperiodogram) now outputs the best fit period to a new fits extension
+- [#133] kepdynamic has been sped up by using astropy LombScargle
+- [#133] keptrial has been greatly sped up by using astropy LombScargle
+- [#133] kepwindow has been sped up by using astropy LombScargle
+- [#133] kepwindow api has been changed. Now includes the 'non-interactive' keyword.
+         The nfreq and fmin keywords have been removed in favor of 'nyqfactor'.
+
 
 3.0 (2017-09-18)
 ================

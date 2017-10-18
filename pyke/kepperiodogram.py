@@ -6,15 +6,16 @@ from astropy.io import fits as pyfits
 from . import kepio, kepmsg, kepkey, kepstat
 from astropy.stats import LombScargle
 
-__all__ = ['kepft']
+__all__ = ['kepperiodogram']
 
 
-def kepft(infile, outfile=None, datacol='PDCSAP_FLUX', pmin=0.1, pmax=10., nfreq=2000,
-          plot=False, overwrite=False, verbose=False, logfile='kepft.log'):
+def kepperiodogram(infile, outfile=None, datacol='PDCSAP_FLUX', pmin=0.1, pmax=10., nfreq=2000,
+          plot=False, overwrite=False, verbose=False, logfile='kepperiodogram.log'):
     """
-    kepft -- Calculate and store a Fourier Transform from a Kepler time series
+    kepperiodogram -- Calculate and store a Lomb Scargle Periodogram based on a
+    Kepler time series
 
-    ``kepft`` calculates the discrete Fourier transform for a user-provided
+    ``kepperiodogram`` calculates the discrete Fourier transform for a user-provided
     Kepler time series. The result is stored in a new FITS file that is a
     direct copy of the input file but with an additional table extension
     containing the power spectrum.
@@ -52,10 +53,10 @@ def kepft(infile, outfile=None, datacol='PDCSAP_FLUX', pmin=0.1, pmax=10., nfreq
     --------
     .. code-block:: bash
 
-        $ kepft kplr002436324-2009259160929_llc.fits --pmin 0.5
+        $ kepperiodogram kplr002436324-2009259160929_llc.fits --pmin 0.5
           --pmax 100 --nfreq 1000 --plot --verbose
 
-    .. image:: ../_static/images/api/kepft.png
+    .. image:: ../_static/images/api/kepperiodogram.png
         :align: center
     """
 
@@ -64,7 +65,7 @@ def kepft(infile, outfile=None, datacol='PDCSAP_FLUX', pmin=0.1, pmax=10., nfreq
     ## log the call
     hashline = '--------------------------------------------------------------'
     kepmsg.log(logfile, hashline, verbose)
-    call = ('KEPFT -- '
+    call = ('kepperiodogram -- '
             + ' infile={}'.format(infile)
             + ' outfile={}'.format(outfile)
             + ' datacol={}'.format(datacol)
@@ -82,7 +83,7 @@ def kepft(infile, outfile=None, datacol='PDCSAP_FLUX', pmin=0.1, pmax=10., nfreq
     if overwrite:
         kepio.overwrite(outfile, logfile, verbose)
     if kepio.fileexists(outfile):
-        errmsg = 'ERROR -- KEPFT: {} exists. Use --overwrite'.format(outfile)
+        errmsg = 'ERROR -- kepperiodogram: {} exists. Use --overwrite'.format(outfile)
         kepmsg.err(logfile, errmsg, verbose)
     ## open input file
     instr = pyfits.open(infile)
@@ -121,7 +122,7 @@ def kepft(infile, outfile=None, datacol='PDCSAP_FLUX', pmin=0.1, pmax=10., nfreq
     instr[-1].header['EXTNAME'] = ('POWER SPECTRUM', 'extension name')
     instr[-1].header['PERIOD'] = (period, 'most significant trial period [d]')
 
-    kepmsg.log(logfile,"KEPFT - best period found: {}".format(period),verbose)
+    kepmsg.log(logfile,"kepperiodogram - best period found: {}".format(period),verbose)
     kepmsg.log(logfile,"Writing output file {}...".format(outfile),verbose)
     instr.writeto(outfile)
     ## history keyword in output file
@@ -161,9 +162,9 @@ def kepft(infile, outfile=None, datacol='PDCSAP_FLUX', pmin=0.1, pmax=10., nfreq
         # render plot
         plt.show()
     ## end time
-    kepmsg.clock('KEPFT completed at', logfile, verbose)
+    kepmsg.clock('kepperiodogram completed at', logfile, verbose)
 
-def kepft_main():
+def kepperiodogram_main():
     import argparse
     parser = argparse.ArgumentParser(
              description=('Calculate and store a Fourier Transform from a'
@@ -172,7 +173,7 @@ def kepft_main():
     parser.add_argument('infile', help='Name of input file', type=str)
     parser.add_argument('--outfile',
                         help=('Name of FITS file to output.'
-                              ' If None, outfile is infile-kepft.'),
+                              ' If None, outfile is infile-kepperiodogram.'),
                         default=None)
     parser.add_argument('--datacol', default='PDCSAP_FLUX',
                         help='Name of data column to plot', type=str)
@@ -188,7 +189,7 @@ def kepft_main():
     parser.add_argument('--verbose', action='store_true',
                         help='Write to a log file?')
     parser.add_argument('--logfile', '-l', help='Name of ascii log file',
-                        default='kepft.log', type=str)
+                        default='kepperiodogram.log', type=str)
     args = parser.parse_args()
-    kepft(args.infile, args.outfile, args.datacol, args.pmin, args.pmax,
+    kepperiodogram(args.infile, args.outfile, args.datacol, args.pmin, args.pmax,
           args.nfreq, args.plot, args.overwrite, args.verbose, args.logfile)

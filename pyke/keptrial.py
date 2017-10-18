@@ -37,7 +37,7 @@ def keptrial(infile, outfile=None, datacol='SAP_FLUX', errcol='SAP_FLUX_ERR',
     values of nfreq and ntrial have to be chosen carefully to avoid excessive
     run times. The values of **fmin**, **fmax** and **nfreq** have to be
     chosen carefully in order to provide a sensible measure of period and
-    error. It is recommended that ``kepft`` be used to estimate the period and
+    error. It is recommended that ``kepperiodogram`` be used to estimate the period and
     error before attempting to use ``keptrial``. An exercise of trial and error
     will most-likely be needed to choose a permutation of :math:`fmin`,
     :math:`fmax` and :math:`nfreq` that resolves the period distribution over a
