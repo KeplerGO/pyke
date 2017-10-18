@@ -133,17 +133,17 @@ class KeplerPRF(object):
 
     Attributes
     ----------
-    prf_files_dir : str
-        Relative or aboslute path to a directory containing the Pixel Response
-        Function calibration files produced during Kepler data comissioning.
     channel : int
         KeplerTargetPixelFile.channel
     shape : (int, int)
-        KeplerTargetPixelFile.shape
+        KeplerTargetPixelFile.shape[1:]
     column : int
         KeplerTargetPixelFile.column
     row : int
         KeplerTargetPixelFile.row
+    prf_files_dir : str
+        Relative or aboslute path to a directory containing the Pixel Response
+        Function calibration files produced during Kepler data comissioning.
 
     Notes
     -----
