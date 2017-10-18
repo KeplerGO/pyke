@@ -161,8 +161,8 @@ def kepdynamic(infile, outfile=None, fcol='SAP_FLUX', pmin=0.1, pmax=10., nfreq=
         y = y - np.median(y)
 
         # determine FT power
-        fr = np.linspace(fmin,fmax,nfreq)
-        power = LombScargle(x, y,y.max()-y.min()).power(fr)
+        fr = np.linspace(fmin, fmax, nfreq)
+        power = LombScargle(x, y, y.max()-y.min()).power(fr)
 
         for j in range(len(power)):
             dynam.append(power[j])

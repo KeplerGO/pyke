@@ -122,8 +122,8 @@ def kepperiodogram(infile, outfile=None, datacol='PDCSAP_FLUX', pmin=0.1, pmax=1
     instr[-1].header['EXTNAME'] = ('POWER SPECTRUM', 'extension name')
     instr[-1].header['PERIOD'] = (period, 'most significant trial period [d]')
 
-    kepmsg.log(logfile,"kepperiodogram - best period found: {}".format(period),verbose)
-    kepmsg.log(logfile,"Writing output file {}...".format(outfile),verbose)
+    kepmsg.log(logfile, "kepperiodogram - best period found: {}".format(period), verbose)
+    kepmsg.log(logfile, "Writing output file {}...".format(outfile), verbose)
     instr.writeto(outfile)
     ## history keyword in output file
     kepkey.history(call, instr[0], outfile, logfile, verbose)

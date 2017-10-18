@@ -102,8 +102,8 @@ def kepwindow(infile, outfile=None, fcol='SAP_FLUX', nyqfactor=0.01,
     barytime = barytime[np.isfinite(barytime)]
     ls = LombScargle(barytime, 1, center_data=False, fit_mean=False)
     freqW, powerW = ls.autopower(nyquist_factor=nyqfactor)
-    freqW = np.append(-freqW[::-1],freqW)
-    powerW = np.append(powerW[::-1],powerW)
+    freqW = np.append(-freqW[::-1], freqW)
+    powerW = np.append(powerW[::-1], powerW)
 
     freqW, powerW = np.sort(freqW), powerW[np.argsort(freqW)]
 
@@ -117,7 +117,7 @@ def kepwindow(infile, outfile=None, fcol='SAP_FLUX', nyqfactor=0.01,
     plt.xlabel(r'Frequency (d$^{-1}$)', {'color' : 'k'})
     plt.ylabel('Power', {'color' : 'k'})
     plt.grid()
-    plt.savefig(re.sub('.fits', '.png', outfile),bbox_inches='tight')
+    plt.savefig(re.sub('.fits', '.png', outfile), bbox_inches='tight')
     if not noninteractive:
         plt.show()
     #plt.xlim(-0.1,0.1)
