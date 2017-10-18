@@ -10,55 +10,10 @@ from astropy.io import fits as pyfits
 from oktopus.posterior import PoissonPosterior
 
 
-__all__ = ['KeplerPRFPhotometry', 'KeplerPRF']
+__all__ = ['KeplerPRFPhotometry', 'KeplerSceneModel', 'KeplerPRF', 'get_initial_guesses']
 
 
-class PRFPhotometry(object):
-    """An abstract base class for a general PRF/PSF photometry algorithm
-    for target pixel files."""
-
-    @abstractmethod
-    def do_photometry(self, tpf, initial_guesses=None):
-        """Perform photometry on a given target pixel file.
-
-        Parameters
-        ----------
-        tpf : pyke.TargetPixelFile instance
-            A target pixel file instance
-        initial_guesses : None or array-like
-            A vector of initial estimates for the PRF/PSF model
-        """
-        pass
-
-    @abstractmethod
-    def generate_residuals_movie(self):
-        """Creates a movie showing the residuals (image - fitted stars)
-        for every cadence.
-        """
-        pass
-
-
-class PRFModel(object):
-    """An abstract base class for a general PRF/PSF parametric model."""
-
-    @abstractmethod
-    def evaluate(self, params):
-        """Builds the PRF model parametrized by params.
-
-        Parameters
-        ----------
-        *params : list-like
-            Parameter values used to build a PRF model.
-
-        Returns
-        -------
-        prf_model : 2D array
-            PRF/PSF model.
-        """
-        pass
-
-
-class KeplerPRFPhotometry(PRFPhotometry):
+class KeplerPRFPhotometry(object):
     """
     This class performs PRF Photometry on a target pixel file from
     NASA's Kepler/K2 missions.
@@ -72,39 +27,46 @@ class KeplerPRFPhotometry(PRFPhotometry):
         Noise distribution associated with each random measurement
     """
 
-    def __init__(self, scene_model, priors, loss_function=PoissonPosterior):
+    def __init__(self, scene_model, prior, loss_function=PoissonPosterior):
         self.scene_model = scene_model
-        self.priors = priors
+        self.prior = prior
         self.loss_function = loss_function
         self.opt_params = np.array([])
         self.residuals = np.array([])
         self.uncertainties = np.array([])
 
-    def do_photometry(self, tpf, x0=None, **kwargs):
+    def fit(self, tpf_flux, x0=None, cadences='all', **kwargs):
         """
-        Performs photometry on a Target Pixel File.
+        Fits the scene model to the given data in ``tpf_flux``.
 
         Parameters
         ----------
-        tpf : instance of KeplerTargetPixelFile
-            A target pixel file
+        tpf_flux : array-like
+            A pixel flux time-series, e.g, KeplerTargetPixelFile.flux.
+            Such that (time, row, column) represents the shape of ``tpf_flux``.
         x0 : array-like or None
             Initial guesses on the parameters.
+        cadences : array-like of ints or str
+            A list or array that contains the cadences which will be fitted.
+            Default is to fit all cadences.
         kwargs : dict
             Dictionary of additional parameters to be passed to
             `scipy.optimize.minimize`.
         """
         if x0 is None:
-            x0 = self.priors.mean
+            x0 = self.prior.mean
 
-        for t in range(len(tpf.time)):
-            loss = self.loss_function(tpf.flux[t], self.scene_model, prior=self.priors)
+        if cadences == 'all':
+            cadences = range(tpf_flux.shape[0])
+
+        for t in cadences:
+            loss = self.loss_function(tpf_flux[t], self.scene_model, prior=self.prior)
             opt_params = loss.fit(x0=x0, **kwargs).x
-            residuals = tpf.flux[t] - self.prf_model(*opt_params)
-            self.opt_params.append(opt_params)
-            self.residuals.append(residuals)
-        self.opt_params = self.opt_params.reshape((tpf.shape[0], len(x0)))
-        self.residuals = self.residuals.reshape(tpf.shape)
+            residuals = tpf_flux[t] - self.scene_model(*opt_params)
+            self.opt_params = np.append(self.opt_params, opt_params)
+            self.residuals = np.append(self.residuals, residuals)
+        self.opt_params = self.opt_params.reshape((tpf_flux.shape[0], len(x0)))
+        self.residuals = self.residuals.reshape(tpf_flux.shape)
 
     def generate_residuals_movie(self):
         pass
