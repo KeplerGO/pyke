@@ -10,8 +10,8 @@ import re
 __all__ = ['kepfold']
 
 
-def kepfold(infile, period=None, bjd0=None, outfile=None, bindata=False,
-            nbins=1000, datacol='PDCSAP_FLUX',noninteractive=False,
+def kepfold(infile, outfile=None, period=None, bjd0=None, bindata=False,
+            nbins=1000, datacol='SAP_FLUX',noninteractive=False,
             overwrite=False, verbose=False, logfile="kepfold.log"):
     """
     kepfold: Phase-fold light curve data on linear ephemeris.
@@ -27,10 +27,7 @@ def kepfold(infile, period=None, bjd0=None, outfile=None, bindata=False,
     float column in the LIGHT CURVE extension of the input file before being
     exported as a new file with name defined by the user. Optionally, kepfold
     will plot the data folded on the ephemeris and store it within a new FITS
-    extension of the output file called FOLDED. Both the SAP and PDC fluxes are
-    binned and stored in the new extension. There are a number of binning
-    algorithms, mean, median and sigma clipping. The user has options to adapt
-    bin size, binning method and the rejection of outliers.
+    extension of the output file called FOLDED. 
 
     Parameters
     ----------
@@ -100,6 +97,7 @@ def kepfold(infile, period=None, bjd0=None, outfile=None, bindata=False,
             + ' bjd0={}'.format(bjd0)
             + ' bindata={}'.format(bindata)
             + ' datacol={}'.format(datacol)
+            + ' noninteractive='.format(noninteractive)
             + ' overwrite={}'.format(overwrite)
             + ' verbose={}'.format(verbose)
             + ' logfile={}'.format(logfile))
@@ -239,20 +237,20 @@ def kepfold_main():
              description=("Phase-fold light curve data on linear ephemeris."),
              formatter_class=PyKEArgumentHelpFormatter)
     parser.add_argument('infile', help='Name of FITS input file', type=str)
+    parser.add_argument('--outfile',
+                        help=('Name of FITS file to output.'
+                              ' If None, outfile is infile-kepfold.'),
+                        default=None)
     parser.add_argument('--period', help='Period to fold data upon [days]',
                         type=float, default=None)
     parser.add_argument('--bjd0',
                         help='time of zero phase for the folded period [BJD]',
                         type=float, default=None)
-    parser.add_argument('--outfile',
-                        help=('Name of FITS file to output.'
-                              ' If None, outfile is infile-kepfold.'),
-                        default=None)
     parser.add_argument('--bindata', action='store_true',
                         help='Bin output data?')
     parser.add_argument('--nbins', default=1000, help='Number of period bins',
                         type=int)
-    parser.add_argument('--datacol', default='PDCSAP_FLUX',
+    parser.add_argument('--datacol', default='SAP_FLUX',
                         help='Name of data column to plot', type=str)
     parser.add_argument('--non-interactive', action='store_true',
                         help='Pop up matplotlib plot window?',
@@ -265,6 +263,6 @@ def kepfold_main():
                         default='kepfold.log', dest='logfile', type=str)
     args = parser.parse_args()
 
-    kepfold(args.infile, args.period, args.bjd0, args.outfile, args.bindata,
+    kepfold(args.infile, args.outfile, args.period, args.bjd0, args.bindata,
             args.nbins, args.datacol, args.noninteractive, args.overwrite,
             args.verbose, args.logfile)

@@ -9,7 +9,7 @@ from astropy.stats import LombScargle
 __all__ = ['kepwindow']
 
 
-def kepwindow(infile, outfile=None, fcol='SAP_FLUX', nyqfactor=0.01,
+def kepwindow(infile, outfile=None, datacol='SAP_FLUX', nyqfactor=0.01,
               plot=False, noninteractive=False, overwrite=False, verbose=False,
               logfile='kepwindow.log'):
     """
@@ -20,9 +20,10 @@ def kepwindow(infile, outfile=None, fcol='SAP_FLUX', nyqfactor=0.01,
     to operational pauses and issues, and timestamps are corrected to the
     barycenter of the solar system. The size of the barycenter correction is
     time-dependent. kepwindow calculates a discrete window function for a
-    user-provided Kepler time series. The result is stored in a new FITS file
-    that is a direct copy of the input file but with an additional table
-    extension containing the window function.
+    user-provided Kepler time series. This is calculated using a Lomb-Scargle
+    periodogram. The result is stored in a new FITS file that is a direct copy
+    of the input file but with an additional table extension containing the
+    window function.
 
     Parameters
     ----------
@@ -32,11 +33,11 @@ def kepwindow(infile, outfile=None, fcol='SAP_FLUX', nyqfactor=0.01,
     outfile : str
         The name of the output FITS file with a new extension containing the
         window function.
-    fcol : str
+    datacol : str
         The name of the FITS table column in extension 1 of infile with which
         the window function should be coupled to. While the window function
         ostensibly requires the timing information, this particular piece of
-        information is required so that the task can search the fcol array for
+        information is required so that the task can search the datacol array for
         bad data such as instances of NaN. These will be rejected before the
         window function is calculated.
     nyqfactor : int
@@ -72,9 +73,10 @@ def kepwindow(infile, outfile=None, fcol='SAP_FLUX', nyqfactor=0.01,
     call = ('KEPWINDOW -- '
             + ' infile={}'.format(infile)
             + ' outfile={}'.format(outfile)
-            + ' fcol={}'.format(fcol)
+            + ' datacol={}'.format(datacol)
             + ' nyqfactor={}'.format(nyqfactor)
             + ' plot='.format(plot)
+            + ' noninteractive='.format(noninteractive)
             + ' overwrite={}'.format(overwrite)
             + ' verbose={}'.format(verbose)
             + ' logfile={}'.format(logfile))
@@ -155,7 +157,7 @@ def kepwindow_main():
                         default=None)
     parser.add_argument('--datacol', default='SAP_FLUX',
                         help='Name of data column', type=str,
-                        dest='fcol')
+                        dest='datacol')
     parser.add_argument('--nyqfactor', default=0.01,
                         help='number of nyquist frequencies to evaluate up to', type=float)
     parser.add_argument('--plot', action='store_true', help='Plot result?')
@@ -169,6 +171,6 @@ def kepwindow_main():
     parser.add_argument('--logfile', '-l', help='Name of ascii log file',
                         default='kepwindow.log', dest='logfile', type=str)
     args = parser.parse_args()
-    kepwindow(args.infile, args.outfile, args.fcol, args.nyqfactor,
+    kepwindow(args.infile, args.outfile, args.datacol, args.nyqfactor,
               args.plot, args.noninteractive, args.overwrite, args.verbose,
               args.logfile)

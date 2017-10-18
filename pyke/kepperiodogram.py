@@ -10,15 +10,13 @@ __all__ = ['kepperiodogram']
 
 
 def kepperiodogram(infile, outfile=None, datacol='PDCSAP_FLUX', pmin=0.1, pmax=10., nfreq=2000,
-          plot=False, overwrite=False, verbose=False, logfile='kepperiodogram.log'):
+          plot=False, noninteractive=False, overwrite=False, verbose=False,
+          logfile='kepperiodogram.log'):
     """
     kepperiodogram -- Calculate and store a Lomb Scargle Periodogram based on a
-    Kepler time series
-
-    ``kepperiodogram`` calculates the discrete Fourier transform for a user-provided
     Kepler time series. The result is stored in a new FITS file that is a
     direct copy of the input file but with an additional table extension
-    containing the power spectrum.
+    containing the periodogram.
 
     Parameters
     ----------
@@ -42,6 +40,8 @@ def kepperiodogram(infile, outfile=None, datacol='PDCSAP_FLUX', pmin=0.1, pmax=1
         :math:`1/pmin` that the Fourier transform will be calculated.
     plot : bool
         Plot the output Fourier spectrum?
+    non-interactive : bool
+        If True, prevents the matplotlib window to pop up.
     overwrite : bool
         Overwrite the output file?
     verbose : bool
@@ -73,6 +73,7 @@ def kepperiodogram(infile, outfile=None, datacol='PDCSAP_FLUX', pmin=0.1, pmax=1
             + ' pmax={}'.format(pmax)
             + ' nfreq={}'.format(nfreq)
             + ' plot={}'.format(plot)
+            + ' noninteractive={}'.format(noninteractive)
             + ' overwrite={}'.format(overwrite)
             + ' verbose={}'.format(verbose)
             + ' logfile={}'.format(logfile))
@@ -160,7 +161,8 @@ def kepperiodogram(infile, outfile=None, datacol='PDCSAP_FLUX', pmin=0.1, pmax=1
         plt.ylabel(ylab, {'color' : 'k'})
         plt.grid()
         # render plot
-        plt.show()
+        if not noninteractive:
+            plt.show()
     ## end time
     kepmsg.clock('kepperiodogram completed at', logfile, verbose)
 
@@ -184,6 +186,9 @@ def kepperiodogram_main():
     parser.add_argument('--nfreq', default=2000,
                         help='Number of frequency intervals', type=int)
     parser.add_argument('--plot', action='store_true', help='Plot result?')
+    parser.add_argument('--non-interactive', action='store_true',
+                        help='Pop up matplotlib plot window?',
+                        dest='noninteractive')
     parser.add_argument('--overwrite', action='store_true',
                         help='Overwrite output file?')
     parser.add_argument('--verbose', action='store_true',
@@ -191,5 +196,7 @@ def kepperiodogram_main():
     parser.add_argument('--logfile', '-l', help='Name of ascii log file',
                         default='kepperiodogram.log', type=str)
     args = parser.parse_args()
+
     kepperiodogram(args.infile, args.outfile, args.datacol, args.pmin, args.pmax,
-          args.nfreq, args.plot, args.overwrite, args.verbose, args.logfile)
+          args.nfreq, args.plot, args.noninteractive, args.overwrite,
+          args.verbose, args.logfile)

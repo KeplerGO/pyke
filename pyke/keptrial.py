@@ -56,11 +56,10 @@ def keptrial(infile, outfile=None, datacol='SAP_FLUX', errcol='SAP_FLUX_ERR',
         results of a Monte Carlo period analysis.
     datacol : str
         The column name containing data stored within extension 1 of infile.
-        This data is the input data for a series of Fourier transform
-        calculations. Typically this name is SAP_FLUX (Simple Aperture
-        Photometry fluxes), but any data column within extension 1 of the FITS
-        file can be used provided it is coupled to an error column name using
-        errcol.
+        This data is the input data for periodogram. Typically this name is
+        SAP_FLUX (Simple Aperture Photometry fluxes), but any data column within
+        extension 1 of the FITS file can be used provided it is coupled to an
+        error column name using errcol.
     errcol : str
         The uncertainty data coupled to datacol. Typically this column is
         called SAP_FLUX_ERR.

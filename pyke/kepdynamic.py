@@ -11,7 +11,7 @@ from . import kepio, kepmsg, kepkey, kepstat
 __all__ = ['kepdynamic']
 
 
-def kepdynamic(infile, outfile=None, fcol='SAP_FLUX', pmin=0.1, pmax=10., nfreq=2000,
+def kepdynamic(infile, outfile=None, datacol='SAP_FLUX', pmin=0.1, pmax=10., nfreq=2000,
                deltat=10., nslice=10, plot=False, plotscale='log', cmap='PuBu',
                overwrite=False, verbose=False, logfile='kepdynamic.log'):
     """
@@ -26,7 +26,7 @@ def kepdynamic(infile, outfile=None, fcol='SAP_FLUX', pmin=0.1, pmax=10., nfreq=
     outfile : string
         The name of the output FITS file with a new image extension containing
         the dynamic power spectrum.
-    fcol : str
+    datacol : str
         The name of the FITS table column in extension 1 of infile upon which
         the sequence power spectra will be calculated.
     pmin : float [day]
@@ -61,7 +61,7 @@ def kepdynamic(infile, outfile=None, fcol='SAP_FLUX', pmin=0.1, pmax=10., nfreq=
     --------
     .. code-block:: bash
 
-        $ kepdynamic kplr002436324-2009259160929_llc.fits --fcol SAP_FLUX
+        $ kepdynamic kplr002436324-2009259160929_llc.fits --datacol SAP_FLUX
         --pmin 0.08 --pmax 0.1 --nfreq 500 --deltat 5.0 --nslice 500 --plot --verbose
 
     .. image:: ../_static/images/api/kepdynamic.png
@@ -77,7 +77,7 @@ def kepdynamic(infile, outfile=None, fcol='SAP_FLUX', pmin=0.1, pmax=10., nfreq=
     call = ('KEPDYNAMIC -- '
             + ' infile={}'.format(infile)
             + ' outfile={}'.format(outfile)
-            + ' fcol={}'.format(fcol)
+            + ' datacol={}'.format(datacol)
             + ' pmin={}'.format(pmin)
             + ' pmax={}'.format(pmax)
             + ' nfreq={}'.format(nfreq)
@@ -121,7 +121,7 @@ def kepdynamic(infile, outfile=None, fcol='SAP_FLUX', pmin=0.1, pmax=10., nfreq=
 
     # read table columns
     barytime = kepio.readtimecol(infile, instr[1].data, logfile, verbose)
-    signal = kepio.readfitscol(infile, instr[1].data, fcol, logfile, verbose)
+    signal = kepio.readfitscol(infile, instr[1].data, datacol, logfile, verbose)
     barytime = barytime + bjdref
     signal = signal / cadenom
 
@@ -248,7 +248,7 @@ def kepdynamic_main():
                         help=('Name of FITS file to output.'
                               ' If None, outfile is infile-kepdynamic.'),
                         default=None)
-    parser.add_argument('--fcol', default='SAP_FLUX',
+    parser.add_argument('--datacol', default='SAP_FLUX',
                         help='Name of data column to plot', type=str)
     parser.add_argument('--pmin', default=0.1,
                         help='Minimum search period [days]', type=float)
@@ -273,6 +273,6 @@ def kepdynamic_main():
     parser.add_argument('--logfile', '-l', help='Name of ascii log file',
                         default='kepdynamic.log', dest='logfile', type=str)
     args = parser.parse_args()
-    kepdynamic(args.infile, args.outfile, args.fcol, args.pmin, args.pmax,
+    kepdynamic(args.infile, args.outfile, args.datacol, args.pmin, args.pmax,
                args.nfreq, args.deltat, args.nslice, args.plot, args.plotscale,
                args.cmap, args.overwrite, args.verbose, args.logfile)
