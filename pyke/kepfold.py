@@ -27,7 +27,7 @@ def kepfold(infile, outfile=None, period=None, bjd0=None, bindata=False,
     float column in the LIGHT CURVE extension of the input file before being
     exported as a new file with name defined by the user. Optionally, kepfold
     will plot the data folded on the ephemeris and store it within a new FITS
-    extension of the output file called FOLDED. 
+    extension of the output file called FOLDED.
 
     Parameters
     ----------
@@ -156,18 +156,7 @@ def kepfold(infile, outfile=None, period=None, bjd0=None, bindata=False,
                                             unit='e/s', array=signal)
     col2 = pyfits.Column(name='ERR'.format(datacol), format='E',
                                             unit='e/s', array=err)
-    if bindata:
-        col3 = pyfits.Column(name='PHASE_BINNED', format='E',
-                                                array=bs)
-        col4 = pyfits.Column(name='FLUX_BINNED', format='E',
-                                                unit='e/s', array=binned)
-        col5 = pyfits.Column(name='ERR_BINNED'.format(datacol), format='E',
-                                                unit='e/s', array=binned_err)
-
     cols = pyfits.ColDefs([col0, col1, col2])
-    if bindata:
-        cols = pyfits.ColDefs([col0, col1, col2, col3, col4, col5])
-
     instr.append(pyfits.BinTableHDU.from_columns(cols))
 
     instr[-1].header.cards['TTYPE1'].comment = 'column title: phase'
@@ -178,21 +167,32 @@ def kepfold(infile, outfile=None, period=None, bjd0=None, bindata=False,
     instr[-1].header.cards['TFORM3'].comment = 'column type: float32'
     instr[-1].header.cards['TUNIT2'].comment = 'column units: electrons per second'
     instr[-1].header.cards['TUNIT3'].comment = 'column units: electrons per second'
-
-    if bindata:
-        instr[-1].header.cards['TTYPE4'].comment = 'column title: binned phase'
-        instr[-1].header.cards['TTYPE5'].comment = 'column title: binned {}'.format(datacol)
-        instr[-1].header.cards['TTYPE6'].comment = 'column title: binned {} 1-sigma error'.format(datacol)
-        instr[-1].header.cards['TFORM4'].comment = 'column type: float32'
-        instr[-1].header.cards['TFORM5'].comment = 'column type: float32'
-        instr[-1].header.cards['TFORM6'].comment = 'column type: float32'
-        instr[-1].header.cards['TUNIT5'].comment = 'column units: electrons per second'
-        instr[-1].header.cards['TUNIT6'].comment = 'column units: electrons per second'
-
     instr[-1].header['PERIOD'] = (period, 'period defining the phase [d]')
     instr[-1].header['BJD0'] = (bjd0, 'time of phase zero [BJD]')
+    instr[-1].header['EXTNAME'] = ('FOLDED LC', 'extension name')
+
+
     if bindata:
+        col3 = pyfits.Column(name='PHASE_BINNED', format='E',
+                                                array=bs)
+        col4 = pyfits.Column(name='FLUX_BINNED', format='E',
+                                                unit='e/s', array=binned)
+        col5 = pyfits.Column(name='ERR_BINNED'.format(datacol), format='E',
+                                                unit='e/s', array=binned_err)
+        cols = pyfits.ColDefs([col3, col4, col5])
+        instr.append(pyfits.BinTableHDU.from_columns(cols))
+        instr[-1].header.cards['TTYPE1'].comment = 'column title: phase'
+        instr[-1].header.cards['TTYPE2'].comment = 'column title: {}'.format(datacol)
+        instr[-1].header.cards['TTYPE3'].comment = 'column title: {} 1-sigma error'.format(datacol)
+        instr[-1].header.cards['TFORM1'].comment = 'column type: float32'
+        instr[-1].header.cards['TFORM2'].comment = 'column type: float32'
+        instr[-1].header.cards['TFORM3'].comment = 'column type: float32'
+        instr[-1].header.cards['TUNIT2'].comment = 'column units: electrons per second'
+        instr[-1].header.cards['TUNIT3'].comment = 'column units: electrons per second'
         instr[-1].header['NBINS'] = (nbins, 'number of bins')
+        instr[-1].header['PERIOD'] = (period, 'period defining the phase [d]')
+        instr[-1].header['BJD0'] = (bjd0, 'time of phase zero [BJD]')
+        instr[-1].header['EXTNAME'] = ('BINNED FOLDED LC', 'extension name')
 
 
     # history keyword in output file

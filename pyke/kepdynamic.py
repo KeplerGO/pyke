@@ -13,7 +13,7 @@ __all__ = ['kepdynamic']
 
 def kepdynamic(infile, outfile=None, datacol='SAP_FLUX', pmin=0.1, pmax=10., nfreq=2000,
                deltat=10., nslice=10, plot=False, plotscale='log', cmap='PuBu',
-               overwrite=False, verbose=False, logfile='kepdynamic.log'):
+               noninteractive=False, overwrite=False, verbose=False, logfile='kepdynamic.log'):
     """
     kepdynamic -- Construct a dynamic (time-dependent) power spectrum from
     time series data
@@ -50,6 +50,8 @@ def kepdynamic(infile, outfile=None, datacol='SAP_FLUX', pmin=0.1, pmax=10., nfr
         Plot the output Fourier spectrum?
     cmap : str
         A matplotlib colormap scheme.
+    non-interactive : bool
+        If True, prevents the matplotlib window to pop up.
     overwrite : bool
         Overwrite the output file?
     verbose : boolean
@@ -232,8 +234,8 @@ def kepdynamic(infile, outfile=None, datacol='SAP_FLUX', pmin=0.1, pmax=10., nfr
     plt.ylabel(r'Frequency (d$^{-1}$)', {'color' : 'k'})
     plt.grid()
     plt.savefig(re.sub('\.\S+', '.png', outfile), dpi=100)
-
-    plt.show()
+    if not noninteractive:
+        plt.show()
 
     kepmsg.clock('KEPDYNAMIC completed at', logfile, verbose)
 
@@ -266,6 +268,9 @@ def kepdynamic_main():
                         choices=['linear', 'log', 'squareroot', 'loglog'])
     parser.add_argument('--cmap', default='PuBu', help='image colormap',
                         type=str)
+    parser.add_argument('--non-interactive', action='store_true',
+                        help='Pop up matplotlib plot window?',
+                        dest='noninteractive')
     parser.add_argument('--overwrite', action='store_true',
                         help='Overwrite output file?')
     parser.add_argument('--verbose', action='store_true',
@@ -275,4 +280,5 @@ def kepdynamic_main():
     args = parser.parse_args()
     kepdynamic(args.infile, args.outfile, args.datacol, args.pmin, args.pmax,
                args.nfreq, args.deltat, args.nslice, args.plot, args.plotscale,
-               args.cmap, args.overwrite, args.verbose, args.logfile)
+               args.cmap, args.noninteractive, args.overwrite, args.verbose,
+               args.logfile)
