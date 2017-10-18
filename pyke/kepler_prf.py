@@ -7,7 +7,7 @@ import math
 import scipy
 import numpy as np
 from astropy.io import fits as pyfits
-from oktopus.likelihood import PoissonLikelihood
+from oktopus.posterior import PoissonPosterior
 
 
 __all__ = ['KeplerPRFPhotometry', 'KeplerPRF']
@@ -65,36 +65,46 @@ class KeplerPRFPhotometry(PRFPhotometry):
 
     Attributes
     ----------
-    prf_model : instance of PRFModel
+    scene_model : instance of KeplerSceneModel
+    priors : instance of oktopus.JointPrior
+        Priors on the parameters that will be estimated
+    loss_function : subclass of oktopus.LossFunction
+        Noise distribution associated with each random measurement
     """
-    # Let's borrow as much as possible from photutils here. Ideally,
-    # this could be a child class from BasicPSFPhotometry.
 
-    def __init__(self, prf_model, bkg_model=lambda bkg: np.array([bkg]),
-                 loss_function=PoissonLikelihood):
-        self.prf_model = prf_model
+    def __init__(self, scene_model, priors, loss_function=PoissonPosterior):
+        self.scene_model = scene_model
+        self.priors = priors
         self.loss_function = loss_function
-        self.opt_params = []
-        self.residuals = []
-        self.uncertainties = []
+        self.opt_params = np.array([])
+        self.residuals = np.array([])
+        self.uncertainties = np.array([])
 
-    def do_photometry(self, tpf, initial_guesses=None):
-        if initial_guesses is None:
-            # this must be clever enough to find the number of stars
-            # great way to go is to use photutils.detection.DAOStarFinder
-            initial_guesses, _ = get_inital_guesses(tpf.flux)
+    def do_photometry(self, tpf, x0=None, **kwargs):
+        """
+        Performs photometry on a Target Pixel File.
+
+        Parameters
+        ----------
+        tpf : instance of KeplerTargetPixelFile
+            A target pixel file
+        x0 : array-like or None
+            Initial guesses on the parameters.
+        kwargs : dict
+            Dictionary of additional parameters to be passed to
+            `scipy.optimize.minimize`.
+        """
+        if x0 is None:
+            x0 = self.priors.mean
 
         for t in range(len(tpf.time)):
-            logL = self.loss_function(tpf.flux[t], self.prf_model)
-            opt_result = logL.fit(*initial_guesses).x
-            residuals_opt_result = tpf.flux - self.prf_model(*opt_result)
-            initial_guesses = opt_result
-            self.opt_params.append(opt_result)
-            self.residuals.append(residuals_opt_result)
-            self.uncertainties.append(logL.uncertainties())
-
-        self.opt_params = self.opt_params.reshape((tpf.shape[0], len(initial_guesses)))
-        self.uncertainties = self.uncertainties.reshape((tpf.shape[0], len(initial_guesses)))
+            loss = self.loss_function(tpf.flux[t], self.scene_model, prior=self.priors)
+            opt_params = loss.fit(x0=x0, **kwargs).x
+            residuals = tpf.flux[t] - self.prf_model(*opt_params)
+            self.opt_params.append(opt_params)
+            self.residuals.append(residuals)
+        self.opt_params = self.opt_params.reshape((tpf.shape[0], len(x0)))
+        self.residuals = self.residuals.reshape(tpf.shape)
 
     def generate_residuals_movie(self):
         pass
