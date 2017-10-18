@@ -60,3 +60,4 @@ def test_kepfold():
     assert len(h[-1].data['FLUX_BINNED']) == 1000
     delete("kepperiodogram.fits", "kepperiodogram.log", False)
     delete("kepfold.fits", "kepfold.log", False)
+    h.close()
