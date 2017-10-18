@@ -120,8 +120,8 @@ class KeplerSceneModel(object):
         self.n_sources = n_sources
         self.bkg_model = bkg_model
 
-    def __call__(self, *args):
-        return self.evaluate(*args)
+    def __call__(self, *params):
+        return self.evaluate(*params)
 
     def evaluate(self, flux, centroid_col, centroid_row, scale_col,
                  scale_row, bkg_params):
@@ -186,8 +186,11 @@ class KeplerPRF(object):
         self.row = row
         self.col_coord, self.row_coord, self.interpolate = self._prepare_prf()
 
-    def __call__(self, *args):
-        return self.evaluate(*args)
+    def __call__(self, *params):
+        return self.evaluate(*params)
+
+    def evaluate(self, *params):
+        return self.prf_to_detector(*params)
 
     def prf_to_detector(self, flux, centroid_col, centroid_row, scale_col,
                         scale_row):
@@ -214,9 +217,6 @@ class KeplerPRF(object):
         self.prf_model = flux * self.interpolate(delta_row * scale_row,
                                                  delta_col * scale_col)
         return self.prf_model
-
-    def evaluate(self, *args):
-        return self.prf_to_detector(*args)
 
     def _read_prf_calibration_file(self, path, ext):
         prf_cal_file = pyfits.open(path)

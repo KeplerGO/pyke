@@ -4,7 +4,7 @@ import numpy as np
 from astropy.io import fits
 from astropy.utils.data import get_pkg_data_filename
 from oktopus import PoissonPosterior, UniformPrior, GaussianPrior, JointPrior
-from ..kepler_prf import KeplerPRF, KeplerSceneModel, estimate_initial_guesses
+from ..kepler_prf import KeplerPRF, KeplerSceneModel, get_initial_guesses
 
 
 @pytest.mark.skip(reason="no way of currently testing this")
@@ -30,9 +30,9 @@ def test_prf_vs_aperture_photometry():
                     column=col, row=row,
                     shape=tpf[1].data.shape)
     scene = KeplerSceneModel(prf_model=prf, n_sources=1)
-    fluxo, colo, rowo, _ = estimate_initial_guesses(data=tpf[1].data,
-                                                    ref_col=prf.col_coord[0],
-                                                    ref_row=prf.row_coord[0])
+    fluxo, colo, rowo, _ = get_initial_guesses(data=tpf[1].data,
+                                               ref_col=prf.col_coord[0],
+                                               ref_row=prf.row_coord[0])
     bkgo = np.median(tpf[1].data)
     aperture_flux = tpf[1].data.sum() - bkgo
     prior = JointPrior(GaussianPrior(mean=fluxo, var=math.sqrt(fluxo)),
