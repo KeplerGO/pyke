@@ -99,7 +99,7 @@ def kepclip(infile, ranges, outfile=None, datacol='SAP_FLUX', plot=False,
     # read time and flux columns
     barytime = kepio.readtimecol(infile, table, logfile, verbose)
 
-    barytime = barytime + bjdref   
+    barytime = barytime + bjdref
 
     #Test file type is LC or TPF:
 
@@ -137,7 +137,7 @@ def kepclip(infile, ranges, outfile=None, datacol='SAP_FLUX', plot=False,
         kepkey.history(call, instr[0], outfile, logfile, verbose)
         # comment keyword in output file
         print("Writing output file {}...".format(outfile))
-       
+
         # write output file
         instr[1].data = table[:naxis2]
         comment = 'NaN cadences removed from data'

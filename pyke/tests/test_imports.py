@@ -23,7 +23,7 @@ def test_import():
     from .. import kepflatten
     from .. import kepfold
     from .. import kepfourier
-    from .. import kepft
+    from .. import kepperiodogram
     from .. import kepfunc
     from .. import kephead
     from .. import kepimages
@@ -46,6 +46,10 @@ def test_import():
     from .. import keptrial
     from .. import keptrim
     from .. import kepwindow
+    from .. import lightcurve
+    from .. import targetpixelfile
+    from .. import kepler_prf
+
 
 @pytest.mark.skipif('not HAS_MDP')
 def test_import_keppca():

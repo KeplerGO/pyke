@@ -1,8 +1,9 @@
 from .utils import PyKEArgumentHelpFormatter
+from . import kepio, kepmsg, kepkey, kepfunc, kepstat
 from astropy.io import fits as pyfits
 from matplotlib import pyplot as plt
 import numpy as np
-from . import kepio, kepmsg, kepkey, kepfunc, kepstat
+from tqdm import tqdm
 
 
 __all__ = ['kepfilter']

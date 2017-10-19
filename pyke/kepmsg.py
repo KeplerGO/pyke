@@ -1,22 +1,22 @@
 import sys
 import time
+import logging
 
 def log(filename, message, verbose):
     """write message to log file and shell."""
     if verbose:
         print(message)
-        if filename:
-            output = open(filename, 'a')
-            output.write(message + '\n')
-            output.close()
+    if filename:
+        output = open(filename, 'a')
+        output.write(message + '\n')
+        output.close()
 
 def err(filename, message, verbose):
-    if verbose:
-        log(filename, message, verbose)
+    log(filename, message, verbose)
     raise Exception(message)
 
-def warn(filename, message):
-    log(filename, message, True)
+def warn(filename, message, verbose):
+    log(filename, message, verbose)
 
 def exit(message):
     """write error message to shell and exit"""

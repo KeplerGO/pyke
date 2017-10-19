@@ -387,7 +387,7 @@ def keppca(infile, outfile=None, maskfile='ALL', components='1-3', plotpca=False
     for k in range(0, nrem):
         fluxcor = fluxcor - c[k] * model[:, pcarem[k]]
 
-    normfluxcor = fluxcor / np.mean(reject_outliers(fluxcor, 2))
+    normfluxcor = fluxcor / np.nanmean(reject_outliers(fluxcor, 2))
 
     # input file data
     cards0 = instr[0].header.cards
@@ -747,7 +747,7 @@ def keppca(infile, outfile=None, maskfile='ALL', components='1-3', plotpca=False
 def reject_outliers(data, m):
     """Outlier rejection for computing robust mean"""
     try:
-        return data[np.abs(data - np.mean(data)) < m * np.std(data)]
+        return data[np.abs(data - np.nanmean(data)) < m * np.std(data)]
     except:
         print("Warning: Could not reject outliers.")
         return data
@@ -757,7 +757,7 @@ def mad(data):
     Mean absolute deviation function used for fitting the PCA components to
     the data and subtracting them out
     """
-    return np.mean(np.absolute(data - np.mean(data)))
+    return np.nanmean(np.absolute(data - np.nanmean(data)))
 
 def keppca_main():
     import argparse

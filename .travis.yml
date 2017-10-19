@@ -4,7 +4,6 @@ python:
   - 3.5
   - 3.6
 before_install:
-  - sudo apt-get install -y python-numpy python-scipy
   - pip install codecov
   - pip install pytest-cov
 install:
@@ -15,7 +14,7 @@ before_script: # configure a headless display to test plot generation
   - sleep 3 # give xvfb some time to start
 # command to run tests
 script:
-  - pytest --cov .
+  - pytest
 
 after_success:
   - codecov

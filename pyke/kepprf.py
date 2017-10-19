@@ -1,4 +1,3 @@
-from .utils import PyKEArgumentHelpFormatter
 import numpy as np
 import time
 import math
@@ -11,6 +10,7 @@ from scipy.optimize import fmin_powell
 from scipy.interpolate import RectBivariateSpline
 from scipy.ndimage import interpolation
 from . import kepio, kepmsg, kepplot, kepfunc, kepstat
+from .utils import PyKEArgumentHelpFormatter
 
 
 __all__ = ['kepprf']
@@ -256,8 +256,6 @@ def kepprf(infile, prfdir, frameno, columns, rows, fluxes, background=False,
     # construct input pixel image
     flux = fluxpixels[frameno-1,:]
     ferr = errpixels[frameno-1,:]
-    DATx = np.arange(column,column + xdim)
-    DATy = np.arange(row, row + ydim)
 
     # image scale and intensity limits of pixel data
     n = 0
@@ -269,53 +267,11 @@ def kepprf(infile, prfdir, frameno, columns, rows, fluxes, background=False,
             ERRimg[i, j] = ferr[n]
             n += 1
 
-    # determine suitable PRF calibration file
-    if int(module) < 10:
-        prefix = 'kplr0'
-    else:
-        prefix = 'kplr'
-    prfglob = prfdir + '/' + prefix + str(module) + '.' + str(output) + '*' + '_prf.fits'
-    try:
-        prffile = glob.glob(prfglob)[0]
-    except:
-        errmsg = "ERROR -- KEPPRF: No PRF file found in {0}".format(prfdir)
-        kepmsg.err(logfile, errmsg, verbose)
-
-    # read PRF images
-    prfn = [0,0,0,0,0]
-    crpix1p = np.zeros(5, dtype='float32')
-    crpix2p = np.zeros(5, dtype='float32')
-    crval1p = np.zeros(5, dtype='float32')
-    crval2p = np.zeros(5, dtype='float32')
-    cdelt1p = np.zeros(5, dtype='float32')
-    cdelt2p = np.zeros(5, dtype='float32')
-    for i in range(5):
-        prfn[i], crpix1p[i], crpix2p[i], crval1p[i], crval2p[i], cdelt1p[i], cdelt2p[i] = \
-            kepio.readPRFimage(prffile, i+1, logfile, verbose)
-    prfn = np.array(prfn)
-    PRFx = np.arange(0.5, np.shape(prfn[0])[1] + 0.5)
-    PRFy = np.arange(0.5, np.shape(prfn[0])[0] + 0.5)
-    PRFx = (PRFx - np.size(PRFx) / 2) * cdelt1p[0]
-    PRFy = (PRFy - np.size(PRFy) / 2) * cdelt2p[0]
-
-    # interpolate the calibrated PRF shape to the target position
-    prf = np.zeros(np.shape(prfn[0]), dtype='float32')
-    prfWeight = np.zeros(5, dtype='float32')
-    for i in range(5):
-        prfWeight[i] = math.sqrt((column - crval1p[i])**2 + (row - crval2p[i])**2)
-        if prfWeight[i] == 0.0:
-            prfWeight[i] = 1.0e-6
-        prf = prf + prfn[i] / prfWeight[i]
-    prf = prf / np.nansum(prf) / cdelt1p[0] / cdelt2p[0]
-
-    # location of the data image centered on the PRF image (in PRF pixel units)
-    prfDimY = int(ydim / cdelt1p[0])
-    prfDimX = int(xdim / cdelt2p[0])
-    PRFy0 = int(np.round((np.shape(prf)[0] - prfDimY) / 2))
-    PRFx0 = int(np.round((np.shape(prf)[1] - prfDimX) / 2))
-
-    # interpolation function over the PRF
-    splineInterpolation = RectBivariateSpline(PRFx,PRFy,prf)
+    # read and interpolate PRF
+    (splineInterpolation, DATx, DATy, prf, _, _, PRFx0, PRFy0, cdelt1p,
+        cdelt2p, prfDimX, prfDimY) = kepfunc.read_and_interpolate_prf(
+        prfdir=prfdir, module=module, output=output, column=column, row=row,
+        xdim=xdim, ydim=ydim, verbose=verbose, logfile=logfile)
 
     # construct mesh for background model
     if background:
@@ -435,11 +391,11 @@ def kepprf(infile, prfdir, frameno, columns, rows, fluxes, background=False,
     kepmsg.log(logfile, "            Total flux in aperture = {0} e-/s"
             .format(FluxInAperAll), True)
     kepmsg.log(logfile, "           Target flux in aperture = {0} e-/s"
-            .format(FluxInAperOne),True)
+            .format(FluxInAperOne), True)
     kepmsg.log(logfile, "  Target flux fraction in aperture = {0} %"
-            .format(FluxFraction * 100.0),True)
+            .format(FluxFraction * 100.0), True)
     kepmsg.log(logfile, "Contamination fraction in aperture = {0} %"
-            .format(Contamination * 100.0),True)
+            .format(Contamination * 100.0), True)
 
     # construct model PRF in detector coordinates
     PRFfit = PRFall + 0.0

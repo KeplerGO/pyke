@@ -130,7 +130,7 @@ def kepbls(infile, outfile=None, datacol='DETSAP_FLUX',
             + ' verbose={}'.format(verbose)
             + ' logfile={}'.format(logfile))
 
-    kepmsg.log(logfile,call+'\n',verbose)
+    kepmsg.log(logfile, call+'\n', verbose)
 
     # start time
     kepmsg.clock('KEPBLS started at', logfile, verbose)
@@ -140,12 +140,12 @@ def kepbls(infile, outfile=None, datacol='DETSAP_FLUX',
         message = ('WARNING -- KEPBLS: {}'
                    ' hours transit duration < 1 phase bin when P = {} days.'
                    .format(maxdur, maxper))
-        kepmsg.warn(logfile, message)
+        kepmsg.warn(logfile, message, verbose)
 
     if overwrite:
         kepio.overwrite(outfile, logfile, verbose)
     if kepio.fileexists(outfile):
-        message = 'ERROR -- KEPBLS: ' + outfile + ' exists. Use overwrite=True'
+        message = 'ERROR -- KEPBLS: {} exists. Use overwrite=True'.format(outfile)
         kepmsg.err(logfile, message, verbose)
 
     # open input file
@@ -155,16 +155,16 @@ def kepbls(infile, outfile=None, datacol='DETSAP_FLUX',
     # fudge non-compliant FITS keywords with no values
     instr = kepkey.emptykeys(instr, infile, logfile, verbose)
     # read table structure
-    table = kepio.readfitstab(infile,instr[1],logfile,verbose)
-    # filter input data table
-    work1 = np.array([table.field('time'), table.field(datacol),
-                      table.field(errcol)])
-    work1 = np.rot90(work1, 3)
-    work1 = work1[~np.isnan(work1).any(1)]
+    table = kepio.readfitstab(infile, instr[1], logfile, verbose)
     # read table columns
-    intime = work1[:, 2] + bjdref
-    indata = work1[:, 1]
-    inerr = work1[:, 0]
+    intime = np.array(table.field('time')) + bjdref
+    indata = np.array(table.field(datacol))
+    inerr = np.array(table.field(errcol))
+    # filter input data table
+    good_data_mask = (intime == intime) & (indata == indata)
+    indata = indata[good_data_mask]
+    intime = intime[good_data_mask]
+    inerr = inerr[good_data_mask]
 
     # test whether the period range is sensible
     tr = intime[-1] - intime[0]
@@ -174,8 +174,8 @@ def kepbls(infile, outfile=None, datacol='DETSAP_FLUX',
         kepmsg.err(logfile, message, verbose)
 
     # prepare time series
-    work1 = intime - intime[0]
-    work2 = indata - np.mean(indata)
+    time_arr = intime - intime[0]
+    flux_arr = indata - np.nanmean(indata)
 
     # start period search
     srMax = np.array([], dtype='float32')
@@ -183,10 +183,8 @@ def kepbls(infile, outfile=None, datacol='DETSAP_FLUX',
     transitPhase = np.array([], dtype='float32')
     dPeriod = (maxper - minper) / float(nsearch)
     trialPeriods = np.arange(minper, maxper + dPeriod, dPeriod, dtype='float32')
-    complete = 0
     print(' ')
     for trialPeriod in tqdm(trialPeriods):
-        complete += 1
         srMax = np.append(srMax, 0.0)
         transitDuration = np.append(transitDuration, np.nan)
         transitPhase = np.append(transitPhase, np.nan)
@@ -203,15 +201,15 @@ def kepbls(infile, outfile=None, datacol='DETSAP_FLUX',
         # compute folded time series with trial period
         work4 = np.zeros(nbins, dtype='float32')
         work5 = np.zeros(nbins, dtype='float32')
-        phase = np.array(((work1 * trialFrequency)
-                         - np.floor(work1 * trialFrequency)) * nbins,
+        phase = np.array(((time_arr * trialFrequency)
+                         - np.floor(time_arr * trialFrequency)) * nbins,
                          dtype='int')
-        ptuple = np.array([phase, work2, inerr])
+        ptuple = np.array([phase, flux_arr, inerr])
         ptuple = np.rot90(ptuple, 3)
         phsort = np.array(sorted(ptuple, key=lambda ph: ph[2]))
         for i in range(nbins):
-            elements = np.nonzero(phsort[:,2] == float(i))[0]
-            work4[i] = np.mean(phsort[elements, 1])
+            elements = np.nonzero(phsort[:, 2] == float(i))[0]
+            work4[i] = np.nanmean(phsort[elements, 1])
             work5[i] = (math.sqrt(np.sum(np.power(phsort[elements, 0], 2))
                         / len(elements)))
 

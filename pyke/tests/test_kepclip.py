@@ -34,7 +34,7 @@ def test_kepclip_lc():
 	assert len(h) == len(j)
 
 def test_kepclip_tpf():
-	
+
 	'''
 	Test the TPF clipping
 	Uses a clipped TPF of Tabby's star.
@@ -43,7 +43,7 @@ def test_kepclip_tpf():
 	h = fits.open(TPF_filename)
 	t = h[1].data['TIME'][0:2]
 	ranges = '{:12.12f}'.format(t[0] + 2454833.) + ', {:12.12f}'.format(t[-1] + 2454833.)
-	
+
 	kepclip(infile = TPF_filename, outfile = OUT_filename, ranges = ranges, overwrite = True)
 	j = fits.open(OUT_filename)
 	#The new file should be smaller
@@ -58,10 +58,9 @@ def test_kepclip_tpf():
 	#Test if we clip out the middle file it also works
 	t = h[1].data['TIME'][4:15]
 	ranges = '{:12.12f}'.format(t[0] + 2454833.) + ', {:12.12f}'.format(t[-1] + 2454833.)
-	
+
 	kepclip(infile = TPF_filename, outfile = OUT_filename, ranges = ranges, overwrite = True)
 	j = fits.open(OUT_filename)
 
 	#The middle frame should be identical
 	assert np.allclose(h[1].data['FLUX'][4], j[1].data['FLUX'][0])
-

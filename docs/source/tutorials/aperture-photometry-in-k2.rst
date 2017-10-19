@@ -11,7 +11,8 @@ This mask will be later used to define a photometric extraction aperture.
 The information about the aperture is stored in an ASCII file called
 ``maskfile.txt`` (this name can be changed using the ``--maskfile`` option).
 The required arguments for this tool are the name of the target pixel file
-(TPF) and the frame number.
+(TPF) and the frame number. Let's go ahead, open a terminal session, download
+a TPF using ``wget``, and visualizing the 3000th cadence using ``kepmask``:
 
 .. code-block:: bash
 
@@ -68,7 +69,7 @@ correction factors.
 
     $ kepsff ktwo202073445-c00_lpd-targ-kepextract-kepclip-kepflatten.fits --datacol DETSAP_FLUX --stepsize 5. --npoly_ardx 4 --sigma_dsdt 10. --overwrite
 
-    $ kepdraw ktwo202073445-c00_lpd-targ-kepextract-kepclip-kepflatten-kepsff.fits--datacol DETSAP_FLUX
+    $ kepdraw ktwo202073445-c00_lpd-targ-kepextract-kepclip-kepflatten-kepsff.fits --datacol DETSAP_FLUX
 
 .. image:: ../_static/images/tutorials/example_e/kepsff_lc.png
 

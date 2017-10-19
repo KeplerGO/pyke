@@ -1,17 +1,17 @@
-from .utils import PyKEArgumentHelpFormatter
 import math
 import multiprocessing
 import itertools
-import numpy as np
 import glob
 import sys
 import time
 import re
+import numpy as np
 from matplotlib import pyplot as plt
 from astropy.io import fits as pyfits
 from scipy.optimize import fmin_powell
 from scipy.interpolate import RectBivariateSpline
 from . import kepio, kepmsg, kepkey, kepplot, kepfit, kepfunc
+from .utils import PyKEArgumentHelpFormatter
 
 
 __all__ = ['kepprfphot']
@@ -180,47 +180,18 @@ def kepprfphot(infile, prfdir, columns, rows, fluxes, border=0,
     # start time
     kepmsg.clock('KEPPRFPHOT started at', logfile, verbose)
 
-    # number of sources
-    work = fluxes.strip()
-    work = re.sub(' ', ',', work)
-    work = re.sub(';', ',', work)
-    nsrc = len(work.split(','))
-
-    # construct inital guess vector for fit
-    guess = []
-    try:
-        f = fluxes.strip().split(',')
-        x = columns.strip().split(',')
-        y = rows.strip().split(',')
-        for i in range(len(f)):
-            f[i] = float(f[i])
-    except:
-        f = fluxes
-        x = columns
-        y = rows
+    f = fluxes
+    x = columns
+    y = rows
     nsrc = len(f)
-    for i in range(nsrc):
-        try:
-            guess.append(float(f[i]))
-        except:
-            message = 'ERROR -- KEPPRF: Fluxes must be floating point numbers'
-            kepmsg.err(logfile, message, verbose)
+
     if len(x) != nsrc or len(y) != nsrc:
-        message = ('ERROR -- KEPFIT:FITMULTIPRF: Guesses for rows, columns'
-                   ' and fluxes must have the same number of sources')
-        kepmsg.err(logfile, message, verbose)
-    for i in range(nsrc):
-        try:
-            guess.append(float(x[i]))
-        except:
-            message = 'ERROR -- KEPPRF: Columns must be floating point numbers'
-            kepmsg.err(logfile, message, verbose)
-    for i in range(nsrc):
-        try:
-            guess.append(float(y[i]))
-        except:
-            message = 'ERROR -- KEPPRF: Rows must be floating point numbers'
-            kepmsg.err(logfile,message,verbose)
+        errmsg = ("ERROR -- KEPFIT:FITMULTIPRF: Guesses for rows, columns and "
+                  "fluxes must have the same number of sources")
+        kepmsg.err(logfile, errmsg, verbose)
+
+    guess = list(f) + list(x) + list(y)
+
     if background:
         if border == 0:
             guess.append(0.0)
@@ -228,16 +199,15 @@ def kepprfphot(infile, prfdir, columns, rows, fluxes, border=0,
             for i in range((border + 1) * 2):
                 guess.append(0.0)
     if focus:
-        guess.append(1.0); guess.append(1.0); guess.append(0.0)
+        guess = guess + [1.0, 1.0, 0.0]
 
     # overwrite output file
     for i in range(nsrc):
-        outfile = '{0}_{1}.fits'.format(outfile, i)
-        print("Writing output file {}...".format(outfile))
+        outfilename = '{0}_{1}.fits'.format(outfile, i)
         if overwrite:
-            kepio.overwrite(outfile, logfile, verbose)
-        if kepio.fileexists(outfile):
-            errmsg = 'ERROR -- KEPPRFPHOT: {} exists. Use --overwrite'.format(outfile)
+            kepio.overwrite(outfilename, logfile, verbose)
+        if kepio.fileexists(outfilename):
+            errmsg = 'ERROR -- KEPPRFPHOT: {} exists. Use --overwrite'.format(outfilename)
             kepmsg.err(logfile, errmsg, verbose)
 
     # open TPF FITS file
@@ -301,55 +271,17 @@ def kepprfphot(infile, prfdir, columns, rows, fluxes, border=0,
         print('     Output: {}'.format(output))
         print('')
 
-    # determine suitable PRF calibration file
-    if int(module) < 10:
-        prefix = 'kplr0'
-    else:
-        prefix = 'kplr'
-    prfglob = prfdir + '/' + prefix + str(module) + '.' + str(output) + '*' + '_prf.fits'
-    try:
-        prffile = glob.glob(prfglob)[0]
-    except:
-        message = 'ERROR -- KEPPRFPHOT: No PRF file found in ' + prfdir
-        kepmsg.err(logfile, message, verbose)
+    # read PRF file and interpolate
+    result = kepfunc.read_and_interpolate_prf(prfdir=prfdir, module=module,
+                                              output=output, column=column,
+                                              row=row, xdim=xdim, ydim=ydim,
+                                              verbose=verbose, logfile=logfile)
+    splineInterpolation = result[0]
+    DATx = result[1]
+    DATy = result[2]
+    PRFx = result[4]
+    PRFy = result[5]
 
-    # read PRF images
-    prfn = [0, 0, 0, 0, 0]
-    crpix1p = np.zeros(5, dtype='float32')
-    crpix2p = np.zeros(5, dtype='float32')
-    crval1p = np.zeros(5, dtype='float32')
-    crval2p = np.zeros(5, dtype='float32')
-    cdelt1p = np.zeros(5, dtype='float32')
-    cdelt2p = np.zeros(5, dtype='float32')
-    for i in range(5):
-        prfn[i], crpix1p[i], crpix2p[i], crval1p[i], crval2p[i], cdelt1p[i], cdelt2p[i] \
-            = kepio.readPRFimage(prffile, i+1, logfile, verbose)
-    PRFx = np.arange(0.5, np.shape(prfn[0])[1] + 0.5)
-    PRFy = np.arange(0.5, np.shape(prfn[0])[0] + 0.5)
-    PRFx = (PRFx - np.size(PRFx) / 2) * cdelt1p[0]
-    PRFy = (PRFy - np.size(PRFy) / 2) * cdelt2p[0]
-
-    # interpolate the calibrated PRF shape to the target position
-    prf = np.zeros(np.shape(prfn[0]), dtype='float32')
-    prfWeight = np.zeros(5, dtype='float32')
-    for i in range(5):
-        prfWeight[i] = math.sqrt((column - crval1p[i]) ** 2 + (row - crval2p[i]) ** 2)
-        if prfWeight[i] == 0.0:
-            prfWeight[i] = 1.0e6
-        prf = prf + prfn[i] / prfWeight[i]
-    prf = prf / np.nansum(prf)
-    prf = prf / cdelt1p[0] / cdelt2p[0]
-
-    # location of the data image centered on the PRF image (in PRF pixel units)
-    prfDimY = ydim / cdelt1p[0]
-    prfDimX = xdim / cdelt2p[0]
-    PRFy0 = (np.shape(prf)[0] - prfDimY) / 2
-    PRFx0 = (np.shape(prf)[1] - prfDimX) / 2
-    # construct input pixel image
-    DATx = np.arange(column, column + xdim)
-    DATy = np.arange(row, row + ydim)
-    # interpolation function over the PRF
-    splineInterpolation = RectBivariateSpline(PRFx, PRFy, prf, kx=3, ky=3)
     # construct mesh for background model
     bx = np.arange(1., float(xdim + 1))
     by = np.arange(1., float(ydim + 1))
@@ -501,13 +433,13 @@ def kepprfphot(infile, prfdir, columns, rows, fluxes, border=0,
     flux, OBJx, OBJy = [], [], []
     na = np.shape(ans)[1]
     for i in range(nsrc):
-        flux.append(ans[i,:])
+        flux.append(ans[i, :])
         OBJx.append(ans[nsrc + i, :])
         OBJy.append(ans[nsrc * 2 + i, :])
     try:
         bterms = border + 1
         if bterms == 1:
-            b = ans[nsrc*3,:]
+            b = ans[nsrc * 3, :]
         else:
             b = np.array([])
             bkg = []
@@ -515,7 +447,7 @@ def kepprfphot(infile, prfdir, columns, rows, fluxes, border=0,
                 bcoeff = np.array([ans[nsrc * 3:nsrc * 3 + bterms, i],
                                    ans[nsrc * 3 + bterms:nsrc * 3 + bterms * 2, i]])
                 bkg.append(kepfunc.polyval2d(xx, yy, bcoeff))
-                b = np.append(b,nanmean(bkg[-1].reshape(bkg[-1].size)))
+                b = np.append(b, np.nanmean(bkg[-1].reshape(bkg[-1].size)))
     except:
         b = np.zeros(na)
     if focus:
@@ -606,7 +538,7 @@ def kepprfphot(infile, prfdir, columns, rows, fluxes, border=0,
                                                   cards0[i].comment)
             else:
                 hdu0.header.cards[cards0[i].keyword].comment = cards0[i].comment
-        kepkey.history(call, hdu0, outfile, logfile, verbose)
+        kepkey.history(call, hdu0, outfilename, logfile, verbose)
         outstr = pyfits.HDUList(hdu0)
 
         # construct output light curve extension
@@ -671,7 +603,8 @@ def kepprfphot(infile, prfdir, columns, rows, fluxes, border=0,
                 hdu2.header.cards[cards2[i].keyword].comment = cards2[i].comment
         outstr.append(hdu2)
         # write output file
-        outstr.writeto(outfile + '_' + str(j) + '.fits',checksum=True)
+        print("Writing output file {}...\n".format(outfile + '_' + str(j) + '.fits'))
+        outstr.writeto(outfile + '_' + str(j) + '.fits', checksum=True)
         # close input structure
         struct.close()
 
@@ -1125,12 +1058,12 @@ def kepprfphot_main():
                         type=str)
     parser.add_argument('--columns',
                         help='Column number of each source to be fit',
-                        type=str)
+                        nargs='+', type=float)
     parser.add_argument('--rows', help='Row number of each source to be fit',
-                        type=str)
+                        nargs='+', type=float)
     parser.add_argument('--fluxes',
                         help='Relative flux of each source to be fit',
-                        type=str)
+                        nargs='+', type=float)
     parser.add_argument('--border',
                         help='Order of background polynmial fit', default=0,
                         type=int)

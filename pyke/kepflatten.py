@@ -174,7 +174,7 @@ def kepflatten(infile, outfile=None, datacol='PDCSAP_FLUX',
     except:
         errmsg = ('WARNING -- KEPFLATTEN: cannot find or read error column {}'
                   .format(errcol))
-        kepmsg.warn(logfile, errmsg)
+        kepmsg.warn(logfile, errmsg, verbose)
         errcol = 'None'
     if errcol.lower() == 'none' or errcol == 'PSF_FLUX_ERR':
         err = datac * cadence
@@ -251,9 +251,9 @@ def kepflatten(infile, outfile=None, datacol='PDCSAP_FLUX',
         # rotate y labels by 90 deg
         labels = ax.get_yticklabels()
         plt.setp(plt.gca(), xticklabels=[])
-        plt.plot(ptime[1:-1], pout[1:-1], color='#0000ff', linestyle='-',
+        plt.plot(ptime[1:-1], pout[1:-1], color='#363636', linestyle='-',
                  linewidth=1.0)
-        plt.fill(ptime, pout, color='#ffff00', linewidth=0.0, alpha=0.2)
+        plt.fill(ptime, pout, color='#a8a7a7', linewidth=0.0, alpha=0.2)
         plt.ylabel(ylab, {'color' : 'k'})
         plt.grid()
 
@@ -287,7 +287,7 @@ def kepflatten(infile, outfile=None, datacol='PDCSAP_FLUX',
         except:
             message  = ('WARNING -- KEPFLATTEN: could not fit range '
                         + str(intime[cstep1[i]]) + '-' + str(intime[cstep2[i]]))
-            kepmsg.warn(None, message)
+            kepmsg.warn(logfile, message, verbose)
 
     # find mean fit for each timestamp
     for i in range(len(indata)):
@@ -296,7 +296,8 @@ def kepflatten(infile, outfile=None, datacol='PDCSAP_FLUX',
     masterfit[-1] = masterfit[-4] #fudge
     masterfit[-2] = masterfit[-4] #fudge
     masterfit[-3] = masterfit[-4] #fudge
-    plt.plot(intime - intime0, masterfit / 10 ** nrm, 'g', lw=3)
+    if plot:
+        plt.plot(intime - intime0, masterfit / 10 ** nrm, 'b')
 
     # reject outliers
     rejtime, rejdata = [], []
@@ -309,7 +310,7 @@ def kepflatten(infile, outfile=None, datacol='PDCSAP_FLUX',
     rejtime = np.array(rejtime, dtype='float64')
     rejdata = np.array(rejdata, dtype='float32')
     if plot:
-        plt.plot(rejtime - intime0, rejdata / 10 ** nrm, 'ro')
+        plt.plot(rejtime - intime0, rejdata / 10 ** nrm, 'ro', markersize=2)
     # new data for output file
     outdata = indata / masterfit
     outerr = inerr / masterfit
@@ -334,9 +335,9 @@ def kepflatten(infile, outfile=None, datacol='PDCSAP_FLUX',
         yr = ymax - ymin
         pout = np.insert(pout, [0], [0.0])
         pout = np.append(pout, 0.0)
-        plt.plot(ptime[1:-1], pout[1:-1], color='#0000ff', linestyle='-',
+        plt.plot(ptime[1:-1], pout[1:-1], color='#363636', linestyle='-',
                  linewidth=1.0)
-        plt.fill(ptime, pout, color='#ffff00', linewidth=0.0, alpha=0.2)
+        plt.fill(ptime, pout, color='#a8a7a7', linewidth=0.0, alpha=0.2)
         plt.xlabel(xlab, {'color' : 'k'})
         plt.ylabel(ylab, {'color' : 'k'})
         plt.grid()

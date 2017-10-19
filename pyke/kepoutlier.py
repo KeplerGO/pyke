@@ -125,7 +125,7 @@ def kepoutlier(infile, outfile=None, datacol='SAP_FLUX', nsig=3.0, stepsize=1.0,
     if kepio.fileexists(outfile):
         errmsg = ('ERROR -- KEPOUTLIER: {} exists. Use overwrite=True'
                   .format(outfile))
-        kepmsg.err(logfile, message, verbose)
+        kepmsg.err(logfile, errmsg, verbose)
 
     # open input file
     instr = pyfits.open(infile)
@@ -145,21 +145,11 @@ def kepoutlier(infile, outfile=None, datacol='SAP_FLUX', nsig=3.0, stepsize=1.0,
     try:
         nanclean = instr[1].header['NANCLEAN']
     except:
-        naxis2 = 0
-        try:
-            for i in tqdm(range(len(table.field(0)))):
-                if (np.isfinite(table.field('barytime')[i])
-                    and np.isfinite(table.field(datacol)[i])):
-                    table[naxis2] = table[i]
-                    naxis2 += 1
-                    instr[1].data = table[:naxis2]
-        except:
-            for i in tqdm(range(len(table.field(0)))):
-                if (np.isfinite(table.field('time')[i])
-                    and np.isfinite(table.field(datacol)[i])):
-                    table[naxis2] = table[i]
-                    naxis2 += 1
-                    instr[1].data = table[:naxis2]
+        time = kepio.readtimecol(infile, table, logfile, verbose)
+        flux = kepio.readfitscol(infile, table, datacol, logfile, verbose)
+        finite_data_mask = np.isfinite(time) & np.isfinite(flux) & (flux != 0)
+        table = table[finite_data_mask]
+        instr[1].data = table
         comment = 'NaN cadences removed from data'
         kepkey.new('NANCLEAN', True, comment, instr[1], outfile, logfile,
                    verbose)
@@ -272,12 +262,12 @@ def kepoutlier(infile, outfile=None, datacol='SAP_FLUX', nsig=3.0, stepsize=1.0,
                 mastersigma[j] = 1.0e10
             message = ('WARNING -- KEPOUTLIER: could not fit range '
                        + str(intime[cstep1[i]]) + '-' + str(intime[cstep2[i]]))
-            kepmsg.warn(None, message)
+            kepmsg.warn(logfile, message, verbose)
 
     # reject outliers
     rejtime, rejdata = [], []
     naxis2 = 0
-    for i in range(len(masterfit)):
+    for i in tqdm(range(len(masterfit))):
         if (abs(indata[i] - masterfit[i]) > nsig * mastersigma[i]
             and i in cadencelis):
             rejtime.append(intime[i])
@@ -291,19 +281,20 @@ def kepoutlier(infile, outfile=None, datacol='SAP_FLUX', nsig=3.0, stepsize=1.0,
             table[naxis2] = table[i]
             naxis2 += 1
     instr[1].data = table[:naxis2]
-    rejtime = np.array(rejtime, dtype='float64')
-    rejdata = np.array(rejdata, dtype='float32')
-    plt.plot(rejtime - intime0, rejdata / 10 ** nrm, 'ro')
 
-    # plot ranges
-    plt.xlim(xmin - xr * 0.01, xmax + xr * 0.01)
-    if ymin >= 0.0:
-        plt.ylim(ymin - yr * 0.01, ymax + yr * 0.01)
-    else:
-        plt.ylim(1.0e-10, ymax + yr * 0.01)
+    if plot:
+        rejtime = np.array(rejtime, dtype='float64')
+        rejdata = np.array(rejdata, dtype='float32')
+        plt.plot(rejtime - intime0, rejdata / 10 ** nrm, 'ro')
+        # plot ranges
+        plt.xlim(xmin - xr * 0.01, xmax + xr * 0.01)
+        if ymin >= 0.0:
+            plt.ylim(ymin - yr * 0.01, ymax + yr * 0.01)
+        else:
+            plt.ylim(1.0e-10, ymax + yr * 0.01)
 
-    # render plot
-    plt.show()
+        # render plot
+        plt.show()
     # write output file
     print("Writing output file {}...".format(outfile))
     instr.writeto(outfile)

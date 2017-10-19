@@ -3,9 +3,13 @@ import os
 import sys
 from setuptools import setup
 
-if "publish" in sys.argv[-1]:
-    os.system("python setup.py sdist upload")
+# Prepare and send a new release to PyPI
+if "release" in sys.argv[-1]:
+    os.system("python setup.py sdist")
+    os.system("twine upload dist/*")
+    os.system("rm -rf dist/pyketools*")
     sys.exit()
+
 
 # Load the __version__ variable without importing the package already
 exec(open('pyke/version.py').read())
@@ -24,7 +28,7 @@ entry_points = {'console_scripts': [
         'kepfilter = pyke.kepfilter:kepfilter_main',
         'kepflatten = pyke.kepflatten:kepflatten_main',
         'kepfold = pyke.kepfold:kepfold_main',
-        'kepft = pyke.kepft:kepft_main',
+        'kepperiodogram = pyke.kepperiodogram:kepperiodogram_main',
         'kephead = pyke.kephead:kephead_main',
         'kepimages = pyke.kepimages:kepimages_main',
         'kepmask = pyke.kepmask:kepmask_main',
@@ -46,16 +50,17 @@ entry_points = {'console_scripts': [
 
 setup(name='pyketools',
       version=__version__,
-      description="A backwards-incompatible, python3 compatible, pyraf-free "
-                  "version of PyKE: a suite of tools to analyze Kepler/K2 "
-                  "data",
+      description="Tools to inspect and analyze the pixels and lightcurves "
+                  "obtained by NASA's Kepler, K2, and TESS space telescopes.",
       long_description=open('README.rst').read(),
       author='KeplerGO',
       author_email='keplergo@mail.arc.nasa.gov',
       license='MIT',
       packages=['pyke'],
       install_requires=['numpy>=1.11', 'astropy>=1.3', 'scipy>=0.17.0',
-                        'matplotlib>=1.5.3', 'tqdm'],
+                        'matplotlib>=1.5.3', 'tqdm', 'oktopus'],
+      setup_requires=['pytest-runner'],
+      tests_require=['pytest'],
       entry_points=entry_points,
       include_package_data=True,
       classifiers=[

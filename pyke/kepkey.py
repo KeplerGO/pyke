@@ -104,37 +104,37 @@ def getWCSp(filename, struct, logfile, verbose):
     except:
         txt = ('WARNING -- KEPKEY.GETWCSP: Cannot read keyword CRPIX1P in '
                'file ' + filename)
-        kepmsg.warn(logfile, txt)
+        kepmsg.warn(logfile, txt, verbose)
     try:
         crpix2p = get(filename, struct, 'CRPIX2P', logfile, verbose)
     except:
         txt = ('WARNING -- KEPKEY.GETWCSP: Cannot read keyword CRPIX2P in file '
                + filename)
-        kepmsg.warn(logfile, txt)
+        kepmsg.warn(logfile, txt, verbose)
     try:
         crval1p = get(filename, struct,'CRVAL1P', logfile, verbose)
     except:
         txt = ('WARNING -- KEPKEY.GETWCSP: Cannot read keyword CRVAL1P in file '
                + filename)
-        kepmsg.warn(logfile, txt)
+        kepmsg.warn(logfile, txt, verbose)
     try:
         crval2p = get(filename, struct,'CRVAL2P',logfile,verbose)
     except:
         txt = ('WARNING -- KEPKEY.GETWCSP: Cannot read keyword CRVAL2P in file '
                + filename)
-        kepmsg.warn(logfile, txt)
+        kepmsg.warn(logfile, txt, verbose)
     try:
         cdelt1p = get(filename, struct, 'CDELT1P', logfile, verbose)
     except:
         txt = ('WARNING -- KEPKEY.GETWCSP: Cannot read keyword CDELT1P in file '
                + filename)
-        kepmsg.warn(logfile, txt)
+        kepmsg.warn(logfile, txt, verbose)
     try:
         cdelt2p = get(filename, struct, 'CDELT2P', logfile, verbose)
     except:
         txt = ('WARNING -- KEPKEY.GETWCSP: Cannot read keyword CDELT2P in file '
                + filename)
-        kepmsg.warn(logfile, txt)
+        kepmsg.warn(logfile, txt, verbose)
 
     return crpix1p, crpix2p, crval1p, crval2p, cdelt1p, cdelt2p
 
@@ -150,61 +150,61 @@ def getWCSs(filename, struct, logfile, verbose):
     except:
         txt = ('WARNING -- KEPKEY.GETWCSS: Cannot read keyword CRPIX1 in file '
                + filename)
-        kepmsg.warn(logfile, txt)
+        kepmsg.warn(logfile, txt, verbose)
     try:
         crpix2 = get(filename, struct, 'CRPIX2', logfile, verbose)
     except:
         txt = ('WARNING -- KEPKEY.GETWCSS: Cannot read keyword CRPIX2 in file '
                + filename)
-        kepmsg.warn(logfile, txt)
+        kepmsg.warn(logfile, txt, verbose)
     try:
         crval1 = get(filename, struct, 'CRVAL1', logfile, verbose)
     except:
         txt = ('WARNING -- KEPKEY.GETWCSS: Cannot read keyword CRVAL1 in file '
                + filename)
-        kepmsg.warn(logfile, txt)
+        kepmsg.warn(logfile, txt, verbose)
     try:
         crval2 = get(filename, struct, 'CRVAL2', logfile, verbose)
     except:
         txt = ('WARNING -- KEPKEY.GETWCSS: Cannot read keyword CRVAL2 in file '
                + filename)
-        kepmsg.warn(logfile, txt)
+        kepmsg.warn(logfile, txt, verbose)
     try:
         cdelt1 = get(filename, struct, 'CDELT1', logfile, verbose)
     except:
         txt = ('WARNING -- KEPKEY.GETWCSS: Cannot read keyword CDELT1 in file '
                + filename)
-        kepmsg.warn(logfile, txt)
+        kepmsg.warn(logfile, txt, verbose)
     try:
         cdelt2 = get(filename, struct, 'CDELT2', logfile, verbose)
     except:
         txt = ('WARNING -- KEPKEY.GETWCSS: Cannot read keyword CDELT2 in file '
                + filename)
-        kepmsg.warn(logfile, txt)
+        kepmsg.warn(logfile, txt, verbose)
     try:
         pc1_1 = get(filename, struct, 'PC1_1', logfile, verbose)
     except:
         txt = ('WARNING -- KEPKEY.GETWCSS: Cannot read keyword PC1_1 in file '
                + filename)
-        kepmsg.warn(logfile, txt)
+        kepmsg.warn(logfile, txt, verbose)
     try:
         pc1_2 = get(filename, struct, 'PC1_2', logfile, verbose)
     except:
         txt = ('WARNING -- KEPKEY.GETWCSS: Cannot read keyword PC1_2 in file '
                + filename)
-        kepmsg.warn(logfile, txt)
+        kepmsg.warn(logfile, txt, verbose)
     try:
         pc2_1 = get(filename, struct, 'PC2_1', logfile, verbose)
     except:
         txt = ('WARNING -- KEPKEY.GETWCSS: Cannot read keyword PC2_1 in file '
                 + filename)
-        kepmsg.warn(logfile, txt)
+        kepmsg.warn(logfile, txt, verbose)
     try:
         pc2_2 = get(filename, struct, 'PC2_2', logfile, verbose)
     except:
         txt = ('WARNING -- KEPKEY.GETWCSS: Cannot read keyword PC2_2 in file '
                + filename)
-        kepmsg.warn(logfile, txt)
+        kepmsg.warn(logfile, txt, verbose)
     try:
         pc = np.array([[pc1_1, pc1_2], [pc2_1, pc2_2]])
         pc = np.linalg.inv(pc)
@@ -227,7 +227,7 @@ def emptykeys(struct, filename, logfile, verbose):
         for keyword in struct[hdu].header.keys():
             head = struct[hdu].header[keyword]
             if 'pyfits' in str(head) and 'Undefined' in str(head):
-                delete(keyword, struct[hdu], filename, logfile, verbose)
+                remove(keyword, struct[hdu], filename, logfile, verbose)
     return struct
 
 def HDUnum(struct):

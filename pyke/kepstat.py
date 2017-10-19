@@ -6,7 +6,7 @@ from . import kepmsg
 
 
 def mean_err(array):
-    return math.sqrt(np.sum(array * array)) / len(array)
+    return math.sqrt(np.nansum(array * array)) / len(array)
 
 
 def rms(array1, array2, logfile, verbose):
@@ -17,7 +17,7 @@ def rms(array1, array2, logfile, verbose):
                                                         len(array2)))
         kepmsg.err(logfile, message, verbose)
 
-    return math.sqrt(np.mean((array1 - array2) ** 2))
+    return math.sqrt(np.nanmean((array1 - array2) ** 2))
 
 
 def randarray(signal, err):

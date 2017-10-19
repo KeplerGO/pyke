@@ -109,7 +109,7 @@ def kepstitch(infiles, outfile=None, overwrite=False, verbose=False,
                 except:
                     warnmsg = ('ERROR -- KEPSTITCH: column {} missing from'
                                ' some files.'.format(name))
-                    kepmsg.warn(logfile, warnmsg)
+                    kepmsg.warn(logfile, warnmsg, verbose)
                     pass
             outstr[1] = outtab
             outstr[0].header = head0

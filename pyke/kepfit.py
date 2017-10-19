@@ -76,7 +76,7 @@ def lsqclip(fit_func, pinit, x, y, yerr, rej_lo, rej_hi, niter, logfile,
         kepmsg.exit('ERROR -- KEPFIT.LSQCLIP: y data array is empty')
     if len(x) < len(pinit):
         kepmsg.warn(logfile, ("WARNING -- KEPFIT.LSQCLIP: no degrees of"
-                              "freedom"))
+                              "freedom"), verbose)
 
     # sigma-clipping iterations
     while (iiter < niter and len(x) > len(pinit) and iterstatus > 0):

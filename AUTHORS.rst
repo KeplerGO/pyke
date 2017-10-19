@@ -7,3 +7,5 @@ Authors:
 - `Michael Gully-Santiago <https://github.com/gully>`_
 - `Ann Marie Cody <https://github.com/amcody>`_
 - `Christina Hedges <https://github.com/christinahedges>`_
+- `Pierre Zemb <https://github.com/PierreZ>`_
+- `Radek Poleski <https://github.com/rpoleski>`_

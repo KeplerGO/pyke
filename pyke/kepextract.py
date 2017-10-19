@@ -1,19 +1,20 @@
-from .utils import PyKEArgumentHelpFormatter
 import math
 import numpy as np
 from astropy.io import fits as pyfits
 from scipy.optimize import leastsq
 from copy import copy
 from tqdm import tqdm
+from .utils import PyKEArgumentHelpFormatter
+from .targetpixelfile import KeplerTargetPixelFile, KeplerQualityFlags
 from . import kepio, kepmsg, kepkey, kepstat, kepfunc
 
 
 __all__ = ['kepextract']
 
 
-def kepextract(infile, outfile=None, maskfile='ALL', bkg=False, psfcentroid=False,
-               overwrite=False, verbose=False,
-               logfile='kepextract.log'):
+def kepextract(infile, outfile=None, bitmask=KeplerQualityFlags.DEFAULT_BITMASK,
+               maskfile='ALL', bkg=False, psfcentroid=False, overwrite=False,
+               verbose=False, logfile='kepextract.log'):
     """
     kepextract -- create a light curve from a target pixel file by summing
     user-selected pixels
@@ -27,11 +28,12 @@ def kepextract(infile, outfile=None, maskfile='ALL', bkg=False, psfcentroid=Fals
     alter the summed pixel set. Applications include:
 
         * Use of all pixels in the aperture
-        * The pipeline does not produce a light curve for sources observed with
+        * The Kepler pipeline does not produce a light curve for sources observed with
           custom or dedicated pixel masks. The user can create a light curve for
           these sources using kepextract.
         * Construction of pixel light curves, in which the time series for a single
-          pixel can be examined. Light curves for extended sources which may be
+          pixel can be examined.
+        * Light curves for extended sources which may be
           poorly sampled by the optimal aperture.
 
     Parameters
@@ -41,8 +43,10 @@ def kepextract(infile, outfile=None, maskfile='ALL', bkg=False, psfcentroid=Fals
     outfile : str
         Filename for the output light curve. This product will be written to
         the same FITS format as archived light curves.
+    bitmask : int
+        QUALITY bitmask used to reject poor-quality cadences.
     maskfile : str
-        This string can be one of three options::
+        This string can be one of three options:
 
             * 'ALL' tells the task to calculate principal components from all
               pixels within the pixel mask stored in the input file.
@@ -57,7 +61,7 @@ def kepextract(infile, outfile=None, maskfile='ALL', bkg=False, psfcentroid=Fals
     bkg : bool
         Option to subtract an estimate of the background. Background is
         calculated by identifying the median pixel value for each exposure.
-        This method requires an adequate number of pixels in within the target
+        This method requires an adequate number of pixels within the target
         mask that contain background and negligible source flux. Note that
         background has already been subtracted from calibrated Kepler Target
         Pixel Files, but not early campaign data from the K2 mission.
@@ -68,8 +72,8 @@ def kepextract(infile, outfile=None, maskfile='ALL', bkg=False, psfcentroid=Fals
     overwrite : bool
         Overwrite the output file?
     verbose : bool
-        Option for verbose mode, in which informative messages and warnings to
-        the shell and a logfile.
+        Option for verbose mode, in which informative messages and warnings
+        print to the shell and a logfile.
     logfile : str
         Name of the logfile containing error and warning messages.
 
@@ -125,7 +129,9 @@ def kepextract(infile, outfile=None, maskfile='ALL', bkg=False, psfcentroid=Fals
         kepmsg.err(logfile, errmsg, verbose)
 
     # open input file
-    instr = pyfits.open(infile, mode='readonly', memmap=True)
+    tpf = KeplerTargetPixelFile(infile, quality_bitmask=bitmask,
+                                mode='readonly', memmap=True)
+    instr = tpf.hdu
     tstart, tstop, bjdref, cadence = kepio.timekeys(instr, infile,
                                                     logfile, verbose)
 
@@ -139,63 +145,32 @@ def kepextract(infile, outfile=None, maskfile='ALL', bkg=False, psfcentroid=Fals
     table = instr[1].data[:]
     maskmap = copy(instr[2].data)
 
-    print("Extracting information from Target Pixel File...")
+    kepmsg.log(logfile, "Extracting information from Target Pixel File...",
+               verbose)
 
     # input table data
-    kepid, channel, skygroup, module, output, quarter, season, \
-    ra, dec, column, row, kepmag, xdim, ydim, time = \
-        kepio.readTPF(infile, 'TIME', logfile, verbose)
-    time = np.array(time, dtype='float64')
-
-    kepid, channel, skygroup, module, output, quarter, season, \
-    ra, dec, column, row, kepmag, xdim, ydim, timecorr = \
-        kepio.readTPF(infile, 'TIMECORR', logfile, verbose)
-    timecorr = np.array(timecorr, dtype='float32')
-
-    kepid, channel, skygroup, module, output, quarter, season, \
-    ra, dec, column, row, kepmag, xdim, ydim, cadenceno = \
-        kepio.readTPF(infile, 'CADENCENO', logfile, verbose)
-    cadenceno = np.array(cadenceno, dtype='int')
-
-    kepid, channel, skygroup, module, output, quarter, season, \
-    ra, dec, column, row, kepmag, xdim, ydim, raw_cnts = \
-        kepio.readTPF(infile, 'RAW_CNTS', logfile, verbose)
-
-    kepid, channel, skygroup, module, output, quarter, season, \
-    ra, dec, column, row, kepmag, xdim, ydim, flux = \
-        kepio.readTPF(infile, 'FLUX', logfile, verbose)
-
-    kepid, channel, skygroup, module, output, quarter, season, \
-    ra, dec, column, row, kepmag, xdim, ydim, flux_err = \
-        kepio.readTPF(infile, 'FLUX_ERR', logfile, verbose)
-
-    kepid, channel, skygroup, module, output, quarter, season, \
-    ra, dec, column, row, kepmag, xdim, ydim, flux_bkg = \
-        kepio.readTPF(infile, 'FLUX_BKG', logfile, verbose)
-
-    kepid, channel, skygroup, module, output, quarter, season, \
-    ra, dec, column, row, kepmag, xdim, ydim, flux_bkg_err = \
-        kepio.readTPF(infile, 'FLUX_BKG_ERR', logfile, verbose)
-
-    kepid, channel, skygroup, module, output, quarter, season, \
-    ra, dec, column, row, kepmag, xdim, ydim, cosmic_rays = \
-        kepio.readTPF(infile, 'COSMIC_RAYS', logfile, verbose)
-
-    kepid, channel, skygroup, module, output, quarter, season, \
-    ra, dec, column, row, kepmag, xdim, ydim, quality = \
-        kepio.readTPF(infile, 'QUALITY', logfile, verbose)
-    quality = np.array(quality, dtype='int')
+    timecorr = tpf.hdu[1].data['TIMECORR'][tpf.quality_mask]
+    cadenceno = tpf.hdu[1].data['CADENCENO'][tpf.quality_mask]
+    newshape = (tpf.shape[0], tpf.shape[1] * tpf.shape[2])
+    raw_cnts = tpf.hdu[1].data['RAW_CNTS'][tpf.quality_mask].reshape(newshape)
+    flux_err = tpf.hdu[1].data['FLUX_ERR'][tpf.quality_mask].reshape(newshape)
+    flux_bkg = tpf.hdu[1].data['FLUX_BKG'][tpf.quality_mask].reshape(newshape)
+    flux_bkg_err = tpf.hdu[1].data['FLUX_BKG_ERR'][tpf.quality_mask].reshape(newshape)
+    cosmic_rays = tpf.hdu[1].data['COSMIC_RAYS'][tpf.quality_mask]
+    time = tpf.hdu[1].data['TIME'][tpf.quality_mask]
+    flux = tpf.hdu[1].data['FLUX'][tpf.quality_mask].reshape(newshape)
+    quality = tpf.hdu[1].data['QUALITY'][tpf.quality_mask]
 
     try:
         #  ---for FITS wave #2
-        pos_corr1 = np.array(table.field('POS_CORR1'), dtype='float64')
+        pos_corr1 = np.array(tpf.hdu[1].data['POS_CORR1'][tpf.quality_mask], dtype='float64')
     except:
         pos_corr1 = np.empty(len(time))
         # ---temporary before FITS wave #2
         pos_corr1[:] = np.nan
     try:
         #  ---for FITS wave #2
-        pos_corr2 = np.array(table.field('POS_CORR2'), dtype='float64')
+        pos_corr2 = np.array(tpf.hdu[1].data['POS_CORR2'][tpf.quality_mask], dtype='float64')
     except:
         pos_corr2 = np.empty(len(time))
         # ---temporary before FITS wave #2
@@ -292,8 +267,8 @@ def kepextract(infile, outfile=None, maskfile='ALL', bkg=False, psfcentroid=Fals
         for i in range(maskmap.shape[0]):
             for j in range(maskmap.shape[1]):
                 aperb = np.append(aperb, maskmap[i, j])
-                aperx = np.append(aperx,crval1p + (j + 1 - crpix1p) * cdelt1p)
-                apery = np.append(apery,crval2p + (i + 1 - crpix2p) * cdelt2p)
+                aperx = np.append(aperx, crval1p + (j + 1 - crpix1p) * cdelt1p)
+                apery = np.append(apery, crval2p + (i + 1 - crpix2p) * cdelt2p)
 
     # subtract median pixel value for background?
     sky = np.zeros(len(time), 'float32')
@@ -315,8 +290,8 @@ def kepextract(infile, outfile=None, maskfile='ALL', bkg=False, psfcentroid=Fals
     sap_bkg = np.array([], 'float32')
     sap_bkg_err = np.array([], 'float32')
     raw_flux = np.array([],'float32')
-    print("Aperture photometry...")
-    for i in tqdm(range(len(time))):
+    kepmsg.log(logfile,"Aperture photometry...",verbose)
+    for i in tqdm(range(len(time)), desc="Aperture photometry"):
         work1 = np.array([], 'float64')
         work2 = np.array([], 'float64')
         work3 = np.array([], 'float64')
@@ -335,9 +310,9 @@ def kepextract(infile, outfile=None, maskfile='ALL', bkg=False, psfcentroid=Fals
         sap_bkg_err = np.append(sap_bkg_err, math.sqrt(np.nansum(work4 * work4)))
         raw_flux = np.append(raw_flux, np.nansum(work5))
 
-    print("Sample moments...")
+    kepmsg.log(logfile,"Sample moments...",verbose)
     # construct new table moment data
-    for i in tqdm(range(ntime)):
+    for i in tqdm(range(ntime), desc="Computing moments"):
         xf = np.zeros(shape=(naper))
         yf = np.zeros(shape=(naper))
         f = np.zeros(shape=(naper))
@@ -360,15 +335,17 @@ def kepextract(infile, outfile=None, maskfile='ALL', bkg=False, psfcentroid=Fals
         xfsume = math.sqrt(np.nansum(xfe * xfe) / naper)
         yfsume = math.sqrt(np.nansum(yfe * yfe) / naper)
         fsume = math.sqrt(np.nansum(fe * fe) / naper)
-        mom_centr1[i] = xfsum / fsum
-        mom_centr2[i] = yfsum / fsum
-        mom_centr1_err[i] = math.sqrt((xfsume / xfsum) ** 2 + ((fsume / fsum) ** 2))
-        mom_centr2_err[i] = math.sqrt((yfsume / yfsum) ** 2 + ((fsume / fsum) ** 2))
+        # Ignore "RuntimeWarning: invalid value encountered in double_scalars"
+        with np.errstate(divide='ignore', invalid='ignore'):
+            mom_centr1[i] = xfsum / fsum
+            mom_centr2[i] = yfsum / fsum
+            mom_centr1_err[i] = math.sqrt((xfsume / xfsum) ** 2 + ((fsume / fsum) ** 2))
+            mom_centr2_err[i] = math.sqrt((yfsume / yfsum) ** 2 + ((fsume / fsum) ** 2))
     mom_centr1_err = mom_centr1_err * mom_centr1
     mom_centr2_err = mom_centr2_err * mom_centr2
 
     if psfcentroid:
-        print("PSF Centroiding...")
+        kepmsg.log(logfile,"PSF Centroiding...",verbose)
         # construct new table PSF data
         psf_centr1 = np.zeros(shape=(ntime))
         psf_centr2 = np.zeros(shape=(ntime))
@@ -382,7 +359,7 @@ def kepextract(infile, outfile=None, maskfile='ALL', bkg=False, psfcentroid=Fals
                 k += 1
                 modx[k] = aperx[j]
                 mody[k] = apery[j]
-        for i in tqdm(range(ntime)):
+        for i in tqdm(range(ntime), desc='PSF centroiding'):
             modf = np.zeros(shape=(naper))
             k = -1
             guess = [mom_centr1[i], mom_centr2[i], np.nanmax(flux[i:]), 1.0, 1.0, 0.0, 0.0]
@@ -566,7 +543,7 @@ def kepextract(infile, outfile=None, maskfile='ALL', bkg=False, psfcentroid=Fals
     outstr.append(hdu2)
 
     # write output file
-    print("Writing output file {}...".format(outfile))
+    kepmsg.log(logfile, "Writing output file {}...".format(outfile), verbose)
     outstr.writeto(outfile, checksum=True)
     # close input structure
     instr.close()
@@ -586,6 +563,11 @@ def kepextract_main():
                         help=('Name of FITS file to output.'
                               ' If None, outfile is infile-kepextract.'),
                         default=None)
+    parser.add_argument('--bitmask', type=int,
+                        default=KeplerQualityFlags.DEFAULT_BITMASK,
+                        help=('QUALITY bitmask used to reject cadences'
+                              ' with poor-quality data (default: {}).'.format(
+                                        KeplerQualityFlags.DEFAULT_BITMASK)))
     parser.add_argument('--maskfile', default='ALL',
                         help='Name of mask defintion ASCII file',
                         type=str)
@@ -604,6 +586,6 @@ def kepextract_main():
     parser.add_argument('--logfile', '-l', help='Name of ascii log file',
                         default='kepextract.log', type=str)
     args = parser.parse_args()
-    kepextract(args.infile, args.outfile, args.maskfile, args.bkg,
-               args.psfcentroid, args.overwrite, args.verbose,
-               args.logfile)
+    kepextract(args.infile, outfile=args.outfile, bitmask=args.bitmask,
+               maskfile=args.maskfile, bkg=args.bkg, psfcentroid=args.psfcentroid, 
+               overwrite=args.overwrite, verbose=args.verbose, logfile=args.logfile)

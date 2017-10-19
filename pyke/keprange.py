@@ -125,7 +125,7 @@ def keprange(infile, outfile=None, datacol='SAP_FLUX', rinfile='',
     except:
         errmsg = ('ERROR -- KEPRANGE: no datacol named {} in table {} [1]'
                   .format(col, infile))
-        kepmsg.err(infile, message, verbose)
+        kepmsg.err(infile, errmsg, verbose)
     for i in range(len(barytime)):
         if (np.isfinite(barytime[i]) and np.isfinite(flux[i])
             and flux[i] != 0.0):

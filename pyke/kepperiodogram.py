@@ -3,21 +3,20 @@ import math
 import numpy as np
 from matplotlib import pyplot as plt
 from astropy.io import fits as pyfits
-from . import kepio, kepmsg, kepkey, kepstat, kepfourier
+from . import kepio, kepmsg, kepkey, kepstat
+from astropy.stats import LombScargle
+
+__all__ = ['kepperiodogram']
 
 
-__all__ = ['kepft']
-
-
-def kepft(infile, outfile=None, fcol='SAP_FLUX', pmin=0.1, pmax=10., nfreq=100,
-          plot=False, overwrite=False, verbose=False, logfile='kepft.log'):
+def kepperiodogram(infile, outfile=None, datacol='PDCSAP_FLUX', pmin=0.1, pmax=10., nfreq=2000,
+          plot=False, noninteractive=False, overwrite=False, verbose=False,
+          logfile='kepperiodogram.log'):
     """
-    kepft -- Calculate and store a Fourier Transform from a Kepler time series
-
-    ``kepft`` calculates the discrete Fourier transform for a user-provided
+    kepperiodogram -- Calculate and store a Lomb Scargle Periodogram based on a
     Kepler time series. The result is stored in a new FITS file that is a
     direct copy of the input file but with an additional table extension
-    containing the power spectrum.
+    containing the periodogram.
 
     Parameters
     ----------
@@ -27,7 +26,7 @@ def kepft(infile, outfile=None, fcol='SAP_FLUX', pmin=0.1, pmax=10., nfreq=100,
     outfile : str
         The name of the output FITS file with a new extension containing the
         Fourier spectrum.
-    fcol : str
+    datacol : str
         The name of the FITS table column in extension 1 of infile upon which
         the Fourier transform will be calculated.
     pmin : float [day]
@@ -41,6 +40,8 @@ def kepft(infile, outfile=None, fcol='SAP_FLUX', pmin=0.1, pmax=10., nfreq=100,
         :math:`1/pmin` that the Fourier transform will be calculated.
     plot : bool
         Plot the output Fourier spectrum?
+    non-interactive : bool
+        If True, prevents the matplotlib window to pop up.
     overwrite : bool
         Overwrite the output file?
     verbose : bool
@@ -52,10 +53,10 @@ def kepft(infile, outfile=None, fcol='SAP_FLUX', pmin=0.1, pmax=10., nfreq=100,
     --------
     .. code-block:: bash
 
-        $ kepft kplr002436324-2009259160929_llc.fits --pmin 0.5
+        $ kepperiodogram kplr002436324-2009259160929_llc.fits --pmin 0.5
           --pmax 100 --nfreq 1000 --plot --verbose
 
-    .. image:: ../_static/images/api/kepft.png
+    .. image:: ../_static/images/api/kepperiodogram.png
         :align: center
     """
 
@@ -64,14 +65,15 @@ def kepft(infile, outfile=None, fcol='SAP_FLUX', pmin=0.1, pmax=10., nfreq=100,
     ## log the call
     hashline = '--------------------------------------------------------------'
     kepmsg.log(logfile, hashline, verbose)
-    call = ('KEPFT -- '
+    call = ('kepperiodogram -- '
             + ' infile={}'.format(infile)
             + ' outfile={}'.format(outfile)
-            + ' fcol={}'.format(fcol)
+            + ' datacol={}'.format(datacol)
             + ' pmin={}'.format(pmin)
             + ' pmax={}'.format(pmax)
             + ' nfreq={}'.format(nfreq)
             + ' plot={}'.format(plot)
+            + ' noninteractive={}'.format(noninteractive)
             + ' overwrite={}'.format(overwrite)
             + ' verbose={}'.format(verbose)
             + ' logfile={}'.format(logfile))
@@ -82,7 +84,7 @@ def kepft(infile, outfile=None, fcol='SAP_FLUX', pmin=0.1, pmax=10., nfreq=100,
     if overwrite:
         kepio.overwrite(outfile, logfile, verbose)
     if kepio.fileexists(outfile):
-        errmsg = 'ERROR -- KEPFT: {} exists. Use --overwrite'.format(outfile)
+        errmsg = 'ERROR -- kepperiodogram: {} exists. Use --overwrite'.format(outfile)
         kepmsg.err(logfile, errmsg, verbose)
     ## open input file
     instr = pyfits.open(infile)
@@ -96,7 +98,7 @@ def kepft(infile, outfile=None, fcol='SAP_FLUX', pmin=0.1, pmax=10., nfreq=100,
     except:
         barytime = kepio.readfitscol(infile, instr[1].data, 'time', logfile,
                                      verbose) + bjdref
-    signal = kepio.readfitscol(infile, instr[1].data, fcol, logfile, verbose)
+    signal = kepio.readfitscol(infile, instr[1].data, datacol, logfile, verbose)
     ## remove infinite data from time series
     incols = [barytime, signal]
     outcols = kepstat.removeinfinlc(signal, incols)
@@ -107,7 +109,11 @@ def kepft(infile, outfile=None, fcol='SAP_FLUX', pmin=0.1, pmax=10., nfreq=100,
     fmax = 1.0 / pmin
     deltaf = (fmax - fmin) / nfreq
     ## loop through frequency steps; determine FT power
-    fr, power = kepfourier.ft(barytime, signal, fmin, fmax, deltaf, True)
+    fr = np.linspace(fmin,fmax,nfreq)
+    power = LombScargle(barytime, signal, deltaf).power(fr)
+    #find highest power period
+    period = 1. / fr[power.argmax()]
+
     ## write output file
     col1 = pyfits.Column(name='FREQUENCY', format='E', unit='1/day',
                          array=fr)
@@ -115,7 +121,10 @@ def kepft(infile, outfile=None, fcol='SAP_FLUX', pmin=0.1, pmax=10., nfreq=100,
     cols = pyfits.ColDefs([col1, col2])
     instr.append(pyfits.BinTableHDU.from_columns(cols))
     instr[-1].header['EXTNAME'] = ('POWER SPECTRUM', 'extension name')
-    print("Writing output file {}...".format(outfile))
+    instr[-1].header['PERIOD'] = (period, 'most significant trial period [d]')
+
+    kepmsg.log(logfile, "kepperiodogram - best period found: {}".format(period), verbose)
+    kepmsg.log(logfile, "Writing output file {}...".format(outfile), verbose)
     instr.writeto(outfile)
     ## history keyword in output file
     kepkey.history(call, instr[0], outfile, logfile, verbose)
@@ -152,11 +161,12 @@ def kepft(infile, outfile=None, fcol='SAP_FLUX', pmin=0.1, pmax=10., nfreq=100,
         plt.ylabel(ylab, {'color' : 'k'})
         plt.grid()
         # render plot
-        plt.show()
+        if not noninteractive:
+            plt.show()
     ## end time
-    kepmsg.clock('KEPFT completed at', logfile, verbose)
+    kepmsg.clock('kepperiodogram completed at', logfile, verbose)
 
-def kepft_main():
+def kepperiodogram_main():
     import argparse
     parser = argparse.ArgumentParser(
              description=('Calculate and store a Fourier Transform from a'
@@ -165,23 +175,28 @@ def kepft_main():
     parser.add_argument('infile', help='Name of input file', type=str)
     parser.add_argument('--outfile',
                         help=('Name of FITS file to output.'
-                              ' If None, outfile is infile-kepft.'),
+                              ' If None, outfile is infile-kepperiodogram.'),
                         default=None)
-    parser.add_argument('--datacol', default='SAP_FLUX',
+    parser.add_argument('--datacol', default='PDCSAP_FLUX',
                         help='Name of data column to plot', type=str)
     parser.add_argument('--pmin', default=0.1,
                         help='Minimum search period [days]', type=float)
     parser.add_argument('--pmax', default=10.,
                         help='Maximum search period [days]', type=float)
-    parser.add_argument('--nfreq', default=100,
+    parser.add_argument('--nfreq', default=2000,
                         help='Number of frequency intervals', type=int)
     parser.add_argument('--plot', action='store_true', help='Plot result?')
+    parser.add_argument('--non-interactive', action='store_true',
+                        help='Pop up matplotlib plot window?',
+                        dest='noninteractive')
     parser.add_argument('--overwrite', action='store_true',
                         help='Overwrite output file?')
     parser.add_argument('--verbose', action='store_true',
                         help='Write to a log file?')
     parser.add_argument('--logfile', '-l', help='Name of ascii log file',
-                        default='kepft.log', type=str)
+                        default='kepperiodogram.log', type=str)
     args = parser.parse_args()
-    kepft(args.infile, args.outfile, args.datacol, args.pmin, args.pmax,
-          args.nfreq, args.plot, args.overwrite, args.verbose, args.logfile)
+
+    kepperiodogram(args.infile, args.outfile, args.datacol, args.pmin, args.pmax,
+          args.nfreq, args.plot, args.noninteractive, args.overwrite,
+          args.verbose, args.logfile)
