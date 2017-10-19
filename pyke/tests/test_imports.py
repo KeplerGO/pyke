@@ -23,7 +23,7 @@ def test_import():
     from .. import kepflatten
     from .. import kepfold
     from .. import kepfourier
-    from .. import kepft
+    from .. import kepperiodogram
     from .. import kepfunc
     from .. import kephead
     from .. import kepimages
