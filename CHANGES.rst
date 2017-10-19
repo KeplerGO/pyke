@@ -15,7 +15,9 @@
 - [#133] kepwindow has been sped up by using astropy LombScargle
 - [#133] kepwindow api has been changed. Now includes the 'non-interactive' keyword.
          The nfreq and fmin keywords have been removed in favor of 'nyqfactor'.
-
+- [#66]  kepclip now supports Target Pixel Files
+- [#66]  kepclip no longer removes NaN values from fits files, users must run kepclean
+- [#66]  kepclean has been added, which removes NaN values from TPFs and LCs
 
 3.0 (2017-09-18)
 ================
