@@ -61,7 +61,6 @@ def kepclean(infile, outfile=None, zero=True, overwrite=False, verbose=False,
         errmsg = 'ERROR -- KEPCLIP: ' + outfile + ' exists. Use --overwrite'
         kepmsg.err(logfile, errmsg, verbose)
 
-
     # open input file
     instr = pyfits.open(infile, 'readonly')
     tstart, tstop, bjdref, cadence = kepio.timekeys(instr, infile, logfile,
@@ -102,12 +101,12 @@ def kepclean(infile, outfile=None, zero=True, overwrite=False, verbose=False,
             ydat = instr[ext].data[y]
             if len(np.shape(ydat)) > 1:
                 for i in range(len(np.shape(ydat))-1):
-                    bad = np.all(np.isfinite(ydat)==False,axis=-1)
+                    bad = np.all(~np.isfinite(ydat),axis=-1)
                     ydat = np.nansum(ydat, axis=-1)
                     ydat[bad] = np.nan
-            bad = set(list(np.where(np.isfinite(ydat)==False)[0]))
+            bad = set(list(np.where(~np.isfinite(ydat))[0]))
             if len(np.asarray(list(fin - bad))) == 0:
-                kepmsg.log(logfile, 'WARNING - All {} values are nan. Cannot clean {}.'.format(y,y),
+                kepmsg.log(logfile, 'WARNING - All {} values are nan. Cannot clean {}.'.format(y, y),
                     verbose)
                 continue
             fin -= bad
@@ -120,7 +119,7 @@ def kepclean(infile, outfile=None, zero=True, overwrite=False, verbose=False,
         if zero:
             for d in instr[ext].data.names:
                 y = instr[ext].data[d]
-                y[np.isfinite(y) == False] = 0
+                y[np.isfinite(y) is False] = 0
                 instr[ext].data[d] = y
         instr[ext].data = instr[ext].data[fin]
 

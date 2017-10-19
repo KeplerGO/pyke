@@ -67,7 +67,7 @@ def kepclip(infile, ranges, outfile=None, datacol='SAP_FLUX', plot=False,
     kepmsg.log(logfile, call+'\n', verbose)
 
     # start time
-    kepmsg.clock('KEPCLIP started at',logfile,verbose)
+    kepmsg.clock('KEPCLIP started at', logfile, verbose)
 
     # overwrite output file
     if overwrite:
@@ -92,17 +92,12 @@ def kepclip(infile, ranges, outfile=None, datacol='SAP_FLUX', plot=False,
 
     # fudge non-compliant FITS keywords with no values
     instr = kepkey.emptykeys(instr, infile, logfile, verbose)
-
     # input data
     table = instr[1].data
-
     # read time and flux columns
     barytime = kepio.readtimecol(infile, table, logfile, verbose)
-
     barytime = barytime + bjdref
-
     #Test file type is LC or TPF:
-
     if len(set(instr[1].data.columns.names) & set(['SAP_FLUX']))==1:
         filetype='LC'
     if len(set(instr[1].data.columns.names) & set(['SAP_FLUX']))==0:
@@ -111,7 +106,6 @@ def kepclip(infile, ranges, outfile=None, datacol='SAP_FLUX', plot=False,
     if filetype=='LC':
         message = 'KEPCLIP clipping a Light Curve'
         kepmsg.clock(message, logfile, verbose)
-
         flux = kepio.readfitscol(infile, table, datacol, logfile, verbose)
         if 'flux' in datacol.lower():
             flux = flux / cadenom
@@ -170,11 +164,9 @@ def kepclip(infile, ranges, outfile=None, datacol='SAP_FLUX', plot=False,
             plt.figure()
             plt.clf()
             ax = plt.axes()
-
             # force tick labels to be absolute rather than relative
             plt.gca().xaxis.set_major_formatter(plt.ScalarFormatter(useOffset=False))
             plt.gca().yaxis.set_major_formatter(plt.ScalarFormatter(useOffset=False))
-
             # rotate y labels by 90 deg
             # plot line data
             ltime = [barytime[0]]; ldata = [flux[0]]
@@ -191,7 +183,6 @@ def kepclip(infile, ranges, outfile=None, datacol='SAP_FLUX', plot=False,
             ltime = np.array(ltime, dtype=np.float)
             ldata = np.array(ldata, dtype=np.float)
             plt.plot(ltime, ldata, color='#0000ff', linestyle='-', linewidth=1.0)
-
             # plot fill data
             barytime = np.insert(barytime, [0], [barytime[0]])
             barytime = np.append(barytime, [barytime[-1]])
@@ -201,7 +192,6 @@ def kepclip(infile, ranges, outfile=None, datacol='SAP_FLUX', plot=False,
             plt.xlim(xmin - xr * 0.01, xmax + xr * 0.01)
             if ymin - yr * 0.01 <= 0.0:
                 plt.ylim(1.0e-10, ymax + yr * 0.01)
-
     if filetype=='TPF':
         message = 'KEPCLIP clipping a Target Pixel File'
         kepmsg.clock(message, logfile, verbose)
@@ -235,9 +225,6 @@ def kepclip(infile, ranges, outfile=None, datacol='SAP_FLUX', plot=False,
     # end time
     message = 'KEPCLIP completed at'
     kepmsg.clock(message, logfile, verbose)
-
-
-
 
 def kepclip_main():
     import argparse
