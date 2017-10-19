@@ -23,6 +23,7 @@ def test_kepwindow():
     assert len(h[-1].data['POWER']) == 66
     h.close()
     delete("kepwindow.fits", "kepwindow.log", False)
+    delete("kepwindow.png", "kepwindow.log", False)
 
 def test_kepdynamic():
     kepdynamic(fake_lc, "kepdynamic.fits", overwrite=True, noninteractive=True)
@@ -35,6 +36,7 @@ def test_kepdynamic():
     assert np.shape(h[-1].data) == (2000,10)
     h.close()
     delete("kepdynamic.fits", "kepdynamic.log", False)
+    delete("kepdynamic.png", "kepdynamic.log", False)
 
 def test_kepperiodogram():
     kepperiodogram(fake_lc, "kepperiodogram.fits", overwrite=True, noninteractive=True)
@@ -58,6 +60,7 @@ def test_kepfold():
     assert h[-1].header['EXTNAME'] == 'BINNED FOLDED LC'
     #Check there is the right amount of binned data
     assert len(h[-1].data['FLUX_BINNED']) == 1000
+    h.close()
     delete("kepperiodogram.fits", "kepperiodogram.log", False)
     delete("kepfold.fits", "kepfold.log", False)
-    h.close()
+    delete("kepfold.png", "kepfold.log", False)

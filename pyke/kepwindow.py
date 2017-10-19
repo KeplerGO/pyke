@@ -106,23 +106,19 @@ def kepwindow(infile, outfile=None, datacol='SAP_FLUX', nyqfactor=0.01,
     freqW, powerW = ls.autopower(nyquist_factor=nyqfactor)
     freqW = np.append(-freqW[::-1], freqW)
     powerW = np.append(powerW[::-1], powerW)
-
     freqW, powerW = np.sort(freqW), powerW[np.argsort(freqW)]
-
     freqW, powerW = freqW[np.isfinite(powerW)], powerW[np.isfinite(powerW)]
 
     plt.figure()
     plt.axes([0.06, 0.113, 0.93, 0.86])
     plt.plot(freqW, powerW, color='#363636', linestyle='-', linewidth=1.0)
     plt.fill(freqW, powerW, color='#a8a7a7', linewidth=0.0, alpha=0.2)
-
     plt.xlabel(r'Frequency (d$^{-1}$)', {'color' : 'k'})
     plt.ylabel('Power', {'color' : 'k'})
     plt.grid()
     plt.savefig(re.sub('.fits', '.png', outfile), bbox_inches='tight')
     if not noninteractive:
         plt.show()
-    #plt.xlim(-0.1,0.1)
 
     col1 = pyfits.Column(name='FREQUENCY', format='E', unit='days', array=freqW)
     col2 = pyfits.Column(name='POWER', format='E', array=powerW)
@@ -139,7 +135,6 @@ def kepwindow(infile, outfile=None, datacol='SAP_FLUX', nyqfactor=0.01,
     instr.close()
     kepmsg.clock('KEPWINDOW completed at', logfile, verbose)
     return
-
 
 def kepwindow_main():
     import argparse

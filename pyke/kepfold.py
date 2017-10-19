@@ -137,7 +137,10 @@ def kepfold(infile, outfile=None, period=None, bjd0=None, bindata=False,
     except:
         err = np.copy(signal) / 0 #NaNs
     barytime , signal , err = kepstat.removeinfinlc(signal, [barytime, signal, err])
-    phase = barytime/period % 1
+    if bjd0 is None:
+        bjd0 = 0.
+
+    phase = (barytime - bjd0) /period % 1
 
     if bindata:
         bs = (np.linspace(0,1,nbins))
