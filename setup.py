@@ -16,6 +16,7 @@ exec(open('pyke/version.py').read())
 
 entry_points = {'console_scripts': [
         'kepbls = pyke.kepbls:kepbls_main',
+        'kepclean = pyke.kepclean:kepclean_main',
         'kepclip = pyke.kepclip:kepclip_main',
         'kepconvert = pyke.kepconvert:kepconvert_main',
         'kepcotrend = pyke.kepcotrend:kepcotrend_main',

@@ -19,7 +19,7 @@ def test_kepclip_lc():
 	h = fits.open(LC_filename)
 	t = h[1].data['TIME'][200:400]
 	ranges = '{:12.12f}'.format(t[0] + 2454833.) + ', {:12.12f}'.format(t[-1] + 2454833.)
-	kepclip(infile = LC_filename, outfile = OUT_filename, ranges = ranges, overwrite = True)
+	kepclip(infile=LC_filename, outfile=OUT_filename, ranges=ranges, overwrite=True)
 	j = fits.open(OUT_filename)
 
 	#The new file should be smaller
@@ -44,7 +44,7 @@ def test_kepclip_tpf():
 	t = h[1].data['TIME'][0:2]
 	ranges = '{:12.12f}'.format(t[0] + 2454833.) + ', {:12.12f}'.format(t[-1] + 2454833.)
 
-	kepclip(infile = TPF_filename, outfile = OUT_filename, ranges = ranges, overwrite = True)
+	kepclip(infile=TPF_filename, outfile=OUT_filename, ranges=ranges, overwrite=True)
 	j = fits.open(OUT_filename)
 	#The new file should be smaller
 	assert os.path.getsize(TPF_filename) > os.path.getsize(OUT_filename)
@@ -59,7 +59,9 @@ def test_kepclip_tpf():
 	t = h[1].data['TIME'][4:15]
 	ranges = '{:12.12f}'.format(t[0] + 2454833.) + ', {:12.12f}'.format(t[-1] + 2454833.)
 
-	kepclip(infile = TPF_filename, outfile = OUT_filename, ranges = ranges, overwrite = True)
+	#close the old file and clip it again
+	j.close()
+	kepclip(infile=TPF_filename, outfile=OUT_filename, ranges=ranges, overwrite=True)
 	j = fits.open(OUT_filename)
 
 	#The middle frame should be identical

@@ -136,7 +136,7 @@ def kepclip(infile, ranges, outfile=None, datacol='SAP_FLUX', plot=False,
         # comment keyword in output file
         kepkey.history(call, instr[0], outfile, logfile, verbose)
         # comment keyword in output file
-        print("Writing output file {}...".format(outfile))
+        kepmsg.log(logfile, "Writing output file {}...".format(outfile), verbose)
 
         # write output file
         instr[1].data = table[:naxis2]
@@ -221,9 +221,7 @@ def kepclip(infile, ranges, outfile=None, datacol='SAP_FLUX', plot=False,
         # comment keyword in output file
         kepkey.history(call, instr[0], outfile, logfile, verbose)
 
-
         # write output file
-
         instr[1].data = table[:naxis2]
         comment = 'Trimmed TPF'
         kepkey.new('CLIP_TPF', True, comment, instr[1], outfile, logfile, verbose)
