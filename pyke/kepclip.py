@@ -98,12 +98,12 @@ def kepclip(infile, ranges, outfile=None, datacol='SAP_FLUX', plot=False,
     barytime = kepio.readtimecol(infile, table, logfile, verbose)
     barytime = barytime + bjdref
     #Test file type is LC or TPF:
-    if len(set(instr[1].data.columns.names) & set(['SAP_FLUX']))==1:
+    if len(set(instr[1].data.columns.names) & set(['SAP_FLUX'])) == 1:
         filetype='LC'
-    if len(set(instr[1].data.columns.names) & set(['SAP_FLUX']))==0:
+    if len(set(instr[1].data.columns.names) & set(['SAP_FLUX'])) == 0:
         filetype='TPF'
 
-    if filetype=='LC':
+    if filetype == 'LC':
         message = 'KEPCLIP clipping a Light Curve'
         kepmsg.clock(message, logfile, verbose)
         flux = kepio.readfitscol(infile, table, datacol, logfile, verbose)
@@ -192,7 +192,7 @@ def kepclip(infile, ranges, outfile=None, datacol='SAP_FLUX', plot=False,
             plt.xlim(xmin - xr * 0.01, xmax + xr * 0.01)
             if ymin - yr * 0.01 <= 0.0:
                 plt.ylim(1.0e-10, ymax + yr * 0.01)
-    if filetype=='TPF':
+    if filetype == 'TPF':
         message = 'KEPCLIP clipping a Target Pixel File'
         kepmsg.clock(message, logfile, verbose)
         # filter input data table

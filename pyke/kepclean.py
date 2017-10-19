@@ -88,7 +88,7 @@ def kepclean(infile, outfile=None, zero=True, overwrite=False, verbose=False,
                 except:
                     continue
         flux_keys = np.asarray(flux_keys,dtype=bool)
-        if np.any([(len(flux_keys) == 0),(len(np.where(flux_keys==True)[0]) == 0)]) :
+        if np.any([(len(flux_keys) == 0),(len(np.where(flux_keys == True)[0]) == 0)]) :
             continue
         hnames = np.asarray(hnames)
         #if there are no FLUX keys to correct by, just move on
