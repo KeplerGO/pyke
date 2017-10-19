@@ -6,6 +6,7 @@ import glob
 import math
 import scipy
 import numpy as np
+import tqdm
 from astropy.io import fits as pyfits
 from oktopus.posterior import PoissonPosterior
 
@@ -59,7 +60,7 @@ class KeplerPRFPhotometry(object):
         if cadences == 'all':
             cadences = range(tpf_flux.shape[0])
 
-        for t in cadences:
+        for t in tqdm.tqdm(cadences):
             loss = self.loss_function(tpf_flux[t], self.scene_model, prior=self.prior)
             opt_params = loss.fit(x0=x0, **kwargs).x
             residuals = tpf_flux[t] - self.scene_model(*opt_params)
@@ -95,8 +96,7 @@ class KeplerSceneModel(object):
     def __call__(self, *params):
         return self.evaluate(*params)
 
-    def evaluate(self, flux, centroid_col, centroid_row, scale_col,
-                 scale_row, bkg_params):
+    def evaluate(self, *params):
         """
         Parameters
         ----------
@@ -109,16 +109,12 @@ class KeplerSceneModel(object):
         bkg_params : scalar or array-like
             Parameters for the background model
         """
-        flux = np.asarray([flux])
-        centroid_col, centroid_row = np.asarray([centroid_col]), np.asarray([centroid_row])
-        scale_col, scale_row = np.asarray([scale_col]), np.asarray([scale_row])
-
-        self.mixture_prf_model = []
+        self.mixture_model = []
         for i in range(self.n_sources):
-            self.mixture_prf_model.append(self.prf_model(flux[i],
-                                                         centroid_col[i], centroid_row[i],
-                                                         scale_col[i], scale_row[i]))
-        self.scene_model = np.sum(self.mixture_prf_model, axis=0) + self.bkg_model(bkg_params)
+            self.mixture_model.append(self.prf_model(params[i],
+                                                     params[i + self.n_sources],
+                                                     params[i + 2 * self.n_sources]))
+        self.scene_model = np.sum(self.mixture_model, axis=0) + self.bkg_model(params[-1])
 
         return self.scene_model
 
@@ -164,8 +160,7 @@ class KeplerPRF(object):
     def evaluate(self, *params):
         return self.prf_to_detector(*params)
 
-    def prf_to_detector(self, flux, centroid_col, centroid_row, scale_col,
-                        scale_row):
+    def prf_to_detector(self, flux, centroid_col, centroid_row):
         """
         Interpolates the PRF model onto detector coordinates.
 
@@ -186,8 +181,7 @@ class KeplerPRF(object):
         """
         delta_col = self.col_coord - centroid_col
         delta_row = self.row_coord - centroid_row
-        self.prf_model = flux * self.interpolate(delta_row * scale_row,
-                                                 delta_col * scale_col)
+        self.prf_model = flux * self.interpolate(delta_row, delta_col)
         return self.prf_model
 
     def _read_prf_calibration_file(self, path, ext):
