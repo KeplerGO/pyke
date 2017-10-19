@@ -5,7 +5,8 @@ from astropy.io import fits as pyfits
 
 __all__ = ['kepclean']
 
-def kepclean(infile, outfile=None, overwrite=False, verbose=False, logfile='kepclean.log'):
+def kepclean(infile, outfile=None, zero=True, overwrite=False, verbose=False,
+    logfile='kepclean.log'):
     """
     Remove NaN values from a kepler light curve or TPF fits file. If passed a TPF
     only cadences where the postage stamp is ALL NaN values will be removed.
@@ -17,6 +18,9 @@ def kepclean(infile, outfile=None, overwrite=False, verbose=False, logfile='kepc
          curve within the first data extension.
     outfile: str
          The name of the output FITS file with unwanted data removed.
+    zero: bool
+        Zero any remaining NaNs? (When passing TPFs, lone NaNs can exist in the
+        corners of files.)
     overwrite: bool
         Overwrite the output file?
     verbose: bool
@@ -41,6 +45,7 @@ def kepclean(infile, outfile=None, overwrite=False, verbose=False, logfile='kepc
     call = ('KEPCLEAN -- '
             + 'infile={}'.format(infile)
             + ' outfile={}'.format(outfile)
+            + ' zero={}'.format(zero)
             + ' overwrite={}'.format(overwrite)
             + ' verbose={}'.format(verbose)
             + ' logfile={}'.format(logfile))
@@ -112,7 +117,13 @@ def kepclean(infile, outfile=None, overwrite=False, verbose=False, logfile='kepc
             continue
         kepmsg.log(logfile, 'KEPCLEAN - Removed {} nan entries out of {}'.format(length - len(fin), length), verbose)
         #Replace the extention
+        if zero:
+            for d in instr[ext].data.names:
+                y = instr[ext].data[d]
+                y[np.isfinite(y) == False] = 0
+                instr[ext].data[d] = y
         instr[ext].data = instr[ext].data[fin]
+
         comment = 'NaN cadences removed from data'
         #Add a cleaned header keyword
         kepkey.new('NANCLEAN', True, comment, instr[ext], outfile, logfile, verbose)
@@ -137,6 +148,8 @@ def kepclean_main():
                         help=('Name of FITS file to output.'
                               ' If None, outfile is infile-kepclean.'),
                         default=None)
+    parser.add_argument('--zero', action='store_true',
+                        help='Zero any remaining NaN values?')
     parser.add_argument('--overwrite', action='store_true',
                         help='Overwrite output file?')
     parser.add_argument('--verbose', action='store_true',
@@ -144,4 +157,5 @@ def kepclean_main():
     parser.add_argument('--logfile', '-l', help='Name of ascii log file',
                         default='kepclean.log', dest='logfile', type=str)
     args = parser.parse_args()
-    kepclean(args.infile, args.outfile, args.overwrite, args.verbose, args.logfile)
+    kepclean(args.infile, args.outfile, args.zero, args.overwrite, args.verbose,
+    args.logfile)
