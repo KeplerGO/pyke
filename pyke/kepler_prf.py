@@ -160,7 +160,8 @@ class KeplerPRF(object):
     def evaluate(self, *params):
         return self.prf_to_detector(*params)
 
-    def prf_to_detector(self, flux, centroid_col, centroid_row):
+    def prf_to_detector(self, flux, centroid_col, centroid_row, scale_col,
+                        scale_row, rotation_angle):
         """
         Interpolates the PRF model onto detector coordinates.
 
@@ -172,6 +173,8 @@ class KeplerPRF(object):
             Column and row coordinates of the centroid
         scale_col, scale_row : float or array-like
             Pixel scale in the column and row directions
+        rotation_angle : float
+            Rotation angle in radians
 
         Returns
         -------
@@ -179,9 +182,18 @@ class KeplerPRF(object):
             Two dimensional array representing the PRF values parametrized
             by `params`.
         """
+        cosa = math.cos(rotation_angle)
+        sina = math.sin(rotation_angle)
+
         delta_col = self.col_coord - centroid_col
         delta_row = self.row_coord - centroid_row
-        self.prf_model = flux * self.interpolate(delta_row, delta_col)
+
+        delta_row, delta_col = np.meshgrid(delta_row, delta_col)
+        rot_col = delta_col * cosa - delta_row * sina
+        rot_row = delta_col * sina + delta_row * cosa
+
+        self.prf_model = self.interpolate(rot_row.flatten() * scale_row,
+                                          rot_col.flatten() * scale_col, grid=False).reshape(self.shape)
         return self.prf_model
 
     def _read_prf_calibration_file(self, path, ext):
