@@ -97,6 +97,7 @@ def kepclip(infile, ranges, outfile=None, datacol='SAP_FLUX', plot=False,
     # read time and flux columns
     barytime = kepio.readtimecol(infile, table, logfile, verbose)
     barytime = barytime + bjdref
+
     #Test file type is LC or TPF:
     if len(set(instr[1].data.columns.names) & set(['SAP_FLUX'])) == 1:
         filetype='LC'
@@ -130,18 +131,15 @@ def kepclip(infile, ranges, outfile=None, datacol='SAP_FLUX', plot=False,
         kepkey.history(call, instr[0], outfile, logfile, verbose)
         # comment keyword in output file
         kepmsg.log(logfile, "Writing output file {}...".format(outfile), verbose)
-
         # write output file
         instr[1].data = table[:naxis2]
         comment = 'NaN cadences removed from data'
         kepkey.new('NANCLEAN', True, comment, instr[1], outfile, logfile, verbose)
         instr.writeto(outfile)
-
         # clean up x-axis unit
         barytime0 = (tstart // 100) * 100.0
         barytime = work1 - barytime0
         xlab = 'BJD $-$ {}'.format(barytime0)
-
         # clean up y-axis units
         try:
             nrm = len(str(int(work2.max()))) - 1
@@ -149,7 +147,6 @@ def kepclip(infile, ranges, outfile=None, datacol='SAP_FLUX', plot=False,
             nrm = 0
         flux = work2 / 10 ** nrm
         ylab = '10$^%d$ e$^-$ s$^{-1}$' % nrm
-
         # data limits
         xmin = barytime.min()
         xmax = barytime.max()
@@ -157,7 +154,6 @@ def kepclip(infile, ranges, outfile=None, datacol='SAP_FLUX', plot=False,
         ymax = flux.max()
         xr = xmax - xmin
         yr = ymax - ymin
-
         # clear window, plot box
         if plot:
             plt.figure()

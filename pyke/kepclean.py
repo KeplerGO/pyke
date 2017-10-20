@@ -86,7 +86,7 @@ def kepclean(infile, outfile=None, zero=True, overwrite=False, verbose=False,
                 except:
                     continue
 
-        flux_keys = np.asarray(flux_keys,dtype=bool)
+        flux_keys = np.asarray(flux_keys, dtype=bool)
         if np.any([(len(flux_keys) == 0), (len(np.where(flux_keys == True)[0]) == 0)]) :
             continue
 
