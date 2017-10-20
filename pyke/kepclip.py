@@ -109,7 +109,6 @@ def kepclip(infile, ranges, outfile=None, datacol='SAP_FLUX', plot=False,
         flux = kepio.readfitscol(infile, table, datacol, logfile, verbose)
         if 'flux' in datacol.lower():
             flux = flux / cadenom
-
         # filter input data table
         naxis2 = 0
         work1 = np.array([], 'float64')

@@ -50,13 +50,12 @@ def kepclean(infile, outfile=None, zero=True, overwrite=False, verbose=False,
             + ' verbose={}'.format(verbose)
             + ' logfile={}'.format(logfile))
     kepmsg.log(logfile, call+'\n', verbose)
-
     # start time
     kepmsg.clock('KEPCLEAN started at',logfile,verbose)
-
     # overwrite output file
     if overwrite:
         kepio.overwrite(outfile, logfile, verbose)
+
     if kepio.fileexists(outfile):
         errmsg = 'ERROR -- KEPCLIP: ' + outfile + ' exists. Use --overwrite'
         kepmsg.err(logfile, errmsg, verbose)
@@ -65,7 +64,6 @@ def kepclean(infile, outfile=None, zero=True, overwrite=False, verbose=False,
     instr = pyfits.open(infile, 'readonly')
     tstart, tstop, bjdref, cadence = kepio.timekeys(instr, infile, logfile,
                                                     verbose)
-
     #loop over all extentions in the file
     for ext in range(len(instr)):
         try:
@@ -87,16 +85,18 @@ def kepclean(infile, outfile=None, zero=True, overwrite=False, verbose=False,
                         flux_keys.append(False)
                 except:
                     continue
+
         flux_keys = np.asarray(flux_keys,dtype=bool)
-        if np.any([(len(flux_keys) == 0),(len(np.where(flux_keys == True)[0]) == 0)]) :
+        if np.any([(len(flux_keys) == 0), (len(np.where(flux_keys == True)[0]) == 0)]) :
             continue
+
         hnames = np.asarray(hnames)
         #if there are no FLUX keys to correct by, just move on
         kepmsg.log(logfile, 'KEPCLEAN - Found flux keys {}'.format(hnames[flux_keys]), verbose)
-
         #Loop through and remove indicies where any 'FLUX' keys have NaNs
         length = len(instr[ext].data[hnames[flux_keys][0]])
         fin = set(list(np.arange(length)))
+
         for y in hnames[flux_keys]:
             ydat = instr[ext].data[y]
             if len(np.shape(ydat)) > 1:
@@ -111,18 +111,21 @@ def kepclean(infile, outfile=None, zero=True, overwrite=False, verbose=False,
                 continue
             fin -= bad
         fin = np.asarray(list(fin))
+
         if len(fin) == 0:
             kepmsg.log(logfile, 'WARNING - All values are nan. Cannot clean.', verbose)
             continue
+
         kepmsg.log(logfile, 'KEPCLEAN - Removed {} nan entries out of {}'.format(length - len(fin), length), verbose)
+
         #Replace the extention
         if zero:
             for d in instr[ext].data.names:
                 y = instr[ext].data[d]
                 y[np.isfinite(y) is False] = 0
                 instr[ext].data[d] = y
-        instr[ext].data = instr[ext].data[fin]
 
+        instr[ext].data = instr[ext].data[fin]
         comment = 'NaN cadences removed from data'
         #Add a cleaned header keyword
         kepkey.new('NANCLEAN', True, comment, instr[ext], outfile, logfile, verbose)
@@ -134,7 +137,6 @@ def kepclean(infile, outfile=None, zero=True, overwrite=False, verbose=False,
     instr.writeto(outfile)
     instr.close()
     kepmsg.clock('KEPCLEAN completed at', logfile, verbose)
-
 
 def kepclean_main():
     import argparse
