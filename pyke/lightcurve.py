@@ -191,14 +191,14 @@ class SimplePixelLevelDecorrelationDetrender(Detrender):
     def detrend(self, window_length=None, polyorder=2):
         k = window_length
         if not k:
-            k = int(len(self.time) / 2)
+            k = int(len(self.time) / 2) - 1
         n_windows = int(len(self.time) / k)
         flux_detrended = np.array([])
         for n in range(1, n_windows + 1):
             flux_detrended = np.append(flux_detrended,
                                        self._pld(self.tpf_flux[(n - 1) * k:n * k], polyorder))
         flux_detrended = np.append(flux_detrended, self._pld(self.tpf_flux[n * k:], polyorder))
-        return LightCurve(self.time, flux_detrended + np.nanmedian(self.tpf_flux.sum(axis=(1, 2))))
+        return LightCurve(self.time, flux_detrended + np.nanmedian(np.nansum(self.tpf_flux, axis=(1, 2))))
 
     def _pld(self, tpf_flux, polyorder=2):
         if len(tpf_flux) == 0:
