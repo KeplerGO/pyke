@@ -102,8 +102,8 @@ class KeplerSceneModel(object):
         ----------
         flux : scalar or array-like
             Total integrated flux of the PRF model
-        centroid_col, centroid_row : scalar or array-like
-            Column and row coordinates of the centroid
+        center_col, center_row : scalar or array-like
+            Column and row coordinates of the center
         scale_col, scale_row : scalar or array-like
             Pixel scale in the column and row directions
         bkg_params : scalar or array-like
@@ -125,7 +125,7 @@ class KeplerPRF(object):
 
     This class provides the necessary interface to load Kepler PRF
     calibration files and to create a model that can be fit as a function
-    of flux, centroid positions, width, and rotation angle.
+    of flux, center positions, width, and rotation angle.
 
     Attributes
     ----------
@@ -141,6 +141,22 @@ class KeplerPRF(object):
         Relative or aboslute path to a directory containing the Pixel Response
         Function calibration files produced during Kepler data comissioning.
 
+    Examples
+    --------
+    Objects from the KeplerPRF class are defined by a channel number, a pair of
+    dimensions (the size of the image), and a reference coordinate (bottom left
+    corner). In this example, we create a KeplerPRF object located at channel
+    #44 with dimension equals 10 x 10, reference row and column coordinate
+    equals (5, 5). After the object has been created, we may translate it to a
+    given center coordinate. Additionally, we can specify total flux, pixel
+    scales, and rotation around the object's center.
+
+    >>> import math
+    >>> import matplotlib.pyplot as plt
+    >>> from pyke import KeplerPRF
+    >>> kepprf = KeplerPRF(channel=44, shape=(10, 10), column=5, row=5)
+    >>> kepprf(flux=1000, center_col=10, center_row=10, scale_col=0.7)
+
     Notes
     -----
     The PRF calibration files can be downloaded here: http://archive.stsci.edu/missions/kepler/fpc/prf/
@@ -154,14 +170,13 @@ class KeplerPRF(object):
         self.row = row
         self.col_coord, self.row_coord, self.interpolate = self._prepare_prf()
 
-    def __call__(self, *params):
-        return self.evaluate(*params)
+    def __call__(self, flux, center_col, center_row, scale_col, scale_row,
+                 rotation_angle):
+        return self.evaluate(flux, center_col, center_row,
+                             scale_col, scale_row, rotation_angle)
 
-    def evaluate(self, *params):
-        return self.prf_to_detector(*params)
-
-    def prf_to_detector(self, flux, centroid_col, centroid_row, scale_col,
-                        scale_row, rotation_angle):
+    def evaluate(self, flux, center_col, center_row, scale_col, scale_row,
+                 rotation_angle):
         """
         Interpolates the PRF model onto detector coordinates.
 
@@ -169,8 +184,8 @@ class KeplerPRF(object):
         ----------
         flux : float or array-like
             Total integrated flux of the PRF
-        centroid_col, centroid_row : float or array-like
-            Column and row coordinates of the centroid
+        center_col, center_row : float or array-like
+            Column and row coordinates of the center
         scale_col, scale_row : float or array-like
             Pixel scale in the column and row directions
         rotation_angle : float
@@ -185,8 +200,8 @@ class KeplerPRF(object):
         cosa = math.cos(rotation_angle)
         sina = math.sin(rotation_angle)
 
-        delta_col = self.col_coord - centroid_col
-        delta_row = self.row_coord - centroid_row
+        delta_col = self.col_coord - center_col
+        delta_row = self.row_coord - center_row
 
         delta_row, delta_col = np.meshgrid(delta_row, delta_col)
         rot_col = delta_col * cosa - delta_row * sina
@@ -259,7 +274,7 @@ class KeplerPRF(object):
 
 def get_initial_guesses(data, ref_col, ref_row):
     """
-    Compute the initial guesses for total flux, centroids position, and PSF
+    Compute the initial guesses for total flux, centers position, and PSF
     width using the sample moments of the data.
 
     Parameters
@@ -272,7 +287,7 @@ def get_initial_guesses(data, ref_col, ref_row):
     Return
     ------
     flux0, col0, row0, sigma0: floats
-        Inital guesses for flux, centroid position, and width
+        Inital guesses for flux, center position, and width
     """
 
     flux0 = np.nansum(data)
