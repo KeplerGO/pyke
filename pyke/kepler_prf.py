@@ -142,9 +142,6 @@ class KeplerPRF(object):
         KeplerTargetPixelFile.column
     row : int
         KeplerTargetPixelFile.row
-    prf_files_dir : str
-        Relative or aboslute path to a directory containing the Pixel Response
-        Function calibration files produced during Kepler data comissioning.
 
     Examples
     --------
@@ -162,14 +159,9 @@ class KeplerPRF(object):
     >>> kepprf = KeplerPRF(channel=44, shape=(10, 10), column=5, row=5)
     >>> prf = kepprf(flux=1000, center_col=10, center_row=10, scale_col=0.7, rotation_angle=math.pi/2)
     >>> plt.imshow(prf, origin='lower')
-
-    Notes
-    -----
-    The PRF calibration files can be downloaded here: http://archive.stsci.edu/missions/kepler/fpc/prf/
     """
 
-    def __init__(self, channel, shape, column, row, prf_files_dir=DEFAULT_PRFDIR):
-        self.prf_files_dir = prf_files_dir
+    def __init__(self, channel, shape, column, row):
         self.channel = channel
         self.shape = shape
         self.column = column
@@ -213,8 +205,8 @@ class KeplerPRF(object):
         rot_col = delta_col * cosa - delta_row * sina
         rot_row = delta_col * sina + delta_row * cosa
 
-        self.prf_model = self.interpolate(rot_row.flatten() * scale_row,
-                                          rot_col.flatten() * scale_col, grid=False).reshape(self.shape)
+        self.prf_model = flux * self.interpolate(rot_row.flatten() * scale_row,
+                                                 rot_col.flatten() * scale_col, grid=False).reshape(self.shape)
         return self.prf_model
 
     def _read_prf_calibration_file(self, path, ext):
@@ -238,9 +230,8 @@ class KeplerPRF(object):
             prefix = 'kplr0'
         else:
             prefix = 'kplr'
-        prf_file_path = os.path.join(self.prf_files_dir,
-                                     prefix + str(module) + '.' + str(output) + '*_prf.fits')
-        prffile = glob.glob(prf_file_path)[0]
+        prfs_url_path = "http://archive.stsci.edu/missions/kepler/fpc/prf/extracted/"
+        prffile = prfs_url_path + prefix + str(module) + '.' + str(output) + '_2011265_prf.fits'
 
         # read PRF images
         prfn = [0] * n_hdu
