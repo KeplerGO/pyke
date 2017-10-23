@@ -114,6 +114,9 @@ class LightCurve(object):
 
 
 class KeplerLightCurveFile(object):
+    """
+    Defines a LightCurveFile class for NASA's Kepler and K2 missions.
+    """
 
     def __init__(self, path, **kwargs):
         self.hdu = fits.open(path, **kwargs)
@@ -136,6 +139,13 @@ class KeplerLightCurveFile(object):
     def PDCSAP_FLUX(self):
         return self.get_lightcurve('PDCSAP_FLUX')
 
+    @property
+    def quarter(self)
+        return self.header()['QUARTER']
+
+    def header(self, ext=0)
+        return self.hdu[ext].header
+
     def _flux_types(self):
         """Returns a list of available flux types for this light curve file"""
         return [n for n in  self.hdu[1].data.columns.names if 'FLUX' in n]
@@ -149,6 +159,33 @@ class Detrender(object):
         Returns a LightCurve object
         """
         pass
+
+class SystematicsCorrector(object):
+    def correct(time, flux):
+        pass
+
+
+class KeplerCBVCorrector(SystematicsCorrector):
+    """Remove systematic trends Kepler light curves using
+    cotrending basis vectors.
+
+    Attributes
+    ----------
+    lc_file : KeplerLightCurveFile object
+
+    Notes
+    -----
+    The cotrending basis vectors files can be found
+    here: http://archive.stsci.edu/missions/kepler/cbv/
+    """
+
+    def __init__(self, lc_file, list_cbvs=[1, 2]):
+        self.kepler_cbv_base_url = "http://archive.stsci.edu/missions/kepler/cbv/"
+        self.k2_cbv_base_url = 
+
+    def correct(self, ):
+
+
 
 
 class ArcLengthDetrender(Detrender):
