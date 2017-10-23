@@ -106,6 +106,8 @@ class KeplerSceneModel(object):
             Column and row coordinates of the center
         scale_col, scale_row : scalar or array-like
             Pixel scale in the column and row directions
+        rotation_angle : float
+            Rotation angle in radians
         bkg_params : scalar or array-like
             Parameters for the background model
         """
@@ -113,7 +115,10 @@ class KeplerSceneModel(object):
         for i in range(self.n_sources):
             self.mixture_model.append(self.prf_model(params[i],
                                                      params[i + self.n_sources],
-                                                     params[i + 2 * self.n_sources]))
+                                                     params[i + 2 * self.n_sources],
+                                                     params[i + 3 * self.n_sources],
+                                                     params[i + 4 * self.n_sources],
+                                                     params[i + 5 * self.n_sources]))
         self.scene_model = np.sum(self.mixture_model, axis=0) + self.bkg_model(params[-1])
 
         return self.scene_model
@@ -155,7 +160,8 @@ class KeplerPRF(object):
     >>> import matplotlib.pyplot as plt
     >>> from pyke import KeplerPRF
     >>> kepprf = KeplerPRF(channel=44, shape=(10, 10), column=5, row=5)
-    >>> kepprf(flux=1000, center_col=10, center_row=10, scale_col=0.7)
+    >>> prf = kepprf(flux=1000, center_col=10, center_row=10, scale_col=0.7, rotation_angle=math.pi/2)
+    >>> plt.imshow(prf, origin='lower')
 
     Notes
     -----
