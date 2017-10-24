@@ -3,6 +3,7 @@ import numpy as np
 from scipy import signal
 from astropy.io import fits
 from tqdm import tqdm
+from .utils import channel_to_module_output
 
 __all__ = ['LightCurve', 'KeplerLightCurveFile']
 
@@ -140,10 +141,22 @@ class KeplerLightCurveFile(object):
         return self.get_lightcurve('PDCSAP_FLUX')
 
     @property
-    def quarter(self)
-        return self.header()['QUARTER']
+    def channel(self):
+        return self.header(ext=0)['CHANNEl']
 
-    def header(self, ext=0)
+    @property
+    def quarter(self):
+        return self.header(ext=0)['QUARTER']
+
+    @property
+    def campaign(self):
+        return self.header(ext=0)['CAMPAIGN']
+
+    @property
+    def mission(self):
+        return self.header(ext=0)['MISSION']
+
+    def header(self, ext=0):
         return self.hdu[ext].header
 
     def _flux_types(self):
@@ -161,17 +174,22 @@ class Detrender(object):
         pass
 
 class SystematicsCorrector(object):
-    def correct(time, flux):
+    def correct(self):
         pass
 
 
 class KeplerCBVCorrector(SystematicsCorrector):
-    """Remove systematic trends Kepler light curves using
+    """Remove systematic trends Kepler light curves by fitting
     cotrending basis vectors.
+
+    .. math::
+
+         \arg \min_{\theta \in \Theta} |f(t) - <\theta, \left[\rm{cbv}_1(t), ..., \rm{cbv}_n(t)\right]^{T}|^p
 
     Attributes
     ----------
-    lc_file : KeplerLightCurveFile object
+    lc_file : KeplerLightCurveFile object or str
+    cbvs : list of ints
 
     Notes
     -----
@@ -179,13 +197,68 @@ class KeplerCBVCorrector(SystematicsCorrector):
     here: http://archive.stsci.edu/missions/kepler/cbv/
     """
 
-    def __init__(self, lc_file, list_cbvs=[1, 2]):
-        self.kepler_cbv_base_url = "http://archive.stsci.edu/missions/kepler/cbv/"
-        self.k2_cbv_base_url = 
+    def __init__(self, lc_file, cbvs=[1, 2]):
+        self.lc_file = lc_file
+        self.cbvs = cbvs
 
-    def correct(self, ):
+        if self.lc_file.mission == 'Kepler':
+            self.cbv_base_url = "http://archive.stsci.edu/missions/kepler/cbv/"
+        elif self.lc_file.mission == 'K2':
+            self.cbv_base_url = "http://archive.stsci.edu/missions/k2/cbv/"
 
+    @property
+    def lc_file(self):
+        return self._lc_file
 
+    @lc_file.setter
+    def lc_file(self, value):
+        if isinstance(value, str):
+            self._lc_file = KeplerLightCurveFile(value)
+        elif isinstance(value, KeplerLightCurveFile):
+            self._lc_file = value
+
+    def correct(self):
+        module, output = channel_to_module_output(self.lc_file.channel)
+        cbv_file = pyfits.open(self.get_cbv_file())
+        cbv_data = cbv_file['MODOUT_{0}_{1}'.format(module, output)].data
+
+        cbv_array = []
+        for i in self.cbvs:
+            cbv_array.append(cbv_data.field('VECTOR_{}'.format(i)))
+        cbv_array = np.asarray(cbv_array)
+
+        sap_lc = self.lc_file.SAP_FLUX
+        median_sap_flux = np.median(sap_lc.flux)
+        norm_sap_flux = sap_lc.flux / median_sap_flux - 1
+        norm_err_sap_flux = (sap_lc.flux_err / median_sap_flux) ** 2
+
+        def mean_model(theta):
+            return np.dot(theta, cbv_array)
+
+        chi_sqr = oktopus.GaussianLikelihood(data=norm_sap_flux,
+                                             mean=mean_model,
+                                             var=norm_err_sap_flux)
+
+    def get_cbv_file(self):
+        import requests
+        from bs4 import BeautifulSoup
+
+        soup = BeautifulSoup(requests.get(self.cbv_base_url).text, 'html.parser')
+        cbv_files = np.array([fn for fn in soup.find_all('a') if fn['href'].endswith('fits')])
+
+        if self.lc_file.mission == 'Kepler':
+            if self.lc_file.quarter < 10:
+                quarter = 'q0' + str(self.lc_file.quarter)
+            for cbv_file in cbv_files:
+                if quarter + '-d25' in cbv_file:
+                    break
+        elif self.lc_file.mission == 'K2':
+            campaign = 'c' + str(self.lc_file.campaign)
+            for cbv_file in cbv_files:
+                if campaign in cbv_file:
+                    break
+
+        return self.cbv_base_url + cbv_file
 
 
 class ArcLengthDetrender(Detrender):
