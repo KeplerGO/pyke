@@ -349,11 +349,10 @@ def do_plot(date, flux_old, flux_new, bvsum, cad, good_data, cad_nans, version,
     flux2 = np.insert(flux_old_sub,[0], [0.0])
     flux2 = np.append(flux2, [0.0])
     plt.fill(date2, flux2, color='#a8a7a7', linewidth=0.0, alpha=0.2, label='Data')
-    if (maskdata is None) is False:
+    if maskdata:
         for m in maskdata:
-            pos = np.where((barytime0 + 2400000 + date2 >m[0]) & (barytime0 + 2400000 + date2 <=m [1]))[0]
+            pos = np.where((barytime0 + 2400000 + date2 > m[0]) & (barytime0 + 2400000 + date2 <= m[1]))[0]
             plt.fill_between(date2[pos], flux2[pos].min(), flux2[pos].max(), color='#c0392b', linewidth=0.0, alpha=0.3, label='Masked')
-
 
     plt.xlim(xmin - xr * 0.01, xmax + xr * 0.01)
     if ymin1 - yr1 * 0.01 <= 0.0:
@@ -362,9 +361,8 @@ def do_plot(date, flux_old, flux_new, bvsum, cad, good_data, cad_nans, version,
         plt.ylim(ymin1 - yr1 * 0.01, ymax1 + yr1 * 0.01)
     plt.xlabel(xlab, {'color' : 'k'})
     plt.ylabel(ylab1, {'color' : 'k'})
-    plt.grid(ls='--',alpha=0.3)
+    plt.grid(ls='--', alpha=0.3)
     plt.legend()
-
 
     ax2 = plt.subplot(212, sharex=ax1)
     for i in range(len(blocks)):
