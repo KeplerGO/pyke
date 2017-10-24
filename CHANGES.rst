@@ -18,6 +18,14 @@
 - [#66]  kepclip now supports Target Pixel Files
          kepclip no longer removes NaN values from fits files, users must run kepclean
          kepclean has been added, which removes NaN values from TPFs and LCs
+- [#136] kepcotrend and keprange have new plot colors.
+         The range of masked data is also plotted in kepcotrend.
+         kepcotrend has had a minor bug fixed (a single cotrending basis vector can
+         now be specified.)
+         kepcotrend has had the keyword 'non-interactive' added (so plot windows
+         can be suppressed.)
+         kepcotrend now saves the plot in the same style as other routines
+         (appending '.png' to the output file name.)
 
 3.0 (2017-09-18)
 ================
