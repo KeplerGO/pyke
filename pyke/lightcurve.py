@@ -1,11 +1,13 @@
 import copy
 import numpy as np
 from scipy import signal
-from astropy.io import fits
+from astropy.io import fits as pyfits
 from tqdm import tqdm
+import oktopus
 from .utils import channel_to_module_output
 
-__all__ = ['LightCurve', 'KeplerLightCurveFile']
+__all__ = ['LightCurve', 'KeplerLightCurveFile', 'KeplerCBVCorrector',
+           'SimplePixelLevelDecorrelationDetrender']
 
 
 class LightCurve(object):
@@ -120,13 +122,13 @@ class KeplerLightCurveFile(object):
     """
 
     def __init__(self, path, **kwargs):
-        self.hdu = fits.open(path, **kwargs)
+        self.hdu = pyfits.open(path, **kwargs)
 
     def get_lightcurve(self, flux_type, centroid_type='MOM_CENTR'):
         if flux_type in self._flux_types():
             return LightCurve(self.hdu[1].data['TIME'], self.hdu[1].data[flux_type],
                               flux_err=self.hdu[1].data[flux_type + "_ERR"],
-                              quality=self.hdu[1].data['QUALITY'],
+                              quality=None,
                               centroid_col=self.hdu[1].data[centroid_type + "1"],
                               centroid_row=self.hdu[1].data[centroid_type + "2"])
         else:
@@ -139,6 +141,10 @@ class KeplerLightCurveFile(object):
     @property
     def PDCSAP_FLUX(self):
         return self.get_lightcurve('PDCSAP_FLUX')
+
+    @property
+    def time(self):
+        return self.hdu[1].data['TIME']
 
     @property
     def channel(self):
@@ -228,27 +234,35 @@ class KeplerCBVCorrector(SystematicsCorrector):
         cbv_array = np.asarray(cbv_array)
 
         sap_lc = self.lc_file.SAP_FLUX
-        median_sap_flux = np.median(sap_lc.flux)
+        median_sap_flux = np.nanmedian(sap_lc.flux)
         norm_sap_flux = sap_lc.flux / median_sap_flux - 1
         norm_err_sap_flux = (sap_lc.flux_err / median_sap_flux) ** 2
 
-        def mean_model(theta):
-            return np.dot(theta, cbv_array)
+        def mean_model(*theta):
+            coeffs = np.asarray(theta)
+            return np.dot(coeffs, cbv_array)
 
         chi_sqr = oktopus.GaussianLikelihood(data=norm_sap_flux,
                                              mean=mean_model,
                                              var=norm_err_sap_flux)
+
+        self.coeffs = chi_sqr.fit(x0=np.zeros(len(self.cbvs))).x
+        flux_hat = sap_lc.flux + median_sap_flux * mean_model(self.coeffs)
+        self.lc_hat = LightCurve(time=sap_lc.time, flux=flux_hat.reshape(-1))
+        return self.lc_hat
 
     def get_cbv_file(self):
         import requests
         from bs4 import BeautifulSoup
 
         soup = BeautifulSoup(requests.get(self.cbv_base_url).text, 'html.parser')
-        cbv_files = np.array([fn for fn in soup.find_all('a') if fn['href'].endswith('fits')])
+        cbv_files = [fn['href'] for fn in soup.find_all('a') if fn['href'].endswith('fits')]
 
         if self.lc_file.mission == 'Kepler':
             if self.lc_file.quarter < 10:
                 quarter = 'q0' + str(self.lc_file.quarter)
+            else:
+                quarter = 'q' + str(self.lc_file.quarter)
             for cbv_file in cbv_files:
                 if quarter + '-d25' in cbv_file:
                     break
