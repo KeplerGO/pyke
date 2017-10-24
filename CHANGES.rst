@@ -15,7 +15,14 @@
 - [#133] kepwindow has been sped up by using astropy LombScargle
 - [#133] kepwindow api has been changed. Now includes the 'non-interactive' keyword.
          The nfreq and fmin keywords have been removed in favor of 'nyqfactor'.
-
+- [#136] kepcotrend and keprange have new plot colors.
+         The range of masked data is also plotted in kepcotrend.
+         kepcotrend has had a minor bug fixed (a single cotrending basis vector can
+         now be specified.)
+         kepcotrend has had the keyword 'non-interactive' added (so plot windows
+         can be suppressed.)
+         kepcotrend now saves the plot in the same style as other routines
+         (appending '.png' to the output file name.)
 
 3.0 (2017-09-18)
 ================
