@@ -9,7 +9,7 @@ from scipy.optimize import fmin
 from scipy.interpolate import interp1d
 from astropy.io import fits as pyfits
 from tqdm import tqdm
-
+import re
 
 __all__ = ['kepcotrend']
 
@@ -288,7 +288,9 @@ def make_outfile(fitsfile, outfile, flux_new, bvsum, version):
                                                   header=fitsfile[1].header)
     fitsfile.writeto(outfile)
 
-def do_plot(date, flux_old, flux_new, bvsum, cad, good_data, cad_nans, version):
+def do_plot(date, flux_old, flux_new, bvsum, cad, good_data, cad_nans, version,
+    maskdata, outfile, noninteractive):
+
     plt.figure(figsize=[15, 8])
     plt.clf()
 
@@ -339,14 +341,20 @@ def do_plot(date, flux_old, flux_new, bvsum, cad, good_data, cad_nans, version):
         plot_y = flux_old_sub[mask]
         if np.nan in plot_y:
             break
-        plt.plot(plot_x, plot_y, color='#0000ff', linestyle='-', linewidth=1.0)
+        plt.scatter(plot_x, plot_y, color='#363636', linestyle='-', linewidth=1.0, marker='.', s=5)
         plot_y = bvsum_sub[mask]
-        plt.plot(plot_x, plot_y, color='red', linestyle='-', linewidth=2.0)
+        plt.plot(plot_x, plot_y, color='#c0392b', linestyle='-', linewidth=2.0)
     date2 = np.insert(date_sub, [0], [date_sub[0]])
     date2 = np.append(date2, [date_sub[-1]])
     flux2 = np.insert(flux_old_sub,[0], [0.0])
     flux2 = np.append(flux2, [0.0])
-    plt.fill(date2, flux2, fc='#FFFACD', linewidth=0.0)
+    plt.fill(date2, flux2, color='#a8a7a7', linewidth=0.0, alpha=0.2, label='Data')
+    if (maskdata is None) is False:
+        for m in maskdata:
+            pos = np.where((barytime0 + 2400000 + date2 >m[0]) & (barytime0 + 2400000 + date2 <=m [1]))[0]
+            plt.fill_between(date2[pos], flux2[pos].min(), flux2[pos].max(), color='#c0392b', linewidth=0.0, alpha=0.3, label='Masked')
+
+
     plt.xlim(xmin - xr * 0.01, xmax + xr * 0.01)
     if ymin1 - yr1 * 0.01 <= 0.0:
         plt.ylim(1.0e-10, ymax1 + yr1 * 0.01)
@@ -354,7 +362,9 @@ def do_plot(date, flux_old, flux_new, bvsum, cad, good_data, cad_nans, version):
         plt.ylim(ymin1 - yr1 * 0.01, ymax1 + yr1 * 0.01)
     plt.xlabel(xlab, {'color' : 'k'})
     plt.ylabel(ylab1, {'color' : 'k'})
-    plt.grid()
+    plt.grid(ls='--',alpha=0.3)
+    plt.legend()
+
 
     ax2 = plt.subplot(212, sharex=ax1)
     for i in range(len(blocks)):
@@ -367,14 +377,18 @@ def do_plot(date, flux_old, flux_new, bvsum, cad, good_data, cad_nans, version):
         plot_y = flux_new_sub[mask]
         if np.nan in plot_y:
             break
-        plt.plot(plot_x, plot_y, color='#0000ff', linestyle='-', linewidth=1.0)
+        plt.scatter(plot_x, plot_y, color='#363636', linestyle='-', linewidth=1.0, marker='.', s=5)
         plot_y = bvsum_sub[mask]
 
     date2 = np.insert(date_sub, [0], [date_sub[0]])
     date2 = np.append(date2, [date_sub[-1]])
     flux2 = np.insert(flux_new_sub, [0], [0.0])
     flux2 = np.append(flux2, [0.0])
-    plt.fill(date2, flux2, fc='#FFFACD', linewidth=0.0)
+    plt.fill(date2, flux2, fc='#a8a7a7', alpha=0.2,  linewidth=0.0)
+    if (maskdata is None) is False:
+        for m in maskdata:
+            pos = np.where((barytime0 + 2400000 + date2 >m[0]) & (barytime0 + 2400000 + date2 <=m [1]))[0]
+            plt.fill_between(date2[pos], flux2[pos].min(), flux2[pos].max(), color='#c0392b', linewidth=0.0, alpha=0.3)
     plt.xlim(xmin - xr * 0.01, xmax + xr * 0.01)
 
     if ymin2-yr2*0.01 <= 0.0:
@@ -384,14 +398,15 @@ def do_plot(date, flux_old, flux_new, bvsum, cad, good_data, cad_nans, version):
 
     plt.xlabel(xlab, {'color' : 'k'})
     plt.ylabel(ylab2, {'color' : 'k'})
-    plt.grid()
+    plt.grid(ls='--',alpha=0.3)
     plt.subplots_adjust(0.1, 0.1, 0.94, 0.94, 0.0, 0.0)
     plt.gca().xaxis.set_major_formatter(plt.ScalarFormatter(useOffset=False))
     plt.gca().yaxis.set_major_formatter(plt.ScalarFormatter(useOffset=False))
 
     # render plot
-    plt.savefig("kepcotrend.png")
-    plt.show()
+    plt.savefig(re.sub('.fits', '.png', outfile), bbox_inches='tight')
+    if not noninteractive:
+        plt.show()
 
 def split_on_nans(good_data, cad):
     blocks = []
@@ -407,8 +422,8 @@ def split_on_nans(good_data, cad):
 
 def kepcotrend(infile, bvfile, listbv, outfile=None, fitmethod='llsq',
                fitpower=1, iterate=False, sigma=None, maskfile='',
-               scinterp='linear', plot=False, overwrite=False, verbose=False,
-               logfile='kepcotrend.log'):
+               scinterp='linear', plot=False, noninteractive=False,
+               overwrite=False, verbose=False, logfile='kepcotrend.log'):
     """
     kepcotrend -- Remove systematic trends Kepler light curves using
     cotrending basis vectors. The cotrending basis vectors files can be found
@@ -572,6 +587,8 @@ def kepcotrend(infile, bvfile, listbv, outfile=None, fitmethod='llsq',
         * cubic
     plot : bool
         Plot the data and result?
+    non-interactive : bool
+        If True, prevents the matplotlib window to pop up.
     overwrite : bool
         Overwrite the output file?
     verbose : bool
@@ -728,16 +745,20 @@ def kepcotrend(infile, bvfile, listbv, outfile=None, fitmethod='llsq',
                                       lc_date_o, lc_flux_o, lc_err_o)
     #get a list of basis vectors to use from the list given
     #accept different seperators
-    listbv = listbv.strip()
-    if listbv[1] in [' ', ',', ':', ';', '|', ', ']:
-        separator = str(listbv)[1]
+    if len(listbv) == 1:
+        bvlist = [listbv]
     else:
-        message = ('You must separate your basis vector numbers to use '
-                   'with \' \' \',\' \':\' \';\' or \'|\' and the '
-                   'first basis vector to use must be between 1 and 9')
-        kepmsg.err(logfile, message, verbose)
+        listbv = listbv.strip()
+        if listbv[1] in [' ', ',', ':', ';', '|', ', ']:
+            separator = str(listbv)[1]
+        else:
+            message = ('You must separate your basis vector numbers to use '
+                       'with \' \' \',\' \':\' \';\' or \'|\' and the '
+                       'first basis vector to use must be between 1 and 9')
+            kepmsg.err(logfile, message, verbose)
 
-    bvlist = np.fromstring(listbv, dtype=int, sep=separator)
+        bvlist = np.fromstring(listbv, dtype=int, sep=separator)
+
     if bvlist[0] == 0:
         errmsg = 'Must use at least one basis vector'
         kepmsg.err(logfile, errmsg, verbose)
@@ -812,10 +833,12 @@ def kepcotrend(infile, bvfile, listbv, outfile=None, fitmethod='llsq',
     flux_after_nans = put_in_nans(good_data, flux_after)
 
     if plot:
+        if not domasking:
+            maskdata = None
         newmedflux = np.median(flux_after + 1)
         bvsum_un_norm = newmedflux * (1 - bvsum)
         do_plot(lc_date, lc_flux, flux_after, bvsum_un_norm, lc_cad,
-                good_data, lc_cad_o, version)
+                good_data, lc_cad_o, version, maskdata, outfile, noninteractive)
 
     print("Writing output file {}...".format(outfile))
     make_outfile(instr, outfile, flux_after_nans, bvsum_nans, version)
@@ -878,6 +901,9 @@ def kepcotrend_main():
                                  'cubic'])
     parser.add_argument('--plot', '-p', action='store_true',
                         help='Plot result?')
+    parser.add_argument('--non-interactive', action='store_true',
+                        help='Pop up matplotlib plot window?',
+                        dest='noninteractive')
     parser.add_argument('--overwrite', action='store_true',
                         help='Overwrite output file?')
     parser.add_argument('--verbose', action='store_true',
@@ -887,5 +913,5 @@ def kepcotrend_main():
     args = parser.parse_args()
     kepcotrend(args.infile, args.cbvfile, args.listbv, args.outfile,
                args.fitmethod, args.fitpower, args.iterate, args.sigma,
-               args.maskfile, args.scinterp, args.plot, args.overwrite,
-               args.verbose, args.logfile)
+               args.maskfile, args.scinterp, args.plot, args.noninteractive,
+               args.overwrite, args.verbose, args.logfile)
