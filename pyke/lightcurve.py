@@ -128,7 +128,7 @@ class KeplerLightCurveFile(object):
         if flux_type in self._flux_types():
             return LightCurve(self.hdu[1].data['TIME'], self.hdu[1].data[flux_type],
                               flux_err=self.hdu[1].data[flux_type + "_ERR"],
-                              quality=None,
+                              quality=self.hdu[1].data['SAP_QUALITY'],
                               centroid_col=self.hdu[1].data[centroid_type + "1"],
                               centroid_row=self.hdu[1].data[centroid_type + "2"])
         else:
