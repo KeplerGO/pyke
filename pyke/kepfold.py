@@ -149,8 +149,13 @@ def kepfold(infile, outfile=None, period=None, bjd0=None, bindata=False,
         binned_err = np.zeros(len(bs))
         for i,b in enumerate(bs):
             p = np.where( (phase > (b - db/2.)) & (phase <= (b + db/2.)) )[0]
-            binned[i] = np.mean(signal[p])
-            binned_err[i] = (np.sum(err[p]**2)**0.5)/float(len(p))
+            if len(p) == 0:
+                binned[i]=0
+                binned_err[i]==0
+                continue
+            else:
+                binned[i] = np.mean(signal[p])
+                binned_err[i] = (np.sum(err[p]**2)**0.5)/float(len(p))
 
     # update HDU1 for output file
     col0 = pyfits.Column(name='PHASE', format='E',

@@ -11,6 +11,7 @@ matplotlib.use('TkAgg')
 from .version import __version__
 from .keparray import *
 from .kepbls import *
+from .kepclean import *
 from .kepclip import *
 from .kepconvert import *
 from .kepcotrend import *
