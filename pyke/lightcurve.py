@@ -195,7 +195,15 @@ class KeplerCBVCorrector(SystematicsCorrector):
     Attributes
     ----------
     lc_file : KeplerLightCurveFile object or str
+        An instance from KeplerLightCurveFile or a path for the .fits
+        file of a NASA's Kepler/K2 light curve.
     cbvs : list of ints
+        The list of cotrending basis vectors to fit to the data. For example,
+        [1, 2] will fit the first two basis vectors.
+    loss_function : oktopus.Likelihood subclass
+        A class that describes a cost function.
+        The default is :class:`oktopus.LaplacianLikelihood`, which is tantamount
+        to the L1 norm.
 
     Notes
     -----
@@ -218,6 +226,8 @@ class KeplerCBVCorrector(SystematicsCorrector):
 
     @lc_file.setter
     def lc_file(self, value):
+        # this enables `lc_file` to be either a string
+        # or an object from KeplerLightCurve
         if isinstance(value, str):
             self._lc_file = KeplerLightCurveFile(value)
         elif isinstance(value, KeplerLightCurveFile):
@@ -236,15 +246,14 @@ class KeplerCBVCorrector(SystematicsCorrector):
         sap_lc = self.lc_file.SAP_FLUX
         median_sap_flux = np.nanmedian(sap_lc.flux)
         norm_sap_flux = sap_lc.flux / median_sap_flux - 1
-        norm_err_sap_flux = (sap_lc.flux_err / median_sap_flux) ** 2
+        norm_err_sap_flux = sap_lc.flux_err / median_sap_flux
 
         def mean_model(*theta):
             coeffs = np.asarray(theta)
             return np.dot(coeffs, cbv_array)
 
-        chi_sqr = loss_function(data=norm_sap_flux, mean=mean_model, var=norm_err_sap_flux)
-
-        self.coeffs = chi_sqr.fit(x0=np.zeros(len(self.cbvs))).x
+        loss = loss_function(data=norm_sap_flux, mean=mean_model, var=norm_err_sap_flux)
+        self.coeffs = loss.fit(x0=np.zeros(len(self.cbvs))).x
         flux_hat = sap_lc.flux + median_sap_flux * mean_model(self.coeffs)
         self.lc_hat = LightCurve(time=sap_lc.time, flux=flux_hat.reshape(-1))
         return self.lc_hat
@@ -252,7 +261,9 @@ class KeplerCBVCorrector(SystematicsCorrector):
     def get_cbv_file(self):
         import requests
         from bs4 import BeautifulSoup
-
+        # gets the html page and finds all references to 'a' tag
+        # keeps the ones for which 'href' ends with 'fits'
+        # this might slow things down in case the user wants to fit 1e3 stars
         soup = BeautifulSoup(requests.get(self.cbv_base_url).text, 'html.parser')
         cbv_files = [fn['href'] for fn in soup.find_all('a') if fn['href'].endswith('fits')]
 
