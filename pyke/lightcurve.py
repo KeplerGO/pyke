@@ -281,7 +281,7 @@ class KeplerCBVCorrector(SystematicsCorrector):
             [1, 2] will fit the first two basis vectors.
         """
         module, output = channel_to_module_output(self.lc_file.channel)
-        cbv_file = pyfits.open(self.get_cbv_file())
+        cbv_file = pyfits.open(self.get_cbv_url())
         cbv_data = cbv_file['MODOUT_{0}_{1}'.format(module, output)].data
 
         cbv_array = []
