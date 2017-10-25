@@ -119,8 +119,7 @@ class LightCurve(object):
 
 
 class KeplerLightCurveFile(object):
-    """
-    Defines a LightCurveFile class for NASA's Kepler and K2 missions.
+    """Defines a LightCurveFile class for NASA's Kepler and K2 missions.
     """
 
     def __init__(self, path, **kwargs):
@@ -139,10 +138,12 @@ class KeplerLightCurveFile(object):
                            format(flux_type, self._flux_types))
     @property
     def SAP_FLUX(self):
+        """Returns a LightCurve object for SAP_FLUX"""
         return self.get_lightcurve('SAP_FLUX')
 
     @property
     def PDCSAP_FLUX(self):
+        """Returns a LightCurve object for PDCSAP_FLUX"""
         return self.get_lightcurve('PDCSAP_FLUX')
 
     @property
@@ -159,13 +160,24 @@ class KeplerLightCurveFile(object):
 
     @property
     def campaign(self):
+        """Campaign number"""
         return self.header(ext=0)['CAMPAIGN']
 
     @property
     def mission(self):
+        """Mission name"""
         return self.header(ext=0)['MISSION']
 
     def compute_cotrended_lightcurve(self, cbvs=[1, 2]):
+        """Returns a LightCurve object after cotrending the SAP_FLUX
+        against the cotrending basis vectors.
+
+        Parameters
+        ----------
+        cbvs : list of ints
+            The list of cotrending basis vectors to fit to the data. For example,
+            [1, 2] will fit the first two basis vectors.
+        """
         return KeplerCBVCorrector(self).correct(cbvs=cbvs)
 
     def header(self, ext=0):
@@ -258,6 +270,9 @@ class KeplerCBVCorrector(SystematicsCorrector):
 
     def correct(self, cbvs=[1, 2]):
         """
+        Correct the SAP_FLUX by fitting a number of cotrending basis vectors
+        `cbvs`.
+
         Parameters
         ----------
         cbvs : list of ints
@@ -288,6 +303,7 @@ class KeplerCBVCorrector(SystematicsCorrector):
         self._coeffs = self._opt_result.x
         flux_hat = sap_lc.flux - median_sap_flux * mean_model(self._coeffs)
         lc_hat = LightCurve(time=sap_lc.time, flux=flux_hat.reshape(-1))
+
         return lc_hat
 
     def get_cbv_file(self):
