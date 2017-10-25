@@ -124,7 +124,8 @@ class KeplerLightCurveFile(object):
     """
 
     def __init__(self, path, **kwargs):
-        self.hdu = pyfits.open(path, **kwargs)
+        self.path = path
+        self.hdu = pyfits.open(self.path, **kwargs)
 
     def get_lightcurve(self, flux_type, centroid_type='MOM_CENTR'):
         if flux_type in self._flux_types():
@@ -164,6 +165,9 @@ class KeplerLightCurveFile(object):
     def mission(self):
         return self.header(ext=0)['MISSION']
 
+    def compute_cotrended_lightcurve(self, cbvs=[1, 2]):
+        return KeplerCBVCorrector(self).correct(cbvs=cbvs)
+
     def header(self, ext=0):
         return self.hdu[ext].header
 
@@ -199,9 +203,6 @@ class KeplerCBVCorrector(SystematicsCorrector):
     lc_file : KeplerLightCurveFile object or str
         An instance from KeplerLightCurveFile or a path for the .fits
         file of a NASA's Kepler/K2 light curve.
-    cbvs : list of ints
-        The list of cotrending basis vectors to fit to the data. For example,
-        [1, 2] will fit the first two basis vectors.
     loss_function : oktopus.Likelihood subclass
         A class that describes a cost function.
         The default is :class:`oktopus.LaplacianLikelihood`, which is tantamount
@@ -219,9 +220,8 @@ class KeplerCBVCorrector(SystematicsCorrector):
     >>> plt.legend()
     """
 
-    def __init__(self, lc_file, cbvs=[1, 2], loss_function=oktopus.LaplacianLikelihood):
+    def __init__(self, lc_file, loss_function=oktopus.LaplacianLikelihood):
         self.lc_file = lc_file
-        self.cbvs = cbvs
         self.loss_function = loss_function
 
         if self.lc_file.mission == 'Kepler':
@@ -256,13 +256,20 @@ class KeplerCBVCorrector(SystematicsCorrector):
         """
         return self._opt_result
 
-    def fit(self):
+    def correct(self, cbvs=[1, 2]):
+        """
+        Parameters
+        ----------
+        cbvs : list of ints
+            The list of cotrending basis vectors to fit to the data. For example,
+            [1, 2] will fit the first two basis vectors.
+        """
         module, output = channel_to_module_output(self.lc_file.channel)
         cbv_file = pyfits.open(self.get_cbv_file())
         cbv_data = cbv_file['MODOUT_{0}_{1}'.format(module, output)].data
 
         cbv_array = []
-        for i in self.cbvs:
+        for i in cbvs:
             cbv_array.append(cbv_data.field('VECTOR_{}'.format(i)))
         cbv_array = np.asarray(cbv_array)
 
@@ -277,7 +284,7 @@ class KeplerCBVCorrector(SystematicsCorrector):
 
         loss = self.loss_function(data=norm_sap_flux, mean=mean_model,
                                   var=norm_err_sap_flux)
-        self._opt_result = loss.fit(x0=np.zeros(len(self.cbvs)), method='L-BFGS-B')
+        self._opt_result = loss.fit(x0=np.zeros(len(cbvs)), method='L-BFGS-B')
         self._coeffs = self._opt_result.x
         flux_hat = sap_lc.flux - median_sap_flux * mean_model(self._coeffs)
         lc_hat = LightCurve(time=sap_lc.time, flux=flux_hat.reshape(-1))
