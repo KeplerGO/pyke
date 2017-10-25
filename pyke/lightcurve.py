@@ -212,10 +212,9 @@ class KeplerCBVCorrector(SystematicsCorrector):
     >>> cbv = KeplerCBVCorrector("kplr008462852-2011073133259_llc.fits")
     >>> cbv_lc = cbv.correct()
     >>> sap_lc = KeplerLightCurveFile("kplr008462852-2011073133259_llc.fits").SAP_FLUX
-    >>> plt.plot(cbv_lc.time, cbv_lc.flux, 'o', markersize=1)
-    >>> plt.plot(sap_lc.time, sap_lc.flux, 'x', markersize=1)
+    >>> plt.plot(sap_lc.time, sap_lc.flux, 'x', markersize=1, label='SAP_FLUX')
+    >>> plt.plot(cbv_lc.time, cbv_lc.flux, 'o', markersize=1, label='CBV_FLUX')
     >>> plt.legend()
-
     """
 
     def __init__(self, lc_file, cbvs=[1, 2], loss_function=oktopus.LaplacianLikelihood):
@@ -255,7 +254,7 @@ class KeplerCBVCorrector(SystematicsCorrector):
         """
         return self._opt_result
 
-    def correct(self):
+    def fit(self):
         module, output = channel_to_module_output(self.lc_file.channel)
         cbv_file = pyfits.open(self.get_cbv_file())
         cbv_data = cbv_file['MODOUT_{0}_{1}'.format(module, output)].data
