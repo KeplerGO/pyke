@@ -306,7 +306,7 @@ class KeplerCBVCorrector(SystematicsCorrector):
 
         return LightCurve(time=sap_lc.time, flux=flux_hat.reshape(-1))
 
-    def get_cbv_file(self):
+    def get_cbv_url(self):
         # gets the html page and finds all references to 'a' tag
         # keeps the ones for which 'href' ends with 'fits'
         # this might slow things down in case the user wants to fit 1e3 stars
