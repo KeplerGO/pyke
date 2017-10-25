@@ -1,10 +1,15 @@
 import copy
 import numpy as np
 from scipy import signal
-from astropy.io import fits
+from astropy.io import fits as pyfits
 from tqdm import tqdm
+import oktopus
+import requests
+from bs4 import BeautifulSoup
+from .utils import channel_to_module_output
 
-__all__ = ['LightCurve', 'KeplerLightCurveFile']
+__all__ = ['LightCurve', 'KeplerLightCurveFile', 'KeplerCBVCorrector',
+           'SimplePixelLevelDecorrelationDetrender']
 
 
 class LightCurve(object):
@@ -114,15 +119,18 @@ class LightCurve(object):
 
 
 class KeplerLightCurveFile(object):
+    """Defines a LightCurveFile class for NASA's Kepler and K2 missions.
+    """
 
     def __init__(self, path, **kwargs):
-        self.hdu = fits.open(path, **kwargs)
+        self.path = path
+        self.hdu = pyfits.open(self.path, **kwargs)
 
     def get_lightcurve(self, flux_type, centroid_type='MOM_CENTR'):
         if flux_type in self._flux_types():
             return LightCurve(self.hdu[1].data['TIME'], self.hdu[1].data[flux_type],
                               flux_err=self.hdu[1].data[flux_type + "_ERR"],
-                              quality=self.hdu[1].data['QUALITY'],
+                              quality=self.hdu[1].data['SAP_QUALITY'],
                               centroid_col=self.hdu[1].data[centroid_type + "1"],
                               centroid_row=self.hdu[1].data[centroid_type + "2"])
         else:
@@ -130,11 +138,50 @@ class KeplerLightCurveFile(object):
                            format(flux_type, self._flux_types))
     @property
     def SAP_FLUX(self):
+        """Returns a LightCurve object for SAP_FLUX"""
         return self.get_lightcurve('SAP_FLUX')
 
     @property
     def PDCSAP_FLUX(self):
+        """Returns a LightCurve object for PDCSAP_FLUX"""
         return self.get_lightcurve('PDCSAP_FLUX')
+
+    @property
+    def time(self):
+        return self.hdu[1].data['TIME']
+
+    @property
+    def channel(self):
+        return self.header(ext=0)['CHANNEL']
+
+    @property
+    def quarter(self):
+        return self.header(ext=0)['QUARTER']
+
+    @property
+    def campaign(self):
+        """Campaign number"""
+        return self.header(ext=0)['CAMPAIGN']
+
+    @property
+    def mission(self):
+        """Mission name"""
+        return self.header(ext=0)['MISSION']
+
+    def compute_cotrended_lightcurve(self, cbvs=[1, 2]):
+        """Returns a LightCurve object after cotrending the SAP_FLUX
+        against the cotrending basis vectors.
+
+        Parameters
+        ----------
+        cbvs : list of ints
+            The list of cotrending basis vectors to fit to the data. For example,
+            [1, 2] will fit the first two basis vectors.
+        """
+        return KeplerCBVCorrector(self).correct(cbvs=cbvs)
+
+    def header(self, ext=0):
+        return self.hdu[ext].header
 
     def _flux_types(self):
         """Returns a list of available flux types for this light curve file"""
@@ -149,6 +196,138 @@ class Detrender(object):
         Returns a LightCurve object
         """
         pass
+
+
+class SystematicsCorrector(object):
+    def correct(self):
+        pass
+
+
+class KeplerCBVCorrector(SystematicsCorrector):
+    r"""Remove systematic trends from Kepler light curves by fitting
+    cotrending basis vectors.
+
+    .. math::
+
+         \arg \min_{\theta \in \Theta} |f(t) - <\theta, \left[\rm{cbv}_1(t), ..., \rm{cbv}_n(t)\right]^{T}|^p
+
+    Attributes
+    ----------
+    lc_file : KeplerLightCurveFile object or str
+        An instance from KeplerLightCurveFile or a path for the .fits
+        file of a NASA's Kepler/K2 light curve.
+    loss_function : oktopus.Likelihood subclass
+        A class that describes a cost function.
+        The default is :class:`oktopus.LaplacianLikelihood`, which is tantamount
+        to the L1 norm.
+
+    Examples
+    --------
+    >>> import matplotlib.pyplot as plt
+    >>> from pyke import KeplerCBVCorrector, KeplerLightCurveFile
+    >>> cbv = KeplerCBVCorrector("kplr008462852-2011073133259_llc.fits")
+    >>> cbv_lc = cbv.correct()
+    >>> sap_lc = KeplerLightCurveFile("kplr008462852-2011073133259_llc.fits").SAP_FLUX
+    >>> plt.plot(sap_lc.time, sap_lc.flux, 'x', markersize=1, label='SAP_FLUX')
+    >>> plt.plot(cbv_lc.time, cbv_lc.flux, 'o', markersize=1, label='CBV_FLUX')
+    >>> plt.legend()
+    """
+
+    def __init__(self, lc_file, loss_function=oktopus.LaplacianLikelihood):
+        self.lc_file = lc_file
+        self.loss_function = loss_function
+
+        if self.lc_file.mission == 'Kepler':
+            self.cbv_base_url = "http://archive.stsci.edu/missions/kepler/cbv/"
+        elif self.lc_file.mission == 'K2':
+            self.cbv_base_url = "http://archive.stsci.edu/missions/k2/cbv/"
+
+    @property
+    def lc_file(self):
+        return self._lc_file
+
+    @lc_file.setter
+    def lc_file(self, value):
+        # this enables `lc_file` to be either a string
+        # or an object from KeplerLightCurve
+        if isinstance(value, str):
+            self._lc_file = KeplerLightCurveFile(value)
+        elif isinstance(value, KeplerLightCurveFile):
+            self._lc_file = value
+
+    @property
+    def coeffs(self):
+        """
+        Returns the fitted coefficients.
+        """
+        return self._coeffs
+
+    @property
+    def opt_result(self):
+        """
+        Returns the result of the optimization process.
+        """
+        return self._opt_result
+
+    def correct(self, cbvs=[1, 2]):
+        """
+        Correct the SAP_FLUX by fitting a number of cotrending basis vectors
+        `cbvs`.
+
+        Parameters
+        ----------
+        cbvs : list of ints
+            The list of cotrending basis vectors to fit to the data. For example,
+            [1, 2] will fit the first two basis vectors.
+        """
+        module, output = channel_to_module_output(self.lc_file.channel)
+        cbv_file = pyfits.open(self.get_cbv_url())
+        cbv_data = cbv_file['MODOUT_{0}_{1}'.format(module, output)].data
+
+        cbv_array = []
+        for i in cbvs:
+            cbv_array.append(cbv_data.field('VECTOR_{}'.format(i)))
+        cbv_array = np.asarray(cbv_array)
+
+        sap_lc = self.lc_file.SAP_FLUX
+        median_sap_flux = np.nanmedian(sap_lc.flux)
+        norm_sap_flux = sap_lc.flux / median_sap_flux - 1
+        norm_err_sap_flux = sap_lc.flux_err / median_sap_flux
+
+        def mean_model(*theta):
+            coeffs = np.asarray(theta)
+            return np.dot(coeffs, cbv_array)
+
+        loss = self.loss_function(data=norm_sap_flux, mean=mean_model,
+                                  var=norm_err_sap_flux)
+        self._opt_result = loss.fit(x0=np.zeros(len(cbvs)), method='L-BFGS-B')
+        self._coeffs = self._opt_result.x
+        flux_hat = sap_lc.flux - median_sap_flux * mean_model(self._coeffs)
+
+        return LightCurve(time=sap_lc.time, flux=flux_hat.reshape(-1))
+
+    def get_cbv_url(self):
+        # gets the html page and finds all references to 'a' tag
+        # keeps the ones for which 'href' ends with 'fits'
+        # this might slow things down in case the user wants to fit 1e3 stars
+        soup = BeautifulSoup(requests.get(self.cbv_base_url).text, 'html.parser')
+        cbv_files = [fn['href'] for fn in soup.find_all('a') if fn['href'].endswith('fits')]
+
+        if self.lc_file.mission == 'Kepler':
+            if self.lc_file.quarter < 10:
+                quarter = 'q0' + str(self.lc_file.quarter)
+            else:
+                quarter = 'q' + str(self.lc_file.quarter)
+            for cbv_file in cbv_files:
+                if quarter + '-d25' in cbv_file:
+                    break
+        elif self.lc_file.mission == 'K2':
+            campaign = 'c' + str(self.lc_file.campaign)
+            for cbv_file in cbv_files:
+                if campaign in cbv_file:
+                    break
+
+        return self.cbv_base_url + cbv_file
 
 
 class ArcLengthDetrender(Detrender):
