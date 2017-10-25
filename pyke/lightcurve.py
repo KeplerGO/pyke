@@ -276,7 +276,7 @@ class KeplerCBVCorrector(SystematicsCorrector):
 
         loss = self.loss_function(data=norm_sap_flux, mean=mean_model,
                                   var=norm_err_sap_flux)
-        self._opt_result = loss.fit(x0=np.zeros(len(self.cbvs)))
+        self._opt_result = loss.fit(x0=np.zeros(len(self.cbvs)), method='L-BFGS-B')
         self._coeffs = self._opt_result.x
         flux_hat = sap_lc.flux - median_sap_flux * mean_model(self._coeffs)
         lc_hat = LightCurve(time=sap_lc.time, flux=flux_hat.reshape(-1))
