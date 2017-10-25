@@ -148,7 +148,7 @@ class KeplerLightCurveFile(object):
 
     @property
     def channel(self):
-        return self.header(ext=0)['CHANNEl']
+        return self.header(ext=0)['CHANNEL']
 
     @property
     def quarter(self):
@@ -185,7 +185,7 @@ class SystematicsCorrector(object):
 
 
 class KeplerCBVCorrector(SystematicsCorrector):
-    """Remove systematic trends Kepler light curves by fitting
+    r"""Remove systematic trends from Kepler light curves by fitting
     cotrending basis vectors.
 
     .. math::
@@ -203,7 +203,7 @@ class KeplerCBVCorrector(SystematicsCorrector):
     here: http://archive.stsci.edu/missions/kepler/cbv/
     """
 
-    def __init__(self, lc_file, cbvs=[1, 2]):
+    def __init__(self, lc_file, cbvs=[1, 2], loss_function=oktopus.LaplacianLikelihood):
         self.lc_file = lc_file
         self.cbvs = cbvs
 
@@ -242,9 +242,7 @@ class KeplerCBVCorrector(SystematicsCorrector):
             coeffs = np.asarray(theta)
             return np.dot(coeffs, cbv_array)
 
-        chi_sqr = oktopus.GaussianLikelihood(data=norm_sap_flux,
-                                             mean=mean_model,
-                                             var=norm_err_sap_flux)
+        chi_sqr = loss_function(data=norm_sap_flux, mean=mean_model, var=norm_err_sap_flux)
 
         self.coeffs = chi_sqr.fit(x0=np.zeros(len(self.cbvs))).x
         flux_hat = sap_lc.flux + median_sap_flux * mean_model(self.coeffs)
