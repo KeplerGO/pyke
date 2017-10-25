@@ -205,10 +205,17 @@ class KeplerCBVCorrector(SystematicsCorrector):
         The default is :class:`oktopus.LaplacianLikelihood`, which is tantamount
         to the L1 norm.
 
-    Notes
-    -----
-    The cotrending basis vectors files can be found
-    here: http://archive.stsci.edu/missions/kepler/cbv/
+    Examples
+    --------
+    >>> import matplotlib.pyplot as plt
+    >>> from pyke import KeplerCBVCorrector, KeplerLightCurveFile
+    >>> cbv = KeplerCBVCorrector("kplr008462852-2011073133259_llc.fits")
+    >>> cbv_lc = cbv.correct()
+    >>> sap_lc = KeplerLightCurveFile("kplr008462852-2011073133259_llc.fits").SAP_FLUX
+    >>> plt.plot(cbv_lc.time, cbv_lc.flux, 'o', markersize=1)
+    >>> plt.plot(sap_lc.time, sap_lc.flux, 'x', markersize=1)
+    >>> plt.legend()
+
     """
 
     def __init__(self, lc_file, cbvs=[1, 2], loss_function=oktopus.LaplacianLikelihood):
@@ -234,6 +241,20 @@ class KeplerCBVCorrector(SystematicsCorrector):
         elif isinstance(value, KeplerLightCurveFile):
             self._lc_file = value
 
+    @property
+    def coeffs(self):
+        """
+        Returns the fitted coefficients.
+        """
+        return self._coeffs
+
+    @property
+    def opt_result(self):
+        """
+        Returns the result of the optimization process.
+        """
+        return self._opt_result
+
     def correct(self):
         module, output = channel_to_module_output(self.lc_file.channel)
         cbv_file = pyfits.open(self.get_cbv_file())
@@ -255,10 +276,11 @@ class KeplerCBVCorrector(SystematicsCorrector):
 
         loss = self.loss_function(data=norm_sap_flux, mean=mean_model,
                                   var=norm_err_sap_flux)
-        self.coeffs = loss.fit(x0=np.zeros(len(self.cbvs))).x
-        flux_hat = sap_lc.flux + median_sap_flux * mean_model(self.coeffs)
-        self.lc_hat = LightCurve(time=sap_lc.time, flux=flux_hat.reshape(-1))
-        return self.lc_hat
+        self._opt_result = loss.fit(x0=np.zeros(len(self.cbvs)))
+        self._coeffs = self._opt_result.x
+        flux_hat = sap_lc.flux - median_sap_flux * mean_model(self._coeffs)
+        lc_hat = LightCurve(time=sap_lc.time, flux=flux_hat.reshape(-1))
+        return lc_hat
 
     def get_cbv_file(self):
         import requests
