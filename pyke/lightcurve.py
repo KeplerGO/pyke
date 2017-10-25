@@ -4,6 +4,8 @@ from scipy import signal
 from astropy.io import fits as pyfits
 from tqdm import tqdm
 import oktopus
+import requests
+from bs4 import BeautifulSoup
 from .utils import channel_to_module_output
 
 __all__ = ['LightCurve', 'KeplerLightCurveFile', 'KeplerCBVCorrector',
@@ -282,8 +284,6 @@ class KeplerCBVCorrector(SystematicsCorrector):
         return lc_hat
 
     def get_cbv_file(self):
-        import requests
-        from bs4 import BeautifulSoup
         # gets the html page and finds all references to 'a' tag
         # keeps the ones for which 'href' ends with 'fits'
         # this might slow things down in case the user wants to fit 1e3 stars
