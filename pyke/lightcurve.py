@@ -197,6 +197,7 @@ class Detrender(object):
         """
         pass
 
+
 class SystematicsCorrector(object):
     def correct(self):
         pass
@@ -302,9 +303,8 @@ class KeplerCBVCorrector(SystematicsCorrector):
         self._opt_result = loss.fit(x0=np.zeros(len(cbvs)), method='L-BFGS-B')
         self._coeffs = self._opt_result.x
         flux_hat = sap_lc.flux - median_sap_flux * mean_model(self._coeffs)
-        lc_hat = LightCurve(time=sap_lc.time, flux=flux_hat.reshape(-1))
 
-        return lc_hat
+        return LightCurve(time=sap_lc.time, flux=flux_hat.reshape(-1))
 
     def get_cbv_file(self):
         # gets the html page and finds all references to 'a' tag
