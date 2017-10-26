@@ -1,12 +1,11 @@
 from . import DEFAULT_PRFDIR
 from .utils import channel_to_module_output
 from abc import abstractmethod
-import os
-import glob
 import math
 import scipy
 import numpy as np
 import tqdm
+from inspect import signature
 from astropy.io import fits as pyfits
 from oktopus.posterior import PoissonPosterior
 
@@ -88,9 +87,8 @@ class KeplerSceneModel(object):
         Default is a constant background
     """
 
-    def __init__(self, prf_model, n_sources, bkg_model=lambda bkg: np.array([bkg])):
-        self.prf_model = prf_model
-        self.n_sources = n_sources
+    def __init__(self, prfs, bkg_model=lambda bkg: np.array([bkg])):
+        self.prfs
         self.bkg_model = bkg_model
 
     def __call__(self, *params):
@@ -111,15 +109,16 @@ class KeplerSceneModel(object):
         bkg_params : scalar or array-like
             Parameters for the background model
         """
-        self.mixture_model = []
-        for i in range(self.n_sources):
-            self.mixture_model.append(self.prf_model(params[i],
-                                                     params[i + self.n_sources],
-                                                     params[i + 2 * self.n_sources],
-                                                     params[i + 3 * self.n_sources],
-                                                     params[i + 4 * self.n_sources],
-                                                     params[i + 5 * self.n_sources]))
-        self.scene_model = np.sum(self.mixture_model, axis=0) + self.bkg_model(params[-1])
+        n_models = len(self.prfs)
+        bkg_order = len(signature(bkg_model).parameters)
+        model_orders = [0]
+        for i in range(n_models):
+            model_orders.append(len(signature(prfs[i]).parameters))
+        n_params = np.cumsum(model_orders)
+        self.mm = []
+        for i in range(n_models):
+            self.mm.append(self.prfs[i](*params[n_params[i]:n_params[i+1]]))
+        self.scene_model = np.sum(self.mm, axis=0) + self.bkg_model(*params[-bkg_order:])
 
         return self.scene_model
 
@@ -157,7 +156,8 @@ class KeplerPRF(object):
     >>> import matplotlib.pyplot as plt
     >>> from pyke import KeplerPRF
     >>> kepprf = KeplerPRF(channel=44, shape=(10, 10), column=5, row=5)
-    >>> prf = kepprf(flux=1000, center_col=10, center_row=10, scale_col=0.7, rotation_angle=math.pi/2)
+    >>> prf = kepprf(flux=1000, center_col=10, center_row=10, scale_col=0.7,
+    ...              rotation_angle=math.pi/2)
     >>> plt.imshow(prf, origin='lower')
     """
 
