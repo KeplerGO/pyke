@@ -88,7 +88,7 @@ class KeplerSceneModel(object):
     """
 
     def __init__(self, prfs, bkg_model=lambda bkg: np.array([bkg])):
-        self.prfs
+        self.prfs = prfs
         self.bkg_model = bkg_model
 
     def __call__(self, *params):
@@ -110,11 +110,13 @@ class KeplerSceneModel(object):
             Parameters for the background model
         """
         n_models = len(self.prfs)
-        bkg_order = len(signature(bkg_model).parameters)
+        bkg_order = len(signature(self.bkg_model).parameters)
+
         model_orders = [0]
         for i in range(n_models):
-            model_orders.append(len(signature(prfs[i]).parameters))
+            model_orders.append(len(signature(self.prfs[i]).parameters))
         n_params = np.cumsum(model_orders)
+
         self.mm = []
         for i in range(n_models):
             self.mm.append(self.prfs[i](*params[n_params[i]:n_params[i+1]]))
@@ -156,8 +158,8 @@ class KeplerPRF(object):
     >>> import matplotlib.pyplot as plt
     >>> from pyke import KeplerPRF
     >>> kepprf = KeplerPRF(channel=44, shape=(10, 10), column=5, row=5)
-    >>> prf = kepprf(flux=1000, center_col=10, center_row=10, scale_col=0.7,
-    ...              rotation_angle=math.pi/2)
+    >>> prf = kepprf(flux=1000, center_col=10, center_row=10,
+    ...              scale_row=0.7, scale_col=0.7, rotation_angle=math.pi/2)
     >>> plt.imshow(prf, origin='lower')
     """
 
