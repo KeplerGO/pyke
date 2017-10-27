@@ -78,17 +78,15 @@ class KeplerSceneModel(object):
 
     Attributes
     ----------
-    prf_model : instance of KeplerPRF
-        An instance of the KeplerPRF class
-    n_sources : int
-        Number of sources to be modeled with ``prf_model``
+    prfs : list of callables
+        A list of prfs
     bkg_model : callable
         A function that models the background variation.
         Default is a constant background
     """
 
     def __init__(self, prfs, bkg_model=lambda bkg: np.array([bkg])):
-        self.prfs = prfs
+        self.prfs = list(prfs)
         self.bkg_model = bkg_model
 
     def __call__(self, *params):
