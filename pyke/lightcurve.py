@@ -322,7 +322,7 @@ class KeplerCBVCorrector(SystematicsCorrector):
                 if quarter + '-d25' in cbv_file:
                     break
         elif self.lc_file.mission == 'K2':
-            if self.lc_file.camapaign <= 8:
+            if self.lc_file.campaign <= 8:
                 campaign = 'c0' + str(self.lc_file.campaign)
             else:
                 campaign = 'c' + str(self.lc_file.campaign)
