@@ -14,7 +14,7 @@ __all__ = ['LightCurve', 'KeplerLightCurveFile', 'KeplerCBVCorrector',
 
 class LightCurve(object):
     """
-    Implements a basic time-series class for a generic lightcurve.
+    Implements a simple class for a generic light curve.
 
     Attributes
     ----------
@@ -24,20 +24,12 @@ class LightCurve(object):
         Data flux for every time point
     flux_err : array-like
         Uncertainty in each flux data point
-    quality : array-like
-        Array indicating the quality of each data point
-    centroid_col, centroid_row : array-like, array-like
-        Centroid column and row coordinates as a function of time
     """
 
-    def __init__(self, time, flux, flux_err=None, quality=None, centroid_col=None,
-                 centroid_row=None):
+    def __init__(self, time, flux, flux_err=None):
         self.time = time
         self.flux = flux
         self.flux_err = flux_err
-        self.quality = quality
-        self.centroid_col = centroid_col
-        self.centroid_row = centroid_row
 
     def stitch(self, *others):
         """
@@ -56,21 +48,13 @@ class LightCurve(object):
         time = self.time
         flux = self.flux
         flux_err = self.flux_err
-        quality = self.quality
-        centroid_col = self.centroid_col
-        centroid_row = self.centroid_row
 
         for i in range(len(others)):
             time = np.append(time, others[i].time)
             flux = np.append(flux, others[i].flux)
             flux_err = np.append(flux_err, others[i].flux_err)
-            quality = np.append(quality, others[i].quality)
-            centroid_col = np.append(centroid_col, others[i].centroid_col)
-            centroid_row = np.append(centroid_row, others[i].centroid_row)
 
-        return LightCurve(time=time, flux=flux, flux_err=flux_err,
-                          quality=quality, centroid_col=centroid_col,
-                          centroid_row=centroid_row)
+        return LightCurve(time=time, flux=flux, flux_err=flux_err)
 
     def flatten(self, window_length=101, polyorder=3, **kwargs):
         """
@@ -114,6 +98,23 @@ class LightCurve(object):
     def to_csv(self):
         raise NotImplementedError()
 
+
+class KeplerLightCurve(LightCurve):
+    """
+    Attributes
+    ----------
+    quality : array-like
+        Array indicating the quality of each data point
+    centroid_col, centroid_row : array-like, array-like
+        Centroid column and row coordinates as a function of time
+    """
+
+    def __init__(time, flux, flux_err=None, quality=None, centroid_col=None,
+                 centroid_row=None):
+        self.quality = quality
+        self.centroid_col = centroid_col
+        self.centroid_row = centroid_row
+
     def to_fits(self):
         raise NotImplementedError()
 
@@ -128,11 +129,11 @@ class KeplerLightCurveFile(object):
 
     def get_lightcurve(self, flux_type, centroid_type='MOM_CENTR'):
         if flux_type in self._flux_types():
-            return LightCurve(self.hdu[1].data['TIME'], self.hdu[1].data[flux_type],
-                              flux_err=self.hdu[1].data[flux_type + "_ERR"],
-                              quality=self.hdu[1].data['SAP_QUALITY'],
-                              centroid_col=self.hdu[1].data[centroid_type + "1"],
-                              centroid_row=self.hdu[1].data[centroid_type + "2"])
+            return KeplerLightCurve(self.hdu[1].data['TIME'], self.hdu[1].data[flux_type],
+                                    flux_err=self.hdu[1].data[flux_type + "_ERR"],
+                                    quality=self.hdu[1].data['SAP_QUALITY'],
+                                    centroid_col=self.hdu[1].data[centroid_type + "1"],
+                                    centroid_row=self.hdu[1].data[centroid_type + "2"])
         else:
             raise KeyError("{} is not a valid flux type. Available types are: {}".
                            format(flux_type, self._flux_types))
