@@ -27,7 +27,7 @@ def test_prf_vs_aperture_photometry():
     prf = KeplerPRF(channel=tpf[0].header['CHANNEL'],
                     column=col, row=row,
                     shape=tpf[1].data.shape)
-    scene = KeplerSceneModel(prf_model=prf, n_sources=1)
+    scene = KeplerSceneModel(prfs=prf)
     flux_ub, colo, rowo, _ = get_initial_guesses(data=tpf[1].data,
                                                ref_col=prf.col_coord[0],
                                                ref_row=prf.row_coord[0])
