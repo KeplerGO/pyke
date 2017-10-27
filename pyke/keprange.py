@@ -169,7 +169,7 @@ def plotlc():
     plt.text(0.5, 0.5, 'LOAD', fontsize=24, weight='heavy',
              horizontalalignment='center', verticalalignment='center')
     plt.setp(plt.gca(), xticklabels=[], xticks=[], yticklabels=[], yticks=[])
-    plt.fill([0.0, 1.0, 1.0, 0.0, 0.0], [0.0, 0.0, 1.0, 1.0, 0.0], '#ffffee')
+    plt.fill([0.0, 1.0, 1.0, 0.0, 0.0], [0.0, 0.0, 1.0, 1.0, 0.0], '#ffffff')
     plt.xlim(0.0, 1.0)
     plt.ylim(0.0, 1.0)
     aid = plt.connect('button_press_event', clicker1)
@@ -179,7 +179,7 @@ def plotlc():
     plt.text(0.5, 0.5, 'SAVE', fontsize=24, weight='heavy',
              horizontalalignment='center', verticalalignment='center')
     plt.setp(plt.gca(), xticklabels=[], xticks=[], yticklabels=[], yticks=[])
-    plt.fill([0.0, 1.0, 1.0, 0.0, 0.0], [0.0, 0.0, 1.0, 1.0, 0.0], '#ffffee')
+    plt.fill([0.0, 1.0, 1.0, 0.0, 0.0], [0.0, 0.0, 1.0, 1.0, 0.0], '#ffffff')
     plt.xlim(0.0, 1.0)
     plt.ylim(0.0, 1.0)
     bid = plt.connect('button_press_event', clicker2)
@@ -189,7 +189,7 @@ def plotlc():
     plt.text(0.5, 0.5, 'CLEAR', fontsize=24, weight='heavy',
              horizontalalignment='center', verticalalignment='center')
     plt.setp(plt.gca(), xticklabels=[], xticks=[], yticklabels=[], yticks=[])
-    plt.fill([0.0, 1.0, 1.0, 0.0, 0.0], [0.0, 0.0, 1.0, 1.0, 0.0], '#ffffee')
+    plt.fill([0.0, 1.0, 1.0, 0.0, 0.0], [0.0, 0.0, 1.0, 1.0, 0.0], '#ffffff')
     plt.xlim(0.0, 1.0)
     plt.ylim(0.0, 1.0)
     cid = plt.connect('button_press_event', clicker3)
@@ -199,7 +199,7 @@ def plotlc():
     plt.text(0.5, 0.5, 'PRINT', fontsize=24, weight='heavy',
              horizontalalignment='center', verticalalignment='center')
     plt.setp(plt.gca(), xticklabels=[], xticks=[], yticklabels=[], yticks=[])
-    plt.fill([0.0, 1.0, 1.0, 0.0, 0.0], [0.0, 0.0, 1.0, 1.0, 0.0], '#ffffee')
+    plt.fill([0.0, 1.0, 1.0, 0.0, 0.0], [0.0, 0.0, 1.0, 1.0, 0.0], '#ffffff')
     plt.xlim(0.0, 1.0)
     plt.ylim(0.0, 1.0)
     did = plt.connect('button_press_event', clicker4)
@@ -218,27 +218,27 @@ def plotlc():
         else:
             ltime = np.array(ltime, dtype=np.float64) - barytime0
             ldata = np.array(ldata, dtype=np.float64) / 10 ** nrm
-            plt.plot(ltime,ldata,color='#0000ff',linestyle='-',linewidth=1.0)
+            plt.scatter(ltime, ldata, color='#363636', marker='.' ,s=5,linewidth=1.0)
             ltime = []; ldata = []
     ltime = np.array(ltime, dtype=np.float64) - barytime0
     ldata = np.array(ldata, dtype=np.float64) / 10 ** nrm
-    plt.plot(ltime, ldata, color='#0000ff', linestyle='-', linewidth=1.0)
-    plt.fill(barytime, flux, fc='#ffff00', linewidth=0.0, alpha=0.2)
+    plt.scatter(ltime, ldata, color='#363636', marker='.', s=5, linewidth=1.0)
+    plt.fill(barytime, flux, fc='#a8a7a7', linewidth=0.0, alpha=0.2)
     plt.xlabel(xlab, {'color' : 'k'})
     plt.ylabel(ylab, {'color' : 'k'})
-    plt.grid()
+    plt.grid(ls='--', alpha=0.3)
 
     # plt.plot masks
     for i in range(len(mask)):
         t = float(mask[i])
-        plt.plot([t, t], [ymin, ymax], color='g', linestyle='-', linewidth=0.5)
+        plt.plot([t, t], [ymin, ymax], color='#c0392b', linestyle='-', linewidth=0.5)
     nt = 0
     for i in range(int(len(mask) / 2)):
         t1 = float(mask[nt])
         t2 = float(mask[nt + 1])
         nt += 2
         plt.fill([t1, t1, t2, t2, t1], [ymin, ymax, ymax, ymin, ymin],
-                 fc='g', linewidth=0.0, alpha=0.5)
+                 fc='#c0392b', linewidth=0.0, alpha=0.5)
     # plot ranges
     plt.xlim(xmin - xr * 0.01, xmax + xr * 0.01)
     if ymin - yr * 0.01 <= 0.0:

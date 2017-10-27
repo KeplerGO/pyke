@@ -2,8 +2,9 @@ from .utils import PyKEArgumentHelpFormatter
 import numpy as np
 from astropy.io import fits as pyfits
 from matplotlib import pyplot as plt
+from astropy.stats import LombScargle
 from tqdm import tqdm
-from . import kepio, kepmsg, kepkey, kepfit, kepfunc, kepstat, kepfourier
+from . import kepio, kepmsg, kepkey, kepfit, kepfunc, kepstat
 
 
 __all__ = ['keptrial']
@@ -36,7 +37,7 @@ def keptrial(infile, outfile=None, datacol='SAP_FLUX', errcol='SAP_FLUX_ERR',
     values of nfreq and ntrial have to be chosen carefully to avoid excessive
     run times. The values of **fmin**, **fmax** and **nfreq** have to be
     chosen carefully in order to provide a sensible measure of period and
-    error. It is recommended that ``kepft`` be used to estimate the period and
+    error. It is recommended that ``kepperiodogram`` be used to estimate the period and
     error before attempting to use ``keptrial``. An exercise of trial and error
     will most-likely be needed to choose a permutation of :math:`fmin`,
     :math:`fmax` and :math:`nfreq` that resolves the period distribution over a
@@ -55,11 +56,10 @@ def keptrial(infile, outfile=None, datacol='SAP_FLUX', errcol='SAP_FLUX_ERR',
         results of a Monte Carlo period analysis.
     datacol : str
         The column name containing data stored within extension 1 of infile.
-        This data is the input data for a series of Fourier transform
-        calculations. Typically this name is SAP_FLUX (Simple Aperture
-        Photometry fluxes), but any data column within extension 1 of the FITS
-        file can be used provided it is coupled to an error column name using
-        errcol.
+        This data is the input data for periodogram. Typically this name is
+        SAP_FLUX (Simple Aperture Photometry fluxes), but any data column within
+        extension 1 of the FITS file can be used provided it is coupled to an
+        error column name using errcol.
     errcol : str
         The uncertainty data coupled to datacol. Typically this column is
         called SAP_FLUX_ERR.
@@ -144,7 +144,8 @@ def keptrial(infile, outfile=None, datacol='SAP_FLUX', errcol='SAP_FLUX_ERR',
         # adjust data within the error bars
         #work1 = kepstat.randarray(signal, err)
         # determine FT power
-        fr, power = kepfourier.ft(barytime, signal, fmin, fmax, deltaf, False)
+        fr = np.arange(fmin, fmax, deltaf)
+        power = LombScargle(barytime, signal, signal.max()-signal.min()).power(fr)
         # determine peak in FT
         pmax.append(-1.0e30)
         for j in range(len(fr)):
