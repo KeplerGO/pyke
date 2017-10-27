@@ -587,5 +587,5 @@ def kepextract_main():
                         default='kepextract.log', type=str)
     args = parser.parse_args()
     kepextract(args.infile, outfile=args.outfile, bitmask=args.bitmask,
-               maskfile=args.maskfile, bkg=args.bkg, psfcentroid=args.psfcentroid, 
+               maskfile=args.maskfile, bkg=args.bkg, psfcentroid=args.psfcentroid,
                overwrite=args.overwrite, verbose=args.verbose, logfile=args.logfile)
