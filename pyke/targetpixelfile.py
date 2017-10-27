@@ -255,9 +255,9 @@ class KeplerTargetPixelFile(TargetPixelFile):
         """Returns the quality flag integer of every good cadence."""
         return self.hdu[1].data['QUALITY'][self.quality_mask]
 
-    def estimate_background(self, method='median'):
+    def estimate_background_per_pixel(self, method='median'):
         """Returns the median value of the fluxes for every cadence as an
-        estimate for the background."""
+        estimate for the background density."""
         if method == 'median':
             return np.nanmedian(self.flux[:, self.aperture_mask], axis=1)
         elif method == 'mean':
