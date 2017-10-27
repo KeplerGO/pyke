@@ -61,7 +61,8 @@ class KeplerPRFPhotometry(object):
 
         for t in tqdm.tqdm(cadences):
             loss = self.loss_function(tpf_flux[t], self.scene_model, prior=self.prior)
-            opt_params = loss.fit(x0=x0, **kwargs).x
+            result = loss.fit(x0=x0, **kwargs)
+            opt_params = result.x
             residuals = tpf_flux[t] - self.scene_model(*opt_params)
             self.opt_params = np.append(self.opt_params, opt_params)
             self.residuals = np.append(self.residuals, residuals)
@@ -86,11 +87,21 @@ class KeplerSceneModel(object):
     """
 
     def __init__(self, prfs, bkg_model=lambda bkg: np.array([bkg])):
-        self.prfs = list(prfs)
+        self.prfs = np.asarray([prfs]).reshape(-1)
         self.bkg_model = bkg_model
+        self._prepare_scene_model()
 
     def __call__(self, *params):
         return self.evaluate(*params)
+
+    def _prepare_scene_model(self):
+        self.n_models = len(self.prfs)
+        self.bkg_order = len(signature(self.bkg_model).parameters)
+
+        model_orders = [0]
+        for i in range(self.n_models):
+            model_orders.append(len(signature(self.prfs[i]).parameters))
+        self.n_params = np.cumsum(model_orders)
 
     def evaluate(self, *params):
         """
@@ -107,18 +118,10 @@ class KeplerSceneModel(object):
         bkg_params : scalar or array-like
             Parameters for the background model
         """
-        n_models = len(self.prfs)
-        bkg_order = len(signature(self.bkg_model).parameters)
-
-        model_orders = [0]
-        for i in range(n_models):
-            model_orders.append(len(signature(self.prfs[i]).parameters))
-        n_params = np.cumsum(model_orders)
-
         self.mm = []
-        for i in range(n_models):
-            self.mm.append(self.prfs[i](*params[n_params[i]:n_params[i+1]]))
-        self.scene_model = np.sum(self.mm, axis=0) + self.bkg_model(*params[-bkg_order:])
+        for i in range(self.n_models):
+            self.mm.append(self.prfs[i](*params[self.n_params[i]:self.n_params[i+1]]))
+        self.scene_model = np.sum(self.mm, axis=0) + self.bkg_model(*params[-self.bkg_order:])
 
         return self.scene_model
 
