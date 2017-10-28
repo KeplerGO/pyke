@@ -110,14 +110,32 @@ class KeplerLightCurve(LightCurve):
         Centroid column and row coordinates as a function of time
     """
 
-    def __init__(time, flux, flux_err=None, quality=None, centroid_col=None,
-                 centroid_row=None):
+    def __init__(time, flux, flux_err=None, quality=None, quality_bit_mask=None,
+                 centroid_col=None, centroid_row=None, channel=None, campaign=None,
+                 quarter=None, mission=None):
         self.quality = quality
+        self.quality_bit_mask = quality_bit_mask
         self.centroid_col = centroid_col
         self.centroid_row = centroid_row
+        self.channel = channel
+        self.campaign = campaign
+        self.quarter = quarter
+        self.mission = mission
 
     def to_fits(self):
         raise NotImplementedError()
+
+    def compute_cotrended_lightcurve(self, cbvs=[1, 2]):
+        """Returns a KeplerLightCurve object after cotrending the SAP_FLUX
+        against the cotrending basis vectors.
+
+        Parameters
+        ----------
+        cbvs : list of ints
+            The list of cotrending basis vectors to fit to the data. For example,
+            [1, 2] will fit the first two basis vectors.
+        """
+        return KeplerCBVCorrector(self).correct(cbvs=cbvs)
 
 
 class KeplerLightCurveFile(object):
@@ -133,12 +151,12 @@ class KeplerLightCurveFile(object):
 
     def get_lightcurve(self, flux_type, centroid_type='MOM_CENTR'):
         if flux_type in self._flux_types():
-            return LightCurve(self.hdu[1].data['TIME'][self.quality_mask],
-                              self.hdu[1].data[flux_type][self.quality_mask],
-                              flux_err=self.hdu[1].data[flux_type + "_ERR"][self.quality_mask],
-                              quality=self.hdu[1].data['SAP_QUALITY'][self.quality_mask],
-                              centroid_col=self.hdu[1].data[centroid_type + "1"][self.quality_mask],
-                              centroid_row=self.hdu[1].data[centroid_type + "2"][self.quality_mask])
+            return KeplerLightCurve(self.hdu[1].data['TIME'][self.quality_mask],
+                                    self.hdu[1].data[flux_type][self.quality_mask],
+                                    flux_err=self.hdu[1].data[flux_type + "_ERR"][self.quality_mask],
+                                    quality=self.hdu[1].data['SAP_QUALITY'][self.quality_mask],
+                                    centroid_col=self.hdu[1].data[centroid_type + "1"][self.quality_mask],
+                                    centroid_row=self.hdu[1].data[centroid_type + "2"][self.quality_mask])
         else:
             raise KeyError("{} is not a valid flux type. Available types are: {}".
                            format(flux_type, self._flux_types))
