@@ -48,7 +48,7 @@ def test_import():
     from .. import kepwindow
     from .. import lightcurve
     from .. import targetpixelfile
-    from .. import kepler_prf
+    from .. import prf_photometry
 
 
 @pytest.mark.skipif('not HAS_MDP')

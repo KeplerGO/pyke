@@ -4,7 +4,7 @@ import numpy as np
 from astropy.io import fits
 from astropy.utils.data import get_pkg_data_filename
 from oktopus import PoissonPosterior, UniformPrior, GaussianPrior, JointPrior
-from ..kepler_prf import KeplerPRF, KeplerSceneModel, KeplerPRFPhotometry, get_initial_guesses
+from ..prf_photometry import KeplerPRF, KeplerSceneModel, KeplerPRFPhotometry, get_initial_guesses
 
 
 def test_prf_normalization():
