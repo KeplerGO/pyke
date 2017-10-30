@@ -203,14 +203,30 @@ class KeplerPRF(object):
 
         delta_col = self.col_coord - center_col
         delta_row = self.row_coord - center_row
-
         delta_row, delta_col = np.meshgrid(delta_row, delta_col)
+
         rot_col = delta_col * cosa - delta_row * sina
         rot_row = delta_col * sina + delta_row * cosa
 
         self.prf_model = flux * self.interpolate(rot_row.flatten() * scale_row,
                                                  rot_col.flatten() * scale_col, grid=False).reshape(self.shape)
         return self.prf_model
+
+    def gradient(self, flux, center_col, center_row):
+        delta_col = self.col_coord - center_col
+        delta_row = self.row_coord - center_row
+        delta_row, delta_col = np.meshgrid(delta_row, delta_col)
+
+        deriv_flux = self.interpolate(delta_col, delta_row, grid=False).reshape(self.shape)
+
+        deriv_center_col = - flux * self.interpolate(delta_col, delta_row, dx=1,
+                                                     grid=False).reshape(self.shape)
+
+        deriv_center_row = - flux * self.interpolate(delta_col, delta_row, dy=1,
+                                                     grid=False).reshape(self.shape)
+
+        return [deriv_flux, deriv_center_col, deriv_center_row]
+
 
     def _read_prf_calibration_file(self, path, ext):
         prf_cal_file = pyfits.open(path)
