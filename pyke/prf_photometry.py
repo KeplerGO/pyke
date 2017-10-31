@@ -241,15 +241,11 @@ class KeplerPRF(object):
         delta_row, delta_col = np.meshgrid(delta_row, delta_col)
 
         deriv_flux = self.interpolate(delta_col, delta_row, grid=False).reshape(self.shape)
-
         deriv_center_col = - flux * self.interpolate(delta_col, delta_row, dx=1,
                                                      grid=False).reshape(self.shape)
-
         deriv_center_row = - flux * self.interpolate(delta_col, delta_row, dy=1,
                                                      grid=False).reshape(self.shape)
-
         return [deriv_flux, deriv_center_col, deriv_center_row]
-
 
     def _read_prf_calibration_file(self, path, ext):
         prf_cal_file = pyfits.open(path)
