@@ -69,9 +69,6 @@ class KeplerPRFPhotometry(object):
         self.opt_params = self.opt_params.reshape((tpf_flux.shape[0], len(x0)))
         self.residuals = self.residuals.reshape(tpf_flux.shape)
 
-    def generate_residuals_movie(self):
-        pass
-
 
 class KeplerSceneModel(object):
     """
