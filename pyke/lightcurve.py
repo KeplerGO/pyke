@@ -6,7 +6,8 @@ from tqdm import tqdm
 import oktopus
 import requests
 from bs4 import BeautifulSoup
-from .utils import channel_to_module_output
+from .utils import channel_to_module_output, KeplerQualityFlags
+
 
 __all__ = ['LightCurve', 'KeplerLightCurveFile', 'KeplerCBVCorrector',
            'SimplePixelLevelDecorrelationDetrender']
@@ -122,20 +123,35 @@ class KeplerLightCurveFile(object):
     """Defines a LightCurveFile class for NASA's Kepler and K2 missions.
     """
 
-    def __init__(self, path, **kwargs):
+    def __init__(self, path, quality_bitmask=KeplerQualityFlags.DEFAULT_BITMASK,
+                 **kwargs):
         self.path = path
         self.hdu = pyfits.open(self.path, **kwargs)
+        self.quality_bitmask = quality_bitmask
+        self.quality_mask = self._quality_mask(quality_bitmask)
 
     def get_lightcurve(self, flux_type, centroid_type='MOM_CENTR'):
         if flux_type in self._flux_types():
-            return LightCurve(self.hdu[1].data['TIME'], self.hdu[1].data[flux_type],
-                              flux_err=self.hdu[1].data[flux_type + "_ERR"],
-                              quality=self.hdu[1].data['SAP_QUALITY'],
-                              centroid_col=self.hdu[1].data[centroid_type + "1"],
-                              centroid_row=self.hdu[1].data[centroid_type + "2"])
+            return LightCurve(self.hdu[1].data['TIME'][self.quality_mask],
+                              self.hdu[1].data[flux_type][self.quality_mask],
+                              flux_err=self.hdu[1].data[flux_type + "_ERR"][self.quality_mask],
+                              quality=self.hdu[1].data['SAP_QUALITY'][self.quality_mask],
+                              centroid_col=self.hdu[1].data[centroid_type + "1"][self.quality_mask],
+                              centroid_row=self.hdu[1].data[centroid_type + "2"][self.quality_mask])
         else:
             raise KeyError("{} is not a valid flux type. Available types are: {}".
                            format(flux_type, self._flux_types))
+
+    def _quality_mask(self, quality_bitmask):
+        """Returns a boolean mask which flags all good-quality cadences.
+
+        Parameters
+        ----------
+        quality_bitmask : int
+            Bitmask. See ref. [1], table 2-3.
+        """
+        return (self.hdu[1].data['SAP_QUALITY'] & quality_bitmask) == 0
+
     @property
     def SAP_FLUX(self):
         """Returns a LightCurve object for SAP_FLUX"""
@@ -148,7 +164,7 @@ class KeplerLightCurveFile(object):
 
     @property
     def time(self):
-        return self.hdu[1].data['TIME']
+        return self.hdu[1].data['TIME'][self.quality_mask]
 
     @property
     def channel(self):
@@ -286,7 +302,7 @@ class KeplerCBVCorrector(SystematicsCorrector):
 
         cbv_array = []
         for i in cbvs:
-            cbv_array.append(cbv_data.field('VECTOR_{}'.format(i)))
+            cbv_array.append(cbv_data.field('VECTOR_{}'.format(i))[self.lc_file.quality_mask])
         cbv_array = np.asarray(cbv_array)
 
         sap_lc = self.lc_file.SAP_FLUX
@@ -322,7 +338,10 @@ class KeplerCBVCorrector(SystematicsCorrector):
                 if quarter + '-d25' in cbv_file:
                     break
         elif self.lc_file.mission == 'K2':
-            campaign = 'c' + str(self.lc_file.campaign)
+            if self.lc_file.campaign <= 8:
+                campaign = 'c0' + str(self.lc_file.campaign)
+            else:
+                campaign = 'c' + str(self.lc_file.campaign)
             for cbv_file in cbv_files:
                 if campaign in cbv_file:
                     break
