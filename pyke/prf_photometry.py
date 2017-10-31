@@ -69,6 +69,12 @@ class KeplerPRFPhotometry(object):
         self.opt_params = self.opt_params.reshape((tpf_flux.shape[0], len(x0)))
         self.residuals = self.residuals.reshape(tpf_flux.shape)
 
+    def get_residuals(self):
+        return self.residuals
+
+    def get_fitted_parameters_matrix(self):
+        return self.opt_params
+
 
 class KeplerSceneModel(object):
     """
@@ -180,11 +186,11 @@ class KeplerPRF(object):
 
         Parameters
         ----------
-        flux : float or array-like
+        flux : float
             Total integrated flux of the PRF
-        center_col, center_row : float or array-like
+        center_col, center_row : float
             Column and row coordinates of the center
-        scale_col, scale_row : float or array-like
+        scale_col, scale_row : float
             Pixel scale in the column and row directions
         rotation_angle : float
             Rotation angle in radians
@@ -210,6 +216,26 @@ class KeplerPRF(object):
         return self.prf_model
 
     def gradient(self, flux, center_col, center_row):
+        """
+        This function returns the gradient of the KeplerPRF model with respect
+        to flux, center_col, and center_row, in the particular case where the
+        scales in the row and column dimensions are both equal to one and the
+        rotation angle is zero.
+
+        Parameters
+        ----------
+        flux : float
+            Total integrated flux of the PRF
+        center_col, center_row : float
+            Column and row coordinates of the center
+
+        Returns
+        -------
+        grad_prf : list
+            Returns a list of arrays where the elements are the derivative
+            of the KeplerPRF model with respect to flux, center_col, and
+            center_row, respectively.
+        """
         delta_col = self.col_coord - center_col
         delta_row = self.row_coord - center_row
         delta_row, delta_col = np.meshgrid(delta_row, delta_col)
