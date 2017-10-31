@@ -302,7 +302,7 @@ class KeplerCBVCorrector(SystematicsCorrector):
 
         cbv_array = []
         for i in cbvs:
-            cbv_array.append(cbv_data.field('VECTOR_{}'.format(i))[self._lc_file.quality_mask])
+            cbv_array.append(cbv_data.field('VECTOR_{}'.format(i))[self.lc_file.quality_mask])
         cbv_array = np.asarray(cbv_array)
 
         sap_lc = self.lc_file.SAP_FLUX
