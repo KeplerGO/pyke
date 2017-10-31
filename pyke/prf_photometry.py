@@ -10,17 +10,17 @@ from astropy.io import fits as pyfits
 from oktopus.posterior import PoissonPosterior
 
 
-__all__ = ['KeplerPRFPhotometry', 'KeplerSceneModel', 'KeplerPRF', 'get_initial_guesses']
+__all__ = ['PRFPhotometry', 'SceneModel', 'KeplerPRF', 'get_initial_guesses']
 
 
-class KeplerPRFPhotometry(object):
+class PRFPhotometry(object):
     """
-    This class performs PRF Photometry on a target pixel file from
-    NASA's Kepler/K2 missions.
+    This class performs PRF Photometry on TPF-like files.
 
     Attributes
     ----------
-    scene_model : instance of KeplerSceneModel
+    scene_model : instance of SceneModel
+        Model which will be fit to the data
     priors : instance of oktopus.JointPrior
         Priors on the parameters that will be estimated
     loss_function : subclass of oktopus.LossFunction
@@ -76,9 +76,9 @@ class KeplerPRFPhotometry(object):
         return self.opt_params
 
 
-class KeplerSceneModel(object):
+class SceneModel(object):
     """
-    This class builds a generic model for a Kepler scene.
+    This class builds a generic model for a scene.
 
     Attributes
     ----------
@@ -125,8 +125,15 @@ class KeplerSceneModel(object):
         for i in range(self.n_models):
             self.mm.append(self.prfs[i](*params[self.n_params[i]:self.n_params[i+1]]))
         self.scene_model = np.sum(self.mm, axis=0) + self.bkg_model(*params[-self.bkg_order:])
-
         return self.scene_model
+
+    def gradient(self, *params):
+        grad = []
+        for i in range(self.n_models):
+            grad.append(self.prfs[i].gradient(*params[self.n_params[i]:self.n_params[i+1]]))
+        grad.append(self.bkg_model.gradient(*params[-self.bkg_order:]))
+        grad = sum(grad, [])
+        return grad
 
 
 class KeplerPRF(object):

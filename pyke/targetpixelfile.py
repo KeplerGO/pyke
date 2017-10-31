@@ -1,4 +1,5 @@
 import numpy as np
+import scipy
 import matplotlib.pyplot as plt
 from astropy.io import fits
 from astropy.visualization import (PercentileInterval, ImageNormalize,
@@ -155,7 +156,7 @@ class KeplerTargetPixelFile(TargetPixelFile):
     @property
     def flux(self):
         """Returns the flux for all good-quality cadences."""
-        return self.hdu[1].data['FLUX'][self.quality_mask]
+        return self.hdu[1].data['FLUX'][self.quality_mask] + self.flux_bkg
 
     @property
     def flux_err(self):
@@ -164,7 +165,7 @@ class KeplerTargetPixelFile(TargetPixelFile):
 
     @property
     def flux_bkg(self):
-        """Returns the flux on the background for all good-quality cadences."""
+        """Returns the background flux for all good-quality cadences."""
         return self.hdu[1].data['FLUX_BKG'][self.quality_mask]
 
     @property
@@ -172,13 +173,16 @@ class KeplerTargetPixelFile(TargetPixelFile):
         """Returns the quality flag integer of every good cadence."""
         return self.hdu[1].data['QUALITY'][self.quality_mask]
 
-    def estimate_background_per_pixel(self, method='median'):
+    def estimate_background_per_pixel(self, method='mode'):
         """Returns the median value of the fluxes for every cadence as an
         estimate for the background density."""
         if method == 'median':
             return np.nanmedian(self.flux[:, self.aperture_mask], axis=1)
         elif method == 'mean':
             return np.nanmean(self.flux[:, self.aperture_mask], axis=1)
+        elif method == 'mode':
+            return scipy.stats.mode(self.flux[:, self.aperture_mask], axis=1,
+                                    nan_policy='omit')[0]
         else:
             raise ValueError("method {} is not available".format(method))
 
@@ -189,28 +193,26 @@ class KeplerTargetPixelFile(TargetPixelFile):
     def _get_aperture_flux(self):
         return np.nansum(self.flux[:, self.aperture_mask], axis=1)
 
-    def to_lightcurve(self, method=None, subtract_bkg=False, **kwargs):
+    def get_bkg_lightcurve(self):
+        return np.nansum(self.flux_bkg[:, self.aperture_mask], axis=1)
+
+    def to_lightcurve(self, subtract_bkg=False):
         """Performs apperture photometry and optionally detrends the lightcurve.
 
         Attributes
         ----------
-        method : str or None
-            Method to detrend the light curve.
-        kwargs : dict
-            Keyword arguments passed to the detrending method.
+        subtract_bkg : bool
+            Whether or not to subtract the background.
 
         Returns
         -------
         lc : LightCurve object
-            Array containing the summed or detrended flux within the aperture
-            for each cadence.
+            Array containing the summed flux within the aperture for each
+            cadence.
         """
 
         aperture_flux = self._get_aperture_flux()
         if subtract_bkg:
-            aperture_flux = aperture_flux - self.aperture_npix * self.estimate_background()
-        if method is None:
-            return LightCurve(flux=aperture_flux, time=self.time)
-        else:
-            return LightCurve(flux=aperture_flux,
-                              time=self.time).detrend(method=method, **kwargs)
+            aperture_flux = aperture_flux - self.get_bkg_lightcurve()
+
+        return LightCurve(flux=aperture_flux, time=self.time)
