@@ -4,7 +4,7 @@ import numpy as np
 from astropy.io import fits
 from astropy.utils.data import get_pkg_data_filename
 from oktopus import PoissonPosterior, UniformPrior, GaussianPrior, JointPrior
-from ..prf_photometry import KeplerPRF, KeplerSceneModel, KeplerPRFPhotometry, get_initial_guesses
+from ..prf_photometry import KeplerPRF, SceneModel, PRFPhotometry, get_initial_guesses
 
 
 def test_prf_normalization():
@@ -27,7 +27,7 @@ def test_prf_vs_aperture_photometry():
     prf = KeplerPRF(channel=tpf[0].header['CHANNEL'],
                     column=col, row=row,
                     shape=tpf[1].data.shape)
-    scene = KeplerSceneModel(prfs=prf)
+    scene = SceneModel(prfs=prf)
     flux_ub, colo, rowo, _ = get_initial_guesses(data=tpf[1].data,
                                                ref_col=prf.col_coord[0],
                                                ref_row=prf.row_coord[0])
@@ -50,7 +50,7 @@ def test_prf_vs_aperture_photometry():
     assert np.isclose(prf_bkg, np.percentile(tpf[1].data, 10), rtol=0.1)
 
     # Test KeplerPRFPhotometry class
-    kepler_phot = KeplerPRFPhotometry(scene_model=scene, prior=prior)
+    kepler_phot = PRFPhotometry(scene_model=scene, prior=prior)
     tpf_flux = tpf[1].data.reshape((1, tpf[1].data.shape[0], tpf[1].data.shape[1]))
     kepler_phot.fit(tpf_flux=tpf_flux, x0=prior.mean)
     opt_params = kepler_phot.opt_params.reshape(-1)
