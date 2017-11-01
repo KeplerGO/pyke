@@ -308,8 +308,8 @@ class SimpleKeplerPRF(KeplerPRF):
         delta_row = self.row_coord - center_row
         delta_row, delta_col = np.meshgrid(delta_row, delta_col)
 
-        self.prf_model = flux * self.interpolate(delta_row.flatten() * scale_row,
-                                                 delta_col.flatten() * scale_col, grid=False).reshape(self.shape)
+        self.prf_model = flux * self.interpolate(delta_row.flatten(),
+                                                 delta_col.flatten(), grid=False).reshape(self.shape)
         return self.prf_model
 
     def gradient(self, flux, center_col, center_row):
@@ -335,10 +335,13 @@ class SimpleKeplerPRF(KeplerPRF):
         delta_row = self.row_coord - center_row
         delta_row, delta_col = np.meshgrid(delta_row, delta_col)
 
-        deriv_flux = self.interpolate(delta_col, delta_row, grid=False).reshape(self.shape)
-        deriv_center_col = - flux * self.interpolate(delta_col, delta_row, dx=1,
+        deriv_flux = self.interpolate(delta_col.flatten(), delta_row.flatten(),
+                                      grid=False).reshape(self.shape)
+        deriv_center_col = - flux * self.interpolate(delta_col.flatten(),
+                                                     delta_row.flatten(), dx=1,
                                                      grid=False).reshape(self.shape)
-        deriv_center_row = - flux * self.interpolate(delta_col, delta_row, dy=1,
+        deriv_center_row = - flux * self.interpolate(delta_col.flatten(),
+                                                     delta_row.flatten(), dy=1,
                                                      grid=False).reshape(self.shape)
         return [deriv_flux, deriv_center_col, deriv_center_row]
 
