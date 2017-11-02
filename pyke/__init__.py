@@ -3,8 +3,6 @@
 from __future__ import absolute_import
 import os
 PACKAGEDIR = os.path.abspath(os.path.dirname(__file__))
-# Where are the Kepler PRF files stored by default?
-DEFAULT_PRFDIR = os.path.expanduser('~/.pyke/kepler-prf-calibration-data/')
 import matplotlib
 matplotlib.use('TkAgg')
 

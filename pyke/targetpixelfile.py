@@ -2,10 +2,8 @@ import numpy as np
 import scipy
 import matplotlib.pyplot as plt
 from astropy.io import fits
-from astropy.visualization import (PercentileInterval, ImageNormalize,
-                                   SqrtStretch, LogStretch, LinearStretch)
 from .lightcurve import LightCurve
-from .utils import KeplerQualityFlags
+from .utils import KeplerQualityFlags, plot_image
 
 
 __all__ = ['KeplerTargetPixelFile']
@@ -96,25 +94,9 @@ class KeplerTargetPixelFile(TargetPixelFile):
     def row(self):
         return self.hdu['TARGETTABLES'].header['2CRV5P']
 
-    def plot(self, nframe=100, scale='linear', **kwargs):
+    def plot(self, nframe=100, **kwargs):
         pflux = self.flux[nframe]
-        vmin, vmax = PercentileInterval(95.).get_limits(pflux)
-        if scale == 'linear':
-            norm = ImageNormalize(vmin=vmin, vmax=vmax, stretch=LinearStretch())
-        elif scale == 'sqrt':
-            norm = ImageNormalize(vmin=vmin, vmax=vmax, stretch=SqrtStretch())
-        elif scale == 'log':
-            norm = ImageNormalize(vmin=vmin, vmax=vmax, stretch=LogStretch())
-        else:
-            raise ValueError("scale {} is not available.".format(scale))
-
-        plt.imshow(pflux, origin='lower', norm=norm,
-                   extent=(self.column, self.column + self.shape[2],
-                           self.row, self.row + self.shape[1]), **kwargs)
-        plt.xlabel('Pixel Column Number')
-        plt.ylabel('Pixel Row Number')
-        plt.title('Kepler ID: {}'.format(self.keplerid))
-        plt.colorbar(norm=norm)
+        plot_image(pflux, title='Kepler ID: {}'.format(self.keplerid), **kwargs)
 
     @property
     def aperture_mask(self):

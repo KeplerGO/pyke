@@ -1,5 +1,3 @@
-from . import DEFAULT_PRFDIR
-from .utils import channel_to_module_output
 from abc import abstractmethod
 import math
 import scipy
@@ -8,6 +6,7 @@ import tqdm
 from inspect import signature
 from astropy.io import fits as pyfits
 from oktopus.posterior import PoissonPosterior
+from .utils import channel_to_module_output, plot_image
 
 
 __all__ = ['PRFPhotometry', 'SceneModel', 'KeplerPRF', 'SimpleKeplerPRF', 'get_initial_guesses']
@@ -283,6 +282,10 @@ class KeplerPRF(object):
         interpolate = scipy.interpolate.RectBivariateSpline(PRFrow, PRFcol, prf)
 
         return col_coord, row_coord, interpolate
+
+    def plot(self, *params, **kwargs):
+        pflux = self.evaluate(*params)
+        plot_image(pflux, title='Kepler PRF Model, Channel: {}'.format(self.channel), **kwargs)
 
 
 class SimpleKeplerPRF(KeplerPRF):
