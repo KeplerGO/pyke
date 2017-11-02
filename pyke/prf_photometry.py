@@ -277,7 +277,10 @@ class KeplerPRF(object):
         # location of the data image centered on the PRF image (in PRF pixel units)
         col_coord = np.arange(self.column + .5, self.column + coldim + .5)
         row_coord = np.arange(self.row + .5, self.row + rowdim + .5)
-        interpolate = scipy.interpolate.RectBivariateSpline(PRFcol, PRFrow, prf)
+        # x-axis correspond to row-axis in scipy.RectBivariate
+        # not to be confused with our convention, in which the
+        # x-axis correspond to the column-axis
+        interpolate = scipy.interpolate.RectBivariateSpline(PRFrow, PRFcol, prf)
 
         return col_coord, row_coord, interpolate
 
@@ -306,10 +309,8 @@ class SimpleKeplerPRF(KeplerPRF):
         """
         delta_col = self.col_coord - center_col
         delta_row = self.row_coord - center_row
-        delta_row, delta_col = np.meshgrid(delta_row, delta_col)
 
-        self.prf_model = flux * self.interpolate(delta_row.flatten(),
-                                                 delta_col.flatten(), grid=False).reshape(self.shape)
+        self.prf_model = flux * self.interpolate(delta_row, delta_col)
         return self.prf_model
 
     def gradient(self, flux, center_col, center_row):
@@ -333,16 +334,10 @@ class SimpleKeplerPRF(KeplerPRF):
         """
         delta_col = self.col_coord - center_col
         delta_row = self.row_coord - center_row
-        delta_row, delta_col = np.meshgrid(delta_row, delta_col)
 
-        deriv_flux = self.interpolate(delta_row.flatten(), delta_col.flatten(),
-                                      grid=False).reshape(self.shape)
-        deriv_center_col = - flux * self.interpolate(delta_row.flatten(),
-                                                     delta_col.flatten(), dx=1,
-                                                     grid=False).reshape(self.shape)
-        deriv_center_row = - flux * self.interpolate(delta_row.flatten(),
-                                                     delta_col.flatten(), dy=1,
-                                                     grid=False).reshape(self.shape)
+        deriv_flux = self.interpolate(delta_row, delta_col)
+        deriv_center_col = - flux * self.interpolate(delta_row, delta_col, dy=1)
+        deriv_center_row = - flux * self.interpolate(delta_row, delta_col, dx=1)
         return [deriv_flux, deriv_center_col, deriv_center_row]
 
 
