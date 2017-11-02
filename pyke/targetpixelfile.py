@@ -96,7 +96,9 @@ class KeplerTargetPixelFile(TargetPixelFile):
 
     def plot(self, nframe=100, **kwargs):
         pflux = self.flux[nframe]
-        plot_image(pflux, title='Kepler ID: {}'.format(self.keplerid), **kwargs)
+        plot_image(pflux, title='Kepler ID: {}'.format(self.keplerid),
+                   extent=(self.column, self.column + self.shape[2],
+                           self.row, self.row + self.shape[1]), **kwargs)
 
     @property
     def aperture_mask(self):

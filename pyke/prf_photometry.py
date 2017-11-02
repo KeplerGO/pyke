@@ -285,7 +285,9 @@ class KeplerPRF(object):
 
     def plot(self, *params, **kwargs):
         pflux = self.evaluate(*params)
-        plot_image(pflux, title='Kepler PRF Model, Channel: {}'.format(self.channel), **kwargs)
+        plot_image(pflux, title='Kepler PRF Model, Channel: {}'.format(self.channel),
+                   extent=(self.column, self.column + self.shape[1],
+                           self.row, self.row + self.shape[0]), **kwargs)
 
 
 class SimpleKeplerPRF(KeplerPRF):
