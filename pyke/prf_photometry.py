@@ -30,10 +30,11 @@ class PRFPhotometry(object):
         self.scene_model = scene_model
         self.prior = prior
         self.loss_function = loss_function
+        self.loss_kwargs = kwargs
         self.opt_params = np.array([])
         self.residuals = np.array([])
+        self.loss_value = np.array([])
         self.uncertainties = np.array([])
-        self.loss_kwargs = kwargs
 
     def fit(self, tpf_flux, x0=None, cadences='all', **kwargs):
         """
@@ -65,6 +66,7 @@ class PRFPhotometry(object):
             result = loss.fit(x0=x0, **kwargs)
             opt_params = result.x
             residuals = tpf_flux[t] - self.scene_model(*opt_params)
+            self.loss_value = np.append(self.loss_value, result.fun)
             self.opt_params = np.append(self.opt_params, opt_params)
             self.residuals = np.append(self.residuals, residuals)
         self.opt_params = self.opt_params.reshape((tpf_flux.shape[0], len(x0)))
@@ -214,10 +216,10 @@ class KeplerPRF(object):
 
         delta_col = self.col_coord - center_col
         delta_row = self.row_coord - center_row
-        delta_row, delta_col = np.meshgrid(delta_row, delta_col)
+        delta_col, delta_row = np.meshgrid(delta_col, delta_row)
 
-        rot_col = delta_col * cosa - delta_row * sina
-        rot_row = delta_col * sina + delta_row * cosa
+        rot_row = delta_row * cosa - delta_col * sina
+        rot_col = delta_row * sina + delta_col * cosa
 
         self.prf_model = flux * self.interpolate(rot_row.flatten() * scale_row,
                                                  rot_col.flatten() * scale_col, grid=False).reshape(self.shape)
