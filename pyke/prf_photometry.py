@@ -26,13 +26,14 @@ class PRFPhotometry(object):
         Noise distribution associated with each random measurement
     """
 
-    def __init__(self, scene_model, prior, loss_function=PoissonPosterior):
+    def __init__(self, scene_model, prior, loss_function=PoissonPosterior, **kwargs):
         self.scene_model = scene_model
         self.prior = prior
         self.loss_function = loss_function
         self.opt_params = np.array([])
         self.residuals = np.array([])
         self.uncertainties = np.array([])
+        self.loss_kwargs = kwargs
 
     def fit(self, tpf_flux, x0=None, cadences='all', **kwargs):
         """
@@ -59,7 +60,8 @@ class PRFPhotometry(object):
             cadences = range(tpf_flux.shape[0])
 
         for t in tqdm.tqdm(cadences):
-            loss = self.loss_function(tpf_flux[t], self.scene_model, prior=self.prior)
+            loss = self.loss_function(tpf_flux[t], self.scene_model,
+                                      prior=self.prior, **self.loss_kwargs)
             result = loss.fit(x0=x0, **kwargs)
             opt_params = result.x
             residuals = tpf_flux[t] - self.scene_model(*opt_params)
@@ -343,6 +345,7 @@ class SimpleKeplerPRF(KeplerPRF):
         deriv_flux = self.interpolate(delta_row, delta_col)
         deriv_center_col = - flux * self.interpolate(delta_row, delta_col, dy=1)
         deriv_center_row = - flux * self.interpolate(delta_row, delta_col, dx=1)
+
         return [deriv_flux, deriv_center_col, deriv_center_row]
 
 

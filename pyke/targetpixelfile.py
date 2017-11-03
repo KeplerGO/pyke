@@ -58,7 +58,7 @@ class KeplerTargetPixelFile(TargetPixelFile):
         self.hdu = fits.open(self.path, **kwargs)
         self.quality_bitmask = quality_bitmask
         self.quality_mask = self._quality_mask(quality_bitmask)
-        self.aperture_mask = None
+        self.aperture_mask = aperture_mask
 
     def _quality_mask(self, quality_bitmask):
         """Returns a boolean mask which flags all good-quality cadences.
@@ -109,8 +109,9 @@ class KeplerTargetPixelFile(TargetPixelFile):
         if mask is not None:
             self._aperture_mask = mask
         else:
+            mask = self.hdu[1].data['FLUX'][100] == self.hdu[1].data['FLUX'][100]
             self._aperture_mask = np.ones((self.shape[1], self.shape[2]),
-                                          dtype=bool)
+                                          dtype=bool) * mask
 
     @property
     def aperture_npix(self):
@@ -157,9 +158,9 @@ class KeplerTargetPixelFile(TargetPixelFile):
         """Returns the quality flag integer of every good cadence."""
         return self.hdu[1].data['QUALITY'][self.quality_mask]
 
-    def estimate_background_per_pixel(self, method='mode'):
-        """Returns the median value of the fluxes for every cadence as an
-        estimate for the background density."""
+    def estimate_background_per_pixel(self, method='kepler_pipeline'):
+        """Returns an estimate of the background value per pixel for every
+        cadence."""
         if method == 'median':
             return np.nanmedian(self.flux[:, self.aperture_mask], axis=1)
         elif method == 'mean':
@@ -167,6 +168,8 @@ class KeplerTargetPixelFile(TargetPixelFile):
         elif method == 'mode':
             return scipy.stats.mode(self.flux[:, self.aperture_mask], axis=1,
                                     nan_policy='omit')[0]
+        elif method == 'kepler_pipeline':
+            return self.get_bkg_lightcurve() / self.aperture_npix
         else:
             raise ValueError("method {} is not available".format(method))
 
