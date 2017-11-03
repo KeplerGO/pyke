@@ -141,7 +141,7 @@ class KeplerTargetPixelFile(TargetPixelFile):
     @property
     def flux(self):
         """Returns the flux for all good-quality cadences."""
-        return self.hdu[1].data['FLUX'][self.quality_mask] + self.flux_bkg
+        return self.hdu[1].data['FLUX'][self.quality_mask]
 
     @property
     def flux_err(self):
