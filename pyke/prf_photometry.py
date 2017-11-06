@@ -36,7 +36,8 @@ class PRFPhotometry(object):
         self.loss_value = np.array([])
         self.uncertainties = np.array([])
 
-    def fit(self, tpf_flux, x0=None, cadences='all', **kwargs):
+    def fit(self, tpf_flux, x0=None, cadences='all', method='powell',
+            **kwargs):
         """
         Fits the scene model to the given data in ``tpf_flux``.
 
@@ -63,7 +64,7 @@ class PRFPhotometry(object):
         for t in tqdm.tqdm(cadences):
             loss = self.loss_function(tpf_flux[t], self.scene_model,
                                       prior=self.prior, **self.loss_kwargs)
-            result = loss.fit(x0=x0, **kwargs)
+            result = loss.fit(x0=x0, method='powell', **kwargs)
             opt_params = result.x
             residuals = tpf_flux[t] - self.scene_model(*opt_params)
             self.loss_value = np.append(self.loss_value, result.fun)
