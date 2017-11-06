@@ -138,6 +138,12 @@ class SceneModel(object):
         grad = sum(grad, [])
         return grad
 
+    def plot(self, *params, **kwargs):
+        pflux = self.evaluate(*params)
+        plot_image(pflux, title='Scene Model, Channel: {}'.format(self.prfs[0].channel),
+                   extent=(self.prfs[0].column, self.prfs[0].column + self.prfs[0].shape[1],
+                           self.prfs[0].row, self.prfs[0].row + self.prfs[0].shape[0]), **kwargs)
+
 
 class KeplerPRF(object):
     """
