@@ -402,7 +402,7 @@ class SimplePixelLevelDecorrelationDetrender(Detrender):
         if len(tpf_flux) == 0:
             return np.array([])
         pixels_series = tpf_flux.reshape((tpf_flux.shape[0], -1))
-        lightcurve = np.sum(pixels_series, axis=1).reshape(-1, 1)
+        lightcurve = np.nansum(pixels_series, axis=1).reshape(-1, 1)
         # design matrix
         X = pixels_series / lightcurve
         X = np.hstack((X, np.array([np.linspace(0, 1, tpf_flux.shape[0]) ** n for n in range(polyorder+1)]).T))
