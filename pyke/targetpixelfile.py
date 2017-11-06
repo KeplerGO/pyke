@@ -158,7 +158,7 @@ class KeplerTargetPixelFile(TargetPixelFile):
         """Returns the quality flag integer of every good cadence."""
         return self.hdu[1].data['QUALITY'][self.quality_mask]
 
-    def estimate_background_per_pixel(self, method='kepler_pipeline'):
+    def estimate_background_per_pixel(self, method='mode'):
         """Returns an estimate of the background value per pixel for every
         cadence."""
         if method == 'median':
@@ -167,9 +167,9 @@ class KeplerTargetPixelFile(TargetPixelFile):
             return np.nanmean(self.flux[:, self.aperture_mask], axis=1)
         elif method == 'mode':
             return scipy.stats.mode(self.flux[:, self.aperture_mask], axis=1,
-                                    nan_policy='omit')[0]
+                                    nan_policy='omit')[0].reshape(-1)
         elif method == 'kepler_pipeline':
-            return self.get_bkg_lightcurve() / self.aperture_npix
+            return np.nansum(self.flux_bkg[:, self.aperture_mask], axis=1) / self.aperture_npix
         else:
             raise ValueError("method {} is not available".format(method))
 
@@ -180,8 +180,8 @@ class KeplerTargetPixelFile(TargetPixelFile):
     def _get_aperture_flux(self):
         return np.nansum(self.flux[:, self.aperture_mask], axis=1)
 
-    def get_bkg_lightcurve(self):
-        return np.nansum(self.flux_bkg[:, self.aperture_mask], axis=1)
+    def get_bkg_lightcurve(self, method='mode'):
+        return self.estimate_background_per_pixel(method=method) * self.aperture_npix
 
     def to_lightcurve(self, subtract_bkg=False):
         """Performs apperture photometry and optionally detrends the lightcurve.
