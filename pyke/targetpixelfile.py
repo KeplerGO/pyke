@@ -134,6 +134,11 @@ class KeplerTargetPixelFile(TargetPixelFile):
         return self.hdu[1].data['TIME'][self.quality_mask]
 
     @property
+    def cadenceno(self):
+        """Return the cadence number for all good-quality cadences."""
+        return self.hdu[1].data['CADENCENO'][self.quality_mask]
+
+    @property
     def nan_time_mask(self):
         """Returns a boolean mask flagging cadences whose time is `nan`."""
         return ~np.isfinite(self.time)
