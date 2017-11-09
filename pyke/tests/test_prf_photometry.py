@@ -5,7 +5,7 @@ from scipy.stats import mode
 from astropy.io import fits
 from astropy.utils.data import get_pkg_data_filename
 from oktopus import PoissonPosterior, UniformPrior, GaussianPrior, JointPrior
-from ..prf_photometry import KeplerPRF, SceneModel, PRFPhotometry, get_initial_guesses
+from ..prf_photometry import SimpleKeplerPRF, KeplerPRF, SceneModel, PRFPhotometry, get_initial_guesses
 
 
 def test_prf_normalization():
@@ -39,7 +39,7 @@ def test_prf_vs_aperture_photometry():
                        GaussianPrior(mean=1, var=1e-2),
                        GaussianPrior(mean=1, var=1e-2),
                        GaussianPrior(mean=0, var=1e-2),
-                       UniformPrior(lb=.2*bkg, ub=5*bkg))
+                       UniformPrior(lb=bkg - .5*bkg, ub=bkg + .5*bkg))
     logL = PoissonPosterior(tpf[1].data, mean=scene, prior=prior)
     result = logL.fit(x0=prior.mean, method='powell')
     prf_flux, prf_col, prf_row, prf_scale_col, prf_scale_row, prf_rotation, prf_bkg = logL.opt_result.x
@@ -57,3 +57,11 @@ def test_prf_vs_aperture_photometry():
     assert np.isclose(opt_params[1], prf_col, rtol=1e-1)
     assert np.isclose(opt_params[2], prf_row, rtol=1e-1)
     assert np.isclose(opt_params[-1], prf_bkg, rtol=0.1)
+
+def test_get_initial_guesses():
+    prf = SimpleKeplerPRF(channel=41, column=50, row=30, shape=[11, 11])
+    prf_data = prf(flux=1, center_col=55.5, center_row=35.5)
+    flux, col, row, _ = get_initial_guesses(prf_data, 50, 30)
+    result = [flux, col, row]
+    answer = [1, 55.5, 35.5]
+    assert np.testing.assert_allclose(result, answer, rtol=1e-2)

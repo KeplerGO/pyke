@@ -377,7 +377,7 @@ def get_initial_guesses(data, ref_col, ref_row):
     """
 
     flux0 = np.nansum(data)
-    yy, xx = np.indices(data.shape)
+    yy, xx = np.indices(data.shape) + 0.5
     yy = ref_row + yy
     xx = ref_col + xx
     col0 = np.nansum(xx * data) / flux0
