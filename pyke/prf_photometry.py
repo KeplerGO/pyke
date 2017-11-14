@@ -3,10 +3,20 @@ import math
 import scipy
 import numpy as np
 import tqdm
-from inspect import signature
+import sys
 from astropy.io import fits as pyfits
 from oktopus.posterior import PoissonPosterior
 from .utils import channel_to_module_output, plot_image
+
+if sys.version_info[0] == 2:
+    from inspect import getargspec
+    def _get_number_of_arguments(func):
+        return len(getargspec(func).args)
+
+else:
+    from inspect import signature
+    def _get_number_of_arguments(func):
+        return len(signature(func).parameters)
 
 
 __all__ = ['PRFPhotometry', 'SceneModel', 'KeplerPRF', 'SimpleKeplerPRF', 'get_initial_guesses']
@@ -393,3 +403,4 @@ def get_initial_guesses(data, ref_col, ref_row):
     sigma0 = math.sqrt((sigma_x**2 + sigma_y**2)/2.0)
 
     return flux0, col0, row0, sigma0
+
