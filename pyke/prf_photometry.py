@@ -113,11 +113,11 @@ class SceneModel(object):
 
     def _prepare_scene_model(self):
         self.n_models = len(self.prfs)
-        self.bkg_order = len(signature(self.bkg_model).parameters)
+        self.bkg_order = _get_number_of_arguments(self.bkg_model)
 
         model_orders = [0]
         for i in range(self.n_models):
-            model_orders.append(len(signature(self.prfs[i]).parameters))
+            model_orders.append(_get_number_of_arguments(self.prfs[i]))
         self.n_params = np.cumsum(model_orders)
 
     def evaluate(self, *params):
