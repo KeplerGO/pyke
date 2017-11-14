@@ -389,25 +389,25 @@ def keptransit(inputfile, outputfile, datacol, errorcol, periodini_d,
         print('Fixed a / R_star = {}'.format(newars))
     else:
         newars = fit_output[0][4]
-        print 'Fit a / R_star = {}'.format(newars)
+        print('Fit a / R_star = {}'.format(newars))
     if fixed_dict['inc']:
         newinc = guess_params[5]
-        print 'Fixed inclination (deg) = {}'.format(newinc* 180. / np.pi)
+        print('Fixed inclination (deg) = {}'.format(newinc* 180. / np.pi))
     else:
         newinc = fit_output[0][5]
-        print 'Fit inclination (deg) = {}'.format(newinc* 180. / np.pi)
+        print('Fit inclination (deg) = {}'.format(newinc* 180. / np.pi))
     if fixed_dict['omega']:
         newomega = guess_params[6]
-        print 'Fixed omega = {}'.format(newomega)
+        print('Fixed omega = {}'.format(newomega))
     else:
         newomega = fit_output[0][6]
-        print 'Fit omega = {}'.format(newomega)
+        print('Fit omega = {}'.format(newomega))
     if fixed_dict['sec']:
         newsec = guess_params[7]
-        print 'Fixed seconary eclipse depth = {}'.format(newsec)
+        print('Fixed seconary eclipse depth = {}'.format(newsec))
     else:
         newsec = fit_output[0][7]
-        print 'Fit seconary eclipse depth = {}'.format(newsec)
+        print('Fit seconary eclipse depth = {}'.format(newsec))
     if not fixfluxoffset:
         newfluxoffset = fit_output[0][8]
         print('Fit flux offset = {}'.format(newfluxoffset))
