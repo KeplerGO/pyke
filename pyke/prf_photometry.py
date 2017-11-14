@@ -48,7 +48,9 @@ class PRFPhotometry(object):
     >>> tpf = KeplerTargetPixelFile("https://archive.stsci.edu/missions/kepler/"
     ...                             "target_pixel_files/0084/008462852/"
     ...                             "kplr008462852-2013098041711_lpd-targ.fits.gz")
+    Downloading https://archive.stsci.edu/missions/kepler/target_pixel_files/0084/008462852/kplr008462852-2013098041711_lpd-targ.fits.gz [Done]
     >>> prf = SimpleKeplerPRF(tpf.channel, tpf.shape[1:], tpf.column, tpf.row)
+    Downloading http://archive.stsci.edu/missions/kepler/fpc/prf/extracted/kplr16.4_2011265_prf.fits [Done]
     >>> scene = SceneModel(prfs=prf)
     >>> prior = UniformPrior(lb=[1.2e5, 230., 128.,1e2], ub=[3.4e5, 235., 133., 1e3])
     >>> phot = PRFPhotometry(scene, prior)
