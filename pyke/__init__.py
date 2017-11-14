@@ -47,6 +47,7 @@ from .keptimefix import *
 from .keptrial import *
 from .keptrim import *
 from .kepwindow import *
+from .prf_photometry import *
 from .lightcurve import *
 from .targetpixelfile import *
 from .utils import *
