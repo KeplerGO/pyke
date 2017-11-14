@@ -83,8 +83,9 @@ class PRFPhotometry(object):
         Parameters
         ----------
         tpf_flux : array-like
-            A pixel flux time-series, e.g, KeplerTargetPixelFile.flux.
-            Such that (time, row, column) represents the shape of ``tpf_flux``.
+            A pixel flux time-series, i.e., the pixel data, e.g,
+            KeplerTargetPixelFile.flux, such that (time, row, column) represents
+            the shape of ``tpf_flux``.
         x0 : array-like or None
             Initial guesses on the parameters. The default is to use the mean
             of the prior distribution.
