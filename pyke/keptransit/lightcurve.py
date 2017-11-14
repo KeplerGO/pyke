@@ -64,7 +64,7 @@ def transit_errfunc_ptia(par_tofit, par_fixed, JD, flux, flux_err):
     P, Ecc, omega, limbd, sec = par_fixed
     flux_model = lightcurve(JD, P, p, Ttr, Ecc, a, incl, omega, limbd, sec)
     chi2 = numpy.sum((flux - flux_model)**2 / flux_err**2)
-    print 'chi2: ', chi2
+    print('chi2: {}'.format(chi2))
     return chi2
 
 def transit_fit_example():
@@ -99,8 +99,8 @@ def transit_fit_example():
     plt.plot(JD, initial_guess, 'b--', label = 'initial')
     plt.plot(JD, fit, 'r-', label = 'fit')
     plt.legend(loc = 'lower right')
-    print p_true, p_guess, p_fit
-    print Ttr_true, Ttr_guess, Ttr_fit
-    print incl_true, incl_guess, incl_fit
-    print a_true, a_guess, a_fit
+    print(p_true, p_guess, p_fit)
+    print(Ttr_true, Ttr_guess, Ttr_fit)
+    print(incl_true, incl_guess, incl_fit)
+    print(a_true, a_guess, a_fit)
     return

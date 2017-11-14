@@ -389,7 +389,7 @@ def t2z(tt, per, inc, hjd, ars, ecc=0, longperi=0):
 
     if ecc <> 0:
         ecc = 0
-        print "WARNING: setting ecc=0 for now until I get this function working"
+        print("WARNING: setting ecc=0 for now until I get this function working")
 
 
     if ecc==0:
@@ -410,8 +410,8 @@ def uniform(*arg, **kw):
     :func:`occultuniform`.
     """
     # 2011-04-19 15:06 IJMC: Created
-    print "The function 'transit.uniform()' is deprecated."
-    print "Please use transit.occultuniform() in the future."
+    print("The function 'transit.uniform()' is deprecated.")
+    print("Please use transit.occultuniform() in the future.")
     return occultuniform(*arg, **kw)
 
 
