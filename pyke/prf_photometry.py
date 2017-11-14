@@ -8,11 +8,17 @@ from astropy.io import fits as pyfits
 from oktopus.posterior import PoissonPosterior
 from .utils import channel_to_module_output, plot_image
 
+# This is a workaround to get the number of arguments of
+# a given function.
+# In Python 2, this works by using getargspec.
+# Note that `self` is accounted as an argument,
+# which is unwanted, hence the subtraction by 1.
+# On the other hand, Python 3 handles that trivially with the
+# signature function.
 if sys.version_info[0] == 2:
     from inspect import getargspec
     def _get_number_of_arguments(func):
-        return len(getargspec(func).args)
-
+        return len(getargspec(func).args) - 1
 else:
     from inspect import signature
     def _get_number_of_arguments(func):
@@ -117,7 +123,7 @@ class SceneModel(object):
 
         model_orders = [0]
         for i in range(self.n_models):
-            model_orders.append(_get_number_of_arguments(self.prfs[i]))
+            model_orders.append(_get_number_of_arguments(self.prfs[i].evaluate))
         self.n_params = np.cumsum(model_orders)
 
     def evaluate(self, *params):
