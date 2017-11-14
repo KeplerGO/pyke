@@ -6,7 +6,7 @@ from astropy.io import fits as pyfits
 __all__ = ['kepclean']
 
 def kepclean(infile, outfile=None, zero=True, overwrite=False, verbose=False,
-    logfile='kepclean.log'):
+             logfile='kepclean.log'):
     """
     Remove NaN values from a kepler light curve or TPF fits file. If passed a TPF
     only cadences where the postage stamp is ALL NaN values will be removed.
@@ -122,7 +122,7 @@ def kepclean(infile, outfile=None, zero=True, overwrite=False, verbose=False,
         if zero:
             for d in instr[ext].data.names:
                 y = instr[ext].data[d]
-                y[np.isfinite(y) is False] = 0
+                y[np.isfinite(y) == False] = 0
                 instr[ext].data[d] = y
 
         instr[ext].data = instr[ext].data[fin]
