@@ -1,11 +1,13 @@
 import pytest
 import math
 import numpy as np
+from numpy.testing import assert_allclose
 from scipy.stats import mode
 from astropy.io import fits
 from astropy.utils.data import get_pkg_data_filename
 from oktopus import PoissonPosterior, UniformPrior, GaussianPrior, JointPrior
-from ..prf_photometry import SimpleKeplerPRF, KeplerPRF, SceneModel, PRFPhotometry, get_initial_guesses
+from ..prf_photometry import (SimpleKeplerPRF, KeplerPRF, SceneModel,
+                              PRFPhotometry, get_initial_guesses)
 
 
 def test_prf_normalization():
@@ -64,4 +66,27 @@ def test_get_initial_guesses():
     flux, col, row, _ = get_initial_guesses(prf_data, 50, 30)
     result = [flux, col, row]
     answer = [1, 55.5, 35.5]
-    assert np.testing.assert_allclose(result, answer, rtol=1e-2)
+    assert_allclose(result, answer, rtol=1e-1)
+
+def test_simple_kepler_prf():
+    """Ensures that concentric PRFs have the same values.
+    """
+
+    prf_1 = SimpleKeplerPRF(channel=16, shape=[20, 20], column=0, row=0)
+    prf_2 = SimpleKeplerPRF(channel=16, shape=[10, 10], column=5, row=5)
+    for c in [10, 8, 10, 7]:
+        for r in [10, 10, 7, 7]:
+            assert_allclose(prf_2(flux=1, center_col=c, center_row=r),
+                            prf_1(flux=1, center_col=c, center_row=r)[5:15, 5:15],
+                            rtol=1e-5)
+
+def test_simple_kepler_prf_interpolation_consistency():
+    """Ensures that the interpolated prf is consistent with calibration files.
+    """
+    sprf = SimpleKeplerPRF(channel=56, shape=[15, 15], column=0, row=0)
+    cal_prf = fits.open("http://archive.stsci.edu/missions/kepler/fpc/prf/"
+                    "extracted/kplr16.4_2011265_prf.fits")
+    cal_prf_subsampled = cal_prf[-1].data[25::50, 25::50]
+    cal_prf_subsampled_normalized = cal_prf_subsampled / (cal_prf[-1].data.sum() * 0.02 ** 2)
+    sprf_data = sprf(flux=1, center_col=7.5, center_row=7.5)
+    np.isclose(np.sum(np.abs(sprf_data - cal_prf_subsampled_normalized)), 0)

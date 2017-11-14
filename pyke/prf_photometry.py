@@ -262,8 +262,10 @@ class KeplerPRF(object):
         crval2p = np.zeros(n_hdu, dtype='float32')
         cdelt1p = np.zeros(n_hdu, dtype='float32')
         cdelt2p = np.zeros(n_hdu, dtype='float32')
+
         for i in range(n_hdu):
             prfn[i], crval1p[i], crval2p[i], cdelt1p[i], cdelt2p[i] = self._read_prf_calibration_file(prffile, i+1)
+
         prfn = np.array(prfn)
         PRFcol = np.arange(0.5, np.shape(prfn[0])[1] + 0.5)
         PRFrow = np.arange(0.5, np.shape(prfn[0])[0] + 0.5)
@@ -273,15 +275,17 @@ class KeplerPRF(object):
         # interpolate the calibrated PRF shape to the target position
         rowdim, coldim = self.shape[0], self.shape[1]
         prf = np.zeros(np.shape(prfn[0]), dtype='float32')
-        prfWeight = np.zeros(n_hdu, dtype='float32')
-        ref_column = self.column + (coldim - 1.) / 2.
-        ref_row = self.row + (rowdim - 1.) / 2.
+        prf_weight = np.zeros(n_hdu, dtype='float32')
+        ref_column = self.column + .5 * coldim
+        ref_row = self.row + .5 * rowdim
+
         for i in range(n_hdu):
-            prfWeight[i] = math.sqrt((ref_column - crval1p[i]) ** 2
+            prf_weight[i] = math.sqrt((ref_column - crval1p[i]) ** 2
                                      + (ref_row - crval2p[i]) ** 2)
-            if prfWeight[i] < min_prf_weight:
-                prfWeight[i] = min_prf_weight
-            prf += prfn[i] / prfWeight[i]
+            if prf_weight[i] < min_prf_weight:
+                prf_weight[i] = min_prf_weight
+            prf += prfn[i] / prf_weight[i]
+
         prf /= (np.nansum(prf) * cdelt1p[0] * cdelt2p[0])
 
         # location of the data image centered on the PRF image (in PRF pixel units)
@@ -325,8 +329,8 @@ class SimpleKeplerPRF(KeplerPRF):
         """
         delta_col = self.col_coord - center_col
         delta_row = self.row_coord - center_row
-
         self.prf_model = flux * self.interpolate(delta_row, delta_col)
+
         return self.prf_model
 
     def gradient(self, flux, center_col, center_row):
