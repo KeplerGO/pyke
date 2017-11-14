@@ -40,6 +40,23 @@ class PRFPhotometry(object):
         Priors on the parameters that will be estimated
     loss_function : subclass of oktopus.LossFunction
         Noise distribution associated with each random measurement
+
+    Examples
+    --------
+    >>> from pyke import KeplerTargetPixelFile, SimpleKeplerPRF, SceneModel, PRFPhotometry
+    >>> from oktopus import UniformPrior
+    >>> tpf = KeplerTargetPixelFile("https://archive.stsci.edu/missions/kepler/"
+    ...                             "target_pixel_files/0084/008462852/"
+    ...                             "kplr008462852-2013098041711_lpd-targ.fits.gz")
+    >>> prf = SimpleKeplerPRF(tpf.channel, tpf.shape[1:], tpf.column, tpf.row)
+    >>> scene = SceneModel(prfs=prf)
+    >>> prior = UniformPrior(lb=[1.2e5, 230., 128.,1e2], ub=[3.4e5, 235., 133., 1e3])
+    >>> phot = PRFPhotometry(scene, prior)
+    >>> results = phot.fit(tpf.flux)
+    >>> flux_fit = results[:, 0]
+    >>> x_fit = results[:, 1]
+    >>> y_fit = results[:, 2]
+    >>> bkg_fit = results[:, 3]
     """
 
     def __init__(self, scene_model, prior, loss_function=PoissonPosterior, **kwargs):
@@ -63,14 +80,27 @@ class PRFPhotometry(object):
             A pixel flux time-series, e.g, KeplerTargetPixelFile.flux.
             Such that (time, row, column) represents the shape of ``tpf_flux``.
         x0 : array-like or None
-            Initial guesses on the parameters.
+            Initial guesses on the parameters. The default is to use the mean
+            of the prior distribution.
         cadences : array-like of ints or str
             A list or array that contains the cadences which will be fitted.
             Default is to fit all cadences.
         kwargs : dict
             Dictionary of additional parameters to be passed to
             `scipy.optimize.minimize`.
+
+        Returns
+        -------
+        opt_params : array-like
+            Matrix with the optimized parameter values. The i-th line contain
+            the best parameter values at the i-th cadence. The order of the parameters
+            in every line follows the order of the ``scene_model``.
         """
+        self.opt_params = np.array([])
+        self.residuals = np.array([])
+        self.loss_value = np.array([])
+        self.uncertainties = np.array([])
+
         if x0 is None:
             x0 = self.prior.mean
 
@@ -88,6 +118,8 @@ class PRFPhotometry(object):
             self.residuals = np.append(self.residuals, residuals)
         self.opt_params = self.opt_params.reshape((tpf_flux.shape[0], len(x0)))
         self.residuals = self.residuals.reshape(tpf_flux.shape)
+
+        return self.opt_params
 
     def get_residuals(self):
         return self.residuals
