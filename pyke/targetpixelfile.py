@@ -94,8 +94,24 @@ class KeplerTargetPixelFile(TargetPixelFile):
     def row(self):
         return self.hdu['TARGETTABLES'].header['2CRV5P']
 
-    def plot(self, nframe=100, **kwargs):
-        pflux = self.flux[nframe]
+    def plot(self, frame=None, cadenceno=None, **kwargs):
+        """
+        Plot a target pixel file at a given frame (index) or cadence number.
+
+        Parameters
+        ----------
+        frame : int
+            Frame number.
+        cadenceno : int
+            Alternatively, a cadence number can be provided.
+            This argument has priority over frame number.
+        """
+        if cadenceno is not None:
+            frame = np.argwhere(cadenceno == self.cadenceno)[0][0]
+        elif frame is None:
+            raise ValueError("Either frame or cadenceno must be provided.")
+
+        pflux = self.flux[frame]
         plot_image(pflux, title='Kepler ID: {}'.format(self.keplerid),
                    extent=(self.column, self.column + self.shape[2],
                            self.row, self.row + self.shape[1]), **kwargs)
