@@ -124,9 +124,6 @@ class PRFPhotometry(object):
     def get_residuals(self):
         return self.residuals
 
-    def get_fitted_parameters_matrix(self):
-        return self.opt_params
-
 
 class SceneModel(object):
     """
