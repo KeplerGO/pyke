@@ -90,3 +90,11 @@ def test_simple_kepler_prf_interpolation_consistency():
     cal_prf_subsampled_normalized = cal_prf_subsampled / (cal_prf[-1].data.sum() * 0.02 ** 2)
     sprf_data = sprf(flux=1, center_col=7.5, center_row=7.5)
     np.isclose(np.sum(np.abs(sprf_data - cal_prf_subsampled_normalized)), 0)
+
+def test_scene_model():
+    prf = SimpleKeplerPRF(channel=16, shape=[10, 10], column=15, row=15)
+    scene = SceneModel(prfs=prf)
+
+    assert scene.n_models == 1
+    assert scene.bkg_order == 1
+    assert (scene.n_params == [0, 3]).all()
