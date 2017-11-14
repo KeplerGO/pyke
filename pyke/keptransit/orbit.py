@@ -21,8 +21,8 @@ def eccan(Ecc, M, Tol = 1.0e-8, Nmax = 50):
         i += 1
         if i >= Nmax:
             if Flag ==1:
-                print Ecc, M
-                print 'Eccan did not converge'
+                print(Ecc, M)
+                print('Eccan did not converge')
                 return M
             Flag = 1
             i = 0
