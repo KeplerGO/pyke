@@ -179,9 +179,26 @@ class KeplerTargetPixelFile(TargetPixelFile):
         """Returns the quality flag integer of every good cadence."""
         return self.hdu[1].data['QUALITY'][self.quality_mask]
 
-    def estimate_background_per_pixel(self, method='mode'):
+    def estimate_bkg_per_pixel(self, method='mode'):
         """Returns an estimate of the background value per pixel for every
-        cadence."""
+        cadence.
+
+        Parameters
+        ----------
+        method : str
+            The method used to estimate the background:
+                * 'median' - median of the pixel values per cadence.
+                * 'mean' - mean of the pixel values per cadence.
+                * 'mode' - mode of the pixel values per cadence (usually slow).
+                * 'kepler_pipeline' - uses the background values estimated by
+                   the kepler pipeline.
+
+        Returns
+        -------
+        value : array-like
+            Array in which the i-th element represents an estimate of the
+            background density at the i-th cadence.
+        """
         if method == 'median':
             return np.nanmedian(self.flux[:, self.aperture_mask], axis=1)
         elif method == 'mean':
