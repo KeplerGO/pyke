@@ -1,5 +1,8 @@
 import numpy as np
+import matplotlib.pyplot as plt
 from argparse import HelpFormatter, SUPPRESS, OPTIONAL, ZERO_OR_MORE
+from astropy.visualization import (PercentileInterval, ImageNormalize,
+                                   SqrtStretch, LogStretch, LinearStretch)
 
 
 class PyKEArgumentHelpFormatter(HelpFormatter):
@@ -152,3 +155,21 @@ class KeplerQualityFlags(object):
             if quality & flag > 0:
                 result.append(cls.STRINGS[flag])
         return result
+
+def plot_image(image, scale='linear', origin='lower', xlabel='Pixel Column Number',
+               ylabel='Pixel Row Number', title=None, **kwargs):
+        vmin, vmax = PercentileInterval(95.).get_limits(image)
+        if scale == 'linear':
+            norm = ImageNormalize(vmin=vmin, vmax=vmax, stretch=LinearStretch())
+        elif scale == 'sqrt':
+            norm = ImageNormalize(vmin=vmin, vmax=vmax, stretch=SqrtStretch())
+        elif scale == 'log':
+            norm = ImageNormalize(vmin=vmin, vmax=vmax, stretch=LogStretch())
+        else:
+            raise ValueError("scale {} is not available.".format(scale))
+
+        plt.imshow(image, origin=origin, norm=norm, **kwargs)
+        plt.xlabel(xlabel)
+        plt.ylabel(ylabel)
+        plt.title(title)
+        plt.colorbar(norm=norm)
