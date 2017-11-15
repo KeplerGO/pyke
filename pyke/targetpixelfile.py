@@ -219,7 +219,7 @@ class KeplerTargetPixelFile(TargetPixelFile):
         return np.nansum(self.flux[:, self.aperture_mask], axis=1)
 
     def get_bkg_lightcurve(self, method='mode'):
-        return self.estimate_background_per_pixel(method=method) * self.aperture_npix
+        return self.estimate_bkg_per_pixel(method=method) * self.aperture_npix
 
     def to_lightcurve(self, subtract_bkg=False):
         """Performs apperture photometry and optionally detrends the lightcurve.
