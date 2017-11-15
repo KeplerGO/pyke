@@ -6,8 +6,7 @@ from scipy.stats import mode
 from astropy.io import fits
 from astropy.utils.data import get_pkg_data_filename
 from oktopus import PoissonPosterior, UniformPrior, GaussianPrior, JointPrior
-from ..prf_photometry import (SimpleKeplerPRF, KeplerPRF, SceneModel,
-                              PRFPhotometry, get_initial_guesses)
+from ..prf import SimpleKeplerPRF, KeplerPRF, SceneModel, PRFPhotometry, get_initial_guesses
 
 
 def test_prf_normalization():
