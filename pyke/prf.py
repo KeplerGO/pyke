@@ -45,6 +45,16 @@ class PRFPhotometry(object):
     loss_function : subclass of oktopus.LossFunction
         Noise distribution associated with each random measurement
 
+    Notes
+    -----
+    Best fit values are returned by the ``fit`` method, but can also be
+    accessed on the ``opt_params`` attribute. Uncertainties on the best fit
+    parameters are reported on the ``uncertainties`` attribute.
+    Uncertainties are derived based on the Fisher Information Matrix.
+    Interested readers might find the following references useful:
+        * https://en.wikipedia.org/wiki/Fisher_information
+        * https://en.wikipedia.org/wiki/Cramér–Rao_bound
+
     Examples
     --------
     >>> from pyke import KeplerTargetPixelFile, SimpleKeplerPRF, SceneModel, PRFPhotometry
@@ -120,9 +130,12 @@ class PRFPhotometry(object):
             result = loss.fit(x0=x0, method='powell', **kwargs)
             opt_params = result.x
             residuals = tpf_flux[t] - self.scene_model(*opt_params)
+            uncertainties = loss.loglikelihood.uncertainties(opt_params)
             self.loss_value = np.append(self.loss_value, result.fun)
             self.opt_params = np.append(self.opt_params, opt_params)
             self.residuals = np.append(self.residuals, residuals)
+            self.uncertainties = np.append(self.uncertainties, uncertainties)
+        self.uncertainties = self.uncertainties.reshape((tpf_flux.shape[0], len(x0)))
         self.opt_params = self.opt_params.reshape((tpf_flux.shape[0], len(x0)))
         self.residuals = self.residuals.reshape(tpf_flux.shape)
 
