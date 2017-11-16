@@ -55,6 +55,7 @@ class PRFPhotometry(object):
     Interested readers might find the following references useful:
         * https://en.wikipedia.org/wiki/Fisher_information
         * https://en.wikipedia.org/wiki/Cramér–Rao_bound
+        * https://en.wikipedia.org/wiki/Observed_information
 
     Examples
     --------
