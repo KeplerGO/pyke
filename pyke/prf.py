@@ -6,6 +6,7 @@ import tqdm
 import sys
 from astropy.io import fits as pyfits
 from oktopus.posterior import PoissonPosterior
+from oktopus.models import ConstantModel
 from .utils import channel_to_module_output, plot_image
 
 # This is a workaround to get the number of arguments of
@@ -155,10 +156,10 @@ class SceneModel(object):
         A list of prfs
     bkg_model : callable
         A function that models the background variation.
-        Default is a constant background
+        Default is a constant background.
     """
 
-    def __init__(self, prfs, bkg_model=lambda bkg: np.array([bkg])):
+    def __init__(self, prfs, bkg_model=ConstantModel()):
         self.prfs = np.asarray([prfs]).reshape(-1)
         self.bkg_model = bkg_model
         self._prepare_scene_model()
