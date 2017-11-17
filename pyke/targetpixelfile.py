@@ -70,21 +70,25 @@ class KeplerTargetPixelFile(TargetPixelFile):
         """
         return (self.hdu[1].data['QUALITY'] & quality_bitmask) == 0
 
+    def header(self, ext=0):
+        """Returns the header for a given extension."""
+        return self.hdu[ext].header
+
     @property
     def keplerid(self):
-        return self.hdu[0].header['KEPLERID']
+        return self.header()['KEPLERID']
 
     @property
     def module(self):
-        return self.hdu[0].header['MODULE']
+        return self.header()['MODULE']
 
     @property
     def channel(self):
-        return self.hdu[0].header['CHANNEL']
+        return self.header()['CHANNEL']
 
     @property
     def output(self):
-        return self.hdu[0].header['OUTPUT']
+        return self.header()['OUTPUT']
 
     @property
     def column(self):
