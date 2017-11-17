@@ -147,6 +147,23 @@ class PRFPhotometry(object):
         return self.residuals
 
 
+class KeplerPRFPhotometry(PRFPhotometry):
+    """
+    """
+
+    def fit(self, tpf_flux, x0=None, cadences='all', cadence_type='lc',
+            method='powell', **kwargs):
+
+        # uncertainties need to be rescaled by the number of readouts,
+        # the photon accumulation time per frame, and the gain
+        # in e-/count
+        if cadence_type == 'lc':
+            self.uncertainties /= (270 * 6.019802903270 * 104.76)
+        elif cadence_type == 'sc':
+            self.uncertainties /= (9 * 6.019802903270 * 104.76)
+
+
+
 class SceneModel(object):
     """
     This class builds a generic model for a scene.
