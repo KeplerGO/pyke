@@ -1,0 +1,48 @@
+.. _whatsnew-3.1:
+
+=======================
+What's new in PyKE 3.1?
+=======================
+
+PyKE 3.1 provides the following improvements:
+
+* ``kepclip`` works with target pixel files.
+* ``kepfold`` API has been updated.
+* ``kepfourier`` has been removed in favour of ``kepperiodogram``.
+* ``kepdynamic``, ``keptrial``, and ``kepwindow`` have been sped up significantly
+  by using astropy's LombScargle.
+
+Additionally, those are the set of new features:
+
+* ``module_output_to_channel`` and ``channel_to_module_output``: utility functions
+  to convert module/output to corresponding channel number (and vice-versa).
+
+* ``KeplerQualityFlags``: a class that encondes the meaning of the various Kepler
+  QUALITY bitmask flags, as documented in the Kepler Archive Manual.
+
+* ``KeplerTargetPixelFile``: a class that provides easy access to data and metadata
+ of target pixel files.
+
+* ``KeplerLightCurveFile``: a class that provides easy access to data and metadata
+ of light curve files.
+
+* ``LightCurve``: this class provides methods such as ``stitch``, ``flatten``, and ``fold``.
+
+* ``KeplerCBVCorrector``: this class implements the functionality in ``kepcotrend``. It
+  presents a few advantages, e.g., it automatically downloads the cotrend basis vectors
+  files from MAST.
+
+* ``SimplePixelLevelDecorrelationDetrender``: this class implements a basic version of
+  the first order Pixel Level Decorrelation (PLD) used by Deming et. al. and Luger et.
+  al..
+
+* Pixel Response Function photometry classes have been developed. More precisely,
+    * ``KeplerPRF``: implements a parametric PRF model using the PRF calibration files.
+      This model has the following parameters: flux, centroid position, pixel scales, and
+      rotation angle.
+    * ``SimpleKeplerPRF``: a simple version of ``KeplerPRF`` in which the model is
+      parametrized by flux and centroid position.
+    * ``SceneModel``: a general class to combine an arbitrary number of PRF models
+      and a background model. This class is one of the building blocks to enable
+      simultaneous fitting of overlapping PRFs.
+    * ``PRFPhotometry``: this class performs PRF photometry in target pixel files.
