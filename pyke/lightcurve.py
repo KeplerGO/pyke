@@ -20,11 +20,11 @@ class LightCurve(object):
     Attributes
     ----------
     time : array-like
-        Time-line
+        Time measurements
     flux : array-like
         Data flux for every time point
     flux_err : array-like
-        Uncertainty in each flux data point
+        Uncertainty on each flux data point
     """
 
     def __init__(self, time, flux, flux_err=None):
@@ -101,39 +101,34 @@ class LightCurve(object):
 
 
 class KeplerLightCurve(LightCurve):
-    """
+    """Defines a light curve class for NASA's Kepler and K2 missions.
+
     Attributes
     ----------
-    quality : array-like
-        Array indicating the quality of each data point
+    time : array-like
+        Time measurements
+    flux : array-like
+        Data flux for every time point
+    flux_err : array-like
+        Uncertainty on each flux data point
     centroid_col, centroid_row : array-like, array-like
         Centroid column and row coordinates as a function of time
+    quality : array-like
+        Array indicating the quality of each data point
     """
 
-    def __init__(self, time, flux, flux_err=None, quality=None, quality_bit_mask=None,
-                 centroid_col=None, centroid_row=None, channel=None, campaign=None,
-                 quarter=None, mission=None):
+    def __init__(self, time, flux, flux_err=None, centroid_col=None,
+                 centroid_row=None, quality=None, quality_bitmask=None,
+                 channel=None, campaign=None, quarter=None, mission=None):
         super(KeplerLightCurve, self).__init__(time, flux, flux_err)
-        self.quality = quality
-        self.quality_bit_mask = quality_bit_mask
         self.centroid_col = centroid_col
         self.centroid_row = centroid_row
+        self.quality = quality
+        self.quality_bitmask = quality_bitmask
         self.channel = channel
         self.campaign = campaign
         self.quarter = quarter
         self.mission = mission
-
-    def compute_cotrended_lightcurve(self, cbvs=[1, 2]):
-        """Returns a KeplerLightCurve object after cotrending the SAP_FLUX
-        against the cotrending basis vectors.
-
-        Parameters
-        ----------
-        cbvs : list of ints
-            The list of cotrending basis vectors to fit to the data. For example,
-            [1, 2] will fit the first two basis vectors.
-        """
-        return KeplerCBVCorrector(self).correct(cbvs=cbvs)
 
     def to_fits(self):
         raise NotImplementedError()
@@ -142,6 +137,15 @@ class KeplerLightCurve(LightCurve):
 class KeplerLightCurveFile(object):
     """Defines a class for a given light curve FITS file from NASA's Kepler and
     K2 missions.
+
+    Attributes
+    ----------
+    path : str
+        Directory path or url to a lightcurve FITS file.
+    quality_bitmask : int
+        Bitmask specifying quality flags of cadences that should be ignored.
+    kwargs : dict
+        Keyword arguments to be passed to astropy.io.fits.open.
     """
 
     def __init__(self, path, quality_bitmask=KeplerQualityFlags.DEFAULT_BITMASK,
@@ -156,9 +160,14 @@ class KeplerLightCurveFile(object):
             return KeplerLightCurve(self.hdu[1].data['TIME'][self.quality_mask],
                                     self.hdu[1].data[flux_type][self.quality_mask],
                                     flux_err=self.hdu[1].data[flux_type + "_ERR"][self.quality_mask],
-                                    quality=self.hdu[1].data['SAP_QUALITY'][self.quality_mask],
                                     centroid_col=self.hdu[1].data[centroid_type + "1"][self.quality_mask],
-                                    centroid_row=self.hdu[1].data[centroid_type + "2"][self.quality_mask])
+                                    centroid_row=self.hdu[1].data[centroid_type + "2"][self.quality_mask],
+                                    quality=self.hdu[1].data['SAP_QUALITY'][self.quality_mask],
+                                    quality_bitmask=self.quality_bitmask,
+                                    channel=self.channel,
+                                    campaign=self.campaign,
+                                    quarter=self.quarter,
+                                    mission=self.mission)
         else:
             raise KeyError("{} is not a valid flux type. Available types are: {}".
                            format(flux_type, self._flux_types))
@@ -175,30 +184,39 @@ class KeplerLightCurveFile(object):
 
     @property
     def SAP_FLUX(self):
-        """Returns a LightCurve object for SAP_FLUX"""
+        """Returns a KeplerLightCurve object for SAP_FLUX"""
         return self.get_lightcurve('SAP_FLUX')
 
     @property
     def PDCSAP_FLUX(self):
-        """Returns a LightCurve object for PDCSAP_FLUX"""
+        """Returns a KeplerLightCurve object for PDCSAP_FLUX"""
         return self.get_lightcurve('PDCSAP_FLUX')
 
     @property
     def time(self):
+        """Time measurements"""
         return self.hdu[1].data['TIME'][self.quality_mask]
 
     @property
     def channel(self):
+        """Channel number"""
         return self.header(ext=0)['CHANNEL']
 
     @property
     def quarter(self):
-        return self.header(ext=0)['QUARTER']
+        """Quarter number"""
+        try:
+            return self.header(ext=0)['QUARTER']
+        except KeyError:
+            return None
 
     @property
     def campaign(self):
         """Campaign number"""
-        return self.header(ext=0)['CAMPAIGN']
+        try:
+            return self.header(ext=0)['CAMPAIGN']
+        except KeyError:
+            return None
 
     @property
     def mission(self):
@@ -218,6 +236,7 @@ class KeplerLightCurveFile(object):
         return KeplerCBVCorrector(self).correct(cbvs=cbvs)
 
     def header(self, ext=0):
+        """Header of the object at extension `ext`"""
         return self.hdu[ext].header
 
     def _flux_types(self):
@@ -265,9 +284,9 @@ class KeplerCBVCorrector(SystematicsCorrector):
     >>> cbv = KeplerCBVCorrector("kplr008462852-2011073133259_llc.fits")
     >>> cbv_lc = cbv.correct()
     >>> sap_lc = KeplerLightCurveFile("kplr008462852-2011073133259_llc.fits").SAP_FLUX
-    >>> plt.plot(sap_lc.time, sap_lc.flux, 'x', markersize=1, label='SAP_FLUX')
-    >>> plt.plot(cbv_lc.time, cbv_lc.flux, 'o', markersize=1, label='CBV_FLUX')
-    >>> plt.legend()
+    >>> plt.plot(sap_lc.time, sap_lc.flux, 'x', markersize=1, label='SAP_FLUX') # doctest: +SKIP
+    >>> plt.plot(cbv_lc.time, cbv_lc.flux, 'o', markersize=1, label='CBV_FLUX') # doctest: +SKIP
+    >>> plt.legend() # doctest: +SKIP
     """
 
     def __init__(self, lc_file, loss_function=oktopus.LaplacianLikelihood):
@@ -286,11 +305,14 @@ class KeplerCBVCorrector(SystematicsCorrector):
     @lc_file.setter
     def lc_file(self, value):
         # this enables `lc_file` to be either a string
-        # or an object from KeplerLightCurve
+        # or an object from KeplerLightCurveFile
         if isinstance(value, str):
             self._lc_file = KeplerLightCurveFile(value)
         elif isinstance(value, KeplerLightCurveFile):
             self._lc_file = value
+        else:
+            raise ValueError("lc_file must be either a string or a"
+                             " KeplerLightCurveFile instance, got {}.".format(value))
 
     @property
     def coeffs(self):
