@@ -115,6 +115,16 @@ class KeplerLightCurve(LightCurve):
         Centroid column and row coordinates as a function of time
     quality : array-like
         Array indicating the quality of each data point
+    quality_bitmask : int
+        Bitmask specifying quality flags of cadences that should be ignored
+    channel : int
+        Channel number
+    campaign : int
+        Campaign number
+    quater : int
+        Quarter number
+    mission : str
+        Mission name
     """
 
     def __init__(self, time, flux, flux_err=None, centroid_col=None,
