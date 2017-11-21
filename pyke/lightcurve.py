@@ -296,6 +296,8 @@ class KeplerCBVCorrector(SystematicsCorrector):
     >>> cbv = KeplerCBVCorrector(fn)
     Downloading https://archive.stsci.edu/missions/kepler/lightcurves/0084/008462852/kplr008462852-2011073133259_llc.fits [Done]
     >>> cbv_lc = cbv.correct()
+    Downloading http://archive.stsci.edu/missions/kepler/cbv/kplr2011073133259-q08-d25_lcbv.fits [Done]
+    >>> sap_lc = KeplerLightCurveFile(fn).SAP_FLUX
     >>> plt.plot(sap_lc.time, sap_lc.flux, 'x', markersize=1, label='SAP_FLUX') # doctest: +SKIP
     >>> plt.plot(cbv_lc.time, cbv_lc.flux, 'o', markersize=1, label='CBV_FLUX') # doctest: +SKIP
     >>> plt.legend() # doctest: +SKIP
