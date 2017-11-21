@@ -1,17 +1,15 @@
 PyKE: Kepler, K2 & TESS Data Analysis Tools
 ============================================
-|pypi-badge| |ci-badge| |appveyor-badge| |doc-badge| |cov-badge| |doi-badge|
+|pypi-badge| |ci-badge| |appveyor-badge| |cov-badge| |doi-badge|
 
 .. |pypi-badge| image:: https://img.shields.io/pypi/v/pyketools.svg
                 :target: https://pypi.python.org/pypi/pyketools
-.. |ci-badge| image:: https://travis-ci.org/KeplerGO/PyKE.svg?branch=master
-              :target: https://travis-ci.org/KeplerGO/PyKE
+.. |ci-badge| image:: https://travis-ci.org/KeplerGO/pyke.svg?branch=master
+              :target: https://travis-ci.org/KeplerGO/pyke
 .. |appveyor-badge| image:: https://ci.appveyor.com/api/projects/status/6jvv5d7a142gwm8a/branch/master?svg=true
                     :target: https://ci.appveyor.com/project/mirca/pyke
-.. |doc-badge| image:: https://readthedocs.org/projects/pyke/badge/?version=latest
-              :target: https://pyke.keplerscience.org
-.. |cov-badge| image:: https://codecov.io/gh/KeplerGO/PyKE/branch/master/graph/badge.svg
-              :target: https://codecov.io/gh/KeplerGO/PyKE
+.. |cov-badge| image:: https://codecov.io/gh/KeplerGO/pyke/branch/master/graph/badge.svg
+              :target: https://codecov.io/gh/KeplerGO/pyke
 .. |doi-badge| image:: https://zenodo.org/badge/DOI/10.5281/zenodo.835584.svg
               :target: https://doi.org/10.5281/zenodo.835584
 
@@ -55,7 +53,7 @@ For example, let's visualize the pixels of Kepler target KIC008462852
 
 .. we should use full url addresses for images henceforth, so that they will be correctly captured by PYPI
 
-.. image:: http://pyke.keplerscience.org/en/latest/_images/kepmask1.png
+.. image:: http://pyke.keplerscience.org/_images/kepmask1.png
 
 ``kepmask`` is an interactive tool used to create a custom
 aperture mask which can subsequently be used in other PyKE tasks.
@@ -69,7 +67,7 @@ To visualize the resulting light curve, we can use ``kepdraw``::
 
     $ kepdraw lightcurve.fits
 
-.. image:: http://pyke.keplerscience.org/en/latest/_images/kepdraw1.png
+.. image:: http://pyke.keplerscience.org/_images/kepdraw1.png
 
 
 Contributing

@@ -296,7 +296,8 @@ def kepflatten(infile, outfile=None, datacol='PDCSAP_FLUX',
     masterfit[-1] = masterfit[-4] #fudge
     masterfit[-2] = masterfit[-4] #fudge
     masterfit[-3] = masterfit[-4] #fudge
-    plt.plot(intime - intime0, masterfit / 10 ** nrm, 'b')
+    if plot:
+        plt.plot(intime - intime0, masterfit / 10 ** nrm, 'b')
 
     # reject outliers
     rejtime, rejdata = [], []

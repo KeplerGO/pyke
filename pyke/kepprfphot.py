@@ -203,11 +203,11 @@ def kepprfphot(infile, prfdir, columns, rows, fluxes, border=0,
 
     # overwrite output file
     for i in range(nsrc):
-        outfile = '{0}_{1}.fits'.format(outfile, i)
+        outfilename = '{0}_{1}.fits'.format(outfile, i)
         if overwrite:
-            kepio.overwrite(outfile, logfile, verbose)
-        if kepio.fileexists(outfile):
-            errmsg = 'ERROR -- KEPPRFPHOT: {} exists. Use --overwrite'.format(outfile)
+            kepio.overwrite(outfilename, logfile, verbose)
+        if kepio.fileexists(outfilename):
+            errmsg = 'ERROR -- KEPPRFPHOT: {} exists. Use --overwrite'.format(outfilename)
             kepmsg.err(logfile, errmsg, verbose)
 
     # open TPF FITS file
@@ -538,7 +538,7 @@ def kepprfphot(infile, prfdir, columns, rows, fluxes, border=0,
                                                   cards0[i].comment)
             else:
                 hdu0.header.cards[cards0[i].keyword].comment = cards0[i].comment
-        kepkey.history(call, hdu0, outfile, logfile, verbose)
+        kepkey.history(call, hdu0, outfilename, logfile, verbose)
         outstr = pyfits.HDUList(hdu0)
 
         # construct output light curve extension

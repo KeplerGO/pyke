@@ -1,19 +1,34 @@
+import copy
 import numpy as np
-from astropy.io import fits
+from scipy import signal
+from astropy.io import fits as pyfits
+from tqdm import tqdm
+import oktopus
+import requests
+from bs4 import BeautifulSoup
+from .utils import channel_to_module_output, KeplerQualityFlags
 
-__all__ = ['LightCurve', 'KeplerLightCurveFile']
+
+__all__ = ['LightCurve', 'KeplerLightCurveFile', 'KeplerCBVCorrector',
+           'SimplePixelLevelDecorrelationDetrender']
 
 
 class LightCurve(object):
     """
     Implements a basic time-series class for a generic lightcurve.
 
-    Parameters
+    Attributes
     ----------
-    time : numpy array-like
-        Time-line.
-    flux : numpy array-like
-        Data flux for every time point.
+    time : array-like
+        Time-line
+    flux : array-like
+        Data flux for every time point
+    flux_err : array-like
+        Uncertainty in each flux data point
+    quality : array-like
+        Array indicating the quality of each data point
+    centroid_col, centroid_row : array-like, array-like
+        Centroid column and row coordinates as a function of time
     """
 
     def __init__(self, time, flux, flux_err=None, quality=None, centroid_col=None,
@@ -25,15 +40,74 @@ class LightCurve(object):
         self.centroid_col = centroid_col
         self.centroid_row = centroid_row
 
-    def detrend(self, method='arclength', **kwargs):
+    def stitch(self, *others):
         """
+        Stitches LightCurve objects.
+
+        Parameters
+        ----------
+        *others : LightCurve objects
+            Light curves to be stitched.
+
+        Returns
+        -------
+        stitched_lc : LightCurve object
+            Stitched light curve.
         """
-        if method == 'arclength':
-            return ArcLengthDetrender().detrend(time=self.time, flux=self.flux,
-                                                flux_err=self.flux_err, **kwargs)
-        else:
-            return FirstDifferenceDetrender().detrend(time=self.time, flux=self.flux,
-                                                      flux_err=self.flux_err, **kwargs)
+        time = self.time
+        flux = self.flux
+        flux_err = self.flux_err
+        quality = self.quality
+        centroid_col = self.centroid_col
+        centroid_row = self.centroid_row
+
+        for i in range(len(others)):
+            time = np.append(time, others[i].time)
+            flux = np.append(flux, others[i].flux)
+            flux_err = np.append(flux_err, others[i].flux_err)
+            quality = np.append(quality, others[i].quality)
+            centroid_col = np.append(centroid_col, others[i].centroid_col)
+            centroid_row = np.append(centroid_row, others[i].centroid_row)
+
+        return LightCurve(time=time, flux=flux, flux_err=flux_err,
+                          quality=quality, centroid_col=centroid_col,
+                          centroid_row=centroid_row)
+
+    def flatten(self, window_length=101, polyorder=3, **kwargs):
+        """
+        Removes low frequency trend using scipy's Savitzky-Golay filter.
+
+        Parameters
+        ----------
+        window_length : int
+            The length of the filter window (i.e. the number of coefficients).
+            ``window_length`` must be a positive odd integer.
+        polyorder : int
+            The order of the polynomial used to fit the samples. ``polyorder``
+            must be less than window_length.
+        **kwargs : dict
+            Dictionary of arguments to be passed to `scipy.signal.savgol_filter`.
+
+        Returns
+        -------
+        flatten_lc : LightCurve object
+            Flattened lightcurve
+        trend_lc : LightCurve object
+            Trend in the lightcurve data
+        """
+        trend_signal = signal.savgol_filter(x=self.flux, window_length=window_length,
+                                            polyorder=polyorder, **kwargs)
+        flatten_lc = copy.copy(self)
+        flatten_lc.flux = self.flux / trend_signal
+        if self.flux_err is not None:
+            flatten_lc.flux_err = self.flux_err / trend_signal
+        trend_lc = copy.copy(self)
+        trend_lc.flux = trend_signal
+
+        return flatten_lc, trend_lc
+
+    def fold(self, phase, period):
+        return LightCurve(((self.time - phase + 0.5 * period) / period) % 1 - 0.5, self.flux)
 
     def draw(self):
         raise NotImplementedError("Should we implement a LightCurveDrawer class?")
@@ -46,27 +120,84 @@ class LightCurve(object):
 
 
 class KeplerLightCurveFile(object):
+    """Defines a LightCurveFile class for NASA's Kepler and K2 missions.
+    """
 
-    def __init__(self, path, **kwargs):
-        self.hdu = fits.open(path, **kwargs)
+    def __init__(self, path, quality_bitmask=KeplerQualityFlags.DEFAULT_BITMASK,
+                 **kwargs):
+        self.path = path
+        self.hdu = pyfits.open(self.path, **kwargs)
+        self.quality_bitmask = quality_bitmask
+        self.quality_mask = self._quality_mask(quality_bitmask)
 
     def get_lightcurve(self, flux_type, centroid_type='MOM_CENTR'):
         if flux_type in self._flux_types():
-            return LightCurve(self.hdu[1].data['TIME'], self.hdu[1].data[flux_type],
-                              flux_err=self.hdu[1].data[flux_type + "_ERR"],
-                              quality=self.hdu[1].data['QUALITY'],
-                              centroid_col=self.hdu[1].data[centroid_type + "1"],
-                              centroid_row=self.hdu[1].data[centroid_type + "2"])
+            return LightCurve(self.hdu[1].data['TIME'][self.quality_mask],
+                              self.hdu[1].data[flux_type][self.quality_mask],
+                              flux_err=self.hdu[1].data[flux_type + "_ERR"][self.quality_mask],
+                              quality=self.hdu[1].data['SAP_QUALITY'][self.quality_mask],
+                              centroid_col=self.hdu[1].data[centroid_type + "1"][self.quality_mask],
+                              centroid_row=self.hdu[1].data[centroid_type + "2"][self.quality_mask])
         else:
             raise KeyError("{} is not a valid flux type. Available types are: {}".
                            format(flux_type, self._flux_types))
+
+    def _quality_mask(self, quality_bitmask):
+        """Returns a boolean mask which flags all good-quality cadences.
+
+        Parameters
+        ----------
+        quality_bitmask : int
+            Bitmask. See ref. [1], table 2-3.
+        """
+        return (self.hdu[1].data['SAP_QUALITY'] & quality_bitmask) == 0
+
     @property
     def SAP_FLUX(self):
+        """Returns a LightCurve object for SAP_FLUX"""
         return self.get_lightcurve('SAP_FLUX')
 
     @property
     def PDCSAP_FLUX(self):
+        """Returns a LightCurve object for PDCSAP_FLUX"""
         return self.get_lightcurve('PDCSAP_FLUX')
+
+    @property
+    def time(self):
+        return self.hdu[1].data['TIME'][self.quality_mask]
+
+    @property
+    def channel(self):
+        return self.header(ext=0)['CHANNEL']
+
+    @property
+    def quarter(self):
+        return self.header(ext=0)['QUARTER']
+
+    @property
+    def campaign(self):
+        """Campaign number"""
+        return self.header(ext=0)['CAMPAIGN']
+
+    @property
+    def mission(self):
+        """Mission name"""
+        return self.header(ext=0)['MISSION']
+
+    def compute_cotrended_lightcurve(self, cbvs=[1, 2]):
+        """Returns a LightCurve object after cotrending the SAP_FLUX
+        against the cotrending basis vectors.
+
+        Parameters
+        ----------
+        cbvs : list of ints
+            The list of cotrending basis vectors to fit to the data. For example,
+            [1, 2] will fit the first two basis vectors.
+        """
+        return KeplerCBVCorrector(self).correct(cbvs=cbvs)
+
+    def header(self, ext=0):
+        return self.hdu[ext].header
 
     def _flux_types(self):
         """Returns a list of available flux types for this light curve file"""
@@ -82,33 +213,204 @@ class Detrender(object):
         """
         pass
 
-class FirstDifferenceDetrender(Detrender):
-    """
-    First difference detrending
-    """
-    def detrend(time, flux):
-        return LightCurve(time, flux - np.append(0, flux[1:]))
 
-class LinearDetrender(Detrender):
-    """
-    """
-    @staticmethod
-    def detrend(time, flux):
+class SystematicsCorrector(object):
+    def correct(self):
         pass
+
+
+class KeplerCBVCorrector(SystematicsCorrector):
+    r"""Remove systematic trends from Kepler light curves by fitting
+    cotrending basis vectors.
+
+    .. math::
+
+         \arg \min_{\theta \in \Theta} |f(t) - <\theta, \left[\rm{cbv}_1(t), ..., \rm{cbv}_n(t)\right]^{T}|^p
+
+    Attributes
+    ----------
+    lc_file : KeplerLightCurveFile object or str
+        An instance from KeplerLightCurveFile or a path for the .fits
+        file of a NASA's Kepler/K2 light curve.
+    loss_function : oktopus.Likelihood subclass
+        A class that describes a cost function.
+        The default is :class:`oktopus.LaplacianLikelihood`, which is tantamount
+        to the L1 norm.
+
+    Examples
+    --------
+    >>> import matplotlib.pyplot as plt
+    >>> from pyke import KeplerCBVCorrector, KeplerLightCurveFile
+    >>> fn = ("https://archive.stsci.edu/missions/kepler/lightcurves/"
+    ...       "0084/008462852/kplr008462852-2011073133259_llc.fits")
+    >>> cbv = KeplerCBVCorrector(fn)
+    Downloading https://archive.stsci.edu/missions/kepler/lightcurves/0084/008462852/kplr008462852-2011073133259_llc.fits [Done]
+    >>> cbv_lc = cbv.correct()
+    Downloading http://archive.stsci.edu/missions/kepler/cbv/kplr2011073133259-q08-d25_lcbv.fits [Done]
+    >>> sap_lc = KeplerLightCurveFile(fn).SAP_FLUX
+    >>> plt.plot(sap_lc.time, sap_lc.flux, 'x', markersize=1, label='SAP_FLUX') # doctest: +SKIP
+    >>> plt.plot(cbv_lc.time, cbv_lc.flux, 'o', markersize=1, label='CBV_FLUX') # doctest: +SKIP
+    >>> plt.legend() # doctest: +SKIP
+    """
+
+    def __init__(self, lc_file, loss_function=oktopus.LaplacianLikelihood):
+        self.lc_file = lc_file
+        self.loss_function = loss_function
+
+        if self.lc_file.mission == 'Kepler':
+            self.cbv_base_url = "http://archive.stsci.edu/missions/kepler/cbv/"
+        elif self.lc_file.mission == 'K2':
+            self.cbv_base_url = "http://archive.stsci.edu/missions/k2/cbv/"
+
+    @property
+    def lc_file(self):
+        return self._lc_file
+
+    @lc_file.setter
+    def lc_file(self, value):
+        # this enables `lc_file` to be either a string
+        # or an object from KeplerLightCurve
+        if isinstance(value, str):
+            self._lc_file = KeplerLightCurveFile(value)
+        elif isinstance(value, KeplerLightCurveFile):
+            self._lc_file = value
+
+    @property
+    def coeffs(self):
+        """
+        Returns the fitted coefficients.
+        """
+        return self._coeffs
+
+    @property
+    def opt_result(self):
+        """
+        Returns the result of the optimization process.
+        """
+        return self._opt_result
+
+    def correct(self, cbvs=[1, 2]):
+        """
+        Correct the SAP_FLUX by fitting a number of cotrending basis vectors
+        `cbvs`.
+
+        Parameters
+        ----------
+        cbvs : list of ints
+            The list of cotrending basis vectors to fit to the data. For example,
+            [1, 2] will fit the first two basis vectors.
+        """
+        module, output = channel_to_module_output(self.lc_file.channel)
+        cbv_file = pyfits.open(self.get_cbv_url())
+        cbv_data = cbv_file['MODOUT_{0}_{1}'.format(module, output)].data
+
+        cbv_array = []
+        for i in cbvs:
+            cbv_array.append(cbv_data.field('VECTOR_{}'.format(i))[self.lc_file.quality_mask])
+        cbv_array = np.asarray(cbv_array)
+
+        sap_lc = self.lc_file.SAP_FLUX
+        median_sap_flux = np.nanmedian(sap_lc.flux)
+        norm_sap_flux = sap_lc.flux / median_sap_flux - 1
+        norm_err_sap_flux = sap_lc.flux_err / median_sap_flux
+
+        def mean_model(*theta):
+            coeffs = np.asarray(theta)
+            return np.dot(coeffs, cbv_array)
+
+        loss = self.loss_function(data=norm_sap_flux, mean=mean_model,
+                                  var=norm_err_sap_flux)
+        self._opt_result = loss.fit(x0=np.zeros(len(cbvs)), method='L-BFGS-B')
+        self._coeffs = self._opt_result.x
+        flux_hat = sap_lc.flux - median_sap_flux * mean_model(self._coeffs)
+
+        return LightCurve(time=sap_lc.time, flux=flux_hat.reshape(-1))
+
+    def get_cbv_url(self):
+        # gets the html page and finds all references to 'a' tag
+        # keeps the ones for which 'href' ends with 'fits'
+        # this might slow things down in case the user wants to fit 1e3 stars
+        soup = BeautifulSoup(requests.get(self.cbv_base_url).text, 'html.parser')
+        cbv_files = [fn['href'] for fn in soup.find_all('a') if fn['href'].endswith('fits')]
+
+        if self.lc_file.mission == 'Kepler':
+            if self.lc_file.quarter < 10:
+                quarter = 'q0' + str(self.lc_file.quarter)
+            else:
+                quarter = 'q' + str(self.lc_file.quarter)
+            for cbv_file in cbv_files:
+                if quarter + '-d25' in cbv_file:
+                    break
+        elif self.lc_file.mission == 'K2':
+            if self.lc_file.campaign <= 8:
+                campaign = 'c0' + str(self.lc_file.campaign)
+            else:
+                campaign = 'c' + str(self.lc_file.campaign)
+            for cbv_file in cbv_files:
+                if campaign in cbv_file:
+                    break
+
+        return self.cbv_base_url + cbv_file
+
 
 class ArcLengthDetrender(Detrender):
     def detrend(time, flux):
         pass
 
-class EMDDetrender(Detrender):
-    """
-    Empirical Mode Decomposition Detrender
-    """
-    def detrend(time, flux):
-        pass
 
-class PolynomialDetrender(Detrender):
+class SimplePixelLevelDecorrelationDetrender(Detrender):
+    r"""
+    Implements the basic first order Pixel Level Decorrelation (PLD) proposed by
+    Deming et. al. [1]_ and Luger et. al. [2]_, [3]_.
+
+    Attributes
+    ----------
+    time : array-like
+        Time array
+    tpf_flux : array-like
+        Pixel values series
+
+    Notes
+    -----
+    This code serves only as a quick look into the PLD technique.
+    Users are encouraged to check out the GitHub repos
+    `everest <http://www.github.com/rodluger/everest>`_
+    and `everest3 <http://www.github.com/rodluger/everest3>`_.
+
+    References
+    ----------
+    .. [1] Deming et. al. Spitzer Secondary Eclipses of the Dense, \
+           Modestly-irradiated, Giant Exoplanet HAT-P-20b using Pixel-Level Decorrelation.
+    .. [2] Luger et. al. EVEREST: Pixel Level Decorrelation of K2 Light Curves.
+    .. [3] Luger et. al. An Update to the EVEREST K2 Pipeline: short cadence, \
+           saturated stars, and Kepler-like photometry down to K_p = 15.
     """
-    """
-    def detrend(time, flux):
-        pass
+
+    def __init__(self, time, tpf_flux):
+        self.time = time
+        self.tpf_flux = tpf_flux
+
+    def detrend(self, window_length=None, polyorder=2):
+        k = window_length
+        if not k:
+            k = int(len(self.time) / 2) - 1
+        n_windows = int(len(self.time) / k)
+        flux_detrended = np.array([])
+        for n in range(1, n_windows + 1):
+            flux_detrended = np.append(flux_detrended,
+                                       self._pld(self.tpf_flux[(n - 1) * k:n * k], polyorder))
+        flux_detrended = np.append(flux_detrended, self._pld(self.tpf_flux[n * k:], polyorder))
+        return LightCurve(self.time, flux_detrended + np.nanmedian(np.nansum(self.tpf_flux, axis=(1, 2))))
+
+    def _pld(self, tpf_flux, polyorder=2):
+        if len(tpf_flux) == 0:
+            return np.array([])
+        pixels_series = tpf_flux.reshape((tpf_flux.shape[0], -1))
+        lightcurve = np.nansum(pixels_series, axis=1).reshape(-1, 1)
+        # design matrix
+        X = pixels_series / lightcurve
+        X = np.hstack((X, np.array([np.linspace(0, 1, tpf_flux.shape[0]) ** n for n in range(polyorder+1)]).T))
+        opt_weights = np.linalg.solve(np.dot(X.T, X), np.dot(X.T, lightcurve))
+        model = np.dot(X, opt_weights)
+        flux_detrended = lightcurve - model
+        return flux_detrended

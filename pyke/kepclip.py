@@ -1,9 +1,9 @@
+from .utils import PyKEArgumentHelpFormatter
+from . import kepio, kepmsg, kepkey
 import numpy as np
 from astropy.io import fits as pyfits
 from matplotlib import pyplot as plt
 from tqdm import tqdm
-from .utils import PyKEArgumentHelpFormatter
-from . import kepio, kepmsg, kepkey
 
 
 __all__ = ['kepclip']
@@ -67,7 +67,7 @@ def kepclip(infile, ranges, outfile=None, datacol='SAP_FLUX', plot=False,
     kepmsg.log(logfile, call+'\n', verbose)
 
     # start time
-    kepmsg.clock('KEPCLIP started at',logfile,verbose)
+    kepmsg.clock('KEPCLIP started at', logfile, verbose)
 
     # overwrite output file
     if overwrite:
@@ -90,101 +90,130 @@ def kepclip(infile, ranges, outfile=None, datacol='SAP_FLUX', plot=False,
     except:
         cadenom = cadence
 
+    # fudge non-compliant FITS keywords with no values
+    instr = kepkey.emptykeys(instr, infile, logfile, verbose)
     # input data
     table = instr[1].data
-
     # read time and flux columns
     barytime = kepio.readtimecol(infile, table, logfile, verbose)
-    flux = kepio.readfitscol(infile, table, datacol, logfile, verbose)
     barytime = barytime + bjdref
-    if 'flux' in datacol.lower():
-        flux = flux / cadenom
 
-    # filter input data table
-    finite_data_mask = np.isfinite(barytime) & np.isfinite(flux) & (flux != 0)
-    barytime = barytime[finite_data_mask]
-    flux = flux[finite_data_mask]
-    table = table[finite_data_mask]
-    accept_time_mask = np.ones_like(barytime, dtype=bool)
-    for i in range(len(t1)):
-        accept_time_mask[(barytime >= t1[i]) & (barytime <= t2[i])] = False
-    work1 = barytime[accept_time_mask]
-    work2 = flux[accept_time_mask]
-    table = table[accept_time_mask]
+    #Test file type is LC or TPF:
+    if len(set(instr[1].data.columns.names) & set(['SAP_FLUX'])) == 1:
+        filetype='LC'
+    if len(set(instr[1].data.columns.names) & set(['SAP_FLUX'])) == 0:
+        filetype='TPF'
 
-    # comment keyword in output file
-    print("Writing output file {}...".format(outfile))
-    kepkey.history(call, instr[0], outfile, logfile, verbose)
-    # write output file
-    instr[1].data = table
-    comment = 'NaN cadences removed from data'
-    kepkey.new('NANCLEAN', True, comment, instr[1], outfile, logfile, verbose)
-    instr.writeto(outfile)
+    if filetype == 'LC':
+        message = 'KEPCLIP clipping a Light Curve'
+        kepmsg.clock(message, logfile, verbose)
+        flux = kepio.readfitscol(infile, table, datacol, logfile, verbose)
+        if 'flux' in datacol.lower():
+            flux = flux / cadenom
+        # filter input data table
+        naxis2 = 0
+        work1 = np.array([], 'float64')
+        work2 = np.array([], 'float32')
+        for i in tqdm(range(len(barytime))):
+            if (np.isfinite(barytime[i]) and np.isfinite(flux[i])
+                and flux[i] != 0.0):
+                reject = True
+                for j in range(len(t1)):
+                    if (barytime[i] >= t1[j] and barytime[i] <= t2[j]):
+                        reject = False
+                if not reject:
+                    table[naxis2] = table[i]
+                    work1 = np.append(work1, barytime[i])
+                    work2 = np.append(work2, flux[i])
+                    naxis2 += 1
 
-    # clean up x-axis unit
-    barytime0 = (tstart // 100) * 100.0
-    barytime = work1 - barytime0
-    xlab = 'BJD $-$ {}'.format(barytime0)
+        # comment keyword in output file
+        kepkey.history(call, instr[0], outfile, logfile, verbose)
+        # comment keyword in output file
+        kepmsg.log(logfile, "Writing output file {}...".format(outfile), verbose)
+        # write output file
+        instr[1].data = table[:naxis2]
+        comment = 'NaN cadences removed from data'
+        kepkey.new('NANCLEAN', True, comment, instr[1], outfile, logfile, verbose)
+        instr.writeto(outfile)
+        # clean up x-axis unit
+        barytime0 = (tstart // 100) * 100.0
+        barytime = work1 - barytime0
+        xlab = 'BJD $-$ {}'.format(barytime0)
+        # clean up y-axis units
+        try:
+            nrm = len(str(int(work2.max()))) - 1
+        except:
+            nrm = 0
+        flux = work2 / 10 ** nrm
+        ylab = '10$^%d$ e$^-$ s$^{-1}$' % nrm
+        # data limits
+        xmin = barytime.min()
+        xmax = barytime.max()
+        ymin = flux.min()
+        ymax = flux.max()
+        xr = xmax - xmin
+        yr = ymax - ymin
+        # clear window, plot box
+        if plot:
+            plt.figure()
+            plt.clf()
+            ax = plt.axes()
+            # force tick labels to be absolute rather than relative
+            plt.gca().xaxis.set_major_formatter(plt.ScalarFormatter(useOffset=False))
+            plt.gca().yaxis.set_major_formatter(plt.ScalarFormatter(useOffset=False))
+            # rotate y labels by 90 deg
+            # plot line data
+            ltime = [barytime[0]]; ldata = [flux[0]]
+            for i in range(1, len(flux)):
+                if barytime[i - 1] > barytime[i] - 0.025:
+                    ltime.append(barytime[i])
+                    ldata.append(flux[i])
+                else:
+                    ltime = np.array(ltime, dtype=np.float)
+                    ldata = np.array(ldata, dtype=np.float)
+                    plt.plot(ltime, ldata, color='#0000ff', linestyle='-',
+                             linewidth=1.0)
+                    ltime = []; ldata = []
+            ltime = np.array(ltime, dtype=np.float)
+            ldata = np.array(ldata, dtype=np.float)
+            plt.plot(ltime, ldata, color='#0000ff', linestyle='-', linewidth=1.0)
+            # plot fill data
+            barytime = np.insert(barytime, [0], [barytime[0]])
+            barytime = np.append(barytime, [barytime[-1]])
+            flux = np.insert(flux, [0], [0.0])
+            flux = np.append(flux, [0.0])
+            plt.fill(barytime, flux, fc='#ffff00', linewidth=0.0, alpha=0.2)
+            plt.xlim(xmin - xr * 0.01, xmax + xr * 0.01)
+            if ymin - yr * 0.01 <= 0.0:
+                plt.ylim(1.0e-10, ymax + yr * 0.01)
+    if filetype == 'TPF':
+        message = 'KEPCLIP clipping a Target Pixel File'
+        kepmsg.clock(message, logfile, verbose)
+        # filter input data table
+        naxis2 = 0
 
-    # clean up y-axis units
-    try:
-        nrm = len(str(int(work2.max()))) - 1
-    except:
-        nrm = 0
-    flux = work2 / 10 ** nrm
-    ylab = '10$^%d$ e$^-$ s$^{-1}$' % nrm
+        for i in tqdm(range(len(barytime))):
+            if (np.isfinite(barytime[i])):
+                reject = True
+                for j in range(len(t1)):
+                    if (barytime[i] >= t1[j]) and (barytime[i] < t2[j]):
+                        reject = False
+                if not reject:
+                    table[naxis2] = table[i]
+                    naxis2 += 1
 
-    # data limits
-    xmin = barytime.min()
-    xmax = barytime.max()
-    ymin = flux.min()
-    ymax = flux.max()
-    xr = xmax - xmin
-    yr = ymax - ymin
+        # comment keyword in output file
+        kepkey.history(call, instr[0], outfile, logfile, verbose)
 
-    # clear window, plot box
-    if plot:
-        plt.figure()
-        plt.clf()
-        ax = plt.axes()
-
-        # force tick labels to be absolute rather than relative
-        plt.gca().xaxis.set_major_formatter(plt.ScalarFormatter(useOffset=False))
-        plt.gca().yaxis.set_major_formatter(plt.ScalarFormatter(useOffset=False))
-
-        # rotate y labels by 90 deg
-        # plot line data
-        ltime = [barytime[0]]; ldata = [flux[0]]
-        for i in range(1, len(flux)):
-            if barytime[i - 1] > barytime[i] - 0.025:
-                ltime.append(barytime[i])
-                ldata.append(flux[i])
-            else:
-                ltime = np.array(ltime, dtype=np.float)
-                ldata = np.array(ldata, dtype=np.float)
-                plt.plot(ltime, ldata, color='#0000ff', linestyle='-',
-                         linewidth=1.0)
-                ltime = []; ldata = []
-        ltime = np.array(ltime, dtype=np.float)
-        ldata = np.array(ldata, dtype=np.float)
-        plt.plot(ltime, ldata, color='#0000ff', linestyle='-', linewidth=1.0)
-
-        # plot fill data
-        barytime = np.insert(barytime, [0], [barytime[0]])
-        barytime = np.append(barytime, [barytime[-1]])
-        flux = np.insert(flux, [0], [0.0])
-        flux = np.append(flux, [0.0])
-        plt.fill(barytime, flux, fc='#ffff00', linewidth=0.0, alpha=0.2)
-        plt.xlim(xmin - xr * 0.01, xmax + xr * 0.01)
-        if ymin - yr * 0.01 <= 0.0:
-            plt.ylim(1.0e-10, ymax + yr * 0.01)
-        else:
-            plt.ylim(ymin - yr * 0.01, ymax + yr * 0.01)
-        plt.xlabel(xlab, {'color' : 'k'})
-        plt.ylabel(ylab, {'color' : 'k'})
-        plt.grid()
-        plt.show()
-
+        # write output file
+        instr[1].data = table[:naxis2]
+        comment = 'Trimmed TPF'
+        kepkey.new('CLIP_TPF', True, comment, instr[1], outfile, logfile, verbose)
+        instr.writeto(outfile)
+        if plot:
+            message = 'KEPCLIP no plotting available for Target Pixel Files'
+            kepmsg.clock(message, logfile, verbose)
     # close input file
     instr.close()
 
@@ -204,7 +233,7 @@ def kepclip_main():
                         type=str)
     parser.add_argument('--outfile',
                         help=('Name of FITS file to output.'
-                              ' If None, outfile is infile-kepclip.fits'),
+                              ' If None, outfile is infile-kepclip.'),
                         default=None)
     parser.add_argument('--datacol', help='Data column to plot',
                         default='SAP_FLUX', type=str)
