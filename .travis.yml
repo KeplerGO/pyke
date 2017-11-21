@@ -6,6 +6,8 @@ python:
 before_install:
   - pip install codecov
   - pip install pytest-cov
+  - pip install sphinx_rtd_theme
+  - pip install numpydoc
 install:
   - pip install -r requirements.txt
 before_script: # configure a headless display to test plot generation

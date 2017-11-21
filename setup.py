@@ -62,7 +62,7 @@ setup(name='pyketools',
                         'matplotlib>=1.5.3', 'tqdm', 'oktopus', 'bs4',
                         'requests'],
       setup_requires=['pytest-runner'],
-      tests_require=['pytest'],
+      tests_require=['pytest', 'pytest-cov'],
       entry_points=entry_points,
       include_package_data=True,
       classifiers=[

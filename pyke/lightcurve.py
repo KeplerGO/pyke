@@ -291,9 +291,11 @@ class KeplerCBVCorrector(SystematicsCorrector):
     --------
     >>> import matplotlib.pyplot as plt
     >>> from pyke import KeplerCBVCorrector, KeplerLightCurveFile
-    >>> cbv = KeplerCBVCorrector("kplr008462852-2011073133259_llc.fits")
+    >>> fn = ("https://archive.stsci.edu/missions/kepler/lightcurves/"
+    ...       "0084/008462852/kplr008462852-2011073133259_llc.fits")
+    >>> cbv = KeplerCBVCorrector(fn)
+    Downloading https://archive.stsci.edu/missions/kepler/lightcurves/0084/008462852/kplr008462852-2011073133259_llc.fits [Done]
     >>> cbv_lc = cbv.correct()
-    >>> sap_lc = KeplerLightCurveFile("kplr008462852-2011073133259_llc.fits").SAP_FLUX
     >>> plt.plot(sap_lc.time, sap_lc.flux, 'x', markersize=1, label='SAP_FLUX') # doctest: +SKIP
     >>> plt.plot(cbv_lc.time, cbv_lc.flux, 'o', markersize=1, label='CBV_FLUX') # doctest: +SKIP
     >>> plt.legend() # doctest: +SKIP
@@ -455,7 +457,7 @@ class SimplePixelLevelDecorrelationDetrender(Detrender):
         if len(tpf_flux) == 0:
             return np.array([])
         pixels_series = tpf_flux.reshape((tpf_flux.shape[0], -1))
-        lightcurve = np.sum(pixels_series, axis=1).reshape(-1, 1)
+        lightcurve = np.nansum(pixels_series, axis=1).reshape(-1, 1)
         # design matrix
         X = pixels_series / lightcurve
         X = np.hstack((X, np.array([np.linspace(0, 1, tpf_flux.shape[0]) ** n for n in range(polyorder+1)]).T))
