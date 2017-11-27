@@ -156,6 +156,7 @@ class KeplerQualityFlags(object):
                 result.append(cls.STRINGS[flag])
         return result
 
+
 def plot_image(image, scale='linear', origin='lower', xlabel='Pixel Column Number',
                ylabel='Pixel Row Number', title=None, **kwargs):
         vmin, vmax = PercentileInterval(95.).get_limits(image)
