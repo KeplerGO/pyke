@@ -121,7 +121,7 @@ class KeplerLightCurve(LightCurve):
         Channel number
     campaign : int
         Campaign number
-    quater : int
+    quarter : int
         Quarter number
     mission : str
         Mission name
