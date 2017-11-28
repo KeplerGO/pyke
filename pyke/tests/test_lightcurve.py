@@ -6,6 +6,7 @@ TABBY_Q8 = ("https://archive.stsci.edu/missions/kepler/lightcurves"
             "/0084/008462852/kplr008462852-2011073133259_llc.fits")
 
 def test_kepler_cbv_fit():
+    # comparing that the two methods to do cbv fit are the nearly the same
     cbv = KeplerCBVCorrector(TABBY_Q8)
     cbv_lc = cbv.correct()
     assert_almost_equal(cbv.coeffs, [0.08534423, 0.10814261], decimal=4)

@@ -41,7 +41,11 @@ class KeplerTargetPixelFile(TargetPixelFile):
     ----------
     path : str
         Path to fits file.
-
+    aperture_mask : array-like or str
+        A boolean array describing the aperture such that `False` means
+        that the pixel will be masked out. It can also use the default
+        Kepler pipeline's aperture if the value 'kepler-pipeline' is passed.
+        The default behaviour is to use all pixels.
     quality_bitmask : int
         Bitmask specifying quality flags of cadences that should be ignored.
 
@@ -126,7 +130,9 @@ class KeplerTargetPixelFile(TargetPixelFile):
 
     @aperture_mask.setter
     def aperture_mask(self, mask):
-        if mask is not None:
+        if mask == 'kepler-pipeline':
+            self._aperture_mask = self.hdu[-1].data == 3
+        elif mask is not None:
             self._aperture_mask = mask
         else:
             mask = self.hdu[1].data['FLUX'][100] == self.hdu[1].data['FLUX'][100]
@@ -183,7 +189,7 @@ class KeplerTargetPixelFile(TargetPixelFile):
         """Returns the quality flag integer of every good cadence."""
         return self.hdu[1].data['QUALITY'][self.quality_mask]
 
-    def estimate_bkg_per_pixel(self, method='mode'):
+    def estimate_bkg_per_pixel(self, method='median'):
         """Returns an estimate of the background value per pixel for every
         cadence.
 
@@ -222,7 +228,7 @@ class KeplerTargetPixelFile(TargetPixelFile):
     def _get_aperture_flux(self):
         return np.nansum(self.flux[:, self.aperture_mask], axis=1)
 
-    def get_bkg_lightcurve(self, method='mode'):
+    def get_bkg_lightcurve(self, method='median'):
         return self.estimate_bkg_per_pixel(method=method) * self.aperture_npix
 
     def to_lightcurve(self, subtract_bkg=False):
