@@ -18,6 +18,7 @@ missions.
 
 .. toctree::
     :maxdepth: 1
+
     ../tutorials/ipython_notebooks/whatsnew31.ipynb
 
 .. _user-docs:

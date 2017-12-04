@@ -1,8 +1,8 @@
 .. _whatsnew-3.1:
 
-==================================
-Changelog PyKE 3.1 (December 2017)
-==================================
+======================================
+Changelog for PyKE 3.1 (December 2017)
+======================================
 
 
 PyKE 3.1 provides the following improvements:
@@ -37,7 +37,8 @@ Additionally, those are the set of new features:
   the first order Pixel Level Decorrelation (PLD) used by Deming et. al. and Luger et.
   al..
 
-* Pixel Response Function photometry classes have been developed. More precisely,
+* Pixel Response Function photometry classes have been developed. More precisely:
+
     * ``KeplerPRF``: implements a parametric PRF model using the PRF calibration files.
       This model has the following parameters: flux, centroid position, pixel scales, and
       rotation angle.
