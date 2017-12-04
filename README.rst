@@ -22,19 +22,20 @@ Documentation
 
 Documentation is hosted at `pyke.keplerscience.org <http://pyke.keplerscience.org>`_.
 
-What's new in PyKE v3? (July 2017)
-----------------------------------
-
+What's new in PyKE v3.1? (December 2017)
+----------------------------------------
 
 PyKE3 is the latest generation of the Kepler/K2/TESS toolkit.
 It provides the following key improvements:
 
 * PyKE3 is now a `pip-installable <http://pyke.keplerscience.org/en/latest/install.html#installing-pyke>`_ package and supports both Python 2 and 3
 * `tasks <http://pyke.keplerscience.org/en/latest/overview.html>`_ are now available both as command-line tools and Python functions
-* PyKE3 no longer depends on PyRAF and is TESS-ready
-* PyKE3 address performance issues specially noticeable in short-cadence data
 * documentation and tutorials are now generated using Sphinx
-* the development has been moved to GitHub to encourage `user contributions <http://pyke.keplerscience.org/en/latest/contributing.html>`_
+* PyKE3 provides an easy interface to play with target pixel files and light curve files
+  from within a Python session
+* The PRF photometry tools were rebranded into a more flexible interface
+
+See the following IPython notebook for examples of the new features and changes: ADD NOTEBOOK URL.
 
 Quickstart
 ----------

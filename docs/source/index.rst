@@ -13,7 +13,7 @@ missions.
 .. .. image:: _static/images/pyke-overview.png
 
 *******************
-:doc:`whatsnew/3.0`
+:doc:`whatsnew/3.1`
 *******************
 
 .. _user-docs:
