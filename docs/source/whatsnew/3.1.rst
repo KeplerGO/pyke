@@ -1,8 +1,8 @@
 .. _whatsnew-3.1:
 
-=======================
-What's new in PyKE 3.1?
-=======================
+==================================
+Changelog PyKE 3.1 (December 2017)
+==================================
 
 
 PyKE 3.1 provides the following improvements:
@@ -47,9 +47,3 @@ Additionally, those are the set of new features:
       and a background model. This class is one of the building blocks to enable
       simultaneous fitting of overlapping PRFs.
     * ``PRFPhotometry``: this class performs PRF photometry in target pixel files.
-
-*For a quick look at the new features, see:*
-
-.. toctree::
-
-    ../tutorials/ipython_notebooks/whatsnew31.ipynb
