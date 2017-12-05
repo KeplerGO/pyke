@@ -200,7 +200,7 @@ class SceneModel(object):
 
 class KeplerPRF(object):
     """
-    Kepler's Pixel Response Function
+    Kepler's Pixel Response Function as designed by [1]_.
 
     This class provides the necessary interface to load Kepler PRF
     calibration files and to create a model that can be fit as a function
@@ -235,6 +235,11 @@ class KeplerPRF(object):
     >>> prf = kepprf(flux=1000, center_col=10, center_row=10,
     ...              scale_row=0.7, scale_col=0.7, rotation_angle=math.pi/2)
     >>> plt.imshow(prf, origin='lower') # doctest: +SKIP
+
+    References
+    ----------
+    .. [1] S. T. Bryson. The Kepler Pixel Response Function, 2010.
+           <https://arxiv.org/abs/1001.0331>.
     """
 
     def __init__(self, channel, shape, column, row):
@@ -359,6 +364,13 @@ class KeplerPRF(object):
 
 
 class SimpleKeplerPRF(KeplerPRF):
+    """
+    Simple model of KeplerPRF.
+
+    This class provides identical functionality as in KeplerPRF, except that
+    it is parametrized only by flux and center positions. The width scales
+    and angle are fixed to 1.0 and 0, respectivelly.
+    """
 
     def __call__(self, flux, center_col, center_row):
         return self.evaluate(flux, center_col, center_row)

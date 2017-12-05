@@ -125,11 +125,14 @@ class KeplerLightCurve(LightCurve):
         Quarter number
     mission : str
         Mission name
+    cadenceno : array-like
+        Cadence numbers corresponding to every time measurement
     """
 
     def __init__(self, time, flux, flux_err=None, centroid_col=None,
                  centroid_row=None, quality=None, quality_bitmask=None,
-                 channel=None, campaign=None, quarter=None, mission=None):
+                 channel=None, campaign=None, quarter=None, mission=None,
+                 cadenceno=None):
         super(KeplerLightCurve, self).__init__(time, flux, flux_err)
         self.centroid_col = centroid_col
         self.centroid_row = centroid_row
@@ -139,6 +142,7 @@ class KeplerLightCurve(LightCurve):
         self.campaign = campaign
         self.quarter = quarter
         self.mission = mission
+        self.cadenceno = cadenceno
 
     def to_fits(self):
         raise NotImplementedError()
@@ -177,7 +181,8 @@ class KeplerLightCurveFile(object):
                                     channel=self.channel,
                                     campaign=self.campaign,
                                     quarter=self.quarter,
-                                    mission=self.mission)
+                                    mission=self.mission,
+                                    cadenceno=self.cadenceno)
         else:
             raise KeyError("{} is not a valid flux type. Available types are: {}".
                            format(flux_type, self._flux_types))
@@ -206,6 +211,11 @@ class KeplerLightCurveFile(object):
     def time(self):
         """Time measurements"""
         return self.hdu[1].data['TIME'][self.quality_mask]
+
+    @property
+    def cadenceno(self):
+        """Cadence number"""
+        return self.hdu[1].data['CADENCENO'][self.quality_mask]
 
     @property
     def channel(self):
