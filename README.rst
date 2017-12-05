@@ -33,7 +33,7 @@ It provides the following key improvements:
 * documentation and tutorials are now generated using Sphinx
 * PyKE3 provides an easy interface to play with target pixel files and light curve files
   from within a Python session
-* The PRF photometry tools were rebranded into a more flexible interface
+* The PRF photometry tools were refactored into a more flexible interface
 
 See the following IPython notebook for examples of the new features and changes: ADD NOTEBOOK URL.
 
