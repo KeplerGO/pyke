@@ -47,7 +47,9 @@ class KeplerTargetPixelFile(TargetPixelFile):
         Kepler pipeline's aperture if the value 'kepler-pipeline' is passed.
         The default behaviour is to use all pixels.
     quality_bitmask : int
-        Bitmask specifying quality flags of cadences that should be ignored:
+        Bitmask specifying quality flags of cadences that should be ignored.
+    quality_mask : str
+        String describing the type of mask that should be applied
             default: recommended quality mask
             conservative: removes more flags, known to remove good data
             hard: removes all data that has been flagged
@@ -59,14 +61,14 @@ class KeplerTargetPixelFile(TargetPixelFile):
     """
 
     def __init__(self, path, aperture_mask=None,
-                 quality_bitmask='default',
+                 quality_mask='default',quality_bitmask=None,
                  **kwargs):
         self.path = path
         self.hdu = fits.open(self.path, **kwargs)
-        self.quality_mask = self._quality_mask(quality_bitmask)
+        self.quality_mask = self._quality_mask(quality_bitmask,quality_mask)
         self.aperture_mask = aperture_mask
 
-    def _quality_mask(self, quality_bitmask):
+    def _quality_mask(self, bitmask, mask):
         """Returns a boolean mask which flags all good-quality cadences.
 
         Parameters
@@ -74,16 +76,18 @@ class KeplerTargetPixelFile(TargetPixelFile):
         quality_bitmask : int
             Bitmask. See ref. [1], table 2-3.
         """
-        if (quality_bitmask is None) or (quality_bitmask is 'None'):
-            bitmask=None
-        if (quality_bitmask is 'default'):
-            bitmask=KeplerQualityFlags.DEFAULT_BITMASK
-        if (quality_bitmask is 'conservative'):
-            bitmask=KeplerQualityFlags.CONSERVATIVE_BITMASK
-        if (quality_bitmask is 'hard'):
-            bitmask=KeplerQualityFlags.QUALITY_ZERO_BITMASK
-        if not (quality_bitmask in [None,'None','default','conservative','hard']):
-            bitmask=KeplerQualityFlags.DEFAULT_BITMASK
+        if bitmask == None:
+            if (mask is None) or (mask is 'None'):
+                bitmask=None
+            if (mask is 'default'):
+                bitmask=KeplerQualityFlags.DEFAULT_BITMASK
+            if (mask is 'conservative'):
+                bitmask=KeplerQualityFlags.CONSERVATIVE_BITMASK
+            if (mask is 'hard'):
+                bitmask=KeplerQualityFlags.QUALITY_ZERO_BITMASK
+            if not (mask in [None,'None','default','conservative','hard']):
+                bitmask=KeplerQualityFlags.DEFAULT_BITMASK
+            self.quality_bitmask=bitmask
         if bitmask is None:
             return ~np.zeros(len(self.hdu[1].data['TIME']),dtype=bool)
         else:
