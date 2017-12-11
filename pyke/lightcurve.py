@@ -170,7 +170,6 @@ class KeplerLightCurveFile(object):
 
     def __init__(self, path, quality_mask='default',quality_bitmask=None,
                  **kwargs):
-
         self.path = path
         self.hdu = pyfits.open(self.path, **kwargs)
         self.quality_bitmask = quality_bitmask
@@ -198,7 +197,6 @@ class KeplerLightCurveFile(object):
 
     def _quality_mask(self, bitmask, mask):
         """Returns a boolean mask which flags all good-quality cadences.
-
         Parameters
         ----------
         quality_bitmask : int

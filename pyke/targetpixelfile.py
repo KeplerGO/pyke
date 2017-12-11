@@ -60,6 +60,7 @@ class KeplerTargetPixelFile(TargetPixelFile):
         http://archive.stsci.edu/kepler/manuals/archive_manual.pdf
     """
 
+
     def __init__(self, path, aperture_mask=None,
                  quality_mask='default',quality_bitmask=None,
                  **kwargs):
@@ -70,7 +71,6 @@ class KeplerTargetPixelFile(TargetPixelFile):
 
     def _quality_mask(self, bitmask, mask):
         """Returns a boolean mask which flags all good-quality cadences.
-
         Parameters
         ----------
         quality_bitmask : int
