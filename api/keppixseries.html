@@ -210,11 +210,45 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="keppixseries-individual-time-series-photometry-for-all-pixels-within-a-target-mask">
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast,
+.nboutput.nblast {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast + .nbinput {
+    margin-top: -19px;
+}
+
+/* nice headers on first paragraph of info/warning boxes */
+.admonition .first {
+    margin: -12px;
+    padding: 6px 12px;
+    margin-bottom: 12px;
+    color: #fff;
+    line-height: 1;
+    display: block;
+}
+.admonition.warning .first {
+    background: #f0b37e;
+}
+.admonition.note .first {
+    background: #6ab0de;
+}
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+</style>
+<div class="section" id="keppixseries-individual-time-series-photometry-for-all-pixels-within-a-target-mask">
 <h1><strong>keppixseries</strong>: individual time series photometry for all pixels within a target mask<a class="headerlink" href="#keppixseries-individual-time-series-photometry-for-all-pixels-within-a-target-mask" title="Permalink to this headline">¶</a></h1>
 <dl class="function">
 <dt id="pyke.keppixseries.keppixseries">
-<code class="descclassname">pyke.keppixseries.</code><code class="descname">keppixseries</code><span class="sig-paren">(</span><em>infile</em>, <em>outfile=None</em>, <em>plotfile=None</em>, <em>plottype='global'</em>, <em>filterlc=False</em>, <em>function='boxcar'</em>, <em>cutoff=1.0</em>, <em>overwrite=False</em>, <em>verbose=False</em>, <em>logfile='keppixseries.log'</em><span class="sig-paren">)</span><a class="headerlink" href="#pyke.keppixseries.keppixseries" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">pyke.keppixseries.</code><code class="descname">keppixseries</code><span class="sig-paren">(</span><em>infile</em>, <em>outfile=None</em>, <em>plotfile=None</em>, <em>plottype='global'</em>, <em>filterlc=False</em>, <em>function='boxcar'</em>, <em>cutoff=1.0</em>, <em>overwrite=False</em>, <em>verbose=False</em>, <em>logfile='keppixseries.log'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyke/keppixseries.html#keppixseries"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyke.keppixseries.keppixseries" title="Permalink to this definition">¶</a></dt>
 <dd><p>keppixseries – individual time series photometry for all pixels within a
 target mask</p>
 <p>keppixseries plots a light curve for each individual pixel in a target

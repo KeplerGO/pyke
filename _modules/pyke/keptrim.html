@@ -1,0 +1,593 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>pyke.keptrim &mdash; PyKE 3.0.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../genindex.html"/>
+        <link rel="search" title="Search" href="../../search.html"/>
+    <link rel="top" title="PyKE 3.0.0 documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> PyKE
+          
+
+          
+            
+            <img src="../../_static/pyke-white.png" class="logo" />
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                3.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/ipython_notebooks/whatsnew31.html">What’s new in PyKE 3.1?</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart.html">Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../overview.html">PyKE tasks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../citing.html">Citing</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/index.html">Photometry tutorials</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">PyKE</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>pyke.keptrim</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pyke.keptrim</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">.utils</span> <span class="k">import</span> <span class="n">PyKEArgumentHelpFormatter</span>
+<span class="kn">import</span> <span class="nn">time</span><span class="o">,</span> <span class="nn">urllib</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">astropy.io</span> <span class="k">import</span> <span class="n">fits</span> <span class="k">as</span> <span class="n">pyfits</span>
+<span class="kn">from</span> <span class="nn">matplotlib</span> <span class="k">import</span> <span class="n">pyplot</span> <span class="k">as</span> <span class="n">plt</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">kepio</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">kepmsg</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">kepkey</span>
+
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;keptrim&#39;</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="keptrim"><a class="viewcode-back" href="../../api/keptrim.html#pyke.keptrim.keptrim">[docs]</a><span class="k">def</span> <span class="nf">keptrim</span><span class="p">(</span><span class="n">infile</span><span class="p">,</span> <span class="n">column</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">imsize</span><span class="p">,</span> <span class="n">outfile</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">kepid</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">overwrite</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">logfile</span><span class="o">=</span><span class="s1">&#39;keptrim.log&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    keptrim -- trim pixels from Target Pixel Files</span>
+
+<span class="sd">    keptrim will extract a square-shaped series of sub-images from a Target</span>
+<span class="sd">    Pixel File. The simple purpose of this task is to reduce the size of large</span>
+<span class="sd">    data sets such as the superstamps or two-wheel engineering data for the</span>
+<span class="sd">    sake of processing efficiency. Performing a keptrim step speeds up</span>
+<span class="sd">    calculations such as kepprfphot considertably and provides manual</span>
+<span class="sd">    convenience for tasks such as kepmask.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    infile : str</span>
+<span class="sd">        Filename for the input Target Pixel File.</span>
+<span class="sd">    column : int</span>
+<span class="sd">        The CCD column number on which to center the output subimage.</span>
+<span class="sd">    row : int</span>
+<span class="sd">        The CCD row number on which to center the output subimage.</span>
+<span class="sd">    imsize : int</span>
+<span class="sd">        The pixel size of the subimage along either the row or column</span>
+<span class="sd">        dimension. The subimage will be square.</span>
+<span class="sd">    outfile : str</span>
+<span class="sd">        Filename for the output Target Pixel File. This product will be written</span>
+<span class="sd">        to the same FITS format as archived light curves.</span>
+<span class="sd">    kepid : None or int</span>
+<span class="sd">        If the target is catalogued within the Kepler Input Catalog (KIC), then</span>
+<span class="sd">        the pixel row and column location will be extracted from the KIC</span>
+<span class="sd">        provided the Kepler ID is provided. The user must be online for this</span>
+<span class="sd">        feature to execute. If provided kepid will override column and row.</span>
+<span class="sd">    overwrite : bool</span>
+<span class="sd">        Overwrite the output file?</span>
+<span class="sd">    verbose : bool</span>
+<span class="sd">        Option for verbose mode, in which informative messages and warnings to</span>
+<span class="sd">        the shell and a logfile.</span>
+<span class="sd">    logfile : str</span>
+<span class="sd">        Name of the logfile containing error and warning messages.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    .. code-block:: bash</span>
+
+<span class="sd">        $ keptrim ktwo251248961-c112_lpd-targ.fits 14 770 --imsize 3</span>
+<span class="sd">        --overwrite --verbose</span>
+
+<span class="sd">    .. image:: ../_static/images/api/keptrim.png</span>
+<span class="sd">        :align: center</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">outfile</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">outfile</span> <span class="o">=</span> <span class="n">infile</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;-</span><span class="si">{}</span><span class="s2">.fits&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">__all__</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="c1"># log the call</span>
+    <span class="n">hashline</span> <span class="o">=</span> <span class="s1">&#39;--------------------------------------------------------------&#39;</span>
+    <span class="n">kepmsg</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">logfile</span><span class="p">,</span> <span class="n">hashline</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+    <span class="n">call</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;KEPTRIM -- &#39;</span>
+            <span class="o">+</span> <span class="s1">&#39; infile=</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">infile</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s1">&#39; outfile=</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">outfile</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s1">&#39; column=</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">column</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s1">&#39; row=</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s1">&#39; imsize=</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">imsize</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s1">&#39; kepid=</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">kepid</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s1">&#39; overwrite=</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">overwrite</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s1">&#39; verbose=</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">verbose</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s1">&#39; logfile=</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">logfile</span><span class="p">))</span>
+    <span class="n">kepmsg</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">logfile</span><span class="p">,</span> <span class="n">call</span><span class="o">+</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+
+    <span class="c1"># start time</span>
+    <span class="n">kepmsg</span><span class="o">.</span><span class="n">clock</span><span class="p">(</span><span class="s1">&#39;KEPTRIM started at&#39;</span><span class="p">,</span> <span class="n">logfile</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+    <span class="c1"># overwrite output file</span>
+    <span class="k">if</span> <span class="n">overwrite</span><span class="p">:</span>
+        <span class="n">kepio</span><span class="o">.</span><span class="n">overwrite</span><span class="p">(</span><span class="n">outfile</span><span class="p">,</span> <span class="n">logfile</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">kepio</span><span class="o">.</span><span class="n">fileexists</span><span class="p">(</span><span class="n">outfile</span><span class="p">):</span>
+        <span class="n">errmsg</span> <span class="o">=</span> <span class="s1">&#39;ERROR -- KEPTRIM: </span><span class="si">{}</span><span class="s1"> exists. Use --overwrite&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">outfile</span><span class="p">)</span>
+        <span class="n">kepmsg</span><span class="o">.</span><span class="n">err</span><span class="p">(</span><span class="n">logfile</span><span class="p">,</span> <span class="n">errmsg</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+
+    <span class="c1"># open input file</span>
+    <span class="n">instr</span> <span class="o">=</span> <span class="n">pyfits</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">infile</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;readonly&#39;</span><span class="p">,</span> <span class="n">memmap</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">cards0</span> <span class="o">=</span> <span class="n">instr</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">header</span><span class="o">.</span><span class="n">cards</span>
+    <span class="n">cards1</span> <span class="o">=</span> <span class="n">instr</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">header</span><span class="o">.</span><span class="n">cards</span>
+    <span class="n">cards2</span> <span class="o">=</span> <span class="n">instr</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">header</span><span class="o">.</span><span class="n">cards</span>
+
+    <span class="c1"># fudge non-compliant FITS keywords with no values</span>
+    <span class="n">instr</span> <span class="o">=</span> <span class="n">kepkey</span><span class="o">.</span><span class="n">emptykeys</span><span class="p">(</span><span class="n">instr</span><span class="p">,</span> <span class="n">infile</span><span class="p">,</span> <span class="n">logfile</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+
+    <span class="c1"># identify the season of observation</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">season</span> <span class="o">=</span> <span class="n">cards0</span><span class="p">[</span><span class="s1">&#39;SEASON&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">season</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="c1"># retrieve column and row from KIC</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">kic</span> <span class="o">=</span> <span class="n">FOVKepID</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">kepid</span><span class="p">))</span>
+        <span class="n">column</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">kic</span><span class="p">[</span><span class="mi">98</span> <span class="o">+</span> <span class="n">season</span> <span class="o">*</span> <span class="mi">5</span><span class="p">])</span>
+        <span class="n">row</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">kic</span><span class="p">[</span><span class="mi">97</span> <span class="o">+</span> <span class="n">season</span> <span class="o">*</span> <span class="mi">5</span><span class="p">])</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="k">pass</span>
+
+    <span class="c1"># convert CCD column and row to image column and row</span>
+    <span class="k">if</span> <span class="n">imsize</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">imsize</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="n">crpix1p</span> <span class="o">=</span> <span class="n">cards2</span><span class="p">[</span><span class="s1">&#39;CRPIX1P&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+    <span class="n">crpix2p</span> <span class="o">=</span> <span class="n">cards2</span><span class="p">[</span><span class="s1">&#39;CRPIX2P&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+    <span class="n">crval1p</span> <span class="o">=</span> <span class="n">cards2</span><span class="p">[</span><span class="s1">&#39;CRVAL1P&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+    <span class="n">crval2p</span> <span class="o">=</span> <span class="n">cards2</span><span class="p">[</span><span class="s1">&#39;CRVAL2P&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+    <span class="n">cdelt1p</span> <span class="o">=</span> <span class="n">cards2</span><span class="p">[</span><span class="s1">&#39;CDELT1P&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+    <span class="n">cdelt2p</span> <span class="o">=</span> <span class="n">cards2</span><span class="p">[</span><span class="s1">&#39;CDELT2P&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+    <span class="n">imcol</span> <span class="o">=</span> <span class="p">(</span><span class="n">column</span> <span class="o">-</span> <span class="n">crval1p</span><span class="p">)</span> <span class="o">*</span> <span class="n">cdelt1p</span> <span class="o">+</span> <span class="n">crpix1p</span> <span class="o">-</span> <span class="mi">1</span>
+    <span class="n">imrow</span> <span class="o">=</span> <span class="p">(</span><span class="n">row</span> <span class="o">-</span> <span class="n">crval2p</span><span class="p">)</span> <span class="o">*</span> <span class="n">cdelt2p</span> <span class="o">+</span> <span class="n">crpix2p</span> <span class="o">-</span> <span class="mi">1</span>
+    <span class="n">crval1p</span> <span class="o">=</span> <span class="n">column</span> <span class="o">-</span> <span class="n">imsize</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">+</span> <span class="mf">0.5</span>
+    <span class="n">crval2p</span> <span class="o">=</span> <span class="n">row</span> <span class="o">-</span> <span class="n">imsize</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">+</span> <span class="mf">0.5</span>
+
+    <span class="c1"># check subimage is contained inside the input image</span>
+    <span class="n">naxis1</span> <span class="o">=</span> <span class="n">cards2</span><span class="p">[</span><span class="s1">&#39;NAXIS1&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+    <span class="n">naxis2</span> <span class="o">=</span> <span class="n">cards2</span><span class="p">[</span><span class="s1">&#39;NAXIS2&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+    <span class="n">x1</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">imcol</span> <span class="o">-</span> <span class="n">imsize</span> <span class="o">//</span> <span class="mi">2</span> <span class="o">+</span> <span class="mf">0.5</span><span class="p">)</span>
+    <span class="n">x2</span> <span class="o">=</span> <span class="n">x1</span> <span class="o">+</span> <span class="n">imsize</span>
+    <span class="n">y1</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">imrow</span> <span class="o">-</span> <span class="n">imsize</span> <span class="o">//</span> <span class="mi">2</span> <span class="o">+</span> <span class="mf">0.5</span><span class="p">)</span>
+    <span class="n">y2</span> <span class="o">=</span> <span class="n">y1</span> <span class="o">+</span> <span class="n">imsize</span>
+
+    <span class="k">if</span> <span class="n">x1</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">y1</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">x2</span> <span class="o">&gt;</span> <span class="n">naxis1</span> <span class="ow">or</span> <span class="n">y2</span> <span class="o">&gt;</span> <span class="n">naxis2</span><span class="p">:</span>
+        <span class="n">errmsg</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;ERROR -- KEPTRIM: Requested pixel area falls outside of &#39;</span>
+                  <span class="s1">&#39;the pixel image in file </span><span class="si">{}</span><span class="s1">. Make the pixel area smaller &#39;</span>
+                  <span class="s1">&#39;or relocate it&#39;&#39;s center.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">infile</span><span class="p">))</span>
+        <span class="n">kepmsg</span><span class="o">.</span><span class="n">err</span><span class="p">(</span><span class="n">logfile</span><span class="p">,</span> <span class="n">errmsg</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+
+    <span class="c1"># time series data</span>
+    <span class="n">time</span> <span class="o">=</span> <span class="n">instr</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="s1">&#39;TIME&#39;</span><span class="p">)[:]</span>
+    <span class="n">timecorr</span> <span class="o">=</span> <span class="n">instr</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="s1">&#39;TIMECORR&#39;</span><span class="p">)[:]</span>
+    <span class="n">cadenceno</span> <span class="o">=</span> <span class="n">instr</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="s1">&#39;CADENCENO&#39;</span><span class="p">)[:]</span>
+    <span class="n">raw_cnts</span> <span class="o">=</span> <span class="n">instr</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="s1">&#39;RAW_CNTS&#39;</span><span class="p">)[:]</span>
+    <span class="n">flux</span> <span class="o">=</span> <span class="n">instr</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="s1">&#39;FLUX&#39;</span><span class="p">)[:]</span>
+    <span class="n">flux_err</span> <span class="o">=</span> <span class="n">instr</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="s1">&#39;FLUX_ERR&#39;</span><span class="p">)[:]</span>
+    <span class="n">flux_bkg</span> <span class="o">=</span> <span class="n">instr</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="s1">&#39;FLUX_BKG&#39;</span><span class="p">)[:]</span>
+    <span class="n">flux_bkg_err</span> <span class="o">=</span> <span class="n">instr</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="s1">&#39;FLUX_BKG_ERR&#39;</span><span class="p">)[:]</span>
+    <span class="n">cosmic_rays</span> <span class="o">=</span> <span class="n">instr</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="s1">&#39;COSMIC_RAYS&#39;</span><span class="p">)[:]</span>
+    <span class="n">quality</span> <span class="o">=</span> <span class="n">instr</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="s1">&#39;QUALITY&#39;</span><span class="p">)[:]</span>
+    <span class="n">pos_corr1</span> <span class="o">=</span> <span class="n">instr</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="s1">&#39;POS_CORR1&#39;</span><span class="p">)[:]</span>
+    <span class="n">pos_corr2</span> <span class="o">=</span> <span class="n">instr</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="s1">&#39;POS_CORR2&#39;</span><span class="p">)[:]</span>
+
+    <span class="c1"># resize time series</span>
+    <span class="n">raw_cnts</span> <span class="o">=</span> <span class="n">raw_cnts</span><span class="p">[:,</span> <span class="n">y1</span><span class="p">:</span><span class="n">y2</span><span class="p">,</span> <span class="n">x1</span><span class="p">:</span><span class="n">x2</span><span class="p">]</span>
+    <span class="n">flux</span> <span class="o">=</span> <span class="n">flux</span><span class="p">[:,</span> <span class="n">y1</span><span class="p">:</span><span class="n">y2</span><span class="p">,</span> <span class="n">x1</span><span class="p">:</span><span class="n">x2</span><span class="p">]</span>
+    <span class="n">flux_err</span> <span class="o">=</span> <span class="n">flux_err</span><span class="p">[:,</span> <span class="n">y1</span><span class="p">:</span><span class="n">y2</span><span class="p">,</span> <span class="n">x1</span><span class="p">:</span><span class="n">x2</span><span class="p">]</span>
+    <span class="n">flux_bkg</span> <span class="o">=</span> <span class="n">flux_bkg</span><span class="p">[:,</span> <span class="n">y1</span><span class="p">:</span><span class="n">y2</span><span class="p">,</span> <span class="n">x1</span><span class="p">:</span><span class="n">x2</span><span class="p">]</span>
+    <span class="n">flux_bkg_err</span> <span class="o">=</span> <span class="n">flux_bkg_err</span><span class="p">[:,</span> <span class="n">y1</span><span class="p">:</span><span class="n">y2</span><span class="p">,</span> <span class="n">x1</span><span class="p">:</span><span class="n">x2</span><span class="p">]</span>
+    <span class="n">cosmic_rays</span> <span class="o">=</span> <span class="n">cosmic_rays</span><span class="p">[:,</span> <span class="n">y1</span><span class="p">:</span><span class="n">y2</span><span class="p">,</span> <span class="n">x1</span><span class="p">:</span><span class="n">x2</span><span class="p">]</span>
+
+    <span class="c1"># reshape time series images</span>
+    <span class="n">isize</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">flux</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">jsize</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">flux</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">ksize</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">flux</span><span class="p">)[</span><span class="mi">2</span><span class="p">]</span>
+    <span class="n">raw_cnts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">raw_cnts</span><span class="p">,</span> <span class="p">(</span><span class="n">isize</span><span class="p">,</span> <span class="n">jsize</span> <span class="o">*</span> <span class="n">ksize</span><span class="p">))</span>
+    <span class="n">flux</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">flux</span><span class="p">,</span> <span class="p">(</span><span class="n">isize</span><span class="p">,</span> <span class="n">jsize</span> <span class="o">*</span> <span class="n">ksize</span><span class="p">))</span>
+    <span class="n">flux_err</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">flux_err</span><span class="p">,</span> <span class="p">(</span><span class="n">isize</span><span class="p">,</span> <span class="n">jsize</span> <span class="o">*</span> <span class="n">ksize</span><span class="p">))</span>
+    <span class="n">flux_bkg</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">flux_bkg</span><span class="p">,</span> <span class="p">(</span><span class="n">isize</span><span class="p">,</span> <span class="n">jsize</span> <span class="o">*</span> <span class="n">ksize</span><span class="p">))</span>
+    <span class="n">flux_bkg_err</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">flux_bkg_err</span><span class="p">,</span> <span class="p">(</span><span class="n">isize</span><span class="p">,</span> <span class="n">jsize</span> <span class="o">*</span> <span class="n">ksize</span><span class="p">))</span>
+    <span class="n">cosmic_rays</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">cosmic_rays</span><span class="p">,</span> <span class="p">(</span><span class="n">isize</span><span class="p">,</span> <span class="n">jsize</span> <span class="o">*</span> <span class="n">ksize</span><span class="p">))</span>
+
+    <span class="c1"># pixel map data</span>
+    <span class="n">maskmap</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">instr</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">y1</span><span class="p">:</span><span class="n">y2</span><span class="p">,</span><span class="n">x1</span><span class="p">:</span><span class="n">x2</span><span class="p">])</span>
+
+    <span class="c1"># construct output primary extension</span>
+    <span class="n">hdu0</span> <span class="o">=</span> <span class="n">pyfits</span><span class="o">.</span><span class="n">PrimaryHDU</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">cards0</span><span class="p">)):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">cards0</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">keyword</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">hdu0</span><span class="o">.</span><span class="n">header</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="n">hdu0</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="n">cards0</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">keyword</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">cards0</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">cards0</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">comment</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">hdu0</span><span class="o">.</span><span class="n">header</span><span class="o">.</span><span class="n">cards</span><span class="p">[</span><span class="n">cards0</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">keyword</span><span class="p">]</span><span class="o">.</span><span class="n">comment</span> <span class="o">=</span> <span class="n">cards0</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">comment</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+    <span class="n">kepkey</span><span class="o">.</span><span class="n">history</span><span class="p">(</span><span class="n">call</span><span class="p">,</span> <span class="n">hdu0</span><span class="p">,</span> <span class="n">outfile</span><span class="p">,</span> <span class="n">logfile</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+    <span class="n">outstr</span> <span class="o">=</span> <span class="n">pyfits</span><span class="o">.</span><span class="n">HDUList</span><span class="p">(</span><span class="n">hdu0</span><span class="p">)</span>
+
+    <span class="c1"># construct output light curve extension</span>
+    <span class="n">coldim</span> <span class="o">=</span> <span class="s1">&#39;(&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">imsize</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;,&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">imsize</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;)&#39;</span>
+    <span class="n">eformat</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">imsize</span><span class="o">*</span><span class="n">imsize</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;E&#39;</span>
+    <span class="n">jformat</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">imsize</span><span class="o">*</span><span class="n">imsize</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;J&#39;</span>
+    <span class="n">kformat</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">imsize</span><span class="o">*</span><span class="n">imsize</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;K&#39;</span>
+    <span class="n">col1</span> <span class="o">=</span>  <span class="n">pyfits</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;TIME&#39;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;D&#39;</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;BJD - 2454833&#39;</span><span class="p">,</span>
+                          <span class="n">array</span><span class="o">=</span><span class="n">time</span><span class="p">)</span>
+    <span class="n">col2</span> <span class="o">=</span>  <span class="n">pyfits</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;TIMECORR&#39;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;E&#39;</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;d&#39;</span><span class="p">,</span>
+                          <span class="n">array</span><span class="o">=</span><span class="n">timecorr</span><span class="p">)</span>
+    <span class="n">col3</span> <span class="o">=</span>  <span class="n">pyfits</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;CADENCENO&#39;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;J&#39;</span><span class="p">,</span> <span class="n">array</span><span class="o">=</span><span class="n">cadenceno</span><span class="p">)</span>
+    <span class="n">col4</span> <span class="o">=</span>  <span class="n">pyfits</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;RAW_CNTS&#39;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="n">jformat</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;count&#39;</span><span class="p">,</span>
+                          <span class="n">dim</span><span class="o">=</span><span class="n">coldim</span><span class="p">,</span> <span class="n">array</span><span class="o">=</span><span class="n">raw_cnts</span><span class="p">)</span>
+    <span class="n">col5</span> <span class="o">=</span>  <span class="n">pyfits</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;FLUX&#39;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="n">eformat</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;e-/s&#39;</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="n">coldim</span><span class="p">,</span>
+                          <span class="n">array</span><span class="o">=</span><span class="n">flux</span><span class="p">)</span>
+    <span class="n">col6</span> <span class="o">=</span>  <span class="n">pyfits</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;FLUX_ERR&#39;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="n">eformat</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;e-/s&#39;</span><span class="p">,</span>
+                          <span class="n">dim</span><span class="o">=</span><span class="n">coldim</span><span class="p">,</span><span class="n">array</span><span class="o">=</span><span class="n">flux_err</span><span class="p">)</span>
+    <span class="n">col7</span> <span class="o">=</span>  <span class="n">pyfits</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;FLUX_BKG&#39;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="n">eformat</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;e-/s&#39;</span><span class="p">,</span>
+                          <span class="n">dim</span><span class="o">=</span><span class="n">coldim</span><span class="p">,</span><span class="n">array</span><span class="o">=</span><span class="n">flux_bkg</span><span class="p">)</span>
+    <span class="n">col8</span> <span class="o">=</span>  <span class="n">pyfits</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;FLUX_BKG_ERR&#39;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="n">eformat</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;e-/s&#39;</span><span class="p">,</span>
+                          <span class="n">dim</span><span class="o">=</span><span class="n">coldim</span><span class="p">,</span> <span class="n">array</span><span class="o">=</span><span class="n">flux_bkg_err</span><span class="p">)</span>
+    <span class="n">col9</span> <span class="o">=</span>  <span class="n">pyfits</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;COSMIC_RAYS&#39;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="n">eformat</span><span class="p">,</span><span class="n">unit</span><span class="o">=</span><span class="s1">&#39;e-/s&#39;</span><span class="p">,</span>
+                          <span class="n">dim</span><span class="o">=</span><span class="n">coldim</span><span class="p">,</span> <span class="n">array</span><span class="o">=</span><span class="n">cosmic_rays</span><span class="p">)</span>
+    <span class="n">col10</span> <span class="o">=</span> <span class="n">pyfits</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;QUALITY&#39;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;J&#39;</span><span class="p">,</span> <span class="n">array</span><span class="o">=</span><span class="n">quality</span><span class="p">)</span>
+    <span class="n">col11</span> <span class="o">=</span> <span class="n">pyfits</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;POS_CORR1&#39;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;E&#39;</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;pixel&#39;</span><span class="p">,</span>
+                          <span class="n">array</span><span class="o">=</span><span class="n">pos_corr1</span><span class="p">)</span>
+    <span class="n">col12</span> <span class="o">=</span> <span class="n">pyfits</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;POS_CORR2&#39;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;E&#39;</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;pixel&#39;</span><span class="p">,</span>
+                          <span class="n">array</span><span class="o">=</span><span class="n">pos_corr2</span><span class="p">)</span>
+    <span class="n">cols</span> <span class="o">=</span>  <span class="n">pyfits</span><span class="o">.</span><span class="n">ColDefs</span><span class="p">([</span><span class="n">col1</span><span class="p">,</span> <span class="n">col2</span><span class="p">,</span> <span class="n">col3</span><span class="p">,</span> <span class="n">col4</span><span class="p">,</span> <span class="n">col5</span><span class="p">,</span> <span class="n">col6</span><span class="p">,</span> <span class="n">col7</span><span class="p">,</span> <span class="n">col8</span><span class="p">,</span>
+                            <span class="n">col9</span><span class="p">,</span> <span class="n">col10</span><span class="p">,</span> <span class="n">col11</span><span class="p">,</span> <span class="n">col12</span><span class="p">])</span>
+    <span class="n">hdu1</span> <span class="o">=</span>  <span class="n">pyfits</span><span class="o">.</span><span class="n">BinTableHDU</span><span class="o">.</span><span class="n">from_columns</span><span class="p">(</span><span class="n">cols</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">cards1</span><span class="p">)):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">cards1</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">keyword</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="n">cards1</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">keyword</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">cards1</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+                                                  <span class="n">cards1</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">comment</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="o">.</span><span class="n">cards</span><span class="p">[</span><span class="n">cards1</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">keyword</span><span class="p">]</span><span class="o">.</span><span class="n">comment</span> <span class="o">=</span> <span class="n">cards1</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">comment</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+    <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;1CRV4P&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">crval1p</span><span class="p">,</span>
+                             <span class="s1">&#39;[pixel] detector coordinate at reference pixel&#39;</span><span class="p">)</span>
+    <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;2CRV4P&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">crval2p</span><span class="p">,</span>
+                             <span class="s1">&#39;[pixel] detector coordinate at reference pixel&#39;</span><span class="p">)</span>
+    <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;1CRPX4&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">((</span><span class="n">imsize</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span>
+                             <span class="s1">&#39;[pixel] reference pixel along image axis 1&#39;</span><span class="p">)</span>
+    <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;2CRPX4&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">((</span><span class="n">imsize</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span>
+                             <span class="s1">&#39;[pixel] reference pixel along image axis 2&#39;</span><span class="p">)</span>
+    <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;1CRV5P&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">crval1p</span><span class="p">,</span>
+                             <span class="s1">&#39;[pixel] detector coordinate at reference pixel&#39;</span><span class="p">)</span>
+    <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;2CRV5P&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">crval2p</span><span class="p">,</span>
+                             <span class="s1">&#39;[pixel] detector coordinate at reference pixel&#39;</span><span class="p">)</span>
+    <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;1CRPX5&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">((</span><span class="n">imsize</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span>
+                             <span class="s1">&#39;[pixel] reference pixel along image axis 1&#39;</span><span class="p">)</span>
+    <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;2CRPX5&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">((</span><span class="n">imsize</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span>
+                             <span class="s1">&#39;[pixel] reference pixel along image axis 2&#39;</span><span class="p">)</span>
+    <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;1CRV6P&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">crval1p</span><span class="p">,</span>
+                             <span class="s1">&#39;[pixel] detector coordinate at reference pixel&#39;</span><span class="p">)</span>
+    <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;2CRV6P&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">crval2p</span><span class="p">,</span>
+                             <span class="s1">&#39;[pixel] detector coordinate at reference pixel&#39;</span><span class="p">)</span>
+    <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;1CRPX6&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">((</span><span class="n">imsize</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span>
+                             <span class="s1">&#39;[pixel] reference pixel along image axis 1&#39;</span><span class="p">)</span>
+    <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;2CRPX6&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">((</span><span class="n">imsize</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span>
+                             <span class="s1">&#39;[pixel] reference pixel along image axis 2&#39;</span><span class="p">)</span>
+    <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;1CRV7P&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">crval1p</span><span class="p">,</span>
+                             <span class="s1">&#39;[pixel] detector coordinate at reference pixel&#39;</span><span class="p">)</span>
+    <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;2CRV7P&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">crval2p</span><span class="p">,</span>
+                             <span class="s1">&#39;[pixel] detector coordinate at reference pixel&#39;</span><span class="p">)</span>
+    <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;1CRPX7&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">((</span><span class="n">imsize</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span>
+                             <span class="s1">&#39;[pixel] reference pixel along image axis 1&#39;</span><span class="p">)</span>
+    <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;2CRPX7&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">((</span><span class="n">imsize</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span>
+                             <span class="s1">&#39;[pixel] reference pixel along image axis 2&#39;</span><span class="p">)</span>
+    <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;1CRV8P&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">crval1p</span><span class="p">,</span>
+                             <span class="s1">&#39;[pixel] detector coordinate at reference pixel&#39;</span><span class="p">)</span>
+    <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;2CRV8P&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">crval2p</span><span class="p">,</span>
+                             <span class="s1">&#39;[pixel] detector coordinate at reference pixel&#39;</span><span class="p">)</span>
+    <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;1CRPX8&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">((</span><span class="n">imsize</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span>
+                             <span class="s1">&#39;[pixel] reference pixel along image axis 1&#39;</span><span class="p">)</span>
+    <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;2CRPX8&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">((</span><span class="n">imsize</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span>
+                             <span class="s1">&#39;[pixel] reference pixel along image axis 2&#39;</span><span class="p">)</span>
+    <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;1CRV9P&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">crval1p</span><span class="p">,</span>
+                             <span class="s1">&#39;[pixel] detector coordinate at reference pixel&#39;</span><span class="p">)</span>
+    <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;2CRV9P&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">crval2p</span><span class="p">,</span>
+                             <span class="s1">&#39;[pixel] detector coordinate at reference pixel&#39;</span><span class="p">)</span>
+    <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;1CRPX9&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">((</span><span class="n">imsize</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span>
+                             <span class="s1">&#39;[pixel] reference pixel along image axis 1&#39;</span><span class="p">)</span>
+    <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;2CRPX9&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">((</span><span class="n">imsize</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span>
+                             <span class="s1">&#39;[pixel] reference pixel along image axis 2&#39;</span><span class="p">)</span>
+    <span class="n">outstr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">hdu1</span><span class="p">)</span>
+
+    <span class="c1"># construct output mask bitmap extension</span>
+    <span class="n">hdu2</span> <span class="o">=</span> <span class="n">pyfits</span><span class="o">.</span><span class="n">ImageHDU</span><span class="p">(</span><span class="n">maskmap</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">cards2</span><span class="p">)):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">cards2</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">keyword</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">hdu2</span><span class="o">.</span><span class="n">header</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="n">hdu2</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="n">cards2</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">keyword</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">cards2</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+                                                  <span class="n">cards2</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">comment</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">hdu2</span><span class="o">.</span><span class="n">header</span><span class="o">.</span><span class="n">cards</span><span class="p">[</span><span class="n">cards2</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">keyword</span><span class="p">]</span><span class="o">.</span><span class="n">comment</span> <span class="o">=</span> <span class="n">cards2</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">comment</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+    <span class="n">hdu2</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;NAXIS1&#39;</span> <span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">imsize</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+    <span class="n">hdu2</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;NAXIS2&#39;</span> <span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">imsize</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+    <span class="n">hdu2</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;CRVAL1P&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">crval1p</span><span class="p">,</span>
+                              <span class="s1">&#39;[pixel] detector coordinate at reference pixel&#39;</span><span class="p">)</span>
+    <span class="n">hdu2</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;CRVAL2P&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">crval2p</span><span class="p">,</span>
+                              <span class="s1">&#39;[pixel] detector coordinate at reference pixel&#39;</span><span class="p">)</span>
+    <span class="n">hdu2</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;CRPIX1&#39;</span> <span class="p">]</span> <span class="o">=</span> <span class="p">((</span><span class="n">imsize</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span>
+                              <span class="s1">&#39;[pixel] reference pixel along image axis 1&#39;</span><span class="p">)</span>
+    <span class="n">hdu2</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;CRPIX2&#39;</span> <span class="p">]</span> <span class="o">=</span> <span class="p">((</span><span class="n">imsize</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span>
+                              <span class="s1">&#39;[pixel] reference pixel along image axis 2&#39;</span><span class="p">)</span>
+    <span class="n">outstr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">hdu2</span><span class="p">)</span>
+
+    <span class="c1"># write output file</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Writing output file </span><span class="si">{}</span><span class="s2">...&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">outfile</span><span class="p">))</span>
+    <span class="n">outstr</span><span class="o">.</span><span class="n">writeto</span><span class="p">(</span><span class="n">outfile</span><span class="p">,</span><span class="n">checksum</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="c1"># close input structure</span>
+    <span class="n">instr</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="c1"># end time</span>
+    <span class="n">kepmsg</span><span class="o">.</span><span class="n">clock</span><span class="p">(</span><span class="s1">&#39;KEPTRIM finished at&#39;</span><span class="p">,</span> <span class="n">logfile</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span></div>
+
+<span class="k">def</span> <span class="nf">FOVKepID</span><span class="p">(</span><span class="nb">id</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;KIC retrieval based upon KepID&quot;&quot;&quot;</span>
+
+    <span class="c1"># build mast query</span>
+    <span class="n">url</span>  <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;http://archive.stsci.edu/kepler/kepler_fov/search.php?&#39;</span>
+            <span class="s1">&#39;action=Search&amp;kic_kepler_id=</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">id</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;&amp;max_records=100&#39;</span>
+            <span class="s1">&#39;&amp;verb=3&amp;outputformat=CSV&#39;</span><span class="p">)</span>
+
+    <span class="c1"># retrieve results from MAST</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+    <span class="n">lines</span> <span class="o">=</span> <span class="n">urllib</span><span class="o">.</span><span class="n">urlopen</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">:</span>
+        <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">line</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span>
+            <span class="ow">and</span> <span class="s1">&#39;Kepler&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">line</span>
+            <span class="ow">and</span> <span class="s1">&#39;integer&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">line</span>
+            <span class="ow">and</span> <span class="s1">&#39;no rows found&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">line</span><span class="p">):</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">out</span>
+
+<span class="k">def</span> <span class="nf">keptrim_main</span><span class="p">():</span>
+    <span class="kn">import</span> <span class="nn">argparse</span>
+    <span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">(</span>
+             <span class="n">description</span><span class="o">=</span><span class="s1">&#39;Trim unwanted pixels from a Target Pixel File&#39;</span><span class="p">,</span>
+             <span class="n">formatter_class</span><span class="o">=</span><span class="n">PyKEArgumentHelpFormatter</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;infile&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Name of input target pixel file&#39;</span><span class="p">,</span>
+                        <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;column&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;CCD column number of the target&#39;</span><span class="p">,</span>
+                        <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;row&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;CCD row number of the target&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;imsize&#39;</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;Number of pixels to extract in both row and&#39;</span>
+                              <span class="s1">&#39; column dimensions&#39;</span><span class="p">),</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--outfile&#39;</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;Name of FITS file to output.&#39;</span>
+                              <span class="s1">&#39; If None, outfile is infile-keptrim.&#39;</span><span class="p">),</span>
+                        <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--kepid&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Kepler ID number from the Kepler Input Catalog&#39;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--overwrite&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_true&#39;</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Overwrite output file?&#39;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--verbose&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_true&#39;</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Write to a log file?&#39;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--logfile&#39;</span><span class="p">,</span> <span class="s1">&#39;-l&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Name of ascii log file&#39;</span><span class="p">,</span>
+                        <span class="n">default</span><span class="o">=</span><span class="s1">&#39;keptrim.log&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">)</span>
+    <span class="n">args</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">()</span>
+    <span class="n">keptrim</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">infile</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">column</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">row</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">imsize</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">outfile</span><span class="p">,</span>
+            <span class="n">args</span><span class="o">.</span><span class="n">kepid</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">overwrite</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">verbose</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">logfile</span><span class="p">)</span>
+</pre></div>
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright PyKE Developers and Contributors.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'3.0.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

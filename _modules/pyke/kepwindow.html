@@ -1,0 +1,407 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>pyke.kepwindow &mdash; PyKE 3.0.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../genindex.html"/>
+        <link rel="search" title="Search" href="../../search.html"/>
+    <link rel="top" title="PyKE 3.0.0 documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> PyKE
+          
+
+          
+            
+            <img src="../../_static/pyke-white.png" class="logo" />
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                3.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/ipython_notebooks/whatsnew31.html">What’s new in PyKE 3.1?</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart.html">Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../overview.html">PyKE tasks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../citing.html">Citing</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/index.html">Photometry tutorials</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">PyKE</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>pyke.kepwindow</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pyke.kepwindow</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">.utils</span> <span class="k">import</span> <span class="n">PyKEArgumentHelpFormatter</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">from</span> <span class="nn">astropy.io</span> <span class="k">import</span> <span class="n">fits</span> <span class="k">as</span> <span class="n">pyfits</span>
+<span class="kn">from</span> <span class="nn">matplotlib</span> <span class="k">import</span> <span class="n">pyplot</span> <span class="k">as</span> <span class="n">plt</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">kepio</span><span class="p">,</span> <span class="n">kepmsg</span><span class="p">,</span> <span class="n">kepkey</span><span class="p">,</span> <span class="n">kepstat</span><span class="p">,</span> <span class="n">kepfourier</span>
+<span class="kn">from</span> <span class="nn">astropy.stats</span> <span class="k">import</span> <span class="n">LombScargle</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;kepwindow&#39;</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="kepwindow"><a class="viewcode-back" href="../../api/kepwindow.html#pyke.kepwindow.kepwindow">[docs]</a><span class="k">def</span> <span class="nf">kepwindow</span><span class="p">(</span><span class="n">infile</span><span class="p">,</span> <span class="n">outfile</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">datacol</span><span class="o">=</span><span class="s1">&#39;SAP_FLUX&#39;</span><span class="p">,</span> <span class="n">nyqfactor</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span>
+              <span class="n">plot</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">noninteractive</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+              <span class="n">logfile</span><span class="o">=</span><span class="s1">&#39;kepwindow.log&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    kepwindow -- Calculate and store the window function for a Kepler time</span>
+<span class="sd">    series</span>
+
+<span class="sd">    Kepler time stamps are not perfectly uniform. There are gaps in the data due</span>
+<span class="sd">    to operational pauses and issues, and timestamps are corrected to the</span>
+<span class="sd">    barycenter of the solar system. The size of the barycenter correction is</span>
+<span class="sd">    time-dependent. kepwindow calculates a discrete window function for a</span>
+<span class="sd">    user-provided Kepler time series. This is calculated using a Lomb-Scargle</span>
+<span class="sd">    periodogram. The result is stored in a new FITS file that is a direct copy</span>
+<span class="sd">    of the input file but with an additional table extension containing the</span>
+<span class="sd">    window function.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    infile : str</span>
+<span class="sd">        The name of a MAST standard format FITS file containing a Kepler light</span>
+<span class="sd">        curve within the first data extension.</span>
+<span class="sd">    outfile : str</span>
+<span class="sd">        The name of the output FITS file with a new extension containing the</span>
+<span class="sd">        window function.</span>
+<span class="sd">    datacol : str</span>
+<span class="sd">        The name of the FITS table column in extension 1 of infile with which</span>
+<span class="sd">        the window function should be coupled to. While the window function</span>
+<span class="sd">        ostensibly requires the timing information, this particular piece of</span>
+<span class="sd">        information is required so that the task can search the datacol array for</span>
+<span class="sd">        bad data such as instances of NaN. These will be rejected before the</span>
+<span class="sd">        window function is calculated.</span>
+<span class="sd">    nyqfactor : int</span>
+<span class="sd">        The number of nyquist factors up to which to evaluate. Kepler data is</span>
+<span class="sd">        fairly regular and so the default will usually encompass most of the window.</span>
+<span class="sd">    plot : bool</span>
+<span class="sd">        Plot the output window function?</span>
+<span class="sd">    non-interactive : bool</span>
+<span class="sd">        If True, prevents the matplotlib window to pop up.</span>
+<span class="sd">    overwrite : bool</span>
+<span class="sd">        Overwrite the output file?</span>
+<span class="sd">    verbose : bool</span>
+<span class="sd">        Print informative messages and warnings to the shell and logfile?</span>
+<span class="sd">    logfile : str</span>
+<span class="sd">        Name of the logfile containing error and warning messages.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    .. code-block:: bash</span>
+
+<span class="sd">        $ kepwindow kplr002436324-2009259160929_llc.fits --datacol SAP_FLUX</span>
+<span class="sd">        --nyqfactor 0.02 --plot --verbose</span>
+
+<span class="sd">    .. image:: ../_static/images/api/kepwindow.png</span>
+<span class="sd">        :align: center</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">outfile</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">outfile</span> <span class="o">=</span> <span class="n">infile</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;-</span><span class="si">{}</span><span class="s2">.fits&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">__all__</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="c1">## log the call</span>
+    <span class="n">hashline</span> <span class="o">=</span> <span class="s1">&#39;--------------------------------------------------------------&#39;</span>
+    <span class="n">kepmsg</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">logfile</span><span class="p">,</span> <span class="n">hashline</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+    <span class="n">call</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;KEPWINDOW -- &#39;</span>
+            <span class="o">+</span> <span class="s1">&#39; infile=</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">infile</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s1">&#39; outfile=</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">outfile</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s1">&#39; datacol=</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">datacol</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s1">&#39; nyqfactor=</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">nyqfactor</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s1">&#39; plot=&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">plot</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s1">&#39; noninteractive=&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">noninteractive</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s1">&#39; overwrite=</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">overwrite</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s1">&#39; verbose=</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">verbose</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s1">&#39; logfile=</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">logfile</span><span class="p">))</span>
+    <span class="n">kepmsg</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">logfile</span><span class="p">,</span> <span class="n">call</span><span class="o">+</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+
+    <span class="c1">## start time</span>
+    <span class="n">kepmsg</span><span class="o">.</span><span class="n">clock</span><span class="p">(</span><span class="s1">&#39;KEPWINDOW started at&#39;</span><span class="p">,</span> <span class="n">logfile</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+    <span class="c1">## overwrite output file</span>
+    <span class="k">if</span> <span class="n">overwrite</span><span class="p">:</span>
+        <span class="n">kepio</span><span class="o">.</span><span class="n">overwrite</span><span class="p">(</span><span class="n">outfile</span><span class="p">,</span> <span class="n">logfile</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">kepio</span><span class="o">.</span><span class="n">fileexists</span><span class="p">(</span><span class="n">outfile</span><span class="p">):</span>
+        <span class="n">errmsg</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;ERROR -- KEPWINDOW: </span><span class="si">{}</span><span class="s1"> exists. Use overwrite=True&#39;</span>
+                  <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">outfile</span><span class="p">))</span>
+        <span class="n">kepmsg</span><span class="o">.</span><span class="n">err</span><span class="p">(</span><span class="n">logfile</span><span class="p">,</span> <span class="n">errmsg</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+
+    <span class="c1">## open input file</span>
+    <span class="n">instr</span> <span class="o">=</span> <span class="n">pyfits</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">infile</span><span class="p">)</span>
+    <span class="n">tstart</span><span class="p">,</span> <span class="n">tstop</span><span class="p">,</span> <span class="n">bjdref</span><span class="p">,</span> <span class="n">cadence</span> <span class="o">=</span> <span class="n">kepio</span><span class="o">.</span><span class="n">timekeys</span><span class="p">(</span><span class="n">instr</span><span class="p">,</span> <span class="n">infile</span><span class="p">,</span> <span class="n">logfile</span><span class="p">,</span>
+                                                    <span class="n">verbose</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">barytime</span> <span class="o">=</span> <span class="n">instr</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="s1">&#39;barytime&#39;</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">barytime</span> <span class="o">=</span> <span class="n">kepio</span><span class="o">.</span><span class="n">readfitscol</span><span class="p">(</span><span class="n">infile</span><span class="p">,</span> <span class="n">instr</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="s1">&#39;time&#39;</span><span class="p">,</span> <span class="n">logfile</span><span class="p">,</span>
+                                     <span class="n">verbose</span><span class="p">)</span>
+    <span class="n">barytime</span> <span class="o">=</span> <span class="n">barytime</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">barytime</span><span class="p">)]</span>
+    <span class="n">ls</span> <span class="o">=</span> <span class="n">LombScargle</span><span class="p">(</span><span class="n">barytime</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">center_data</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">fit_mean</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">freqW</span><span class="p">,</span> <span class="n">powerW</span> <span class="o">=</span> <span class="n">ls</span><span class="o">.</span><span class="n">autopower</span><span class="p">(</span><span class="n">nyquist_factor</span><span class="o">=</span><span class="n">nyqfactor</span><span class="p">)</span>
+    <span class="n">freqW</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="o">-</span><span class="n">freqW</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">freqW</span><span class="p">)</span>
+    <span class="n">powerW</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">powerW</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">powerW</span><span class="p">)</span>
+    <span class="n">freqW</span><span class="p">,</span> <span class="n">powerW</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">freqW</span><span class="p">),</span> <span class="n">powerW</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">freqW</span><span class="p">)]</span>
+    <span class="n">freqW</span><span class="p">,</span> <span class="n">powerW</span> <span class="o">=</span> <span class="n">freqW</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">powerW</span><span class="p">)],</span> <span class="n">powerW</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">powerW</span><span class="p">)]</span>
+
+    <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">axes</span><span class="p">([</span><span class="mf">0.06</span><span class="p">,</span> <span class="mf">0.113</span><span class="p">,</span> <span class="mf">0.93</span><span class="p">,</span> <span class="mf">0.86</span><span class="p">])</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">freqW</span><span class="p">,</span> <span class="n">powerW</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;#363636&#39;</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;-&#39;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span><span class="n">freqW</span><span class="p">,</span> <span class="n">powerW</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;#a8a7a7&#39;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.2</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;Frequency (d$^{-1}$)&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;color&#39;</span> <span class="p">:</span> <span class="s1">&#39;k&#39;</span><span class="p">})</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Power&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;color&#39;</span> <span class="p">:</span> <span class="s1">&#39;k&#39;</span><span class="p">})</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">()</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s1">&#39;.fits&#39;</span><span class="p">,</span> <span class="s1">&#39;.png&#39;</span><span class="p">,</span> <span class="n">outfile</span><span class="p">),</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s1">&#39;tight&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">noninteractive</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+    <span class="n">col1</span> <span class="o">=</span> <span class="n">pyfits</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;FREQUENCY&#39;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;E&#39;</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;days&#39;</span><span class="p">,</span> <span class="n">array</span><span class="o">=</span><span class="n">freqW</span><span class="p">)</span>
+    <span class="n">col2</span> <span class="o">=</span> <span class="n">pyfits</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;POWER&#39;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;E&#39;</span><span class="p">,</span> <span class="n">array</span><span class="o">=</span><span class="n">powerW</span><span class="p">)</span>
+    <span class="n">cols</span> <span class="o">=</span> <span class="n">pyfits</span><span class="o">.</span><span class="n">ColDefs</span><span class="p">([</span><span class="n">col1</span><span class="p">,</span> <span class="n">col2</span><span class="p">])</span>
+    <span class="n">instr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pyfits</span><span class="o">.</span><span class="n">BinTableHDU</span><span class="o">.</span><span class="n">from_columns</span><span class="p">(</span><span class="n">cols</span><span class="p">))</span>
+    <span class="n">instr</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;EXTNAME&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;WINDOW FUNCTION&#39;</span><span class="p">,</span> <span class="s1">&#39;extension name&#39;</span><span class="p">)</span>
+    <span class="n">kepmsg</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">logfile</span><span class="p">,</span> <span class="s2">&quot;Writing output file </span><span class="si">{}</span><span class="s2">...&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">outfile</span><span class="p">),</span> <span class="n">verbose</span><span class="p">)</span>
+
+    <span class="c1">## comment keyword in output file</span>
+    <span class="n">kepkey</span><span class="o">.</span><span class="n">comment</span><span class="p">(</span><span class="n">call</span><span class="p">,</span> <span class="n">instr</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">outfile</span><span class="p">,</span> <span class="n">logfile</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+    <span class="n">instr</span><span class="o">.</span><span class="n">writeto</span><span class="p">(</span><span class="n">outfile</span><span class="p">)</span>
+
+    <span class="c1">## close input file</span>
+    <span class="n">instr</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="n">kepmsg</span><span class="o">.</span><span class="n">clock</span><span class="p">(</span><span class="s1">&#39;KEPWINDOW completed at&#39;</span><span class="p">,</span> <span class="n">logfile</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+    <span class="k">return</span></div>
+
+<span class="k">def</span> <span class="nf">kepwindow_main</span><span class="p">():</span>
+    <span class="kn">import</span> <span class="nn">argparse</span>
+    <span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">(</span>
+             <span class="n">description</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;Calculate and store the window function for a&quot;</span>
+                          <span class="s2">&quot; Kepler time series&quot;</span><span class="p">),</span>
+             <span class="n">formatter_class</span><span class="o">=</span><span class="n">PyKEArgumentHelpFormatter</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;infile&#39;</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;The name of a MAST standard format FITS&#39;</span>
+                              <span class="s1">&#39; file containing a Kepler light curve&#39;</span><span class="p">),</span>
+                        <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--outfile&#39;</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;Name of FITS file to output.&#39;</span>
+                              <span class="s1">&#39; If None, outfile is infile-kepwindow.&#39;</span><span class="p">),</span>
+                        <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--datacol&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s1">&#39;SAP_FLUX&#39;</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Name of data column&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span>
+                        <span class="n">dest</span><span class="o">=</span><span class="s1">&#39;datacol&#39;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--nyqfactor&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;number of nyquist frequencies to evaluate up to&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--plot&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_true&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Plot result?&#39;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--non-interactive&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_true&#39;</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Pop up matplotlib plot window?&#39;</span><span class="p">,</span>
+                        <span class="n">dest</span><span class="o">=</span><span class="s1">&#39;noninteractive&#39;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--overwrite&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_true&#39;</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Overwrite output file?&#39;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--verbose&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_true&#39;</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Write to a log file?&#39;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--logfile&#39;</span><span class="p">,</span> <span class="s1">&#39;-l&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Name of ascii log file&#39;</span><span class="p">,</span>
+                        <span class="n">default</span><span class="o">=</span><span class="s1">&#39;kepwindow.log&#39;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s1">&#39;logfile&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">)</span>
+    <span class="n">args</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">()</span>
+    <span class="n">kepwindow</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">infile</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">outfile</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">datacol</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">nyqfactor</span><span class="p">,</span>
+              <span class="n">args</span><span class="o">.</span><span class="n">plot</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">noninteractive</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">overwrite</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">verbose</span><span class="p">,</span>
+              <span class="n">args</span><span class="o">.</span><span class="n">logfile</span><span class="p">)</span>
+</pre></div>
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright PyKE Developers and Contributors.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'3.0.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

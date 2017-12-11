@@ -1,0 +1,453 @@
+{
+ "cells": [
+  {
+   "cell_type": "code",
+   "execution_count": 3,
+   "metadata": {
+    "collapsed": true
+   },
+   "outputs": [],
+   "source": [
+    "%matplotlib inline\n",
+    "import matplotlib.pyplot as plt"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 6,
+   "metadata": {
+    "collapsed": true
+   },
+   "outputs": [],
+   "source": [
+    "import numpy as np"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 11,
+   "metadata": {
+    "collapsed": true
+   },
+   "outputs": [],
+   "source": [
+    "from oktopus.models import SymmetricGaussian2D"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 37,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "y, x = np.indices((11, 11))"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 29,
+   "metadata": {
+    "collapsed": true
+   },
+   "outputs": [],
+   "source": [
+    "g1 = SymmetricGaussian2D(y, x)\n",
+    "g2 = SymmetricGaussian2D(y, x)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 85,
+   "metadata": {
+    "collapsed": true
+   },
+   "outputs": [],
+   "source": [
+    "data = g1(10, 3, 3, 1) + np.random.normal(size=x.shape, scale=0.5)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 86,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "<matplotlib.image.AxesImage at 0x1187ba9b0>"
+      ]
+     },
+     "execution_count": 86,
+     "metadata": {},
+     "output_type": "execute_result"
+    },
+    {
+     "data": {
+      "image/png": "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\nTkSuQmCC\n",
+      "text/plain": [
+       "<matplotlib.figure.Figure at 0x11866de10>"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    }
+   ],
+   "source": [
+    "plt.imshow(data, origin='lower', cmap='jet')"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 87,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "2.9427731660153067"
+      ]
+     },
+     "execution_count": 87,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "xc = np.sum(x * data) / np.sum(data)\n",
+    "xc"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 88,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "2.9286542044179806"
+      ]
+     },
+     "execution_count": 88,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "yc = np.sum(y * data) / np.sum(data)\n",
+    "yc"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "No problem, so far! Let's add a negative component to the data and see how that affect the centroid"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 89,
+   "metadata": {
+    "collapsed": true
+   },
+   "outputs": [],
+   "source": [
+    "data_ = data + g1(-3, 7, 7, 1)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 90,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "<matplotlib.image.AxesImage at 0x1189316a0>"
+      ]
+     },
+     "execution_count": 90,
+     "metadata": {},
+     "output_type": "execute_result"
+    },
+    {
+     "data": {
+      "image/png": "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\n",
+      "text/plain": [
+       "<matplotlib.figure.Figure at 0x1187128d0>"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    }
+   ],
+   "source": [
+    "plt.imshow(data_, origin='lower', cmap='jet')"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 91,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "1.1250961019734065"
+      ]
+     },
+     "execution_count": 91,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "xc = np.sum(x * data_) / np.sum(data_)\n",
+    "xc"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 92,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "0.76284372335915118"
+      ]
+     },
+     "execution_count": 92,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "yc = np.sum(y * data_) / np.sum(data)\n",
+    "yc"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "As we can see... s#@1t has happened"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Now, let's automagically compensate that negative value:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 93,
+   "metadata": {
+    "collapsed": true
+   },
+   "outputs": [],
+   "source": [
+    "data_min = np.min(data_)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 94,
+   "metadata": {
+    "collapsed": true
+   },
+   "outputs": [],
+   "source": [
+    "data_comp = data_ + abs(data_min)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 95,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "0"
+      ]
+     },
+     "execution_count": 95,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "(data_comp < 0).sum()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Let's mask the negative data:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 96,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "3.4361279753762317"
+      ]
+     },
+     "execution_count": 96,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "np.sum(x[data_ > 0] * data_[data_ > 0]) / np.sum(data_[data_ > 0])"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 98,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "3.492001313193946"
+      ]
+     },
+     "execution_count": 98,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "np.sum(y[data_ > 0] * data_[data_ > 0]) / np.sum(data_[data_ > 0])"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Not that bad!"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Ok, now, let's tests our maths:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 97,
+   "metadata": {
+    "collapsed": true
+   },
+   "outputs": [],
+   "source": [
+    "xc_prime = np.sum(x * data_comp) / np.sum(data_comp)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 71,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "4.5988053774752364"
+      ]
+     },
+     "execution_count": 71,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "xc_prime"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 76,
+   "metadata": {
+    "collapsed": true
+   },
+   "outputs": [],
+   "source": [
+    "n_pixels = data.shape[0] * data.shape[1]"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 77,
+   "metadata": {
+    "collapsed": true
+   },
+   "outputs": [],
+   "source": [
+    "c = abs(data_min)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 100,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "1.4725841866096201"
+      ]
+     },
+     "execution_count": 100,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "xc_corrected = ((np.sum(data_) + n_pixels * c) * xc_prime - c * np.sum(x))/np.sum(data_)\n",
+    "xc_corrected"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {
+    "collapsed": true
+   },
+   "outputs": [],
+   "source": []
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python [default]",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.6.2"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 2
+}

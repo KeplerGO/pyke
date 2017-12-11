@@ -210,11 +210,45 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="keptrial-calculate-best-period-and-error-estimate-from-time-series">
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast,
+.nboutput.nblast {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast + .nbinput {
+    margin-top: -19px;
+}
+
+/* nice headers on first paragraph of info/warning boxes */
+.admonition .first {
+    margin: -12px;
+    padding: 6px 12px;
+    margin-bottom: 12px;
+    color: #fff;
+    line-height: 1;
+    display: block;
+}
+.admonition.warning .first {
+    background: #f0b37e;
+}
+.admonition.note .first {
+    background: #6ab0de;
+}
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+</style>
+<div class="section" id="keptrial-calculate-best-period-and-error-estimate-from-time-series">
 <h1><strong>keptrial</strong>: calculate best period and error estimate from time series<a class="headerlink" href="#keptrial-calculate-best-period-and-error-estimate-from-time-series" title="Permalink to this headline">¶</a></h1>
 <dl class="function">
 <dt id="pyke.keptrial.keptrial">
-<code class="descclassname">pyke.keptrial.</code><code class="descname">keptrial</code><span class="sig-paren">(</span><em>infile</em>, <em>outfile=None</em>, <em>datacol='SAP_FLUX'</em>, <em>errcol='SAP_FLUX_ERR'</em>, <em>fmin=0.1</em>, <em>fmax=50</em>, <em>nfreq=10</em>, <em>method='ft'</em>, <em>ntrials=1000</em>, <em>plot=False</em>, <em>overwrite=False</em>, <em>verbose=False</em>, <em>logfile='keptrial.log'</em><span class="sig-paren">)</span><a class="headerlink" href="#pyke.keptrial.keptrial" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">pyke.keptrial.</code><code class="descname">keptrial</code><span class="sig-paren">(</span><em>infile</em>, <em>outfile=None</em>, <em>datacol='SAP_FLUX'</em>, <em>errcol='SAP_FLUX_ERR'</em>, <em>fmin=0.1</em>, <em>fmax=50</em>, <em>nfreq=10</em>, <em>method='ft'</em>, <em>ntrials=1000</em>, <em>plot=False</em>, <em>overwrite=False</em>, <em>verbose=False</em>, <em>logfile='keptrial.log'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyke/keptrial.html#keptrial"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyke.keptrial.keptrial" title="Permalink to this definition">¶</a></dt>
 <dd><p>keptrial – Calculate best period and error estimate from time series</p>
 <p><code class="docutils literal"><span class="pre">keptrial</span></code> measures the strongest period within the frequency range
 <span class="math">\(fmin\)</span> to <span class="math">\(fmax\)</span> and estimates 1-<span class="math">\(\sigma\)</span> error
@@ -235,7 +269,7 @@ than formal confidence.</p>
 values of nfreq and ntrial have to be chosen carefully to avoid excessive
 run times. The values of <strong>fmin</strong>, <strong>fmax</strong> and <strong>nfreq</strong> have to be
 chosen carefully in order to provide a sensible measure of period and
-error. It is recommended that <code class="docutils literal"><span class="pre">kepft</span></code> be used to estimate the period and
+error. It is recommended that <code class="docutils literal"><span class="pre">kepperiodogram</span></code> be used to estimate the period and
 error before attempting to use <code class="docutils literal"><span class="pre">keptrial</span></code>. An exercise of trial and error
 will most-likely be needed to choose a permutation of <span class="math">\(fmin\)</span>,
 <span class="math">\(fmax\)</span> and <span class="math">\(nfreq\)</span> that resolves the period distribution over a
@@ -260,11 +294,10 @@ results of a Monte Carlo period analysis.</p>
 <p><strong>datacol</strong> : str</p>
 <blockquote>
 <div><p>The column name containing data stored within extension 1 of infile.
-This data is the input data for a series of Fourier transform
-calculations. Typically this name is SAP_FLUX (Simple Aperture
-Photometry fluxes), but any data column within extension 1 of the FITS
-file can be used provided it is coupled to an error column name using
-errcol.</p>
+This data is the input data for periodogram. Typically this name is
+SAP_FLUX (Simple Aperture Photometry fluxes), but any data column within
+extension 1 of the FITS file can be used provided it is coupled to an
+error column name using errcol.</p>
 </div></blockquote>
 <p><strong>errcol</strong> : str</p>
 <blockquote>

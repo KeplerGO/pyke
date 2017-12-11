@@ -1,0 +1,668 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>pyke.kepconvert &mdash; PyKE 3.0.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../genindex.html"/>
+        <link rel="search" title="Search" href="../../search.html"/>
+    <link rel="top" title="PyKE 3.0.0 documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> PyKE
+          
+
+          
+            
+            <img src="../../_static/pyke-white.png" class="logo" />
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                3.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/ipython_notebooks/whatsnew31.html">What’s new in PyKE 3.1?</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart.html">Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../overview.html">PyKE tasks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../citing.html">Citing</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/index.html">Photometry tutorials</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">PyKE</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>pyke.kepconvert</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pyke.kepconvert</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">.utils</span> <span class="k">import</span> <span class="n">PyKEArgumentHelpFormatter</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">astropy.io</span> <span class="k">import</span> <span class="n">fits</span> <span class="k">as</span> <span class="n">pyfits</span>
+<span class="kn">from</span> <span class="nn">astropy.time</span> <span class="k">import</span> <span class="n">Time</span> <span class="k">as</span> <span class="n">astropyTime</span>
+<span class="kn">from</span> <span class="nn">tqdm</span> <span class="k">import</span> <span class="n">tqdm</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">kepio</span><span class="p">,</span> <span class="n">kepmsg</span><span class="p">,</span> <span class="n">kepkey</span>
+
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;kepconvert&#39;</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="kepconvert"><a class="viewcode-back" href="../../api/kepconvert.html#pyke.kepconvert.kepconvert">[docs]</a><span class="k">def</span> <span class="nf">kepconvert</span><span class="p">(</span><span class="n">infile</span><span class="p">,</span> <span class="n">conversion</span><span class="p">,</span> <span class="n">columns</span><span class="p">,</span> <span class="n">timeformat</span><span class="o">=</span><span class="s1">&#39;jd&#39;</span><span class="p">,</span> <span class="n">outfile</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">baddata</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+               <span class="n">overwrite</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">logfile</span><span class="o">=</span><span class="s1">&#39;kepconvert.log&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    kepconvert -- Convert Kepler FITS time series to or from a different file</span>
+<span class="sd">    format</span>
+
+<span class="sd">    The Kepler PyRAF tasks perform exclusively upon a standardized FITS file</span>
+<span class="sd">    format. kepconvert converts tabular data to or from FITS format. Currently,</span>
+<span class="sd">    only ASCII conversions are supported.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    infile : str</span>
+<span class="sd">        The name of an input file, e.g. a MAST standard format FITS file</span>
+<span class="sd">        containing a Kepler light curve within the first data extension,</span>
+<span class="sd">        or an ASCII table.</span>
+<span class="sd">    outfile : str</span>
+<span class="sd">        The name of the output file, e.g. a FITS structure, ASCII table</span>
+<span class="sd">        or CSV file.</span>
+<span class="sd">    conversion : str</span>
+<span class="sd">        Define the type of file conversion:</span>
+
+<span class="sd">        * fits2asc</span>
+<span class="sd">        * fits2csv</span>
+<span class="sd">        * asc2fits</span>
+<span class="sd">    columns : str</span>
+<span class="sd">        A comma-delimited list of data column names or descriptors.</span>
+<span class="sd">    timeformat: str</span>
+<span class="sd">        You can convert the Barycentric Julian Date (BJD) given by FITS files</span>
+<span class="sd">        into any subformat supported by Astropy.Time:</span>
+
+<span class="sd">        * jd</span>
+<span class="sd">        * mjd</span>
+<span class="sd">        * decimalyear</span>
+<span class="sd">        * unix</span>
+<span class="sd">        * cxcsec</span>
+<span class="sd">        * gps</span>
+<span class="sd">        * plot_date</span>
+<span class="sd">        * datetime</span>
+<span class="sd">        * iso</span>
+<span class="sd">        * isot</span>
+<span class="sd">        * yday</span>
+<span class="sd">        * fits</span>
+<span class="sd">        * byear</span>
+<span class="sd">        * jyear</span>
+<span class="sd">        * byear_str</span>
+<span class="sd">        * jyear_str</span>
+
+<span class="sd">        Be careful that these subformat are for **Solar System Barycenter** and are not</span>
+<span class="sd">        Earth-centered.</span>
+<span class="sd">    baddata : bool</span>
+<span class="sd">        If **True**, all the rows from the input FITS file are output to an</span>
+<span class="sd">        ascii file. If **False** then only rows with SAP_QUALITY equal to zero</span>
+<span class="sd">        will be outputed. This option is only applicable if **conversion**</span>
+<span class="sd">        is **fits2asc**.</span>
+<span class="sd">    overwrite : bool</span>
+<span class="sd">        Overwrite the output file?</span>
+<span class="sd">    verbose : bool</span>
+<span class="sd">        Print informative messages and warnings to the shell and logfile?</span>
+<span class="sd">    logfile : str</span>
+<span class="sd">        Name of the logfile containing error and warning messages.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    .. code-block:: bash</span>
+
+<span class="sd">        $ kepconvert kplr002436324-2009259160929_llc.fits fits2asc</span>
+<span class="sd">          --columns TIME,SAP_FLUX,SAP_FLUX_ERR,SAP_QUALITY --verbose</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">outfile</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">conversion</span> <span class="o">==</span> <span class="s2">&quot;fits2asc&quot;</span><span class="p">:</span>
+            <span class="n">outfile</span> <span class="o">=</span> <span class="n">infile</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;-</span><span class="si">{}</span><span class="s2">.txt&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">__all__</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">elif</span> <span class="n">conversion</span> <span class="o">==</span> <span class="s2">&quot;asc2fits&quot;</span><span class="p">:</span>
+            <span class="n">outfile</span> <span class="o">=</span> <span class="n">infile</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;-</span><span class="si">{}</span><span class="s2">.fits&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">__all__</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+    <span class="n">hashline</span> <span class="o">=</span> <span class="s1">&#39;--------------------------------------------------------------&#39;</span>
+    <span class="n">kepmsg</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">logfile</span><span class="p">,</span> <span class="n">hashline</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+    <span class="n">call</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;KEPCONVERT -- &#39;</span>
+            <span class="o">+</span> <span class="s1">&#39; infile=</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">infile</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s1">&#39; outfile=</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">outfile</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s1">&#39; conversion=</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">conversion</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s1">&#39; columns=</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">columns</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s1">&#39; baddata=</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">baddata</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s1">&#39; overwrite=</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">overwrite</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s1">&#39; verbose=</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">verbose</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s1">&#39; logfile=</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">logfile</span><span class="p">))</span>
+    <span class="n">kepmsg</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">logfile</span><span class="p">,</span> <span class="n">call</span><span class="o">+</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+
+    <span class="c1"># start time</span>
+    <span class="n">kepmsg</span><span class="o">.</span><span class="n">clock</span><span class="p">(</span><span class="s1">&#39;KEPCONVERT started at&#39;</span><span class="p">,</span> <span class="n">logfile</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+    <span class="c1"># data columns</span>
+    <span class="n">colnames</span> <span class="o">=</span> <span class="n">columns</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
+    <span class="n">ncol</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">colnames</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">ncol</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">errmsg</span> <span class="o">=</span> <span class="s1">&#39;ERROR -- KEPCONVERT: no data columns specified&#39;</span>
+        <span class="n">kepmsg</span><span class="o">.</span><span class="n">err</span><span class="p">(</span><span class="n">logfile</span><span class="p">,</span> <span class="n">errmsg</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+    <span class="c1"># input file exists</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">kepio</span><span class="o">.</span><span class="n">fileexists</span><span class="p">(</span><span class="n">infile</span><span class="p">):</span>
+        <span class="n">errmsg</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;ERROR -- KEPCONVERT: input file </span><span class="si">{}</span><span class="s1"> does not exist&#39;</span>
+                  <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">infile</span><span class="p">))</span>
+        <span class="n">kepmsg</span><span class="o">.</span><span class="n">err</span><span class="p">(</span><span class="n">logfile</span><span class="p">,</span> <span class="n">errmsg</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+    <span class="c1"># overwrite output file</span>
+    <span class="k">if</span> <span class="n">overwrite</span><span class="p">:</span>
+        <span class="n">kepio</span><span class="o">.</span><span class="n">overwrite</span><span class="p">(</span><span class="n">outfile</span><span class="p">,</span> <span class="n">logfile</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">kepio</span><span class="o">.</span><span class="n">fileexists</span><span class="p">(</span><span class="n">outfile</span><span class="p">):</span>
+        <span class="n">message</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;ERROR -- KEPCONVERT: </span><span class="si">{}</span><span class="s1"> exists. Use --overwrite&#39;</span>
+                   <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">outfile</span><span class="p">))</span>
+        <span class="n">kepmsg</span><span class="o">.</span><span class="n">err</span><span class="p">(</span><span class="n">logfile</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+    <span class="c1"># open FITS input file</span>
+    <span class="k">if</span> <span class="n">conversion</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;fits2&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">5</span><span class="p">):</span>
+
+        <span class="n">supported_conversions</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;fits2csv&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;comment&#39;</span><span class="p">:</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;delimiter&#39;</span><span class="p">:</span> <span class="s1">&#39;,&#39;</span><span class="p">},</span>
+            <span class="s1">&#39;fits2asc&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;comment&#39;</span><span class="p">:</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;delimiter&#39;</span><span class="p">:</span> <span class="s1">&#39; &#39;</span><span class="p">},</span>
+        <span class="p">}</span>
+
+        <span class="k">if</span> <span class="n">conversion</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">supported_conversions</span><span class="p">:</span>
+            <span class="n">errmsg</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="s1">&#39;ERROR -- KEPCONVERT: conversion not supported: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">conversion</span><span class="p">))</span>
+            <span class="n">kepmsg</span><span class="o">.</span><span class="n">err</span><span class="p">(</span><span class="n">logfile</span><span class="p">,</span> <span class="n">errmsg</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+
+        <span class="n">instr</span> <span class="o">=</span> <span class="n">pyfits</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">infile</span><span class="p">,</span> <span class="s1">&#39;readonly&#39;</span><span class="p">)</span>
+        <span class="n">tstart</span><span class="p">,</span> <span class="n">tstop</span><span class="p">,</span> <span class="n">bjdref</span><span class="p">,</span> <span class="n">cadence</span> <span class="o">=</span> <span class="n">kepio</span><span class="o">.</span><span class="n">timekeys</span><span class="p">(</span><span class="n">instr</span><span class="p">,</span> <span class="n">infile</span><span class="p">,</span>
+                                                        <span class="n">logfile</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+        <span class="c1"># read FITS table data</span>
+        <span class="n">table</span> <span class="o">=</span> <span class="n">kepio</span><span class="o">.</span><span class="n">readfitstab</span><span class="p">(</span><span class="n">infile</span><span class="p">,</span> <span class="n">instr</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">logfile</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+        <span class="c1"># check columns exist in FITS file</span>
+        <span class="n">work</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">colname</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="n">colnames</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">colname</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;time&#39;</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">timeformat</span> <span class="o">!=</span> <span class="s2">&quot;jd&quot;</span><span class="p">:</span>
+                        <span class="n">kepmsg</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">logfile</span><span class="p">,</span> <span class="s1">&#39;KEPCONVERT -- converting BJD to &#39;</span> <span class="o">+</span>
+                                   <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">timeformat</span><span class="p">),</span> <span class="n">verbose</span><span class="p">)</span>
+                        <span class="n">times</span> <span class="o">=</span> <span class="p">[]</span>
+                        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">table</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">colname</span><span class="p">)</span> <span class="o">+</span> <span class="n">bjdref</span><span class="p">:</span>
+                            <span class="c1"># adding 0 as nan</span>
+                            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">i</span><span class="p">):</span>
+                                <span class="n">times</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+                                <span class="k">continue</span>
+                            <span class="n">cvttime</span> <span class="o">=</span> <span class="n">astropyTime</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;jd&#39;</span><span class="p">)</span>
+                            <span class="n">cvttime</span><span class="o">.</span><span class="n">format</span> <span class="o">=</span> <span class="n">timeformat</span>
+                            <span class="n">times</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cvttime</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+                        <span class="n">work</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">times</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">work</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">table</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">colname</span><span class="p">)</span> <span class="o">+</span> <span class="n">bjdref</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">work</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">table</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">colname</span><span class="p">))</span>
+            <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">errmsg</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;ERROR -- KEPCONVERT: error converting time to &#39;</span><span class="o">+</span>
+                          <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">timeformat</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)))</span>
+                <span class="n">kepmsg</span><span class="o">.</span><span class="n">err</span><span class="p">(</span><span class="n">logfile</span><span class="p">,</span> <span class="n">errmsg</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                <span class="n">errmsg</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;ERROR -- KEPCONVERT: no column </span><span class="si">{}</span><span class="s1"> in </span><span class="si">{}</span><span class="s1">&#39;</span>
+                <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">colname</span><span class="p">,</span> <span class="n">infile</span><span class="p">))</span>
+                <span class="n">kepmsg</span><span class="o">.</span><span class="n">err</span><span class="p">(</span><span class="n">logfile</span><span class="p">,</span> <span class="n">errmsg</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">baddata</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">qualcol</span> <span class="o">=</span> <span class="n">table</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="s1">&#39;SAP_QUALITY&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">errmsg</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;No SAP_QUALITY column in data, are you using an old&#39;</span>
+                          <span class="s1">&#39; FITS file?&#39;</span><span class="p">)</span>
+                <span class="n">kepmsg</span><span class="o">.</span><span class="n">err</span><span class="p">(</span><span class="n">logfile</span><span class="p">,</span> <span class="n">errmsg</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">work</span><span class="p">)):</span>
+                <span class="n">work</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">work</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">qualcol</span><span class="p">]</span>
+        <span class="c1"># close input file</span>
+        <span class="n">instr</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="c1">## write output file</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Writing output file </span><span class="si">{}</span><span class="s2">...&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">outfile</span><span class="p">))</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">savetxt</span><span class="p">(</span><span class="n">fname</span><span class="o">=</span><span class="n">outfile</span><span class="p">,</span> <span class="n">X</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">work</span><span class="p">)</span><span class="o">.</span><span class="n">T</span><span class="p">,</span>
+                   <span class="n">delimiter</span><span class="o">=</span><span class="n">supported_conversions</span><span class="p">[</span><span class="n">conversion</span><span class="p">][</span><span class="s1">&#39;delimiter&#39;</span><span class="p">],</span>
+                   <span class="n">header</span><span class="o">=</span><span class="n">columns</span><span class="p">,</span>
+                   <span class="n">comments</span><span class="o">=</span><span class="n">supported_conversions</span><span class="p">[</span><span class="n">conversion</span><span class="p">][</span><span class="s1">&#39;comment&#39;</span><span class="p">])</span>
+    <span class="c1">## open and read ASCII input file</span>
+    <span class="k">if</span> <span class="n">conversion</span> <span class="o">==</span> <span class="s1">&#39;asc2fits&#39;</span><span class="p">:</span>
+        <span class="n">table</span> <span class="o">=</span> <span class="n">kepio</span><span class="o">.</span><span class="n">openascii</span><span class="p">(</span><span class="n">infile</span><span class="p">,</span><span class="s1">&#39;r&#39;</span><span class="p">,</span><span class="n">logfile</span><span class="p">,</span><span class="n">verbose</span><span class="p">)</span>
+        <span class="c1">## organize ASCII table into arrays</span>
+        <span class="n">work</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">ncol</span><span class="p">):</span>
+            <span class="n">work</span><span class="o">.</span><span class="n">append</span><span class="p">([])</span>
+        <span class="n">nline</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="n">table</span><span class="p">):</span>
+            <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            <span class="n">line</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s1">&#39;\s+&#39;</span><span class="p">,</span> <span class="s1">&#39;,&#39;</span><span class="p">,</span> <span class="n">line</span><span class="p">)</span>
+            <span class="n">line</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s1">&#39;\|&#39;</span><span class="p">,</span> <span class="s1">&#39;,&#39;</span><span class="p">,</span> <span class="n">line</span><span class="p">)</span>
+            <span class="n">line</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s1">&#39;;&#39;</span><span class="p">,</span> <span class="s1">&#39;,&#39;</span><span class="p">,</span> <span class="n">line</span><span class="p">)</span>
+            <span class="k">if</span> <span class="s1">&#39;#&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+                <span class="n">nline</span> <span class="o">+</span> <span class="mi">1</span>
+                <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">line</span><span class="p">)</span> <span class="o">==</span> <span class="n">ncol</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">line</span><span class="p">)):</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="n">work</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span>
+                        <span class="k">except</span><span class="p">:</span>
+                            <span class="n">errmsg</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;ERROR --KEPCONVERT: </span><span class="si">{}</span><span class="s1"> is not float&#39;</span>
+                                      <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span>
+                            <span class="n">kepmsg</span><span class="o">.</span><span class="n">err</span><span class="p">(</span><span class="n">logfile</span><span class="p">,</span> <span class="n">errmsg</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+                            <span class="k">break</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">message</span>  <span class="o">=</span> <span class="s1">&#39;ERROR --KEPCONVERT: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">ncol</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; columns required but &#39;</span>
+                    <span class="n">message</span> <span class="o">+=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">line</span><span class="p">))</span> <span class="o">+</span> <span class="s1">&#39; columns supplied by &#39;</span> <span class="o">+</span> <span class="n">infile</span>
+                    <span class="n">message</span> <span class="o">+=</span> <span class="s1">&#39; at line&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">nline</span><span class="p">)</span>
+                    <span class="n">kepmsg</span><span class="o">.</span><span class="n">err</span><span class="p">(</span><span class="n">logfile</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+                    <span class="k">break</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">ncol</span><span class="p">):</span>
+            <span class="n">work</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">work</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float64&#39;</span><span class="p">)</span>
+
+        <span class="c1">## timing keywords for output file</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">ncol</span><span class="p">):</span>
+            <span class="k">if</span> <span class="s1">&#39;time&#39;</span> <span class="ow">in</span> <span class="n">colnames</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">work</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mf">54000.0</span> <span class="ow">and</span> <span class="n">work</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mf">60000.0</span><span class="p">:</span>
+                    <span class="n">work</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+=</span> <span class="mf">2.4e6</span>
+                <span class="n">tstart</span> <span class="o">=</span> <span class="n">work</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+                <span class="n">tstop</span> <span class="o">=</span> <span class="n">work</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+                <span class="n">lc_start</span> <span class="o">=</span> <span class="n">tstart</span>
+                <span class="n">lc_end</span> <span class="o">=</span> <span class="n">tstop</span>
+                <span class="k">if</span> <span class="n">lc_start</span> <span class="o">&gt;</span> <span class="mf">2.4e6</span><span class="p">:</span>
+                    <span class="n">lc_start</span> <span class="o">-=</span> <span class="mf">2.4e6</span>
+                <span class="k">if</span> <span class="n">lc_end</span> <span class="o">&gt;</span> <span class="mf">2.4e6</span><span class="p">:</span>
+                    <span class="n">lc_end</span> <span class="o">-=</span> <span class="mf">2.4e6</span>
+                <span class="n">dts</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">work</span><span class="p">[</span><span class="n">i</span><span class="p">])):</span>
+                   <span class="n">dts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">work</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">-</span> <span class="n">work</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+                <span class="n">dts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">dts</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float32&#39;</span><span class="p">)</span>
+                <span class="n">cadence</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">dts</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">cadence</span> <span class="o">*</span> <span class="mf">86400.0</span> <span class="o">&gt;</span> <span class="mf">58.0</span> <span class="ow">and</span> <span class="n">cadence</span> <span class="o">*</span> <span class="mf">86400.0</span> <span class="o">&lt;</span> <span class="mf">61.0</span><span class="p">:</span>
+                    <span class="n">obsmode</span> <span class="o">=</span> <span class="s1">&#39;short cadence&#39;</span>
+                <span class="k">elif</span> <span class="n">cadence</span> <span class="o">*</span> <span class="mf">86400.0</span> <span class="o">&gt;</span> <span class="mf">1600.0</span> <span class="ow">and</span> <span class="n">cadence</span> <span class="o">*</span> <span class="mf">86400.0</span> <span class="o">&lt;</span> <span class="mf">2000.0</span><span class="p">:</span>
+                    <span class="n">obsmode</span> <span class="o">=</span> <span class="s1">&#39;long cadence&#39;</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">obsmode</span> <span class="o">=</span> <span class="s1">&#39;unknown&#39;</span>
+
+        <span class="c1">## Create the outfile primary extension</span>
+        <span class="n">hdu0</span> <span class="o">=</span> <span class="n">pyfits</span><span class="o">.</span><span class="n">PrimaryHDU</span><span class="p">()</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">hdu0</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;EXTNAME&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;PRIMARY&#39;</span><span class="p">,</span> <span class="s1">&#39;name of extension&#39;</span><span class="p">)</span>
+            <span class="n">hdu0</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;EXTVER&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="s1">&#39;extension version number&#39;</span><span class="p">)</span>
+            <span class="n">hdu0</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;ORIGIN&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;NASA/Ames&#39;</span><span class="p">,</span> <span class="s1">&#39;organization that generated this file&#39;</span><span class="p">)</span>
+            <span class="n">hdu0</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;DATE&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">asctime</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">localtime</span><span class="p">()),</span> <span class="s1">&#39;file creation date&#39;</span><span class="p">)</span>
+            <span class="n">hdu0</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;CREATOR&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;kepconvert&#39;</span><span class="p">,</span> <span class="s1">&#39;SW version used to create this file&#39;</span><span class="p">)</span>
+            <span class="n">hdu0</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;PROCVER&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;None&#39;</span><span class="p">,</span> <span class="s1">&#39;processing script version&#39;</span><span class="p">)</span>
+            <span class="n">hdu0</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;FILEVER&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;2.0&#39;</span><span class="p">,</span> <span class="s1">&#39;file format version&#39;</span><span class="p">)</span>
+            <span class="n">hdu0</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;TIMVERSN&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;OGIP/93-003&#39;</span><span class="p">,</span> <span class="s1">&#39;OGIP memo number for file format&#39;</span><span class="p">)</span>
+            <span class="n">hdu0</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;TELESCOP&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;Kepler&#39;</span><span class="p">,</span> <span class="s1">&#39;telescope&#39;</span><span class="p">)</span>
+            <span class="n">hdu0</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;INSTRUME&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;Kepler photometer&#39;</span><span class="p">,</span> <span class="s1">&#39;detector type&#39;</span><span class="p">)</span>
+            <span class="n">hdu0</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;OBJECT&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;Unknown&#39;</span><span class="p">,</span> <span class="s1">&#39;string version of kepID&#39;</span><span class="p">)</span>
+            <span class="n">hdu0</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;KEPLERID&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;Unknown&#39;</span><span class="p">,</span> <span class="s1">&#39;unique Kepler target identifier&#39;</span><span class="p">)</span>
+            <span class="n">hdu0</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;CHANNEL&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;Unknown&#39;</span><span class="p">,</span> <span class="s1">&#39;CCD channel&#39;</span><span class="p">)</span>
+            <span class="n">hdu0</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;SKYGROUP&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;Unknown&#39;</span><span class="p">,</span> <span class="s1">&#39;roll-independent location of channel&#39;</span><span class="p">)</span>
+            <span class="n">hdu0</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;MODULE&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;Unknown&#39;</span><span class="p">,</span> <span class="s1">&#39;CCD module&#39;</span><span class="p">)</span>
+            <span class="n">hdu0</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;OUTPUT&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;Unknown&#39;</span><span class="p">,</span> <span class="s1">&#39;CCD output&#39;</span><span class="p">)</span>
+            <span class="n">hdu0</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;QUARTER&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;Unknown&#39;</span><span class="p">,</span>
+                                      <span class="s1">&#39;mission quarter during which data was collected&#39;</span><span class="p">)</span>
+            <span class="n">hdu0</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;SEASON&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;Unknown&#39;</span><span class="p">,</span>
+                                     <span class="s1">&#39;mission season during which data was collected&#39;</span><span class="p">)</span>
+            <span class="n">hdu0</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;DATA_REL&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;Unknown&#39;</span><span class="p">,</span> <span class="s1">&#39;version of data release notes describing data&#39;</span><span class="p">)</span>
+            <span class="n">hdu0</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;OBSMODE&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">obsmode</span><span class="p">,</span> <span class="s1">&#39;observing mode&#39;</span><span class="p">)</span>
+            <span class="n">hdu0</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;RADESYS&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;Unknown&#39;</span><span class="p">,</span> <span class="s1">&#39;reference frame of celestial coordinates&#39;</span><span class="p">)</span>
+            <span class="n">hdu0</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;RA_OBJ&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;Unknown&#39;</span><span class="p">,</span> <span class="s1">&#39;[deg] right ascension from KIC&#39;</span><span class="p">)</span>
+            <span class="n">hdu0</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;DEC_OBJ&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;Unknown&#39;</span><span class="p">,</span> <span class="s1">&#39;[deg] declination from KIC&#39;</span><span class="p">)</span>
+            <span class="n">hdu0</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;EQUINOX&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mf">2000.0</span><span class="p">,</span> <span class="s1">&#39;equinox of celestial coordinate system&#39;</span><span class="p">)</span>
+            <span class="n">hdu0</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;PMRA&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;Unknown&#39;</span><span class="p">,</span> <span class="s1">&#39;[arcsec/yr] RA proper motion&#39;</span><span class="p">)</span>
+            <span class="n">hdu0</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;PMDEC&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;Unknown&#39;</span><span class="p">,</span> <span class="s1">&#39;[arcsec/yr] Dec proper motion&#39;</span><span class="p">)</span>
+            <span class="n">hdu0</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;PMTOTAL&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;Unknown&#39;</span><span class="p">,</span> <span class="s1">&#39;[arcsec/yr] total proper motion&#39;</span><span class="p">)</span>
+            <span class="n">hdu0</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;PARALLAX&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;Unknown&#39;</span><span class="p">,</span> <span class="s1">&#39;[arcsec] parallax&#39;</span><span class="p">)</span>
+            <span class="n">hdu0</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;GLON&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;Unknown&#39;</span><span class="p">,</span> <span class="s1">&#39;[deg] galactic longitude&#39;</span><span class="p">)</span>
+            <span class="n">hdu0</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;GLAT&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;Unknown&#39;</span><span class="p">,</span> <span class="s1">&#39;[deg] galactic latitude&#39;</span><span class="p">)</span>
+            <span class="n">hdu0</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;GMAG&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;Unknown&#39;</span><span class="p">,</span> <span class="s1">&#39;[mag] SDSS g band magnitude from KIC&#39;</span><span class="p">)</span>
+            <span class="n">hdu0</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;RMAG&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;Unknown&#39;</span><span class="p">,</span> <span class="s1">&#39;[mag] SDSS r band magnitude from KIC&#39;</span><span class="p">)</span>
+            <span class="n">hdu0</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;IMAG&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;Unknown&#39;</span><span class="p">,</span> <span class="s1">&#39;[mag] SDSS i band magnitude from KIC&#39;</span><span class="p">)</span>
+            <span class="n">hdu0</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;ZMAG&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;Unknown&#39;</span><span class="p">,</span> <span class="s1">&#39;[mag] SDSS z band magnitude from KIC&#39;</span><span class="p">)</span>
+            <span class="n">hdu0</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;D51MAG&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;Unknown&#39;</span> <span class="p">,</span><span class="s1">&#39;[mag] D51 magnitude], from KIC&#39;</span><span class="p">)</span>
+            <span class="n">hdu0</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;JMAG&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;Unknown&#39;</span><span class="p">,</span> <span class="s1">&#39;[mag] J band magnitude from 2MASS&#39;</span><span class="p">)</span>
+            <span class="n">hdu0</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;HMAG&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;Unknown&#39;</span><span class="p">,</span> <span class="s1">&#39;[mag] H band magnitude from 2MASS&#39;</span><span class="p">)</span>
+            <span class="n">hdu0</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;KMAG&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;Unknown&#39;</span><span class="p">,</span> <span class="s1">&#39;[mag] K band magnitude from 2MASS&#39;</span><span class="p">)</span>
+            <span class="n">hdu0</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;KEPMAG&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;Unknown&#39;</span><span class="p">,</span> <span class="s1">&#39;[mag] Kepler magnitude (Kp) from KIC&#39;</span><span class="p">)</span>
+            <span class="n">hdu0</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;GRCOLOR&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;Unknown&#39;</span><span class="p">,</span> <span class="s1">&#39;[mag] (g-r) color, SDSS bands&#39;</span><span class="p">)</span>
+            <span class="n">hdu0</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;JKCOLOR&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;Unknown&#39;</span><span class="p">,</span> <span class="s1">&#39;[mag] (J-K) color, 2MASS bands&#39;</span><span class="p">)</span>
+            <span class="n">hdu0</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;GKCOLOR&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;Unknown&#39;</span><span class="p">,</span> <span class="s1">&#39;[mag] (g-K) color, SDSS g - 2MASS K&#39;</span><span class="p">)</span>
+            <span class="n">hdu0</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;TEFF&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;Unknown&#39;</span><span class="p">,</span> <span class="s1">&#39;[K] effective temperature from KIC&#39;</span><span class="p">)</span>
+            <span class="n">hdu0</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;LOGG&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;Unknown&#39;</span><span class="p">,</span> <span class="s1">&#39;[cm/s2] log10 surface gravity from KIC&#39;</span><span class="p">)</span>
+            <span class="n">hdu0</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;FEH&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;Unknown&#39;</span><span class="p">,</span> <span class="s1">&#39;[log10([Fe/H])] metallicity from KIC&#39;</span><span class="p">)</span>
+            <span class="n">hdu0</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;EBMINUSV&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;Unknown&#39;</span><span class="p">,</span> <span class="s1">&#39;[mag] E(B-V) redenning from KIC&#39;</span><span class="p">)</span>
+            <span class="n">hdu0</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;AV&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;Unknown&#39;</span><span class="p">,</span> <span class="s1">&#39;[mag] A_v extinction from KIC&#39;</span><span class="p">)</span>
+            <span class="n">hdu0</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;RADIUS&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;Unknown&#39;</span><span class="p">,</span> <span class="s1">&#39;[solar radii] stellar radius from KIC&#39;</span><span class="p">)</span>
+            <span class="n">hdu0</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;TMINDEX&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;Unknown&#39;</span><span class="p">,</span> <span class="s1">&#39;unique 2MASS catalog ID from KIC&#39;</span><span class="p">)</span>
+            <span class="n">hdu0</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;SCPID&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;Unknown&#39;</span><span class="p">,</span> <span class="s1">&#39;unique SCP processing ID from KIC&#39;</span><span class="p">)</span>
+            <span class="n">hdulist</span> <span class="o">=</span> <span class="n">pyfits</span><span class="o">.</span><span class="n">HDUList</span><span class="p">(</span><span class="n">hdu0</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">errmsg</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;ERROR -- KEPCONVERT: cannot create primary extension in </span><span class="si">{}</span><span class="s1">&#39;</span>
+                      <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">outfile</span><span class="p">))</span>
+            <span class="n">kepmsg</span><span class="o">.</span><span class="n">err</span><span class="p">(</span><span class="n">logfile</span><span class="p">,</span> <span class="n">errmsg</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+        <span class="c1">## create the outfile HDU 1 extension</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">fitscol</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">ncol</span><span class="p">):</span>
+                <span class="n">fitscol</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pytfits</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">colnames</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;D&#39;</span><span class="p">,</span>
+                                              <span class="n">array</span><span class="o">=</span><span class="n">work</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span>
+            <span class="n">fitscols</span> <span class="o">=</span> <span class="n">pyfits</span><span class="o">.</span><span class="n">ColDefs</span><span class="p">(</span><span class="n">fitscol</span><span class="p">)</span>
+            <span class="n">hdu1</span> <span class="o">=</span> <span class="n">pyfits</span><span class="o">.</span><span class="n">BinTableHDU</span><span class="o">.</span><span class="n">from_columns</span><span class="p">(</span><span class="n">fitscols</span><span class="p">)</span>
+            <span class="n">hdulist</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">hdu1</span><span class="p">)</span>
+            <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;INHERIT&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="s1">&#39;inherit primary keywords&#39;</span><span class="p">)</span>
+            <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;EXTNAME&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;LIGHTCURVE&#39;</span><span class="p">,</span> <span class="s1">&#39;name of extension&#39;</span><span class="p">)</span>
+            <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;EXTVER&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;extension version number&#39;</span><span class="p">)</span>
+            <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;TELESCOP&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;Kepler&#39;</span><span class="p">,</span> <span class="s1">&#39;telescope&#39;</span><span class="p">)</span>
+            <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;INSTRUME&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;Kepler photometer&#39;</span><span class="p">,</span> <span class="s1">&#39;detector type&#39;</span><span class="p">)</span>
+            <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;OBJECT&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;Unknown&#39;</span><span class="p">,</span> <span class="s1">&#39;string version of kepID&#39;</span><span class="p">)</span>
+            <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;KEPLERID&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;Unknown&#39;</span><span class="p">,</span> <span class="s1">&#39;unique Kepler target identifier&#39;</span><span class="p">)</span>
+            <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;RADESYS&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;Unknown&#39;</span><span class="p">,</span>
+                                      <span class="s1">&#39;reference frame of celestial coordinates&#39;</span><span class="p">)</span>
+            <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;RA_OBJ&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;Unknown&#39;</span><span class="p">,</span> <span class="s1">&#39;[deg] right ascension from KIC&#39;</span><span class="p">)</span>
+            <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;DEC_OBJ&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;Unknown&#39;</span><span class="p">,</span> <span class="s1">&#39;[deg] declination from KIC&#39;</span><span class="p">)</span>
+            <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;EQUINOX&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mf">2000.0</span><span class="p">,</span> <span class="s1">&#39;equinox of celestial coordinate system&#39;</span><span class="p">)</span>
+            <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;TIMEREF&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;Unknown&#39;</span><span class="p">,</span> <span class="s1">&#39;barycentric correction applied to times&#39;</span><span class="p">)</span>
+            <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;TASSIGN&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;Unknown&#39;</span><span class="p">,</span> <span class="s1">&#39;where time is assigned&#39;</span><span class="p">)</span>
+            <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;TIMESYS&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;Unknown&#39;</span><span class="p">,</span> <span class="s1">&#39;time system is barycentric JD&#39;</span><span class="p">)</span>
+            <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;BJDREFI&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="s1">&#39;integer part of BJD reference date&#39;</span><span class="p">)</span>
+            <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;BJDREFF&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="s1">&#39;fraction of day in BJD reference date&#39;</span><span class="p">)</span>
+            <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;TIMEUNIT&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;Unknown&#39;</span><span class="p">,</span> <span class="s1">&#39;time unit for TIME, TSTART and TSTOP&#39;</span><span class="p">)</span>
+            <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;TSTART&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">tstart</span><span class="p">,</span> <span class="s1">&#39;observation start time in JD - BJDREF&#39;</span><span class="p">)</span>
+            <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;TSTOP&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">tstop</span><span class="p">,</span> <span class="s1">&#39;observation stop time in JD - BJDREF&#39;</span><span class="p">)</span>
+            <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;LC_START&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">lc_start</span><span class="p">,</span> <span class="s1">&#39;observation start time in MJD&#39;</span><span class="p">)</span>
+            <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;LC_END&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">lc_end</span><span class="p">,</span> <span class="s1">&#39;observation stop time in MJD&#39;</span><span class="p">)</span>
+            <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;TELAPSE&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">tstop</span> <span class="o">-</span> <span class="n">tstart</span><span class="p">,</span> <span class="s1">&#39;[d] TSTOP - TSTART&#39;</span><span class="p">)</span>
+            <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;LIVETIME&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;Unknown&#39;</span><span class="p">,</span> <span class="s1">&#39;[d] TELAPSE multiplied by DEADC&#39;</span><span class="p">)</span>
+            <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;EXPOSURE&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;Unknown&#39;</span><span class="p">,</span> <span class="s1">&#39;[d] time on source&#39;</span><span class="p">)</span>
+            <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;DEADC&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;Unknown&#39;</span><span class="p">,</span> <span class="s1">&#39;deadtime correction&#39;</span><span class="p">)</span>
+            <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;TIMEPIXR&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;Unknown&#39;</span><span class="p">,</span>
+                                       <span class="s1">&#39;bin time beginning=0 middle=0.5 end=1&#39;</span><span class="p">)</span>
+            <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;TIERRELA&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;Unknown&#39;</span><span class="p">,</span>
+                                       <span class="s1">&#39;[d] relative time error&#39;</span><span class="p">)</span>
+            <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;TIERABSO&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;Unknown&#39;</span><span class="p">,</span>
+                                       <span class="s1">&#39;[d] absolute time error&#39;</span><span class="p">)</span>
+            <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;INT_TIME&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;Unknown&#39;</span><span class="p">,</span>
+                                       <span class="s1">&#39;[s] photon accumulation time per frame&#39;</span><span class="p">)</span>
+            <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;READTIME&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;Unknown&#39;</span><span class="p">,</span>
+                                       <span class="s1">&#39;[s] readout time per frame&#39;</span><span class="p">)</span>
+            <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;FRAMETIM&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;Unknown&#39;</span><span class="p">,</span>
+                                       <span class="s1">&#39;[s] frame time (INT_TIME + READTIME)&#39;</span><span class="p">)</span>
+            <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;NUM_FRM&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;Unknown&#39;</span><span class="p">,</span>
+                                      <span class="s1">&#39;number of frames per time stamp&#39;</span><span class="p">)</span>
+            <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;TIMEDEL&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;Unknown&#39;</span><span class="p">,</span> <span class="s1">&#39;[d] time resolution of data&#39;</span><span class="p">)</span>
+            <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;DATE-OBS&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;Unknown&#39;</span><span class="p">,</span> <span class="s1">&#39;TSTART as UT calendar date&#39;</span><span class="p">)</span>
+            <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;DATE-END&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;Unknown&#39;</span><span class="p">,</span> <span class="s1">&#39;TSTOP as UT calendar date&#39;</span><span class="p">)</span>
+            <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;BACKAPP&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;Unknown&#39;</span><span class="p">,</span> <span class="s1">&#39;background is subtracted&#39;</span><span class="p">)</span>
+            <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;DEADAPP&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;Unknown&#39;</span><span class="p">,</span> <span class="s1">&#39;deadtime applied&#39;</span><span class="p">)</span>
+            <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;VIGNAPP&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;Unknown&#39;</span><span class="p">,</span>
+                                      <span class="s1">&#39;vignetting or collimator correction applied&#39;</span><span class="p">)</span>
+            <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;GAIN&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;Unknown&#39;</span><span class="p">,</span>
+                                   <span class="s1">&#39;channel gain [electrons/count]&#39;</span><span class="p">)</span>
+            <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;READNOIS&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;Unknown&#39;</span><span class="p">,</span>
+                                       <span class="s1">&#39;read noise [electrons]&#39;</span><span class="p">)</span>
+            <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;NREADOUT&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;Unknown&#39;</span><span class="p">,</span>
+                                       <span class="s1">&#39;number of reads per cadence&#39;</span><span class="p">)</span>
+            <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;TIMSLICE&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;Unknown&#39;</span><span class="p">,</span>
+                                       <span class="s1">&#39;time-slice readout sequence section&#39;</span><span class="p">)</span>
+            <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;MEANBLCK&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;Unknown&#39;</span><span class="p">,</span>
+                                       <span class="s1">&#39;FSW mean black level [count]&#39;</span><span class="p">)</span>
+            <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;PDCSAPFL&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;Unknown&#39;</span><span class="p">,</span>
+                                       <span class="s1">&#39;SAP PDC processing flags (bit code)&#39;</span><span class="p">)</span>
+            <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;PDCDIAFL&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;Unknown&#39;</span><span class="p">,</span>
+                                       <span class="s1">&#39;DIA PDC processing flags (bit code)&#39;</span><span class="p">)</span>
+            <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;MISPXSAP&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;Unknown&#39;</span><span class="p">,</span>
+                                       <span class="s1">&#39;no of optimal aperture pixels missing from SAP&#39;</span><span class="p">)</span>
+            <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;MISPXDIA&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;Unknown&#39;</span><span class="p">,</span>
+                                       <span class="s1">&#39;no of optimal aperture pixels missing from DIA&#39;</span><span class="p">)</span>
+            <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;CROWDSAP&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;Unknown&#39;</span><span class="p">,</span>
+                                       <span class="s1">&#39;crowding metric evaluated over SAP opt. ap.&#39;</span><span class="p">)</span>
+            <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;CROWDDIA&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;Unknown&#39;</span><span class="p">,</span>
+                                       <span class="s1">&#39;crowding metric evaluated over DIA aperture&#39;</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">errmsg</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;ERROR -- KEPCONVERT: cannot create light curve &#39;</span>
+                      <span class="s1">&#39;extension in </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">outfile</span><span class="p">))</span>
+            <span class="n">kepmsg</span><span class="o">.</span><span class="n">err</span><span class="p">(</span><span class="n">logfile</span><span class="p">,</span> <span class="n">errmsg</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+
+        <span class="c1">## history keyword in output file</span>
+        <span class="n">kepkey</span><span class="o">.</span><span class="n">history</span><span class="p">(</span><span class="n">call</span><span class="p">,</span> <span class="n">hdu0</span><span class="p">,</span> <span class="n">outfile</span><span class="p">,</span> <span class="n">logfile</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+        <span class="c1">## filter data table</span>
+        <span class="n">instr</span> <span class="o">=</span> <span class="n">kepio</span><span class="o">.</span><span class="n">filterNaN</span><span class="p">(</span><span class="n">hdulist</span><span class="p">,</span> <span class="n">colnames</span><span class="p">[</span><span class="nb">min</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">colnames</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)],</span>
+                                <span class="n">outfile</span><span class="p">,</span> <span class="n">logfile</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+
+        <span class="c1">## write output FITS file</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Writing output file </span><span class="si">{}</span><span class="s2">...&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">outfile</span><span class="p">))</span>
+        <span class="n">hdulist</span><span class="o">.</span><span class="n">writeto</span><span class="p">(</span><span class="n">outfile</span><span class="p">,</span> <span class="n">checksum</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="c1">## end time</span>
+    <span class="n">kepmsg</span><span class="o">.</span><span class="n">clock</span><span class="p">(</span><span class="s1">&#39;KEPCONVERT completed at&#39;</span><span class="p">,</span> <span class="n">logfile</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span></div>
+
+<span class="k">def</span> <span class="nf">kepconvert_main</span><span class="p">():</span>
+    <span class="kn">import</span> <span class="nn">argparse</span>
+    <span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">(</span>
+            <span class="n">description</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;Convert Kepler FITS time series to or from a&#39;</span>
+                         <span class="s1">&#39; different file format&#39;</span><span class="p">),</span>
+            <span class="n">formatter_class</span><span class="o">=</span><span class="n">PyKEArgumentHelpFormatter</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;infile&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Name of input file&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;conversion&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Type of data conversion&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span>
+                        <span class="n">choices</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;fits2asc&#39;</span><span class="p">,</span> <span class="s1">&#39;fits2csv&#39;</span><span class="p">,</span> <span class="s1">&#39;asc2fits&#39;</span><span class="p">],</span> <span class="n">default</span><span class="o">=</span><span class="s1">&#39;fits2asc&#39;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--timeformat&#39;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s1">&#39;timeformat&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s1">&#39;jd&#39;</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Export time into any subformat handled by astropy.Time (e.g. mjd, iso, decimalyear)&quot;</span><span class="p">,</span>
+                        <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--columns&#39;</span><span class="p">,</span> <span class="s1">&#39;-c&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s1">&#39;TIME,SAP_FLUX,SAP_FLUX_ERR&#39;</span><span class="p">,</span>
+                        <span class="n">dest</span><span class="o">=</span><span class="s1">&#39;columns&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Comma-delimited list of data columns&#39;</span><span class="p">,</span>
+                        <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--outfile&#39;</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;Name of file to output.&#39;</span>
+                              <span class="s1">&#39; If None, outfile is infile-kepconvert.&#39;</span><span class="p">),</span>
+                        <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--baddata&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_false&#39;</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Output rows which have been flagged as questionable&#39;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--overwrite&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_true&#39;</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Overwrite output file?&#39;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--verbose&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_true&#39;</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Write to a log file?&#39;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--logfile&#39;</span><span class="p">,</span> <span class="s1">&#39;-l&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Name of ascii log file&#39;</span><span class="p">,</span>
+                        <span class="n">default</span><span class="o">=</span><span class="s1">&#39;kepconvert.log&#39;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s1">&#39;logfile&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">)</span>
+    <span class="n">args</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">()</span>
+    <span class="n">kepconvert</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">infile</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">conversion</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">columns</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">outfile</span><span class="p">,</span>
+               <span class="n">args</span><span class="o">.</span><span class="n">baddata</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">overwrite</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">verbose</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">logfile</span><span class="p">)</span>
+</pre></div>
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright PyKE Developers and Contributors.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'3.0.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

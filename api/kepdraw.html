@@ -210,11 +210,45 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="kepdraw-interactive-plotting-of-kepler-time-series-data">
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast,
+.nboutput.nblast {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast + .nbinput {
+    margin-top: -19px;
+}
+
+/* nice headers on first paragraph of info/warning boxes */
+.admonition .first {
+    margin: -12px;
+    padding: 6px 12px;
+    margin-bottom: 12px;
+    color: #fff;
+    line-height: 1;
+    display: block;
+}
+.admonition.warning .first {
+    background: #f0b37e;
+}
+.admonition.note .first {
+    background: #6ab0de;
+}
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+</style>
+<div class="section" id="kepdraw-interactive-plotting-of-kepler-time-series-data">
 <h1><strong>kepdraw</strong>: interactive plotting of Kepler time series data<a class="headerlink" href="#kepdraw-interactive-plotting-of-kepler-time-series-data" title="Permalink to this headline">¶</a></h1>
 <dl class="function">
 <dt id="pyke.kepdraw.kepdraw">
-<code class="descclassname">pyke.kepdraw.</code><code class="descname">kepdraw</code><span class="sig-paren">(</span><em>infile</em>, <em>outfile=None</em>, <em>datacol=None</em>, <em>ploterr=False</em>, <em>errcol='SAP_FLUX_ERR'</em>, <em>quality=False</em>, <em>lcolor='#363636'</em>, <em>lwidth=1.0</em>, <em>fcolor='#a8a7a7'</em>, <em>falpha=0.2</em>, <em>labelsize=20</em>, <em>ticksize=14</em>, <em>xsize=18.0</em>, <em>ysize=6.0</em>, <em>fullrange=False</em>, <em>chooserange=False</em>, <em>y1=0</em>, <em>y2=10000.0</em>, <em>plotgrid=False</em>, <em>ylabel='e$^-$ s$^{-1}$'</em>, <em>plottype='fast'</em>, <em>noninteractive=False</em>, <em>verbose=False</em>, <em>logfile='kepdraw.log'</em><span class="sig-paren">)</span><a class="headerlink" href="#pyke.kepdraw.kepdraw" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">pyke.kepdraw.</code><code class="descname">kepdraw</code><span class="sig-paren">(</span><em>infile</em>, <em>outfile=None</em>, <em>datacol=None</em>, <em>ploterr=False</em>, <em>errcol='SAP_FLUX_ERR'</em>, <em>quality=False</em>, <em>lcolor='#363636'</em>, <em>lwidth=1.0</em>, <em>fcolor='#a8a7a7'</em>, <em>falpha=0.2</em>, <em>labelsize=20</em>, <em>ticksize=14</em>, <em>xsize=18.0</em>, <em>ysize=6.0</em>, <em>fullrange=False</em>, <em>chooserange=False</em>, <em>y1=0</em>, <em>y2=10000.0</em>, <em>plotgrid=False</em>, <em>ylabel='e$^-$ s$^{-1}$'</em>, <em>plottype='fast'</em>, <em>noninteractive=False</em>, <em>verbose=False</em>, <em>logfile='kepdraw.log'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyke/kepdraw.html#kepdraw"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyke.kepdraw.kepdraw" title="Permalink to this definition">¶</a></dt>
 <dd><p>kepdraw – Interactive plotting of time series data</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />

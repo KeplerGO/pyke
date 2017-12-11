@@ -38,7 +38,7 @@
     <link rel="top" title="PyKE 3.0.0 documentation" href="../index.html"/>
         <link rel="up" title="Photometry tutorials" href="index.html"/>
         <link rel="next" title="Example 4: Removing Stellar Astrophysics and Quarter Stitching" href="removing-stellar-astroph-quarter-stitch.html"/>
-        <link rel="prev" title="Example 2: PSF photometry in a K2 cluster" href="psf-photometry-in-k2.html"/> 
+        <link rel="prev" title="Example 1: Aperture photometry on a K2 target" href="aperture-photometry-in-k2.html"/> 
 
   
   <script src="../_static/js/modernizr.min.js"></script>
@@ -104,7 +104,6 @@
 <ul class="current">
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">Photometry tutorials</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="aperture-photometry-in-k2.html">Example 1: Aperture photometry on a K2 target</a></li>
-<li class="toctree-l2"><a class="reference internal" href="psf-photometry-in-k2.html">Example 2: PSF photometry in a K2 cluster</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Example 3: Separating a background EB from a foreground star</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#step-1-plot-archived-sap-data">Step 1: Plot archived SAP data</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#step-2-plot-archived-pdcsap-data">Step 2: Plot archived PDCSAP data</a></li>
@@ -115,6 +114,7 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="removing-stellar-astroph-quarter-stitch.html">Example 4: Removing Stellar Astrophysics and Quarter Stitching</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ipython_notebooks/c9-prf-fitting.html">Fitting PRFs in K2 TPFs from Campaign 9.1</a></li>
 </ul>
 </li>
 </ul>
@@ -182,7 +182,41 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="example-3-separating-a-background-eb-from-a-foreground-star">
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast,
+.nboutput.nblast {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast + .nbinput {
+    margin-top: -19px;
+}
+
+/* nice headers on first paragraph of info/warning boxes */
+.admonition .first {
+    margin: -12px;
+    padding: 6px 12px;
+    margin-bottom: 12px;
+    color: #fff;
+    line-height: 1;
+    display: block;
+}
+.admonition.warning .first {
+    background: #f0b37e;
+}
+.admonition.note .first {
+    background: #6ab0de;
+}
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+</style>
+<div class="section" id="example-3-separating-a-background-eb-from-a-foreground-star">
 <h1>Example 3: Separating a background EB from a foreground star<a class="headerlink" href="#example-3-separating-a-background-eb-from-a-foreground-star" title="Permalink to this headline">¶</a></h1>
 <p>The likelihood of source confusion around any given target is high.
 One cannot be certain whether astrophysical variability across a Kepler light curve comes entirely from the target star.
@@ -302,7 +336,7 @@ $ kepcotrend kepextract_eb.fits --outfile kepcotrend_eb.fits
         <a href="removing-stellar-astroph-quarter-stitch.html" class="btn btn-neutral float-right" title="Example 4: Removing Stellar Astrophysics and Quarter Stitching" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="psf-photometry-in-k2.html" class="btn btn-neutral" title="Example 2: PSF photometry in a K2 cluster" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="aperture-photometry-in-k2.html" class="btn btn-neutral" title="Example 1: Aperture photometry on a K2 target" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

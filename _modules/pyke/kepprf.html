@@ -1,0 +1,822 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>pyke.kepprf &mdash; PyKE 3.0.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../genindex.html"/>
+        <link rel="search" title="Search" href="../../search.html"/>
+    <link rel="top" title="PyKE 3.0.0 documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> PyKE
+          
+
+          
+            
+            <img src="../../_static/pyke-white.png" class="logo" />
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                3.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/ipython_notebooks/whatsnew31.html">What’s new in PyKE 3.1?</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart.html">Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../overview.html">PyKE tasks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../citing.html">Citing</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/index.html">Photometry tutorials</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">PyKE</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>pyke.kepprf</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pyke.kepprf</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">glob</span>
+<span class="kn">from</span> <span class="nn">matplotlib</span> <span class="k">import</span> <span class="n">pyplot</span> <span class="k">as</span> <span class="n">plt</span>
+<span class="kn">from</span> <span class="nn">matplotlib</span> <span class="k">import</span> <span class="n">ticker</span>
+<span class="kn">from</span> <span class="nn">astropy.io</span> <span class="k">import</span> <span class="n">fits</span> <span class="k">as</span> <span class="n">pyfits</span>
+<span class="kn">from</span> <span class="nn">scipy</span> <span class="k">import</span> <span class="n">interpolate</span><span class="p">,</span> <span class="n">optimize</span><span class="p">,</span> <span class="n">ndimage</span><span class="p">,</span> <span class="n">stats</span>
+<span class="kn">from</span> <span class="nn">scipy.optimize</span> <span class="k">import</span> <span class="n">fmin_powell</span>
+<span class="kn">from</span> <span class="nn">scipy.interpolate</span> <span class="k">import</span> <span class="n">RectBivariateSpline</span>
+<span class="kn">from</span> <span class="nn">scipy.ndimage</span> <span class="k">import</span> <span class="n">interpolation</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">kepio</span><span class="p">,</span> <span class="n">kepmsg</span><span class="p">,</span> <span class="n">kepplot</span><span class="p">,</span> <span class="n">kepfunc</span><span class="p">,</span> <span class="n">kepstat</span>
+<span class="kn">from</span> <span class="nn">.utils</span> <span class="k">import</span> <span class="n">PyKEArgumentHelpFormatter</span>
+
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;kepprf&#39;</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="kepprf"><a class="viewcode-back" href="../../api/kepprf.html#pyke.kepprf.kepprf">[docs]</a><span class="k">def</span> <span class="nf">kepprf</span><span class="p">(</span><span class="n">infile</span><span class="p">,</span> <span class="n">prfdir</span><span class="p">,</span> <span class="n">frameno</span><span class="p">,</span> <span class="n">columns</span><span class="p">,</span> <span class="n">rows</span><span class="p">,</span> <span class="n">fluxes</span><span class="p">,</span> <span class="n">background</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+           <span class="n">border</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">focus</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">xtol</span><span class="o">=</span><span class="mf">1e-4</span><span class="p">,</span> <span class="n">ftol</span><span class="o">=</span><span class="mf">1.</span><span class="p">,</span> <span class="n">outfile</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">plot</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+           <span class="n">imscale</span><span class="o">=</span><span class="s1">&#39;linear&#39;</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;YlOrBr&#39;</span><span class="p">,</span> <span class="n">apercol</span><span class="o">=</span><span class="s1">&#39;#ffffff&#39;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+           <span class="n">logfile</span><span class="o">=</span><span class="s1">&#39;kepprf.log&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    kepprf -- Fit a PSF model to a specific image within a Target Pixel File</span>
+
+<span class="sd">    Fit a PSF model, combined with spacecraft jitter and pixel scale</span>
+<span class="sd">    drift (the Pixel Response Function; PRF) to a single observation of Kepler</span>
+<span class="sd">    target pixels.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    infile : str</span>
+<span class="sd">        The name of a MAST standard format FITS file containing Kepler Target</span>
+<span class="sd">        Pixel data within the first data extension.</span>
+<span class="sd">    prfdir : str</span>
+<span class="sd">        The full or relative directory path to a folder containing the Kepler</span>
+<span class="sd">        PSF calibration. Calibration files can be downloaded from the Kepler</span>
+<span class="sd">        focal plane characteristics page at the MAST.</span>
+<span class="sd">    frameno : int</span>
+<span class="sd">        The cadence number in the input file data containing the pixels to</span>
+<span class="sd">        plot. If the chosen observation has a non-zero quality flag set or the</span>
+<span class="sd">        pixel set contains only NULLs then the task will halt with an error</span>
+<span class="sd">        message.</span>
+<span class="sd">    columns : list</span>
+<span class="sd">        A starting guess for the CCD column position(s) of the source(s) that</span>
+<span class="sd">        are to be fit. The model is unlikely to converge if the guess is too</span>
+<span class="sd">        far away from the correct location. A rule of thumb is to provide a</span>
+<span class="sd">        guess within 1 CCD pixel of the true position. If more than one source</span>
+<span class="sd">        is being modeled then the column positions of each are separated by a</span>
+<span class="sd">        comma. The same number of sources in the columns, rows and fluxes</span>
+<span class="sd">        field is a requirement of this task.</span>
+<span class="sd">    rows : list</span>
+<span class="sd">        A starting guess for the CCD row position(s) of the source(s) that are</span>
+<span class="sd">        to be fit. The model is unlikely to converge if the guess is too far</span>
+<span class="sd">        away from the correct location. A rule of thumb is to provide a guess</span>
+<span class="sd">        within 1 CCD pixel of the true position. If more than one source is</span>
+<span class="sd">        being modeled then the row positions of each are separated by a comma.</span>
+<span class="sd">        The same number of sources in the columns, rows and fluxes field is a</span>
+<span class="sd">        requirement of this task.</span>
+<span class="sd">    fluxes : list</span>
+<span class="sd">        A starting guess for the flux(es) of the source(s) that are to be fit.</span>
+<span class="sd">        Fit convergence is not particularly reliant on the accuracy of these</span>
+<span class="sd">        guesses, but the fit will converge faster the more accurate the guess.</span>
+<span class="sd">        If more than one source is being modeled then the row positions of</span>
+<span class="sd">        each are separated by a comma. The same number of sources in the</span>
+<span class="sd">        columns, rows and fluxes field is a requirement of this task.</span>
+<span class="sd">    background : boolean</span>
+<span class="sd">        Whether to include a background component in the model. If `True` then</span>
+<span class="sd">        the background will be represented by a two-dimensional polynomial of</span>
+<span class="sd">        order `border`. This functionality is somewhat experimental, with one</span>
+<span class="sd">        eye upon potential background gradients across large masks or on those</span>
+<span class="sd">        detectors more prone to pattern noise. Generally it is recommended to</span>
+<span class="sd">        set background as `False`.</span>
+<span class="sd">    border : int</span>
+<span class="sd">        If a background is included in the fit then it is modeled as a</span>
+<span class="sd">        two-dimensional polynomial. This parameter is the polynomial order. A</span>
+<span class="sd">        zero-order polynomial is generally recommended.</span>
+<span class="sd">    focus : boolean</span>
+<span class="sd">        Whether to incude pixel scale and focus rotation with the fit</span>
+<span class="sd">        parameters of the model. This is also an experimental function. This</span>
+<span class="sd">        approach does not attempt to deal with inter- or intra-pixel</span>
+<span class="sd">        variations. The recommended use is currently to set focus as `False`.</span>
+<span class="sd">    xtol : float</span>
+<span class="sd">        The dimensionless, relative model parameter convergence criterion for</span>
+<span class="sd">        the fit algorithm.</span>
+<span class="sd">    ftol : float</span>
+<span class="sd">        The dimensionless, relative model residual convergence criterion for</span>
+<span class="sd">        the fit algorithm.</span>
+<span class="sd">    outfile : str</span>
+<span class="sd">        Name of an optional output plot file containing the results of kepprf.</span>
+<span class="sd">        An example is provided in Figure 1. Typically this is a PNG format</span>
+<span class="sd">        file. If no file is required, outfile can be &#39;None&#39; or blank, in</span>
+<span class="sd">        which case the plot will be generated but the plot will not be saved</span>
+<span class="sd">        to a file. Any existing file with this name will be automatically</span>
+<span class="sd">        overwritten.</span>
+<span class="sd">    plot : boolean</span>
+<span class="sd">        Plot fit results to the screen?</span>
+<span class="sd">    imscale : str</span>
+<span class="sd">        kepprf can plot images with three choices of image scales. The choice</span>
+<span class="sd">        is made using this argument.</span>
+<span class="sd">        The options are:</span>
+<span class="sd">        * linear</span>
+<span class="sd">        * logarithmic</span>
+<span class="sd">        * squareroot</span>
+<span class="sd">    cmap : str</span>
+<span class="sd">        matplotlib&#39;s color map</span>
+<span class="sd">    verbose : boolean</span>
+<span class="sd">        Print informative messages and warnings to the shell and logfile?</span>
+<span class="sd">    logfile : string</span>
+<span class="sd">        Name of the logfile containing error and warning messages.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    Using the command line tool ``kepprf``, one can fit multiple PRFs to a given</span>
+<span class="sd">    frame in a target pixel file as follows</span>
+
+<span class="sd">    .. code-block:: bash</span>
+
+<span class="sd">        $ kepprf kplr008256049-2010174085026_lpd-targ.fits --prfdir ~/kplr2011265_prf/</span>
+<span class="sd">        --frameno 1000 --columns 830 831 --rows 242 241 --fluxes 1.0 0.1 --plot --verbose</span>
+
+<span class="sd">              KepID: 8256049</span>
+<span class="sd">                BJD: 2455296.903574196</span>
+<span class="sd">         RA (J2000): 298.67861</span>
+<span class="sd">        Dec (J2000): 44.1755</span>
+<span class="sd">             KepMag: 15.654</span>
+<span class="sd">           SkyGroup: 53</span>
+<span class="sd">             Season: 3</span>
+<span class="sd">            Channel: 81</span>
+<span class="sd">             Module: 24</span>
+<span class="sd">             Output: 1</span>
+
+<span class="sd">        Convergence time = 0.15390515327453613s</span>
+
+<span class="sd">        Flux = 3978.040625752744 e-/s X = 829.8259431097927 pix Y = 242.3810334478628 pix</span>
+<span class="sd">        Flux = 4734.069273790539 e-/s X = 830.990805551025 pix Y = 240.97340366638306 pix</span>
+
+<span class="sd">                        Total flux in mask = 10747.293440638587 e-/s</span>
+<span class="sd">                       Target flux in mask = 3793.041929468528 e-/s</span>
+<span class="sd">                    Total flux in aperture = 6365.551487630484 e-/s</span>
+<span class="sd">                   Target flux in aperture = 3110.924803570053 e-/s</span>
+<span class="sd">          Target flux fraction in aperture = 78.2024392468689 %</span>
+<span class="sd">        Contamination fraction in aperture = 51.12874650978488 %</span>
+
+<span class="sd">               Residual flux = -0.5748827605745994 e-/s</span>
+<span class="sd">        Pearsons chi^2 test = 296.12077907844986 for 13 dof</span>
+<span class="sd">                 Chi^2 test = 19803.55879917441 for 13 dof</span>
+
+<span class="sd">    .. image:: ../_static/images/api/kepprf.png</span>
+<span class="sd">        :align: center</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">outfile</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">outfile</span> <span class="o">=</span> <span class="n">infile</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;-</span><span class="si">{}</span><span class="s2">.png&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">__all__</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+    <span class="c1"># log the call</span>
+    <span class="n">hashline</span> <span class="o">=</span> <span class="s1">&#39;--------------------------------------------------------------&#39;</span>
+    <span class="n">kepmsg</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">logfile</span><span class="p">,</span> <span class="n">hashline</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+    <span class="n">call</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;KEPPRF -- &#39;</span>
+            <span class="o">+</span> <span class="s1">&#39; infile=</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">infile</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s1">&#39; frameno=</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">frameno</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s1">&#39; columns=</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">columns</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s1">&#39; rows=</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">rows</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s1">&#39; fluxes=</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">fluxes</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s1">&#39; prfdir=</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">prfdir</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s1">&#39; background=</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">background</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s1">&#39; border=</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">border</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s1">&#39; focus=</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">focus</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s1">&#39; xtol=</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">xtol</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s1">&#39; ftol=</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">xtol</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s1">&#39; outfile=</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">outfile</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s1">&#39; plot=</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">plot</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s1">&#39; imscale=</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">imscale</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s1">&#39; cmap=</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">cmap</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s1">&#39; apercol=</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">apercol</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s1">&#39; verbose=</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">verbose</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s1">&#39; logfile=</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">logfile</span><span class="p">))</span>
+
+    <span class="n">kepmsg</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">logfile</span><span class="p">,</span> <span class="n">call</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+
+    <span class="c1"># start time</span>
+    <span class="n">kepmsg</span><span class="o">.</span><span class="n">clock</span><span class="p">(</span><span class="s1">&#39;KEPPRF started at&#39;</span><span class="p">,</span><span class="n">logfile</span><span class="p">,</span><span class="n">verbose</span><span class="p">)</span>
+
+    <span class="c1"># construct inital guess vector for fit</span>
+    <span class="n">f</span> <span class="o">=</span> <span class="n">fluxes</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">columns</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">rows</span>
+    <span class="n">nsrc</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">!=</span> <span class="n">nsrc</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="o">!=</span> <span class="n">nsrc</span><span class="p">:</span>
+        <span class="n">errmsg</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;ERROR -- KEPFIT:FITMULTIPRF: Guesses for rows, columns and &quot;</span>
+                  <span class="s2">&quot;fluxes must have the same number of sources&quot;</span><span class="p">)</span>
+        <span class="n">kepmsg</span><span class="o">.</span><span class="n">err</span><span class="p">(</span><span class="n">logfile</span><span class="p">,</span> <span class="n">errmsg</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+
+    <span class="n">guess</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">f</span><span class="p">)</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">background</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">border</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">guess</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">((</span><span class="n">border</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="mi">2</span><span class="p">):</span>
+                <span class="n">guess</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">focus</span><span class="p">:</span>
+        <span class="n">guess</span> <span class="o">=</span> <span class="n">guess</span> <span class="o">+</span> <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">]</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">kepid</span><span class="p">,</span> <span class="n">channel</span><span class="p">,</span> <span class="n">skygroup</span><span class="p">,</span> <span class="n">module</span><span class="p">,</span> <span class="n">output</span><span class="p">,</span> <span class="n">quarter</span><span class="p">,</span> <span class="n">season</span><span class="p">,</span> <span class="n">ra</span><span class="p">,</span> \
+        <span class="n">dec</span><span class="p">,</span> <span class="n">column</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">kepmag</span><span class="p">,</span> <span class="n">xdim</span><span class="p">,</span> <span class="n">ydim</span><span class="p">,</span> <span class="n">barytime</span> <span class="o">=</span> \
+        <span class="n">kepio</span><span class="o">.</span><span class="n">readTPF</span><span class="p">(</span><span class="n">infile</span><span class="p">,</span> <span class="s1">&#39;TIME&#39;</span><span class="p">,</span> <span class="n">logfile</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">errmsg</span> <span class="o">=</span> <span class="s2">&quot;ERROR -- KEPPRF: is </span><span class="si">{}</span><span class="s2"> a Target Pixel File? &quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">infile</span><span class="p">)</span>
+        <span class="n">kepmsg</span><span class="o">.</span><span class="n">err</span><span class="p">(</span><span class="n">logfile</span><span class="p">,</span> <span class="n">errmsg</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+    <span class="n">kepid</span><span class="p">,</span> <span class="n">channel</span><span class="p">,</span> <span class="n">skygroup</span><span class="p">,</span> <span class="n">module</span><span class="p">,</span> <span class="n">output</span><span class="p">,</span> <span class="n">quarter</span><span class="p">,</span> <span class="n">season</span><span class="p">,</span> \
+        <span class="n">ra</span><span class="p">,</span> <span class="n">dec</span><span class="p">,</span> <span class="n">column</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">kepmag</span><span class="p">,</span> <span class="n">xdim</span><span class="p">,</span> <span class="n">ydim</span><span class="p">,</span> <span class="n">tcorr</span> <span class="o">=</span> \
+        <span class="n">kepio</span><span class="o">.</span><span class="n">readTPF</span><span class="p">(</span><span class="n">infile</span><span class="p">,</span> <span class="s1">&#39;TIMECORR&#39;</span><span class="p">,</span> <span class="n">logfile</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+    <span class="n">kepid</span><span class="p">,</span> <span class="n">channel</span><span class="p">,</span> <span class="n">skygroup</span><span class="p">,</span> <span class="n">module</span><span class="p">,</span> <span class="n">output</span><span class="p">,</span> <span class="n">quarter</span><span class="p">,</span> <span class="n">season</span><span class="p">,</span> \
+        <span class="n">ra</span><span class="p">,</span> <span class="n">dec</span><span class="p">,</span> <span class="n">column</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">kepmag</span><span class="p">,</span> <span class="n">xdim</span><span class="p">,</span> <span class="n">ydim</span><span class="p">,</span> <span class="n">cadno</span> <span class="o">=</span> \
+        <span class="n">kepio</span><span class="o">.</span><span class="n">readTPF</span><span class="p">(</span><span class="n">infile</span><span class="p">,</span> <span class="s1">&#39;CADENCENO&#39;</span><span class="p">,</span> <span class="n">logfile</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+    <span class="n">kepid</span><span class="p">,</span> <span class="n">channel</span><span class="p">,</span> <span class="n">skygroup</span><span class="p">,</span> <span class="n">module</span><span class="p">,</span> <span class="n">output</span><span class="p">,</span> <span class="n">quarter</span><span class="p">,</span> <span class="n">season</span><span class="p">,</span> \
+        <span class="n">ra</span><span class="p">,</span> <span class="n">dec</span><span class="p">,</span> <span class="n">column</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">kepmag</span><span class="p">,</span> <span class="n">xdim</span><span class="p">,</span> <span class="n">ydim</span><span class="p">,</span> <span class="n">fluxpixels</span> <span class="o">=</span> \
+        <span class="n">kepio</span><span class="o">.</span><span class="n">readTPF</span><span class="p">(</span><span class="n">infile</span><span class="p">,</span><span class="s1">&#39;FLUX&#39;</span><span class="p">,</span><span class="n">logfile</span><span class="p">,</span><span class="n">verbose</span><span class="p">)</span>
+    <span class="n">kepid</span><span class="p">,</span> <span class="n">channel</span><span class="p">,</span> <span class="n">skygroup</span><span class="p">,</span> <span class="n">module</span><span class="p">,</span> <span class="n">output</span><span class="p">,</span> <span class="n">quarter</span><span class="p">,</span> <span class="n">season</span><span class="p">,</span> \
+        <span class="n">ra</span><span class="p">,</span> <span class="n">dec</span><span class="p">,</span> <span class="n">column</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">kepmag</span><span class="p">,</span> <span class="n">xdim</span><span class="p">,</span> <span class="n">ydim</span><span class="p">,</span> <span class="n">errpixels</span> <span class="o">=</span> \
+        <span class="n">kepio</span><span class="o">.</span><span class="n">readTPF</span><span class="p">(</span><span class="n">infile</span><span class="p">,</span> <span class="s1">&#39;FLUX_ERR&#39;</span><span class="p">,</span> <span class="n">logfile</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+    <span class="n">kepid</span><span class="p">,</span> <span class="n">channel</span><span class="p">,</span> <span class="n">skygroup</span><span class="p">,</span> <span class="n">module</span><span class="p">,</span> <span class="n">output</span><span class="p">,</span> <span class="n">quarter</span><span class="p">,</span> <span class="n">season</span><span class="p">,</span> \
+        <span class="n">ra</span><span class="p">,</span> <span class="n">dec</span><span class="p">,</span> <span class="n">column</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">kepmag</span><span class="p">,</span> <span class="n">xdim</span><span class="p">,</span> <span class="n">ydim</span><span class="p">,</span> <span class="n">qual</span> <span class="o">=</span> \
+        <span class="n">kepio</span><span class="o">.</span><span class="n">readTPF</span><span class="p">(</span><span class="n">infile</span><span class="p">,</span> <span class="s1">&#39;QUALITY&#39;</span><span class="p">,</span> <span class="n">logfile</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+
+    <span class="c1"># read mask defintion data from TPF file</span>
+
+    <span class="n">maskimg</span><span class="p">,</span> <span class="n">pixcoord1</span><span class="p">,</span> <span class="n">pixcoord2</span> <span class="o">=</span> <span class="n">kepio</span><span class="o">.</span><span class="n">readMaskDefinition</span><span class="p">(</span><span class="n">infile</span><span class="p">,</span> <span class="n">logfile</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+    <span class="n">npix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="n">maskimg</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+
+    <span class="c1"># print target data</span>
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;      KepID: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">kepid</span><span class="p">))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;        BJD: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">barytime</span><span class="p">[</span><span class="n">frameno</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="mf">2454833.0</span><span class="p">))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39; RA (J2000): </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ra</span><span class="p">))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Dec (J2000): </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">dec</span><span class="p">))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;     KepMag: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">kepmag</span><span class="p">))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;   SkyGroup: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">skygroup</span><span class="p">))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;     Season: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">season</span><span class="p">)))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;    Channel: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">channel</span><span class="p">))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;     Module: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">module</span><span class="p">))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;     Output: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">output</span><span class="p">))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+
+    <span class="c1"># is this a good row with finite timestamp and pixels?</span>
+    <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">barytime</span><span class="p">[</span><span class="n">frameno</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="ow">or</span> <span class="n">np</span><span class="o">.</span><span class="n">nansum</span><span class="p">(</span><span class="n">fluxpixels</span><span class="p">[</span><span class="n">frameno</span><span class="o">-</span><span class="mi">1</span><span class="p">,:])</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">):</span>
+        <span class="n">errmsg</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;ERROR -- KEPFIELD: Row </span><span class="si">{0}</span><span class="s2"> is a bad quality timestamp&quot;</span>
+                  <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">frameno</span><span class="p">))</span>
+        <span class="n">kepmsg</span><span class="o">.</span><span class="n">err</span><span class="p">(</span><span class="n">logfile</span><span class="p">,</span> <span class="n">errmsg</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+
+    <span class="c1"># construct input pixel image</span>
+    <span class="n">flux</span> <span class="o">=</span> <span class="n">fluxpixels</span><span class="p">[</span><span class="n">frameno</span><span class="o">-</span><span class="mi">1</span><span class="p">,:]</span>
+    <span class="n">ferr</span> <span class="o">=</span> <span class="n">errpixels</span><span class="p">[</span><span class="n">frameno</span><span class="o">-</span><span class="mi">1</span><span class="p">,:]</span>
+
+    <span class="c1"># image scale and intensity limits of pixel data</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">DATimg</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">ydim</span><span class="p">,</span> <span class="n">xdim</span><span class="p">))</span>
+    <span class="n">ERRimg</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">ydim</span><span class="p">,</span> <span class="n">xdim</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">ydim</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">xdim</span><span class="p">):</span>
+            <span class="n">DATimg</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">flux</span><span class="p">[</span><span class="n">n</span><span class="p">]</span>
+            <span class="n">ERRimg</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">ferr</span><span class="p">[</span><span class="n">n</span><span class="p">]</span>
+            <span class="n">n</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="c1"># read and interpolate PRF</span>
+    <span class="p">(</span><span class="n">splineInterpolation</span><span class="p">,</span> <span class="n">DATx</span><span class="p">,</span> <span class="n">DATy</span><span class="p">,</span> <span class="n">prf</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">PRFx0</span><span class="p">,</span> <span class="n">PRFy0</span><span class="p">,</span> <span class="n">cdelt1p</span><span class="p">,</span>
+        <span class="n">cdelt2p</span><span class="p">,</span> <span class="n">prfDimX</span><span class="p">,</span> <span class="n">prfDimY</span><span class="p">)</span> <span class="o">=</span> <span class="n">kepfunc</span><span class="o">.</span><span class="n">read_and_interpolate_prf</span><span class="p">(</span>
+        <span class="n">prfdir</span><span class="o">=</span><span class="n">prfdir</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="n">module</span><span class="p">,</span> <span class="n">output</span><span class="o">=</span><span class="n">output</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="n">column</span><span class="p">,</span> <span class="n">row</span><span class="o">=</span><span class="n">row</span><span class="p">,</span>
+        <span class="n">xdim</span><span class="o">=</span><span class="n">xdim</span><span class="p">,</span> <span class="n">ydim</span><span class="o">=</span><span class="n">ydim</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span> <span class="n">logfile</span><span class="o">=</span><span class="n">logfile</span><span class="p">)</span>
+
+    <span class="c1"># construct mesh for background model</span>
+    <span class="k">if</span> <span class="n">background</span><span class="p">:</span>
+        <span class="n">bx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mf">1.</span><span class="p">,</span><span class="nb">float</span><span class="p">(</span><span class="n">xdim</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span>
+        <span class="n">by</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mf">1.</span><span class="p">,</span><span class="nb">float</span><span class="p">(</span><span class="n">ydim</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span>
+        <span class="n">xx</span><span class="p">,</span> <span class="n">yy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">bx</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">bx</span><span class="o">.</span><span class="n">max</span><span class="p">(),</span> <span class="n">xdim</span><span class="p">),</span>
+                             <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">by</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">by</span><span class="o">.</span><span class="n">max</span><span class="p">(),</span> <span class="n">ydim</span><span class="p">))</span>
+
+    <span class="c1"># fit PRF model to pixel data</span>
+    <span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">focus</span> <span class="ow">and</span> <span class="n">background</span><span class="p">:</span>
+        <span class="n">args</span> <span class="o">=</span> <span class="p">(</span><span class="n">DATx</span><span class="p">,</span> <span class="n">DATy</span><span class="p">,</span> <span class="n">DATimg</span><span class="p">,</span> <span class="n">ERRimg</span><span class="p">,</span> <span class="n">nsrc</span><span class="p">,</span> <span class="n">border</span><span class="p">,</span> <span class="n">xx</span><span class="p">,</span> <span class="n">yy</span><span class="p">,</span>
+                <span class="n">splineInterpolation</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="nb">float</span><span class="p">(</span><span class="n">y</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+        <span class="n">ans</span> <span class="o">=</span> <span class="n">fmin_powell</span><span class="p">(</span><span class="n">kepfunc</span><span class="o">.</span><span class="n">PRFwithFocusAndBackground</span><span class="p">,</span> <span class="n">guess</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">,</span>
+                          <span class="n">xtol</span><span class="o">=</span><span class="n">xtol</span><span class="p">,</span> <span class="n">ftol</span><span class="o">=</span><span class="n">ftol</span><span class="p">,</span> <span class="n">disp</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">focus</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">background</span><span class="p">:</span>
+        <span class="n">args</span> <span class="o">=</span> <span class="p">(</span><span class="n">DATx</span><span class="p">,</span> <span class="n">DATy</span><span class="p">,</span> <span class="n">DATimg</span><span class="p">,</span> <span class="n">ERRimg</span><span class="p">,</span> <span class="n">nsrc</span><span class="p">,</span> <span class="n">splineInterpolation</span><span class="p">,</span>
+                <span class="nb">float</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="nb">float</span><span class="p">(</span><span class="n">y</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+        <span class="n">ans</span> <span class="o">=</span> <span class="n">fmin_powell</span><span class="p">(</span><span class="n">kepfunc</span><span class="o">.</span><span class="n">PRFwithFocus</span><span class="p">,</span> <span class="n">guess</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">,</span> <span class="n">xtol</span><span class="o">=</span><span class="n">xtol</span><span class="p">,</span>
+                          <span class="n">ftol</span><span class="o">=</span><span class="n">ftol</span><span class="p">,</span> <span class="n">disp</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">background</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">focus</span><span class="p">:</span>
+        <span class="n">args</span> <span class="o">=</span> <span class="p">(</span><span class="n">DATx</span><span class="p">,</span> <span class="n">DATy</span><span class="p">,</span> <span class="n">DATimg</span><span class="p">,</span> <span class="n">ERRimg</span><span class="p">,</span> <span class="n">nsrc</span><span class="p">,</span> <span class="n">border</span><span class="p">,</span> <span class="n">xx</span><span class="p">,</span> <span class="n">yy</span><span class="p">,</span>
+                <span class="n">splineInterpolation</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="nb">float</span><span class="p">(</span><span class="n">y</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+        <span class="n">ans</span> <span class="o">=</span> <span class="n">fmin_powell</span><span class="p">(</span><span class="n">kepfunc</span><span class="o">.</span><span class="n">PRFwithBackground</span><span class="p">,</span> <span class="n">guess</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">,</span>
+                          <span class="n">xtol</span><span class="o">=</span><span class="n">xtol</span><span class="p">,</span> <span class="n">ftol</span><span class="o">=</span><span class="n">ftol</span><span class="p">,</span> <span class="n">disp</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">args</span> <span class="o">=</span> <span class="p">(</span><span class="n">DATx</span><span class="p">,</span> <span class="n">DATy</span><span class="p">,</span> <span class="n">DATimg</span><span class="p">,</span> <span class="n">ERRimg</span><span class="p">,</span> <span class="n">nsrc</span><span class="p">,</span> <span class="n">splineInterpolation</span><span class="p">,</span>
+                <span class="nb">float</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="nb">float</span><span class="p">(</span><span class="n">y</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+        <span class="n">ans</span> <span class="o">=</span> <span class="n">fmin_powell</span><span class="p">(</span><span class="n">kepfunc</span><span class="o">.</span><span class="n">PRF</span><span class="p">,</span> <span class="n">guess</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">,</span> <span class="n">xtol</span><span class="o">=</span><span class="n">xtol</span><span class="p">,</span>
+                          <span class="n">ftol</span><span class="o">=</span><span class="n">ftol</span><span class="p">,</span> <span class="n">disp</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Convergence time = </span><span class="si">{}</span><span class="s2">s</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span><span class="p">))</span>
+
+    <span class="c1"># pad the PRF data if the PRF array is smaller than the data array</span>
+    <span class="n">flux</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">OBJx</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">OBJy</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">PRFmod</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">prfDimY</span><span class="p">,</span> <span class="n">prfDimX</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">PRFy0</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">PRFx0</span> <span class="o">&lt;</span> <span class="mf">0.0</span><span class="p">:</span>
+        <span class="n">PRFmod</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">prfDimY</span><span class="p">,</span> <span class="n">prfDimX</span><span class="p">))</span>
+        <span class="n">superPRF</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">prfDimY</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">prfDimX</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="n">superPRF</span><span class="p">[</span><span class="nb">abs</span><span class="p">(</span><span class="n">PRFy0</span><span class="p">):</span><span class="nb">abs</span><span class="p">(</span><span class="n">PRFy0</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">prf</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span>
+                 <span class="nb">abs</span><span class="p">(</span><span class="n">PRFx0</span><span class="p">):</span><span class="nb">abs</span><span class="p">(</span><span class="n">PRFx0</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">prf</span><span class="p">)[</span><span class="mi">1</span><span class="p">]]</span> <span class="o">=</span> <span class="n">prf</span>
+        <span class="n">prf</span> <span class="o">=</span> <span class="n">superPRF</span> <span class="o">*</span> <span class="mf">1.0</span>
+        <span class="n">PRFy0</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">PRFx0</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="c1"># rotate the PRF model around its center</span>
+    <span class="k">if</span> <span class="n">focus</span><span class="p">:</span>
+        <span class="n">angle</span> <span class="o">=</span> <span class="n">ans</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">prf</span> <span class="o">=</span> <span class="n">interpolation</span><span class="o">.</span><span class="n">rotate</span><span class="p">(</span><span class="n">prf</span><span class="p">,</span> <span class="o">-</span><span class="n">angle</span><span class="p">,</span> <span class="n">reshape</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                                   <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;nearest&#39;</span><span class="p">)</span>
+    <span class="c1"># iterate through the sources in the best fit PSF model</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nsrc</span><span class="p">):</span>
+        <span class="n">flux</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ans</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+        <span class="n">OBJx</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ans</span><span class="p">[</span><span class="n">nsrc</span> <span class="o">+</span> <span class="n">i</span><span class="p">])</span>
+        <span class="n">OBJy</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ans</span><span class="p">[</span><span class="n">nsrc</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">i</span><span class="p">])</span>
+        <span class="c1"># calculate best-fit model</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="p">(</span><span class="n">OBJy</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">DATy</span><span class="p">))</span> <span class="o">/</span> <span class="n">cdelt1p</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="p">(</span><span class="n">OBJx</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">DATx</span><span class="p">))</span> <span class="o">/</span> <span class="n">cdelt2p</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">prfTmp</span> <span class="o">=</span> <span class="n">interpolation</span><span class="o">.</span><span class="n">shift</span><span class="p">(</span><span class="n">prf</span><span class="p">,</span> <span class="p">[</span><span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="p">],</span> <span class="n">order</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;constant&#39;</span><span class="p">)</span>
+        <span class="n">prfTmp</span> <span class="o">=</span> <span class="n">prfTmp</span><span class="p">[</span><span class="n">PRFy0</span><span class="p">:</span><span class="n">PRFy0</span> <span class="o">+</span> <span class="n">prfDimY</span><span class="p">,</span> <span class="n">PRFx0</span><span class="p">:</span><span class="n">PRFx0</span> <span class="o">+</span> <span class="n">prfDimX</span><span class="p">]</span>
+        <span class="n">PRFmod</span> <span class="o">=</span> <span class="n">PRFmod</span> <span class="o">+</span> <span class="n">prfTmp</span> <span class="o">*</span> <span class="n">flux</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="n">wx</span> <span class="o">=</span> <span class="mf">1.0</span>
+        <span class="n">wy</span> <span class="o">=</span> <span class="mf">1.0</span>
+        <span class="n">angle</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">b</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="c1"># write out best fit parameters</span>
+        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+            <span class="n">txt</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Flux = </span><span class="si">{0}</span><span class="s2"> e-/s X = </span><span class="si">{1}</span><span class="s2"> pix Y = </span><span class="si">{2}</span><span class="s2"> pix&quot;</span>
+                   <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">flux</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">OBJx</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">OBJy</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span>
+            <span class="n">kepmsg</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">logfile</span><span class="p">,</span> <span class="n">txt</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">background</span><span class="p">:</span>
+        <span class="n">bterms</span> <span class="o">=</span> <span class="n">border</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="n">bterms</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">b</span> <span class="o">=</span> <span class="n">ans</span><span class="p">[</span><span class="n">nsrc</span> <span class="o">*</span> <span class="mi">3</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">bcoeff</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">ans</span><span class="p">[</span><span class="n">nsrc</span><span class="o">*</span><span class="mi">3</span><span class="p">:</span><span class="n">nsrc</span><span class="o">*</span><span class="mi">3</span><span class="o">+</span><span class="n">bterms</span><span class="p">],</span>
+                               <span class="n">ans</span><span class="p">[</span><span class="n">nsrc</span><span class="o">*</span><span class="mi">3</span><span class="o">+</span><span class="n">bterms</span><span class="p">:</span><span class="n">nsrc</span><span class="o">*</span><span class="mi">3</span><span class="o">+</span><span class="n">bterms</span><span class="o">*</span><span class="mi">2</span><span class="p">]])</span>
+            <span class="n">bkg</span> <span class="o">=</span> <span class="n">kepfunc</span><span class="o">.</span><span class="n">polyval2d</span><span class="p">(</span><span class="n">xx</span><span class="p">,</span> <span class="n">yy</span><span class="p">,</span> <span class="n">bcoeff</span><span class="p">)</span>
+            <span class="n">b</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nanmean</span><span class="p">(</span><span class="n">bkg</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">bkg</span><span class="o">.</span><span class="n">size</span><span class="p">))</span>
+        <span class="n">txt</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">   Mean background = </span><span class="si">{0}</span><span class="s2"> e-/s&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">b</span><span class="p">)</span>
+        <span class="n">kepmsg</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">logfile</span><span class="p">,</span> <span class="n">txt</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">focus</span><span class="p">:</span>
+        <span class="n">wx</span> <span class="o">=</span> <span class="n">ans</span><span class="p">[</span><span class="o">-</span><span class="mi">3</span><span class="p">]</span>
+        <span class="n">wy</span> <span class="o">=</span> <span class="n">ans</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span>
+        <span class="n">angle</span> <span class="o">=</span> <span class="n">ans</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">focus</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">background</span><span class="p">:</span>
+            <span class="n">kepmsg</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">logfile</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+        <span class="n">kepmsg</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">logfile</span><span class="p">,</span> <span class="s2">&quot; X/Y focus factors = </span><span class="si">{0}</span><span class="s2">/</span><span class="si">{1}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">wx</span><span class="p">,</span> <span class="n">wy</span><span class="p">),</span>
+                   <span class="kc">True</span><span class="p">)</span>
+        <span class="n">kepmsg</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">logfile</span><span class="p">,</span> <span class="s2">&quot;PRF rotation angle = </span><span class="si">{0}</span><span class="s2"> deg&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">angle</span><span class="p">),</span>
+                   <span class="kc">True</span><span class="p">)</span>
+    <span class="c1"># measure flux fraction and contamination</span>
+    <span class="n">PRFall</span> <span class="o">=</span> <span class="n">kepfunc</span><span class="o">.</span><span class="n">PRF2DET</span><span class="p">(</span><span class="n">flux</span><span class="p">,</span> <span class="n">OBJx</span><span class="p">,</span> <span class="n">OBJy</span><span class="p">,</span> <span class="n">DATx</span><span class="p">,</span> <span class="n">DATy</span><span class="p">,</span> <span class="n">wx</span><span class="p">,</span> <span class="n">wy</span><span class="p">,</span> <span class="n">angle</span><span class="p">,</span>
+                             <span class="n">splineInterpolation</span><span class="p">)</span>
+    <span class="n">PRFone</span> <span class="o">=</span> <span class="n">kepfunc</span><span class="o">.</span><span class="n">PRF2DET</span><span class="p">([</span><span class="n">flux</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span> <span class="p">[</span><span class="n">OBJx</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span> <span class="p">[</span><span class="n">OBJy</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span> <span class="n">DATx</span><span class="p">,</span> <span class="n">DATy</span><span class="p">,</span>
+                             <span class="n">wx</span><span class="p">,</span> <span class="n">wy</span><span class="p">,</span> <span class="n">angle</span><span class="p">,</span> <span class="n">splineInterpolation</span><span class="p">)</span>
+    <span class="n">FluxInMaskAll</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nansum</span><span class="p">(</span><span class="n">PRFall</span><span class="p">)</span>
+    <span class="n">FluxInMaskOne</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nansum</span><span class="p">(</span><span class="n">PRFone</span><span class="p">)</span>
+    <span class="n">FluxInAperAll</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="n">FluxInAperOne</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">ydim</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">xdim</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">kepstat</span><span class="o">.</span><span class="n">bitInBitmap</span><span class="p">(</span><span class="n">maskimg</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">],</span> <span class="mi">2</span><span class="p">):</span>
+                <span class="n">FluxInAperAll</span> <span class="o">+=</span> <span class="n">PRFall</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span>
+                <span class="n">FluxInAperOne</span> <span class="o">+=</span> <span class="n">PRFone</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span>
+    <span class="n">FluxFraction</span> <span class="o">=</span> <span class="n">FluxInAperOne</span> <span class="o">/</span> <span class="n">flux</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">Contamination</span> <span class="o">=</span> <span class="p">(</span><span class="n">FluxInAperAll</span> <span class="o">-</span> <span class="n">FluxInAperOne</span><span class="p">)</span> <span class="o">/</span> <span class="n">FluxInAperAll</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">Contamination</span> <span class="o">=</span> <span class="mf">0.0</span>
+
+    <span class="n">kepmsg</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">logfile</span><span class="p">,</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">                Total flux in mask = </span><span class="si">{0}</span><span class="s2"> e-/s&quot;</span>
+            <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">FluxInMaskAll</span><span class="p">),</span> <span class="kc">True</span><span class="p">)</span>
+    <span class="n">kepmsg</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">logfile</span><span class="p">,</span> <span class="s2">&quot;               Target flux in mask = </span><span class="si">{0}</span><span class="s2"> e-/s&quot;</span>
+            <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">FluxInMaskOne</span><span class="p">),</span> <span class="kc">True</span><span class="p">)</span>
+    <span class="n">kepmsg</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">logfile</span><span class="p">,</span> <span class="s2">&quot;            Total flux in aperture = </span><span class="si">{0}</span><span class="s2"> e-/s&quot;</span>
+            <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">FluxInAperAll</span><span class="p">),</span> <span class="kc">True</span><span class="p">)</span>
+    <span class="n">kepmsg</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">logfile</span><span class="p">,</span> <span class="s2">&quot;           Target flux in aperture = </span><span class="si">{0}</span><span class="s2"> e-/s&quot;</span>
+            <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">FluxInAperOne</span><span class="p">),</span> <span class="kc">True</span><span class="p">)</span>
+    <span class="n">kepmsg</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">logfile</span><span class="p">,</span> <span class="s2">&quot;  Target flux fraction in aperture = </span><span class="si">{0}</span><span class="s2"> %&quot;</span>
+            <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">FluxFraction</span> <span class="o">*</span> <span class="mf">100.0</span><span class="p">),</span> <span class="kc">True</span><span class="p">)</span>
+    <span class="n">kepmsg</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">logfile</span><span class="p">,</span> <span class="s2">&quot;Contamination fraction in aperture = </span><span class="si">{0}</span><span class="s2"> %&quot;</span>
+            <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">Contamination</span> <span class="o">*</span> <span class="mf">100.0</span><span class="p">),</span> <span class="kc">True</span><span class="p">)</span>
+
+    <span class="c1"># construct model PRF in detector coordinates</span>
+    <span class="n">PRFfit</span> <span class="o">=</span> <span class="n">PRFall</span> <span class="o">+</span> <span class="mf">0.0</span>
+    <span class="k">if</span> <span class="n">background</span> <span class="ow">and</span> <span class="n">bterms</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">PRFfit</span> <span class="o">=</span> <span class="n">PRFall</span> <span class="o">+</span> <span class="n">b</span>
+    <span class="k">if</span> <span class="n">background</span> <span class="ow">and</span> <span class="n">bterms</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">PRFfit</span> <span class="o">=</span> <span class="n">PRFall</span> <span class="o">+</span> <span class="n">bkg</span>
+
+    <span class="c1"># calculate residual of DATA - FIT</span>
+    <span class="n">PRFres</span> <span class="o">=</span> <span class="n">DATimg</span> <span class="o">-</span> <span class="n">PRFfit</span>
+    <span class="n">FLUXres</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nansum</span><span class="p">(</span><span class="n">PRFres</span><span class="p">)</span> <span class="o">/</span> <span class="n">npix</span>
+
+    <span class="c1"># calculate the sum squared difference between data and model</span>
+    <span class="n">Pearson</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">nansum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">DATimg</span> <span class="o">-</span> <span class="n">PRFfit</span><span class="p">)</span> <span class="o">/</span> <span class="n">PRFfit</span><span class="p">))</span>
+    <span class="n">Chi2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nansum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">DATimg</span> <span class="o">-</span> <span class="n">PRFfit</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">ERRimg</span><span class="p">))</span>
+    <span class="n">DegOfFreedom</span> <span class="o">=</span> <span class="n">npix</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">guess</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">kepmsg</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">logfile</span><span class="p">,</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">       Residual flux = </span><span class="si">{0}</span><span class="s2"> e-/s&quot;</span>
+                <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">FLUXres</span><span class="p">),</span> <span class="kc">True</span><span class="p">)</span>
+        <span class="n">kepmsg</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">logfile</span><span class="p">,</span> <span class="s2">&quot;Pearson</span><span class="se">\&#39;</span><span class="s2">s chi^2 test = </span><span class="si">{0}</span><span class="s2"> for </span><span class="si">{1}</span><span class="s2"> dof&quot;</span>
+                <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">Pearson</span><span class="p">,</span> <span class="n">DegOfFreedom</span><span class="p">),</span> <span class="kc">True</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="k">pass</span>
+    <span class="n">kepmsg</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">logfile</span><span class="p">,</span> <span class="s2">&quot;          Chi^2 test = </span><span class="si">{0}</span><span class="s2"> for </span><span class="si">{1}</span><span class="s2"> dof&quot;</span>
+            <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">Chi2</span><span class="p">,</span> <span class="n">DegOfFreedom</span><span class="p">),</span> <span class="kc">True</span><span class="p">)</span>
+
+    <span class="c1"># image scale and intensity limits for plotting images</span>
+    <span class="n">imgdat_pl</span><span class="p">,</span> <span class="n">zminfl</span><span class="p">,</span> <span class="n">zmaxfl</span> <span class="o">=</span> <span class="n">kepplot</span><span class="o">.</span><span class="n">intScale2D</span><span class="p">(</span><span class="n">DATimg</span><span class="p">,</span> <span class="n">imscale</span><span class="p">)</span>
+    <span class="n">imgprf_pl</span><span class="p">,</span> <span class="n">zminpr</span><span class="p">,</span> <span class="n">zmaxpr</span> <span class="o">=</span> <span class="n">kepplot</span><span class="o">.</span><span class="n">intScale2D</span><span class="p">(</span><span class="n">PRFmod</span><span class="p">,</span> <span class="n">imscale</span><span class="p">)</span>
+    <span class="n">imgfit_pl</span><span class="p">,</span> <span class="n">zminfi</span><span class="p">,</span> <span class="n">zmaxfi</span> <span class="o">=</span> <span class="n">kepplot</span><span class="o">.</span><span class="n">intScale2D</span><span class="p">(</span><span class="n">PRFfit</span><span class="p">,</span> <span class="n">imscale</span><span class="p">)</span>
+    <span class="n">imgres_pl</span><span class="p">,</span> <span class="n">zminre</span><span class="p">,</span> <span class="n">zmaxre</span> <span class="o">=</span> <span class="n">kepplot</span><span class="o">.</span><span class="n">intScale2D</span><span class="p">(</span><span class="n">PRFres</span><span class="p">,</span> <span class="s1">&#39;linear&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">imscale</span> <span class="o">==</span> <span class="s1">&#39;linear&#39;</span><span class="p">:</span>
+        <span class="n">zmaxpr</span> <span class="o">*=</span> <span class="mf">0.9</span>
+    <span class="k">elif</span> <span class="n">imscale</span> <span class="o">==</span> <span class="s1">&#39;logarithmic&#39;</span><span class="p">:</span>
+        <span class="n">zmaxpr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">zmaxpr</span><span class="p">)</span>
+        <span class="n">zminpr</span> <span class="o">=</span> <span class="n">zmaxpr</span> <span class="o">/</span> <span class="mi">2</span>
+
+    <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">[</span><span class="mi">12</span><span class="p">,</span> <span class="mi">10</span><span class="p">])</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">clf</span><span class="p">()</span>
+    <span class="n">plotimage</span><span class="p">(</span><span class="n">imgdat_pl</span><span class="p">,</span> <span class="n">zminfl</span><span class="p">,</span> <span class="n">zmaxfl</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">column</span><span class="p">,</span> <span class="n">xdim</span><span class="p">,</span> <span class="n">ydim</span><span class="p">,</span> <span class="mf">0.07</span><span class="p">,</span>
+              <span class="mf">0.53</span><span class="p">,</span> <span class="s1">&#39;observation&#39;</span><span class="p">,</span> <span class="n">cmap</span><span class="p">)</span>
+    <span class="n">plotimage</span><span class="p">(</span><span class="n">imgprf_pl</span><span class="p">,</span> <span class="n">zminpr</span><span class="p">,</span> <span class="n">zmaxpr</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">column</span><span class="p">,</span> <span class="n">xdim</span><span class="p">,</span> <span class="n">ydim</span><span class="p">,</span> <span class="mf">0.44</span><span class="p">,</span>
+              <span class="mf">0.53</span><span class="p">,</span> <span class="s1">&#39;model&#39;</span><span class="p">,</span> <span class="n">cmap</span><span class="p">)</span>
+    <span class="n">kepplot</span><span class="o">.</span><span class="n">borders</span><span class="p">(</span><span class="n">maskimg</span><span class="p">,</span> <span class="n">xdim</span><span class="p">,</span> <span class="n">ydim</span><span class="p">,</span> <span class="n">pixcoord1</span><span class="p">,</span> <span class="n">pixcoord2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">apercol</span><span class="p">,</span>
+                    <span class="s1">&#39;--&#39;</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span>
+    <span class="n">kepplot</span><span class="o">.</span><span class="n">borders</span><span class="p">(</span><span class="n">maskimg</span><span class="p">,</span> <span class="n">xdim</span><span class="p">,</span> <span class="n">ydim</span><span class="p">,</span> <span class="n">pixcoord1</span><span class="p">,</span> <span class="n">pixcoord2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">apercol</span><span class="p">,</span>
+                    <span class="s1">&#39;-&#39;</span><span class="p">,</span> <span class="mf">3.0</span><span class="p">)</span>
+    <span class="n">plotimage</span><span class="p">(</span><span class="n">imgfit_pl</span><span class="p">,</span> <span class="n">zminfl</span><span class="p">,</span> <span class="n">zmaxfl</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">column</span><span class="p">,</span> <span class="n">xdim</span><span class="p">,</span> <span class="n">ydim</span><span class="p">,</span> <span class="mf">0.07</span><span class="p">,</span>
+              <span class="mf">0.08</span><span class="p">,</span> <span class="s1">&#39;fit&#39;</span><span class="p">,</span> <span class="n">cmap</span><span class="p">)</span>
+    <span class="n">plotimage</span><span class="p">(</span><span class="n">imgres_pl</span><span class="p">,</span> <span class="n">zminfl</span><span class="p">,</span> <span class="n">zmaxfl</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">column</span><span class="p">,</span> <span class="n">xdim</span><span class="p">,</span> <span class="n">ydim</span><span class="p">,</span> <span class="mf">0.44</span><span class="p">,</span>
+              <span class="mf">0.08</span><span class="p">,</span> <span class="s1">&#39;residual&#39;</span><span class="p">,</span> <span class="n">cmap</span><span class="p">)</span>
+
+    <span class="c1"># plot data color bar</span>
+    <span class="n">barwin</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">axes</span><span class="p">([</span><span class="mf">0.84</span><span class="p">,</span><span class="mf">0.08</span><span class="p">,</span><span class="mf">0.06</span><span class="p">,</span><span class="mf">0.9</span><span class="p">])</span>
+    <span class="k">if</span> <span class="n">imscale</span> <span class="o">==</span> <span class="s1">&#39;linear&#39;</span><span class="p">:</span>
+        <span class="n">brange</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">zminfl</span><span class="p">,</span> <span class="n">zmaxfl</span><span class="p">,</span> <span class="p">(</span><span class="n">zmaxfl</span> <span class="o">-</span> <span class="n">zminfl</span><span class="p">)</span> <span class="o">/</span> <span class="mi">1000</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">imscale</span> <span class="o">==</span> <span class="s1">&#39;logarithmic&#39;</span><span class="p">:</span>
+        <span class="n">brange</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mf">10.0</span> <span class="o">**</span> <span class="n">zminfl</span><span class="p">,</span> <span class="mf">10.0</span> <span class="o">**</span> <span class="n">zmaxfl</span><span class="p">,</span>
+                           <span class="p">(</span><span class="mf">10.0</span> <span class="o">**</span> <span class="n">zmaxfl</span> <span class="o">-</span> <span class="mf">10.0</span><span class="o">**</span><span class="n">zminfl</span><span class="p">)</span> <span class="o">/</span> <span class="mi">1000</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">imscale</span> <span class="o">==</span> <span class="s1">&#39;squareroot&#39;</span><span class="p">:</span>
+        <span class="n">brange</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">zminfl</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="n">zmaxfl</span> <span class="o">**</span> <span class="mi">2</span><span class="p">,</span>
+                           <span class="p">(</span><span class="n">zmaxfl</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="n">zminfl</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="mi">1000</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">imscale</span> <span class="o">==</span> <span class="s1">&#39;linear&#39;</span><span class="p">:</span>
+        <span class="n">barimg</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="n">brange</span><span class="p">,</span> <span class="p">(</span><span class="mi">1000</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+    <span class="k">elif</span> <span class="n">imscale</span> <span class="o">==</span> <span class="s1">&#39;logarithmic&#39;</span><span class="p">:</span>
+        <span class="n">barimg</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="n">brange</span><span class="p">,</span> <span class="p">(</span><span class="mi">1000</span><span class="p">,</span> <span class="mi">1</span><span class="p">)))</span>
+    <span class="k">elif</span> <span class="n">imscale</span> <span class="o">==</span> <span class="s1">&#39;squareroot&#39;</span><span class="p">:</span>
+        <span class="n">barimg</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="n">brange</span><span class="p">,</span> <span class="p">(</span><span class="mi">1000</span><span class="p">,</span> <span class="mi">1</span><span class="p">)))</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">nrm</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">nanmax</span><span class="p">(</span><span class="n">brange</span><span class="p">))))</span> <span class="o">-</span> <span class="mi">1</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">nrm</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">brange</span> <span class="o">=</span> <span class="n">brange</span> <span class="o">/</span> <span class="mi">10</span> <span class="o">**</span> <span class="n">nrm</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">barimg</span><span class="p">,</span> <span class="n">aspect</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">,</span> <span class="n">interpolation</span><span class="o">=</span><span class="s1">&#39;nearest&#39;</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="s1">&#39;lower&#39;</span><span class="p">,</span>
+               <span class="n">vmin</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">nanmin</span><span class="p">(</span><span class="n">barimg</span><span class="p">),</span> <span class="n">vmax</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">nanmax</span><span class="p">(</span><span class="n">barimg</span><span class="p">),</span>
+               <span class="n">extent</span><span class="o">=</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="n">brange</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">brange</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]),</span> <span class="n">cmap</span><span class="o">=</span><span class="n">cmap</span><span class="p">)</span>
+    <span class="n">barwin</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">tick_right</span><span class="p">()</span>
+    <span class="n">barwin</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">set_label_position</span><span class="p">(</span><span class="s1">&#39;right&#39;</span><span class="p">)</span>
+    <span class="n">barwin</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">set_major_locator</span><span class="p">(</span><span class="n">plt</span><span class="o">.</span><span class="n">MaxNLocator</span><span class="p">(</span><span class="mi">7</span><span class="p">))</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">set_major_formatter</span><span class="p">(</span><span class="n">plt</span><span class="o">.</span><span class="n">ScalarFormatter</span><span class="p">(</span><span class="n">useOffset</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span><span class="o">.</span><span class="n">set_autoscale_on</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">setp</span><span class="p">(</span><span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">(),</span> <span class="n">xticklabels</span><span class="o">=</span><span class="p">[],</span> <span class="n">xticks</span><span class="o">=</span><span class="p">[])</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Flux (10$^{</span><span class="si">%d</span><span class="s1">}$ e$^-$ s$^{-1}$)&#39;</span> <span class="o">%</span> <span class="n">nrm</span><span class="p">)</span>
+    <span class="n">barwin</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">set_major_formatter</span><span class="p">(</span><span class="n">ticker</span><span class="o">.</span><span class="n">FormatStrFormatter</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%.1f</span><span class="s1">&#39;</span><span class="p">))</span>
+
+    <span class="c1"># render plot</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Writing output file </span><span class="si">{}</span><span class="s2">...&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">outfile</span><span class="p">))</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">outfile</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">plot</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">draw</span><span class="p">()</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+    <span class="c1"># stop time</span>
+    <span class="n">kepmsg</span><span class="o">.</span><span class="n">clock</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">KEPPRF ended at&#39;</span><span class="p">,</span> <span class="n">logfile</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span></div>
+
+<span class="c1"># plot channel image</span>
+<span class="k">def</span> <span class="nf">plotimage</span><span class="p">(</span><span class="n">imgflux_pl</span><span class="p">,</span> <span class="n">zminfl</span><span class="p">,</span> <span class="n">zmaxfl</span><span class="p">,</span> <span class="n">plmode</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">column</span><span class="p">,</span>
+              <span class="n">xdim</span><span class="p">,</span> <span class="n">ydim</span><span class="p">,</span> <span class="n">winx</span><span class="p">,</span> <span class="n">winy</span><span class="p">,</span> <span class="n">tlabel</span><span class="p">,</span> <span class="n">cmap</span><span class="p">):</span>
+    <span class="c1"># pixel limits of the subimage</span>
+    <span class="n">ymin</span> <span class="o">=</span> <span class="n">row</span>
+    <span class="n">ymax</span> <span class="o">=</span> <span class="n">ymin</span> <span class="o">+</span> <span class="n">ydim</span>
+    <span class="n">xmin</span> <span class="o">=</span> <span class="n">column</span>
+    <span class="n">xmax</span> <span class="o">=</span> <span class="n">xmin</span> <span class="o">+</span> <span class="n">xdim</span>
+    <span class="c1"># plot limits for flux image</span>
+    <span class="n">ymin</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">ymin</span><span class="p">)</span> <span class="o">-</span> <span class="mf">0.5</span>
+    <span class="n">ymax</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">ymax</span><span class="p">)</span> <span class="o">-</span> <span class="mf">0.5</span>
+    <span class="n">xmin</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">xmin</span><span class="p">)</span> <span class="o">-</span> <span class="mf">0.5</span>
+    <span class="n">xmax</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">xmax</span><span class="p">)</span> <span class="o">-</span> <span class="mf">0.5</span>
+    <span class="c1"># plot the image window</span>
+    <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">axes</span><span class="p">([</span><span class="n">winx</span><span class="p">,</span><span class="n">winy</span><span class="p">,</span><span class="mf">0.37</span><span class="p">,</span><span class="mf">0.45</span><span class="p">])</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">imgflux_pl</span><span class="p">,</span><span class="n">aspect</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">,</span><span class="n">interpolation</span><span class="o">=</span><span class="s1">&#39;nearest&#39;</span><span class="p">,</span><span class="n">origin</span><span class="o">=</span><span class="s1">&#39;lower&#39;</span><span class="p">,</span>
+           <span class="n">vmin</span><span class="o">=</span><span class="n">zminfl</span><span class="p">,</span><span class="n">vmax</span><span class="o">=</span><span class="n">zmaxfl</span><span class="p">,</span><span class="n">extent</span><span class="o">=</span><span class="p">(</span><span class="n">xmin</span><span class="p">,</span><span class="n">xmax</span><span class="p">,</span><span class="n">ymin</span><span class="p">,</span><span class="n">ymax</span><span class="p">),</span><span class="n">cmap</span><span class="o">=</span><span class="n">cmap</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span><span class="o">.</span><span class="n">set_autoscale_on</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">labels</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">get_yticklabels</span><span class="p">()</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_major_formatter</span><span class="p">(</span><span class="n">plt</span><span class="o">.</span><span class="n">ScalarFormatter</span><span class="p">(</span><span class="n">useOffset</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">set_major_formatter</span><span class="p">(</span><span class="n">plt</span><span class="o">.</span><span class="n">ScalarFormatter</span><span class="p">(</span><span class="n">useOffset</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">plmode</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">setp</span><span class="p">(</span><span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">(),</span><span class="n">xticklabels</span><span class="o">=</span><span class="p">[])</span>
+    <span class="k">if</span> <span class="n">plmode</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">setp</span><span class="p">(</span><span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">(),</span><span class="n">xticklabels</span><span class="o">=</span><span class="p">[],</span><span class="n">yticklabels</span><span class="o">=</span><span class="p">[])</span>
+    <span class="k">if</span> <span class="n">plmode</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">setp</span><span class="p">(</span><span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">(),</span><span class="n">yticklabels</span><span class="o">=</span><span class="p">[])</span>
+    <span class="k">if</span> <span class="n">plmode</span> <span class="o">==</span> <span class="mi">3</span> <span class="ow">or</span> <span class="n">plmode</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Pixel Column Number&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;color&#39;</span> <span class="p">:</span> <span class="s1">&#39;k&#39;</span><span class="p">})</span>
+    <span class="k">if</span> <span class="n">plmode</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">or</span> <span class="n">plmode</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Pixel Row Number&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;color&#39;</span> <span class="p">:</span> <span class="s1">&#39;k&#39;</span><span class="p">})</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="mf">0.05</span><span class="p">,</span> <span class="mf">0.93</span><span class="p">,</span><span class="n">tlabel</span><span class="p">,</span><span class="n">horizontalalignment</span><span class="o">=</span><span class="s1">&#39;left&#39;</span><span class="p">,</span><span class="n">verticalalignment</span><span class="o">=</span><span class="s1">&#39;center&#39;</span><span class="p">,</span>
+               <span class="n">fontsize</span><span class="o">=</span><span class="mi">36</span><span class="p">,</span><span class="n">fontweight</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span><span class="n">transform</span><span class="o">=</span><span class="n">ax</span><span class="o">.</span><span class="n">transAxes</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">kepprf_main</span><span class="p">():</span>
+    <span class="kn">import</span> <span class="nn">argparse</span>
+
+    <span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">(</span>
+             <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Fitting PRF model to Target Pixel image&quot;</span><span class="p">,</span>
+             <span class="n">formatter_class</span><span class="o">=</span><span class="n">PyKEArgumentHelpFormatter</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;infile&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Name of input target pixel file&#39;</span><span class="p">,</span>
+                        <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--prfdir&#39;</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;Folder containing Point Response Function &quot;</span>
+                              <span class="s2">&quot;FITS files&quot;</span><span class="p">),</span> <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--frameno&#39;</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Cadence number of image stored in infile&#39;</span><span class="p">,</span>
+                        <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--columns&#39;</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;Initial guesses for the center of each source &quot;</span>
+                              <span class="s2">&quot;on the x-axis&quot;</span><span class="p">),</span>
+                        <span class="n">nargs</span><span class="o">=</span><span class="s1">&#39;+&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--rows&#39;</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;Initial guesses for the center of each source &quot;</span>
+                              <span class="s2">&quot;on the x-axis&quot;</span><span class="p">),</span>
+                        <span class="n">nargs</span><span class="o">=</span><span class="s1">&#39;+&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--fluxes&#39;</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Relative flux of each source to be fit&#39;</span><span class="p">,</span>
+                        <span class="n">nargs</span><span class="o">=</span><span class="s1">&#39;+&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--background&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_true&#39;</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Fit background?&#39;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--border&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Order of background polynmial fit&#39;</span><span class="p">,</span>
+                        <span class="n">default</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--focus&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_true&#39;</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Fit focus changes?&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--xtol&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mf">1.0e-4</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Fit parameter tolerance&#39;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s1">&#39;xtol&#39;</span><span class="p">,</span>
+                        <span class="nb">type</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--ftol&#39;</span><span class="p">,</span> <span class="s1">&#39;-f&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Fit minimization tolerance&#39;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s1">&#39;ftol&#39;</span><span class="p">,</span>
+                        <span class="nb">type</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--outfile&#39;</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;Name of output PNG plot file.&#39;</span>
+                              <span class="s1">&#39; If None, outfile is infile-kepprf.&#39;</span><span class="p">),</span>
+                        <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--plot&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_true&#39;</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Plot fit results?&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--imscale&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Type of image intensity scale&#39;</span><span class="p">,</span>
+                        <span class="n">default</span><span class="o">=</span><span class="s1">&#39;linear&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span>
+                        <span class="n">choices</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;linear&#39;</span><span class="p">,</span><span class="s1">&#39;logarithmic&#39;</span><span class="p">,</span><span class="s1">&#39;squareroot&#39;</span><span class="p">])</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--cmap&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Image colormap&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s1">&#39;YlOrBr&#39;</span><span class="p">,</span>
+                        <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--apercol&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Aperture color&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s1">&#39;#ffffff&#39;</span><span class="p">,</span>
+                        <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--verbose&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_true&#39;</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Write to a log file?&#39;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--logfile&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s1">&#39;kepprf.log&#39;</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Name of ascii log file&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">)</span>
+    <span class="n">args</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">()</span>
+
+    <span class="n">kepprf</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">infile</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">prfdir</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">frameno</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">columns</span><span class="p">,</span>
+           <span class="n">args</span><span class="o">.</span><span class="n">rows</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">fluxes</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">background</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">border</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">focus</span><span class="p">,</span>
+           <span class="n">args</span><span class="o">.</span><span class="n">xtol</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">ftol</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">outfile</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">plot</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">imscale</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">cmap</span><span class="p">,</span>
+           <span class="n">args</span><span class="o">.</span><span class="n">apercol</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">verbose</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">logfile</span><span class="p">)</span>
+</pre></div>
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright PyKE Developers and Contributors.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'3.0.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

@@ -210,20 +210,55 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="kepwindow-calculate-and-store-the-window-function-for-a-kepler-time-series">
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast,
+.nboutput.nblast {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast + .nbinput {
+    margin-top: -19px;
+}
+
+/* nice headers on first paragraph of info/warning boxes */
+.admonition .first {
+    margin: -12px;
+    padding: 6px 12px;
+    margin-bottom: 12px;
+    color: #fff;
+    line-height: 1;
+    display: block;
+}
+.admonition.warning .first {
+    background: #f0b37e;
+}
+.admonition.note .first {
+    background: #6ab0de;
+}
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+</style>
+<div class="section" id="kepwindow-calculate-and-store-the-window-function-for-a-kepler-time-series">
 <h1><strong>kepwindow</strong>: calculate and store the window function for a Kepler time series<a class="headerlink" href="#kepwindow-calculate-and-store-the-window-function-for-a-kepler-time-series" title="Permalink to this headline">¶</a></h1>
 <dl class="function">
 <dt id="pyke.kepwindow.kepwindow">
-<code class="descclassname">pyke.kepwindow.</code><code class="descname">kepwindow</code><span class="sig-paren">(</span><em>infile</em>, <em>outfile=None</em>, <em>fcol='SAP_FLUX'</em>, <em>fmax=1.0</em>, <em>nfreq=100</em>, <em>plot=False</em>, <em>overwrite=False</em>, <em>verbose=False</em>, <em>logfile='kepwindow.log'</em><span class="sig-paren">)</span><a class="headerlink" href="#pyke.kepwindow.kepwindow" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">pyke.kepwindow.</code><code class="descname">kepwindow</code><span class="sig-paren">(</span><em>infile</em>, <em>outfile=None</em>, <em>datacol='SAP_FLUX'</em>, <em>nyqfactor=0.01</em>, <em>plot=False</em>, <em>noninteractive=False</em>, <em>overwrite=False</em>, <em>verbose=False</em>, <em>logfile='kepwindow.log'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyke/kepwindow.html#kepwindow"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyke.kepwindow.kepwindow" title="Permalink to this definition">¶</a></dt>
 <dd><p>kepwindow – Calculate and store the window function for a Kepler time
 series</p>
 <p>Kepler time stamps are not perfectly uniform. There are gaps in the data due
 to operational pauses and issues, and timestamps are corrected to the
 barycenter of the solar system. The size of the barycenter correction is
 time-dependent. kepwindow calculates a discrete window function for a
-user-provided Kepler time series. The result is stored in a new FITS file
-that is a direct copy of the input file but with an additional table
-extension containing the window function.</p>
+user-provided Kepler time series. This is calculated using a Lomb-Scargle
+periodogram. The result is stored in a new FITS file that is a direct copy
+of the input file but with an additional table extension containing the
+window function.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -238,27 +273,27 @@ curve within the first data extension.</p>
 <div><p>The name of the output FITS file with a new extension containing the
 window function.</p>
 </div></blockquote>
-<p><strong>fcol</strong> : str</p>
+<p><strong>datacol</strong> : str</p>
 <blockquote>
 <div><p>The name of the FITS table column in extension 1 of infile with which
 the window function should be coupled to. While the window function
 ostensibly requires the timing information, this particular piece of
-information is required so that the task can search the fcol array for
+information is required so that the task can search the datacol array for
 bad data such as instances of NaN. These will be rejected before the
 window function is calculated.</p>
 </div></blockquote>
-<p><strong>fmax</strong> : float [1/day]</p>
+<p><strong>nyqfactor</strong> : int</p>
 <blockquote>
-<div><p>The maximum frequency on which the window function will be calculated.</p>
-</div></blockquote>
-<p><strong>nfreq</strong> : int</p>
-<blockquote>
-<div><p>The number of uniform frequency steps between 0 and fmax over which the
-window function will be calculated.</p>
+<div><p>The number of nyquist factors up to which to evaluate. Kepler data is
+fairly regular and so the default will usually encompass most of the window.</p>
 </div></blockquote>
 <p><strong>plot</strong> : bool</p>
 <blockquote>
 <div><p>Plot the output window function?</p>
+</div></blockquote>
+<p><strong>non-interactive</strong> : bool</p>
+<blockquote>
+<div><p>If True, prevents the matplotlib window to pop up.</p>
 </div></blockquote>
 <p><strong>overwrite</strong> : bool</p>
 <blockquote>
@@ -278,7 +313,7 @@ window function will be calculated.</p>
 </table>
 <p class="rubric">Examples</p>
 <div class="highlight-bash"><div class="highlight"><pre><span></span>$ kepwindow kplr002436324-2009259160929_llc.fits --datacol SAP_FLUX
---fmax <span class="m">0</span>.7 --nfreq <span class="m">500</span> --plot --verbose
+--nyqfactor <span class="m">0</span>.02 --plot --verbose
 </pre></div>
 </div>
 <img alt="../_images/kepwindow.png" class="align-center" src="../_images/kepwindow.png" />

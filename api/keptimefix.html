@@ -210,11 +210,45 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="keptimefix-correct-a-time-stamp-error-in-the-target-pixel-files">
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast,
+.nboutput.nblast {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast + .nbinput {
+    margin-top: -19px;
+}
+
+/* nice headers on first paragraph of info/warning boxes */
+.admonition .first {
+    margin: -12px;
+    padding: 6px 12px;
+    margin-bottom: 12px;
+    color: #fff;
+    line-height: 1;
+    display: block;
+}
+.admonition.warning .first {
+    background: #f0b37e;
+}
+.admonition.note .first {
+    background: #6ab0de;
+}
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+</style>
+<div class="section" id="keptimefix-correct-a-time-stamp-error-in-the-target-pixel-files">
 <h1><strong>keptimefix</strong>: correct a time stamp error in the target pixel files<a class="headerlink" href="#keptimefix-correct-a-time-stamp-error-in-the-target-pixel-files" title="Permalink to this headline">¶</a></h1>
 <dl class="function">
 <dt id="pyke.keptimefix.keptimefix">
-<code class="descclassname">pyke.keptimefix.</code><code class="descname">keptimefix</code><span class="sig-paren">(</span><em>infile</em>, <em>outfile=None</em>, <em>overwrite=False</em>, <em>verbose=False</em>, <em>logfile='keptimefix.log'</em><span class="sig-paren">)</span><a class="headerlink" href="#pyke.keptimefix.keptimefix" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">pyke.keptimefix.</code><code class="descname">keptimefix</code><span class="sig-paren">(</span><em>infile</em>, <em>outfile=None</em>, <em>overwrite=False</em>, <em>verbose=False</em>, <em>logfile='keptimefix.log'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyke/keptimefix.html#keptimefix"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyke.keptimefix.keptimefix" title="Permalink to this definition">¶</a></dt>
 <dd><p>keptimefix – Correct a time stamp error in the target pixel files</p>
 <p>All Kepler light curve and target pixel files with version numbers 5.0
 contain an error in the time stamps. This was fixed in the light curve with

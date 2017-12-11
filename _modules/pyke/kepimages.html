@@ -1,0 +1,544 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>pyke.kepimages &mdash; PyKE 3.0.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../genindex.html"/>
+        <link rel="search" title="Search" href="../../search.html"/>
+    <link rel="top" title="PyKE 3.0.0 documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> PyKE
+          
+
+          
+            
+            <img src="../../_static/pyke-white.png" class="logo" />
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                3.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/ipython_notebooks/whatsnew31.html">What’s new in PyKE 3.1?</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart.html">Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../overview.html">PyKE tasks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../citing.html">Citing</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/index.html">Photometry tutorials</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">PyKE</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>pyke.kepimages</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pyke.kepimages</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">.utils</span> <span class="k">import</span> <span class="n">PyKEArgumentHelpFormatter</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">astropy.io</span> <span class="k">import</span> <span class="n">fits</span> <span class="k">as</span> <span class="n">pyfits</span>
+<span class="kn">from</span> <span class="nn">tqdm</span> <span class="k">import</span> <span class="n">tqdm</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">kepio</span><span class="p">,</span> <span class="n">kepmsg</span><span class="p">,</span> <span class="n">kepkey</span><span class="p">,</span> <span class="n">kepstat</span>
+
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;kepimages&#39;</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="kepimages"><a class="viewcode-back" href="../../api/kepimages.html#pyke.kepimages.kepimages">[docs]</a><span class="k">def</span> <span class="nf">kepimages</span><span class="p">(</span><span class="n">infile</span><span class="p">,</span> <span class="n">prefix</span><span class="p">,</span> <span class="n">imtype</span><span class="o">=</span><span class="s1">&#39;FLUX&#39;</span><span class="p">,</span> <span class="n">ranges</span><span class="o">=</span><span class="s1">&#39;0,0&#39;</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+              <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">logfile</span><span class="o">=</span><span class="s1">&#39;kepimages.log&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    kepimages -- create a series of separate FITS image files from a Target</span>
+<span class="sd">    Pixel File</span>
+
+<span class="sd">    ``kepimages`` will create a series of FITS image files which copy the</span>
+<span class="sd">    images stored within a Target Pixel File (TPF). One FITS image file will be</span>
+<span class="sd">    created for each Kepler exposure. The user can request all images within a</span>
+<span class="sd">    TPF or a subset by supplying a series of Barycentric Julian Date ranges.</span>
+<span class="sd">    FITS keywords from the primary and first extensions of the TPF are</span>
+<span class="sd">    propagated into the output image files. The mid-time of each exposure</span>
+<span class="sd">    (MIDTIME), Barycentric time correction (BARYCORR), cadence number</span>
+<span class="sd">    (CADENCEN) and data quality flag (QUALITY) are exported to the FITS images</span>
+<span class="sd">    as keywords. The position of the target during each observation, relative</span>
+<span class="sd">    to the mid-time of the quarter, in both pixel column and row directions are</span>
+<span class="sd">    recorded in keywords POSCORR1 and POSCORR2. If a cosmic ray event was</span>
+<span class="sd">    recorded during an individual exposure then the keyword COSM_RAY is flagged</span>
+<span class="sd">    as true. The keywords TELAPSE, LIVETIME and EXPOSURE are overwritten and\</span>
+<span class="sd">    refer to the individual exposure times of each image.</span>
+
+<span class="sd">    The user can choose from six different images to extract:</span>
+
+<span class="sd">    * ``RAW_CNTS`` -- uncalibrated pixel count values</span>
+<span class="sd">    * ``FLUX`` -- calibrated pixel, background-subtracted, cosmic ray-removed</span>
+<span class="sd">      fluxes in units of :math:`e^{-}/s`</span>
+<span class="sd">    * ``FLUX_ERR`` -- 1-:math:`\sigma` errors on the FLUX image, as</span>
+<span class="sd">      propagated through the pixel calibration</span>
+<span class="sd">    * ``FLUX_BKG`` -- the background that has been subtracted from the FLUX</span>
+<span class="sd">      image in units of :math:`e^{-}/s`</span>
+<span class="sd">    * ``FLUX_BKG_ERR`` -- 1-:math:`\sigma` errors on the FLUX_BKG image, as</span>
+<span class="sd">      propagated through the pixel calibration</span>
+<span class="sd">    * ``COSMIC_RAYS`` -- the cosmic ray map that has been subtracted from the</span>
+<span class="sd">      FLUX image in units of :math:`e^{-}/s`</span>
+
+<span class="sd">    We recommend the tools `ds9 &lt;http://ds9.si.edu/&gt;`_ and</span>
+<span class="sd">    `fv &lt;https://heasarc.gsfc.nasa.gov/ftools/fv/&gt;`_ for the inspection of the</span>
+<span class="sd">    FITS image products. The intent of the kepimages tool is to convert the</span>
+<span class="sd">    TPF content into a form from which images can be imported into the array</span>
+<span class="sd">    of public photometry software available to the K2 and Kepler communities.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    infile : str</span>
+<span class="sd">        Filename for the input Target Pixel File.</span>
+<span class="sd">    prefix : str</span>
+<span class="sd">        Prefix for the filenames of the output FITS images. Individual</span>
+<span class="sd">        filenames will be prefix_BJDddddddd.dddd.fits, where</span>
+<span class="sd">        ddddddd.dddd is the mid-time of the exposure in units of BJD.</span>
+<span class="sd">    ranges : str</span>
+<span class="sd">        The user can choose here specific time ranges of exposures from which</span>
+<span class="sd">        to export images. Time ranges are supplied as comma-separated pairs of</span>
+<span class="sd">        Barycentric Julian Dates (BJDs). Multiple ranges are separated by a</span>
+<span class="sd">        semi-colon. An example containing two time ranges is::</span>
+
+<span class="sd">            &#39;2455641.658,2455641.740;2455671.658,2455672.740&#39;</span>
+<span class="sd">    overwrite : bool</span>
+<span class="sd">        Overwrite the output file? if overwrite is False and an existing file has</span>
+<span class="sd">        the same name as outfile then the task will stop with an error.</span>
+<span class="sd">    verbose : bool</span>
+<span class="sd">        Print informative messages and warnings to the shell and logfile?</span>
+<span class="sd">    logfile : str</span>
+<span class="sd">        Name of the logfile containing error and warning messages.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    .. code-block: bash</span>
+
+<span class="sd">        $ kepimages ktwo202073445-c00_lpd-targ.fits ktwo202073445-c00 --verbose</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># log the call</span>
+    <span class="n">hashline</span> <span class="o">=</span> <span class="s1">&#39;--------------------------------------------------------------&#39;</span>
+    <span class="n">kepmsg</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">logfile</span><span class="p">,</span> <span class="n">hashline</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+    <span class="n">call</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;KEPIMAGES -- &#39;</span>
+            <span class="o">+</span> <span class="s1">&#39; infile=</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">infile</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s1">&#39; prefix=</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">prefix</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s1">&#39; imtype=</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">imtype</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s1">&#39; ranges=</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ranges</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s1">&#39; overwrite=</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">overwrite</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s1">&#39; verbose=</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">verbose</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s1">&#39; logfile=</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">logfile</span><span class="p">))</span>
+    <span class="n">kepmsg</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">logfile</span><span class="p">,</span><span class="n">call</span><span class="o">+</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span><span class="n">verbose</span><span class="p">)</span>
+
+    <span class="n">kepmsg</span><span class="o">.</span><span class="n">clock</span><span class="p">(</span><span class="s1">&#39;KEPIMAGES started at&#39;</span><span class="p">,</span> <span class="n">logfile</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+
+    <span class="c1"># open input file</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">)</span>
+    <span class="n">instr</span> <span class="o">=</span> <span class="n">pyfits</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">infile</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;readonly&#39;</span><span class="p">,</span> <span class="n">memmap</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">cards0</span> <span class="o">=</span> <span class="n">instr</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">header</span><span class="o">.</span><span class="n">cards</span>
+    <span class="n">cards1</span> <span class="o">=</span> <span class="n">instr</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">header</span><span class="o">.</span><span class="n">cards</span>
+    <span class="n">cards2</span> <span class="o">=</span> <span class="n">instr</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">header</span><span class="o">.</span><span class="n">cards</span>
+
+    <span class="c1"># fudge non-compliant FITS keywords with no values</span>
+    <span class="n">instr</span> <span class="o">=</span> <span class="n">kepkey</span><span class="o">.</span><span class="n">emptykeys</span><span class="p">(</span><span class="n">instr</span><span class="p">,</span> <span class="n">infile</span><span class="p">,</span> <span class="n">logfile</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+
+    <span class="c1"># ingest time series data</span>
+    <span class="n">time</span> <span class="o">=</span> <span class="n">instr</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="s1">&#39;TIME&#39;</span><span class="p">)[:]</span> <span class="o">+</span> <span class="mf">2454833.0</span>
+    <span class="n">timecorr</span> <span class="o">=</span> <span class="n">instr</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="s1">&#39;TIMECORR&#39;</span><span class="p">)[:]</span>
+    <span class="n">cadenceno</span> <span class="o">=</span> <span class="n">instr</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="s1">&#39;CADENCENO&#39;</span><span class="p">)[:]</span>
+    <span class="n">raw_cnts</span> <span class="o">=</span> <span class="n">instr</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="s1">&#39;RAW_CNTS&#39;</span><span class="p">)[:]</span>
+    <span class="n">flux</span> <span class="o">=</span> <span class="n">instr</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="s1">&#39;FLUX&#39;</span><span class="p">)[:]</span>
+    <span class="n">flux_err</span> <span class="o">=</span> <span class="n">instr</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="s1">&#39;FLUX_ERR&#39;</span><span class="p">)[:]</span>
+    <span class="n">flux_bkg</span> <span class="o">=</span> <span class="n">instr</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="s1">&#39;FLUX_BKG&#39;</span><span class="p">)[:]</span>
+    <span class="n">flux_bkg_err</span> <span class="o">=</span> <span class="n">instr</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="s1">&#39;FLUX_BKG_ERR&#39;</span><span class="p">)[:]</span>
+    <span class="n">cosmic_rays</span> <span class="o">=</span> <span class="n">instr</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="s1">&#39;COSMIC_RAYS&#39;</span><span class="p">)[:]</span>
+    <span class="n">quality</span> <span class="o">=</span> <span class="n">instr</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="s1">&#39;QUALITY&#39;</span><span class="p">)[:]</span>
+    <span class="n">pos_corr1</span> <span class="o">=</span> <span class="n">instr</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="s1">&#39;POS_CORR1&#39;</span><span class="p">)[:]</span>
+    <span class="n">pos_corr2</span> <span class="o">=</span> <span class="n">instr</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="s1">&#39;POS_CORR2&#39;</span><span class="p">)[:]</span>
+
+    <span class="c1"># choose output image</span>
+    <span class="k">if</span> <span class="n">imtype</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;raw_cnts&#39;</span><span class="p">:</span>
+        <span class="n">outim</span> <span class="o">=</span> <span class="n">raw_cnts</span>
+    <span class="k">elif</span> <span class="n">imtype</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;flux_err&#39;</span><span class="p">:</span>
+        <span class="n">outim</span> <span class="o">=</span> <span class="n">flux_err</span>
+    <span class="k">elif</span> <span class="n">imtype</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;flux_bkg&#39;</span><span class="p">:</span>
+        <span class="n">outim</span> <span class="o">=</span> <span class="n">flux_bkg</span>
+    <span class="k">elif</span> <span class="n">imtype</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;flux_bkg_err&#39;</span><span class="p">:</span>
+        <span class="n">outim</span> <span class="o">=</span> <span class="n">flux_bkg_err</span>
+    <span class="k">elif</span> <span class="n">imtype</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;cosmic_rays&#39;</span><span class="p">:</span>
+        <span class="n">outim</span> <span class="o">=</span> <span class="n">cosmic_rays</span>
+    <span class="k">elif</span> <span class="n">imtype</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;flux_plus_bkg&#39;</span><span class="p">:</span>
+        <span class="n">outim</span> <span class="o">=</span> <span class="n">flux</span> <span class="o">+</span> <span class="n">flux_bkg</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">outim</span> <span class="o">=</span> <span class="n">flux</span>
+
+    <span class="c1"># identify images to be exported</span>
+    <span class="n">tim</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([])</span>
+    <span class="n">dat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([])</span>
+    <span class="n">err</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([])</span>
+    <span class="n">tstart</span><span class="p">,</span> <span class="n">tstop</span> <span class="o">=</span> <span class="n">kepio</span><span class="o">.</span><span class="n">timeranges</span><span class="p">(</span><span class="n">ranges</span><span class="p">,</span> <span class="n">logfile</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+    <span class="n">cadencelis</span> <span class="o">=</span> <span class="n">kepstat</span><span class="o">.</span><span class="n">filterOnRange</span><span class="p">(</span><span class="n">time</span><span class="p">,</span> <span class="n">tstart</span><span class="p">,</span> <span class="n">tstop</span><span class="p">)</span>
+
+    <span class="c1"># provide name for each output file and overwrite if file exists</span>
+    <span class="k">for</span> <span class="n">cadence</span> <span class="ow">in</span> <span class="n">cadencelis</span><span class="p">:</span>
+        <span class="n">outfile</span> <span class="o">=</span> <span class="n">prefix</span> <span class="o">+</span> <span class="s1">&#39;_BJD</span><span class="si">%.4f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">time</span><span class="p">[</span><span class="n">cadence</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;.fits&#39;</span>
+        <span class="k">if</span> <span class="n">overwrite</span><span class="p">:</span>
+            <span class="n">kepio</span><span class="o">.</span><span class="n">overwrite</span><span class="p">(</span><span class="n">outfile</span><span class="p">,</span> <span class="n">logfile</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">kepio</span><span class="o">.</span><span class="n">fileexists</span><span class="p">(</span><span class="n">outfile</span><span class="p">):</span>
+            <span class="n">errmsg</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;ERROR -- KEPIMAGES: </span><span class="si">{}</span><span class="s1"> exists. Use --overwrite&#39;</span>
+                      <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">outfile</span><span class="p">))</span>
+            <span class="n">kepmsg</span><span class="o">.</span><span class="n">err</span><span class="p">(</span><span class="n">logfile</span><span class="p">,</span> <span class="n">errmsg</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+
+    <span class="c1"># construct output primary extension</span>
+    <span class="n">ncad</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">cadence</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="n">cadencelis</span><span class="p">):</span>
+        <span class="n">outfile</span> <span class="o">=</span> <span class="n">prefix</span> <span class="o">+</span> <span class="s1">&#39;_BJD</span><span class="si">%.4f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">time</span><span class="p">[</span><span class="n">cadence</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;.fits&#39;</span>
+        <span class="n">hdu0</span> <span class="o">=</span> <span class="n">pyfits</span><span class="o">.</span><span class="n">PrimaryHDU</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">cards0</span><span class="p">)):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">cards0</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">keyword</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">hdu0</span><span class="o">.</span><span class="n">header</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                    <span class="n">hdu0</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="n">cards0</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">keyword</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">cards0</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+                                                      <span class="n">cards0</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">comment</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">hdu0</span><span class="o">.</span><span class="n">header</span><span class="o">.</span><span class="n">cards</span><span class="p">[</span><span class="n">cards0</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">comment</span> <span class="o">=</span> <span class="n">cards0</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">comment</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="k">pass</span>
+        <span class="n">kepkey</span><span class="o">.</span><span class="n">history</span><span class="p">(</span><span class="n">call</span><span class="p">,</span> <span class="n">hdu0</span><span class="p">,</span> <span class="n">outfile</span><span class="p">,</span> <span class="n">logfile</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+        <span class="n">outstr</span> <span class="o">=</span> <span class="n">pyfits</span><span class="o">.</span><span class="n">HDUList</span><span class="p">(</span><span class="n">hdu0</span><span class="p">)</span>
+
+        <span class="c1"># construct output image extension</span>
+        <span class="n">hdu1</span> <span class="o">=</span> <span class="n">pyfits</span><span class="o">.</span><span class="n">ImageHDU</span><span class="p">(</span><span class="n">outim</span><span class="p">[</span><span class="n">cadence</span><span class="p">])</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">cards2</span><span class="p">)):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">cards2</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">keyword</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                    <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="n">cards2</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">cards2</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+                                                  <span class="n">cards2</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">comment</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="k">pass</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">cards1</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">cards1</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">keyword</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="ow">and</span>
+                <span class="n">cards1</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">keyword</span><span class="p">[:</span><span class="mi">4</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;TTYP&#39;</span><span class="p">,</span> <span class="s1">&#39;TFOR&#39;</span><span class="p">,</span> <span class="s1">&#39;TUNI&#39;</span><span class="p">,</span>
+                                              <span class="s1">&#39;TDIS&#39;</span><span class="p">,</span> <span class="s1">&#39;TDIM&#39;</span><span class="p">,</span> <span class="s1">&#39;WCAX&#39;</span><span class="p">,</span>
+                                              <span class="s1">&#39;1CTY&#39;</span><span class="p">,</span> <span class="s1">&#39;2CTY&#39;</span><span class="p">,</span> <span class="s1">&#39;1CRP&#39;</span><span class="p">,</span>
+                                              <span class="s1">&#39;2CRP&#39;</span><span class="p">,</span> <span class="s1">&#39;1CRV&#39;</span><span class="p">,</span> <span class="s1">&#39;2CRV&#39;</span><span class="p">,</span>
+                                              <span class="s1">&#39;1CUN&#39;</span><span class="p">,</span> <span class="s1">&#39;2CUN&#39;</span><span class="p">,</span> <span class="s1">&#39;1CDE&#39;</span><span class="p">,</span>
+                                              <span class="s1">&#39;2CDE&#39;</span><span class="p">,</span> <span class="s1">&#39;1CTY&#39;</span><span class="p">,</span> <span class="s1">&#39;2CTY&#39;</span><span class="p">,</span>
+                                              <span class="s1">&#39;1CDL&#39;</span><span class="p">,</span> <span class="s1">&#39;2CDL&#39;</span><span class="p">,</span> <span class="s1">&#39;11PC&#39;</span><span class="p">,</span>
+                                              <span class="s1">&#39;12PC&#39;</span><span class="p">,</span> <span class="s1">&#39;21PC&#39;</span><span class="p">,</span> <span class="s1">&#39;22PC&#39;</span><span class="p">,</span>
+                                              <span class="s1">&#39;WCSN&#39;</span><span class="p">,</span><span class="s1">&#39;TFIE&#39;</span><span class="p">]):</span>
+                <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="n">cards1</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">keyword</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">cards1</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+                                                  <span class="n">cards1</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">comment</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">int_time</span> <span class="o">=</span> <span class="n">cards1</span><span class="p">[</span><span class="s1">&#39;INT_TIME&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">kepmsg</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="n">logfile</span><span class="p">,</span>
+                        <span class="s1">&#39;WARNING -- KEPIMAGES: cannot find INT_TIME keyword&#39;</span><span class="p">,</span>
+                        <span class="n">verbose</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">frametim</span> <span class="o">=</span> <span class="n">cards1</span><span class="p">[</span><span class="s1">&#39;FRAMETIM&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">kepmsg</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="n">logfile</span><span class="p">,</span>
+                        <span class="s1">&#39;WARNING -- KEPIMAGES: cannot find FRAMETIM keyword&#39;</span><span class="p">,</span>
+                        <span class="n">verbose</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">num_frm</span> <span class="o">=</span> <span class="n">cards1</span><span class="p">[</span><span class="s1">&#39;NUM_FRM&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">kepmsg</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="n">logfile</span><span class="p">,</span>
+                        <span class="s1">&#39;WARNING -- KEPIMAGES: cannot find NUM_FRM keyword&#39;</span><span class="p">,</span>
+                        <span class="n">verbose</span><span class="p">)</span>
+
+        <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;EXTNAME&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;IMAGE&#39;</span><span class="p">,</span><span class="s1">&#39;name of extension&#39;</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;TELAPSE&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">frametim</span> <span class="o">*</span> <span class="n">num_frm</span><span class="p">,</span>
+                                      <span class="s1">&#39;[s] elapsed time for exposure&#39;</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;TELAPSE&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mi">999</span><span class="p">,</span> <span class="s1">&#39;[s] elapsed time for exposure&#39;</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;LIVETIME&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">int_time</span> <span class="o">*</span> <span class="n">num_frm</span><span class="p">,</span>
+                                       <span class="s1">&#39;[s] TELASPE multiplied by DEADC&#39;</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;LIVETIME&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mi">999</span><span class="p">,</span> <span class="s1">&#39;[s] TELASPE multiplied by DEADC&#39;</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;EXPOSURE&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">int_time</span> <span class="o">*</span> <span class="n">num_frm</span><span class="p">,</span>
+                                       <span class="s1">&#39;[s] time on source&#39;</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;EXPOSURE&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mi">999</span><span class="p">,</span> <span class="s1">&#39;[s] time on source&#39;</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;MIDTIME&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">time</span><span class="p">[</span><span class="n">cadence</span><span class="p">],</span>
+                                      <span class="s1">&#39;[BJD] mid-time of exposure&#39;</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;MIDTIME&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mi">999</span><span class="p">,</span> <span class="s1">&#39;[BJD] mid-time of exposure&#39;</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;TIMECORR&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">timecorr</span><span class="p">[</span><span class="n">cadence</span><span class="p">],</span>
+                                       <span class="s1">&#39;[d] barycenter - timeslice correction&#39;</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;TIMECORR&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mi">999</span><span class="p">,</span>
+                                       <span class="s1">&#39;[d] barycenter - timeslice correction&#39;</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;CADENCEN&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">cadenceno</span><span class="p">[</span><span class="n">cadence</span><span class="p">],</span>
+                                       <span class="s1">&#39;unique cadence number&#39;</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;CADENCEN&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mi">999</span><span class="p">,</span> <span class="s1">&#39;unique cadence number&#39;</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;QUALITY&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">quality</span><span class="p">[</span><span class="n">cadence</span><span class="p">],</span> <span class="s1">&#39;pixel quality flag&#39;</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;QUALITY&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mi">999</span><span class="p">,</span> <span class="s1">&#39;pixel quality flag&#39;</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="kc">True</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">cosmic_rays</span><span class="p">[</span><span class="n">cadence</span><span class="p">]):</span>
+                <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;COSM_RAY&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="s1">&#39;cosmic ray detected?&#39;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;COSM_RAY&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="s1">&#39;cosmic ray detected?&#39;</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;COSM_RAY&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mi">999</span><span class="p">,</span> <span class="s1">&#39;cosmic ray detected?&#39;</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">pc1</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">pos_corr1</span><span class="p">[</span><span class="n">cadence</span><span class="p">])</span>
+            <span class="n">pc2</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">pos_corr2</span><span class="p">[</span><span class="n">cadence</span><span class="p">])</span>
+            <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;POSCORR1&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">pc1</span><span class="p">,</span> <span class="s1">&#39;[pix] column position correction&#39;</span><span class="p">)</span>
+            <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;POSCORR2&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">pc2</span><span class="p">,</span> <span class="s1">&#39;[pix] row position correction&#39;</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;POSCORR1&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mi">999</span><span class="p">,</span> <span class="s1">&#39;[pix] column position correction&#39;</span><span class="p">)</span>
+            <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;POSCORR2&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mi">999</span><span class="p">,</span> <span class="s1">&#39;[pix] row position correction&#39;</span><span class="p">)</span>
+        <span class="n">outstr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">hdu1</span><span class="p">)</span>
+
+        <span class="c1"># write output file</span>
+        <span class="n">outstr</span><span class="o">.</span><span class="n">writeto</span><span class="p">(</span><span class="n">outfile</span><span class="p">,</span> <span class="n">checksum</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">ncad</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">txt</span>  <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\r</span><span class="si">%3d%%</span><span class="s1"> &#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">ncad</span><span class="p">)</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">cadencelis</span><span class="p">))</span> <span class="o">*</span> <span class="mf">100.0</span><span class="p">)</span>
+        <span class="n">txt</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> &#39;</span> <span class="o">%</span> <span class="n">outfile</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">txt</span><span class="p">)</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+
+    <span class="c1"># close input structure</span>
+    <span class="n">instr</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="nb">print</span> <span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+
+    <span class="c1"># end time</span>
+    <span class="n">kepmsg</span><span class="o">.</span><span class="n">clock</span><span class="p">(</span><span class="s1">&#39;KEPIMAGES finished at&#39;</span><span class="p">,</span><span class="n">logfile</span><span class="p">,</span><span class="n">verbose</span><span class="p">)</span></div>
+
+
+<span class="k">def</span> <span class="nf">kepimages_main</span><span class="p">():</span>
+    <span class="kn">import</span> <span class="nn">argparse</span>
+    <span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">(</span>
+             <span class="n">description</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;Export images within a Target Pixel File to a&#39;</span>
+                          <span class="s1">&#39; series of FITS image files&#39;</span><span class="p">),</span>
+             <span class="n">formatter_class</span><span class="o">=</span><span class="n">PyKEArgumentHelpFormatter</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;infile&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Name of input target pixel file&#39;</span><span class="p">,</span>
+                        <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;prefix&#39;</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Prefix of name for each output image file&#39;</span><span class="p">,</span>
+                        <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--imtype&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s1">&#39;FLUX&#39;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s1">&#39;imtype&#39;</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Image type&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span>
+                        <span class="n">choices</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;RAW_CNTS&#39;</span><span class="p">,</span> <span class="s1">&#39;FLUX&#39;</span><span class="p">,</span> <span class="s1">&#39;FLUX_ERR&#39;</span><span class="p">,</span> <span class="s1">&#39;FLUX_BKG&#39;</span><span class="p">,</span>
+                                 <span class="s1">&#39;FLUX_BKG_ERR&#39;</span><span class="p">,</span> <span class="s1">&#39;FLUX_PLUS_BKG&#39;</span><span class="p">,</span> <span class="s1">&#39;COSMIC_RAYS&#39;</span><span class="p">])</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--ranges&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Time ranges for output [BJD]&#39;</span><span class="p">,</span>
+                        <span class="n">default</span><span class="o">=</span><span class="s1">&#39;0,0&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--overwrite&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_true&#39;</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Overwrite output file?&#39;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--verbose&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_true&#39;</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Write to a log file?&#39;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--logfile&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Name of ascii log file&#39;</span><span class="p">,</span>
+                        <span class="n">default</span><span class="o">=</span><span class="s1">&#39;kepimages.log&#39;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s1">&#39;logfile&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">)</span>
+    <span class="n">args</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">()</span>
+    <span class="n">kepimages</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">infile</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">prefix</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">imtype</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">ranges</span><span class="p">,</span>
+              <span class="n">args</span><span class="o">.</span><span class="n">overwrite</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">verbose</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">logfile</span><span class="p">)</span>
+</pre></div>
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright PyKE Developers and Contributors.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'3.0.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

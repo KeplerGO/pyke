@@ -210,11 +210,45 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="kepdetrend-detrend-aperture-photometry-data">
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast,
+.nboutput.nblast {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast + .nbinput {
+    margin-top: -19px;
+}
+
+/* nice headers on first paragraph of info/warning boxes */
+.admonition .first {
+    margin: -12px;
+    padding: 6px 12px;
+    margin-bottom: 12px;
+    color: #fff;
+    line-height: 1;
+    display: block;
+}
+.admonition.warning .first {
+    background: #f0b37e;
+}
+.admonition.note .first {
+    background: #6ab0de;
+}
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+</style>
+<div class="section" id="kepdetrend-detrend-aperture-photometry-data">
 <h1><strong>kepdetrend</strong>: detrend aperture photometry data<a class="headerlink" href="#kepdetrend-detrend-aperture-photometry-data" title="Permalink to this headline">¶</a></h1>
 <dl class="function">
 <dt id="pyke.kepdetrend.kepdetrend">
-<code class="descclassname">pyke.kepdetrend.</code><code class="descname">kepdetrend</code><span class="sig-paren">(</span><em>infile</em>, <em>ranges1</em>, <em>ranges2</em>, <em>npoly1</em>, <em>npoly2</em>, <em>nsig1</em>, <em>nsig2</em>, <em>niter1</em>, <em>niter2</em>, <em>outfile=None</em>, <em>datacol='SAP_FLUX'</em>, <em>errcol='SAP_FLUX_ERR'</em>, <em>popnans=False</em>, <em>plot=False</em>, <em>overwrite=False</em>, <em>verbose=False</em>, <em>logfile='kepdetrend.log'</em><span class="sig-paren">)</span><a class="headerlink" href="#pyke.kepdetrend.kepdetrend" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">pyke.kepdetrend.</code><code class="descname">kepdetrend</code><span class="sig-paren">(</span><em>infile</em>, <em>ranges1</em>, <em>ranges2</em>, <em>npoly1</em>, <em>npoly2</em>, <em>nsig1</em>, <em>nsig2</em>, <em>niter1</em>, <em>niter2</em>, <em>outfile=None</em>, <em>datacol='SAP_FLUX'</em>, <em>errcol='SAP_FLUX_ERR'</em>, <em>popnans=False</em>, <em>plot=False</em>, <em>overwrite=False</em>, <em>verbose=False</em>, <em>logfile='kepdetrend.log'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyke/kepdetrend.html#kepdetrend"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyke.kepdetrend.kepdetrend" title="Permalink to this definition">¶</a></dt>
 <dd><p>kepdetrend – Detrend aperture photometry data</p>
 <p>Simple Aperture Photometry (SAP) data can contain a series of systematic
 trends associated with the spacecraft, detector and environment rather than

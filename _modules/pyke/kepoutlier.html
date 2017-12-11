@@ -1,0 +1,581 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>pyke.kepoutlier &mdash; PyKE 3.0.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../genindex.html"/>
+        <link rel="search" title="Search" href="../../search.html"/>
+    <link rel="top" title="PyKE 3.0.0 documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> PyKE
+          
+
+          
+            
+            <img src="../../_static/pyke-white.png" class="logo" />
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                3.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/ipython_notebooks/whatsnew31.html">What’s new in PyKE 3.1?</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart.html">Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../overview.html">PyKE tasks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../citing.html">Citing</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/index.html">Photometry tutorials</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">PyKE</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>pyke.kepoutlier</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pyke.kepoutlier</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">.utils</span> <span class="k">import</span> <span class="n">PyKEArgumentHelpFormatter</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">astropy.io</span> <span class="k">import</span> <span class="n">fits</span> <span class="k">as</span> <span class="n">pyfits</span>
+<span class="kn">from</span> <span class="nn">matplotlib</span> <span class="k">import</span> <span class="n">pyplot</span> <span class="k">as</span> <span class="n">plt</span>
+<span class="kn">from</span> <span class="nn">tqdm</span> <span class="k">import</span> <span class="n">tqdm</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">kepio</span><span class="p">,</span> <span class="n">kepmsg</span><span class="p">,</span> <span class="n">kepkey</span><span class="p">,</span> <span class="n">kepfit</span><span class="p">,</span> <span class="n">kepstat</span><span class="p">,</span> <span class="n">kepfunc</span>
+
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;kepoutlier&#39;</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="kepoutlier"><a class="viewcode-back" href="../../api/kepoutlier.html#pyke.kepoutlier.kepoutlier">[docs]</a><span class="k">def</span> <span class="nf">kepoutlier</span><span class="p">(</span><span class="n">infile</span><span class="p">,</span> <span class="n">outfile</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">datacol</span><span class="o">=</span><span class="s1">&#39;SAP_FLUX&#39;</span><span class="p">,</span> <span class="n">nsig</span><span class="o">=</span><span class="mf">3.0</span><span class="p">,</span> <span class="n">stepsize</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+               <span class="n">npoly</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">niter</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">operation</span><span class="o">=</span><span class="s1">&#39;remove&#39;</span><span class="p">,</span> <span class="n">ranges</span><span class="o">=</span><span class="s1">&#39;0,0&#39;</span><span class="p">,</span> <span class="n">plot</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+               <span class="n">plotfit</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+               <span class="n">logfile</span><span class="o">=</span><span class="s1">&#39;kepoutlier.log&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    kepoutlier -- Remove or replace statistical outliers from time series data</span>
+
+<span class="sd">    kepoutlier identifies data outliers relative to piecemeal best-fit</span>
+<span class="sd">    polynomials. Outliers are either removed from the output time series or</span>
+<span class="sd">    replaced by a noise-treated value defined by the polynomial fit. Identified</span>
+<span class="sd">    outliers and the best fit functions are optionally plotted for inspection</span>
+<span class="sd">    purposes.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    infile : str</span>
+<span class="sd">        The name of a MAST standard format FITS file containing a Kepler light</span>
+<span class="sd">        curve within the first data extension.</span>
+<span class="sd">    outfile : str</span>
+<span class="sd">        The name of the output FITS file. ``outfile`` will be direct copy of</span>
+<span class="sd">        infile with either data outliers removed (i.e. the table will have</span>
+<span class="sd">        fewer rows) or the outliers will be corrected according to a best-fit</span>
+<span class="sd">        function and a noise model.</span>
+<span class="sd">    datacol : str</span>
+<span class="sd">        The column name containing data stored within extension 1 of infile.</span>
+<span class="sd">        This data will be searched for outliers. Typically this name is</span>
+<span class="sd">        SAP_FLUX (Simple Aperture Photometry fluxes) or PDCSAP_FLUX (Pre-search</span>
+<span class="sd">        Data Conditioning fluxes).</span>
+<span class="sd">    nsig : float</span>
+<span class="sd">        The sigma clipping threshold. Data deviating from a best fit function</span>
+<span class="sd">        by more than the threshold will be either removed or corrected</span>
+<span class="sd">        according to the user selection of operation.</span>
+<span class="sd">    stepsize : float</span>
+<span class="sd">        The data within datacol is unlikely to be well represented by a single</span>
+<span class="sd">        polynomial function. stepsize splits the data up into a series of time</span>
+<span class="sd">        blocks, each is fit independently by a separate function. The user can</span>
+<span class="sd">        provide an informed choice of stepsize after inspecting the data with</span>
+<span class="sd">        the kepdraw tool. Units are days.</span>
+<span class="sd">    npoly : int</span>
+<span class="sd">        The polynomial order of each best-fit function.</span>
+<span class="sd">    niter : int</span>
+<span class="sd">        If outliers are found in a particular data section, that data will be</span>
+<span class="sd">        removed temporarily and the time series fit again. This will be</span>
+<span class="sd">        iterated niter times before freezing upon the best available fit.</span>
+<span class="sd">    operation : str</span>
+
+<span class="sd">        * ``remove`` throws away outliers. The output data table will smaller</span>
+<span class="sd">          or equal in size to the input table.</span>
+<span class="sd">        * ``replace`` replaces outliers with a value that is consistent with</span>
+<span class="sd">          the best-fit polynomial function and a random component defined by the</span>
+<span class="sd">          rms of the data relative to the fit and calculated using the inverse</span>
+<span class="sd">          normal cumulative function and a random number generator.</span>
+<span class="sd">    ranges : str</span>
+<span class="sd">        The user can choose specific time ranges of data on which to work. This</span>
+<span class="sd">        could, for example, avoid removing known stellar flares from a dataset.</span>
+<span class="sd">        Time ranges are supplied as comma-separated pairs of Barycentric Julian</span>
+<span class="sd">        Dates (BJDs). Multiple ranges are separated by a semi-colon. An example</span>
+<span class="sd">        containing two time ranges is::</span>
+
+<span class="sd">            &#39;2455012.48517,2455014.50072;2455022.63487,2455025.08231&#39;</span>
+
+<span class="sd">        If the user wants to correct the entire time series then providing</span>
+<span class="sd">        ``ranges = &#39;0,0&#39;`` will tell the task to operate on the whole time series.</span>
+<span class="sd">    plot : bool</span>
+<span class="sd">        Plot the data and outliers?</span>
+<span class="sd">    plotfit : bool</span>
+<span class="sd">        Overlay the polynomial fits upon the plot?</span>
+<span class="sd">    overwrite : bool</span>
+<span class="sd">        Overwrite the output file?</span>
+<span class="sd">    verbose : bool</span>
+<span class="sd">        Print informative messages and warnings to the shell and logfile?</span>
+<span class="sd">    logfile : str</span>
+<span class="sd">        Name of the logfile containing error and warning messages.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    .. code-block:: bash</span>
+
+<span class="sd">        $ kepoutlier kplr002437329-2010355172524_llc.fits --datacol SAP_FLUX</span>
+<span class="sd">        --nsig 4 --stepsize 5 --npoly 2 --niter 10 --operation replace</span>
+<span class="sd">        --verbose --plot --plotfit</span>
+
+<span class="sd">    .. image:: ../_static/images/api/kepoutlier.png</span>
+<span class="sd">        :align: center</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">outfile</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">outfile</span> <span class="o">=</span> <span class="n">infile</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;-</span><span class="si">{}</span><span class="s2">.fits&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">__all__</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+    <span class="c1"># log the call</span>
+    <span class="n">hashline</span> <span class="o">=</span> <span class="s1">&#39;--------------------------------------------------------------&#39;</span>
+    <span class="n">kepmsg</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">logfile</span><span class="p">,</span> <span class="n">hashline</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+    <span class="n">call</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;KEPOUTLIER -- &#39;</span>
+            <span class="o">+</span> <span class="s1">&#39; infile=</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">infile</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s1">&#39; outfile=</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">outfile</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s1">&#39; datacol=</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">datacol</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s1">&#39; nsig=</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">nsig</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s1">&#39; stepsize=</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">stepsize</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s1">&#39; npoly=</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">npoly</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s1">&#39; niter=</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">niter</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s1">&#39; operation=</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">operation</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s1">&#39; ranges=</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ranges</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s1">&#39; plot=</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">plot</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s1">&#39; plotfit=</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">plotfit</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s1">&#39; overwrite=</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">overwrite</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s1">&#39; verbose=</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">verbose</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s1">&#39; logfile=</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">logfile</span><span class="p">))</span>
+    <span class="n">kepmsg</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">logfile</span><span class="p">,</span> <span class="n">call</span><span class="o">+</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+    <span class="c1"># start time</span>
+    <span class="n">kepmsg</span><span class="o">.</span><span class="n">clock</span><span class="p">(</span><span class="s1">&#39;KEPOUTLIER started at&#39;</span><span class="p">,</span> <span class="n">logfile</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+    <span class="c1"># overwrite output file</span>
+    <span class="k">if</span> <span class="n">overwrite</span><span class="p">:</span>
+        <span class="n">kepio</span><span class="o">.</span><span class="n">overwrite</span><span class="p">(</span><span class="n">outfile</span><span class="p">,</span> <span class="n">logfile</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">kepio</span><span class="o">.</span><span class="n">fileexists</span><span class="p">(</span><span class="n">outfile</span><span class="p">):</span>
+        <span class="n">errmsg</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;ERROR -- KEPOUTLIER: </span><span class="si">{}</span><span class="s1"> exists. Use overwrite=True&#39;</span>
+                  <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">outfile</span><span class="p">))</span>
+        <span class="n">kepmsg</span><span class="o">.</span><span class="n">err</span><span class="p">(</span><span class="n">logfile</span><span class="p">,</span> <span class="n">errmsg</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+
+    <span class="c1"># open input file</span>
+    <span class="n">instr</span> <span class="o">=</span> <span class="n">pyfits</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">infile</span><span class="p">)</span>
+    <span class="n">tstart</span><span class="p">,</span> <span class="n">tstop</span><span class="p">,</span> <span class="n">bjdref</span><span class="p">,</span> <span class="n">cadence</span> <span class="o">=</span> <span class="n">kepio</span><span class="o">.</span><span class="n">timekeys</span><span class="p">(</span><span class="n">instr</span><span class="p">,</span> <span class="n">infile</span><span class="p">,</span> <span class="n">logfile</span><span class="p">,</span>
+                                                    <span class="n">verbose</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">work</span> <span class="o">=</span> <span class="n">instr</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;FILEVER&#39;</span><span class="p">]</span>
+        <span class="n">cadenom</span> <span class="o">=</span> <span class="mf">1.0</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">cadenom</span> <span class="o">=</span> <span class="n">cadence</span>
+
+    <span class="c1"># fudge non-compliant FITS keywords with no values</span>
+    <span class="n">instr</span> <span class="o">=</span> <span class="n">kepkey</span><span class="o">.</span><span class="n">emptykeys</span><span class="p">(</span><span class="n">instr</span><span class="p">,</span> <span class="n">infile</span><span class="p">,</span> <span class="n">logfile</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+    <span class="c1"># read table structure</span>
+    <span class="n">table</span> <span class="o">=</span> <span class="n">kepio</span><span class="o">.</span><span class="n">readfitstab</span><span class="p">(</span><span class="n">infile</span><span class="p">,</span> <span class="n">instr</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">logfile</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+    <span class="c1"># filter input data table</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">nanclean</span> <span class="o">=</span> <span class="n">instr</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;NANCLEAN&#39;</span><span class="p">]</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">time</span> <span class="o">=</span> <span class="n">kepio</span><span class="o">.</span><span class="n">readtimecol</span><span class="p">(</span><span class="n">infile</span><span class="p">,</span> <span class="n">table</span><span class="p">,</span> <span class="n">logfile</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+        <span class="n">flux</span> <span class="o">=</span> <span class="n">kepio</span><span class="o">.</span><span class="n">readfitscol</span><span class="p">(</span><span class="n">infile</span><span class="p">,</span> <span class="n">table</span><span class="p">,</span> <span class="n">datacol</span><span class="p">,</span> <span class="n">logfile</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+        <span class="n">finite_data_mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">time</span><span class="p">)</span> <span class="o">&amp;</span> <span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">flux</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">flux</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">table</span> <span class="o">=</span> <span class="n">table</span><span class="p">[</span><span class="n">finite_data_mask</span><span class="p">]</span>
+        <span class="n">instr</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">table</span>
+        <span class="n">comment</span> <span class="o">=</span> <span class="s1">&#39;NaN cadences removed from data&#39;</span>
+        <span class="n">kepkey</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s1">&#39;NANCLEAN&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="n">comment</span><span class="p">,</span> <span class="n">instr</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">outfile</span><span class="p">,</span> <span class="n">logfile</span><span class="p">,</span>
+                   <span class="n">verbose</span><span class="p">)</span>
+
+    <span class="c1"># read table columns</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">intime</span> <span class="o">=</span> <span class="n">instr</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="s1">&#39;barytime&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="mf">2.4e6</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">intime</span> <span class="o">=</span> <span class="n">kepio</span><span class="o">.</span><span class="n">readfitscol</span><span class="p">(</span><span class="n">infile</span><span class="p">,</span> <span class="n">instr</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="s1">&#39;time&#39;</span><span class="p">,</span> <span class="n">logfile</span><span class="p">,</span>
+                                   <span class="n">verbose</span><span class="p">)</span>
+    <span class="n">indata</span> <span class="o">=</span> <span class="n">kepio</span><span class="o">.</span><span class="n">readfitscol</span><span class="p">(</span><span class="n">infile</span><span class="p">,</span> <span class="n">instr</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">datacol</span><span class="p">,</span> <span class="n">logfile</span><span class="p">,</span>
+                               <span class="n">verbose</span><span class="p">)</span>
+    <span class="n">intime</span> <span class="o">=</span> <span class="n">intime</span> <span class="o">+</span> <span class="n">bjdref</span>
+    <span class="n">indata</span> <span class="o">=</span> <span class="n">indata</span> <span class="o">/</span> <span class="n">cadenom</span>
+    <span class="c1"># time ranges for region to be corrected</span>
+    <span class="n">t1</span><span class="p">,</span> <span class="n">t2</span> <span class="o">=</span> <span class="n">kepio</span><span class="o">.</span><span class="n">timeranges</span><span class="p">(</span><span class="n">ranges</span><span class="p">,</span> <span class="n">logfile</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+    <span class="n">cadencelis</span> <span class="o">=</span> <span class="n">kepstat</span><span class="o">.</span><span class="n">filterOnRange</span><span class="p">(</span><span class="n">intime</span><span class="p">,</span> <span class="n">t1</span><span class="p">,</span> <span class="n">t2</span><span class="p">)</span>
+
+    <span class="c1"># find limits of each time step</span>
+    <span class="n">tstep1</span><span class="p">,</span> <span class="n">tstep2</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
+    <span class="n">work</span> <span class="o">=</span> <span class="n">intime</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">while</span> <span class="n">work</span> <span class="o">&lt;</span> <span class="n">intime</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
+        <span class="n">tstep1</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">work</span><span class="p">)</span>
+        <span class="n">tstep2</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">work</span> <span class="o">+</span> <span class="n">stepsize</span><span class="p">,</span> <span class="n">intime</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]],</span>
+                               <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float64&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">min</span><span class="p">())</span>
+        <span class="n">work</span> <span class="o">+=</span> <span class="n">stepsize</span>
+
+    <span class="c1"># find cadence limits of each time step</span>
+    <span class="n">cstep1</span><span class="p">,</span> <span class="n">cstep2</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
+    <span class="n">work1</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">work2</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">intime</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="n">intime</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">intime</span><span class="p">[</span><span class="n">work1</span><span class="p">]</span> <span class="ow">and</span> <span class="n">intime</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">intime</span><span class="p">[</span><span class="n">work1</span><span class="p">]</span> <span class="o">+</span> <span class="n">stepsize</span><span class="p">:</span>
+            <span class="n">work2</span> <span class="o">=</span> <span class="n">i</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">cstep1</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">work1</span><span class="p">)</span>
+            <span class="n">cstep2</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">work2</span><span class="p">)</span>
+            <span class="n">work1</span> <span class="o">=</span> <span class="n">i</span>
+            <span class="n">work2</span> <span class="o">=</span> <span class="n">i</span>
+    <span class="n">cstep1</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">work1</span><span class="p">)</span>
+    <span class="n">cstep2</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">work2</span><span class="p">)</span>
+
+    <span class="n">outdata</span> <span class="o">=</span> <span class="n">indata</span> <span class="o">*</span> <span class="mf">1.0</span>
+    <span class="c1"># comment keyword in output file</span>
+    <span class="n">kepkey</span><span class="o">.</span><span class="n">history</span><span class="p">(</span><span class="n">call</span><span class="p">,</span> <span class="n">instr</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">outfile</span><span class="p">,</span> <span class="n">logfile</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+    <span class="c1"># clean up x-axis unit</span>
+    <span class="n">intime0</span> <span class="o">=</span> <span class="p">(</span><span class="n">tstart</span> <span class="o">//</span> <span class="mi">100</span><span class="p">)</span> <span class="o">*</span> <span class="mf">100.0</span>
+    <span class="n">ptime</span> <span class="o">=</span> <span class="n">intime</span> <span class="o">-</span> <span class="n">intime0</span>
+    <span class="n">xlab</span> <span class="o">=</span> <span class="s1">&#39;BJD $-$ </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">intime0</span><span class="p">)</span>
+
+    <span class="c1"># clean up y-axis units</span>
+    <span class="n">pout</span> <span class="o">=</span> <span class="n">indata</span> <span class="o">*</span> <span class="mf">1.0</span>
+    <span class="n">nrm</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">pout</span><span class="o">.</span><span class="n">max</span><span class="p">())))</span><span class="o">-</span><span class="mi">1</span>
+    <span class="n">pout</span> <span class="o">=</span> <span class="n">pout</span> <span class="o">/</span> <span class="mi">10</span><span class="o">**</span><span class="n">nrm</span>
+    <span class="n">ylab</span> <span class="o">=</span> <span class="s1">&#39;10$^</span><span class="si">%d</span><span class="s1">$ e$^-$ s$^{-1}$&#39;</span> <span class="o">%</span> <span class="n">nrm</span>
+
+    <span class="c1"># data limits</span>
+    <span class="n">xmin</span> <span class="o">=</span> <span class="n">ptime</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+    <span class="n">xmax</span> <span class="o">=</span> <span class="n">ptime</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+    <span class="n">ymin</span> <span class="o">=</span> <span class="n">pout</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+    <span class="n">ymax</span> <span class="o">=</span> <span class="n">pout</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+    <span class="n">xr</span> <span class="o">=</span> <span class="n">xmax</span> <span class="o">-</span> <span class="n">xmin</span>
+    <span class="n">yr</span> <span class="o">=</span> <span class="n">ymax</span> <span class="o">-</span> <span class="n">ymin</span>
+    <span class="n">ptime</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">ptime</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="n">ptime</span><span class="p">[</span><span class="mi">0</span><span class="p">]])</span>
+    <span class="n">ptime</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ptime</span><span class="p">,</span> <span class="p">[</span><span class="n">ptime</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]])</span>
+    <span class="n">pout</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">pout</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">])</span>
+    <span class="n">pout</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pout</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+
+    <span class="c1"># plot light curve</span>
+    <span class="k">if</span> <span class="n">plot</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">clf</span><span class="p">()</span>
+        <span class="c1"># plot data</span>
+        <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">axes</span><span class="p">([</span><span class="mf">0.06</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.93</span><span class="p">,</span> <span class="mf">0.87</span><span class="p">])</span>
+        <span class="c1"># force tick labels to be absolute rather than relative</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_major_formatter</span><span class="p">(</span><span class="n">plt</span><span class="o">.</span><span class="n">ScalarFormatter</span><span class="p">(</span><span class="n">useOffset</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">set_major_formatter</span><span class="p">(</span><span class="n">plt</span><span class="o">.</span><span class="n">ScalarFormatter</span><span class="p">(</span><span class="n">useOffset</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ptime</span><span class="p">,</span> <span class="n">pout</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;#0000ff&#39;</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;-&#39;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span><span class="n">ptime</span><span class="p">,</span> <span class="n">pout</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;#ffff00&#39;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.2</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="n">xlab</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;color&#39;</span> <span class="p">:</span> <span class="s1">&#39;k&#39;</span><span class="p">})</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="n">ylab</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;color&#39;</span> <span class="p">:</span> <span class="s1">&#39;k&#39;</span><span class="p">})</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">()</span>
+    <span class="c1"># loop over each time step, fit data, determine rms</span>
+    <span class="n">masterfit</span> <span class="o">=</span> <span class="n">indata</span> <span class="o">*</span> <span class="mf">0.0</span>
+    <span class="n">mastersigma</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">masterfit</span><span class="p">))</span>
+    <span class="n">functype</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">kepfunc</span><span class="p">,</span> <span class="s1">&#39;poly&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">npoly</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">cstep1</span><span class="p">)):</span>
+        <span class="n">pinit</span> <span class="o">=</span> <span class="p">[</span><span class="n">indata</span><span class="p">[</span><span class="n">cstep1</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span><span class="n">cstep2</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()]</span>
+        <span class="k">if</span> <span class="n">npoly</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">npoly</span><span class="p">):</span>
+                <span class="n">pinit</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)</span>
+        <span class="n">pinit</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">pinit</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float32&#39;</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">coeffs</span><span class="p">,</span> <span class="n">errors</span><span class="p">,</span> <span class="n">covar</span><span class="p">,</span> <span class="n">iiter</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="n">chi2</span><span class="p">,</span> <span class="n">dof</span><span class="p">,</span> <span class="n">fit</span><span class="p">,</span> <span class="n">plotx</span><span class="p">,</span> <span class="n">ploty</span> <span class="o">=</span> \
+                <span class="n">kepfit</span><span class="o">.</span><span class="n">lsqclip</span><span class="p">(</span><span class="n">functype</span><span class="p">,</span> <span class="n">pinit</span><span class="p">,</span>
+                               <span class="n">intime</span><span class="p">[</span><span class="n">cstep1</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span><span class="n">cstep2</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">intime</span><span class="p">[</span><span class="n">cstep1</span><span class="p">[</span><span class="n">i</span><span class="p">]],</span>
+                               <span class="n">indata</span><span class="p">[</span><span class="n">cstep1</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span><span class="n">cstep2</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span><span class="p">],</span> <span class="kc">None</span><span class="p">,</span> <span class="n">nsig</span><span class="p">,</span>
+                               <span class="n">nsig</span><span class="p">,</span> <span class="n">niter</span><span class="p">,</span> <span class="n">logfile</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">coeffs</span><span class="p">)):</span>
+                <span class="n">masterfit</span><span class="p">[</span><span class="n">cstep1</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span> <span class="n">cstep2</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+=</span> <span class="p">(</span><span class="n">coeffs</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
+                        <span class="o">*</span> <span class="p">(</span><span class="n">intime</span><span class="p">[</span><span class="n">cstep1</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span><span class="n">cstep2</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">intime</span><span class="p">[</span><span class="n">cstep1</span><span class="p">[</span><span class="n">i</span><span class="p">]])</span> <span class="o">**</span> <span class="n">j</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">cstep1</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">cstep2</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+                <span class="n">mastersigma</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">sigma</span>
+            <span class="k">if</span> <span class="n">plotfit</span><span class="p">:</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">plotx</span> <span class="o">+</span> <span class="n">intime</span><span class="p">[</span><span class="n">cstep1</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span> <span class="o">-</span> <span class="n">intime0</span><span class="p">,</span> <span class="n">ploty</span> <span class="o">/</span> <span class="mi">10</span> <span class="o">**</span> <span class="n">nrm</span><span class="p">,</span>
+                         <span class="s1">&#39;g&#39;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">cstep1</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">cstep2</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+                <span class="n">masterfit</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">indata</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
+                <span class="n">mastersigma</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0e10</span>
+            <span class="n">message</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;WARNING -- KEPOUTLIER: could not fit range &#39;</span>
+                       <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">intime</span><span class="p">[</span><span class="n">cstep1</span><span class="p">[</span><span class="n">i</span><span class="p">]])</span> <span class="o">+</span> <span class="s1">&#39;-&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">intime</span><span class="p">[</span><span class="n">cstep2</span><span class="p">[</span><span class="n">i</span><span class="p">]]))</span>
+            <span class="n">kepmsg</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="n">logfile</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+
+    <span class="c1"># reject outliers</span>
+    <span class="n">rejtime</span><span class="p">,</span> <span class="n">rejdata</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
+    <span class="n">naxis2</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">masterfit</span><span class="p">))):</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">indata</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">masterfit</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">&gt;</span> <span class="n">nsig</span> <span class="o">*</span> <span class="n">mastersigma</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="ow">and</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">cadencelis</span><span class="p">):</span>
+            <span class="n">rejtime</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">intime</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+            <span class="n">rejdata</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">indata</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">operation</span> <span class="o">==</span> <span class="s1">&#39;replace&#39;</span><span class="p">:</span>
+                <span class="p">[</span><span class="n">rnd</span><span class="p">]</span> <span class="o">=</span> <span class="n">kepstat</span><span class="o">.</span><span class="n">randarray</span><span class="p">([</span><span class="n">masterfit</span><span class="p">[</span><span class="n">i</span><span class="p">]],</span> <span class="p">[</span><span class="n">mastersigma</span><span class="p">[</span><span class="n">i</span><span class="p">]])</span>
+                <span class="n">table</span><span class="p">[</span><span class="n">naxis2</span><span class="p">]</span> <span class="o">=</span> <span class="n">table</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                <span class="n">table</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">datacol</span><span class="p">)[</span><span class="n">naxis2</span><span class="p">]</span> <span class="o">=</span> <span class="n">rnd</span>
+                <span class="n">naxis2</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">table</span><span class="p">[</span><span class="n">naxis2</span><span class="p">]</span> <span class="o">=</span> <span class="n">table</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">naxis2</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="n">instr</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">table</span><span class="p">[:</span><span class="n">naxis2</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">plot</span><span class="p">:</span>
+        <span class="n">rejtime</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">rejtime</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float64&#39;</span><span class="p">)</span>
+        <span class="n">rejdata</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">rejdata</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float32&#39;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">rejtime</span> <span class="o">-</span> <span class="n">intime0</span><span class="p">,</span> <span class="n">rejdata</span> <span class="o">/</span> <span class="mi">10</span> <span class="o">**</span> <span class="n">nrm</span><span class="p">,</span> <span class="s1">&#39;ro&#39;</span><span class="p">)</span>
+        <span class="c1"># plot ranges</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">xlim</span><span class="p">(</span><span class="n">xmin</span> <span class="o">-</span> <span class="n">xr</span> <span class="o">*</span> <span class="mf">0.01</span><span class="p">,</span> <span class="n">xmax</span> <span class="o">+</span> <span class="n">xr</span> <span class="o">*</span> <span class="mf">0.01</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">ymin</span> <span class="o">&gt;=</span> <span class="mf">0.0</span><span class="p">:</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">(</span><span class="n">ymin</span> <span class="o">-</span> <span class="n">yr</span> <span class="o">*</span> <span class="mf">0.01</span><span class="p">,</span> <span class="n">ymax</span> <span class="o">+</span> <span class="n">yr</span> <span class="o">*</span> <span class="mf">0.01</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">(</span><span class="mf">1.0e-10</span><span class="p">,</span> <span class="n">ymax</span> <span class="o">+</span> <span class="n">yr</span> <span class="o">*</span> <span class="mf">0.01</span><span class="p">)</span>
+
+        <span class="c1"># render plot</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+    <span class="c1"># write output file</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Writing output file </span><span class="si">{}</span><span class="s2">...&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">outfile</span><span class="p">))</span>
+    <span class="n">instr</span><span class="o">.</span><span class="n">writeto</span><span class="p">(</span><span class="n">outfile</span><span class="p">)</span>
+    <span class="c1"># close input file</span>
+    <span class="n">instr</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="n">kepmsg</span><span class="o">.</span><span class="n">clock</span><span class="p">(</span><span class="s1">&#39;KEPOUTLIER completed at&#39;</span><span class="p">,</span> <span class="n">logfile</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span></div>
+
+<span class="k">def</span> <span class="nf">kepoutlier_main</span><span class="p">():</span>
+    <span class="kn">import</span> <span class="nn">argparse</span>
+    <span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">(</span>
+             <span class="n">description</span><span class="o">=</span><span class="s1">&#39;Remove or replace data outliers from a time series&#39;</span><span class="p">,</span>
+             <span class="n">formatter_class</span><span class="o">=</span><span class="n">PyKEArgumentHelpFormatter</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;infile&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Name of input file&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--outfile&#39;</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;Name of FITS file to output.&#39;</span>
+                              <span class="s1">&#39; If None, outfile is infile-kepoutlier.&#39;</span><span class="p">),</span>
+                        <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--datacol&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s1">&#39;SAP_FLUX&#39;</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Name of data column to plot&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--nsig&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mf">3.</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Sigma clipping threshold for outliers&#39;</span><span class="p">,</span>
+                        <span class="nb">type</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--stepsize&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Stepsize on which to fit data [days]&#39;</span><span class="p">,</span>
+                        <span class="nb">type</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--npoly&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Polynomial order for each fit&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--niter&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Maximum number of clipping iterations&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--operation&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s1">&#39;remove&#39;</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Remove or replace outliers?&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span>
+                        <span class="n">choices</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;replace&#39;</span><span class="p">,</span><span class="s1">&#39;remove&#39;</span><span class="p">])</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--ranges&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s1">&#39;0,0&#39;</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Time ranges of regions to filter&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--plot&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_true&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Plot result?&#39;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--plotfit&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_true&#39;</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Plot fit over results?&#39;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--overwrite&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_true&#39;</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Overwrite output file?&#39;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--verbose&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_true&#39;</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Write to a log file?&#39;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--logfile&#39;</span><span class="p">,</span> <span class="s1">&#39;-l&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Name of ascii log file&#39;</span><span class="p">,</span>
+                        <span class="n">default</span><span class="o">=</span><span class="s1">&#39;kepoutlier.log&#39;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s1">&#39;logfile&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">)</span>
+    <span class="n">args</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">()</span>
+    <span class="n">kepoutlier</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">infile</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">outfile</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">datacol</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">nsig</span><span class="p">,</span>
+               <span class="n">args</span><span class="o">.</span><span class="n">stepsize</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">npoly</span><span class="p">,</span><span class="n">args</span><span class="o">.</span><span class="n">niter</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">operation</span><span class="p">,</span>
+               <span class="n">args</span><span class="o">.</span><span class="n">ranges</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">plot</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">plotfit</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">overwrite</span><span class="p">,</span>
+               <span class="n">args</span><span class="o">.</span><span class="n">verbose</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">logfile</span><span class="p">)</span>
+</pre></div>
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright PyKE Developers and Contributors.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'3.0.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

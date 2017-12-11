@@ -1,0 +1,1151 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>pyke.kepcotrend &mdash; PyKE 3.0.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../genindex.html"/>
+        <link rel="search" title="Search" href="../../search.html"/>
+    <link rel="top" title="PyKE 3.0.0 documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> PyKE
+          
+
+          
+            
+            <img src="../../_static/pyke-white.png" class="logo" />
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                3.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/ipython_notebooks/whatsnew31.html">What’s new in PyKE 3.1?</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart.html">Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../overview.html">PyKE tasks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../citing.html">Citing</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/index.html">Photometry tutorials</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">PyKE</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>pyke.kepcotrend</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pyke.kepcotrend</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">.utils</span> <span class="k">import</span> <span class="n">PyKEArgumentHelpFormatter</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">kepmsg</span><span class="p">,</span> <span class="n">kepio</span><span class="p">,</span> <span class="n">kepkey</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">from</span> <span class="nn">matplotlib.cbook</span> <span class="k">import</span> <span class="n">is_numlike</span>
+<span class="kn">from</span> <span class="nn">scipy.optimize</span> <span class="k">import</span> <span class="n">leastsq</span>
+<span class="kn">from</span> <span class="nn">scipy.optimize</span> <span class="k">import</span> <span class="n">fmin</span>
+<span class="kn">from</span> <span class="nn">scipy.interpolate</span> <span class="k">import</span> <span class="n">interp1d</span>
+<span class="kn">from</span> <span class="nn">astropy.io</span> <span class="k">import</span> <span class="n">fits</span> <span class="k">as</span> <span class="n">pyfits</span>
+<span class="kn">from</span> <span class="nn">tqdm</span> <span class="k">import</span> <span class="n">tqdm</span>
+<span class="kn">import</span> <span class="nn">re</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;kepcotrend&#39;</span><span class="p">]</span>
+
+
+<span class="k">def</span> <span class="nf">cut_bad_data</span><span class="p">(</span><span class="n">cad</span><span class="p">,</span> <span class="n">date</span><span class="p">,</span> <span class="n">flux</span><span class="p">,</span> <span class="n">err</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    this function finds cadences with good data and returns them</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">good_data_mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">date</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">flux</span><span class="p">))</span>
+    <span class="n">date</span> <span class="o">=</span> <span class="n">date</span><span class="p">[</span><span class="n">good_data_mask</span><span class="p">]</span>
+    <span class="n">cad</span> <span class="o">=</span> <span class="n">cad</span><span class="p">[</span><span class="n">good_data_mask</span><span class="p">]</span>
+    <span class="n">flux</span> <span class="o">=</span> <span class="n">flux</span><span class="p">[</span><span class="n">good_data_mask</span><span class="p">]</span>
+    <span class="n">err</span> <span class="o">=</span> <span class="n">err</span><span class="p">[</span><span class="n">good_data_mask</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">cad</span><span class="p">,</span> <span class="n">date</span><span class="p">,</span> <span class="n">flux</span><span class="p">,</span> <span class="n">err</span><span class="p">,</span> <span class="n">good_data_mask</span>
+
+<span class="k">def</span> <span class="nf">put_in_nans</span><span class="p">(</span><span class="n">good_data</span><span class="p">,</span> <span class="n">flux</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Function finds the cadences where the data has been removed using</span>
+<span class="sd">    cut_bad_data() and puts data back in. The flux data put back in is nan.</span>
+<span class="sd">    This function is used when writing data to a FITS files.</span>
+<span class="sd">    good_data == True means the datapoint is good!!</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">newflux</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">good_data</span><span class="p">))</span>
+    <span class="n">newflux</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+    <span class="n">newflux</span><span class="p">[</span><span class="n">good_data</span><span class="p">]</span> <span class="o">=</span> <span class="n">flux</span>
+
+    <span class="k">return</span> <span class="n">newflux</span>
+
+<span class="k">def</span> <span class="nf">get_pcomp_list_newformat</span><span class="p">(</span><span class="n">bvdat</span><span class="p">,</span> <span class="n">pcomplist</span><span class="p">,</span> <span class="n">newcad</span><span class="p">,</span> <span class="n">short</span><span class="p">,</span> <span class="n">scinterp</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Finds cotrending basis vectors which have been requested to be</span>
+<span class="sd">    used by the user and adds them to an array.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">pcomp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">pcomplist</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">newcad</span><span class="p">)))</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">pcomplist</span><span class="p">))):</span>
+        <span class="n">j</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">pcomplist</span><span class="p">)[</span><span class="n">i</span><span class="p">])</span>
+        <span class="n">dat</span> <span class="o">=</span> <span class="n">bvdat</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="s1">&#39;VECTOR_</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">j</span><span class="p">))[</span><span class="o">~</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">bvdat</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="s1">&#39;CADENCENO&#39;</span><span class="p">))]</span>
+        <span class="n">bvcadfull</span> <span class="o">=</span> <span class="n">bvdat</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="s1">&#39;CADENCENO&#39;</span><span class="p">)[</span><span class="o">~</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">bvdat</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="s1">&#39;CADENCENO&#39;</span><span class="p">))]</span>
+        <span class="c1">#try:</span>
+        <span class="k">if</span> <span class="n">short</span><span class="p">:</span>
+            <span class="c1">#if the data is short cadence the interpolate the basis vectors</span>
+            <span class="n">bv_data</span> <span class="o">=</span> <span class="n">dat</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">in1d</span><span class="p">(</span><span class="n">bvdat</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="s1">&#39;CADENCENO&#39;</span><span class="p">),</span> <span class="n">newcad</span><span class="p">)]</span>
+            <span class="n">bv_cad</span> <span class="o">=</span> <span class="n">bvcadfull</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">in1d</span><span class="p">(</span><span class="n">bvdat</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="s1">&#39;CADENCENO&#39;</span><span class="p">),</span> <span class="n">newcad</span><span class="p">)]</span>
+            <span class="c1">#funny things happen why I use interp1d for linear interpolation</span>
+            <span class="c1">#so I have opted to use the numpy interp function for linear</span>
+            <span class="k">if</span> <span class="n">scinterp</span> <span class="o">==</span> <span class="s1">&#39;linear&#39;</span><span class="p">:</span>
+                <span class="n">intpl</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span><span class="n">newcad</span><span class="p">,</span> <span class="n">bv_cad</span><span class="p">,</span> <span class="n">bv_data</span><span class="p">,</span> <span class="n">left</span><span class="o">=</span><span class="n">bv_data</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                                  <span class="n">right</span><span class="o">=</span><span class="n">bv_data</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+                <span class="n">pcomp</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">intpl</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">intpl</span> <span class="o">=</span> <span class="n">interp1d</span><span class="p">(</span><span class="n">bv_cad</span><span class="p">,</span> <span class="n">bv_data</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="n">scinterp</span><span class="p">,</span>
+                                 <span class="n">bounds_error</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">fill_value</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+                <span class="n">pcomp</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">intpl</span><span class="p">(</span><span class="n">newcad</span><span class="p">)),</span> <span class="mi">0</span><span class="p">,</span> <span class="n">intpl</span><span class="p">(</span><span class="n">newcad</span><span class="p">))</span>
+                <span class="n">mid_pt</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">pcomp</span><span class="p">[</span><span class="n">i</span><span class="p">]))))</span>
+                <span class="n">p_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">pcomp</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+                <span class="n">lower</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">p_len</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">mid_pt</span><span class="p">,</span> <span class="n">pcomp</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)]</span>
+                <span class="n">upper</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">p_len</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">mid_pt</span><span class="p">,</span> <span class="n">pcomp</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)]</span>
+                <span class="n">pcomp</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">lower</span><span class="p">]</span> <span class="o">=</span> <span class="n">bv_data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">pcomp</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">upper</span><span class="p">]</span> <span class="o">=</span> <span class="n">bv_data</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">pcomp</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">dat</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">in1d</span><span class="p">(</span><span class="n">bvdat</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="s1">&#39;CADENCENO&#39;</span><span class="p">),</span> <span class="n">newcad</span><span class="p">)]</span>
+    <span class="k">return</span> <span class="n">pcomp</span>
+
+<span class="k">def</span> <span class="nf">make_sc_lc</span><span class="p">(</span><span class="n">obs_cad</span><span class="p">,</span> <span class="n">bv_cad</span><span class="p">,</span> <span class="n">flux</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    make short cadence data look like long cadence data</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">newflux</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">bv_cad</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">bv_cad</span><span class="p">)):</span>
+        <span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">obs_cad</span> <span class="o">&gt;</span> <span class="n">bv_cad</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="mi">15</span><span class="p">,</span>
+                              <span class="n">obs_cad</span> <span class="o">&lt;</span> <span class="n">bv_cad</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="mi">15</span><span class="p">)</span>
+        <span class="n">newflux</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">obs_cad</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">newflux</span>
+
+<span class="k">def</span> <span class="nf">near_intpl</span><span class="p">(</span><span class="n">xout</span><span class="p">,</span> <span class="n">xin</span><span class="p">,</span> <span class="n">yin</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Interpolate the curve defined by (xin, yin) at points xout. The array</span>
+<span class="sd">    xin must be monotonically increasing. The output has the same data type as</span>
+<span class="sd">    the input yin.</span>
+
+<span class="sd">    :param yin: y values of input curve</span>
+<span class="sd">    :param xin: x values of input curve</span>
+<span class="sd">    :param xout: x values of output interpolated curve</span>
+<span class="sd">    :param method: interpolation method (&#39;linear&#39; | &#39;nearest&#39;)</span>
+
+<span class="sd">    @:rtype: numpy array with interpolated curve</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">lenxin</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">xin</span><span class="p">)</span>
+    <span class="n">i1</span> <span class="o">=</span> <span class="n">searchsorted</span><span class="p">(</span><span class="n">xin</span><span class="p">,</span> <span class="n">xout</span><span class="p">)</span>
+    <span class="n">i1</span><span class="p">[</span><span class="n">i1</span> <span class="o">==</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">i1</span><span class="p">[</span><span class="n">i1</span> <span class="o">==</span> <span class="n">lenxin</span><span class="p">]</span> <span class="o">=</span> <span class="n">lenxin</span> <span class="o">-</span> <span class="mi">1</span>
+    <span class="n">x0</span> <span class="o">=</span> <span class="n">xin</span><span class="p">[</span><span class="n">i1</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
+    <span class="n">x1</span> <span class="o">=</span> <span class="n">xin</span><span class="p">[</span><span class="n">i1</span><span class="p">]</span>
+    <span class="n">y0</span> <span class="o">=</span> <span class="n">yin</span><span class="p">[</span><span class="n">i1</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
+    <span class="n">y1</span> <span class="o">=</span> <span class="n">yin</span><span class="p">[</span><span class="n">i1</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">xout</span> <span class="o">-</span> <span class="n">x0</span><span class="p">)</span> <span class="o">&lt;</span> <span class="nb">abs</span><span class="p">(</span><span class="n">xout</span> <span class="o">-</span> <span class="n">x1</span><span class="p">),</span> <span class="n">y0</span><span class="p">,</span> <span class="n">y1</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">get_pcomp_list</span><span class="p">(</span><span class="n">pcompdata</span><span class="p">,</span> <span class="n">pcomplist</span><span class="p">,</span> <span class="n">newcad</span><span class="p">):</span>
+    <span class="n">pcomp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">pcomplist</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">newcad</span><span class="p">)))</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">pcomplist</span><span class="p">))):</span>
+        <span class="n">j</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">pcomplist</span><span class="p">)[</span><span class="n">i</span><span class="p">])</span> <span class="o">-</span> <span class="mi">1</span>
+        <span class="n">dat</span> <span class="o">=</span> <span class="n">pcompdata</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">j</span> <span class="o">+</span> <span class="mi">2</span><span class="p">]</span>
+        <span class="n">pcomp</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">dat</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">in1d</span><span class="p">(</span><span class="n">pcompdata</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">newcad</span><span class="p">)]</span>
+    <span class="k">return</span> <span class="n">pcomp</span>
+
+<span class="k">def</span> <span class="nf">do_lsq_uhat</span><span class="p">(</span><span class="n">pcomps</span><span class="p">,</span> <span class="n">flux</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    does a linear least squares fit of the basis vectors to the light curve</span>
+<span class="sd">    using the &#39;matrix&#39; method - U(transpose) * y = coeffs</span>
+<span class="sd">    In my implimentation y is a horizontal 1D array and U is also a long thin</span>
+<span class="sd">    array of length correpsonding to the number of basis vectors use. In</span>
+<span class="sd">    effect what I have is my U is already transposed and y need to be</span>
+<span class="sd">    transposed to used. First I convert to what is expected in leasts</span>
+<span class="sd">    squares fitting</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">U_hat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">matrix</span><span class="p">(</span><span class="n">pcomps</span><span class="p">)</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span>
+    <span class="n">y_hat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">matrix</span><span class="p">(</span><span class="n">flux</span><span class="p">)</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span>
+    <span class="n">U_trans</span> <span class="o">=</span> <span class="n">U_hat</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span>
+    <span class="n">coeffs</span> <span class="o">=</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">U_trans</span> <span class="o">*</span> <span class="n">U_hat</span><span class="p">)</span> <span class="o">*</span> <span class="n">U_trans</span> <span class="o">*</span> <span class="n">y_hat</span>
+
+    <span class="k">return</span> <span class="n">coeffs</span>
+
+<span class="k">def</span> <span class="nf">do_lsq_nlin</span><span class="p">(</span><span class="n">pcomps</span><span class="p">,</span> <span class="n">flux</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    does a linear least squares fit of the basis vectors to the light curve</span>
+<span class="sd">    using the &#39;lst_sq&#39; method - this performs a Levenberg-Marquart least</span>
+<span class="sd">    squares fit. The initial guess is an array of zeros</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">guess</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">1.</span><span class="p">]),</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">pcomps</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>
+    <span class="n">t</span> <span class="o">=</span> <span class="n">leastsq</span><span class="p">(</span><span class="n">fitfunct</span><span class="p">,</span> <span class="n">guess</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">pcomps</span><span class="p">,</span> <span class="n">flux</span><span class="p">),</span> <span class="n">full_output</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="k">return</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">t</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+<span class="k">def</span> <span class="nf">do_lsq_fmin</span><span class="p">(</span><span class="n">pcomps</span><span class="p">,</span> <span class="n">flux</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    performs a simplex fit of the basis vectors to the light curve.</span>
+<span class="sd">    Initial guess is an array with 1. as the first element and zero as the</span>
+<span class="sd">    value of all other elements in the array</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">guess</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">1.</span><span class="p">]),</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">pcomps</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>
+    <span class="n">t</span> <span class="o">=</span> <span class="n">fmin</span><span class="p">(</span><span class="n">fitfunct_fmin</span><span class="p">,</span> <span class="n">guess</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">pcomps</span><span class="p">,</span> <span class="n">flux</span><span class="p">))</span>
+    <span class="k">return</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">do_lsq_fmin_pow</span><span class="p">(</span><span class="n">pcomps</span><span class="p">,</span> <span class="n">flux</span><span class="p">,</span> <span class="n">order</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    performs a simplex fit of the basis vectors to the light curve.</span>
+<span class="sd">    Initial guess is an array with 1. as the first element and zero as the</span>
+<span class="sd">    value of all other elements in the array</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">guess</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+    <span class="n">initial</span> <span class="o">=</span> <span class="n">fmin</span><span class="p">(</span><span class="n">fitfunct_fmin_pow</span><span class="p">,</span> <span class="n">guess</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">pcomps</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">],</span> <span class="n">flux</span><span class="p">,</span> <span class="n">order</span><span class="p">))</span>
+    <span class="n">guess</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">initial</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">pcomps</span><span class="p">)</span> <span class="o">-</span> <span class="mi">2</span><span class="p">))</span>
+    <span class="n">t</span> <span class="o">=</span> <span class="n">fmin</span><span class="p">(</span><span class="n">fitfunct_fmin_pow</span><span class="p">,</span> <span class="n">guess</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">pcomps</span><span class="p">,</span> <span class="n">flux</span><span class="p">,</span> <span class="n">order</span><span class="p">))</span>
+    <span class="k">return</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">fitfunct_fmin</span><span class="p">(</span><span class="n">scale</span><span class="p">,</span> <span class="n">pcomp</span><span class="p">,</span> <span class="n">zeroflux</span><span class="p">):</span>
+    <span class="n">outflux</span> <span class="o">=</span> <span class="n">fitfunct</span><span class="p">(</span><span class="n">scale</span><span class="p">,</span> <span class="n">pcomp</span><span class="p">,</span> <span class="n">zeroflux</span><span class="p">)</span>
+    <span class="n">sumsq</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">outflux</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">sumsq</span>
+
+<span class="k">def</span> <span class="nf">fitfunct_fmin_pow</span><span class="p">(</span><span class="n">scale</span><span class="p">,</span> <span class="n">pcomp</span><span class="p">,</span> <span class="n">zeroflux</span><span class="p">,</span> <span class="n">order</span><span class="p">):</span>
+    <span class="n">outflux</span> <span class="o">=</span> <span class="n">fitfunct</span><span class="p">(</span><span class="n">scale</span><span class="p">,</span> <span class="n">pcomp</span><span class="p">,</span> <span class="n">zeroflux</span><span class="p">)</span>
+    <span class="n">sumsq</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">outflux</span><span class="p">),</span> <span class="n">order</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">sumsq</span>
+
+<span class="k">def</span> <span class="nf">fitfunct</span><span class="p">(</span><span class="n">scale</span><span class="p">,</span> <span class="n">pcomp</span><span class="p">,</span> <span class="n">zeroflux</span><span class="p">):</span>
+    <span class="n">outflux</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">zeroflux</span><span class="p">)</span>
+    <span class="n">outflux</span> <span class="o">-=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">scale</span><span class="p">,</span> <span class="n">pcomp</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">outflux</span>
+
+<span class="k">def</span> <span class="nf">chi2_gtf</span><span class="p">(</span><span class="n">obs</span><span class="p">,</span> <span class="n">expect</span><span class="p">,</span> <span class="n">err</span><span class="p">,</span> <span class="n">dof</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    calculates a chi squared of the model fit to the data</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">chisqu</span> <span class="o">=</span> <span class="mf">0.</span>
+    <span class="n">obs</span> <span class="o">=</span> <span class="n">obs</span>
+    <span class="n">expect</span>  <span class="o">=</span> <span class="n">expect</span>
+    <span class="n">err</span> <span class="o">=</span> <span class="n">err</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">obs</span><span class="p">)):</span>
+        <span class="n">chisqu</span> <span class="o">+=</span> <span class="p">((</span><span class="n">obs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">expect</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">/</span> <span class="n">err</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">**</span> <span class="mi">2</span>
+    <span class="n">chisqu</span> <span class="o">=</span> <span class="n">chisqu</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="n">dof</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">chisqu</span>
+
+<span class="k">def</span> <span class="nf">rms</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    calculates a root mean square of the model fit to the data</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">rms</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="n">model</span> <span class="o">-</span> <span class="n">data</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">model</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">rms</span>
+
+<span class="k">def</span> <span class="nf">do_lst_iter</span><span class="p">(</span><span class="n">bvs</span><span class="p">,</span> <span class="n">cad</span><span class="p">,</span> <span class="n">flux</span><span class="p">,</span> <span class="n">nsigma</span><span class="p">,</span> <span class="n">niter</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">order</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    performs an iterative fit of the basis vectors to the light curve</span>
+<span class="sd">    after each fit outliers further than nsigma from the fit are removed and the fit recalculated.</span>
+
+<span class="sd">    The sigma actually means a median absolute deviation from the median.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">iiter</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">fluxnew</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">flux</span><span class="p">)</span>
+    <span class="n">lcnew</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">cad</span><span class="p">)</span>
+    <span class="n">bvsnew</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">bvs</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;lst_sq&#39;</span><span class="p">:</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="n">do_lsq_nlin</span><span class="p">(</span><span class="n">bvsnew</span><span class="p">,</span> <span class="n">fluxnew</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;simplex&#39;</span><span class="p">:</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="n">do_lsq_fmin_pow</span><span class="p">(</span><span class="n">bvsnew</span><span class="p">,</span> <span class="n">fluxnew</span><span class="p">,</span> <span class="n">order</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;llsq&#39;</span><span class="p">:</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="n">do_lsq_uhat</span><span class="p">(</span><span class="n">bvsnew</span><span class="p">,</span> <span class="n">fluxnew</span><span class="p">)</span>
+
+    <span class="n">bvsum</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">t</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">bvsnew</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">while</span> <span class="p">(</span><span class="n">iiter</span> <span class="o">&lt;</span> <span class="n">niter</span><span class="p">):</span>
+        <span class="n">iiter</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">matchrange</span> <span class="o">=</span> <span class="mf">1.4826</span> <span class="o">*</span> <span class="n">nsigma</span> <span class="o">*</span> <span class="n">MAD_model</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">subtract</span><span class="p">(</span><span class="n">fluxnew</span><span class="p">,</span> <span class="n">bvsum</span><span class="p">))</span>
+        <span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">fluxnew</span> <span class="o">-</span> <span class="n">bvsum</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">matchrange</span><span class="p">)</span>
+        <span class="n">mask</span> <span class="o">=</span> <span class="n">mask</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+        <span class="n">fluxnew</span> <span class="o">=</span> <span class="n">fluxnew</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span>
+        <span class="n">lcnew</span> <span class="o">=</span> <span class="n">lcnew</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">bvsnew</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">bvsnew2</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="n">bvsnew2</span> <span class="o">=</span> <span class="n">newpcompsarray</span><span class="p">(</span><span class="n">bvsnew</span><span class="p">,</span> <span class="n">mask</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">bvsnew</span><span class="p">)[</span><span class="mi">0</span><span class="p">]):</span>
+            <span class="n">bvsnew2</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">bvsnew</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">mask</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;llsq&#39;</span><span class="p">:</span>
+            <span class="n">t</span> <span class="o">=</span> <span class="n">do_lsq_uhat</span><span class="p">(</span><span class="n">bvsnew2</span><span class="p">,</span> <span class="n">fluxnew</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;lst_sq&#39;</span><span class="p">:</span>
+            <span class="n">t</span> <span class="o">=</span> <span class="n">do_lsq_nlin</span><span class="p">(</span><span class="n">bvsnew2</span><span class="p">,</span> <span class="n">fluxnew</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;simplex&#39;</span><span class="p">:</span>
+            <span class="n">t</span> <span class="o">=</span> <span class="n">do_lsq_fmin_pow</span><span class="p">(</span><span class="n">bvsnew2</span><span class="p">,</span> <span class="n">fluxnew</span><span class="p">,</span> <span class="n">order</span><span class="p">)</span>
+        <span class="n">bvsum</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">t</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">bvsnew2</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">t</span><span class="p">,</span> <span class="n">mask</span>
+
+<span class="k">def</span> <span class="nf">newpcompsarray</span><span class="p">(</span><span class="n">pcomp</span><span class="p">,</span> <span class="n">mask</span><span class="p">):</span>
+    <span class="n">pcompnew</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">pcomp</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">len</span><span class="p">(</span><span class="n">mask</span><span class="p">[</span><span class="n">mask</span><span class="p">])))</span>
+    <span class="k">return</span> <span class="n">pcompnew</span>
+
+
+<span class="k">def</span> <span class="nf">MAD_model</span><span class="p">(</span><span class="n">xx</span><span class="p">,</span> <span class="n">minSd</span><span class="o">=</span><span class="mf">1E-16</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Median Absolute Deviation&quot;&quot;&quot;</span>
+    <span class="n">absdev</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">xx</span><span class="p">)</span>
+    <span class="n">mad</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">absdev</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">mad</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">mad</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">mad</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">),</span> <span class="p">(</span><span class="n">minSd</span> <span class="o">/</span> <span class="mf">1.48</span><span class="p">)))</span>
+    <span class="n">mad</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">mad</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">mad</span>
+
+
+<span class="k">def</span> <span class="nf">make_outfile</span><span class="p">(</span><span class="n">fitsfile</span><span class="p">,</span> <span class="n">outfile</span><span class="p">,</span> <span class="n">flux_new</span><span class="p">,</span> <span class="n">bvsum</span><span class="p">,</span> <span class="n">version</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    creates a fits file identical to the input fits file save from</span>
+<span class="sd">    containing two extra columns - CBVSAP_MODL and CBVSAP_FLUX which are the</span>
+<span class="sd">    sum of basis vectors fit to the data and the resulting corrected flux</span>
+<span class="sd">    after the basis vector fit has been subtracted</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">version</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">unit</span> <span class="o">=</span> <span class="s1">&#39;e-/cadence&#39;</span>
+        <span class="n">flux_new</span> <span class="o">=</span> <span class="n">flux_new</span> <span class="o">*</span> <span class="mf">1625.3514</span> <span class="c1">#convert to e-/cadence</span>
+    <span class="k">elif</span> <span class="n">version</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="n">unit</span> <span class="o">=</span> <span class="s1">&#39;e-/s&#39;</span>
+    <span class="n">col1</span> <span class="o">=</span> <span class="n">pyfits</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;CBVSAP_MODL&#39;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;E13.7   &#39;</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="n">unit</span><span class="p">,</span>
+                         <span class="n">array</span><span class="o">=</span><span class="n">bvsum</span><span class="p">)</span>
+    <span class="n">col2</span> <span class="o">=</span> <span class="n">pyfits</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;CBVSAP_FLUX&#39;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;E13.7   &#39;</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="n">unit</span><span class="p">,</span>
+                         <span class="n">array</span><span class="o">=</span><span class="n">flux_new</span><span class="p">)</span>
+    <span class="n">cols</span> <span class="o">=</span> <span class="n">fitsfile</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">columns</span> <span class="o">+</span> <span class="n">col1</span> <span class="o">+</span> <span class="n">col2</span>
+    <span class="n">fitsfile</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">pyfits</span><span class="o">.</span><span class="n">BinTableHDU</span><span class="o">.</span><span class="n">from_columns</span><span class="p">(</span><span class="n">cols</span><span class="p">,</span>
+                                                  <span class="n">header</span><span class="o">=</span><span class="n">fitsfile</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">header</span><span class="p">)</span>
+    <span class="n">fitsfile</span><span class="o">.</span><span class="n">writeto</span><span class="p">(</span><span class="n">outfile</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">do_plot</span><span class="p">(</span><span class="n">date</span><span class="p">,</span> <span class="n">flux_old</span><span class="p">,</span> <span class="n">flux_new</span><span class="p">,</span> <span class="n">bvsum</span><span class="p">,</span> <span class="n">cad</span><span class="p">,</span> <span class="n">good_data</span><span class="p">,</span> <span class="n">cad_nans</span><span class="p">,</span> <span class="n">version</span><span class="p">,</span>
+    <span class="n">maskdata</span><span class="p">,</span> <span class="n">outfile</span><span class="p">,</span> <span class="n">noninteractive</span><span class="p">):</span>
+
+    <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">[</span><span class="mi">15</span><span class="p">,</span> <span class="mi">8</span><span class="p">])</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">clf</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">version</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">barytime0</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">date</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="mi">100</span><span class="p">)</span> <span class="o">*</span> <span class="mf">100.0</span><span class="p">)</span>
+        <span class="n">date_sub</span> <span class="o">=</span> <span class="n">date</span> <span class="o">-</span> <span class="n">barytime0</span>
+        <span class="n">xlab</span> <span class="o">=</span> <span class="sa">r</span><span class="s1">&#39;BJD $-$ </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">barytime0</span><span class="o">+</span><span class="mf">2400000.</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">version</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="n">barytime0</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="nb">int</span><span class="p">((</span><span class="n">date</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="mf">54833.</span><span class="p">)</span> <span class="o">/</span> <span class="mi">100</span><span class="p">)</span> <span class="o">*</span> <span class="mf">100.0</span><span class="p">)</span>
+        <span class="n">date_sub</span> <span class="o">=</span> <span class="n">date</span> <span class="o">+</span> <span class="mf">54833.</span> <span class="o">-</span> <span class="n">barytime0</span>
+        <span class="n">xlab</span> <span class="o">=</span> <span class="sa">r</span><span class="s1">&#39;BJD $-$ </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">barytime0</span><span class="o">+</span><span class="mf">2400000.</span><span class="p">)</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">nrm1</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">flux_old</span><span class="o">.</span><span class="n">max</span><span class="p">())))</span> <span class="o">-</span> <span class="mi">1</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">nrm1</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">flux_old_sub</span> <span class="o">=</span> <span class="n">flux_old</span> <span class="o">/</span> <span class="mi">10</span> <span class="o">**</span> <span class="n">nrm1</span>
+    <span class="n">bvsum_sub</span> <span class="o">=</span> <span class="n">bvsum</span> <span class="o">/</span> <span class="mi">10</span> <span class="o">**</span> <span class="n">nrm1</span>
+    <span class="n">ylab1</span> <span class="o">=</span> <span class="sa">r</span><span class="s1">&#39;10$^</span><span class="si">%d</span><span class="s1">$ e$^-$ s$^{-1}$&#39;</span> <span class="o">%</span> <span class="n">nrm1</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">nrm2</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">flux_new</span><span class="o">.</span><span class="n">max</span><span class="p">())))</span> <span class="o">-</span> <span class="mi">1</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">nrm2</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">flux_new_sub</span> <span class="o">=</span> <span class="n">flux_new</span> <span class="o">/</span> <span class="mi">10</span> <span class="o">**</span> <span class="n">nrm2</span>
+    <span class="n">ylab2</span> <span class="o">=</span> <span class="sa">r</span><span class="s1">&#39;10$^</span><span class="si">%d</span><span class="s1">$ e$^-$ s$^{-1}$&#39;</span> <span class="o">%</span> <span class="n">nrm2</span>
+
+    <span class="n">xmin</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">date_sub</span><span class="p">)</span>
+    <span class="n">xmax</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">date_sub</span><span class="p">)</span>
+    <span class="n">ymin1</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">flux_old_sub</span><span class="p">),</span> <span class="nb">min</span><span class="p">(</span><span class="n">bvsum_sub</span><span class="p">))</span>
+    <span class="n">ymax1</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">flux_old_sub</span><span class="p">),</span> <span class="nb">max</span><span class="p">(</span><span class="n">bvsum_sub</span><span class="p">))</span>
+    <span class="n">ymin2</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">flux_new_sub</span><span class="p">)</span>
+    <span class="n">ymax2</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">flux_new_sub</span><span class="p">)</span>
+    <span class="n">xr</span> <span class="o">=</span> <span class="n">xmax</span> <span class="o">-</span> <span class="n">xmin</span>
+    <span class="n">yr1</span> <span class="o">=</span> <span class="n">ymax1</span> <span class="o">-</span> <span class="n">ymin1</span>
+    <span class="n">yr2</span> <span class="o">=</span> <span class="n">ymax2</span> <span class="o">-</span> <span class="n">ymin2</span>
+
+    <span class="n">ax1</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">211</span><span class="p">)</span>
+
+    <span class="n">blocks</span> <span class="o">=</span> <span class="n">split_on_nans</span><span class="p">(</span><span class="n">good_data</span><span class="p">,</span><span class="n">cad_nans</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">blocks</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">block</span> <span class="o">=</span> <span class="p">[</span><span class="n">blocks</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">blocks</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">block</span> <span class="o">=</span> <span class="p">[</span><span class="n">blocks</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">],</span> <span class="n">blocks</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span>
+        <span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">cad</span> <span class="o">&gt;=</span> <span class="n">block</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">cad</span> <span class="o">&lt;=</span> <span class="n">block</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">plot_x</span> <span class="o">=</span> <span class="n">date_sub</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span>
+        <span class="n">plot_y</span> <span class="o">=</span> <span class="n">flux_old_sub</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span> <span class="ow">in</span> <span class="n">plot_y</span><span class="p">:</span>
+            <span class="k">break</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">plot_x</span><span class="p">,</span> <span class="n">plot_y</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;#363636&#39;</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;-&#39;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+        <span class="n">plot_y</span> <span class="o">=</span> <span class="n">bvsum_sub</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">plot_x</span><span class="p">,</span> <span class="n">plot_y</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;#c0392b&#39;</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;-&#39;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mf">2.0</span><span class="p">)</span>
+    <span class="n">date2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">date_sub</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="n">date_sub</span><span class="p">[</span><span class="mi">0</span><span class="p">]])</span>
+    <span class="n">date2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">date2</span><span class="p">,</span> <span class="p">[</span><span class="n">date_sub</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]])</span>
+    <span class="n">flux2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">flux_old_sub</span><span class="p">,[</span><span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">])</span>
+    <span class="n">flux2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">flux2</span><span class="p">,</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">])</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span><span class="n">date2</span><span class="p">,</span> <span class="n">flux2</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;#a8a7a7&#39;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Data&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">maskdata</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">maskdata</span><span class="p">:</span>
+            <span class="n">pos</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">((</span><span class="n">barytime0</span> <span class="o">+</span> <span class="mi">2400000</span> <span class="o">+</span> <span class="n">date2</span> <span class="o">&gt;</span> <span class="n">m</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">barytime0</span> <span class="o">+</span> <span class="mi">2400000</span> <span class="o">+</span> <span class="n">date2</span> <span class="o">&lt;=</span> <span class="n">m</span><span class="p">[</span><span class="mi">1</span><span class="p">]))[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">fill_between</span><span class="p">(</span><span class="n">date2</span><span class="p">[</span><span class="n">pos</span><span class="p">],</span> <span class="n">flux2</span><span class="p">[</span><span class="n">pos</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">flux2</span><span class="p">[</span><span class="n">pos</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">(),</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;#c0392b&#39;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Masked&#39;</span><span class="p">)</span>
+
+    <span class="n">plt</span><span class="o">.</span><span class="n">xlim</span><span class="p">(</span><span class="n">xmin</span> <span class="o">-</span> <span class="n">xr</span> <span class="o">*</span> <span class="mf">0.01</span><span class="p">,</span> <span class="n">xmax</span> <span class="o">+</span> <span class="n">xr</span> <span class="o">*</span> <span class="mf">0.01</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">ymin1</span> <span class="o">-</span> <span class="n">yr1</span> <span class="o">*</span> <span class="mf">0.01</span> <span class="o">&lt;=</span> <span class="mf">0.0</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">(</span><span class="mf">1.0e-10</span><span class="p">,</span> <span class="n">ymax1</span> <span class="o">+</span> <span class="n">yr1</span> <span class="o">*</span> <span class="mf">0.01</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">(</span><span class="n">ymin1</span> <span class="o">-</span> <span class="n">yr1</span> <span class="o">*</span> <span class="mf">0.01</span><span class="p">,</span> <span class="n">ymax1</span> <span class="o">+</span> <span class="n">yr1</span> <span class="o">*</span> <span class="mf">0.01</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="n">xlab</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;color&#39;</span> <span class="p">:</span> <span class="s1">&#39;k&#39;</span><span class="p">})</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="n">ylab1</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;color&#39;</span> <span class="p">:</span> <span class="s1">&#39;k&#39;</span><span class="p">})</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">ls</span><span class="o">=</span><span class="s1">&#39;--&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+
+    <span class="n">ax2</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">212</span><span class="p">,</span> <span class="n">sharex</span><span class="o">=</span><span class="n">ax1</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">blocks</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">block</span> <span class="o">=</span> <span class="p">[</span><span class="n">blocks</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">blocks</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">block</span> <span class="o">=</span> <span class="p">[</span><span class="n">blocks</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">],</span> <span class="n">blocks</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span>
+        <span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">cad</span> <span class="o">&gt;=</span> <span class="n">block</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">cad</span> <span class="o">&lt;=</span> <span class="n">block</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">plot_x</span> <span class="o">=</span> <span class="n">date_sub</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span>
+        <span class="n">plot_y</span> <span class="o">=</span> <span class="n">flux_new_sub</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span> <span class="ow">in</span> <span class="n">plot_y</span><span class="p">:</span>
+            <span class="k">break</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">plot_x</span><span class="p">,</span> <span class="n">plot_y</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;#363636&#39;</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;-&#39;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+        <span class="n">plot_y</span> <span class="o">=</span> <span class="n">bvsum_sub</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span>
+
+    <span class="n">date2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">date_sub</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="n">date_sub</span><span class="p">[</span><span class="mi">0</span><span class="p">]])</span>
+    <span class="n">date2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">date2</span><span class="p">,</span> <span class="p">[</span><span class="n">date_sub</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]])</span>
+    <span class="n">flux2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">flux_new_sub</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">])</span>
+    <span class="n">flux2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">flux2</span><span class="p">,</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">])</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span><span class="n">date2</span><span class="p">,</span> <span class="n">flux2</span><span class="p">,</span> <span class="n">fc</span><span class="o">=</span><span class="s1">&#39;#a8a7a7&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span>  <span class="n">linewidth</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">maskdata</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">maskdata</span><span class="p">:</span>
+            <span class="n">pos</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">((</span><span class="n">barytime0</span> <span class="o">+</span> <span class="mi">2400000</span> <span class="o">+</span> <span class="n">date2</span> <span class="o">&gt;</span><span class="n">m</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">barytime0</span> <span class="o">+</span> <span class="mi">2400000</span> <span class="o">+</span> <span class="n">date2</span> <span class="o">&lt;=</span><span class="n">m</span> <span class="p">[</span><span class="mi">1</span><span class="p">]))[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">fill_between</span><span class="p">(</span><span class="n">date2</span><span class="p">[</span><span class="n">pos</span><span class="p">],</span> <span class="n">flux2</span><span class="p">[</span><span class="n">pos</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">flux2</span><span class="p">[</span><span class="n">pos</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">(),</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;#c0392b&#39;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">xlim</span><span class="p">(</span><span class="n">xmin</span> <span class="o">-</span> <span class="n">xr</span> <span class="o">*</span> <span class="mf">0.01</span><span class="p">,</span> <span class="n">xmax</span> <span class="o">+</span> <span class="n">xr</span> <span class="o">*</span> <span class="mf">0.01</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">ymin2</span><span class="o">-</span><span class="n">yr2</span><span class="o">*</span><span class="mf">0.01</span> <span class="o">&lt;=</span> <span class="mf">0.0</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">(</span><span class="mf">1.0e-10</span><span class="p">,</span> <span class="n">ymax2</span> <span class="o">+</span> <span class="n">yr2</span> <span class="o">*</span> <span class="mf">0.01</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">(</span><span class="n">ymin2</span> <span class="o">-</span> <span class="n">yr2</span> <span class="o">*</span> <span class="mf">0.01</span><span class="p">,</span> <span class="n">ymax2</span> <span class="o">+</span> <span class="n">yr2</span> <span class="o">*</span> <span class="mf">0.01</span><span class="p">)</span>
+
+    <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="n">xlab</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;color&#39;</span> <span class="p">:</span> <span class="s1">&#39;k&#39;</span><span class="p">})</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="n">ylab2</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;color&#39;</span> <span class="p">:</span> <span class="s1">&#39;k&#39;</span><span class="p">})</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">ls</span><span class="o">=</span><span class="s1">&#39;--&#39;</span><span class="p">,</span><span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">subplots_adjust</span><span class="p">(</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.94</span><span class="p">,</span> <span class="mf">0.94</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_major_formatter</span><span class="p">(</span><span class="n">plt</span><span class="o">.</span><span class="n">ScalarFormatter</span><span class="p">(</span><span class="n">useOffset</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">set_major_formatter</span><span class="p">(</span><span class="n">plt</span><span class="o">.</span><span class="n">ScalarFormatter</span><span class="p">(</span><span class="n">useOffset</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
+
+    <span class="c1"># render plot</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s1">&#39;.fits&#39;</span><span class="p">,</span> <span class="s1">&#39;.png&#39;</span><span class="p">,</span> <span class="n">outfile</span><span class="p">),</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s1">&#39;tight&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">noninteractive</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+<span class="k">def</span> <span class="nf">split_on_nans</span><span class="p">(</span><span class="n">good_data</span><span class="p">,</span> <span class="n">cad</span><span class="p">):</span>
+    <span class="n">blocks</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">time_of_nans</span> <span class="o">=</span> <span class="n">cad</span><span class="p">[</span><span class="o">~</span><span class="n">good_data</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">good_data</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+        <span class="n">blocks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cad</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">time_of_nans</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="n">time_of_nans</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">time_of_nans</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">blocks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">time_of_nans</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">good_data</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
+            <span class="n">blocks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cad</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">blocks</span>
+
+<div class="viewcode-block" id="kepcotrend"><a class="viewcode-back" href="../../api/kepcotrend.html#pyke.kepcotrend.kepcotrend">[docs]</a><span class="k">def</span> <span class="nf">kepcotrend</span><span class="p">(</span><span class="n">infile</span><span class="p">,</span> <span class="n">bvfile</span><span class="p">,</span> <span class="n">listbv</span><span class="p">,</span> <span class="n">outfile</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fitmethod</span><span class="o">=</span><span class="s1">&#39;llsq&#39;</span><span class="p">,</span>
+               <span class="n">fitpower</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">iterate</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">maskfile</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
+               <span class="n">scinterp</span><span class="o">=</span><span class="s1">&#39;linear&#39;</span><span class="p">,</span> <span class="n">plot</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">noninteractive</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+               <span class="n">overwrite</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">logfile</span><span class="o">=</span><span class="s1">&#39;kepcotrend.log&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    kepcotrend -- Remove systematic trends Kepler light curves using</span>
+<span class="sd">    cotrending basis vectors. The cotrending basis vectors files can be found</span>
+<span class="sd">    here: http://archive.stsci.edu/kepler/cbv.html</span>
+
+<span class="sd">    Simple Aperture Photometry (SAP) data often contain systematic trends</span>
+<span class="sd">    associated with the spacecraft, detector and environment rather than the</span>
+<span class="sd">    target. See the the Kepler data release notes for descriptions of</span>
+<span class="sd">    systematics and the cadences that they affect. Within the Kepler pipeline</span>
+<span class="sd">    these contaminants are treated during Pre-search Data Conditioning (PDC)</span>
+<span class="sd">    and cleaned data are provided in the light curve files archived at MAST</span>
+<span class="sd">    within the column PDCSAP_FLUX. The Kepler pipeline attempts to remove</span>
+<span class="sd">    systematics with a combination of data detrending and cotrending against</span>
+<span class="sd">    engineering telemetry from the spacecraft such as detector temperatures.</span>
+<span class="sd">    These processes are imperfect but tackled in the spirit of correcting as</span>
+<span class="sd">    many targets as possible with enough accuracy for the mission to meet</span>
+<span class="sd">    exoplanet detection specifications.</span>
+
+<span class="sd">    The imperfections in the method are most apparent in variable stars, those</span>
+<span class="sd">    stars that are of most interest for stellar astrophysics. The PDC</span>
+<span class="sd">    correction can occasionally hamper data analysis or, at worst, destroy</span>
+<span class="sd">    astrophysical signal from the target. While data filtering (``kepoutlier``,</span>
+<span class="sd">    ``kepfilter``) and data detrending with analytical functions</span>
+<span class="sd">    (``kepdetrend``) often provide some mitigation for data artifacts, these</span>
+<span class="sd">    methods require assumptions and often result in lossy data. An alternative</span>
+<span class="sd">    viable approach is to identify the photometric variability common to all of</span>
+<span class="sd">    the stars neighboring the target and subtract those trends from the target.</span>
+<span class="sd">    In principle, the correct choice, weighting and subtraction of these common</span>
+<span class="sd">    trends will leave behind a corrected flux time series which better</span>
+<span class="sd">    represents statistically the true signal from the target.</span>
+
+<span class="sd">    While GOs, KASC members and archive users wait for the Kepler project to</span>
+<span class="sd">    release quarters of data, they do not have access to all the light curve</span>
+<span class="sd">    data neighboring their targets and so cannot take the ensemble approach</span>
+<span class="sd">    themselves without help. To mitigate this problem the Kepler Science Office</span>
+<span class="sd">    have made available ancillary data which describes the systematic trends</span>
+<span class="sd">    present in the ensemble flux data for each CCD channel. These data are</span>
+<span class="sd">    known as the Cotrending Basis Vectors (CBVs). More details on the method</span>
+<span class="sd">    used to generate these basis vectors will be provided in the Kepler Data</span>
+<span class="sd">    Processing Handbook soon, but until that time, a summary of the method is</span>
+<span class="sd">    given here. To create the initial basis set, that is the flux time series&#39;</span>
+<span class="sd">    that are used to make the cotrending basis vectors:</span>
+
+<span class="sd">    The time series photometry of each star on a specific detector channel is</span>
+<span class="sd">    normalized by its own median flux. One (unity) is subtracted from each time</span>
+<span class="sd">    series so that the median value of the light curve is zero.</span>
+<span class="sd">    The time series is divided by the root-mean square of the photometry.</span>
+<span class="sd">    The correlation between each time series on the CCD channel is calculated</span>
+<span class="sd">    using the median and root-mean square normalized flux.</span>
+<span class="sd">    The median absolute correlation is then calculated for each star.</span>
+<span class="sd">    All stars on the channel are sorted into ascending order of correlation.</span>
+<span class="sd">    The 50 percent most correlated stars are selected.</span>
+<span class="sd">    The median normalized fluxes only (as opposed to the root-mean square</span>
+<span class="sd">    normalized fluxes) are now used for the rest of the process Singular Value</span>
+<span class="sd">    Decomposition is applied to the matrix of correlated sources to create</span>
+<span class="sd">    orthonormal basis vectors from the U matrix, sorted by their singular</span>
+<span class="sd">    values.</span>
+
+<span class="sd">    The archived cotrending basis vectors are a reduced-rank representation of</span>
+<span class="sd">    the full set of basis vectors and consist of the 16 leading columns.</span>
+
+<span class="sd">    To correct a SAP light curve, :math:`Fsap`, for systematic features,</span>
+<span class="sd">    ``kepcotrend`` employs the cotrending basis vectors :math:`CBVi`. The task</span>
+<span class="sd">    finds the coefficients :math:`Ai` which minimize</span>
+
+<span class="sd">    .. math::</span>
+
+<span class="sd">        Fcbv = Fsap - \sum_{i} Ai \cdot CBV_i</span>
+
+<span class="sd">    The corrected light curve, Fcbv, can be tailored to the needs of the user</span>
+<span class="sd">    and their scientific objective. The user decides which combination of basis</span>
+<span class="sd">    vectors best removes systematics from their specific Kepler SAP light</span>
+<span class="sd">    curve. In principle the user can choose any combination of cotrending basis</span>
+<span class="sd">    vectors to fit to the data. However, experience suggests that most choices</span>
+<span class="sd">    will be to decide how many sequential basis vectors to include in the fit,</span>
+<span class="sd">    starting with first vector. For example a user is much more likely to</span>
+<span class="sd">    choose a vector combination 1, 2, 3, 4, 5, 6 etc over e.g. a combination 1,</span>
+<span class="sd">    2, 5, 7, 8, 10, 12. The user should always include at least the first two</span>
+<span class="sd">    basis vectors. The number of basis vectors used is directly related to the</span>
+<span class="sd">    scientific aims of the user and the light curve being analyzed and</span>
+<span class="sd">    experimental iteration towards a target-specific optimal basis set is</span>
+<span class="sd">    recommended. Occasionally kepcotrend over-fits the data and removes real</span>
+<span class="sd">    astrophysical signal. This is particularly prevalent if too many basis</span>
+<span class="sd">    vectors are used. A good rule of thumb is to start with two basis vectors</span>
+<span class="sd">    and increase the number until there is no improvement, or signals which are</span>
+<span class="sd">    thought to be astrophysical start to become distorted.</span>
+
+<span class="sd">    The user is given a choice of fitting algorithm to use. For most purposes</span>
+<span class="sd">    the linear least squares method is both the fastest and the most accurate</span>
+<span class="sd">    because it gives the exact solution to the least squares problem. However</span>
+<span class="sd">    we have found a few situations where the best solution, scientifically,</span>
+<span class="sd">    comes from using the simplex fitting algorithm which performs something</span>
+<span class="sd">    other than a least squares fit. Performing a least absolute residuals fit</span>
+<span class="sd">    (fitpower=1.0), for example, is more robust to outliers.</span>
+
+<span class="sd">    There are instances when the fit performs sub-optimally due to the presence</span>
+<span class="sd">    of certain events in the light curve. For this reason we have included two</span>
+<span class="sd">    options which can be used individually or simultaneously to improve the fit</span>
+<span class="sd">    - iterative fitting and data masking. Iterative fitting performs the fit</span>
+<span class="sd">    and rejects data points that are greater than a specified distance from the</span>
+<span class="sd">    optimal fit before re-fitting. The lower threshold for data clipping is</span>
+<span class="sd">    provided by the user as the number of sigma from the best fit. The clipping</span>
+<span class="sd">    threshold is more accurately defined as the number of Median Absolute</span>
+<span class="sd">    Deviations (MADs) multiplied by 1.4826. The distribution of MAD will be</span>
+<span class="sd">    identical to the distribution of standard deviation if the distribution is</span>
+<span class="sd">    Gaussian. We use MAD because in highly non-Gaussian distributions MAD is</span>
+<span class="sd">    more robust to outliers than standard deviation.</span>
+
+<span class="sd">    The code will print out the coefficients fit to each basis vector, the</span>
+<span class="sd">    root-mean square of the fit and the chi-squared value of the fit. The rms</span>
+<span class="sd">    and the chi-squared value include only the data points included in the fit</span>
+<span class="sd">    so if an iterative fit is performed these clipped values are not included</span>
+<span class="sd">    in this calculation.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    infile : str</span>
+<span class="sd">        the input file in the FITS format obtained from MAST</span>
+<span class="sd">    outfile : str</span>
+<span class="sd">        the output will be a fits file in the same style as the input file but</span>
+<span class="sd">        with two additional columns: CBVSAP_MODL and CBVSAP_FLUX. The first of</span>
+<span class="sd">        these is the best fitting linear combination of basis vectors.</span>
+<span class="sd">        The second is the new flux with the basis vector sum subtracted. This</span>
+<span class="sd">        is the new flux value.</span>
+<span class="sd">    bvfile : str</span>
+<span class="sd">        the name of the FITS file containing the basis vectors</span>
+<span class="sd">    listbv : list of integers</span>
+<span class="sd">        the basis vectors to fit to the data</span>
+<span class="sd">    fitmethod : str</span>
+<span class="sd">        fit using either the &#39;llsq&#39; or the &#39;simplex&#39; method. &#39;llsq&#39; is usually</span>
+<span class="sd">        the correct one to use because as the basis vectors are orthogonal.</span>
+<span class="sd">        Simplex gives you option of using a different merit function - ie. you</span>
+<span class="sd">        can minimise the least absolute residual instead of the least squares</span>
+<span class="sd">        which weights outliers less</span>
+<span class="sd">    fitpower : float</span>
+<span class="sd">        if using a simplex you can chose your own power in the metir function</span>
+<span class="sd">        - i.e. the merit function minimises :math:`abs(Obs - Mod)^P`.</span>
+<span class="sd">        :math:`P = 2` is least squares, :math:`P = 1` minimises least absolutes</span>
+<span class="sd">    iterate : bool</span>
+<span class="sd">        should the program fit the basis vectors to the light curve data then</span>
+<span class="sd">        remove data points further than &#39;sigma&#39; from the fit and then refit</span>
+<span class="sd">    maskfile : str</span>
+<span class="sd">        this is the name of a mask file which can be used to define regions of</span>
+<span class="sd">        the flux time series to exclude from the fit. The easiest way to create</span>
+<span class="sd">        this is by using ``keprange`` from the PyKE set of tools. You can also</span>
+<span class="sd">        make this yourself with two BJDs on each line in the file specifying</span>
+<span class="sd">        the beginning and ending date of the region to exclude.</span>
+<span class="sd">    scinterp : str</span>
+<span class="sd">        the basis vectors are only calculated for long cadence data, therefore if</span>
+<span class="sd">        you want to use short cadence data you have to interpolate the basis</span>
+<span class="sd">        vectors. There are several methods to do this, the best of these probably</span>
+<span class="sd">        being nearest which picks the value of the nearest long cadence data</span>
+<span class="sd">        point.</span>
+<span class="sd">        The options available are:</span>
+
+<span class="sd">        * linear</span>
+<span class="sd">        * nearest</span>
+<span class="sd">        * zero</span>
+<span class="sd">        * slinear</span>
+<span class="sd">        * quadratic</span>
+<span class="sd">        * cubic</span>
+<span class="sd">    plot : bool</span>
+<span class="sd">        Plot the data and result?</span>
+<span class="sd">    non-interactive : bool</span>
+<span class="sd">        If True, prevents the matplotlib window to pop up.</span>
+<span class="sd">    overwrite : bool</span>
+<span class="sd">        Overwrite the output file?</span>
+<span class="sd">    verbose : bool</span>
+<span class="sd">        Print informative messages and warnings to the shell and logfile?</span>
+<span class="sd">    logfile : str</span>
+<span class="sd">        Name of the logfile containing error and warning messages.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    .. code-block:: bash</span>
+
+<span class="sd">        $ kepcotrend kplr005110407-2009350155506_llc.fits ~/cbv/kplr2009350155506-q03-d25_lcbv.fits</span>
+<span class="sd">        &#39;1 2 3&#39; --plot --verbose</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">outfile</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">outfile</span> <span class="o">=</span> <span class="n">infile</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;-</span><span class="si">{}</span><span class="s2">.fits&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">__all__</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="c1"># log the call</span>
+    <span class="n">hashline</span> <span class="o">=</span> <span class="s1">&#39;--------------------------------------------------------------&#39;</span>
+    <span class="n">kepmsg</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">logfile</span><span class="p">,</span> <span class="n">hashline</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+    <span class="n">call</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;KEPCOTREND -- &#39;</span>
+            <span class="o">+</span> <span class="s1">&#39; infile=</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">infile</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s1">&#39; outfile=</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">outfile</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s1">&#39; bvfile=</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">bvfile</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s1">&#39; listbv=</span><span class="si">{}</span><span class="s1"> &#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">listbv</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s1">&#39; fitmethod=</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">fitmethod</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s1">&#39; fitpower=</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">fitpower</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s1">&#39; iterate=</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">iterate</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s1">&#39; sigma_clip=</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">sigma</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s1">&#39; mask_file=</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">maskfile</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s1">&#39; scinterp=</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">scinterp</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s1">&#39; plot=</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">plot</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s1">&#39; overwrite=</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">overwrite</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s1">&#39; verbose=</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">verbose</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s1">&#39; logfile=</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">logfile</span><span class="p">))</span>
+    <span class="n">kepmsg</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">logfile</span><span class="p">,</span> <span class="n">call</span><span class="o">+</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+
+    <span class="c1"># start time</span>
+    <span class="n">kepmsg</span><span class="o">.</span><span class="n">clock</span><span class="p">(</span><span class="s1">&#39;KEPCOTREND started at&#39;</span><span class="p">,</span> <span class="n">logfile</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+
+    <span class="c1"># overwrite output file</span>
+    <span class="k">if</span> <span class="n">overwrite</span><span class="p">:</span>
+        <span class="n">kepio</span><span class="o">.</span><span class="n">overwrite</span><span class="p">(</span><span class="n">outfile</span><span class="p">,</span> <span class="n">logfile</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">kepio</span><span class="o">.</span><span class="n">fileexists</span><span class="p">(</span><span class="n">outfile</span><span class="p">):</span>
+        <span class="n">errmsg</span> <span class="o">=</span> <span class="s1">&#39;ERROR -- KEPCOTREND: </span><span class="si">{}</span><span class="s1"> exists. Use --overwrite&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">outfile</span><span class="p">)</span>
+        <span class="n">kepmsg</span><span class="o">.</span><span class="n">err</span><span class="p">(</span><span class="n">logfile</span><span class="p">,</span> <span class="n">errmsg</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+
+    <span class="c1"># open input file</span>
+    <span class="n">instr</span> <span class="o">=</span> <span class="n">pyfits</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">infile</span><span class="p">)</span>
+    <span class="n">tstart</span><span class="p">,</span> <span class="n">tstop</span><span class="p">,</span> <span class="n">bjdref</span><span class="p">,</span> <span class="n">cadence</span> <span class="o">=</span> <span class="n">kepio</span><span class="o">.</span><span class="n">timekeys</span><span class="p">(</span><span class="n">instr</span><span class="p">,</span> <span class="n">infile</span><span class="p">,</span> <span class="n">logfile</span><span class="p">,</span>
+                                                    <span class="n">verbose</span><span class="p">)</span>
+    <span class="c1"># fudge non-compliant FITS keywords with no values</span>
+    <span class="n">instr</span> <span class="o">=</span> <span class="n">kepkey</span><span class="o">.</span><span class="n">emptykeys</span><span class="p">(</span><span class="n">instr</span><span class="p">,</span> <span class="n">infile</span><span class="p">,</span> <span class="n">logfile</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">kepio</span><span class="o">.</span><span class="n">fileexists</span><span class="p">(</span><span class="n">bvfile</span><span class="p">):</span>
+        <span class="n">message</span> <span class="o">=</span> <span class="s1">&#39;ERROR -- KEPCOTREND: &#39;</span> <span class="o">+</span> <span class="n">bvfile</span> <span class="o">+</span> <span class="s1">&#39; does not exist.&#39;</span>
+        <span class="n">kepmsg</span><span class="o">.</span><span class="n">err</span><span class="p">(</span><span class="n">logfile</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+    <span class="c1">#lsq_sq - nonlinear least squares fitting and simplex_abs have been</span>
+    <span class="c1">#removed from the options in PyRAF but they are still in the code!</span>
+    <span class="k">if</span> <span class="n">fitmethod</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;llsq&#39;</span><span class="p">,</span><span class="s1">&#39;matrix&#39;</span><span class="p">,</span><span class="s1">&#39;lst_sq&#39;</span><span class="p">,</span><span class="s1">&#39;simplex_abs&#39;</span><span class="p">,</span><span class="s1">&#39;simplex&#39;</span><span class="p">]:</span>
+        <span class="n">errmsg</span> <span class="o">=</span> <span class="s1">&#39;Fit method must either: llsq, matrix, lst_sq or simplex&#39;</span>
+        <span class="n">kepmsg</span><span class="o">.</span><span class="n">err</span><span class="p">(</span><span class="n">logfile</span><span class="p">,</span> <span class="n">errmsg</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">is_numlike</span><span class="p">(</span><span class="n">fitpower</span><span class="p">)</span> <span class="ow">and</span> <span class="n">fitpower</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">errmsg</span> <span class="o">=</span> <span class="s1">&#39;Fit power must be an real number or None&#39;</span>
+        <span class="n">kepmsg</span><span class="o">.</span><span class="n">err</span><span class="p">(</span><span class="n">logfile</span><span class="p">,</span> <span class="n">errmsg</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">fitpower</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">fitpower</span> <span class="o">=</span> <span class="mf">1.</span>
+
+    <span class="c1"># input data</span>
+    <span class="n">short</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">test</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">instr</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;FILEVER&#39;</span><span class="p">])</span>
+        <span class="n">version</span> <span class="o">=</span> <span class="mi">2</span>
+    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+        <span class="n">version</span> <span class="o">=</span> <span class="mi">1</span>
+
+    <span class="n">table</span> <span class="o">=</span> <span class="n">instr</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">data</span>
+    <span class="k">if</span> <span class="n">version</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">instr</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;DATATYPE&#39;</span><span class="p">])</span> <span class="o">==</span> <span class="s1">&#39;long cadence&#39;</span><span class="p">:</span>
+            <span class="n">quarter</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">instr</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;QUARTER&#39;</span><span class="p">])</span>
+            <span class="n">module</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">instr</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;MODULE&#39;</span><span class="p">])</span>
+            <span class="n">output</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">instr</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;OUTPUT&#39;</span><span class="p">])</span>
+            <span class="n">channel</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">instr</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;CHANNEL&#39;</span><span class="p">])</span>
+            <span class="n">lc_cad_o</span> <span class="o">=</span> <span class="n">table</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="s1">&#39;cadence_number&#39;</span><span class="p">)</span>
+            <span class="n">lc_date_o</span> <span class="o">=</span> <span class="n">table</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="s1">&#39;barytime&#39;</span><span class="p">)</span>
+            <span class="n">lc_flux_o</span> <span class="o">=</span> <span class="n">table</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="s1">&#39;ap_raw_flux&#39;</span><span class="p">)</span> <span class="o">/</span> <span class="mf">1625.3468</span> <span class="c1">#convert to e-/s</span>
+            <span class="n">lc_err_o</span> <span class="o">=</span> <span class="n">table</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="s1">&#39;ap_raw_err&#39;</span><span class="p">)</span> <span class="o">/</span> <span class="mf">1625.3468</span> <span class="c1">#convert to e-/s</span>
+        <span class="k">elif</span> <span class="nb">str</span><span class="p">(</span><span class="n">instr</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;DATATYPE&#39;</span><span class="p">])</span> <span class="o">==</span> <span class="s1">&#39;short cadence&#39;</span><span class="p">:</span>
+            <span class="n">short</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">quarter</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">instr</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;QUARTER&#39;</span><span class="p">])</span>
+            <span class="n">module</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">instr</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;MODULE&#39;</span><span class="p">])</span>
+            <span class="n">output</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">instr</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;OUTPUT&#39;</span><span class="p">])</span>
+            <span class="n">channel</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">instr</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;CHANNEL&#39;</span><span class="p">])</span>
+            <span class="n">lc_cad_o</span> <span class="o">=</span> <span class="n">table</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="s1">&#39;cadence_number&#39;</span><span class="p">)</span>
+            <span class="n">lc_date_o</span> <span class="o">=</span> <span class="n">table</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="s1">&#39;barytime&#39;</span><span class="p">)</span>
+            <span class="n">lc_flux_o</span> <span class="o">=</span> <span class="n">table</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="s1">&#39;ap_raw_flux&#39;</span><span class="p">)</span> <span class="o">/</span> <span class="mf">54.178</span> <span class="c1">#convert to e-/s</span>
+            <span class="n">lc_err_o</span> <span class="o">=</span> <span class="n">table</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="s1">&#39;ap_raw_err&#39;</span><span class="p">)</span> <span class="o">/</span> <span class="mf">54.178</span> <span class="c1">#convert to e-/s</span>
+
+    <span class="k">elif</span> <span class="n">version</span> <span class="o">&gt;=</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">instr</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;OBSMODE&#39;</span><span class="p">])</span> <span class="o">==</span> <span class="s1">&#39;long cadence&#39;</span><span class="p">:</span>
+            <span class="n">quarter</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">instr</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;QUARTER&#39;</span><span class="p">])</span>
+            <span class="n">module</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">instr</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;MODULE&#39;</span><span class="p">])</span>
+            <span class="n">output</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">instr</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;OUTPUT&#39;</span><span class="p">])</span>
+            <span class="n">channel</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">instr</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;CHANNEL&#39;</span><span class="p">])</span>
+            <span class="n">lc_cad_o</span> <span class="o">=</span> <span class="n">table</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="s1">&#39;CADENCENO&#39;</span><span class="p">)</span>
+            <span class="n">lc_date_o</span> <span class="o">=</span> <span class="n">table</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="s1">&#39;TIME&#39;</span><span class="p">)</span>
+            <span class="n">lc_flux_o</span> <span class="o">=</span> <span class="n">table</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="s1">&#39;SAP_FLUX&#39;</span><span class="p">)</span>
+            <span class="n">lc_err_o</span> <span class="o">=</span> <span class="n">table</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="s1">&#39;SAP_FLUX_ERR&#39;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">str</span><span class="p">(</span><span class="n">instr</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;OBSMODE&#39;</span><span class="p">])</span> <span class="o">==</span> <span class="s1">&#39;short cadence&#39;</span><span class="p">:</span>
+            <span class="n">short</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">quarter</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">instr</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;QUARTER&#39;</span><span class="p">])</span>
+            <span class="n">module</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">instr</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;MODULE&#39;</span><span class="p">])</span>
+            <span class="n">output</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">instr</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;OUTPUT&#39;</span><span class="p">])</span>
+            <span class="n">channel</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">instr</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;CHANNEL&#39;</span><span class="p">])</span>
+            <span class="n">lc_cad_o</span> <span class="o">=</span> <span class="n">table</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="s1">&#39;CADENCENO&#39;</span><span class="p">)</span>
+            <span class="n">lc_date_o</span> <span class="o">=</span> <span class="n">table</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="s1">&#39;TIME&#39;</span><span class="p">)</span>
+            <span class="n">lc_flux_o</span> <span class="o">=</span> <span class="n">table</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="s1">&#39;SAP_FLUX&#39;</span><span class="p">)</span>
+            <span class="n">lc_err_o</span> <span class="o">=</span> <span class="n">table</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="s1">&#39;SAP_FLUX_ERR&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">quarter</span><span class="p">)</span> <span class="o">==</span> <span class="nb">str</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span> <span class="ow">and</span> <span class="n">version</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">lc_cad_o</span> <span class="o">=</span> <span class="n">lc_cad_o</span><span class="p">[</span><span class="n">lc_cad_o</span> <span class="o">&gt;=</span> <span class="mi">11914</span><span class="p">]</span>
+        <span class="n">lc_date_o</span> <span class="o">=</span> <span class="n">lc_date_o</span><span class="p">[</span><span class="n">lc_cad_o</span> <span class="o">&gt;=</span> <span class="mi">11914</span><span class="p">]</span>
+        <span class="n">lc_flux_o</span> <span class="o">=</span> <span class="n">lc_flux_o</span><span class="p">[</span><span class="n">lc_cad_o</span> <span class="o">&gt;=</span> <span class="mi">11914</span><span class="p">]</span>
+        <span class="n">lc_err_o</span> <span class="o">=</span> <span class="n">lc_err_o</span><span class="p">[</span><span class="n">lc_cad_o</span> <span class="o">&gt;=</span> <span class="mi">11914</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">short</span> <span class="ow">and</span> <span class="n">scinterp</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">errmsg</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;You cannot select None as the interpolation method &#39;</span>
+                  <span class="s1">&#39;because you are using short cadence data and &#39;</span>
+                  <span class="s1">&#39;therefore must use some form of interpolation. I &#39;</span>
+                  <span class="s1">&#39;reccommend nearest if you are unsure.&#39;</span><span class="p">)</span>
+        <span class="n">kepmsg</span><span class="o">.</span><span class="n">err</span><span class="p">(</span><span class="n">logfile</span><span class="p">,</span> <span class="n">errmsg</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+
+    <span class="n">bvfiledata</span> <span class="o">=</span> <span class="n">pyfits</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">bvfile</span><span class="p">)</span>
+    <span class="n">bvdata</span> <span class="o">=</span> <span class="n">bvfiledata</span><span class="p">[</span><span class="s1">&#39;MODOUT_</span><span class="si">{0}</span><span class="s1">_</span><span class="si">{1}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">output</span><span class="p">)]</span><span class="o">.</span><span class="n">data</span>
+
+    <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">bvfiledata</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;QUARTER&#39;</span><span class="p">])</span> <span class="o">!=</span> <span class="nb">int</span><span class="p">(</span><span class="n">quarter</span><span class="p">):</span>
+        <span class="n">errmsg</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;CBV file and light curve file are from different &#39;</span>
+                  <span class="s1">&#39;quarters. CBV file is from Q</span><span class="si">{0}</span><span class="s1"> and light curve is &#39;</span>
+                  <span class="s1">&#39;from Q</span><span class="si">{1}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">bvfiledata</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;QUARTER&#39;</span><span class="p">]),</span>
+                                     <span class="nb">int</span><span class="p">(</span><span class="n">quarter</span><span class="p">)))</span>
+        <span class="n">kepmsg</span><span class="o">.</span><span class="n">err</span><span class="p">(</span><span class="n">logfile</span><span class="p">,</span> <span class="n">errmsg</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">quarter</span><span class="p">)</span> <span class="o">==</span> <span class="mi">4</span> <span class="ow">and</span> <span class="nb">int</span><span class="p">(</span><span class="n">module</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+        <span class="n">errmsg</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;Approximately twenty days into Q4 Module 3 failed. &#39;</span>
+                  <span class="s1">&#39;As a result, Q4 light curves contain these 20 day &#39;</span>
+                  <span class="s1">&#39;of data. However, we do not calculate CBVs for &#39;</span>
+                  <span class="s1">&#39;this section of data.&#39;</span><span class="p">)</span>
+        <span class="n">kepmsg</span><span class="o">.</span><span class="n">err</span><span class="p">(</span><span class="n">logfile</span><span class="p">,</span> <span class="n">errmsg</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+
+    <span class="c1">#cut out infinites and zero flux columns</span>
+    <span class="n">lc_cad</span><span class="p">,</span> <span class="n">lc_date</span><span class="p">,</span> <span class="n">lc_flux</span><span class="p">,</span> <span class="n">lc_err</span><span class="p">,</span> <span class="n">good_data</span> <span class="o">=</span> <span class="n">cut_bad_data</span><span class="p">(</span><span class="n">lc_cad_o</span><span class="p">,</span>
+                                      <span class="n">lc_date_o</span><span class="p">,</span> <span class="n">lc_flux_o</span><span class="p">,</span> <span class="n">lc_err_o</span><span class="p">)</span>
+    <span class="c1">#get a list of basis vectors to use from the list given</span>
+    <span class="c1">#accept different seperators</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">listbv</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">bvlist</span> <span class="o">=</span> <span class="p">[</span><span class="n">listbv</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">listbv</span> <span class="o">=</span> <span class="n">listbv</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">listbv</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39; &#39;</span><span class="p">,</span> <span class="s1">&#39;,&#39;</span><span class="p">,</span> <span class="s1">&#39;:&#39;</span><span class="p">,</span> <span class="s1">&#39;;&#39;</span><span class="p">,</span> <span class="s1">&#39;|&#39;</span><span class="p">,</span> <span class="s1">&#39;, &#39;</span><span class="p">]:</span>
+            <span class="n">separator</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">listbv</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">message</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;You must separate your basis vector numbers to use &#39;</span>
+                       <span class="s1">&#39;with </span><span class="se">\&#39;</span><span class="s1"> </span><span class="se">\&#39;</span><span class="s1"> </span><span class="se">\&#39;</span><span class="s1">,</span><span class="se">\&#39;</span><span class="s1"> </span><span class="se">\&#39;</span><span class="s1">:</span><span class="se">\&#39;</span><span class="s1"> </span><span class="se">\&#39;</span><span class="s1">;</span><span class="se">\&#39;</span><span class="s1"> or </span><span class="se">\&#39;</span><span class="s1">|</span><span class="se">\&#39;</span><span class="s1"> and the &#39;</span>
+                       <span class="s1">&#39;first basis vector to use must be between 1 and 9&#39;</span><span class="p">)</span>
+            <span class="n">kepmsg</span><span class="o">.</span><span class="n">err</span><span class="p">(</span><span class="n">logfile</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+
+        <span class="n">bvlist</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fromstring</span><span class="p">(</span><span class="n">listbv</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="n">separator</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">bvlist</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">errmsg</span> <span class="o">=</span> <span class="s1">&#39;Must use at least one basis vector&#39;</span>
+        <span class="n">kepmsg</span><span class="o">.</span><span class="n">err</span><span class="p">(</span><span class="n">logfile</span><span class="p">,</span> <span class="n">errmsg</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">short</span><span class="p">:</span>
+        <span class="n">bvdata</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="s1">&#39;CADENCENO&#39;</span><span class="p">)[:]</span> <span class="o">=</span> <span class="p">((((</span><span class="n">bvdata</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="s1">&#39;CADENCENO&#39;</span><span class="p">)[:]</span> <span class="o">+</span>
+                                        <span class="p">(</span><span class="mf">7.5</span> <span class="o">/</span> <span class="mf">15.</span><span class="p">)</span> <span class="p">)</span> <span class="o">*</span> <span class="mf">30.</span><span class="p">)</span> <span class="o">-</span> <span class="mf">11540.</span><span class="p">)</span><span class="o">.</span><span class="n">round</span><span class="p">())</span>
+    <span class="n">bvectors</span> <span class="o">=</span> <span class="n">get_pcomp_list_newformat</span><span class="p">(</span><span class="n">bvdata</span><span class="p">,</span> <span class="n">bvlist</span><span class="p">,</span> <span class="n">lc_cad</span><span class="p">,</span> <span class="n">short</span><span class="p">,</span> <span class="n">scinterp</span><span class="p">)</span>
+    <span class="n">medflux</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">lc_flux</span><span class="p">)</span>
+    <span class="n">n_flux</span> <span class="o">=</span> <span class="p">(</span><span class="n">lc_flux</span> <span class="o">/</span> <span class="n">medflux</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+    <span class="n">n_err</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">lc_err</span> <span class="o">*</span> <span class="n">lc_err</span> <span class="o">/</span> <span class="p">(</span><span class="n">medflux</span> <span class="o">*</span> <span class="n">medflux</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="n">maskfile</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+        <span class="n">domasking</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">kepio</span><span class="o">.</span><span class="n">fileexists</span><span class="p">(</span><span class="n">maskfile</span><span class="p">):</span>
+            <span class="n">errmsg</span> <span class="o">=</span> <span class="s1">&#39;Maskfile </span><span class="si">{}</span><span class="s1"> does not exist&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">maskfile</span><span class="p">)</span>
+            <span class="n">kepmsg</span><span class="o">.</span><span class="n">err</span><span class="p">(</span><span class="n">logfile</span><span class="p">,</span> <span class="n">errmsg</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">domasking</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="k">if</span> <span class="n">domasking</span><span class="p">:</span>
+        <span class="n">lc_date_masked</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">lc_date</span><span class="p">)</span>
+        <span class="n">n_flux_masked</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">n_flux</span><span class="p">)</span>
+        <span class="n">lc_cad_masked</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">lc_cad</span><span class="p">)</span>
+        <span class="n">n_err_masked</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">n_err</span><span class="p">)</span>
+        <span class="n">maskdata</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_2d</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">genfromtxt</span><span class="p">(</span><span class="n">maskfile</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">))</span>
+        <span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">lc_date_masked</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">maskrange</span> <span class="ow">in</span> <span class="n">maskdata</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">version</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">start</span> <span class="o">=</span> <span class="n">maskrange</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="mf">2400000.0</span>
+                <span class="n">end</span> <span class="o">=</span> <span class="n">maskrange</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="mf">2400000.0</span>
+            <span class="k">elif</span> <span class="n">version</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="n">start</span> <span class="o">=</span> <span class="n">maskrange</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="mf">2454833.</span>
+                <span class="n">end</span> <span class="o">=</span> <span class="n">maskrange</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="mf">2454833.</span>
+            <span class="n">masknew</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_xor</span><span class="p">(</span><span class="n">lc_date</span> <span class="o">&lt;</span> <span class="n">start</span><span class="p">,</span> <span class="n">lc_date</span> <span class="o">&gt;</span> <span class="n">end</span><span class="p">)</span>
+            <span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span><span class="n">masknew</span><span class="p">)</span>
+        <span class="n">lc_date_masked</span> <span class="o">=</span> <span class="n">lc_date_masked</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span>
+        <span class="n">n_flux_masked</span> <span class="o">=</span> <span class="n">n_flux_masked</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span>
+        <span class="n">lc_cad_masked</span> <span class="o">=</span> <span class="n">lc_cad_masked</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span>
+        <span class="n">n_err_masked</span> <span class="o">=</span> <span class="n">n_err_masked</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">lc_date_masked</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">lc_date</span><span class="p">)</span>
+        <span class="n">n_flux_masked</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">n_flux</span><span class="p">)</span>
+        <span class="n">lc_cad_masked</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">lc_cad</span><span class="p">)</span>
+        <span class="n">n_err_masked</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">n_err</span><span class="p">)</span>
+
+    <span class="n">bvectors_masked</span> <span class="o">=</span> <span class="n">get_pcomp_list_newformat</span><span class="p">(</span><span class="n">bvdata</span><span class="p">,</span> <span class="n">bvlist</span><span class="p">,</span> <span class="n">lc_cad_masked</span><span class="p">,</span>
+                                               <span class="n">short</span><span class="p">,</span> <span class="n">scinterp</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">iterate</span> <span class="ow">and</span> <span class="n">sigma</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">errmsg</span> <span class="o">=</span> <span class="s1">&#39;If fitting iteratively you must specify a clipping range&#39;</span>
+        <span class="n">kepmsg</span><span class="o">.</span><span class="n">err</span><span class="p">(</span><span class="n">logfile</span><span class="p">,</span> <span class="n">errmsg</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+
+    <span class="c1">#uses Pvals = yhat * U_transpose</span>
+    <span class="k">if</span> <span class="n">iterate</span><span class="p">:</span>
+        <span class="n">coeffs</span><span class="p">,</span> <span class="n">fittedmask</span> <span class="o">=</span> <span class="n">do_lst_iter</span><span class="p">(</span><span class="n">bvectors_masked</span><span class="p">,</span> <span class="n">lc_cad_masked</span><span class="p">,</span>
+                                         <span class="n">n_flux_masked</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="mf">50.</span><span class="p">,</span> <span class="n">fitmethod</span><span class="p">,</span>
+                                         <span class="n">fitpower</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">fitmethod</span> <span class="o">==</span> <span class="s1">&#39;lst_sq&#39;</span><span class="p">:</span>
+            <span class="n">coeffs</span> <span class="o">=</span> <span class="n">do_lsq_nlin</span><span class="p">(</span><span class="n">bvectors_masked</span><span class="p">,</span> <span class="n">n_flux_masked</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">fitmethod</span> <span class="o">==</span> <span class="s1">&#39;simplex&#39;</span><span class="p">:</span>
+            <span class="n">coeffs</span> <span class="o">=</span> <span class="n">do_lsq_fmin_pow</span><span class="p">(</span><span class="n">bvectors_masked</span><span class="p">,</span> <span class="n">n_flux_masked</span><span class="p">,</span> <span class="n">fitpower</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">coeffs</span> <span class="o">=</span> <span class="n">do_lsq_uhat</span><span class="p">(</span><span class="n">bvectors_masked</span><span class="p">,</span> <span class="n">n_flux_masked</span><span class="p">)</span>
+
+    <span class="n">coeffs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">coeffs</span><span class="p">)</span>
+    <span class="n">flux_after</span> <span class="o">=</span> <span class="n">medflux</span> <span class="o">*</span> <span class="p">(</span><span class="n">n_flux</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">coeffs</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">bvectors</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">flux_after_masked</span> <span class="o">=</span> <span class="n">medflux</span> <span class="o">*</span> <span class="p">(</span><span class="n">n_flux_masked</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">coeffs</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">bvectors_masked</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">bvsum</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">coeffs</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">bvectors</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">bvsum_masked</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">coeffs</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">bvectors_masked</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">bvsum_nans</span> <span class="o">=</span> <span class="n">put_in_nans</span><span class="p">(</span><span class="n">good_data</span><span class="p">,</span> <span class="n">bvsum</span><span class="p">)</span>
+    <span class="n">flux_after_nans</span> <span class="o">=</span> <span class="n">put_in_nans</span><span class="p">(</span><span class="n">good_data</span><span class="p">,</span> <span class="n">flux_after</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">plot</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">domasking</span><span class="p">:</span>
+            <span class="n">maskdata</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">newmedflux</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">flux_after</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">bvsum_un_norm</span> <span class="o">=</span> <span class="n">newmedflux</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">bvsum</span><span class="p">)</span>
+        <span class="n">do_plot</span><span class="p">(</span><span class="n">lc_date</span><span class="p">,</span> <span class="n">lc_flux</span><span class="p">,</span> <span class="n">flux_after</span><span class="p">,</span> <span class="n">bvsum_un_norm</span><span class="p">,</span> <span class="n">lc_cad</span><span class="p">,</span>
+                <span class="n">good_data</span><span class="p">,</span> <span class="n">lc_cad_o</span><span class="p">,</span> <span class="n">version</span><span class="p">,</span> <span class="n">maskdata</span><span class="p">,</span> <span class="n">outfile</span><span class="p">,</span> <span class="n">noninteractive</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Writing output file </span><span class="si">{}</span><span class="s2">...&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">outfile</span><span class="p">))</span>
+    <span class="n">make_outfile</span><span class="p">(</span><span class="n">instr</span><span class="p">,</span> <span class="n">outfile</span><span class="p">,</span> <span class="n">flux_after_nans</span><span class="p">,</span> <span class="n">bvsum_nans</span><span class="p">,</span> <span class="n">version</span><span class="p">)</span>
+    <span class="c1"># close input file</span>
+    <span class="n">instr</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="c1">#print some results to screen:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;      -----      &#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">iterate</span><span class="p">:</span>
+        <span class="n">flux_fit</span> <span class="o">=</span> <span class="n">n_flux_masked</span><span class="p">[</span><span class="n">fittedmask</span><span class="p">]</span>
+        <span class="n">sum_fit</span> <span class="o">=</span> <span class="n">bvsum_masked</span><span class="p">[</span><span class="n">fittedmask</span><span class="p">]</span>
+        <span class="n">err_fit</span> <span class="o">=</span> <span class="n">n_err_masked</span><span class="p">[</span><span class="n">fittedmask</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">flux_fit</span> <span class="o">=</span> <span class="n">n_flux_masked</span>
+        <span class="n">sum_fit</span> <span class="o">=</span> <span class="n">bvsum_masked</span>
+        <span class="n">err_fit</span> <span class="o">=</span> <span class="n">n_err_masked</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;reduced chi2: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">chi2_gtf</span><span class="p">(</span><span class="n">flux_fit</span><span class="p">,</span> <span class="n">sum_fit</span><span class="p">,</span> <span class="n">err_fit</span><span class="p">,</span>
+                                             <span class="nb">len</span><span class="p">(</span><span class="n">flux_fit</span><span class="p">)</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">coeffs</span><span class="p">))))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;rms: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">medflux</span> <span class="o">*</span> <span class="n">rms</span><span class="p">(</span><span class="n">flux_fit</span><span class="p">,</span> <span class="n">sum_fit</span><span class="p">)))</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">coeffs</span><span class="p">)):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Coefficient of CBV #</span><span class="si">{0}</span><span class="s1">: </span><span class="si">{1}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">coeffs</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;      -----      &#39;</span><span class="p">)</span>
+
+    <span class="c1"># end time</span>
+    <span class="n">kepmsg</span><span class="o">.</span><span class="n">clock</span><span class="p">(</span><span class="s1">&#39;KEPCOTREND completed at&#39;</span><span class="p">,</span> <span class="n">logfile</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span></div>
+
+<span class="k">def</span> <span class="nf">kepcotrend_main</span><span class="p">():</span>
+    <span class="kn">import</span> <span class="nn">argparse</span>
+    <span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">(</span>
+             <span class="n">description</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;Remove systematic trends in photometry using&#39;</span>
+                          <span class="s1">&#39; cotrending basis vectors (CBV)&#39;</span><span class="p">),</span>
+             <span class="n">formatter_class</span><span class="o">=</span><span class="n">PyKEArgumentHelpFormatter</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;infile&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Name of input file&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;cbvfile&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Name of file containing the CBVs&#39;</span><span class="p">,</span>
+                        <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;listbv&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;The CBVs to use&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--outfile&#39;</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;Name of FITS file to output.&#39;</span>
+                              <span class="s1">&#39; If None, outfile is infile-kepcotrend.&#39;</span><span class="p">),</span>
+                        <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--method&#39;</span><span class="p">,</span> <span class="s1">&#39;-m&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Fitting method&#39;</span><span class="p">,</span>
+                        <span class="n">default</span><span class="o">=</span><span class="s1">&#39;llsq&#39;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s1">&#39;fitmethod&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span>
+                        <span class="n">choices</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;llsq&#39;</span><span class="p">,</span> <span class="s1">&#39;simplex&#39;</span><span class="p">,</span> <span class="s1">&#39;lst_sq&#39;</span><span class="p">])</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--fitpower&#39;</span><span class="p">,</span> <span class="s1">&#39;-f&#39;</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;The index of the merit function (simplex only)&#39;</span><span class="p">,</span>
+                        <span class="n">default</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--iterate&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_true&#39;</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Fit iteratively &#39;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s1">&#39;iterate&#39;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--sigmaclip&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">float</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Sigma clip value when iteratively fitting&#39;</span><span class="p">,</span>
+                        <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s1">&#39;sigma&#39;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--maskfile&#39;</span><span class="p">,</span> <span class="s1">&#39;-q&#39;</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Name of file containing a mask&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
+                        <span class="n">dest</span><span class="o">=</span><span class="s1">&#39;maskfile&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--scinterp&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Short cadence interpolation method&#39;</span><span class="p">,</span>
+                        <span class="n">default</span><span class="o">=</span><span class="s1">&#39;linear&#39;</span><span class="p">,</span>
+                        <span class="n">choices</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;linear&#39;</span><span class="p">,</span> <span class="s1">&#39;nearest&#39;</span><span class="p">,</span> <span class="s1">&#39;slinear&#39;</span><span class="p">,</span> <span class="s1">&#39;quadratic&#39;</span><span class="p">,</span>
+                                 <span class="s1">&#39;cubic&#39;</span><span class="p">])</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--plot&#39;</span><span class="p">,</span> <span class="s1">&#39;-p&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_true&#39;</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Plot result?&#39;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--non-interactive&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_true&#39;</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Pop up matplotlib plot window?&#39;</span><span class="p">,</span>
+                        <span class="n">dest</span><span class="o">=</span><span class="s1">&#39;noninteractive&#39;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--overwrite&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_true&#39;</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Overwrite output file?&#39;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--verbose&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_true&#39;</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Write to a log file?&#39;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--logfile&#39;</span><span class="p">,</span> <span class="s1">&#39;-l&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Name of ascii log file&#39;</span><span class="p">,</span>
+                        <span class="n">default</span><span class="o">=</span><span class="s1">&#39;kepcotrend.log&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">)</span>
+    <span class="n">args</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">()</span>
+    <span class="n">kepcotrend</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">infile</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">cbvfile</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">listbv</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">outfile</span><span class="p">,</span>
+               <span class="n">args</span><span class="o">.</span><span class="n">fitmethod</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">fitpower</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">iterate</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">sigma</span><span class="p">,</span>
+               <span class="n">args</span><span class="o">.</span><span class="n">maskfile</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">scinterp</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">plot</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">noninteractive</span><span class="p">,</span>
+               <span class="n">args</span><span class="o">.</span><span class="n">overwrite</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">verbose</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">logfile</span><span class="p">)</span>
+</pre></div>
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright PyKE Developers and Contributors.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'3.0.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

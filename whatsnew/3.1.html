@@ -1,0 +1,321 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Changelog for PyKE 3.1 (December 2017) &mdash; PyKE 3.0.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../genindex.html"/>
+        <link rel="search" title="Search" href="../search.html"/>
+    <link rel="top" title="PyKE 3.0.0 documentation" href="../index.html"/> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> PyKE
+          
+
+          
+            
+            <img src="../_static/pyke-white.png" class="logo" />
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                3.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/ipython_notebooks/whatsnew31.html">What’s new in PyKE 3.1?</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../overview.html">PyKE tasks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../citing.html">Citing</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/index.html">Photometry tutorials</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">PyKE</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li>Changelog for PyKE 3.1 (December 2017)</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/whatsnew/3.1.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast,
+.nboutput.nblast {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast + .nbinput {
+    margin-top: -19px;
+}
+
+/* nice headers on first paragraph of info/warning boxes */
+.admonition .first {
+    margin: -12px;
+    padding: 6px 12px;
+    margin-bottom: 12px;
+    color: #fff;
+    line-height: 1;
+    display: block;
+}
+.admonition.warning .first {
+    background: #f0b37e;
+}
+.admonition.note .first {
+    background: #6ab0de;
+}
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+</style>
+<div class="section" id="changelog-for-pyke-3-1-december-2017">
+<span id="whatsnew-3-1"></span><h1>Changelog for PyKE 3.1 (December 2017)<a class="headerlink" href="#changelog-for-pyke-3-1-december-2017" title="Permalink to this headline">¶</a></h1>
+<p>PyKE 3.1 provides the following improvements:</p>
+<ul class="simple">
+<li><code class="docutils literal"><span class="pre">kepclip</span></code> works with target pixel files.</li>
+<li><code class="docutils literal"><span class="pre">kepfold</span></code> API has been updated.</li>
+<li><code class="docutils literal"><span class="pre">kepfourier</span></code> has been removed in favour of <code class="docutils literal"><span class="pre">kepperiodogram</span></code>.</li>
+<li><code class="docutils literal"><span class="pre">kepdynamic</span></code>, <code class="docutils literal"><span class="pre">keptrial</span></code>, and <code class="docutils literal"><span class="pre">kepwindow</span></code> have been sped up significantly
+by using astropy’s LombScargle.</li>
+</ul>
+<p>Additionally, those are the set of new features:</p>
+<ul class="simple">
+<li><code class="docutils literal"><span class="pre">module_output_to_channel</span></code> and <code class="docutils literal"><span class="pre">channel_to_module_output</span></code>: utility functions
+to convert module/output to corresponding channel number (and vice-versa).</li>
+<li><code class="docutils literal"><span class="pre">KeplerQualityFlags</span></code>: a class that encondes the meaning of the various Kepler
+QUALITY bitmask flags, as documented in the Kepler Archive Manual.</li>
+<li><code class="docutils literal"><span class="pre">KeplerTargetPixelFile</span></code>: a class that provides easy access to data and metadata</li>
+</ul>
+<blockquote>
+<div>of target pixel files.</div></blockquote>
+<ul class="simple">
+<li><code class="docutils literal"><span class="pre">KeplerLightCurveFile</span></code>: a class that provides easy access to data and metadata</li>
+</ul>
+<blockquote>
+<div>of light curve files.</div></blockquote>
+<ul>
+<li><p class="first"><code class="docutils literal"><span class="pre">LightCurve</span></code>: this class provides methods such as <code class="docutils literal"><span class="pre">stitch</span></code>, <code class="docutils literal"><span class="pre">flatten</span></code>, and <code class="docutils literal"><span class="pre">fold</span></code>.</p>
+</li>
+<li><p class="first"><code class="docutils literal"><span class="pre">KeplerCBVCorrector</span></code>: this class implements the functionality in <code class="docutils literal"><span class="pre">kepcotrend</span></code>. It
+presents a few advantages, e.g., it automatically downloads the cotrend basis vectors
+files from MAST.</p>
+</li>
+<li><p class="first"><code class="docutils literal"><span class="pre">SimplePixelLevelDecorrelationDetrender</span></code>: this class implements a basic version of
+the first order Pixel Level Decorrelation (PLD) used by Deming et. al. and Luger et.
+al..</p>
+</li>
+<li><p class="first">Pixel Response Function photometry classes have been developed. More precisely:</p>
+<blockquote>
+<div><ul class="simple">
+<li><code class="docutils literal"><span class="pre">KeplerPRF</span></code>: implements a parametric PRF model using the PRF calibration files.
+This model has the following parameters: flux, centroid position, pixel scales, and
+rotation angle.</li>
+<li><code class="docutils literal"><span class="pre">SimpleKeplerPRF</span></code>: a simple version of <code class="docutils literal"><span class="pre">KeplerPRF</span></code> in which the model is
+parametrized by flux and centroid position.</li>
+<li><code class="docutils literal"><span class="pre">SceneModel</span></code>: a general class to combine an arbitrary number of PRF models
+and a background model. This class is one of the building blocks to enable
+simultaneous fitting of overlapping PRFs.</li>
+<li><code class="docutils literal"><span class="pre">PRFPhotometry</span></code>: this class performs PRF photometry in target pixel files.</li>
+</ul>
+</div></blockquote>
+</li>
+</ul>
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright PyKE Developers and Contributors.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'3.0.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

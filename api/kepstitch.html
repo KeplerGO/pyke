@@ -210,11 +210,45 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="kepstitch-append-short-cadence-months-and-or-long-cadence-quarters">
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast,
+.nboutput.nblast {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast + .nbinput {
+    margin-top: -19px;
+}
+
+/* nice headers on first paragraph of info/warning boxes */
+.admonition .first {
+    margin: -12px;
+    padding: 6px 12px;
+    margin-bottom: 12px;
+    color: #fff;
+    line-height: 1;
+    display: block;
+}
+.admonition.warning .first {
+    background: #f0b37e;
+}
+.admonition.note .first {
+    background: #6ab0de;
+}
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+</style>
+<div class="section" id="kepstitch-append-short-cadence-months-and-or-long-cadence-quarters">
 <h1><strong>kepstitch</strong>: append short cadence months and/or long cadence quarters<a class="headerlink" href="#kepstitch-append-short-cadence-months-and-or-long-cadence-quarters" title="Permalink to this headline">¶</a></h1>
 <dl class="function">
 <dt id="pyke.kepstitch.kepstitch">
-<code class="descclassname">pyke.kepstitch.</code><code class="descname">kepstitch</code><span class="sig-paren">(</span><em>infiles</em>, <em>outfile=None</em>, <em>overwrite=False</em>, <em>verbose=False</em>, <em>logfile='kepstich.log'</em><span class="sig-paren">)</span><a class="headerlink" href="#pyke.kepstitch.kepstitch" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">pyke.kepstitch.</code><code class="descname">kepstitch</code><span class="sig-paren">(</span><em>infiles</em>, <em>outfile=None</em>, <em>overwrite=False</em>, <em>verbose=False</em>, <em>logfile='kepstich.log'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyke/kepstitch.html#kepstitch"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyke.kepstitch.kepstitch" title="Permalink to this definition">¶</a></dt>
 <dd><p>kepstitch – Append short cadence months and/or long cadence quarters</p>
 <p><code class="docutils literal"><span class="pre">kepstitch</span></code> takes a list of FITS light curves obtained from the MAST
 archive and concatenates them into one long table. Be aware that this task

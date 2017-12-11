@@ -210,11 +210,45 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="kepimages-create-a-series-of-separate-fits-image-files-from-a-target-pixel-file">
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast,
+.nboutput.nblast {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast + .nbinput {
+    margin-top: -19px;
+}
+
+/* nice headers on first paragraph of info/warning boxes */
+.admonition .first {
+    margin: -12px;
+    padding: 6px 12px;
+    margin-bottom: 12px;
+    color: #fff;
+    line-height: 1;
+    display: block;
+}
+.admonition.warning .first {
+    background: #f0b37e;
+}
+.admonition.note .first {
+    background: #6ab0de;
+}
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+</style>
+<div class="section" id="kepimages-create-a-series-of-separate-fits-image-files-from-a-target-pixel-file">
 <h1><strong>kepimages</strong>: create a series of separate FITS image files from a Target Pixel File<a class="headerlink" href="#kepimages-create-a-series-of-separate-fits-image-files-from-a-target-pixel-file" title="Permalink to this headline">¶</a></h1>
 <dl class="function">
 <dt id="pyke.kepimages.kepimages">
-<code class="descclassname">pyke.kepimages.</code><code class="descname">kepimages</code><span class="sig-paren">(</span><em>infile</em>, <em>prefix</em>, <em>imtype='FLUX'</em>, <em>ranges='0</em>, <em>0'</em>, <em>overwrite=True</em>, <em>verbose=True</em>, <em>logfile='kepimages.log'</em><span class="sig-paren">)</span><a class="headerlink" href="#pyke.kepimages.kepimages" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">pyke.kepimages.</code><code class="descname">kepimages</code><span class="sig-paren">(</span><em>infile</em>, <em>prefix</em>, <em>imtype='FLUX'</em>, <em>ranges='0</em>, <em>0'</em>, <em>overwrite=True</em>, <em>verbose=True</em>, <em>logfile='kepimages.log'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyke/kepimages.html#kepimages"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyke.kepimages.kepimages" title="Permalink to this definition">¶</a></dt>
 <dd><p>kepimages – create a series of separate FITS image files from a Target
 Pixel File</p>
 <p><code class="docutils literal"><span class="pre">kepimages</span></code> will create a series of FITS image files which copy the

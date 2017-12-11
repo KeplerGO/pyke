@@ -1,0 +1,813 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>pyke.keppixseries &mdash; PyKE 3.0.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../genindex.html"/>
+        <link rel="search" title="Search" href="../../search.html"/>
+    <link rel="top" title="PyKE 3.0.0 documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> PyKE
+          
+
+          
+            
+            <img src="../../_static/pyke-white.png" class="logo" />
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                3.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/ipython_notebooks/whatsnew31.html">What’s new in PyKE 3.1?</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart.html">Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../overview.html">PyKE tasks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../citing.html">Citing</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/index.html">Photometry tutorials</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">PyKE</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>pyke.keppixseries</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pyke.keppixseries</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">.utils</span> <span class="k">import</span> <span class="n">PyKEArgumentHelpFormatter</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">astropy.io</span> <span class="k">import</span> <span class="n">fits</span> <span class="k">as</span> <span class="n">pyfits</span>
+<span class="kn">from</span> <span class="nn">matplotlib</span> <span class="k">import</span> <span class="n">pyplot</span> <span class="k">as</span> <span class="n">plt</span>
+<span class="kn">from</span> <span class="nn">tqdm</span> <span class="k">import</span> <span class="n">tqdm</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">kepio</span><span class="p">,</span> <span class="n">kepmsg</span><span class="p">,</span> <span class="n">kepkey</span><span class="p">,</span> <span class="n">kepplot</span><span class="p">,</span> <span class="n">kepstat</span><span class="p">,</span> <span class="n">kepfunc</span>
+
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;keppixseries&#39;</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="keppixseries"><a class="viewcode-back" href="../../api/keppixseries.html#pyke.keppixseries.keppixseries">[docs]</a><span class="k">def</span> <span class="nf">keppixseries</span><span class="p">(</span><span class="n">infile</span><span class="p">,</span> <span class="n">outfile</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">plotfile</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">plottype</span><span class="o">=</span><span class="s1">&#39;global&#39;</span><span class="p">,</span>
+                 <span class="n">filterlc</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">function</span><span class="o">=</span><span class="s1">&#39;boxcar&#39;</span><span class="p">,</span> <span class="n">cutoff</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                 <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">logfile</span><span class="o">=</span><span class="s1">&#39;keppixseries.log&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    keppixseries -- individual time series photometry for all pixels within a</span>
+<span class="sd">    target mask</span>
+
+<span class="sd">    keppixseries plots a light curve for each individual pixel in a target</span>
+<span class="sd">    mask. Light curves are extracted from a target pixel file obtained from the</span>
+<span class="sd">    Kepler data archive at MAST. If required, the data can be fed through a</span>
+<span class="sd">    boxcar, gaussian or sinc function high bandpass filter in order to remove</span>
+<span class="sd">    low frequency signal from the data. keppixseries is a diagnostic tool for</span>
+<span class="sd">    identifying source contaminants in the background or foreground of the</span>
+<span class="sd">    target. It can be employed to identify pixels for inclusion or exclusion</span>
+<span class="sd">    when re-extracting a Kepler light curve from target pixel files.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    infile : str</span>
+<span class="sd">        The name of a MAST standard format FITS file containing Kepler Target</span>
+<span class="sd">        Pixel data within the first data extension.</span>
+<span class="sd">    outfile : str</span>
+<span class="sd">        The name of the output FITS file. This file has two data extensions.</span>
+<span class="sd">        The first called &#39;PIXELSERIES&#39; contains a table with columns of</span>
+<span class="sd">        barycenter-corrected time, barycenter time correction, cadence number,</span>
+<span class="sd">        cadence quality flag and a series of photometric light curves, one for</span>
+<span class="sd">        each pixel within the target mask. Each pixel is labeled COLx_ROWy,</span>
+<span class="sd">        where :math:`x` is the pixel column number and :math:`y` is the pixel</span>
+<span class="sd">        row number on the CCD module/output. The second extension contains the</span>
+<span class="sd">        mask definition map copied directly from the input target pixel file.</span>
+<span class="sd">    plotfile : str</span>
+<span class="sd">        Name of an optional diagnostic output plot file containing the results</span>
+<span class="sd">        of keppixseries. An example is provided in Figure 1. Typically this is</span>
+<span class="sd">        a PNG format file. If no diagnostic file is required, plotfile can be</span>
+<span class="sd">        &#39;None&#39;. The plot will be generated regardless of the value of this</span>
+<span class="sd">        field, but the plot will not be saved to a file if ``plotfile=&#39;None&#39;``.</span>
+<span class="sd">    plottype : str</span>
+<span class="sd">        keppixseries can plot light curves of three types.</span>
+<span class="sd">        The choice is made using this argument. The options are:</span>
+
+<span class="sd">        * local - All individual pixel light curves are scaled separately to</span>
+<span class="sd">          provide the most dynamic range for each pixel.</span>
+<span class="sd">        * global - All pixel light curves are scaled between zero and the</span>
+<span class="sd">          maximum flux attained by the brightest pixel in the mask. This option</span>
+<span class="sd">          provides the relative contribution to the archived light curve by each</span>
+<span class="sd">          pixel.</span>
+<span class="sd">        * full - All pixels light curves are scaled between zero and the</span>
+<span class="sd">          maximum flux attained by that pixel. This provides the fraction of</span>
+<span class="sd">          variability within each individual pixel.</span>
+<span class="sd">    filterlc : bool</span>
+<span class="sd">        If True, the light curve for each pixel will be treated by a high</span>
+<span class="sd">        band-pass filter to remove long-term trends from e.g. differential</span>
+<span class="sd">        velocity aberration.</span>
+<span class="sd">    function : str</span>
+<span class="sd">        The functional form of the high pass-band filter:</span>
+
+<span class="sd">        * boxcar</span>
+<span class="sd">        * gauss</span>
+<span class="sd">        * sinc</span>
+<span class="sd">    cutoff : float</span>
+<span class="sd">        The frequency of the high pass-band cutoff in units of :math:`days^{-1}`.</span>
+<span class="sd">    overwrite : bool</span>
+<span class="sd">        Overwrite the output file?</span>
+<span class="sd">    verbose : bool</span>
+<span class="sd">        Print informative messages and warnings to the shell and logfile?</span>
+<span class="sd">    logfile = str</span>
+<span class="sd">        Name of the logfile containing error and warning messages.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    .. code-block :: bash</span>
+
+<span class="sd">        $ keppixseries kplr008256049-2010174085026_lpd-targ.fits.gz</span>
+
+<span class="sd">    .. image:: ../_static/images/api/keppixseries.png</span>
+<span class="sd">        :align: center</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">outfile</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">outfile</span> <span class="o">=</span> <span class="n">infile</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;-</span><span class="si">{}</span><span class="s2">.fits&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">__all__</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="c1"># log the call</span>
+    <span class="n">hashline</span> <span class="o">=</span> <span class="s1">&#39;--------------------------------------------------------------&#39;</span>
+    <span class="n">kepmsg</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">logfile</span><span class="p">,</span> <span class="n">hashline</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+    <span class="n">call</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;KEPPIXSERIES -- &#39;</span>
+            <span class="o">+</span> <span class="s1">&#39; infile=</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">infile</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s1">&#39; outfile=</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">outfile</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s1">&#39; plotfile=</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">plotfile</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s1">&#39; plottype=</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">plottype</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s1">&#39; filterlc=</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">filterlc</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s1">&#39; function=</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">function</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s1">&#39; cutoff=</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">cutoff</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s1">&#39; overwrite=</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">overwrite</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s1">&#39; verbose=</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">verbose</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s1">&#39; logfile=</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">logfile</span><span class="p">))</span>
+    <span class="n">kepmsg</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">logfile</span><span class="p">,</span> <span class="n">call</span><span class="o">+</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+
+    <span class="c1"># start time</span>
+    <span class="n">kepmsg</span><span class="o">.</span><span class="n">clock</span><span class="p">(</span><span class="s1">&#39;KEPPIXSERIES started at&#39;</span><span class="p">,</span> <span class="n">logfile</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+
+    <span class="c1"># overwrite output file</span>
+    <span class="k">if</span> <span class="n">overwrite</span><span class="p">:</span>
+        <span class="n">kepio</span><span class="o">.</span><span class="n">overwrite</span><span class="p">(</span><span class="n">outfile</span><span class="p">,</span> <span class="n">logfile</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">kepio</span><span class="o">.</span><span class="n">fileexists</span><span class="p">(</span><span class="n">outfile</span><span class="p">):</span>
+        <span class="n">errmsg</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;ERROR -- KEPPIXSERIES: </span><span class="si">{}</span><span class="s1"> exists. Use --overwrite&#39;</span>
+                  <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">outfile</span><span class="p">))</span>
+        <span class="n">kepmsg</span><span class="o">.</span><span class="n">err</span><span class="p">(</span><span class="n">logfile</span><span class="p">,</span> <span class="n">errmsg</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+
+    <span class="c1"># open TPF FITS file</span>
+    <span class="n">kepid</span><span class="p">,</span> <span class="n">channel</span><span class="p">,</span> <span class="n">skygroup</span><span class="p">,</span> <span class="n">module</span><span class="p">,</span> <span class="n">output</span><span class="p">,</span> <span class="n">quarter</span><span class="p">,</span> <span class="n">season</span><span class="p">,</span> \
+        <span class="n">ra</span><span class="p">,</span> <span class="n">dec</span><span class="p">,</span> <span class="n">column</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">kepmag</span><span class="p">,</span> <span class="n">xdim</span><span class="p">,</span> <span class="n">ydim</span><span class="p">,</span> <span class="n">barytime</span> <span class="o">=</span> \
+        <span class="n">kepio</span><span class="o">.</span><span class="n">readTPF</span><span class="p">(</span><span class="n">infile</span><span class="p">,</span> <span class="s1">&#39;TIME&#39;</span><span class="p">,</span> <span class="n">logfile</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+    <span class="n">kepid</span><span class="p">,</span> <span class="n">channel</span><span class="p">,</span> <span class="n">skygroup</span><span class="p">,</span> <span class="n">module</span><span class="p">,</span> <span class="n">output</span><span class="p">,</span> <span class="n">quarter</span><span class="p">,</span> <span class="n">season</span><span class="p">,</span> \
+        <span class="n">ra</span><span class="p">,</span> <span class="n">dec</span><span class="p">,</span> <span class="n">column</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">kepmag</span><span class="p">,</span> <span class="n">xdim</span><span class="p">,</span> <span class="n">ydim</span><span class="p">,</span> <span class="n">tcorr</span> <span class="o">=</span> \
+        <span class="n">kepio</span><span class="o">.</span><span class="n">readTPF</span><span class="p">(</span><span class="n">infile</span><span class="p">,</span> <span class="s1">&#39;TIMECORR&#39;</span><span class="p">,</span> <span class="n">logfile</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+    <span class="n">kepid</span><span class="p">,</span> <span class="n">channel</span><span class="p">,</span> <span class="n">skygroup</span><span class="p">,</span> <span class="n">module</span><span class="p">,</span> <span class="n">output</span><span class="p">,</span> <span class="n">quarter</span><span class="p">,</span> <span class="n">season</span><span class="p">,</span> \
+        <span class="n">ra</span><span class="p">,</span> <span class="n">dec</span><span class="p">,</span> <span class="n">column</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">kepmag</span><span class="p">,</span> <span class="n">xdim</span><span class="p">,</span> <span class="n">ydim</span><span class="p">,</span> <span class="n">cadno</span> <span class="o">=</span> \
+        <span class="n">kepio</span><span class="o">.</span><span class="n">readTPF</span><span class="p">(</span><span class="n">infile</span><span class="p">,</span> <span class="s1">&#39;CADENCENO&#39;</span><span class="p">,</span> <span class="n">logfile</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+    <span class="n">kepid</span><span class="p">,</span> <span class="n">channel</span><span class="p">,</span> <span class="n">skygroup</span><span class="p">,</span> <span class="n">module</span><span class="p">,</span> <span class="n">output</span><span class="p">,</span> <span class="n">quarter</span><span class="p">,</span> <span class="n">season</span><span class="p">,</span> \
+        <span class="n">ra</span><span class="p">,</span> <span class="n">dec</span><span class="p">,</span> <span class="n">column</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">kepmag</span><span class="p">,</span> <span class="n">xdim</span><span class="p">,</span> <span class="n">ydim</span><span class="p">,</span> <span class="n">fluxpixels</span> <span class="o">=</span> \
+        <span class="n">kepio</span><span class="o">.</span><span class="n">readTPF</span><span class="p">(</span><span class="n">infile</span><span class="p">,</span> <span class="s1">&#39;FLUX&#39;</span><span class="p">,</span> <span class="n">logfile</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+    <span class="n">kepid</span><span class="p">,</span> <span class="n">channel</span><span class="p">,</span> <span class="n">skygroup</span><span class="p">,</span> <span class="n">module</span><span class="p">,</span> <span class="n">output</span><span class="p">,</span> <span class="n">quarter</span><span class="p">,</span> <span class="n">season</span><span class="p">,</span> \
+        <span class="n">ra</span><span class="p">,</span> <span class="n">dec</span><span class="p">,</span> <span class="n">column</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">kepmag</span><span class="p">,</span> <span class="n">xdim</span><span class="p">,</span> <span class="n">ydim</span><span class="p">,</span> <span class="n">errpixels</span> <span class="o">=</span> \
+        <span class="n">kepio</span><span class="o">.</span><span class="n">readTPF</span><span class="p">(</span><span class="n">infile</span><span class="p">,</span> <span class="s1">&#39;FLUX_ERR&#39;</span><span class="p">,</span> <span class="n">logfile</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+    <span class="n">kepid</span><span class="p">,</span> <span class="n">channel</span><span class="p">,</span> <span class="n">skygroup</span><span class="p">,</span> <span class="n">module</span><span class="p">,</span> <span class="n">output</span><span class="p">,</span> <span class="n">quarter</span><span class="p">,</span> <span class="n">season</span><span class="p">,</span> \
+        <span class="n">ra</span><span class="p">,</span> <span class="n">dec</span><span class="p">,</span> <span class="n">column</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">kepmag</span><span class="p">,</span> <span class="n">xdim</span><span class="p">,</span> <span class="n">ydim</span><span class="p">,</span> <span class="n">qual</span> <span class="o">=</span> \
+        <span class="n">kepio</span><span class="o">.</span><span class="n">readTPF</span><span class="p">(</span><span class="n">infile</span><span class="p">,</span> <span class="s1">&#39;QUALITY&#39;</span><span class="p">,</span> <span class="n">logfile</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+
+    <span class="c1"># read mask defintion data from TPF file</span>
+    <span class="n">maskimg</span><span class="p">,</span> <span class="n">pixcoord1</span><span class="p">,</span> <span class="n">pixcoord2</span> <span class="o">=</span> <span class="n">kepio</span><span class="o">.</span><span class="n">readMaskDefinition</span><span class="p">(</span><span class="n">infile</span><span class="p">,</span> <span class="n">logfile</span><span class="p">,</span>
+                                                             <span class="n">verbose</span><span class="p">)</span>
+    <span class="c1"># print target data</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;      KepID:  </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">kepid</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39; RA (J2000):  </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ra</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Dec (J2000): </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">dec</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;     KepMag:  </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">kepmag</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;   SkyGroup:    </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">skygroup</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;     Season:    </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">season</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;    Channel:    </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">channel</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;     Module:    </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">module</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;     Output:     </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">output</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+    <span class="c1"># how many quality = 0 rows?</span>
+    <span class="n">npts</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">nrows</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">fluxpixels</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nrows</span><span class="p">):</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">qual</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">barytime</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+            <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">fluxpixels</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">ydim</span> <span class="o">*</span> <span class="n">xdim</span> <span class="o">//</span> <span class="mi">2</span><span class="p">])):</span>
+            <span class="n">npts</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="n">time</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">npts</span><span class="p">))</span>
+    <span class="n">timecorr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">npts</span><span class="p">))</span>
+    <span class="n">cadenceno</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">npts</span><span class="p">))</span>
+    <span class="n">quality</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">npts</span><span class="p">))</span>
+    <span class="n">pixseries</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">ydim</span><span class="p">,</span> <span class="n">xdim</span><span class="p">,</span> <span class="n">npts</span><span class="p">))</span>
+    <span class="n">errseries</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">ydim</span><span class="p">,</span> <span class="n">xdim</span><span class="p">,</span> <span class="n">npts</span><span class="p">))</span>
+
+    <span class="c1"># construct output light curves</span>
+    <span class="n">nptsx</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">ydim</span><span class="p">)):</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">xdim</span><span class="p">):</span>
+            <span class="n">npts</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nrows</span><span class="p">):</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">qual</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">barytime</span><span class="p">[</span><span class="n">k</span><span class="p">])</span>
+                    <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">fluxpixels</span><span class="p">[</span><span class="n">k</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">ydim</span><span class="o">*</span><span class="n">xdim</span><span class="o">/</span><span class="mi">2</span><span class="p">)])):</span>
+                    <span class="n">time</span><span class="p">[</span><span class="n">npts</span><span class="p">]</span> <span class="o">=</span> <span class="n">barytime</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
+                    <span class="n">timecorr</span><span class="p">[</span><span class="n">npts</span><span class="p">]</span> <span class="o">=</span> <span class="n">tcorr</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
+                    <span class="n">cadenceno</span><span class="p">[</span><span class="n">npts</span><span class="p">]</span> <span class="o">=</span> <span class="n">cadno</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
+                    <span class="n">quality</span><span class="p">[</span><span class="n">npts</span><span class="p">]</span> <span class="o">=</span> <span class="n">qual</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
+                    <span class="n">pixseries</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">npts</span><span class="p">]</span> <span class="o">=</span> <span class="n">fluxpixels</span><span class="p">[</span><span class="n">k</span><span class="p">,</span> <span class="n">nptsx</span><span class="p">]</span>
+                    <span class="n">errseries</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">npts</span><span class="p">]</span> <span class="o">=</span> <span class="n">errpixels</span><span class="p">[</span><span class="n">k</span><span class="p">,</span> <span class="n">nptsx</span><span class="p">]</span>
+                    <span class="n">npts</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">nptsx</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="c1"># define data sampling</span>
+    <span class="k">if</span> <span class="n">filterlc</span><span class="p">:</span>
+        <span class="n">tpf</span> <span class="o">=</span> <span class="n">pyfits</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">infile</span><span class="p">)</span>
+        <span class="n">cadence</span> <span class="o">=</span> <span class="n">kepkey</span><span class="o">.</span><span class="n">cadence</span><span class="p">(</span><span class="n">tpf</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">infile</span><span class="p">,</span> <span class="n">logfile</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+        <span class="n">tr</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="p">(</span><span class="n">cadence</span> <span class="o">/</span> <span class="mi">86400</span><span class="p">)</span>
+        <span class="n">timescale</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="p">(</span><span class="n">cutoff</span> <span class="o">/</span> <span class="n">tr</span><span class="p">)</span>
+
+        <span class="c1"># define convolution function</span>
+        <span class="k">if</span> <span class="n">function</span> <span class="o">==</span> <span class="s1">&#39;boxcar&#39;</span><span class="p">:</span>
+            <span class="n">filtfunc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">timescale</span><span class="p">)))</span>
+        <span class="k">elif</span> <span class="n">function</span> <span class="o">==</span> <span class="s1">&#39;gauss&#39;</span><span class="p">:</span>
+            <span class="n">timescale</span> <span class="o">/=</span> <span class="mi">2</span>
+            <span class="n">dx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">timescale</span> <span class="o">*</span> <span class="mi">10</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="n">filtfunc</span> <span class="o">=</span> <span class="n">filtfunc</span><span class="p">([</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">dx</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">-</span> <span class="mf">1.0</span><span class="p">,</span> <span class="n">timescale</span><span class="p">],</span>
+                                <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">dx</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">dx</span><span class="p">))</span>
+        <span class="k">elif</span> <span class="n">function</span> <span class="o">==</span> <span class="s1">&#39;sinc&#39;</span><span class="p">:</span>
+            <span class="n">dx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">timescale</span> <span class="o">*</span> <span class="mi">12</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="n">fx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">dx</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">dx</span><span class="p">)</span>
+            <span class="n">fx</span> <span class="o">=</span> <span class="n">fx</span> <span class="o">-</span> <span class="n">dx</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">+</span> <span class="mf">0.5</span>
+            <span class="n">fx</span> <span class="o">/=</span> <span class="n">timescale</span>
+            <span class="n">filtfunc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sinc</span><span class="p">(</span><span class="n">fx</span><span class="p">)</span>
+        <span class="n">filtfunc</span> <span class="o">/=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">filtfunc</span><span class="p">)</span>
+
+        <span class="c1"># pad time series at both ends with noise model</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">ydim</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">xdim</span><span class="p">):</span>
+                <span class="n">ave</span><span class="p">,</span> <span class="n">sigma</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">pixseries</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="p">:</span><span class="nb">len</span><span class="p">(</span><span class="n">filtfunc</span><span class="p">)]),</span>
+                              <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">pixseries</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="p">:</span><span class="nb">len</span><span class="p">(</span><span class="n">filtfunc</span><span class="p">)]))</span>
+                <span class="n">padded</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">kepstat</span><span class="o">.</span><span class="n">randarray</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">filtfunc</span><span class="p">))</span> <span class="o">*</span> <span class="n">ave</span><span class="p">,</span>
+                                   <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">filtfunc</span><span class="p">))</span> <span class="o">*</span> <span class="n">sigma</span><span class="p">),</span> <span class="n">pixseries</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="p">:])</span>
+                <span class="n">ave</span><span class="p">,</span> <span class="n">sigma</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">pixseries</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="n">filtfunc</span><span class="p">):]),</span>
+                              <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">pixseries</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="n">filtfunc</span><span class="p">):]))</span>
+                <span class="n">padded</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">padded</span><span class="p">,</span>
+                                   <span class="n">kepstat</span><span class="o">.</span><span class="n">randarray</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">filtfunc</span><span class="p">))</span> <span class="o">*</span> <span class="n">ave</span><span class="p">,</span>
+                                   <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">filtfunc</span><span class="p">))</span> <span class="o">*</span> <span class="n">sigma</span><span class="p">))</span>
+                <span class="c1"># convolve data</span>
+                <span class="n">convolved</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">convolve</span><span class="p">(</span><span class="n">padded</span><span class="p">,</span> <span class="n">filtfunc</span><span class="p">,</span> <span class="s1">&#39;same&#39;</span><span class="p">)</span>
+                <span class="c1"># remove padding from the output array</span>
+                <span class="n">outdata</span> <span class="o">=</span> <span class="n">convolved</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">filtfunc</span><span class="p">):</span> <span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="n">filtfunc</span><span class="p">)]</span>
+                <span class="c1"># subtract low frequencies</span>
+                <span class="n">outmedian</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">outdata</span><span class="p">)</span>
+                <span class="n">pixseries</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">pixseries</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="p">:]</span> <span class="o">-</span> <span class="n">outdata</span> <span class="o">+</span> <span class="n">outmedian</span>
+
+    <span class="c1"># construct output file</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Writing output file </span><span class="si">{}</span><span class="s2">...&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">outfile</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">ydim</span> <span class="o">*</span> <span class="n">xdim</span> <span class="o">&lt;</span> <span class="mi">1000</span><span class="p">:</span>
+        <span class="n">instruct</span> <span class="o">=</span> <span class="n">pyfits</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">infile</span><span class="p">,</span> <span class="s1">&#39;readonly&#39;</span><span class="p">)</span>
+        <span class="n">kepkey</span><span class="o">.</span><span class="n">history</span><span class="p">(</span><span class="n">call</span><span class="p">,</span> <span class="n">instruct</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">outfile</span><span class="p">,</span> <span class="n">logfile</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+        <span class="n">hdulist</span> <span class="o">=</span> <span class="n">pyfits</span><span class="o">.</span><span class="n">HDUList</span><span class="p">(</span><span class="n">instruct</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">cols</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">cols</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pyfits</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;TIME&#39;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;D&#39;</span><span class="p">,</span>
+                                  <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;BJD - 2454833&#39;</span><span class="p">,</span> <span class="n">disp</span><span class="o">=</span><span class="s1">&#39;D12.7&#39;</span><span class="p">,</span>
+                                  <span class="n">array</span><span class="o">=</span><span class="n">time</span><span class="p">))</span>
+        <span class="n">cols</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pyfits</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;TIMECORR&#39;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;E&#39;</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;d&#39;</span><span class="p">,</span>
+                                  <span class="n">disp</span><span class="o">=</span><span class="s1">&#39;E13.6&#39;</span><span class="p">,</span> <span class="n">array</span><span class="o">=</span><span class="n">timecorr</span><span class="p">))</span>
+        <span class="n">cols</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pyfits</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;CADENCENO&#39;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;J&#39;</span><span class="p">,</span> <span class="n">disp</span><span class="o">=</span><span class="s1">&#39;I10&#39;</span><span class="p">,</span>
+                                  <span class="n">array</span><span class="o">=</span><span class="n">cadenceno</span><span class="p">))</span>
+        <span class="n">cols</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pyfits</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;QUALITY&#39;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;J&#39;</span><span class="p">,</span> <span class="n">array</span><span class="o">=</span><span class="n">quality</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">ydim</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">xdim</span><span class="p">):</span>
+                <span class="n">colname</span> <span class="o">=</span> <span class="s1">&#39;COL</span><span class="si">{}</span><span class="s1">_ROW</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="n">column</span><span class="p">,</span> <span class="n">j</span> <span class="o">+</span> <span class="n">row</span><span class="p">)</span>
+                <span class="n">cols</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pyfits</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">colname</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;E&#39;</span><span class="p">,</span>
+                                          <span class="n">disp</span><span class="o">=</span><span class="s1">&#39;E13.6&#39;</span><span class="p">,</span>
+                                          <span class="n">array</span><span class="o">=</span><span class="n">pixseries</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="p">:]))</span>
+        <span class="n">hdu1</span> <span class="o">=</span> <span class="n">pyfits</span><span class="o">.</span><span class="n">BinTableHDU</span><span class="o">.</span><span class="n">from_columns</span><span class="p">(</span><span class="n">pyfits</span><span class="o">.</span><span class="n">ColDefs</span><span class="p">(</span><span class="n">cols</span><span class="p">))</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;INHERIT&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="s1">&#39;inherit the primary header&#39;</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;EXTNAME&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;PIXELSERIES&#39;</span><span class="p">,</span> <span class="s1">&#39;name of extension&#39;</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;EXTVER&#39;</span> <span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">instruct</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;EXTVER&#39;</span><span class="p">],</span>
+                                      <span class="s1">&#39;extension version number (not format version)&#39;</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;TELESCOP&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">instruct</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;TELESCOP&#39;</span><span class="p">],</span>
+                                       <span class="s1">&#39;telescope&#39;</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;INSTRUME&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">instruct</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;INSTRUME&#39;</span><span class="p">],</span>
+                                       <span class="s1">&#39;detector type&#39;</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;OBJECT&#39;</span> <span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">instruct</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;OBJECT&#39;</span><span class="p">],</span>
+                                      <span class="s1">&#39;string version of KEPLERID&#39;</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;KEPLERID&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">instruct</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;KEPLERID&#39;</span><span class="p">],</span>
+                                       <span class="s1">&#39;unique Kepler target identifier&#39;</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;RADESYS&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">instruct</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;RADESYS&#39;</span><span class="p">],</span>
+                                      <span class="s1">&#39;reference frame of celestial coordinates&#39;</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;RA_OBJ&#39;</span> <span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">instruct</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;RA_OBJ&#39;</span><span class="p">],</span>
+                                      <span class="s1">&#39;[deg] right ascension from KIC&#39;</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;DEC_OBJ&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">instruct</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;DEC_OBJ&#39;</span><span class="p">],</span>
+                                      <span class="s1">&#39;[deg] declination from KIC&#39;</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;EQUINOX&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">instruct</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;EQUINOX&#39;</span><span class="p">],</span>
+                                      <span class="s1">&#39;equinox of celestial coordinate system&#39;</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;TIMEREF&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">instruct</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;TIMEREF&#39;</span><span class="p">],</span>
+                                      <span class="s1">&#39;barycentric correction applied to times&#39;</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;TASSIGN&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">instruct</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;TASSIGN&#39;</span><span class="p">],</span>
+                                      <span class="s1">&#39;where time is assigned&#39;</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;TIMESYS&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">instruct</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;TIMESYS&#39;</span><span class="p">],</span>
+                                      <span class="s1">&#39;time system is barycentric JD&#39;</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;BJDREFI&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">instruct</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;BJDREFI&#39;</span><span class="p">],</span>
+                                      <span class="s1">&#39;integer part of BJD reference date&#39;</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;BJDREFF&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">instruct</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;BJDREFF&#39;</span><span class="p">],</span>
+                                      <span class="s1">&#39;fraction of the day in BJD reference date&#39;</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;TIMEUNIT&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">instruct</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;TIMEUNIT&#39;</span><span class="p">],</span>
+                                       <span class="s1">&#39;time unit for TIME, TSTART and TSTOP&#39;</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;TSTART&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">instruct</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;TSTART&#39;</span><span class="p">],</span>
+                                     <span class="s1">&#39;observation start time in BJD-BJDREF&#39;</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;TSTOP&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">instruct</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;TSTOP&#39;</span><span class="p">],</span>
+                                    <span class="s1">&#39;observation stop time in BJD-BJDREF&#39;</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;LC_START&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">instruct</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;LC_START&#39;</span><span class="p">],</span>
+                                       <span class="s1">&#39;mid point of first cadence in MJD&#39;</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;LC_END&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">instruct</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;LC_END&#39;</span><span class="p">],</span>
+                                       <span class="s1">&#39;mid point of last cadence in MJD&#39;</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;TELAPSE&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">instruct</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;TELAPSE&#39;</span><span class="p">],</span>
+                                       <span class="s1">&#39;[d] TSTOP - TSTART&#39;</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;LIVETIME&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">instruct</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;LIVETIME&#39;</span><span class="p">],</span>
+                                       <span class="s1">&#39;[d] TELAPSE multiplied by DEADC&#39;</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;EXPOSURE&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">instruct</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;EXPOSURE&#39;</span><span class="p">],</span>
+                                       <span class="s1">&#39;[d] time on source&#39;</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;DEADC&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">instruct</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;DEADC&#39;</span><span class="p">],</span>
+                                    <span class="s1">&#39;deadtime correction&#39;</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;TIMEPIXR&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">instruct</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;TIMEPIXR&#39;</span><span class="p">],</span>
+                                       <span class="s1">&#39;bin time beginning=0 middle=0.5 end=1&#39;</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;TIERRELA&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">instruct</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;TIERRELA&#39;</span><span class="p">],</span>
+                                       <span class="s1">&#39;[d] relative time error&#39;</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;TIERABSO&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">instruct</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;TIERABSO&#39;</span><span class="p">],</span>
+                                       <span class="s1">&#39;[d] absolute time error&#39;</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;INT_TIME&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">instruct</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;INT_TIME&#39;</span><span class="p">],</span>
+                                       <span class="s1">&#39;[s] photon accumulation time per frame&#39;</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;READTIME&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">instruct</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;READTIME&#39;</span><span class="p">],</span>
+                                       <span class="s1">&#39;[s] readout time per frame&#39;</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;FRAMETIM&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">instruct</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;FRAMETIM&#39;</span><span class="p">],</span>
+                                       <span class="s1">&#39;[s] frame time (INT_TIME + READTIME)&#39;</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;NUM_FRM&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">instruct</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;NUM_FRM&#39;</span><span class="p">],</span>
+                                      <span class="s1">&#39;number of frames per time stamp&#39;</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;TIMEDEL&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">instruct</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;TIMEDEL&#39;</span><span class="p">],</span>
+                                      <span class="s1">&#39;[d] time resolution of data&#39;</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;DATE-OBS&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">instruct</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;DATE-OBS&#39;</span><span class="p">],</span>
+                                       <span class="s1">&#39;TSTART as UTC calendar date&#39;</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;DATE-END&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">instruct</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;DATE-END&#39;</span><span class="p">],</span>
+                                       <span class="s1">&#39;TSTOP as UTC calendar date&#39;</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;BACKAPP&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">instruct</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;BACKAPP&#39;</span><span class="p">],</span>
+                                      <span class="s1">&#39;background is subtracted&#39;</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;DEADAPP&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">instruct</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;DEADAPP&#39;</span><span class="p">],</span>
+                                      <span class="s1">&#39;deadtime applied&#39;</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;VIGNAPP&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">instruct</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;VIGNAPP&#39;</span><span class="p">],</span>
+                                      <span class="s1">&#39;vignetting or collimator correction applied&#39;</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;GAIN&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">instruct</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;GAIN&#39;</span><span class="p">],</span>
+                                   <span class="s1">&#39;[electrons/count] channel gain&#39;</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;READNOIS&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">instruct</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;READNOIS&#39;</span><span class="p">],</span>
+                                       <span class="s1">&#39;[electrons] read noise&#39;</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;NREADOUT&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">instruct</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;NREADOUT&#39;</span><span class="p">],</span>
+                                       <span class="s1">&#39;number of read per cadence&#39;</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;TIMSLICE&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">instruct</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;TIMSLICE&#39;</span><span class="p">],</span>
+                                       <span class="s1">&#39;time-slice readout sequence section&#39;</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;MEANBLCK&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">instruct</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;MEANBLCK&#39;</span><span class="p">],</span>
+                                       <span class="s1">&#39;[count] FSW mean black level&#39;</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="n">hdulist</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">hdu1</span><span class="p">)</span>
+        <span class="n">hdulist</span><span class="o">.</span><span class="n">writeto</span><span class="p">(</span><span class="n">outfile</span><span class="p">)</span>
+        <span class="n">kepkey</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s1">&#39;EXTNAME&#39;</span><span class="p">,</span> <span class="s1">&#39;APERTURE&#39;</span><span class="p">,</span> <span class="s1">&#39;name of extension&#39;</span><span class="p">,</span> <span class="n">instruct</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
+                   <span class="n">outfile</span><span class="p">,</span> <span class="n">logfile</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+        <span class="n">pyfits</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">outfile</span><span class="p">,</span> <span class="n">instruct</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">instruct</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">header</span><span class="p">)</span>
+        <span class="n">instruct</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">warnmsg</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;WARNING -- KEPPIXSERIES: output FITS file requires &gt; 999&#39;</span>
+                   <span class="s1">&#39;columns. Non-compliant with FITS convention.&#39;</span><span class="p">)</span>
+        <span class="n">kepmsg</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="n">logfile</span><span class="p">,</span> <span class="n">warnmsg</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+
+    <span class="c1"># plot pixel array</span>
+    <span class="n">fmin</span> <span class="o">=</span> <span class="mf">1.0e33</span>
+    <span class="n">fmax</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1.033</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">clf</span><span class="p">()</span>
+    <span class="n">dx</span> <span class="o">=</span> <span class="mf">0.93</span> <span class="o">/</span> <span class="n">xdim</span>
+    <span class="n">dy</span> <span class="o">=</span> <span class="mf">0.94</span> <span class="o">/</span> <span class="n">ydim</span>
+    <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">axes</span><span class="p">([</span><span class="mf">0.06</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">,</span> <span class="mf">0.93</span><span class="p">,</span> <span class="mf">0.94</span><span class="p">])</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_major_formatter</span><span class="p">(</span><span class="n">plt</span><span class="o">.</span><span class="n">ScalarFormatter</span><span class="p">(</span><span class="n">useOffset</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">set_major_formatter</span><span class="p">(</span><span class="n">plt</span><span class="o">.</span><span class="n">ScalarFormatter</span><span class="p">(</span><span class="n">useOffset</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_major_locator</span><span class="p">(</span><span class="n">plt</span><span class="o">.</span><span class="n">MaxNLocator</span><span class="p">(</span><span class="n">integer</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">set_major_locator</span><span class="p">(</span><span class="n">plt</span><span class="o">.</span><span class="n">MaxNLocator</span><span class="p">(</span><span class="n">integer</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">xlim</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">pixcoord1</span><span class="p">)</span> <span class="o">-</span> <span class="mf">0.5</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">pixcoord1</span><span class="p">)</span> <span class="o">+</span> <span class="mf">0.5</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">pixcoord2</span><span class="p">)</span> <span class="o">-</span> <span class="mf">0.5</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">pixcoord2</span><span class="p">)</span> <span class="o">+</span> <span class="mf">0.5</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;time&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;color&#39;</span> <span class="p">:</span> <span class="s1">&#39;k&#39;</span><span class="p">})</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;arbitrary flux&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;color&#39;</span> <span class="p">:</span> <span class="s1">&#39;k&#39;</span><span class="p">})</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">ydim</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">xdim</span><span class="p">):</span>
+            <span class="n">tmin</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">amin</span><span class="p">(</span><span class="n">time</span><span class="p">)</span>
+            <span class="n">tmax</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">amax</span><span class="p">(</span><span class="n">time</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">amin</span><span class="p">(</span><span class="n">pixseries</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="p">:]))</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">amin</span><span class="p">(</span><span class="n">pixseries</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="p">:]))</span>
+                <span class="n">fmin</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">amin</span><span class="p">(</span><span class="n">pixseries</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="p">:])</span>
+                <span class="n">fmax</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">amax</span><span class="p">(</span><span class="n">pixseries</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="p">:])</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">ugh</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="n">xmin</span> <span class="o">=</span> <span class="n">tmin</span> <span class="o">-</span> <span class="p">(</span><span class="n">tmax</span> <span class="o">-</span> <span class="n">tmin</span><span class="p">)</span> <span class="o">/</span> <span class="mi">40</span>
+            <span class="n">xmax</span> <span class="o">=</span> <span class="n">tmax</span> <span class="o">+</span> <span class="p">(</span><span class="n">tmax</span> <span class="o">-</span> <span class="n">tmin</span><span class="p">)</span> <span class="o">/</span> <span class="mi">40</span>
+            <span class="n">ymin</span> <span class="o">=</span> <span class="n">fmin</span> <span class="o">-</span> <span class="p">(</span><span class="n">fmax</span> <span class="o">-</span> <span class="n">fmin</span><span class="p">)</span> <span class="o">/</span> <span class="mi">20</span>
+            <span class="n">ymax</span> <span class="o">=</span> <span class="n">fmax</span> <span class="o">+</span> <span class="p">(</span><span class="n">fmax</span> <span class="o">-</span> <span class="n">fmin</span><span class="p">)</span> <span class="o">/</span> <span class="mi">20</span>
+            <span class="k">if</span> <span class="n">kepstat</span><span class="o">.</span><span class="n">bitInBitmap</span><span class="p">(</span><span class="n">maskimg</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">],</span> <span class="mi">2</span><span class="p">):</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">axes</span><span class="p">([</span><span class="mf">0.06</span> <span class="o">+</span> <span class="nb">float</span><span class="p">(</span><span class="n">j</span><span class="p">)</span> <span class="o">*</span> <span class="n">dx</span><span class="p">,</span> <span class="mf">0.05</span> <span class="o">+</span> <span class="n">i</span> <span class="o">*</span> <span class="n">dy</span><span class="p">,</span> <span class="n">dx</span><span class="p">,</span> <span class="n">dy</span><span class="p">],</span>
+                         <span class="n">facecolor</span><span class="o">=</span><span class="s1">&#39;lightslategray&#39;</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">maskimg</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">axes</span><span class="p">([</span><span class="mf">0.06</span> <span class="o">+</span> <span class="nb">float</span><span class="p">(</span><span class="n">j</span><span class="p">)</span> <span class="o">*</span> <span class="n">dx</span><span class="p">,</span> <span class="mf">0.05</span> <span class="o">+</span> <span class="n">i</span> <span class="o">*</span> <span class="n">dy</span><span class="p">,</span> <span class="n">dx</span><span class="p">,</span> <span class="n">dy</span><span class="p">],</span>
+                         <span class="n">facecolor</span><span class="o">=</span><span class="s1">&#39;black&#39;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">axes</span><span class="p">([</span><span class="mf">0.06</span> <span class="o">+</span> <span class="nb">float</span><span class="p">(</span><span class="n">j</span><span class="p">)</span> <span class="o">*</span> <span class="n">dx</span><span class="p">,</span> <span class="mf">0.05</span> <span class="o">+</span> <span class="n">i</span> <span class="o">*</span> <span class="n">dy</span><span class="p">,</span> <span class="n">dx</span><span class="p">,</span> <span class="n">dy</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">j</span> <span class="o">==</span> <span class="nb">int</span><span class="p">(</span><span class="n">xdim</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span> <span class="ow">and</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">setp</span><span class="p">(</span><span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">(),</span> <span class="n">xticklabels</span><span class="o">=</span><span class="p">[],</span> <span class="n">yticklabels</span><span class="o">=</span><span class="p">[])</span>
+            <span class="k">elif</span> <span class="n">j</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">i</span> <span class="o">==</span> <span class="nb">int</span><span class="p">(</span><span class="n">ydim</span> <span class="o">/</span> <span class="mi">2</span><span class="p">):</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">setp</span><span class="p">(</span><span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">(),</span> <span class="n">xticklabels</span><span class="o">=</span><span class="p">[],</span> <span class="n">yticklabels</span><span class="o">=</span><span class="p">[])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">setp</span><span class="p">(</span><span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">(),</span> <span class="n">xticklabels</span><span class="o">=</span><span class="p">[],</span> <span class="n">yticklabels</span><span class="o">=</span><span class="p">[])</span>
+            <span class="n">ptime</span> <span class="o">=</span> <span class="n">time</span> <span class="o">*</span> <span class="mf">1.0</span>
+            <span class="n">ptime</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">ptime</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">ptime</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">ptime</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ptime</span><span class="p">,</span> <span class="n">ptime</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">pflux</span> <span class="o">=</span> <span class="n">pixseries</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="p">:]</span> <span class="o">*</span> <span class="mf">1.0</span>
+            <span class="n">pflux</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">pflux</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="o">-</span><span class="mf">1000.0</span><span class="p">)</span>
+            <span class="n">pflux</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pflux</span><span class="p">,</span> <span class="o">-</span><span class="mf">1000.0</span><span class="p">)</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">time</span><span class="p">,</span><span class="n">pixseries</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="p">:],</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;#0000ff&#39;</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;-&#39;</span><span class="p">,</span>
+                     <span class="n">linewidth</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">kepstat</span><span class="o">.</span><span class="n">bitInBitmap</span><span class="p">(</span><span class="n">maskimg</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">],</span> <span class="mi">2</span><span class="p">):</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span><span class="n">ptime</span><span class="p">,</span> <span class="n">pflux</span><span class="p">,</span> <span class="n">fc</span><span class="o">=</span><span class="s1">&#39;lightslategray&#39;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+                         <span class="n">alpha</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span><span class="n">ptime</span><span class="p">,</span> <span class="n">pflux</span><span class="p">,</span> <span class="n">fc</span><span class="o">=</span><span class="s1">&#39;#FFF380&#39;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span><span class="n">alpha</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
+            <span class="k">if</span> <span class="s1">&#39;loc&#39;</span> <span class="ow">in</span> <span class="n">plottype</span><span class="p">:</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">xlim</span><span class="p">(</span><span class="n">xmin</span><span class="p">,</span> <span class="n">xmax</span><span class="p">)</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">(</span><span class="n">ymin</span><span class="p">,</span> <span class="n">ymax</span><span class="p">)</span>
+            <span class="k">if</span> <span class="s1">&#39;glob&#39;</span> <span class="ow">in</span> <span class="n">plottype</span><span class="p">:</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">xlim</span><span class="p">(</span><span class="n">xmin</span><span class="p">,</span> <span class="n">xmax</span><span class="p">)</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">(</span><span class="mf">1.0e-10</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nanmax</span><span class="p">(</span><span class="n">pixseries</span><span class="p">)</span> <span class="o">*</span> <span class="mf">1.05</span><span class="p">)</span>
+            <span class="k">if</span> <span class="s1">&#39;full&#39;</span> <span class="ow">in</span> <span class="n">plottype</span><span class="p">:</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">xlim</span><span class="p">(</span><span class="n">xmin</span><span class="p">,</span> <span class="n">xmax</span><span class="p">)</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">(</span><span class="mf">1.0e-10</span><span class="p">,</span> <span class="n">ymax</span> <span class="o">*</span> <span class="mf">1.05</span><span class="p">)</span>
+
+    <span class="c1"># render plot</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">plotfile</span><span class="p">)</span>
+
+    <span class="c1"># stop time</span>
+    <span class="n">kepmsg</span><span class="o">.</span><span class="n">clock</span><span class="p">(</span><span class="s1">&#39;KEPPIXSERIES ended at&#39;</span><span class="p">,</span> <span class="n">logfile</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span></div>
+
+<span class="k">def</span> <span class="nf">keppixseries_main</span><span class="p">():</span>
+    <span class="kn">import</span> <span class="nn">argparse</span>
+    <span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">(</span>
+             <span class="n">description</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;Individual time series photometry for all pixels&#39;</span>
+                          <span class="s1">&#39; within a target mask&#39;</span><span class="p">),</span>
+             <span class="n">formatter_class</span><span class="o">=</span><span class="n">PyKEArgumentHelpFormatter</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;infile&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Name of input file&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--outfile&#39;</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;Name of FITS file to output.&#39;</span>
+                              <span class="s1">&#39; If None, outfile is infile-keppixseries.&#39;</span><span class="p">),</span>
+                        <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--plotfile&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s1">&#39;None&#39;</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;name of output PNG plot file&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--plottype&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s1">&#39;global&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Plotting type&#39;</span><span class="p">,</span>
+                        <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span> <span class="n">choices</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;local&#39;</span><span class="p">,</span><span class="s1">&#39;global&#39;</span><span class="p">,</span><span class="s1">&#39;full&#39;</span><span class="p">])</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--filterlc&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_true&#39;</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;High-pass Filter data?&#39;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--function&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s1">&#39;boxcar&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Type of filter&#39;</span><span class="p">,</span>
+                        <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span> <span class="n">choices</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;boxcar&#39;</span><span class="p">,</span><span class="s1">&#39;gauss&#39;</span><span class="p">,</span><span class="s1">&#39;sinc&#39;</span><span class="p">])</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--cutoff&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Characteristic frequency cutoff of filter [1/days]&#39;</span><span class="p">,</span>
+                        <span class="nb">type</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--overwrite&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_true&#39;</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Overwrite output file?&#39;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--verbose&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_true&#39;</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Write to a log file?&#39;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--logfile&#39;</span><span class="p">,</span> <span class="s1">&#39;-l&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Name of ascii log file&#39;</span><span class="p">,</span>
+                        <span class="n">default</span><span class="o">=</span><span class="s1">&#39;keppixseries.log&#39;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s1">&#39;logfile&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">)</span>
+    <span class="n">args</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">()</span>
+    <span class="n">keppixseries</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">infile</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">outfile</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">plotfile</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">plottype</span><span class="p">,</span>
+                 <span class="n">args</span><span class="o">.</span><span class="n">filterlc</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">function</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">cutoff</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">overwrite</span><span class="p">,</span>
+                 <span class="n">args</span><span class="o">.</span><span class="n">verbose</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">logfile</span><span class="p">)</span>
+</pre></div>
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright PyKE Developers and Contributors.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'3.0.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

@@ -210,11 +210,45 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="kepoutlier-remove-or-replace-statistical-outliers-from-time-series-data">
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast,
+.nboutput.nblast {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast + .nbinput {
+    margin-top: -19px;
+}
+
+/* nice headers on first paragraph of info/warning boxes */
+.admonition .first {
+    margin: -12px;
+    padding: 6px 12px;
+    margin-bottom: 12px;
+    color: #fff;
+    line-height: 1;
+    display: block;
+}
+.admonition.warning .first {
+    background: #f0b37e;
+}
+.admonition.note .first {
+    background: #6ab0de;
+}
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+</style>
+<div class="section" id="kepoutlier-remove-or-replace-statistical-outliers-from-time-series-data">
 <h1><strong>kepoutlier</strong>: remove or replace statistical outliers from time series data<a class="headerlink" href="#kepoutlier-remove-or-replace-statistical-outliers-from-time-series-data" title="Permalink to this headline">¶</a></h1>
 <dl class="function">
 <dt id="pyke.kepoutlier.kepoutlier">
-<code class="descclassname">pyke.kepoutlier.</code><code class="descname">kepoutlier</code><span class="sig-paren">(</span><em>infile</em>, <em>outfile=None</em>, <em>datacol='SAP_FLUX'</em>, <em>nsig=3.0</em>, <em>stepsize=1.0</em>, <em>npoly=3</em>, <em>niter=1</em>, <em>operation='remove'</em>, <em>ranges='0</em>, <em>0'</em>, <em>plot=False</em>, <em>plotfit=False</em>, <em>overwrite=False</em>, <em>verbose=False</em>, <em>logfile='kepoutlier.log'</em><span class="sig-paren">)</span><a class="headerlink" href="#pyke.kepoutlier.kepoutlier" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">pyke.kepoutlier.</code><code class="descname">kepoutlier</code><span class="sig-paren">(</span><em>infile</em>, <em>outfile=None</em>, <em>datacol='SAP_FLUX'</em>, <em>nsig=3.0</em>, <em>stepsize=1.0</em>, <em>npoly=3</em>, <em>niter=1</em>, <em>operation='remove'</em>, <em>ranges='0</em>, <em>0'</em>, <em>plot=False</em>, <em>plotfit=False</em>, <em>overwrite=False</em>, <em>verbose=False</em>, <em>logfile='kepoutlier.log'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyke/kepoutlier.html#kepoutlier"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyke.kepoutlier.kepoutlier" title="Permalink to this definition">¶</a></dt>
 <dd><p>kepoutlier – Remove or replace statistical outliers from time series data</p>
 <p>kepoutlier identifies data outliers relative to piecemeal best-fit
 polynomials. Outliers are either removed from the output time series or

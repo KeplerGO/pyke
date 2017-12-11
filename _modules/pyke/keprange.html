@@ -1,0 +1,652 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>pyke.keprange &mdash; PyKE 3.0.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../genindex.html"/>
+        <link rel="search" title="Search" href="../../search.html"/>
+    <link rel="top" title="PyKE 3.0.0 documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> PyKE
+          
+
+          
+            
+            <img src="../../_static/pyke-white.png" class="logo" />
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                3.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/ipython_notebooks/whatsnew31.html">What’s new in PyKE 3.1?</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart.html">Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../overview.html">PyKE tasks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../citing.html">Citing</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/index.html">Photometry tutorials</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">PyKE</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>pyke.keprange</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pyke.keprange</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">.utils</span> <span class="k">import</span> <span class="n">PyKEArgumentHelpFormatter</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">kepio</span><span class="p">,</span> <span class="n">kepmsg</span><span class="p">,</span> <span class="n">kepkey</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">astropy.io</span> <span class="k">import</span> <span class="n">fits</span> <span class="k">as</span> <span class="n">pyfits</span>
+<span class="kn">from</span> <span class="nn">matplotlib</span> <span class="k">import</span> <span class="n">pyplot</span> <span class="k">as</span> <span class="n">plt</span>
+
+<span class="c1"># global variables</span>
+
+<span class="n">instr</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">;</span> <span class="n">cadence</span> <span class="o">=</span> <span class="mf">1800.0</span><span class="p">;</span> <span class="n">barytime0</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">nrm</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span> <span class="n">barytime</span> <span class="o">=</span> <span class="p">[];</span> <span class="n">flux</span> <span class="o">=</span> <span class="p">[];</span> <span class="n">xmin</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">xmax</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="n">ymin</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">ymax</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span> <span class="n">xr</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span> <span class="n">yr</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span> <span class="n">xlab</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">;</span> <span class="n">ylab</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+<span class="n">mask</span> <span class="o">=</span> <span class="p">[];</span> <span class="n">aid</span> <span class="o">=</span> <span class="kc">None</span><span class="p">;</span> <span class="n">bid</span> <span class="o">=</span> <span class="kc">None</span><span class="p">;</span> <span class="n">cid</span> <span class="o">=</span> <span class="kc">None</span><span class="p">;</span> <span class="n">did</span> <span class="o">=</span> <span class="kc">None</span><span class="p">;</span> <span class="n">eid</span> <span class="o">=</span> <span class="kc">None</span><span class="p">;</span> <span class="n">fid</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="n">clobb</span> <span class="o">=</span> <span class="kc">True</span><span class="p">;</span> <span class="n">outf</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">;</span> <span class="n">verb</span> <span class="o">=</span> <span class="kc">True</span><span class="p">;</span> <span class="n">logf</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">;</span> <span class="n">rinf</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;keprange&#39;</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="keprange"><a class="viewcode-back" href="../../api/keprange.html#pyke.keprange.keprange">[docs]</a><span class="k">def</span> <span class="nf">keprange</span><span class="p">(</span><span class="n">infile</span><span class="p">,</span> <span class="n">outfile</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">datacol</span><span class="o">=</span><span class="s1">&#39;SAP_FLUX&#39;</span><span class="p">,</span> <span class="n">rinfile</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
+             <span class="n">overwrite</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">logfile</span><span class="o">=</span><span class="s1">&#39;keprange.log&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    keprange -- Define time ranges interactively for use with other PyKE tasks.</span>
+
+<span class="sd">    A number of PyKE tasks, e.g. kepdetrend, kepoutlier, require the user to</span>
+<span class="sd">    specify ranges in time over which to operate. keprange provides a visual</span>
+<span class="sd">    and interactive tool with which to define time ranges and store them within</span>
+<span class="sd">    an ASCII file. Choices are made using a GUI. Use the left-button of your</span>
+<span class="sd">    mouse to select ranges. An existing ASCII file can be loaded, a new ASCII</span>
+<span class="sd">    file can be written, the list of times can be cleared or printed using the</span>
+<span class="sd">    buttons on the GUI.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    infile : str</span>
+<span class="sd">        The name of a MAST standard format FITS file containing a Kepler light</span>
+<span class="sd">        curve within the first data extension.</span>
+<span class="sd">    outfile : str</span>
+<span class="sd">        The name of the output ASCII file storing time ranges for future use in</span>
+<span class="sd">        other PyKE tools.</span>
+<span class="sd">    rinfile : str</span>
+<span class="sd">        An existing ASCII file containing time ranges in Barycentric Julian</span>
+<span class="sd">        Date (BJD) can be uploaded into the task. This can be used as a basis</span>
+<span class="sd">        for a new set of time ranges. This argument is optional and is not</span>
+<span class="sd">        prompted for automatically. If no ascii file will be input then</span>
+<span class="sd">        rinfile=None will clear the argument buffer after a previous use.</span>
+<span class="sd">    datacol : str</span>
+<span class="sd">        The datacol name containing data stored within extension 1 of infile.</span>
+<span class="sd">        This data will be plotted against time so that the user can choose</span>
+<span class="sd">        appropriate time ranges.</span>
+<span class="sd">    overwrite : bool</span>
+<span class="sd">        Overwrite the output file?</span>
+<span class="sd">    verbose : bool</span>
+<span class="sd">        Print informative messages and warnings to the shell and logfile?</span>
+<span class="sd">    logfile : str</span>
+<span class="sd">        Name of the logfile containing error and warning messages.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    .. code-block:: bash</span>
+
+<span class="sd">        $ keprange kplr002436324-2009259160929_llc.fits --verbose</span>
+
+<span class="sd">    .. image:: ../_static/images/api/keprange.png</span>
+<span class="sd">        :align: center</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">outfile</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">outfile</span> <span class="o">=</span> <span class="n">infile</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;-</span><span class="si">{}</span><span class="s2">.txt&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">__all__</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+    <span class="c1"># startup parameters</span>
+    <span class="k">global</span> <span class="n">instr</span><span class="p">,</span> <span class="n">cadence</span><span class="p">,</span> <span class="n">barytime0</span><span class="p">,</span> <span class="n">nrm</span><span class="p">,</span> <span class="n">barytime</span><span class="p">,</span> <span class="n">flux</span>
+    <span class="k">global</span> <span class="n">xmin</span><span class="p">,</span> <span class="n">xmax</span><span class="p">,</span> <span class="n">ymin</span><span class="p">,</span> <span class="n">ymax</span><span class="p">,</span> <span class="n">xr</span><span class="p">,</span> <span class="n">yr</span><span class="p">,</span> <span class="n">xlab</span><span class="p">,</span> <span class="n">ylab</span>
+    <span class="k">global</span> <span class="n">clobb</span><span class="p">,</span> <span class="n">outf</span><span class="p">,</span> <span class="n">verb</span><span class="p">,</span> <span class="n">logf</span><span class="p">,</span> <span class="n">rinf</span><span class="p">,</span> <span class="n">col</span><span class="p">,</span> <span class="n">bjdref</span><span class="p">,</span> <span class="n">cade</span>
+
+    <span class="c1"># log the call</span>
+    <span class="n">hashline</span> <span class="o">=</span> <span class="s1">&#39;--------------------------------------------------------------&#39;</span>
+    <span class="n">kepmsg</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">logfile</span><span class="p">,</span> <span class="n">hashline</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+    <span class="n">call</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;KEPRANGE -- &#39;</span>
+            <span class="o">+</span> <span class="s1">&#39; infile=</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">infile</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s1">&#39; outfile=</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">outfile</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s1">&#39; rinfile=</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">rinfile</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s1">&#39; datacol=</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">datacol</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s1">&#39; overwrite=</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">overwrite</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s1">&#39; verbose=</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">verbose</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s1">&#39; logfile=</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">logfile</span><span class="p">))</span>
+    <span class="n">kepmsg</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">logfile</span><span class="p">,</span> <span class="n">call</span><span class="o">+</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+    <span class="n">clobb</span> <span class="o">=</span> <span class="n">overwrite</span>
+    <span class="n">outf</span> <span class="o">=</span> <span class="n">outfile</span>
+    <span class="n">verb</span> <span class="o">=</span> <span class="n">verbose</span>
+    <span class="n">logf</span> <span class="o">=</span> <span class="n">logfile</span>
+    <span class="n">rinf</span> <span class="o">=</span> <span class="n">rinfile</span>
+
+    <span class="c1"># start time</span>
+    <span class="n">kepmsg</span><span class="o">.</span><span class="n">clock</span><span class="p">(</span><span class="s1">&#39;KEPRANGE started at: &#39;</span><span class="p">,</span> <span class="n">logfile</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+
+    <span class="c1"># overwrite output file</span>
+    <span class="k">if</span> <span class="n">overwrite</span><span class="p">:</span>
+        <span class="n">kepio</span><span class="o">.</span><span class="n">overwrite</span><span class="p">(</span><span class="n">outfile</span><span class="p">,</span> <span class="n">logfile</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">kepio</span><span class="o">.</span><span class="n">fileexists</span><span class="p">(</span><span class="n">outfile</span><span class="p">):</span>
+        <span class="n">errmsg</span> <span class="o">=</span> <span class="s1">&#39;ERROR -- KEPRANGE: </span><span class="si">{}</span><span class="s1"> exists. Use --overwrite&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">outfile</span><span class="p">)</span>
+        <span class="n">kepmsg</span><span class="o">.</span><span class="n">err</span><span class="p">(</span><span class="n">logfile</span><span class="p">,</span> <span class="n">errmsg</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+
+    <span class="c1">## open input file</span>
+    <span class="n">instr</span> <span class="o">=</span> <span class="n">pyfits</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">infile</span><span class="p">,</span> <span class="s1">&#39;readonly&#39;</span><span class="p">)</span>
+    <span class="n">tstart</span><span class="p">,</span> <span class="n">tstop</span><span class="p">,</span> <span class="n">bjdref</span><span class="p">,</span> <span class="n">cadence</span> <span class="o">=</span> <span class="n">kepio</span><span class="o">.</span><span class="n">timekeys</span><span class="p">(</span><span class="n">instr</span><span class="p">,</span> <span class="n">infile</span><span class="p">,</span>
+                                                    <span class="n">logfile</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">work</span> <span class="o">=</span> <span class="n">instr</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;FILEVER&#39;</span><span class="p">]</span>
+        <span class="n">cadenom</span> <span class="o">=</span> <span class="mf">1.0</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">cadenom</span> <span class="o">=</span> <span class="n">cadence</span>
+    <span class="n">cade</span> <span class="o">=</span> <span class="n">cadenom</span>
+
+    <span class="c1"># fudge non-compliant FITS keywords with no values</span>
+    <span class="n">instr</span> <span class="o">=</span> <span class="n">kepkey</span><span class="o">.</span><span class="n">emptykeys</span><span class="p">(</span><span class="n">instr</span><span class="p">,</span> <span class="n">infile</span><span class="p">,</span> <span class="n">logfile</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+    <span class="c1"># input data</span>
+    <span class="n">table</span> <span class="o">=</span> <span class="n">instr</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">data</span>
+
+    <span class="c1"># filter out NaNs</span>
+    <span class="n">work1</span> <span class="o">=</span> <span class="p">[];</span> <span class="n">work2</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">col</span> <span class="o">=</span> <span class="n">datacol</span>
+    <span class="n">barytime</span> <span class="o">=</span> <span class="n">kepio</span><span class="o">.</span><span class="n">readtimecol</span><span class="p">(</span><span class="n">infile</span><span class="p">,</span> <span class="n">table</span><span class="p">,</span> <span class="n">logfile</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">flux</span> <span class="o">=</span> <span class="n">instr</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">col</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">errmsg</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;ERROR -- KEPRANGE: no datacol named </span><span class="si">{}</span><span class="s1"> in table </span><span class="si">{}</span><span class="s1"> [1]&#39;</span>
+                  <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">col</span><span class="p">,</span> <span class="n">infile</span><span class="p">))</span>
+        <span class="n">kepmsg</span><span class="o">.</span><span class="n">err</span><span class="p">(</span><span class="n">infile</span><span class="p">,</span> <span class="n">errmsg</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">barytime</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">barytime</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">flux</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+            <span class="ow">and</span> <span class="n">flux</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">!=</span> <span class="mf">0.0</span><span class="p">):</span>
+            <span class="n">work1</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">barytime</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="n">bjdref</span><span class="p">)</span>
+            <span class="n">work2</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">flux</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+    <span class="n">barytime</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">work1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+    <span class="n">flux</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">work2</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span> <span class="o">/</span> <span class="n">cadenom</span>
+
+    <span class="c1"># clean up x-axis unit</span>
+    <span class="n">barytime0</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">tstart</span> <span class="o">/</span> <span class="mi">100</span><span class="p">)</span> <span class="o">*</span> <span class="mf">100.0</span><span class="p">)</span>
+    <span class="n">barytime</span> <span class="o">=</span> <span class="n">barytime</span> <span class="o">-</span> <span class="n">barytime0</span>
+    <span class="n">xlab</span> <span class="o">=</span> <span class="s1">&#39;BJD $-$ </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">barytime0</span><span class="p">)</span>
+
+    <span class="c1"># clean up y-axis units</span>
+    <span class="n">nrm</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">flux</span><span class="o">.</span><span class="n">max</span><span class="p">())))</span> <span class="o">-</span> <span class="mi">1</span>
+    <span class="n">flux</span> <span class="o">=</span> <span class="n">flux</span> <span class="o">/</span> <span class="mi">10</span> <span class="o">**</span> <span class="n">nrm</span>
+    <span class="n">ylab</span> <span class="o">=</span> <span class="s1">&#39;10$^</span><span class="si">%d</span><span class="s1">$ e$^-$ s$^{-1}$&#39;</span> <span class="o">%</span> <span class="n">nrm</span>
+
+    <span class="c1"># data limits</span>
+    <span class="n">xmin</span> <span class="o">=</span> <span class="n">barytime</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+    <span class="n">xmax</span> <span class="o">=</span> <span class="n">barytime</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+    <span class="n">ymin</span> <span class="o">=</span> <span class="n">flux</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+    <span class="n">ymax</span> <span class="o">=</span> <span class="n">flux</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+    <span class="n">xr</span> <span class="o">=</span> <span class="n">xmax</span> <span class="o">-</span> <span class="n">xmin</span>
+    <span class="n">yr</span> <span class="o">=</span> <span class="n">ymax</span> <span class="o">-</span> <span class="n">ymin</span>
+    <span class="n">flux</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="n">flux</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
+
+    <span class="c1"># plot new light curve</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;figure.dpi&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">80</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">[</span><span class="mi">17</span><span class="p">,</span> <span class="mi">7</span><span class="p">])</span>
+    <span class="n">plotlc</span><span class="p">()</span></div>
+
+
+<span class="k">def</span> <span class="nf">plotlc</span><span class="p">():</span>
+    <span class="k">global</span> <span class="n">aid</span><span class="p">,</span> <span class="n">bid</span><span class="p">,</span> <span class="n">cid</span><span class="p">,</span> <span class="n">did</span><span class="p">,</span> <span class="n">eid</span><span class="p">,</span> <span class="n">fid</span><span class="p">,</span> <span class="n">mask</span>
+
+    <span class="c1"># load button</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">clf</span><span class="p">()</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">axes</span><span class="p">([</span><span class="mf">0.06</span><span class="p">,</span> <span class="mf">0.02</span><span class="p">,</span> <span class="mf">0.22</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">])</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="s1">&#39;LOAD&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">24</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="s1">&#39;heavy&#39;</span><span class="p">,</span>
+             <span class="n">horizontalalignment</span><span class="o">=</span><span class="s1">&#39;center&#39;</span><span class="p">,</span> <span class="n">verticalalignment</span><span class="o">=</span><span class="s1">&#39;center&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">setp</span><span class="p">(</span><span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">(),</span> <span class="n">xticklabels</span><span class="o">=</span><span class="p">[],</span> <span class="n">xticks</span><span class="o">=</span><span class="p">[],</span> <span class="n">yticklabels</span><span class="o">=</span><span class="p">[],</span> <span class="n">yticks</span><span class="o">=</span><span class="p">[])</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">fill</span><span class="p">([</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span> <span class="s1">&#39;#ffffff&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">xlim</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
+    <span class="n">aid</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s1">&#39;button_press_event&#39;</span><span class="p">,</span> <span class="n">clicker1</span><span class="p">)</span>
+
+    <span class="c1"># save button</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">axes</span><span class="p">([</span><span class="mf">0.2933</span><span class="p">,</span> <span class="mf">0.02</span><span class="p">,</span> <span class="mf">0.22</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">])</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="s1">&#39;SAVE&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">24</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="s1">&#39;heavy&#39;</span><span class="p">,</span>
+             <span class="n">horizontalalignment</span><span class="o">=</span><span class="s1">&#39;center&#39;</span><span class="p">,</span> <span class="n">verticalalignment</span><span class="o">=</span><span class="s1">&#39;center&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">setp</span><span class="p">(</span><span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">(),</span> <span class="n">xticklabels</span><span class="o">=</span><span class="p">[],</span> <span class="n">xticks</span><span class="o">=</span><span class="p">[],</span> <span class="n">yticklabels</span><span class="o">=</span><span class="p">[],</span> <span class="n">yticks</span><span class="o">=</span><span class="p">[])</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">fill</span><span class="p">([</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span> <span class="s1">&#39;#ffffff&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">xlim</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
+    <span class="n">bid</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s1">&#39;button_press_event&#39;</span><span class="p">,</span> <span class="n">clicker2</span><span class="p">)</span>
+
+    <span class="c1"># clear button</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">axes</span><span class="p">([</span><span class="mf">0.5266</span><span class="p">,</span> <span class="mf">0.02</span><span class="p">,</span> <span class="mf">0.22</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">])</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="s1">&#39;CLEAR&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">24</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="s1">&#39;heavy&#39;</span><span class="p">,</span>
+             <span class="n">horizontalalignment</span><span class="o">=</span><span class="s1">&#39;center&#39;</span><span class="p">,</span> <span class="n">verticalalignment</span><span class="o">=</span><span class="s1">&#39;center&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">setp</span><span class="p">(</span><span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">(),</span> <span class="n">xticklabels</span><span class="o">=</span><span class="p">[],</span> <span class="n">xticks</span><span class="o">=</span><span class="p">[],</span> <span class="n">yticklabels</span><span class="o">=</span><span class="p">[],</span> <span class="n">yticks</span><span class="o">=</span><span class="p">[])</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">fill</span><span class="p">([</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span> <span class="s1">&#39;#ffffff&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">xlim</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
+    <span class="n">cid</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s1">&#39;button_press_event&#39;</span><span class="p">,</span> <span class="n">clicker3</span><span class="p">)</span>
+
+    <span class="c1"># print button</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">axes</span><span class="p">([</span><span class="mf">0.76</span><span class="p">,</span> <span class="mf">0.02</span><span class="p">,</span> <span class="mf">0.22</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">])</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="s1">&#39;PRINT&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">24</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="s1">&#39;heavy&#39;</span><span class="p">,</span>
+             <span class="n">horizontalalignment</span><span class="o">=</span><span class="s1">&#39;center&#39;</span><span class="p">,</span> <span class="n">verticalalignment</span><span class="o">=</span><span class="s1">&#39;center&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">setp</span><span class="p">(</span><span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">(),</span> <span class="n">xticklabels</span><span class="o">=</span><span class="p">[],</span> <span class="n">xticks</span><span class="o">=</span><span class="p">[],</span> <span class="n">yticklabels</span><span class="o">=</span><span class="p">[],</span> <span class="n">yticks</span><span class="o">=</span><span class="p">[])</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">fill</span><span class="p">([</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span> <span class="s1">&#39;#ffffff&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">xlim</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
+    <span class="n">did</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s1">&#39;button_press_event&#39;</span><span class="p">,</span> <span class="n">clicker4</span><span class="p">)</span>
+
+    <span class="c1"># light curve</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">axes</span><span class="p">([</span><span class="mf">0.06</span><span class="p">,</span> <span class="mf">0.213</span><span class="p">,</span> <span class="mf">0.92</span><span class="p">,</span> <span class="mf">0.77</span><span class="p">])</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_major_formatter</span><span class="p">(</span><span class="n">plt</span><span class="o">.</span><span class="n">ScalarFormatter</span><span class="p">(</span><span class="n">useOffset</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">set_major_formatter</span><span class="p">(</span><span class="n">plt</span><span class="o">.</span><span class="n">ScalarFormatter</span><span class="p">(</span><span class="n">useOffset</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
+    <span class="n">ltime</span> <span class="o">=</span> <span class="p">[];</span> <span class="n">ldata</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">work1</span> <span class="o">=</span> <span class="n">instr</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="n">bjdref</span>
+    <span class="n">work2</span> <span class="o">=</span> <span class="n">instr</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">col</span><span class="p">)</span> <span class="o">/</span> <span class="n">cade</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">work1</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">work1</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="ow">or</span> <span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">work2</span><span class="p">[</span><span class="n">i</span><span class="p">]):</span>
+            <span class="n">ltime</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">work1</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+            <span class="n">ldata</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">work2</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">ltime</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">ltime</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span> <span class="o">-</span> <span class="n">barytime0</span>
+            <span class="n">ldata</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">ldata</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span> <span class="o">/</span> <span class="mi">10</span> <span class="o">**</span> <span class="n">nrm</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">ltime</span><span class="p">,</span> <span class="n">ldata</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;#363636&#39;</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="s1">&#39;.&#39;</span> <span class="p">,</span><span class="n">s</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span><span class="n">linewidth</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
+            <span class="n">ltime</span> <span class="o">=</span> <span class="p">[];</span> <span class="n">ldata</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">ltime</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">ltime</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span> <span class="o">-</span> <span class="n">barytime0</span>
+    <span class="n">ldata</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">ldata</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span> <span class="o">/</span> <span class="mi">10</span> <span class="o">**</span> <span class="n">nrm</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">ltime</span><span class="p">,</span> <span class="n">ldata</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;#363636&#39;</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span><span class="n">barytime</span><span class="p">,</span> <span class="n">flux</span><span class="p">,</span> <span class="n">fc</span><span class="o">=</span><span class="s1">&#39;#a8a7a7&#39;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.2</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="n">xlab</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;color&#39;</span> <span class="p">:</span> <span class="s1">&#39;k&#39;</span><span class="p">})</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="n">ylab</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;color&#39;</span> <span class="p">:</span> <span class="s1">&#39;k&#39;</span><span class="p">})</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">ls</span><span class="o">=</span><span class="s1">&#39;--&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)</span>
+
+    <span class="c1"># plt.plot masks</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">mask</span><span class="p">)):</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">mask</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="n">t</span><span class="p">,</span> <span class="n">t</span><span class="p">],</span> <span class="p">[</span><span class="n">ymin</span><span class="p">,</span> <span class="n">ymax</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;#c0392b&#39;</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;-&#39;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+    <span class="n">nt</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">mask</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)):</span>
+        <span class="n">t1</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">mask</span><span class="p">[</span><span class="n">nt</span><span class="p">])</span>
+        <span class="n">t2</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">mask</span><span class="p">[</span><span class="n">nt</span> <span class="o">+</span> <span class="mi">1</span><span class="p">])</span>
+        <span class="n">nt</span> <span class="o">+=</span> <span class="mi">2</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">fill</span><span class="p">([</span><span class="n">t1</span><span class="p">,</span> <span class="n">t1</span><span class="p">,</span> <span class="n">t2</span><span class="p">,</span> <span class="n">t2</span><span class="p">,</span> <span class="n">t1</span><span class="p">],</span> <span class="p">[</span><span class="n">ymin</span><span class="p">,</span> <span class="n">ymax</span><span class="p">,</span> <span class="n">ymax</span><span class="p">,</span> <span class="n">ymin</span><span class="p">,</span> <span class="n">ymin</span><span class="p">],</span>
+                 <span class="n">fc</span><span class="o">=</span><span class="s1">&#39;#c0392b&#39;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+    <span class="c1"># plot ranges</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">xlim</span><span class="p">(</span><span class="n">xmin</span> <span class="o">-</span> <span class="n">xr</span> <span class="o">*</span> <span class="mf">0.01</span><span class="p">,</span> <span class="n">xmax</span> <span class="o">+</span> <span class="n">xr</span> <span class="o">*</span> <span class="mf">0.01</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">ymin</span> <span class="o">-</span> <span class="n">yr</span> <span class="o">*</span> <span class="mf">0.01</span> <span class="o">&lt;=</span> <span class="mf">0.0</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">(</span><span class="mf">1.0e-10</span><span class="p">,</span> <span class="n">ymax</span> <span class="o">+</span> <span class="n">yr</span> <span class="o">*</span> <span class="mf">0.01</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">(</span><span class="n">ymin</span> <span class="o">-</span> <span class="n">yr</span> <span class="o">*</span> <span class="mf">0.01</span><span class="p">,</span> <span class="n">ymax</span> <span class="o">+</span> <span class="n">yr</span> <span class="o">*</span> <span class="mf">0.01</span><span class="p">)</span>
+
+    <span class="c1"># ranges</span>
+    <span class="n">eid</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s1">&#39;button_press_event&#39;</span><span class="p">,</span> <span class="n">clicker6</span><span class="p">)</span>
+
+    <span class="c1"># render plot</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+<span class="k">def</span> <span class="nf">clicker1</span><span class="p">(</span><span class="n">event</span><span class="p">):</span>
+
+    <span class="k">global</span> <span class="n">mask</span><span class="p">,</span> <span class="n">aid</span><span class="p">,</span> <span class="n">bid</span><span class="p">,</span> <span class="n">cid</span><span class="p">,</span> <span class="n">did</span><span class="p">,</span> <span class="n">eid</span><span class="p">,</span> <span class="n">fid</span>
+
+    <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">inaxes</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">button</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">x</span> <span class="o">&gt;</span> <span class="mi">83</span> <span class="ow">and</span> <span class="n">event</span><span class="o">.</span><span class="n">x</span> <span class="o">&lt;</span> <span class="mi">383</span> <span class="ow">and</span>
+                <span class="n">event</span><span class="o">.</span><span class="n">y</span> <span class="o">&gt;</span> <span class="mi">12</span> <span class="ow">and</span> <span class="n">event</span><span class="o">.</span><span class="n">y</span> <span class="o">&lt;</span> <span class="mi">68</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">kepio</span><span class="o">.</span><span class="n">fileexists</span><span class="p">(</span><span class="n">rinf</span><span class="p">):</span>
+                    <span class="n">mask</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="n">lines</span> <span class="o">=</span> <span class="n">kepio</span><span class="o">.</span><span class="n">openascii</span><span class="p">(</span><span class="n">rinf</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">logf</span><span class="p">,</span> <span class="n">verb</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">:</span>
+                        <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                            <span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+                            <span class="k">if</span> <span class="n">barytime0</span> <span class="o">&gt;</span> <span class="mf">2.4e6</span><span class="p">:</span>
+                                <span class="n">mask</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">-</span> <span class="n">barytime0</span><span class="p">)</span>
+                                <span class="n">mask</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">-</span> <span class="n">barytime0</span><span class="p">)</span>
+                            <span class="k">else</span><span class="p">:</span>
+                                <span class="n">mask</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">-</span> <span class="n">barytime0</span> <span class="o">-</span> <span class="mf">2.4e6</span><span class="p">)</span>
+                                <span class="n">mask</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">-</span> <span class="n">barytime0</span> <span class="o">-</span> <span class="mf">2.4e6</span><span class="p">)</span>
+                        <span class="k">except</span><span class="p">:</span>
+                            <span class="n">message</span> <span class="o">=</span> <span class="s1">&#39;ERROR -- KEPRANGE: ascii format of ranges &#39;</span>
+                            <span class="n">message</span> <span class="o">+=</span> <span class="s1">&#39;file not recognized.&#39;</span>
+                            <span class="n">kepmsg</span><span class="o">.</span><span class="n">err</span><span class="p">(</span><span class="n">logf</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+                    <span class="n">plt</span><span class="o">.</span><span class="n">disconnect</span><span class="p">(</span><span class="n">aid</span><span class="p">)</span>
+                    <span class="n">plt</span><span class="o">.</span><span class="n">disconnect</span><span class="p">(</span><span class="n">bid</span><span class="p">)</span>
+                    <span class="n">plt</span><span class="o">.</span><span class="n">disconnect</span><span class="p">(</span><span class="n">cid</span><span class="p">)</span>
+                    <span class="n">plt</span><span class="o">.</span><span class="n">disconnect</span><span class="p">(</span><span class="n">did</span><span class="p">)</span>
+                    <span class="n">plt</span><span class="o">.</span><span class="n">disconnect</span><span class="p">(</span><span class="n">eid</span><span class="p">)</span>
+                    <span class="n">plt</span><span class="o">.</span><span class="n">disconnect</span><span class="p">(</span><span class="n">fid</span><span class="p">)</span>
+                    <span class="n">plotlc</span><span class="p">()</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;WARNING -- KEPRANGE: input ranges file does not&#39;</span>
+                          <span class="s1">&#39; exist or was not provided&#39;</span><span class="p">)</span>
+    <span class="k">return</span>
+
+<span class="c1"># -----------------------------------------------------------</span>
+<span class="c1"># save mask to ascii file</span>
+
+<span class="k">def</span> <span class="nf">clicker2</span><span class="p">(</span><span class="n">event</span><span class="p">):</span>
+
+    <span class="k">global</span> <span class="n">mask</span><span class="p">,</span> <span class="n">aid</span><span class="p">,</span> <span class="n">bid</span><span class="p">,</span> <span class="n">cid</span><span class="p">,</span> <span class="n">did</span><span class="p">,</span> <span class="n">eid</span><span class="p">,</span> <span class="n">fid</span><span class="p">,</span> <span class="n">clobb</span>
+
+    <span class="k">if</span> <span class="n">clobb</span><span class="p">:</span>
+        <span class="n">kepio</span><span class="o">.</span><span class="n">overwrite</span><span class="p">(</span><span class="n">outf</span><span class="p">,</span> <span class="n">logf</span><span class="p">,</span> <span class="n">verb</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">kepio</span><span class="o">.</span><span class="n">fileexists</span><span class="p">(</span><span class="n">outf</span><span class="p">):</span>
+        <span class="n">message</span> <span class="o">=</span> <span class="s1">&#39;ERROR -- KEPRANGE: </span><span class="si">{}</span><span class="s1"> exists. Use --overwrite&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">outf</span><span class="p">)</span>
+        <span class="n">kepmsg</span><span class="o">.</span><span class="n">err</span><span class="p">(</span><span class="n">logf</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">verb</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">inaxes</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">button</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">x</span> <span class="o">&gt;</span> <span class="mi">402</span> <span class="ow">and</span> <span class="n">event</span><span class="o">.</span><span class="n">x</span> <span class="o">&lt;</span> <span class="mi">702</span> <span class="ow">and</span>
+                    <span class="n">event</span><span class="o">.</span><span class="n">y</span> <span class="o">&gt;</span> <span class="mi">12</span> <span class="ow">and</span> <span class="n">event</span><span class="o">.</span><span class="n">y</span> <span class="o">&lt;</span> <span class="mi">68</span><span class="p">):</span>
+                    <span class="n">nt</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">txt</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+                    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">mask</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">)):</span>
+                        <span class="n">t1</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">mask</span><span class="p">[</span><span class="n">nt</span><span class="p">])</span> <span class="o">+</span> <span class="n">barytime0</span>
+                        <span class="n">t2</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">mask</span><span class="p">[</span><span class="n">nt</span><span class="o">+</span><span class="mi">1</span><span class="p">])</span> <span class="o">+</span> <span class="n">barytime0</span>
+                        <span class="k">if</span> <span class="n">t1</span> <span class="o">&lt;</span> <span class="mf">2.4e6</span><span class="p">:</span> <span class="n">t1</span> <span class="o">+=</span> <span class="mf">2.4e6</span>
+                        <span class="k">if</span> <span class="n">t2</span> <span class="o">&lt;</span> <span class="mf">2.4e6</span><span class="p">:</span> <span class="n">t2</span> <span class="o">+=</span> <span class="mf">2.4e6</span>
+                        <span class="n">txt</span> <span class="o">+=</span> <span class="nb">str</span><span class="p">(</span><span class="n">t1</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;,&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">t2</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+                        <span class="n">nt</span> <span class="o">+=</span> <span class="mi">2</span>
+                    <span class="n">txt</span> <span class="o">=</span> <span class="n">txt</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+                    <span class="n">kepmsg</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">outf</span><span class="p">,</span> <span class="n">txt</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Wrote ASCII file &#39;</span> <span class="o">+</span> <span class="n">outf</span><span class="p">)</span>
+                    <span class="n">plotlc</span><span class="p">()</span>
+
+<span class="c1"># -----------------------------------------------------------</span>
+<span class="c1"># clear time domain mask</span>
+
+<span class="k">def</span> <span class="nf">clicker3</span><span class="p">(</span><span class="n">event</span><span class="p">):</span>
+
+    <span class="k">global</span> <span class="n">mask</span><span class="p">,</span> <span class="n">aid</span><span class="p">,</span> <span class="n">bid</span><span class="p">,</span> <span class="n">cid</span><span class="p">,</span> <span class="n">did</span><span class="p">,</span> <span class="n">eid</span><span class="p">,</span> <span class="n">fid</span>
+
+    <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">inaxes</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">button</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">x</span> <span class="o">&gt;</span> <span class="mi">723</span> <span class="ow">and</span> <span class="n">event</span><span class="o">.</span><span class="n">x</span> <span class="o">&lt;</span> <span class="mi">1022</span> <span class="ow">and</span>
+                <span class="n">event</span><span class="o">.</span><span class="n">y</span> <span class="o">&gt;</span> <span class="mi">12</span> <span class="ow">and</span> <span class="n">event</span><span class="o">.</span><span class="n">y</span> <span class="o">&lt;</span> <span class="mi">68</span><span class="p">):</span>
+                <span class="n">mask</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">disconnect</span><span class="p">(</span><span class="n">aid</span><span class="p">)</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">disconnect</span><span class="p">(</span><span class="n">bid</span><span class="p">)</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">disconnect</span><span class="p">(</span><span class="n">cid</span><span class="p">)</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">disconnect</span><span class="p">(</span><span class="n">did</span><span class="p">)</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">disconnect</span><span class="p">(</span><span class="n">eid</span><span class="p">)</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">disconnect</span><span class="p">(</span><span class="n">fid</span><span class="p">)</span>
+                <span class="n">plotlc</span><span class="p">()</span>
+
+<span class="c1"># -----------------------------------------------------------</span>
+<span class="c1"># print time domain mask</span>
+
+<span class="k">def</span> <span class="nf">clicker4</span><span class="p">(</span><span class="n">event</span><span class="p">):</span>
+
+    <span class="k">global</span> <span class="n">mask</span><span class="p">,</span> <span class="n">aid</span><span class="p">,</span> <span class="n">bid</span><span class="p">,</span> <span class="n">cid</span><span class="p">,</span> <span class="n">did</span><span class="p">,</span> <span class="n">eid</span><span class="p">,</span> <span class="n">fid</span>
+
+    <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">inaxes</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">button</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">x</span> <span class="o">&gt;</span> <span class="mi">1042</span> <span class="ow">and</span> <span class="n">event</span><span class="o">.</span><span class="n">x</span> <span class="o">&lt;</span> <span class="mi">1342</span> <span class="ow">and</span>
+                <span class="n">event</span><span class="o">.</span><span class="n">y</span> <span class="o">&gt;</span> <span class="mi">12</span> <span class="ow">and</span> <span class="n">event</span><span class="o">.</span><span class="n">y</span> <span class="o">&lt;</span> <span class="mi">68</span><span class="p">):</span>
+                <span class="n">nt</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">txt</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">mask</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">)):</span>
+                    <span class="n">t1</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">mask</span><span class="p">[</span><span class="n">nt</span><span class="p">])</span> <span class="o">+</span> <span class="n">barytime0</span>
+                    <span class="n">t2</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">mask</span><span class="p">[</span><span class="n">nt</span><span class="o">+</span><span class="mi">1</span><span class="p">])</span> <span class="o">+</span> <span class="n">barytime0</span>
+                    <span class="k">if</span> <span class="n">t1</span> <span class="o">&lt;</span> <span class="mf">2.4e6</span><span class="p">:</span> <span class="n">t1</span> <span class="o">+=</span> <span class="mf">2.4e6</span>
+                    <span class="k">if</span> <span class="n">t2</span> <span class="o">&lt;</span> <span class="mf">2.4e6</span><span class="p">:</span> <span class="n">t2</span> <span class="o">+=</span> <span class="mf">2.4e6</span>
+                    <span class="n">txt</span> <span class="o">+=</span> <span class="nb">str</span><span class="p">(</span><span class="n">t1</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;,&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">t2</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+                    <span class="n">nt</span> <span class="o">+=</span> <span class="mi">2</span>
+                <span class="n">txt</span> <span class="o">=</span> <span class="n">txt</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">+</span> <span class="n">txt</span><span class="p">)</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">disconnect</span><span class="p">(</span><span class="n">aid</span><span class="p">)</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">disconnect</span><span class="p">(</span><span class="n">bid</span><span class="p">)</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">disconnect</span><span class="p">(</span><span class="n">cid</span><span class="p">)</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">disconnect</span><span class="p">(</span><span class="n">did</span><span class="p">)</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">disconnect</span><span class="p">(</span><span class="n">eid</span><span class="p">)</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">disconnect</span><span class="p">(</span><span class="n">fid</span><span class="p">)</span>
+                <span class="n">plotlc</span><span class="p">()</span>
+
+<span class="c1"># -----------------------------------------------------------</span>
+<span class="c1"># left-click create time ranges</span>
+
+<span class="k">def</span> <span class="nf">clicker6</span><span class="p">(</span><span class="n">event</span><span class="p">):</span>
+
+    <span class="k">global</span> <span class="n">mask</span><span class="p">,</span> <span class="n">aid</span><span class="p">,</span> <span class="n">bid</span><span class="p">,</span> <span class="n">cid</span><span class="p">,</span> <span class="n">did</span><span class="p">,</span> <span class="n">eid</span><span class="p">,</span> <span class="n">fid</span>
+
+    <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">inaxes</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">button</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">x</span> <span class="o">&gt;</span> <span class="mi">83</span> <span class="ow">and</span> <span class="n">event</span><span class="o">.</span><span class="n">x</span> <span class="o">&lt;</span> <span class="mi">1337</span> <span class="ow">and</span>
+                <span class="n">event</span><span class="o">.</span><span class="n">y</span> <span class="o">&gt;</span> <span class="mi">122</span> <span class="ow">and</span> <span class="n">event</span><span class="o">.</span><span class="n">y</span> <span class="o">&lt;</span> <span class="mi">558</span><span class="p">):</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">mask</span><span class="p">)</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">mask</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">xdata</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">xdata</span> <span class="o">&gt;</span> <span class="n">mask</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
+                        <span class="n">mask</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">xdata</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">mask</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mask</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+                        <span class="n">mask</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">xdata</span>
+                <span class="n">plotlc</span><span class="p">()</span>
+
+<span class="k">def</span> <span class="nf">keprange_main</span><span class="p">():</span>
+    <span class="kn">import</span> <span class="nn">argparse</span>
+    <span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">(</span>
+             <span class="n">description</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;Interactively define and store time ranges via a&#39;</span>
+                          <span class="s1">&#39; GUI&#39;</span><span class="p">),</span>
+             <span class="n">formatter_class</span><span class="o">=</span><span class="n">PyKEArgumentHelpFormatter</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;infile&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Name of input file&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--outfile&#39;</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;Name of ASCII file to output time ranges.&#39;</span>
+                              <span class="s1">&#39; If None, outfile is infile-keprange.&#39;</span><span class="p">),</span>
+                        <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--datacol&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s1">&#39;SAP_FLUX&#39;</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Name of diagnostic FITS column&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--rinfile&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Name of input ASCII time ranges file&#39;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--overwrite&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_true&#39;</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Overwrite output file?&#39;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--verbose&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_true&#39;</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Write to a log file?&#39;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--logfile&#39;</span><span class="p">,</span> <span class="s1">&#39;-l&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Name of ascii log file&#39;</span><span class="p">,</span>
+                        <span class="n">default</span><span class="o">=</span><span class="s1">&#39;keprange.log&#39;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s1">&#39;logfile&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">)</span>
+    <span class="n">args</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">()</span>
+    <span class="n">keprange</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">infile</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">outfile</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">datacol</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">rinfile</span><span class="p">,</span>
+             <span class="n">args</span><span class="o">.</span><span class="n">overwrite</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">verbose</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">logfile</span><span class="p">)</span>
+</pre></div>
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright PyKE Developers and Contributors.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'3.0.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

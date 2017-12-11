@@ -210,11 +210,45 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="kepconvert-convert-kepler-fits-time-series-to-or-from-a-different-file-format">
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast,
+.nboutput.nblast {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast + .nbinput {
+    margin-top: -19px;
+}
+
+/* nice headers on first paragraph of info/warning boxes */
+.admonition .first {
+    margin: -12px;
+    padding: 6px 12px;
+    margin-bottom: 12px;
+    color: #fff;
+    line-height: 1;
+    display: block;
+}
+.admonition.warning .first {
+    background: #f0b37e;
+}
+.admonition.note .first {
+    background: #6ab0de;
+}
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+</style>
+<div class="section" id="kepconvert-convert-kepler-fits-time-series-to-or-from-a-different-file-format">
 <h1><strong>kepconvert</strong>: convert Kepler FITS time series to or from a different file format<a class="headerlink" href="#kepconvert-convert-kepler-fits-time-series-to-or-from-a-different-file-format" title="Permalink to this headline">¶</a></h1>
 <dl class="function">
 <dt id="pyke.kepconvert.kepconvert">
-<code class="descclassname">pyke.kepconvert.</code><code class="descname">kepconvert</code><span class="sig-paren">(</span><em>infile</em>, <em>conversion</em>, <em>columns</em>, <em>timeformat='jd'</em>, <em>outfile=None</em>, <em>baddata=True</em>, <em>overwrite=False</em>, <em>verbose=False</em>, <em>logfile='kepconvert.log'</em><span class="sig-paren">)</span><a class="headerlink" href="#pyke.kepconvert.kepconvert" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">pyke.kepconvert.</code><code class="descname">kepconvert</code><span class="sig-paren">(</span><em>infile</em>, <em>conversion</em>, <em>columns</em>, <em>timeformat='jd'</em>, <em>outfile=None</em>, <em>baddata=True</em>, <em>overwrite=False</em>, <em>verbose=False</em>, <em>logfile='kepconvert.log'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyke/kepconvert.html#kepconvert"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyke.kepconvert.kepconvert" title="Permalink to this definition">¶</a></dt>
 <dd><p>kepconvert – Convert Kepler FITS time series to or from a different file
 format</p>
 <p>The Kepler PyRAF tasks perform exclusively upon a standardized FITS file

@@ -1,0 +1,615 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>pyke.kepbls &mdash; PyKE 3.0.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../genindex.html"/>
+        <link rel="search" title="Search" href="../../search.html"/>
+    <link rel="top" title="PyKE 3.0.0 documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> PyKE
+          
+
+          
+            
+            <img src="../../_static/pyke-white.png" class="logo" />
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                3.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/ipython_notebooks/whatsnew31.html">What’s new in PyKE 3.1?</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart.html">Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../overview.html">PyKE tasks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../citing.html">Citing</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/index.html">Photometry tutorials</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">PyKE</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>pyke.kepbls</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pyke.kepbls</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">.utils</span> <span class="k">import</span> <span class="n">PyKEArgumentHelpFormatter</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">kepio</span><span class="p">,</span> <span class="n">kepmsg</span><span class="p">,</span> <span class="n">kepkey</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">copy</span> <span class="k">import</span> <span class="n">copy</span>
+<span class="kn">from</span> <span class="nn">scipy</span> <span class="k">import</span> <span class="n">stats</span>
+<span class="kn">from</span> <span class="nn">astropy.io</span> <span class="k">import</span> <span class="n">fits</span> <span class="k">as</span> <span class="n">pyfits</span>
+<span class="kn">from</span> <span class="nn">matplotlib</span> <span class="k">import</span> <span class="n">pyplot</span> <span class="k">as</span> <span class="n">plt</span>
+<span class="kn">from</span> <span class="nn">tqdm</span> <span class="k">import</span> <span class="n">tqdm</span>
+
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;kepbls&#39;</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="kepbls"><a class="viewcode-back" href="../../api/kepbls.html#pyke.kepbls.kepbls">[docs]</a><span class="k">def</span> <span class="nf">kepbls</span><span class="p">(</span><span class="n">infile</span><span class="p">,</span> <span class="n">outfile</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">datacol</span><span class="o">=</span><span class="s1">&#39;DETSAP_FLUX&#39;</span><span class="p">,</span>
+           <span class="n">errcol</span><span class="o">=</span><span class="s1">&#39;DETSAP_FLUX_ERR&#39;</span><span class="p">,</span> <span class="n">minper</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">maxper</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span> <span class="n">mindur</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
+           <span class="n">maxdur</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span> <span class="n">nsearch</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">nbins</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">plot</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+           <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">logfile</span><span class="o">=</span><span class="s1">&#39;kepbls.log&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    kepbls -- Perform Box-Least Square searches for periodic exoplanet transits</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    infile : str</span>
+<span class="sd">        The name of a standard format FITS file containing a Kepler light</span>
+<span class="sd">        curve within the first data extension. The data in **infile** will</span>
+<span class="sd">        typically have been flattened by ``kepflatten``. Multiple quarters can</span>
+<span class="sd">        be searched by appending light curves within a single file using</span>
+<span class="sd">        ``kepstitch``.</span>
+<span class="sd">    outfile : str</span>
+<span class="sd">        The name of the output FITS file. **outfile** will be a direct copy of</span>
+<span class="sd">        **infile** but with a new extension called BLS appended containing a</span>
+<span class="sd">        table of i) trial periods, PERIOD, ii) a reference Barycentric Julian</span>
+<span class="sd">        Date (BJD) corresponding the center of the most transit-like structure</span>
+<span class="sd">        in the folded light curve at the trial period, BJD0, iii) a duration</span>
+<span class="sd">        (in hours) corresponding the width of the most transit-like structure</span>
+<span class="sd">        in the folded light curve at the trial period, DURATION, and iv) the</span>
+<span class="sd">        normalized signal residue of the most transit-like structure in the</span>
+<span class="sd">        folded light curve at the trial period, SIG_RES. The definition of</span>
+<span class="sd">        SIG_RES is provided in equation 5 of Kovacs, Zucker and Mazeh (2002).</span>
+<span class="sd">        The maximum calculated value of SIG_RES and the corresponding trial</span>
+<span class="sd">        period, BJD epoch and transit duration are stored as keywords in the</span>
+<span class="sd">        BLS extension called SIGNRES, PERIOD, BJD0, TRANSDUR.</span>
+<span class="sd">    datacol : str</span>
+<span class="sd">        The column name containing data stored within FITS extension 1 of</span>
+<span class="sd">        **infile**. This data will be searched for outliers. Typically this</span>
+<span class="sd">        name is DETSAP_FLUX (Detrended Simple Aperture Photometry fluxes). This</span>
+<span class="sd">        version of the data is computed by the task ``kepflatten``.</span>
+<span class="sd">        Other flux data will be accepted - SAP_FLUX (Simple Aperture</span>
+<span class="sd">        Photometry), PDCSAP_FLUX (Pre-search Data Conditioning fluxes) or</span>
+<span class="sd">        CBVSAP_FLUX (SAP_FLUX corrected for systematic artifacts by the PyKE</span>
+<span class="sd">        tool kepcotrend). However neither of these three options are</span>
+<span class="sd">        recommended because the flux data contain either astrophysical</span>
+<span class="sd">        variability, systematic variability, or both.</span>
+<span class="sd">    errcol : str</span>
+<span class="sd">        The column name containing photometric 1-sigma errors stored within</span>
+<span class="sd">        extension 1 of infile. Typically this name is DETSAP_FLUX_ERR.</span>
+<span class="sd">    minper : float [days]</span>
+<span class="sd">        The shortest trial period on which to search for transits.</span>
+<span class="sd">    maxper : float [days]</span>
+<span class="sd">        The longest trial period on which to search for transits.</span>
+<span class="sd">    mindur : float [hours]</span>
+<span class="sd">        For each trial period, the BLS function will be fit to the data by</span>
+<span class="sd">        i) iterating upon the epoch of mid-transit in the model, and</span>
+<span class="sd">        ii) adjusting the width of the modeled transit. The width is adjusted</span>
+<span class="sd">        systematically in step sizes equaling the cadence of the input data.</span>
+<span class="sd">        **mindur** provides a lower limit to the range of transit widths</span>
+<span class="sd">        tested.</span>
+<span class="sd">    maxdur : float [hours]</span>
+<span class="sd">        Provides an upper limit to the range of transit widths tested over each</span>
+<span class="sd">        trial period.</span>
+<span class="sd">    nsearch : int</span>
+<span class="sd">        The number of trial periods to search between the lower bound</span>
+<span class="sd">        **minper** and the upper bound **maxper**.</span>
+<span class="sd">    nbins : int</span>
+<span class="sd">        Before the BLS transit model is fit to the data, data are folded upon</span>
+<span class="sd">        the trail orbital period and then phase binned by calculating the mean</span>
+<span class="sd">        flux level within each bin interval. **nbins** is the number of phase bins</span>
+<span class="sd">        in which to store the data before each fit.</span>
+<span class="sd">    plot : bool</span>
+<span class="sd">        Plot the calculated Normalized Signal Residue as a function of trial</span>
+<span class="sd">        orbital period?</span>
+<span class="sd">    overwrite : bool</span>
+<span class="sd">        Overwrite the output file? If overwrite is False and an existing file</span>
+<span class="sd">        has the same name as outfile then the task will stop with an error.</span>
+<span class="sd">    verbose : bool</span>
+<span class="sd">        Print informative messages and warnings to the shell and logfile?</span>
+<span class="sd">    logfile : str</span>
+<span class="sd">        Name of the logfile containing error and warning messages.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+
+<span class="sd">    After using ``kepflatten`` to remove low frequency variability in ``kplr011904151-2009350155506_llc.fits``,</span>
+<span class="sd">    we can use the output, ``kepflatten.fits``, into ``kepbls``, i.e.,</span>
+
+<span class="sd">    .. code-block:: bash</span>
+
+<span class="sd">        $ kepbls kepflatten.fits --datacol DETSAP_FLUX --errcol DETSAP_FLUX_ERR</span>
+<span class="sd">        --minper 0.8 --maxper 1.0 --mindur 1.0 --maxdur 12.0 --nsearch 1000</span>
+<span class="sd">        --nbins 1000 --plot --verbose</span>
+
+<span class="sd">             Best trial period = 0.8375062346458435 days</span>
+<span class="sd">           Time of mid-transit = BJD 2455093.5457274746</span>
+<span class="sd">              Transit duration = 1.7099086232483387 hours</span>
+<span class="sd">        Maximum signal residue = 4.487271046981536e-06</span>
+
+<span class="sd">    .. image:: ../_static/images/api/kepbls.png</span>
+<span class="sd">        :align: center</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># log the call</span>
+    <span class="k">if</span> <span class="n">outfile</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">outfile</span> <span class="o">=</span> <span class="n">infile</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;-</span><span class="si">{}</span><span class="s2">.fits&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">__all__</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+    <span class="n">hashline</span> <span class="o">=</span> <span class="s1">&#39;--------------------------------------------------------------&#39;</span>
+    <span class="n">kepmsg</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">logfile</span><span class="p">,</span> <span class="n">hashline</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+    <span class="n">call</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;KEPBLS -- &#39;</span>
+            <span class="o">+</span> <span class="s1">&#39; infile=</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">infile</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s1">&#39; outfile=</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">outfile</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s1">&#39; datacol=</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">datacol</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s1">&#39; errcol=</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">errcol</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s1">&#39; minper=</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">minper</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s1">&#39; maxper=</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">maxper</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s1">&#39; mindur=</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">mindur</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s1">&#39; maxdur=</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">maxdur</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s1">&#39; nsearch=</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">nsearch</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s1">&#39; nbins=</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">nbins</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s1">&#39; plot=</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">plot</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s1">&#39; overwrite=</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">overwrite</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s1">&#39; verbose=</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">verbose</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s1">&#39; logfile=</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">logfile</span><span class="p">))</span>
+
+    <span class="n">kepmsg</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">logfile</span><span class="p">,</span> <span class="n">call</span><span class="o">+</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+
+    <span class="c1"># start time</span>
+    <span class="n">kepmsg</span><span class="o">.</span><span class="n">clock</span><span class="p">(</span><span class="s1">&#39;KEPBLS started at&#39;</span><span class="p">,</span> <span class="n">logfile</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+
+    <span class="c1"># is duration greater than one bin in the phased light curve?</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">nbins</span> <span class="o">*</span> <span class="n">maxdur</span> <span class="o">/</span> <span class="mf">24.0</span> <span class="o">/</span> <span class="n">maxper</span> <span class="o">&gt;</span> <span class="mf">1.0</span><span class="p">:</span>
+        <span class="n">message</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;WARNING -- KEPBLS: </span><span class="si">{}</span><span class="s1">&#39;</span>
+                   <span class="s1">&#39; hours transit duration &lt; 1 phase bin when P = </span><span class="si">{}</span><span class="s1"> days.&#39;</span>
+                   <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">maxdur</span><span class="p">,</span> <span class="n">maxper</span><span class="p">))</span>
+        <span class="n">kepmsg</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="n">logfile</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">overwrite</span><span class="p">:</span>
+        <span class="n">kepio</span><span class="o">.</span><span class="n">overwrite</span><span class="p">(</span><span class="n">outfile</span><span class="p">,</span> <span class="n">logfile</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">kepio</span><span class="o">.</span><span class="n">fileexists</span><span class="p">(</span><span class="n">outfile</span><span class="p">):</span>
+        <span class="n">message</span> <span class="o">=</span> <span class="s1">&#39;ERROR -- KEPBLS: </span><span class="si">{}</span><span class="s1"> exists. Use overwrite=True&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">outfile</span><span class="p">)</span>
+        <span class="n">kepmsg</span><span class="o">.</span><span class="n">err</span><span class="p">(</span><span class="n">logfile</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+
+    <span class="c1"># open input file</span>
+    <span class="n">instr</span> <span class="o">=</span> <span class="n">pyfits</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">infile</span><span class="p">,</span> <span class="s1">&#39;readonly&#39;</span><span class="p">)</span>
+    <span class="n">tstart</span><span class="p">,</span> <span class="n">tstop</span><span class="p">,</span> <span class="n">bjdref</span><span class="p">,</span> <span class="n">cadence</span> <span class="o">=</span> <span class="n">kepio</span><span class="o">.</span><span class="n">timekeys</span><span class="p">(</span><span class="n">instr</span><span class="p">,</span> <span class="n">infile</span><span class="p">,</span> <span class="n">logfile</span><span class="p">,</span>
+                                                    <span class="n">verbose</span><span class="p">)</span>
+    <span class="c1"># fudge non-compliant FITS keywords with no values</span>
+    <span class="n">instr</span> <span class="o">=</span> <span class="n">kepkey</span><span class="o">.</span><span class="n">emptykeys</span><span class="p">(</span><span class="n">instr</span><span class="p">,</span> <span class="n">infile</span><span class="p">,</span> <span class="n">logfile</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+    <span class="c1"># read table structure</span>
+    <span class="n">table</span> <span class="o">=</span> <span class="n">kepio</span><span class="o">.</span><span class="n">readfitstab</span><span class="p">(</span><span class="n">infile</span><span class="p">,</span> <span class="n">instr</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">logfile</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+    <span class="c1"># read table columns</span>
+    <span class="n">intime</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">table</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="s1">&#39;time&#39;</span><span class="p">))</span> <span class="o">+</span> <span class="n">bjdref</span>
+    <span class="n">indata</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">table</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">datacol</span><span class="p">))</span>
+    <span class="n">inerr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">table</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">errcol</span><span class="p">))</span>
+    <span class="c1"># filter input data table</span>
+    <span class="n">good_data_mask</span> <span class="o">=</span> <span class="p">(</span><span class="n">intime</span> <span class="o">==</span> <span class="n">intime</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">indata</span> <span class="o">==</span> <span class="n">indata</span><span class="p">)</span>
+    <span class="n">indata</span> <span class="o">=</span> <span class="n">indata</span><span class="p">[</span><span class="n">good_data_mask</span><span class="p">]</span>
+    <span class="n">intime</span> <span class="o">=</span> <span class="n">intime</span><span class="p">[</span><span class="n">good_data_mask</span><span class="p">]</span>
+    <span class="n">inerr</span> <span class="o">=</span> <span class="n">inerr</span><span class="p">[</span><span class="n">good_data_mask</span><span class="p">]</span>
+
+    <span class="c1"># test whether the period range is sensible</span>
+    <span class="n">tr</span> <span class="o">=</span> <span class="n">intime</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">intime</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">maxper</span> <span class="o">&gt;</span> <span class="n">tr</span><span class="p">:</span>
+        <span class="n">message</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;ERROR -- KEPBLS: maxper is larger than the time range of&#39;</span>
+                   <span class="s1">&#39; the input data&#39;</span><span class="p">)</span>
+        <span class="n">kepmsg</span><span class="o">.</span><span class="n">err</span><span class="p">(</span><span class="n">logfile</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+
+    <span class="c1"># prepare time series</span>
+    <span class="n">time_arr</span> <span class="o">=</span> <span class="n">intime</span> <span class="o">-</span> <span class="n">intime</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">flux_arr</span> <span class="o">=</span> <span class="n">indata</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">nanmean</span><span class="p">(</span><span class="n">indata</span><span class="p">)</span>
+
+    <span class="c1"># start period search</span>
+    <span class="n">srMax</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([],</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float32&#39;</span><span class="p">)</span>
+    <span class="n">transitDuration</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([],</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float32&#39;</span><span class="p">)</span>
+    <span class="n">transitPhase</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([],</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float32&#39;</span><span class="p">)</span>
+    <span class="n">dPeriod</span> <span class="o">=</span> <span class="p">(</span><span class="n">maxper</span> <span class="o">-</span> <span class="n">minper</span><span class="p">)</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="n">nsearch</span><span class="p">)</span>
+    <span class="n">trialPeriods</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">minper</span><span class="p">,</span> <span class="n">maxper</span> <span class="o">+</span> <span class="n">dPeriod</span><span class="p">,</span> <span class="n">dPeriod</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float32&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">trialPeriod</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="n">trialPeriods</span><span class="p">):</span>
+        <span class="n">srMax</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">srMax</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+        <span class="n">transitDuration</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">transitDuration</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
+        <span class="n">transitPhase</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">transitPhase</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
+        <span class="n">trialFrequency</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="n">trialPeriod</span>
+
+        <span class="c1"># minimum and maximum transit durations in quantized phase units</span>
+        <span class="n">duration1</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">nbins</span> <span class="o">*</span> <span class="n">mindur</span> <span class="o">/</span> <span class="mf">24.0</span> <span class="o">/</span> <span class="n">trialPeriod</span><span class="p">),</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">duration2</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">nbins</span> <span class="o">*</span> <span class="n">maxdur</span> <span class="o">/</span> <span class="mf">24.0</span> <span class="o">/</span> <span class="n">trialPeriod</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
+                        <span class="n">duration1</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+
+        <span class="c1"># 30minutes in quantized phase units</span>
+        <span class="n">halfHour</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="mf">0.02083333</span> <span class="o">/</span> <span class="n">trialPeriod</span> <span class="o">*</span> <span class="n">nbins</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+
+        <span class="c1"># compute folded time series with trial period</span>
+        <span class="n">work4</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">nbins</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float32&#39;</span><span class="p">)</span>
+        <span class="n">work5</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">nbins</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float32&#39;</span><span class="p">)</span>
+        <span class="n">phase</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(((</span><span class="n">time_arr</span> <span class="o">*</span> <span class="n">trialFrequency</span><span class="p">)</span>
+                         <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">time_arr</span> <span class="o">*</span> <span class="n">trialFrequency</span><span class="p">))</span> <span class="o">*</span> <span class="n">nbins</span><span class="p">,</span>
+                         <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;int&#39;</span><span class="p">)</span>
+        <span class="n">ptuple</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">phase</span><span class="p">,</span> <span class="n">flux_arr</span><span class="p">,</span> <span class="n">inerr</span><span class="p">])</span>
+        <span class="n">ptuple</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">rot90</span><span class="p">(</span><span class="n">ptuple</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+        <span class="n">phsort</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">ptuple</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">ph</span><span class="p">:</span> <span class="n">ph</span><span class="p">[</span><span class="mi">2</span><span class="p">]))</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nbins</span><span class="p">):</span>
+            <span class="n">elements</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="n">phsort</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="nb">float</span><span class="p">(</span><span class="n">i</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">work4</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nanmean</span><span class="p">(</span><span class="n">phsort</span><span class="p">[</span><span class="n">elements</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+            <span class="n">work5</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">phsort</span><span class="p">[</span><span class="n">elements</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="mi">2</span><span class="p">))</span>
+                        <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">elements</span><span class="p">)))</span>
+
+        <span class="c1"># extend the work arrays beyond nbins by wrapping</span>
+        <span class="n">work4</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">work4</span><span class="p">,</span> <span class="n">work4</span><span class="p">[:</span><span class="n">duration2</span><span class="p">])</span>
+        <span class="n">work5</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">work5</span><span class="p">,</span> <span class="n">work5</span><span class="p">[:</span><span class="n">duration2</span><span class="p">])</span>
+
+        <span class="c1"># calculate weights of folded light curve points</span>
+        <span class="n">sigmaSum</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nansum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">work5</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">))</span>
+        <span class="n">omega</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">work5</span><span class="p">,</span><span class="o">-</span><span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="n">sigmaSum</span>
+
+        <span class="c1"># calculate weighted phased light curve</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">omega</span> <span class="o">*</span> <span class="n">work4</span>
+
+        <span class="c1"># iterate through trial period phase</span>
+        <span class="k">for</span> <span class="n">i1</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nbins</span><span class="p">):</span>
+            <span class="c1"># iterate through transit durations</span>
+            <span class="k">for</span> <span class="n">duration</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">duration1</span><span class="p">,</span> <span class="n">duration2</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">halfHour</span><span class="p">)):</span>
+                <span class="c1"># calculate maximum signal residue</span>
+                <span class="n">i2</span> <span class="o">=</span> <span class="n">i1</span> <span class="o">+</span> <span class="n">duration</span>
+                <span class="n">sr1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="n">i1</span><span class="p">:</span><span class="n">i2</span><span class="p">],</span> <span class="mi">2</span><span class="p">))</span>
+                <span class="n">sr2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">omega</span><span class="p">[</span><span class="n">i1</span><span class="p">:</span><span class="n">i2</span><span class="p">])</span>
+                <span class="n">sr</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">sr1</span> <span class="o">/</span> <span class="p">(</span><span class="n">sr2</span> <span class="o">*</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">-</span> <span class="n">sr2</span><span class="p">)))</span>
+                <span class="k">if</span> <span class="n">sr</span> <span class="o">&gt;</span> <span class="n">srMax</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
+                    <span class="n">srMax</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">sr</span>
+                    <span class="n">transitDuration</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">duration</span><span class="p">)</span>
+                    <span class="n">transitPhase</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">((</span><span class="n">i1</span> <span class="o">+</span> <span class="n">i2</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+
+    <span class="c1"># normalize maximum signal residue curve</span>
+    <span class="n">bestSr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">srMax</span><span class="p">)</span>
+    <span class="n">bestTrial</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="n">srMax</span> <span class="o">==</span> <span class="n">bestSr</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">srMax</span> <span class="o">/=</span> <span class="n">bestSr</span>
+    <span class="n">transitDuration</span> <span class="o">*=</span> <span class="n">trialPeriods</span> <span class="o">/</span> <span class="mf">24.0</span>
+    <span class="n">BJD0</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">transitPhase</span> <span class="o">*</span> <span class="n">trialPeriods</span> <span class="o">/</span> <span class="n">nbins</span><span class="p">,</span><span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float64&#39;</span><span class="p">)</span>
+            <span class="o">+</span> <span class="n">intime</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="mf">2454833.0</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+
+    <span class="c1"># clean up x-axis unit</span>
+    <span class="n">ptime</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="n">trialPeriods</span><span class="p">)</span>
+    <span class="n">xlab</span> <span class="o">=</span> <span class="s1">&#39;Trial Period (days)&#39;</span>
+
+    <span class="c1"># clean up y-axis units</span>
+    <span class="n">pout</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="n">srMax</span><span class="p">)</span>
+    <span class="n">ylab</span> <span class="o">=</span> <span class="s1">&#39;Normalized Signal Residue&#39;</span>
+
+    <span class="c1"># data limits</span>
+    <span class="n">xmin</span> <span class="o">=</span> <span class="n">ptime</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+    <span class="n">xmax</span> <span class="o">=</span> <span class="n">ptime</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+    <span class="n">ymin</span> <span class="o">=</span> <span class="n">pout</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+    <span class="n">ymax</span> <span class="o">=</span> <span class="n">pout</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+    <span class="n">xr</span> <span class="o">=</span> <span class="n">xmax</span> <span class="o">-</span> <span class="n">xmin</span>
+    <span class="n">yr</span> <span class="o">=</span> <span class="n">ymax</span> <span class="o">-</span> <span class="n">ymin</span>
+    <span class="n">ptime</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">ptime</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="n">ptime</span><span class="p">[</span><span class="mi">0</span><span class="p">]])</span>
+    <span class="n">ptime</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ptime</span><span class="p">,</span> <span class="p">[</span><span class="n">ptime</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]])</span>
+    <span class="n">pout</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">pout</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">])</span>
+    <span class="n">pout</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pout</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+
+    <span class="c1"># plot light curve</span>
+    <span class="k">if</span> <span class="n">plot</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">[</span><span class="mi">16</span><span class="p">,</span> <span class="mi">8</span><span class="p">])</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">clf</span><span class="p">()</span>
+        <span class="c1"># plot data</span>
+        <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">axes</span><span class="p">([</span><span class="mf">0.06</span><span class="p">,</span><span class="mf">0.10</span><span class="p">,</span><span class="mf">0.93</span><span class="p">,</span><span class="mf">0.87</span><span class="p">])</span>
+        <span class="c1"># force tick labels to be absolute rather than relative</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_major_formatter</span><span class="p">(</span><span class="n">plt</span><span class="o">.</span><span class="n">ScalarFormatter</span><span class="p">(</span><span class="n">useOffset</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">set_major_formatter</span><span class="p">(</span><span class="n">plt</span><span class="o">.</span><span class="n">ScalarFormatter</span><span class="p">(</span><span class="n">useOffset</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
+
+        <span class="c1"># rotate y labels by 90 deg</span>
+        <span class="n">labels</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">get_yticklabels</span><span class="p">()</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">setp</span><span class="p">(</span><span class="n">labels</span><span class="p">,</span> <span class="s1">&#39;rotation&#39;</span><span class="p">,</span> <span class="mi">90</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ptime</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">pout</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;#0000ff&#39;</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;-&#39;</span><span class="p">,</span>
+                 <span class="n">linewidth</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span><span class="n">ptime</span><span class="p">,</span> <span class="n">pout</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;#ffff00&#39;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.2</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="n">xlab</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;color&#39;</span> <span class="p">:</span> <span class="s1">&#39;k&#39;</span><span class="p">})</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="n">ylab</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;color&#39;</span> <span class="p">:</span> <span class="s1">&#39;k&#39;</span><span class="p">})</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">()</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">xlim</span><span class="p">(</span><span class="n">xmin</span><span class="o">-</span><span class="n">xr</span><span class="o">*</span><span class="mf">0.01</span><span class="p">,</span> <span class="n">xmax</span><span class="o">+</span><span class="n">xr</span><span class="o">*</span><span class="mf">0.01</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">ymin</span> <span class="o">&gt;=</span> <span class="mf">0.0</span><span class="p">:</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">(</span><span class="n">ymin</span><span class="o">-</span><span class="n">yr</span><span class="o">*</span><span class="mf">0.01</span><span class="p">,</span> <span class="n">ymax</span><span class="o">+</span><span class="n">yr</span><span class="o">*</span><span class="mf">0.01</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">(</span><span class="mf">1.0e-10</span><span class="p">,</span> <span class="n">ymax</span><span class="o">+</span><span class="n">yr</span><span class="o">*</span><span class="mf">0.01</span><span class="p">)</span>
+
+        <span class="c1"># render plot</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+    <span class="c1"># append new BLS data extension to the output file</span>
+    <span class="n">col1</span> <span class="o">=</span> <span class="n">pyfits</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;PERIOD&#39;</span><span class="p">,</span><span class="nb">format</span><span class="o">=</span><span class="s1">&#39;E&#39;</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;days&#39;</span><span class="p">,</span>
+                         <span class="n">array</span><span class="o">=</span><span class="n">trialPeriods</span><span class="p">)</span>
+    <span class="n">col2</span> <span class="o">=</span> <span class="n">pyfits</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;BJD0&#39;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;D&#39;</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;BJD - 2454833&#39;</span><span class="p">,</span>
+                         <span class="n">array</span><span class="o">=</span><span class="n">BJD0</span><span class="p">)</span>
+    <span class="n">col3</span> <span class="o">=</span> <span class="n">pyfits</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;DURATION&#39;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;E&#39;</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;hours&#39;</span><span class="p">,</span>
+                         <span class="n">array</span><span class="o">=</span><span class="n">transitDuration</span><span class="p">)</span>
+    <span class="n">col4</span> <span class="o">=</span> <span class="n">pyfits</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;SIG_RES&#39;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;E&#39;</span><span class="p">,</span> <span class="n">array</span><span class="o">=</span><span class="n">srMax</span><span class="p">)</span>
+    <span class="n">cols</span> <span class="o">=</span> <span class="n">pyfits</span><span class="o">.</span><span class="n">ColDefs</span><span class="p">([</span><span class="n">col1</span><span class="p">,</span> <span class="n">col2</span><span class="p">,</span> <span class="n">col3</span><span class="p">,</span> <span class="n">col4</span><span class="p">])</span>
+    <span class="n">instr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pyfits</span><span class="o">.</span><span class="n">BinTableHDU</span><span class="o">.</span><span class="n">from_columns</span><span class="p">(</span><span class="n">cols</span><span class="p">))</span>
+    <span class="n">instr</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">header</span><span class="o">.</span><span class="n">cards</span><span class="p">[</span><span class="s1">&#39;TTYPE1&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">comment</span> <span class="o">=</span> <span class="s1">&#39;column title: trial period&#39;</span>
+    <span class="n">instr</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">header</span><span class="o">.</span><span class="n">cards</span><span class="p">[</span><span class="s1">&#39;TTYPE2&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">comment</span> <span class="o">=</span> <span class="s1">&#39;column title: trial mid-transit zero-point&#39;</span>
+    <span class="n">instr</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">header</span><span class="o">.</span><span class="n">cards</span><span class="p">[</span><span class="s1">&#39;TTYPE3&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">comment</span> <span class="o">=</span> <span class="s1">&#39;column title: trial transit duration&#39;</span>
+    <span class="n">instr</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">header</span><span class="o">.</span><span class="n">cards</span><span class="p">[</span><span class="s1">&#39;TTYPE4&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">comment</span> <span class="o">=</span> <span class="s1">&#39;column title: normalized signal residue&#39;</span>
+    <span class="n">instr</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">header</span><span class="o">.</span><span class="n">cards</span><span class="p">[</span><span class="s1">&#39;TFORM1&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">comment</span> <span class="o">=</span> <span class="s1">&#39;column type: float32&#39;</span>
+    <span class="n">instr</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">header</span><span class="o">.</span><span class="n">cards</span><span class="p">[</span><span class="s1">&#39;TFORM2&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">comment</span> <span class="o">=</span> <span class="s1">&#39;column type: float64&#39;</span>
+    <span class="n">instr</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">header</span><span class="o">.</span><span class="n">cards</span><span class="p">[</span><span class="s1">&#39;TFORM3&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">comment</span> <span class="o">=</span> <span class="s1">&#39;column type: float32&#39;</span>
+    <span class="n">instr</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">header</span><span class="o">.</span><span class="n">cards</span><span class="p">[</span><span class="s1">&#39;TFORM4&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">comment</span> <span class="o">=</span> <span class="s1">&#39;column type: float32&#39;</span>
+    <span class="n">instr</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">header</span><span class="o">.</span><span class="n">cards</span><span class="p">[</span><span class="s1">&#39;TUNIT1&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">comment</span> <span class="o">=</span> <span class="s1">&#39;column units: days&#39;</span>
+    <span class="n">instr</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">header</span><span class="o">.</span><span class="n">cards</span><span class="p">[</span><span class="s1">&#39;TUNIT2&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">comment</span> <span class="o">=</span> <span class="s1">&#39;column units: BJD - 2454833&#39;</span>
+    <span class="n">instr</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">header</span><span class="o">.</span><span class="n">cards</span><span class="p">[</span><span class="s1">&#39;TUNIT3&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">comment</span> <span class="o">=</span> <span class="s1">&#39;column units: hours&#39;</span>
+    <span class="n">instr</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;EXTNAME&#39;</span> <span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;BLS&#39;</span><span class="p">,</span> <span class="s1">&#39;extension name&#39;</span><span class="p">)</span>
+    <span class="n">instr</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;PERIOD&#39;</span>  <span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">trialPeriods</span><span class="p">[</span><span class="n">bestTrial</span><span class="p">],</span> <span class="s1">&#39;most significant trial period [d]&#39;</span><span class="p">)</span>
+    <span class="n">instr</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;BJD0&#39;</span>    <span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">BJD0</span><span class="p">[</span><span class="n">bestTrial</span><span class="p">]</span> <span class="o">+</span> <span class="mf">2454833.0</span><span class="p">,</span> <span class="s1">&#39;time of mid-transit [BJD]&#39;</span><span class="p">)</span>
+    <span class="n">instr</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;TRANSDUR&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">transitDuration</span><span class="p">[</span><span class="n">bestTrial</span><span class="p">],</span> <span class="s1">&#39;transit duration [hours]&#39;</span><span class="p">)</span>
+    <span class="n">instr</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;SIGNRES&#39;</span> <span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">srMax</span><span class="p">[</span><span class="n">bestTrial</span><span class="p">]</span> <span class="o">*</span> <span class="n">bestSr</span><span class="p">,</span> <span class="s1">&#39;maximum signal residue&#39;</span><span class="p">)</span>
+    <span class="c1"># history keyword in output file</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Writing output file </span><span class="si">{}</span><span class="s2">...&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">outfile</span><span class="p">))</span>
+    <span class="n">kepkey</span><span class="o">.</span><span class="n">history</span><span class="p">(</span><span class="n">call</span><span class="p">,</span> <span class="n">instr</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">outfile</span><span class="p">,</span> <span class="n">logfile</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+    <span class="n">instr</span><span class="o">.</span><span class="n">writeto</span><span class="p">(</span><span class="n">outfile</span><span class="p">)</span>
+    <span class="c1"># close input file</span>
+    <span class="n">instr</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="c1"># print best trial period results</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;      Best trial period = </span><span class="si">{}</span><span class="s1"> days&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">trialPeriods</span><span class="p">[</span><span class="n">bestTrial</span><span class="p">]))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;    Time of mid-transit = BJD </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">BJD0</span><span class="p">[</span><span class="n">bestTrial</span><span class="p">]</span> <span class="o">+</span> <span class="mf">2454833.0</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;       Transit duration = </span><span class="si">{}</span><span class="s1"> hours&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">transitDuration</span><span class="p">[</span><span class="n">bestTrial</span><span class="p">]))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39; Maximum signal residue = </span><span class="si">{}</span><span class="s1"> </span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">srMax</span><span class="p">[</span><span class="n">bestTrial</span><span class="p">]</span> <span class="o">*</span> <span class="n">bestSr</span><span class="p">))</span>
+
+    <span class="c1"># end time</span>
+    <span class="n">kepmsg</span><span class="o">.</span><span class="n">clock</span><span class="p">(</span><span class="s1">&#39;KEPBLS completed at&#39;</span><span class="p">,</span> <span class="n">logfile</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span></div>
+
+<span class="k">def</span> <span class="nf">kepbls_main</span><span class="p">():</span>
+    <span class="kn">import</span> <span class="nn">argparse</span>
+    <span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">(</span>
+            <span class="n">description</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;Perform Box-Least Square searches for periodic&#39;</span>
+                         <span class="s1">&#39; exoplanet transits&#39;</span><span class="p">),</span>
+            <span class="n">formatter_class</span><span class="o">=</span><span class="n">PyKEArgumentHelpFormatter</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;infile&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Name of input file&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--outfile&#39;</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;Name of FITS file to output.&#39;</span>
+                              <span class="s1">&#39; If None, outfile is infile-kepbls.&#39;</span><span class="p">),</span>
+                        <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--datacol&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s1">&#39;DETSAP_FLUX&#39;</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Name of data column to plot&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--errcol&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s1">&#39;DETSAP_FLUX_ERR&#39;</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Name of data error column to plot&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--minper&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Minimum search period [days]&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--maxper&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mf">30.0</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Maximum search period [days]&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--mindur&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Minimum transit duration [hours]&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--maxdur&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mf">12.0</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Maximum transit duration [hours]&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--nsearch&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Number of test periods between minper and maxper&#39;</span><span class="p">,</span>
+                        <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--nbins&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Number of bins in the folded time series at any test period&#39;</span><span class="p">,</span>
+                        <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--plot&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_true&#39;</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Plot result?&#39;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--overwrite&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_true&#39;</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Overwrite output file?&#39;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--verbose&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_true&#39;</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Write to a log file?&#39;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--logfile&#39;</span><span class="p">,</span> <span class="s1">&#39;-l&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Name of ascii log file&#39;</span><span class="p">,</span>
+                        <span class="n">default</span><span class="o">=</span><span class="s1">&#39;kepbls.log&#39;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s1">&#39;logfile&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">)</span>
+    <span class="n">args</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">()</span>
+    <span class="n">kepbls</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">infile</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">outfile</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">datacol</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">errcol</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">minper</span><span class="p">,</span>
+           <span class="n">args</span><span class="o">.</span><span class="n">maxper</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">mindur</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">maxdur</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">nsearch</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">nbins</span><span class="p">,</span>
+           <span class="n">args</span><span class="o">.</span><span class="n">plot</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">overwrite</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">verbose</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">logfile</span><span class="p">)</span>
+</pre></div>
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright PyKE Developers and Contributors.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'3.0.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

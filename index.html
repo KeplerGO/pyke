@@ -36,7 +36,7 @@
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
     <link rel="top" title="PyKE 3.0.0 documentation" href="#"/>
-        <link rel="next" title="Quickstart" href="quickstart.html"/> 
+        <link rel="next" title="What’s new in PyKE 3.1?" href="tutorials/ipython_notebooks/whatsnew31.html"/> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
@@ -93,6 +93,9 @@
             
             
               <ul>
+<li class="toctree-l1"><a class="reference internal" href="tutorials/ipython_notebooks/whatsnew31.html">What’s new in PyKE 3.1?</a></li>
+</ul>
+<ul>
 <li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quickstart</a></li>
 <li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="overview.html">PyKE tasks</a></li>
@@ -164,14 +167,53 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="pyke-kepler-k2-tess-data-analysis-tools">
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast,
+.nboutput.nblast {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast + .nbinput {
+    margin-top: -19px;
+}
+
+/* nice headers on first paragraph of info/warning boxes */
+.admonition .first {
+    margin: -12px;
+    padding: 6px 12px;
+    margin-bottom: 12px;
+    color: #fff;
+    line-height: 1;
+    display: block;
+}
+.admonition.warning .first {
+    background: #f0b37e;
+}
+.admonition.note .first {
+    background: #6ab0de;
+}
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+</style>
+<div class="section" id="pyke-kepler-k2-tess-data-analysis-tools">
 <h1>PyKE: Kepler, K2 &amp; TESS Data Analysis Tools<a class="headerlink" href="#pyke-kepler-k2-tess-data-analysis-tools" title="Permalink to this headline">¶</a></h1>
 <p>Welcome to the PyKE documentation!</p>
 <p>PyKE is a set of data analysis tools which offer a user-friendly way to inspect
 and analyze pixels and lightcurves obtained by NASA’s Kepler, K2, and TESS
 missions.</p>
-<div class="section" id="whatsnew-3-0">
-<h2><a class="reference internal" href="whatsnew/3.0.html"><span class="doc">What’s new in PyKE 3.0?</span></a><a class="headerlink" href="#whatsnew-3-0" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="whatsnew-3-1">
+<h2><a class="reference internal" href="whatsnew/3.1.html"><span class="doc">Changelog for PyKE 3.1 (December 2017)</span></a><a class="headerlink" href="#whatsnew-3-1" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="tutorials/ipython_notebooks/whatsnew31.html">What’s new in PyKE 3.1?</a></li>
+</ul>
+</div>
 </div>
 <div class="section" id="documentation">
 <span id="user-docs"></span><h2>Documentation<a class="headerlink" href="#documentation" title="Permalink to this headline">¶</a></h2>
@@ -191,9 +233,9 @@ missions.</p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="tutorials/index.html">Photometry tutorials</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="tutorials/aperture-photometry-in-k2.html">Example 1: Aperture photometry on a K2 target</a></li>
-<li class="toctree-l2"><a class="reference internal" href="tutorials/psf-photometry-in-k2.html">Example 2: PSF photometry in a K2 cluster</a></li>
 <li class="toctree-l2"><a class="reference internal" href="tutorials/separating-a-background-eb.html">Example 3: Separating a background EB from a foreground star</a></li>
 <li class="toctree-l2"><a class="reference internal" href="tutorials/removing-stellar-astroph-quarter-stitch.html">Example 4: Removing Stellar Astrophysics and Quarter Stitching</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/ipython_notebooks/c9-prf-fitting.html">Fitting PRFs in K2 TPFs from Campaign 9.1</a></li>
 </ul>
 </li>
 </ul>
@@ -215,7 +257,7 @@ missions.</p>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="quickstart.html" class="btn btn-neutral float-right" title="Quickstart" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="tutorials/ipython_notebooks/whatsnew31.html" class="btn btn-neutral float-right" title="What’s new in PyKE 3.1?" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
     </div>

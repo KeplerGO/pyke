@@ -210,11 +210,45 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="kepsff-remove-motion-correlated-noise-from-aperture-light-curve-data">
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast,
+.nboutput.nblast {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast + .nbinput {
+    margin-top: -19px;
+}
+
+/* nice headers on first paragraph of info/warning boxes */
+.admonition .first {
+    margin: -12px;
+    padding: 6px 12px;
+    margin-bottom: 12px;
+    color: #fff;
+    line-height: 1;
+    display: block;
+}
+.admonition.warning .first {
+    background: #f0b37e;
+}
+.admonition.note .first {
+    background: #6ab0de;
+}
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+</style>
+<div class="section" id="kepsff-remove-motion-correlated-noise-from-aperture-light-curve-data">
 <h1><strong>kepsff</strong>: remove motion-correlated noise from aperture light curve data<a class="headerlink" href="#kepsff-remove-motion-correlated-noise-from-aperture-light-curve-data" title="Permalink to this headline">¶</a></h1>
 <dl class="function">
 <dt id="pyke.kepsff.kepsff">
-<code class="descclassname">pyke.kepsff.</code><code class="descname">kepsff</code><span class="sig-paren">(</span><em>infile</em>, <em>outfile=None</em>, <em>datacol='DETSAP_FLUX'</em>, <em>cenmethod='moments'</em>, <em>stepsize=5.0</em>, <em>npoly_cxcy=1</em>, <em>sigma_cxcy=10.0</em>, <em>npoly_ardx=6</em>, <em>npoly_dsdt=2</em>, <em>sigma_dsdt=3.0</em>, <em>npoly_arfl=3</em>, <em>sigma_arfl=3.0</em>, <em>plot=False</em>, <em>overwrite=False</em>, <em>verbose=False</em>, <em>logfile='kepsff.log'</em><span class="sig-paren">)</span><a class="headerlink" href="#pyke.kepsff.kepsff" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">pyke.kepsff.</code><code class="descname">kepsff</code><span class="sig-paren">(</span><em>infile</em>, <em>outfile=None</em>, <em>datacol='DETSAP_FLUX'</em>, <em>cenmethod='moments'</em>, <em>stepsize=5.0</em>, <em>npoly_cxcy=1</em>, <em>sigma_cxcy=10.0</em>, <em>npoly_ardx=6</em>, <em>npoly_dsdt=2</em>, <em>sigma_dsdt=3.0</em>, <em>npoly_arfl=3</em>, <em>sigma_arfl=3.0</em>, <em>plot=False</em>, <em>overwrite=False</em>, <em>verbose=False</em>, <em>logfile='kepsff.log'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyke/kepsff.html#kepsff"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyke.kepsff.kepsff" title="Permalink to this definition">¶</a></dt>
 <dd><p>kepsff – remove motion-correlated noise from aperture light curve data</p>
 <p>The systematic noise within aperture-constructed K2 photometry is dominated
 by the effects of boresight roll under the force of solar pressure. Roll is

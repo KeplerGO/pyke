@@ -94,7 +94,10 @@
               
             
             
-              <ul class="current">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/ipython_notebooks/whatsnew31.html">What’s new in PyKE 3.1?</a></li>
+</ul>
+<ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Quickstart</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../install.html">Installation</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../overview.html">PyKE tasks</a><ul class="current">
@@ -208,7 +211,41 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="list-of-pyke-tools">
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast,
+.nboutput.nblast {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast + .nbinput {
+    margin-top: -19px;
+}
+
+/* nice headers on first paragraph of info/warning boxes */
+.admonition .first {
+    margin: -12px;
+    padding: 6px 12px;
+    margin-bottom: 12px;
+    color: #fff;
+    line-height: 1;
+    display: block;
+}
+.admonition.warning .first {
+    background: #f0b37e;
+}
+.admonition.note .first {
+    background: #6ab0de;
+}
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+</style>
+<div class="section" id="list-of-pyke-tools">
 <h1>List of PyKE tools<a class="headerlink" href="#list-of-pyke-tools" title="Permalink to this headline">¶</a></h1>
 <div class="toctree-wrapper compound">
 <ul>

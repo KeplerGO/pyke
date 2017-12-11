@@ -210,11 +210,45 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="kepflatten-remove-low-frequency-variability-from-time-series-preserve-transits-and-flares">
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast,
+.nboutput.nblast {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast + .nbinput {
+    margin-top: -19px;
+}
+
+/* nice headers on first paragraph of info/warning boxes */
+.admonition .first {
+    margin: -12px;
+    padding: 6px 12px;
+    margin-bottom: 12px;
+    color: #fff;
+    line-height: 1;
+    display: block;
+}
+.admonition.warning .first {
+    background: #f0b37e;
+}
+.admonition.note .first {
+    background: #6ab0de;
+}
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+</style>
+<div class="section" id="kepflatten-remove-low-frequency-variability-from-time-series-preserve-transits-and-flares">
 <h1><strong>kepflatten</strong>: remove low frequency variability from time-series, preserve transits and flares<a class="headerlink" href="#kepflatten-remove-low-frequency-variability-from-time-series-preserve-transits-and-flares" title="Permalink to this headline">¶</a></h1>
 <dl class="function">
 <dt id="pyke.kepflatten.kepflatten">
-<code class="descclassname">pyke.kepflatten.</code><code class="descname">kepflatten</code><span class="sig-paren">(</span><em>infile</em>, <em>outfile=None</em>, <em>datacol='PDCSAP_FLUX'</em>, <em>errcol='PDCSAP_FLUX_ERR'</em>, <em>nsig=3.0</em>, <em>stepsize=0.5</em>, <em>winsize=5.0</em>, <em>npoly=3</em>, <em>niter=1</em>, <em>ranges='0</em>, <em>0'</em>, <em>plot=False</em>, <em>overwrite=False</em>, <em>verbose=False</em>, <em>logfile='kepflatten.log'</em><span class="sig-paren">)</span><a class="headerlink" href="#pyke.kepflatten.kepflatten" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">pyke.kepflatten.</code><code class="descname">kepflatten</code><span class="sig-paren">(</span><em>infile</em>, <em>outfile=None</em>, <em>datacol='PDCSAP_FLUX'</em>, <em>errcol='PDCSAP_FLUX_ERR'</em>, <em>nsig=3.0</em>, <em>stepsize=0.5</em>, <em>winsize=5.0</em>, <em>npoly=3</em>, <em>niter=1</em>, <em>ranges='0</em>, <em>0'</em>, <em>plot=False</em>, <em>overwrite=False</em>, <em>verbose=False</em>, <em>logfile='kepflatten.log'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyke/kepflatten.html#kepflatten"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyke.kepflatten.kepflatten" title="Permalink to this definition">¶</a></dt>
 <dd><p>kepflatten – Remove low frequency variability from time-series, preserve
 transits and flares</p>
 <p>kepflatten detrends data for low-frequency photometric structure by

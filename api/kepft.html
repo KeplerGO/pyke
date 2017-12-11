@@ -94,7 +94,10 @@
               
             
             
-              <ul class="current">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/ipython_notebooks/whatsnew31.html">What’s new in PyKE 3.1?</a></li>
+</ul>
+<ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Quickstart</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../install.html">Installation</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../overview.html">PyKE tasks</a><ul class="current">
@@ -210,78 +213,42 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="kepft-calculate-and-store-a-fourier-transform-from-a-kepler-time-series">
-<h1><strong>kepft</strong>: calculate and store a Fourier Transform from a Kepler time series<a class="headerlink" href="#kepft-calculate-and-store-a-fourier-transform-from-a-kepler-time-series" title="Permalink to this headline">¶</a></h1>
-<dl class="function">
-<dt id="pyke.kepft.kepft">
-<code class="descclassname">pyke.kepft.</code><code class="descname">kepft</code><span class="sig-paren">(</span><em>infile</em>, <em>outfile=None</em>, <em>fcol='SAP_FLUX'</em>, <em>pmin=0.1</em>, <em>pmax=10.0</em>, <em>nfreq=100</em>, <em>plot=False</em>, <em>overwrite=False</em>, <em>verbose=False</em>, <em>logfile='kepft.log'</em><span class="sig-paren">)</span><a class="headerlink" href="#pyke.kepft.kepft" title="Permalink to this definition">¶</a></dt>
-<dd><p>kepft – Calculate and store a Fourier Transform from a Kepler time series</p>
-<p><code class="docutils literal"><span class="pre">kepft</span></code> calculates the discrete Fourier transform for a user-provided
-Kepler time series. The result is stored in a new FITS file that is a
-direct copy of the input file but with an additional table extension
-containing the power spectrum.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>infile</strong> : str</p>
-<blockquote>
-<div><p>The name of a MAST standard format FITS file containing a Kepler light
-curve within the first data extension.</p>
-</div></blockquote>
-<p><strong>outfile</strong> : str</p>
-<blockquote>
-<div><p>The name of the output FITS file with a new extension containing the
-Fourier spectrum.</p>
-</div></blockquote>
-<p><strong>fcol</strong> : str</p>
-<blockquote>
-<div><p>The name of the FITS table column in extension 1 of infile upon which
-the Fourier transform will be calculated.</p>
-</div></blockquote>
-<p><strong>pmin</strong> : float [day]</p>
-<blockquote>
-<div><p>The minimum of the period range over which the Fourier transform will
-be calculated.</p>
-</div></blockquote>
-<p><strong>pmax</strong> : float [day]</p>
-<blockquote>
-<div><p>The maximum of the period range over which the Fourier transform will
-be calculated.</p>
-</div></blockquote>
-<p><strong>nfreq</strong> : int</p>
-<blockquote>
-<div><p>The number of uniform frequency steps between <span class="math">\(1/pmax\)</span> and
-<span class="math">\(1/pmin\)</span> that the Fourier transform will be calculated.</p>
-</div></blockquote>
-<p><strong>plot</strong> : bool</p>
-<blockquote>
-<div><p>Plot the output Fourier spectrum?</p>
-</div></blockquote>
-<p><strong>overwrite</strong> : bool</p>
-<blockquote>
-<div><p>Overwrite the output file?</p>
-</div></blockquote>
-<p><strong>verbose</strong> : bool</p>
-<blockquote>
-<div><p>Print informative messages and warnings to the shell and logfile?</p>
-</div></blockquote>
-<p><strong>logfile</strong> : str</p>
-<blockquote class="last">
-<div><p>Name of the logfile containing error and warning messages.</p>
-</div></blockquote>
-</td>
-</tr>
-</tbody>
-</table>
-<p class="rubric">Examples</p>
-<div class="highlight-bash"><div class="highlight"><pre><span></span>$ kepft kplr002436324-2009259160929_llc.fits --pmin <span class="m">0</span>.5
-  --pmax <span class="m">100</span> --nfreq <span class="m">1000</span> --plot --verbose
-</pre></div>
-</div>
-<img alt="../_images/kepft.png" class="align-center" src="../_images/kepft.png" />
-</dd></dl>
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
 
+/* 24px margin */
+.nbinput.nblast,
+.nboutput.nblast {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast + .nbinput {
+    margin-top: -19px;
+}
+
+/* nice headers on first paragraph of info/warning boxes */
+.admonition .first {
+    margin: -12px;
+    padding: 6px 12px;
+    margin-bottom: 12px;
+    color: #fff;
+    line-height: 1;
+    display: block;
+}
+.admonition.warning .first {
+    background: #f0b37e;
+}
+.admonition.note .first {
+    background: #6ab0de;
+}
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+</style>
+<div class="section" id="kepft-calculate-and-store-a-fourier-transform-from-a-kepler-time-series">
+<h1><strong>kepft</strong>: calculate and store a Fourier Transform from a Kepler time series<a class="headerlink" href="#kepft-calculate-and-store-a-fourier-transform-from-a-kepler-time-series" title="Permalink to this headline">¶</a></h1>
 </div>
 
 

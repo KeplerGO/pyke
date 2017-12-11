@@ -210,11 +210,45 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="kepbls-perform-box-least-square-searches-for-periodic-exoplanet-transits">
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast,
+.nboutput.nblast {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast + .nbinput {
+    margin-top: -19px;
+}
+
+/* nice headers on first paragraph of info/warning boxes */
+.admonition .first {
+    margin: -12px;
+    padding: 6px 12px;
+    margin-bottom: 12px;
+    color: #fff;
+    line-height: 1;
+    display: block;
+}
+.admonition.warning .first {
+    background: #f0b37e;
+}
+.admonition.note .first {
+    background: #6ab0de;
+}
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+</style>
+<div class="section" id="kepbls-perform-box-least-square-searches-for-periodic-exoplanet-transits">
 <h1><strong>kepbls</strong>: perform Box-Least Square searches for periodic exoplanet transits<a class="headerlink" href="#kepbls-perform-box-least-square-searches-for-periodic-exoplanet-transits" title="Permalink to this headline">¶</a></h1>
 <dl class="function">
 <dt id="pyke.kepbls.kepbls">
-<code class="descclassname">pyke.kepbls.</code><code class="descname">kepbls</code><span class="sig-paren">(</span><em>infile</em>, <em>outfile=None</em>, <em>datacol='DETSAP_FLUX'</em>, <em>errcol='DETSAP_FLUX_ERR'</em>, <em>minper=1.0</em>, <em>maxper=30</em>, <em>mindur=0.5</em>, <em>maxdur=12</em>, <em>nsearch=1000</em>, <em>nbins=1000</em>, <em>plot=False</em>, <em>overwrite=False</em>, <em>verbose=False</em>, <em>logfile='kepbls.log'</em><span class="sig-paren">)</span><a class="headerlink" href="#pyke.kepbls.kepbls" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">pyke.kepbls.</code><code class="descname">kepbls</code><span class="sig-paren">(</span><em>infile</em>, <em>outfile=None</em>, <em>datacol='DETSAP_FLUX'</em>, <em>errcol='DETSAP_FLUX_ERR'</em>, <em>minper=1.0</em>, <em>maxper=30</em>, <em>mindur=0.5</em>, <em>maxdur=12</em>, <em>nsearch=1000</em>, <em>nbins=1000</em>, <em>plot=False</em>, <em>overwrite=False</em>, <em>verbose=False</em>, <em>logfile='kepbls.log'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyke/kepbls.html#kepbls"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyke.kepbls.kepbls" title="Permalink to this definition">¶</a></dt>
 <dd><p>kepbls – Perform Box-Least Square searches for periodic exoplanet transits</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />

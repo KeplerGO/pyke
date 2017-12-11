@@ -210,11 +210,45 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="kepprf-fit-a-psf-model-to-a-specific-image-within-a-target-pixel-file">
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast,
+.nboutput.nblast {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast + .nbinput {
+    margin-top: -19px;
+}
+
+/* nice headers on first paragraph of info/warning boxes */
+.admonition .first {
+    margin: -12px;
+    padding: 6px 12px;
+    margin-bottom: 12px;
+    color: #fff;
+    line-height: 1;
+    display: block;
+}
+.admonition.warning .first {
+    background: #f0b37e;
+}
+.admonition.note .first {
+    background: #6ab0de;
+}
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+</style>
+<div class="section" id="kepprf-fit-a-psf-model-to-a-specific-image-within-a-target-pixel-file">
 <h1><strong>kepprf</strong>: fit a PSF model to a specific image within a Target Pixel File<a class="headerlink" href="#kepprf-fit-a-psf-model-to-a-specific-image-within-a-target-pixel-file" title="Permalink to this headline">¶</a></h1>
 <dl class="function">
 <dt id="pyke.kepprf.kepprf">
-<code class="descclassname">pyke.kepprf.</code><code class="descname">kepprf</code><span class="sig-paren">(</span><em>infile</em>, <em>prfdir</em>, <em>frameno</em>, <em>columns</em>, <em>rows</em>, <em>fluxes</em>, <em>background=False</em>, <em>border=1</em>, <em>focus=False</em>, <em>xtol=0.0001</em>, <em>ftol=1.0</em>, <em>outfile=None</em>, <em>plot=False</em>, <em>imscale='linear'</em>, <em>cmap='YlOrBr'</em>, <em>apercol='#ffffff'</em>, <em>verbose=False</em>, <em>logfile='kepprf.log'</em><span class="sig-paren">)</span><a class="headerlink" href="#pyke.kepprf.kepprf" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">pyke.kepprf.</code><code class="descname">kepprf</code><span class="sig-paren">(</span><em>infile</em>, <em>prfdir</em>, <em>frameno</em>, <em>columns</em>, <em>rows</em>, <em>fluxes</em>, <em>background=False</em>, <em>border=1</em>, <em>focus=False</em>, <em>xtol=0.0001</em>, <em>ftol=1.0</em>, <em>outfile=None</em>, <em>plot=False</em>, <em>imscale='linear'</em>, <em>cmap='YlOrBr'</em>, <em>apercol='#ffffff'</em>, <em>verbose=False</em>, <em>logfile='kepprf.log'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyke/kepprf.html#kepprf"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyke.kepprf.kepprf" title="Permalink to this definition">¶</a></dt>
 <dd><p>kepprf – Fit a PSF model to a specific image within a Target Pixel File</p>
 <p>Fit a PSF model, combined with spacecraft jitter and pixel scale
 drift (the Pixel Response Function; PRF) to a single observation of Kepler

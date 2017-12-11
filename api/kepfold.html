@@ -210,16 +210,48 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="kepfold-phase-fold-light-curve-data-on-linear-ephemeris">
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast,
+.nboutput.nblast {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast + .nbinput {
+    margin-top: -19px;
+}
+
+/* nice headers on first paragraph of info/warning boxes */
+.admonition .first {
+    margin: -12px;
+    padding: 6px 12px;
+    margin-bottom: 12px;
+    color: #fff;
+    line-height: 1;
+    display: block;
+}
+.admonition.warning .first {
+    background: #f0b37e;
+}
+.admonition.note .first {
+    background: #6ab0de;
+}
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+</style>
+<div class="section" id="kepfold-phase-fold-light-curve-data-on-linear-ephemeris">
 <h1><strong>kepfold</strong>: phase-fold light curve data on linear ephemeris<a class="headerlink" href="#kepfold-phase-fold-light-curve-data-on-linear-ephemeris" title="Permalink to this headline">¶</a></h1>
 <dl class="function">
 <dt id="pyke.kepfold.kepfold">
-<code class="descclassname">pyke.kepfold.</code><code class="descname">kepfold</code><span class="sig-paren">(</span><em>infile</em>, <em>period</em>, <em>bjd0</em>, <em>outfile=None</em>, <em>bindata=False</em>, <em>binmethod='median'</em>, <em>threshold=1.0</em>, <em>niter=5</em>, <em>nbins=1000</em>, <em>rejqual=False</em>, <em>plottype='det'</em>, <em>overwrite=False</em>, <em>verbose=False</em>, <em>logfile='kepfold.log'</em><span class="sig-paren">)</span><a class="headerlink" href="#pyke.kepfold.kepfold" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">pyke.kepfold.</code><code class="descname">kepfold</code><span class="sig-paren">(</span><em>infile</em>, <em>outfile=None</em>, <em>period=None</em>, <em>bjd0=None</em>, <em>bindata=False</em>, <em>nbins=1000</em>, <em>datacol='SAP_FLUX'</em>, <em>noninteractive=False</em>, <em>overwrite=False</em>, <em>verbose=False</em>, <em>logfile='kepfold.log'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyke/kepfold.html#kepfold"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyke.kepfold.kepfold" title="Permalink to this definition">¶</a></dt>
 <dd><p>kepfold: Phase-fold light curve data on linear ephemeris.</p>
 <p>kepfold calculates the phase of all time-tagged data points relative to a
 user-supplied linear ephemeris. The relation is:</p>
-<div class="math">
-\[TIME_i = bjd0 + period \cdot PHASE_i\]</div>
 <p><span class="math">\(TIME\)</span> is the column within the FITS light curve file containing
 barycenter-corrected time stamps. <span class="math">\(bjd0\)</span> is a user-supplied BJD for
 zero phase. period is a user-supplied period in units of days. PHASE is the
@@ -227,10 +259,7 @@ calculated phase for each time stamp; these results are written to a new
 float column in the LIGHT CURVE extension of the input file before being
 exported as a new file with name defined by the user. Optionally, kepfold
 will plot the data folded on the ephemeris and store it within a new FITS
-extension of the output file called FOLDED. Both the SAP and PDC fluxes are
-binned and stored in the new extension. There are a number of binning
-algorithms, mean, median and sigma clipping. The user has options to adapt
-bin size, binning method and the rejection of outliers.</p>
+extension of the output file called FOLDED.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -257,53 +286,18 @@ phased light curve.</p>
 <blockquote>
 <div><p>Collect the data into discrete bins during the fold?</p>
 </div></blockquote>
-<p><strong>binmethod</strong> : str</p>
-<blockquote>
-<div><p>Binning method.</p>
-<ul class="simple">
-<li><cite>mean</cite> calculates the mean of all data points contained within a bin.</li>
-<li><cite>median</cite> calculates the median of all data points within a bin.</li>
-<li><cite>sigclip</cite> calculates a mean iteratively. Each iteration rejects data
-lying further than a threshold number of standard deviations from the
-mean before recalculating the result.</li>
-</ul>
-</div></blockquote>
-<p><strong>threshold</strong> : float</p>
-<blockquote>
-<div><p>The sigma clipping threshold in units of the standard deviation about
-the calculated mean within a phase bin. A typical outlier
-lies &gt; 3.0:math:<cite>sigma</cite> from the mean.</p>
-</div></blockquote>
-<p><strong>niter</strong> : int</p>
-<blockquote>
-<div><p>The maximum number of iterations over which to reject outliers before
-accepting the sigclip result.</p>
-</div></blockquote>
 <p><strong>nbins</strong> : int</p>
 <blockquote>
 <div><p>The number of phase bins to calculate.</p>
 </div></blockquote>
-<p><strong>rejqual</strong> : bool</p>
+<p><strong>datacol</strong> : str</p>
 <blockquote>
-<div><p>If <cite>True</cite>, timestamps with quality issues recorded as a finite quality
-flag in the input file will be thrown away before folding the data.</p>
+<div><p>The name of the FITS table column in extension 1 of infile upon which
+the Fourier transform will be calculated.</p>
 </div></blockquote>
-<p><strong>plottype</strong> : str</p>
+<p><strong>non-interactive</strong> : bool</p>
 <blockquote>
-<div><p>The type of data to plot. The choices refer to the types of photometry
-stored in the input file.</p>
-<ul class="simple">
-<li><code class="docutils literal"><span class="pre">sap</span></code> is Simple Aperture Photometry, stored in the column,
-SAP_FLUX. SAP data is generated by the Kepler pipeline but it can also
-be generated from a target pixel file using the kepextract tool.</li>
-<li><code class="docutils literal"><span class="pre">pdc</span></code> is Pre-search Data Conditioning photometry, stored in the
-column PDCSAP_FLUX. PDC data is a Kepler pipeline product.</li>
-<li><code class="docutils literal"><span class="pre">cbv</span></code> Cotrending Basis Vector is SAP photometry corrected manually
-by the user using the tool <code class="docutils literal"><span class="pre">kepcotrend</span></code>. CBV data is stored in the
-column CBVSAP_FLUX.</li>
-<li><code class="docutils literal"><span class="pre">det</span></code> data has been detrended using piecemeal polynomials with the
-kepflatten tool. DET data is stored in the column DETSAP_FLUX.</li>
-</ul>
+<div><p>If True, prevents the matplotlib window to pop up.</p>
 </div></blockquote>
 <p><strong>overwrite</strong> : bool</p>
 <blockquote>
@@ -323,11 +317,10 @@ kepflatten tool. DET data is stored in the column DETSAP_FLUX.</li>
 </table>
 <p class="rubric">Examples</p>
 <div class="highlight-bash"><div class="highlight"><pre><span></span>$ kepfold kplr010544976-2009201121230_slc.fits
-  <span class="m">0</span>.350471 <span class="m">2455002</span>.825 --bindata --binmethod median --threshold <span class="m">3</span>.0
-  --niter <span class="m">1000</span> --plottype sap --verbose
+  <span class="m">0</span>.350471 <span class="m">2455002</span>.825 --bindata --verbose
 </pre></div>
 </div>
-<img alt="../_images/kepfold.png" class="align-center" src="../_images/kepfold.png" />
+<img alt="../_images/kepfold.png" src="../_images/kepfold.png" />
 </dd></dl>
 
 </div>

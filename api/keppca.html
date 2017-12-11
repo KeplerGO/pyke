@@ -210,11 +210,45 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="keppca-perform-principal-component-analysis-upon-a-target-pixel-file">
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast,
+.nboutput.nblast {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast + .nbinput {
+    margin-top: -19px;
+}
+
+/* nice headers on first paragraph of info/warning boxes */
+.admonition .first {
+    margin: -12px;
+    padding: 6px 12px;
+    margin-bottom: 12px;
+    color: #fff;
+    line-height: 1;
+    display: block;
+}
+.admonition.warning .first {
+    background: #f0b37e;
+}
+.admonition.note .first {
+    background: #6ab0de;
+}
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+</style>
+<div class="section" id="keppca-perform-principal-component-analysis-upon-a-target-pixel-file">
 <h1><strong>keppca</strong>: perform principal component analysis upon a target pixel file<a class="headerlink" href="#keppca-perform-principal-component-analysis-upon-a-target-pixel-file" title="Permalink to this headline">¶</a></h1>
 <dl class="function">
 <dt id="pyke.keppca.keppca">
-<code class="descclassname">pyke.keppca.</code><code class="descname">keppca</code><span class="sig-paren">(</span><em>infile</em>, <em>outfile=None</em>, <em>maskfile='ALL'</em>, <em>components='1-3'</em>, <em>plotpca=False</em>, <em>nmaps=10</em>, <em>overwrite=False</em>, <em>verbose=False</em>, <em>logfile='keppca.log'</em><span class="sig-paren">)</span><a class="headerlink" href="#pyke.keppca.keppca" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">pyke.keppca.</code><code class="descname">keppca</code><span class="sig-paren">(</span><em>infile</em>, <em>outfile=None</em>, <em>maskfile='ALL'</em>, <em>components='1-3'</em>, <em>plotpca=False</em>, <em>nmaps=10</em>, <em>overwrite=False</em>, <em>verbose=False</em>, <em>logfile='keppca.log'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyke/keppca.html#keppca"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyke.keppca.keppca" title="Permalink to this definition">¶</a></dt>
 <dd><p>keppca – Perform principal component analysis upon a target pixel file</p>
 <p>keppca provides a method to mitigate for motion-derived systematic
 artifacts via Principle Component Analysis (PCA). This method was

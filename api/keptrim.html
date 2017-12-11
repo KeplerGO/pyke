@@ -210,11 +210,45 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="keptrim-trim-pixels-from-target-pixel-files">
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast,
+.nboutput.nblast {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast + .nbinput {
+    margin-top: -19px;
+}
+
+/* nice headers on first paragraph of info/warning boxes */
+.admonition .first {
+    margin: -12px;
+    padding: 6px 12px;
+    margin-bottom: 12px;
+    color: #fff;
+    line-height: 1;
+    display: block;
+}
+.admonition.warning .first {
+    background: #f0b37e;
+}
+.admonition.note .first {
+    background: #6ab0de;
+}
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+</style>
+<div class="section" id="keptrim-trim-pixels-from-target-pixel-files">
 <h1><strong>keptrim</strong>: trim pixels from Target Pixel Files<a class="headerlink" href="#keptrim-trim-pixels-from-target-pixel-files" title="Permalink to this headline">¶</a></h1>
 <dl class="function">
 <dt id="pyke.keptrim.keptrim">
-<code class="descclassname">pyke.keptrim.</code><code class="descname">keptrim</code><span class="sig-paren">(</span><em>infile</em>, <em>column</em>, <em>row</em>, <em>imsize</em>, <em>outfile=None</em>, <em>kepid=None</em>, <em>overwrite=False</em>, <em>verbose=False</em>, <em>logfile='keptrim.log'</em><span class="sig-paren">)</span><a class="headerlink" href="#pyke.keptrim.keptrim" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">pyke.keptrim.</code><code class="descname">keptrim</code><span class="sig-paren">(</span><em>infile</em>, <em>column</em>, <em>row</em>, <em>imsize</em>, <em>outfile=None</em>, <em>kepid=None</em>, <em>overwrite=False</em>, <em>verbose=False</em>, <em>logfile='keptrim.log'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyke/keptrim.html#keptrim"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyke.keptrim.keptrim" title="Permalink to this definition">¶</a></dt>
 <dd><p>keptrim – trim pixels from Target Pixel Files</p>
 <p>keptrim will extract a square-shaped series of sub-images from a Target
 Pixel File. The simple purpose of this task is to reduce the size of large

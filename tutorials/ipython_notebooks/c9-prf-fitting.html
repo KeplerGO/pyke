@@ -1,0 +1,1374 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Fitting PRFs in K2 TPFs from Campaign 9.1 &mdash; PyKE 3.0.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../genindex.html"/>
+        <link rel="search" title="Search" href="../../search.html"/>
+    <link rel="top" title="PyKE 3.0.0 documentation" href="../../index.html"/>
+        <link rel="up" title="Photometry tutorials" href="../index.html"/>
+        <link rel="prev" title="Example 4: Removing Stellar Astrophysics and Quarter Stitching" href="../removing-stellar-astroph-quarter-stitch.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> PyKE
+          
+
+          
+            
+            <img src="../../_static/pyke-white.png" class="logo" />
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                3.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="whatsnew31.html">What’s new in PyKE 3.1?</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart.html">Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../overview.html">PyKE tasks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../citing.html">Citing</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Photometry tutorials</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../aperture-photometry-in-k2.html">Example 1: Aperture photometry on a K2 target</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../separating-a-background-eb.html">Example 3: Separating a background EB from a foreground star</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../removing-stellar-astroph-quarter-stitch.html">Example 4: Removing Stellar Astrophysics and Quarter Stitching</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Fitting PRFs in K2 TPFs from Campaign 9.1</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">PyKE</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Photometry tutorials</a> &raquo;</li>
+        
+      <li>Fitting PRFs in K2 TPFs from Campaign 9.1</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../../_sources/tutorials/ipython_notebooks/c9-prf-fitting.ipynb.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS for nbsphinx extension */
+
+/* remove conflicting styling from Sphinx themes */
+div.nbinput,
+div.nbinput div.prompt,
+div.nbinput div.input_area,
+div.nbinput div[class*=highlight],
+div.nbinput div[class*=highlight] pre,
+div.nboutput,
+div.nbinput div.prompt,
+div.nbinput div.output_area,
+div.nboutput div[class*=highlight],
+div.nboutput div[class*=highlight] pre {
+    background: none;
+    border: none;
+    padding: 0 0;
+    margin: 0;
+    box-shadow: none;
+}
+
+/* avoid gaps between output lines */
+div.nboutput div[class*=highlight] pre {
+    line-height: normal;
+}
+
+/* input/output containers */
+div.nbinput,
+div.nboutput {
+    display: -webkit-flex;
+    display: flex;
+    align-items: flex-start;
+    margin: 0;
+    width: 100%;
+}
+@media (max-width: 540px) {
+    div.nbinput,
+    div.nboutput {
+        flex-direction: column;
+    }
+}
+
+/* input container */
+div.nbinput {
+    padding-top: 5px;
+}
+
+/* last container */
+div.nblast {
+    padding-bottom: 5px;
+}
+
+/* input prompt */
+div.nbinput div.prompt pre {
+    color: #303F9F;
+}
+
+/* output prompt */
+div.nboutput div.prompt pre {
+    color: #D84315;
+}
+
+/* all prompts */
+div.nbinput div.prompt,
+div.nboutput div.prompt {
+    min-width: 8ex;
+    padding-top: 0.4em;
+    padding-right: 0.4em;
+    text-align: right;
+    flex: 0;
+}
+@media (max-width: 540px) {
+    div.nbinput div.prompt,
+    div.nboutput div.prompt {
+        text-align: left;
+        padding: 0.4em;
+    }
+    div.nboutput div.prompt.empty {
+        padding: 0;
+    }
+}
+
+/* disable scrollbars on prompts */
+div.nbinput div.prompt pre,
+div.nboutput div.prompt pre {
+    overflow: hidden;
+}
+
+/* input/output area */
+div.nbinput div.input_area,
+div.nboutput div.output_area {
+    padding: 0.4em;
+    -webkit-flex: 1;
+    flex: 1;
+    overflow: auto;
+}
+@media (max-width: 540px) {
+    div.nbinput div.input_area,
+    div.nboutput div.output_area {
+        width: 100%;
+    }
+}
+
+/* input area */
+div.nbinput div.input_area {
+    border: 1px solid #cfcfcf;
+    border-radius: 2px;
+    background: #f7f7f7;
+}
+
+/* override MathJax center alignment in output cells */
+div.nboutput div[class*=MathJax] {
+    text-align: left !important;
+}
+
+/* override sphinx.ext.pngmath center alignment in output cells */
+div.nboutput div.math p {
+    text-align: left;
+}
+
+/* standard error */
+div.nboutput div.output_area.stderr {
+    background: #fdd;
+}
+
+/* ANSI colors */
+.ansi-black-fg { color: #3E424D; }
+.ansi-black-bg { background-color: #3E424D; }
+.ansi-black-intense-fg { color: #282C36; }
+.ansi-black-intense-bg { background-color: #282C36; }
+.ansi-red-fg { color: #E75C58; }
+.ansi-red-bg { background-color: #E75C58; }
+.ansi-red-intense-fg { color: #B22B31; }
+.ansi-red-intense-bg { background-color: #B22B31; }
+.ansi-green-fg { color: #00A250; }
+.ansi-green-bg { background-color: #00A250; }
+.ansi-green-intense-fg { color: #007427; }
+.ansi-green-intense-bg { background-color: #007427; }
+.ansi-yellow-fg { color: #DDB62B; }
+.ansi-yellow-bg { background-color: #DDB62B; }
+.ansi-yellow-intense-fg { color: #B27D12; }
+.ansi-yellow-intense-bg { background-color: #B27D12; }
+.ansi-blue-fg { color: #208FFB; }
+.ansi-blue-bg { background-color: #208FFB; }
+.ansi-blue-intense-fg { color: #0065CA; }
+.ansi-blue-intense-bg { background-color: #0065CA; }
+.ansi-magenta-fg { color: #D160C4; }
+.ansi-magenta-bg { background-color: #D160C4; }
+.ansi-magenta-intense-fg { color: #A03196; }
+.ansi-magenta-intense-bg { background-color: #A03196; }
+.ansi-cyan-fg { color: #60C6C8; }
+.ansi-cyan-bg { background-color: #60C6C8; }
+.ansi-cyan-intense-fg { color: #258F8F; }
+.ansi-cyan-intense-bg { background-color: #258F8F; }
+.ansi-white-fg { color: #C5C1B4; }
+.ansi-white-bg { background-color: #C5C1B4; }
+.ansi-white-intense-fg { color: #A1A6B2; }
+.ansi-white-intense-bg { background-color: #A1A6B2; }
+
+.ansi-bold { font-weight: bold; }
+
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast,
+.nboutput.nblast {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast + .nbinput {
+    margin-top: -19px;
+}
+
+/* nice headers on first paragraph of info/warning boxes */
+.admonition .first {
+    margin: -12px;
+    padding: 6px 12px;
+    margin-bottom: 12px;
+    color: #fff;
+    line-height: 1;
+    display: block;
+}
+.admonition.warning .first {
+    background: #f0b37e;
+}
+.admonition.note .first {
+    background: #6ab0de;
+}
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+</style>
+<div class="section" id="Fitting-PRFs-in-K2-TPFs-from-Campaign-9.1">
+<h1>Fitting PRFs in K2 TPFs from Campaign 9.1<a class="headerlink" href="#Fitting-PRFs-in-K2-TPFs-from-Campaign-9.1" title="Permalink to this headline">¶</a></h1>
+<p>In this simple tutorial we will show how to perform PRF photometry in a
+K2 target pixel file using <code class="docutils literal"><span class="pre">PyKE</span></code> and <code class="docutils literal"><span class="pre">oktopus</span></code>.</p>
+<p><strong>This notebook was created with the following versions of PyKE and
+oktopus:</strong></p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">pyke</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="n">pyke</span><span class="o">.</span><span class="n">__version__</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>Out[2]:
+</pre></div>
+</div>
+<div class="output_area highlight-none"><div class="highlight"><pre>
+<span></span>&#39;3.1.dev&#39;
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">oktopus</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="n">oktopus</span><span class="o">.</span><span class="n">__version__</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>Out[4]:
+</pre></div>
+</div>
+<div class="output_area highlight-none"><div class="highlight"><pre>
+<span></span>&#39;0.1.dev11&#39;
+</pre></div>
+</div>
+</div>
+<p><strong>1. Importing the necessary packages</strong></p>
+<p>As usual, let’s start off by importing a few packages from the standard
+scientific Python stack:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="o">%</span><span class="k">matplotlib</span> inline
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">from</span> <span class="nn">matplotlib</span> <span class="k">import</span> <span class="n">rc</span>
+<span class="n">rc</span><span class="p">(</span><span class="s1">&#39;text&#39;</span><span class="p">,</span> <span class="n">usetex</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">font</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;family&#39;</span> <span class="p">:</span> <span class="s1">&#39;serif&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;size&#39;</span>   <span class="p">:</span> <span class="mi">22</span><span class="p">,</span>
+        <span class="s1">&#39;serif&#39;</span>  <span class="p">:</span> <span class="s1">&#39;New Century Schoolbook&#39;</span><span class="p">}</span>
+<span class="n">rc</span><span class="p">(</span><span class="s1">&#39;font&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">font</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>Since we will perform PRF photometry in a Target Pixel File (TPF), let’s
+import <code class="docutils literal"><span class="pre">KeplerTargetPixelFile</span></code> and <code class="docutils literal"><span class="pre">KeplerQualityFlags</span></code> classes from
+<code class="docutils literal"><span class="pre">PyKE</span></code>:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">pyke</span> <span class="k">import</span> <span class="n">KeplerTargetPixelFile</span><span class="p">,</span> <span class="n">KeplerQualityFlags</span>
+</pre></div>
+</div>
+</div>
+<p>It’s always wise to take a prior look at the data, therefore, let’s
+import <code class="docutils literal"><span class="pre">photutils</span></code> so that we can perform aperture photometry:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">photutils.aperture</span> <span class="k">as</span> <span class="nn">apr</span>
+</pre></div>
+</div>
+</div>
+<p>Additionally, we will need a model for the Pixel Response Function and
+for the scene. We can import those from <code class="docutils literal"><span class="pre">PyKE</span></code>, as well.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">pyke.prf</span> <span class="k">import</span> <span class="n">SimpleKeplerPRF</span><span class="p">,</span> <span class="n">SceneModel</span><span class="p">,</span> <span class="n">PRFPhotometry</span>
+</pre></div>
+</div>
+</div>
+<p>Finally, we will use <code class="docutils literal"><span class="pre">oktopus</span></code> to handle our statistical assumptions:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">oktopus</span> <span class="k">import</span> <span class="n">UniformPrior</span>
+</pre></div>
+</div>
+</div>
+<p><strong>2. Actual PRF Photometry</strong></p>
+<p>Let’s start by instantiating a <code class="docutils literal"><span class="pre">KeplerTargetPixelFile</span></code> object (you may
+either give a url or a local path to the file):</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="n">tpf</span> <span class="o">=</span> <span class="n">KeplerTargetPixelFile</span><span class="p">(</span><span class="s1">&#39;https://archive.stsci.edu/missions/k2/target_pixel_files/c91/&#39;</span>
+                            <span class="s1">&#39;224300000/64000/ktwo224364733-c91_lpd-targ.fits.gz&#39;</span><span class="p">,</span>
+                            <span class="n">quality_bitmask</span><span class="o">=</span><span class="n">KeplerQualityFlags</span><span class="o">.</span><span class="n">CONSERVATIVE_BITMASK</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>Note that we set
+<code class="docutils literal"><span class="pre">quality_bitmask=KeplerQualityFlags.CONSERVATIVE_BITMASK</span></code>, which means
+that cadences that have specific <code class="docutils literal"><span class="pre">QUALITY</span></code> flags such as
+<code class="docutils literal"><span class="pre">Attitude</span> <span class="pre">tweak</span></code>, <code class="docutils literal"><span class="pre">Safe</span> <span class="pre">mode</span></code>, etc, will be ignored.</p>
+<p>Let’s take a look at the pixel data using the <code class="docutils literal"><span class="pre">plot</span></code> method from
+<code class="docutils literal"><span class="pre">KeplerTargetPixelFile</span></code>:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [11]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="n">tpf</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">frame</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/tutorials_ipython_notebooks_c9-prf-fitting_23_0.png" src="../../_images/tutorials_ipython_notebooks_c9-prf-fitting_23_0.png" />
+</div>
+</div>
+<p>Now, let’s create circular apertures around the targets using
+<code class="docutils literal"><span class="pre">photutils</span></code>:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [12]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="n">tpf</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">frame</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+<span class="n">apr</span><span class="o">.</span><span class="n">CircularAperture</span><span class="p">((</span><span class="mf">941.5</span><span class="p">,</span> <span class="mf">878.5</span><span class="p">),</span> <span class="n">r</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s1">&#39;cyan&#39;</span><span class="p">)</span>
+<span class="n">apr</span><span class="o">.</span><span class="n">CircularAperture</span><span class="p">((</span><span class="mf">944.5</span><span class="p">,</span> <span class="mf">875.5</span><span class="p">),</span> <span class="n">r</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s1">&#39;cyan&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/tutorials_ipython_notebooks_c9-prf-fitting_25_0.png" src="../../_images/tutorials_ipython_notebooks_c9-prf-fitting_25_0.png" />
+</div>
+</div>
+<p>We can also use <code class="docutils literal"><span class="pre">photutils</span></code> to create aperture photometry light curves
+from the drawn apertures:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [13]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="n">lc1</span><span class="p">,</span> <span class="n">lc2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">tpf</span><span class="o">.</span><span class="n">time</span><span class="p">)),</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">tpf</span><span class="o">.</span><span class="n">time</span><span class="p">))</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">tpf</span><span class="o">.</span><span class="n">time</span><span class="p">)):</span>
+    <span class="n">lc1</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">apr</span><span class="o">.</span><span class="n">CircularAperture</span><span class="p">((</span><span class="mf">941.5</span> <span class="o">-</span> <span class="n">tpf</span><span class="o">.</span><span class="n">column</span><span class="p">,</span> <span class="mf">878.5</span> <span class="o">-</span> <span class="n">tpf</span><span class="o">.</span><span class="n">row</span><span class="p">),</span> <span class="n">r</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">do_photometry</span><span class="p">(</span><span class="n">tpf</span><span class="o">.</span><span class="n">flux</span><span class="p">[</span><span class="n">i</span><span class="p">])[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">lc2</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">apr</span><span class="o">.</span><span class="n">CircularAperture</span><span class="p">((</span><span class="mf">944.5</span> <span class="o">-</span> <span class="n">tpf</span><span class="o">.</span><span class="n">column</span><span class="p">,</span> <span class="mf">875.5</span> <span class="o">-</span> <span class="n">tpf</span><span class="o">.</span><span class="n">row</span><span class="p">),</span> <span class="n">r</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">do_photometry</span><span class="p">(</span><span class="n">tpf</span><span class="o">.</span><span class="n">flux</span><span class="p">[</span><span class="n">i</span><span class="p">])[</span><span class="mi">0</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<p>Let’s visualize the light curves:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [14]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">[</span><span class="mi">17</span><span class="p">,</span> <span class="mi">4</span><span class="p">])</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">tpf</span><span class="o">.</span><span class="n">time</span><span class="p">,</span> <span class="n">lc1</span><span class="p">,</span> <span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Time&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;Flux&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>Out[14]:
+</pre></div>
+</div>
+<div class="output_area highlight-none"><div class="highlight"><pre>
+<span></span>&lt;matplotlib.text.Text at 0x120f2be48&gt;
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/tutorials_ipython_notebooks_c9-prf-fitting_29_1.png" src="../../_images/tutorials_ipython_notebooks_c9-prf-fitting_29_1.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [15]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">[</span><span class="mi">17</span><span class="p">,</span> <span class="mi">4</span><span class="p">])</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">tpf</span><span class="o">.</span><span class="n">time</span><span class="p">,</span> <span class="n">lc2</span><span class="p">,</span> <span class="s1">&#39;ro&#39;</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Time&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;Flux&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>Out[15]:
+</pre></div>
+</div>
+<div class="output_area highlight-none"><div class="highlight"><pre>
+<span></span>&lt;matplotlib.text.Text at 0x12101aac8&gt;
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/tutorials_ipython_notebooks_c9-prf-fitting_30_1.png" src="../../_images/tutorials_ipython_notebooks_c9-prf-fitting_30_1.png" />
+</div>
+</div>
+<p>Looking at the data before performing PRF photometry is important
+because it will give us insights on how to construct our priors on the
+parameters we want to estimate.</p>
+<p>Another important part of PRF photometry is the background flux levels.
+We can either estimate it beforehand and subtract it from the target
+fluxes or we can let the background be a free parameter during the
+estimation process. We will choose the latter here, because we will
+assume that our data comes from Poisson distributions. Therefore, we
+want the pixel values to be positive everywhere. And, more precisely,
+remember that the subtraction of two Poisson random variables is not a
+Poisson rv. Therefore, subtracting any value would break our statistical
+assumption.</p>
+<p>In any case, let’s take a look at the background levels using the
+<code class="docutils literal"><span class="pre">estimate_background_per_pixel</span></code> method from <code class="docutils literal"><span class="pre">KeplerTargetPixelFile</span></code>
+class.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [16]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="n">bkg</span> <span class="o">=</span> <span class="n">tpf</span><span class="o">.</span><span class="n">estimate_bkg_per_pixel</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [17]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">[</span><span class="mi">17</span><span class="p">,</span> <span class="mi">4</span><span class="p">])</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">tpf</span><span class="o">.</span><span class="n">time</span><span class="p">,</span> <span class="n">bkg</span><span class="p">,</span> <span class="s1">&#39;ko&#39;</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Time&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;Flux&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>Out[17]:
+</pre></div>
+</div>
+<div class="output_area highlight-none"><div class="highlight"><pre>
+<span></span>&lt;matplotlib.text.Text at 0x1212ff518&gt;
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/tutorials_ipython_notebooks_c9-prf-fitting_35_1.png" src="../../_images/tutorials_ipython_notebooks_c9-prf-fitting_35_1.png" />
+</div>
+</div>
+<p>Ooops! Looks like there is something funny happening on that frame
+because the background levels are way bellow zero. Let’s plot the pixel
+data to see what’s going on:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [18]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="n">funny_cadence</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argwhere</span><span class="p">(</span><span class="n">bkg</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [19]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="n">tpf</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">frame</span><span class="o">=</span><span class="n">funny_cadence</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/tutorials_ipython_notebooks_c9-prf-fitting_38_0.png" src="../../_images/tutorials_ipython_notebooks_c9-prf-fitting_38_0.png" />
+</div>
+</div>
+<p>Ok, we see that there is something unusual here. Let’s just ignore this
+cadence for now and move on to our PRF photometry.</p>
+<p>Let’s redraw the background light curve using more meaningful bounds:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [20]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">[</span><span class="mi">17</span><span class="p">,</span> <span class="mi">4</span><span class="p">])</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">tpf</span><span class="o">.</span><span class="n">time</span><span class="p">,</span> <span class="n">bkg</span><span class="p">,</span> <span class="s1">&#39;ko&#39;</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Time&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;Flux&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">(</span><span class="mi">2150</span><span class="p">,</span> <span class="mi">2400</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>Out[20]:
+</pre></div>
+</div>
+<div class="output_area highlight-none"><div class="highlight"><pre>
+<span></span>(2150, 2400)
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/tutorials_ipython_notebooks_c9-prf-fitting_41_1.png" src="../../_images/tutorials_ipython_notebooks_c9-prf-fitting_41_1.png" />
+</div>
+</div>
+<p>Now, let’s create our PRF model using the <code class="docutils literal"><span class="pre">SimpleKeplerPRF</span></code> class:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [21]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="n">sprf</span> <span class="o">=</span> <span class="n">SimpleKeplerPRF</span><span class="p">(</span><span class="n">tpf</span><span class="o">.</span><span class="n">channel</span><span class="p">,</span> <span class="n">tpf</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="n">tpf</span><span class="o">.</span><span class="n">column</span><span class="p">,</span> <span class="n">tpf</span><span class="o">.</span><span class="n">row</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>This is a simple model based on the PRF calibration data. It depends on
+the channel and the dimensions of the target pixel file that we want to
+model. This model is parametrized by stellar positions and flux.</p>
+<p>To combine one or more PRF models and a background model, we can use the
+<code class="docutils literal"><span class="pre">SceneModel</span></code> class:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [22]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="n">scene</span> <span class="o">=</span> <span class="n">SceneModel</span><span class="p">(</span><span class="n">prfs</span><span class="o">=</span><span class="p">[</span><span class="n">sprf</span><span class="p">]</span> <span class="o">*</span> <span class="mi">2</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>Note that this class takes a list of PRF objects as required inputs.
+Additionally, a parameter named <code class="docutils literal"><span class="pre">bkg_model</span></code> can be used to model the
+background variations. The default is a constant value for every frame.</p>
+<p>Now that we have taken a look at the data and created our model, let’s
+put our assumptions on the table by defining a prior distribution for
+the parameters.</p>
+<p>Let’s choose a uniform prior for the whole parameter space. We can do
+that using the <code class="docutils literal"><span class="pre">UniformPrior</span></code> class:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [23]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="n">prior</span> <span class="o">=</span> <span class="n">UniformPrior</span><span class="p">(</span><span class="n">lb</span><span class="o">=</span><span class="p">[</span><span class="mf">10e3</span><span class="p">,</span> <span class="mf">940.</span><span class="p">,</span> <span class="mf">877.</span><span class="p">,</span> <span class="mf">10e3</span><span class="p">,</span> <span class="mf">943.</span><span class="p">,</span> <span class="mf">874.</span><span class="p">,</span> <span class="mf">1e3</span><span class="p">],</span>
+                     <span class="n">ub</span><span class="o">=</span><span class="p">[</span><span class="mf">60e3</span><span class="p">,</span> <span class="mf">944.</span><span class="p">,</span> <span class="mf">880.</span><span class="p">,</span> <span class="mf">60e3</span><span class="p">,</span> <span class="mf">947.</span><span class="p">,</span> <span class="mf">877.</span><span class="p">,</span> <span class="mf">4e3</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<p>This class takes two parameters: <code class="docutils literal"><span class="pre">lb</span></code>, <code class="docutils literal"><span class="pre">ub</span></code>. <code class="docutils literal"><span class="pre">lb</span></code> stands for lower
+bound and <code class="docutils literal"><span class="pre">ub</span></code> for upper bound. The order of those values should
+correspond to the order of the parameters in our model. For example, an
+object from <code class="docutils literal"><span class="pre">SimpleKeplerPRF</span></code> takes <code class="docutils literal"><span class="pre">flux</span></code>, <code class="docutils literal"><span class="pre">center_col</span></code>, and
+<code class="docutils literal"><span class="pre">center_row</span></code>. Therefore, we need to define the prior values on that
+same order. And since we have two targets, that results in six
+parameters that have to be defined. The last parameter is the background
+constant.</p>
+<p>Let’s visualize our model evaluated at the mean value given by our prior
+probability:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [24]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="n">scene</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="o">*</span><span class="n">prior</span><span class="o">.</span><span class="n">mean</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/tutorials_ipython_notebooks_c9-prf-fitting_53_0.png" src="../../_images/tutorials_ipython_notebooks_c9-prf-fitting_53_0.png" />
+</div>
+</div>
+<p>Now, we can feed both the <code class="docutils literal"><span class="pre">SceneModel</span></code> and the <code class="docutils literal"><span class="pre">UniformPrior</span></code>
+objects to the <code class="docutils literal"><span class="pre">PRFPhotometry</span></code> class:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [25]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="n">phot</span> <span class="o">=</span> <span class="n">PRFPhotometry</span><span class="p">(</span><span class="n">scene_model</span><span class="o">=</span><span class="n">scene</span><span class="p">,</span> <span class="n">prior</span><span class="o">=</span><span class="n">prior</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>Finally, we use the <code class="docutils literal"><span class="pre">fit</span></code> method in which we have to pass the pixel
+data <code class="docutils literal"><span class="pre">tpf.flux</span></code>.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [27]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="n">opt_params</span> <span class="o">=</span> <span class="n">phot</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">tpf</span><span class="o">.</span><span class="n">flux</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="stderr output_area docutils container">
+<div class="highlight"><pre>
+  0%|          | 0/1255 [00:00&lt;?, ?it/s]/Users/jvmirca/anaconda3/lib/python3.6/site-packages/autograd/core.py:82: RuntimeWarning: invalid value encountered in log
+  result_value = self.fun(*argvals, **kwargs)
+/Users/jvmirca/anaconda3/lib/python3.6/site-packages/scipy/optimize/optimize.py:1927: RuntimeWarning: invalid value encountered in double_scalars
+  tmp2 = (x - v) * (fx - fw)
+ 30%|██▉       | 374/1255 [00:16&lt;00:43, 20.31it/s]/Users/jvmirca/anaconda3/lib/python3.6/site-packages/scipy/optimize/optimize.py:1928: RuntimeWarning: invalid value encountered in double_scalars
+  p = (x - v) * tmp2 - (x - w) * tmp1
+/Users/jvmirca/anaconda3/lib/python3.6/site-packages/scipy/optimize/optimize.py:1929: RuntimeWarning: invalid value encountered in double_scalars
+  tmp2 = 2.0 * (tmp2 - tmp1)
+100%|██████████| 1255/1255 [00:58&lt;00:00, 21.36it/s]
+</pre></div></div>
+</div>
+<p>Note that our Poisson likelihood assumption is embedded in the
+<code class="docutils literal"><span class="pre">PRFPhotometry</span></code> class. That can be changed while creating
+<code class="docutils literal"><span class="pre">PRFPhotometry</span></code> through the <code class="docutils literal"><span class="pre">loss_function</span></code> parameter.</p>
+<p>Now, let’s retrieve the fitted parameters which are store in the
+<code class="docutils literal"><span class="pre">opt_params</span></code> attribute:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [28]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="n">flux_1</span> <span class="o">=</span> <span class="n">opt_params</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
+<span class="n">xcenter_1</span> <span class="o">=</span> <span class="n">opt_params</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span>
+<span class="n">ycenter_1</span> <span class="o">=</span> <span class="n">opt_params</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span>
+<span class="n">flux_2</span> <span class="o">=</span> <span class="n">opt_params</span><span class="p">[:,</span> <span class="mi">3</span><span class="p">]</span>
+<span class="n">xcenter_2</span> <span class="o">=</span> <span class="n">opt_params</span><span class="p">[:,</span> <span class="mi">4</span><span class="p">]</span>
+<span class="n">ycenter_2</span> <span class="o">=</span> <span class="n">opt_params</span><span class="p">[:,</span> <span class="mi">5</span><span class="p">]</span>
+<span class="n">bkg_hat</span> <span class="o">=</span> <span class="n">opt_params</span><span class="p">[:,</span> <span class="mi">6</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<p>Let’s visualize the parameters as a function of time:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [29]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">[</span><span class="mi">18</span><span class="p">,</span> <span class="mi">4</span><span class="p">])</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">tpf</span><span class="o">.</span><span class="n">time</span><span class="p">,</span> <span class="n">flux_1</span><span class="p">,</span> <span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;Flux&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Time&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>Out[29]:
+</pre></div>
+</div>
+<div class="output_area highlight-none"><div class="highlight"><pre>
+<span></span>(20325.170959279698, 34776.171872301245)
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/tutorials_ipython_notebooks_c9-prf-fitting_62_1.png" src="../../_images/tutorials_ipython_notebooks_c9-prf-fitting_62_1.png" />
+</div>
+</div>
+<p>Oops! That outlier is probably the funny cadence we identified before:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [30]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="n">outlier</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argwhere</span><span class="p">(</span><span class="n">flux_1</span> <span class="o">&gt;</span> <span class="mi">25000</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [31]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="n">outlier</span> <span class="o">==</span> <span class="n">funny_cadence</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>Out[31]:
+</pre></div>
+</div>
+<div class="output_area highlight-none"><div class="highlight"><pre>
+<span></span>True
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [32]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">[</span><span class="mi">18</span><span class="p">,</span> <span class="mi">4</span><span class="p">])</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">tpf</span><span class="o">.</span><span class="n">time</span><span class="p">,</span> <span class="n">flux_1</span><span class="p">,</span> <span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;Flux&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Time&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">(</span><span class="mi">20500</span><span class="p">,</span> <span class="mi">22000</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>Out[32]:
+</pre></div>
+</div>
+<div class="output_area highlight-none"><div class="highlight"><pre>
+<span></span>(20500, 22000)
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/tutorials_ipython_notebooks_c9-prf-fitting_66_1.png" src="../../_images/tutorials_ipython_notebooks_c9-prf-fitting_66_1.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [33]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">[</span><span class="mi">18</span><span class="p">,</span> <span class="mi">4</span><span class="p">])</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">tpf</span><span class="o">.</span><span class="n">time</span><span class="p">,</span> <span class="n">xcenter_1</span><span class="p">,</span> <span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;Column position&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Time&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>Out[33]:
+</pre></div>
+</div>
+<div class="output_area highlight-none"><div class="highlight"><pre>
+<span></span>&lt;matplotlib.text.Text at 0x120d10c88&gt;
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/tutorials_ipython_notebooks_c9-prf-fitting_67_1.png" src="../../_images/tutorials_ipython_notebooks_c9-prf-fitting_67_1.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [34]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">[</span><span class="mi">18</span><span class="p">,</span> <span class="mi">4</span><span class="p">])</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">tpf</span><span class="o">.</span><span class="n">time</span><span class="p">,</span> <span class="n">ycenter_1</span><span class="p">,</span> <span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;Row position&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Time&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>Out[34]:
+</pre></div>
+</div>
+<div class="output_area highlight-none"><div class="highlight"><pre>
+<span></span>&lt;matplotlib.text.Text at 0x120d4c198&gt;
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/tutorials_ipython_notebooks_c9-prf-fitting_68_1.png" src="../../_images/tutorials_ipython_notebooks_c9-prf-fitting_68_1.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [35]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">[</span><span class="mi">18</span><span class="p">,</span> <span class="mi">4</span><span class="p">])</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">tpf</span><span class="o">.</span><span class="n">time</span><span class="p">,</span> <span class="n">flux_2</span><span class="p">,</span> <span class="s1">&#39;ro&#39;</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">(</span><span class="mi">17000</span><span class="p">,</span> <span class="mi">19000</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;Flux&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Time&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>Out[35]:
+</pre></div>
+</div>
+<div class="output_area highlight-none"><div class="highlight"><pre>
+<span></span>&lt;matplotlib.text.Text at 0x111aa6b38&gt;
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/tutorials_ipython_notebooks_c9-prf-fitting_69_1.png" src="../../_images/tutorials_ipython_notebooks_c9-prf-fitting_69_1.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [36]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">[</span><span class="mi">18</span><span class="p">,</span> <span class="mi">4</span><span class="p">])</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">tpf</span><span class="o">.</span><span class="n">time</span><span class="p">,</span> <span class="n">xcenter_2</span><span class="p">,</span> <span class="s1">&#39;ro&#39;</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;Column position&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Time&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>Out[36]:
+</pre></div>
+</div>
+<div class="output_area highlight-none"><div class="highlight"><pre>
+<span></span>&lt;matplotlib.text.Text at 0x121169080&gt;
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/tutorials_ipython_notebooks_c9-prf-fitting_70_1.png" src="../../_images/tutorials_ipython_notebooks_c9-prf-fitting_70_1.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [37]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">[</span><span class="mi">18</span><span class="p">,</span> <span class="mi">4</span><span class="p">])</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">tpf</span><span class="o">.</span><span class="n">time</span><span class="p">,</span> <span class="n">ycenter_2</span><span class="p">,</span> <span class="s1">&#39;ro&#39;</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;Row position&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Time&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>Out[37]:
+</pre></div>
+</div>
+<div class="output_area highlight-none"><div class="highlight"><pre>
+<span></span>&lt;matplotlib.text.Text at 0x1221948d0&gt;
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/tutorials_ipython_notebooks_c9-prf-fitting_71_1.png" src="../../_images/tutorials_ipython_notebooks_c9-prf-fitting_71_1.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [38]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">[</span><span class="mi">18</span><span class="p">,</span> <span class="mi">4</span><span class="p">])</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">tpf</span><span class="o">.</span><span class="n">time</span><span class="p">,</span> <span class="n">bkg_hat</span><span class="p">,</span> <span class="s1">&#39;ko&#39;</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;Background Flux&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Time&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">(</span><span class="mi">2350</span><span class="p">,</span> <span class="mi">2650</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>Out[38]:
+</pre></div>
+</div>
+<div class="output_area highlight-none"><div class="highlight"><pre>
+<span></span>(2350, 2650)
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/tutorials_ipython_notebooks_c9-prf-fitting_72_1.png" src="../../_images/tutorials_ipython_notebooks_c9-prf-fitting_72_1.png" />
+</div>
+</div>
+<p>We can retrieve the residuals using the <code class="docutils literal"><span class="pre">get_residuals</span></code> method:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [39]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="n">residuals</span> <span class="o">=</span> <span class="n">phot</span><span class="o">.</span><span class="n">get_residuals</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [40]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">residuals</span><span class="p">[</span><span class="mi">100</span><span class="p">],</span> <span class="n">origin</span><span class="o">=</span><span class="s1">&#39;lower&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>Out[40]:
+</pre></div>
+</div>
+<div class="output_area highlight-none"><div class="highlight"><pre>
+<span></span>&lt;matplotlib.colorbar.Colorbar at 0x122db3f28&gt;
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/tutorials_ipython_notebooks_c9-prf-fitting_75_1.png" src="../../_images/tutorials_ipython_notebooks_c9-prf-fitting_75_1.png" />
+</div>
+</div>
+<p>We can also get the pixels time series for every single model as shown
+below:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [41]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="n">prf_1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">scene</span><span class="o">.</span><span class="n">prfs</span><span class="p">[</span><span class="mi">0</span><span class="p">](</span><span class="o">*</span><span class="n">phot</span><span class="o">.</span><span class="n">opt_params</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">])</span>
+                  <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">tpf</span><span class="o">.</span><span class="n">time</span><span class="p">))])</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [42]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="n">prf_2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">scene</span><span class="o">.</span><span class="n">prfs</span><span class="p">[</span><span class="mi">1</span><span class="p">](</span><span class="o">*</span><span class="n">phot</span><span class="o">.</span><span class="n">opt_params</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">3</span><span class="p">:</span><span class="mi">6</span><span class="p">])</span>
+                  <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">tpf</span><span class="o">.</span><span class="n">time</span><span class="p">))])</span>
+</pre></div>
+</div>
+</div>
+<p>Let’s then visualize the single models:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [43]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">prf_1</span><span class="p">[</span><span class="mi">100</span><span class="p">],</span> <span class="n">origin</span><span class="o">=</span><span class="s1">&#39;lower&#39;</span><span class="p">,</span> <span class="n">extent</span><span class="o">=</span><span class="p">(</span><span class="mi">940</span><span class="p">,</span> <span class="mi">949</span><span class="p">,</span> <span class="mi">872</span><span class="p">,</span> <span class="mi">880</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>Out[43]:
+</pre></div>
+</div>
+<div class="output_area highlight-none"><div class="highlight"><pre>
+<span></span>&lt;matplotlib.colorbar.Colorbar at 0x120dfc940&gt;
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/tutorials_ipython_notebooks_c9-prf-fitting_80_1.png" src="../../_images/tutorials_ipython_notebooks_c9-prf-fitting_80_1.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [44]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">prf_2</span><span class="p">[</span><span class="mi">100</span><span class="p">],</span> <span class="n">origin</span><span class="o">=</span><span class="s1">&#39;lower&#39;</span><span class="p">,</span> <span class="n">extent</span><span class="o">=</span><span class="p">(</span><span class="mi">940</span><span class="p">,</span> <span class="mi">949</span><span class="p">,</span> <span class="mi">872</span><span class="p">,</span> <span class="mi">880</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>Out[44]:
+</pre></div>
+</div>
+<div class="output_area highlight-none"><div class="highlight"><pre>
+<span></span>&lt;matplotlib.colorbar.Colorbar at 0x12171df60&gt;
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/tutorials_ipython_notebooks_c9-prf-fitting_81_1.png" src="../../_images/tutorials_ipython_notebooks_c9-prf-fitting_81_1.png" />
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+      
+        <a href="../removing-stellar-astroph-quarter-stitch.html" class="btn btn-neutral" title="Example 4: Removing Stellar Astrophysics and Quarter Stitching" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright PyKE Developers and Contributors.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'3.0.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

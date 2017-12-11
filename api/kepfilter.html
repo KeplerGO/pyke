@@ -210,11 +210,45 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="kepfilter-bandpass-filtering-of-kepler-light-curve-data">
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast,
+.nboutput.nblast {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast + .nbinput {
+    margin-top: -19px;
+}
+
+/* nice headers on first paragraph of info/warning boxes */
+.admonition .first {
+    margin: -12px;
+    padding: 6px 12px;
+    margin-bottom: 12px;
+    color: #fff;
+    line-height: 1;
+    display: block;
+}
+.admonition.warning .first {
+    background: #f0b37e;
+}
+.admonition.note .first {
+    background: #6ab0de;
+}
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+</style>
+<div class="section" id="kepfilter-bandpass-filtering-of-kepler-light-curve-data">
 <h1><strong>kepfilter</strong>: bandpass filtering of Kepler light curve data<a class="headerlink" href="#kepfilter-bandpass-filtering-of-kepler-light-curve-data" title="Permalink to this headline">¶</a></h1>
 <dl class="function">
 <dt id="pyke.kepfilter.kepfilter">
-<code class="descclassname">pyke.kepfilter.</code><code class="descname">kepfilter</code><span class="sig-paren">(</span><em>infile</em>, <em>passband</em>, <em>outfile=None</em>, <em>datacol='SAP_FLUX'</em>, <em>function='boxcar'</em>, <em>cutoff=1.0</em>, <em>plot=False</em>, <em>overwrite=False</em>, <em>verbose=False</em>, <em>logfile='kepfilter.log'</em><span class="sig-paren">)</span><a class="headerlink" href="#pyke.kepfilter.kepfilter" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">pyke.kepfilter.</code><code class="descname">kepfilter</code><span class="sig-paren">(</span><em>infile</em>, <em>passband</em>, <em>outfile=None</em>, <em>datacol='SAP_FLUX'</em>, <em>function='boxcar'</em>, <em>cutoff=1.0</em>, <em>plot=False</em>, <em>overwrite=False</em>, <em>verbose=False</em>, <em>logfile='kepfilter.log'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyke/kepfilter.html#kepfilter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyke.kepfilter.kepfilter" title="Permalink to this definition">¶</a></dt>
 <dd><p>kepfilter – bandpass filtering of Kepler light curve data</p>
 <p><code class="docutils literal"><span class="pre">kepfilter</span></code> applies a bandpass filter to Kepler light curve data. In the
 low bandpass option, the data is convolved with a function of

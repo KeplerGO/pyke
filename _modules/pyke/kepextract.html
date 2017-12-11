@@ -1,0 +1,827 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>pyke.kepextract &mdash; PyKE 3.0.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../genindex.html"/>
+        <link rel="search" title="Search" href="../../search.html"/>
+    <link rel="top" title="PyKE 3.0.0 documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> PyKE
+          
+
+          
+            
+            <img src="../../_static/pyke-white.png" class="logo" />
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                3.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/ipython_notebooks/whatsnew31.html">What’s new in PyKE 3.1?</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart.html">Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../overview.html">PyKE tasks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../citing.html">Citing</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/index.html">Photometry tutorials</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">PyKE</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>pyke.kepextract</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pyke.kepextract</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">astropy.io</span> <span class="k">import</span> <span class="n">fits</span> <span class="k">as</span> <span class="n">pyfits</span>
+<span class="kn">from</span> <span class="nn">scipy.optimize</span> <span class="k">import</span> <span class="n">leastsq</span>
+<span class="kn">from</span> <span class="nn">copy</span> <span class="k">import</span> <span class="n">copy</span>
+<span class="kn">from</span> <span class="nn">tqdm</span> <span class="k">import</span> <span class="n">tqdm</span>
+<span class="kn">from</span> <span class="nn">.utils</span> <span class="k">import</span> <span class="n">PyKEArgumentHelpFormatter</span>
+<span class="kn">from</span> <span class="nn">.targetpixelfile</span> <span class="k">import</span> <span class="n">KeplerTargetPixelFile</span><span class="p">,</span> <span class="n">KeplerQualityFlags</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">kepio</span><span class="p">,</span> <span class="n">kepmsg</span><span class="p">,</span> <span class="n">kepkey</span><span class="p">,</span> <span class="n">kepstat</span><span class="p">,</span> <span class="n">kepfunc</span>
+
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;kepextract&#39;</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="kepextract"><a class="viewcode-back" href="../../api/kepextract.html#pyke.kepextract.kepextract">[docs]</a><span class="k">def</span> <span class="nf">kepextract</span><span class="p">(</span><span class="n">infile</span><span class="p">,</span> <span class="n">outfile</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">bitmask</span><span class="o">=</span><span class="n">KeplerQualityFlags</span><span class="o">.</span><span class="n">DEFAULT_BITMASK</span><span class="p">,</span>
+               <span class="n">maskfile</span><span class="o">=</span><span class="s1">&#39;ALL&#39;</span><span class="p">,</span> <span class="n">bkg</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">psfcentroid</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+               <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">logfile</span><span class="o">=</span><span class="s1">&#39;kepextract.log&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    kepextract -- create a light curve from a target pixel file by summing</span>
+<span class="sd">    user-selected pixels</span>
+
+<span class="sd">    kepextract calculates simple aperture photometry, from a target pixel file,</span>
+<span class="sd">    for a user-supplied set of pixels. The Kepler pipeline sums a specific set</span>
+<span class="sd">    of pixels to produce the standard light curves delivered to users. Termed</span>
+<span class="sd">    the optimal aperture, the default pixel set is designed to maximize the</span>
+<span class="sd">    signal-to-noise ratio of the resulting light curve, optimizing for transit</span>
+<span class="sd">    detection. This tool provides users with a straightforward capability to</span>
+<span class="sd">    alter the summed pixel set. Applications include:</span>
+
+<span class="sd">        * Use of all pixels in the aperture</span>
+<span class="sd">        * The Kepler pipeline does not produce a light curve for sources observed with</span>
+<span class="sd">          custom or dedicated pixel masks. The user can create a light curve for</span>
+<span class="sd">          these sources using kepextract.</span>
+<span class="sd">        * Construction of pixel light curves, in which the time series for a single</span>
+<span class="sd">          pixel can be examined.</span>
+<span class="sd">        * Light curves for extended sources which may be</span>
+<span class="sd">          poorly sampled by the optimal aperture.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    infile : str</span>
+<span class="sd">        Filename for the target pixel file.</span>
+<span class="sd">    outfile : str</span>
+<span class="sd">        Filename for the output light curve. This product will be written to</span>
+<span class="sd">        the same FITS format as archived light curves.</span>
+<span class="sd">    bitmask : int</span>
+<span class="sd">        QUALITY bitmask used to reject poor-quality cadences.</span>
+<span class="sd">    maskfile : str</span>
+<span class="sd">        This string can be one of three options:</span>
+
+<span class="sd">            * &#39;ALL&#39; tells the task to calculate principal components from all</span>
+<span class="sd">              pixels within the pixel mask stored in the input file.</span>
+<span class="sd">            * &#39;APER&#39; tells the task to calculate principal components from only</span>
+<span class="sd">              the pixels within the photometric aperture stored in the input file</span>
+<span class="sd">              (e.g. only those pixels summed by the Kepler pipeline to produce</span>
+<span class="sd">              the light curve archived at MAST.</span>
+<span class="sd">            * A filename describing the desired photometric aperture. Such a</span>
+<span class="sd">              file can be constructed using the kepmask or kepffi tools, or can</span>
+<span class="sd">              be created manually using the format described in the documentation</span>
+<span class="sd">              for those tools.</span>
+<span class="sd">    bkg : bool</span>
+<span class="sd">        Option to subtract an estimate of the background. Background is</span>
+<span class="sd">        calculated by identifying the median pixel value for each exposure.</span>
+<span class="sd">        This method requires an adequate number of pixels within the target</span>
+<span class="sd">        mask that contain background and negligible source flux. Note that</span>
+<span class="sd">        background has already been subtracted from calibrated Kepler Target</span>
+<span class="sd">        Pixel Files, but not early campaign data from the K2 mission.</span>
+<span class="sd">    psfcentroid : bool</span>
+<span class="sd">        Measure the star&#39;s position by fitting a 2D Gaussian PSF to the pixels</span>
+<span class="sd">        in the mask. This will populate values for PSF_CENTR1 (column position)</span>
+<span class="sd">        and PSF_CENTR2 (row position) in the output file.</span>
+<span class="sd">    overwrite : bool</span>
+<span class="sd">        Overwrite the output file?</span>
+<span class="sd">    verbose : bool</span>
+<span class="sd">        Option for verbose mode, in which informative messages and warnings</span>
+<span class="sd">        print to the shell and a logfile.</span>
+<span class="sd">    logfile : str</span>
+<span class="sd">        Name of the logfile containing error and warning messages.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    .. code-block:: bash</span>
+
+<span class="sd">        $ kepextract kplr008256049-2010174085026_lpd-targ.fits --maskfile ALL</span>
+
+<span class="sd">    One further can plot the resulted light curve by doing</span>
+
+<span class="sd">    .. code-block:: python</span>
+
+<span class="sd">        import matplotlib.pyplot as plt</span>
+<span class="sd">        from astropy.io import fits</span>
+
+<span class="sd">        f = fits.open(&#39;outlc.fits&#39;)</span>
+<span class="sd">        plt.plot(f[1].data[&#39;TIME&#39;], f[1].data[&#39;SAP_FLUX&#39;])</span>
+
+<span class="sd">    or</span>
+
+<span class="sd">    .. code-block:: bash</span>
+
+<span class="sd">        $ kepdraw outlc.fits</span>
+
+<span class="sd">    .. image:: ../_static/images/api/kepextract.png</span>
+<span class="sd">        :align: center</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">outfile</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">outfile</span> <span class="o">=</span> <span class="n">infile</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;-</span><span class="si">{}</span><span class="s2">.fits&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">__all__</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="c1"># log the call</span>
+    <span class="n">hashline</span> <span class="o">=</span> <span class="s1">&#39;--------------------------------------------------------------&#39;</span>
+    <span class="n">kepmsg</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">logfile</span><span class="p">,</span> <span class="n">hashline</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+    <span class="n">call</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;KEPEXTRACT -- &#39;</span>
+            <span class="o">+</span> <span class="s1">&#39; infile=</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">infile</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s1">&#39; maskfile=</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">maskfile</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s1">&#39; outfile=</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">outfile</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s1">&#39; background=</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">bkg</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s1">&#39; psfcentroid=</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">psfcentroid</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s1">&#39; overwrite=</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">overwrite</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s1">&#39; verbose=</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">verbose</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s1">&#39; logfile=</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">logfile</span><span class="p">))</span>
+    <span class="n">kepmsg</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">logfile</span><span class="p">,</span> <span class="n">call</span><span class="o">+</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+
+    <span class="c1"># start time</span>
+    <span class="n">kepmsg</span><span class="o">.</span><span class="n">clock</span><span class="p">(</span><span class="s1">&#39;KEPEXTRACT started at&#39;</span><span class="p">,</span><span class="n">logfile</span><span class="p">,</span><span class="n">verbose</span><span class="p">)</span>
+    <span class="c1"># overwrite output file</span>
+    <span class="k">if</span> <span class="n">overwrite</span><span class="p">:</span>
+        <span class="n">kepio</span><span class="o">.</span><span class="n">overwrite</span><span class="p">(</span><span class="n">outfile</span><span class="p">,</span> <span class="n">logfile</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">kepio</span><span class="o">.</span><span class="n">fileexists</span><span class="p">(</span><span class="n">outfile</span><span class="p">):</span>
+        <span class="n">errmsg</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;ERROR -- KEPEXTRACT: </span><span class="si">{}</span><span class="s1"> exists. Use --overwrite&#39;</span>
+                  <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">outfile</span><span class="p">))</span>
+        <span class="n">kepmsg</span><span class="o">.</span><span class="n">err</span><span class="p">(</span><span class="n">logfile</span><span class="p">,</span> <span class="n">errmsg</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+
+    <span class="c1"># open input file</span>
+    <span class="n">tpf</span> <span class="o">=</span> <span class="n">KeplerTargetPixelFile</span><span class="p">(</span><span class="n">infile</span><span class="p">,</span> <span class="n">quality_bitmask</span><span class="o">=</span><span class="n">bitmask</span><span class="p">,</span>
+                                <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;readonly&#39;</span><span class="p">,</span> <span class="n">memmap</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">instr</span> <span class="o">=</span> <span class="n">tpf</span><span class="o">.</span><span class="n">hdu</span>
+    <span class="n">tstart</span><span class="p">,</span> <span class="n">tstop</span><span class="p">,</span> <span class="n">bjdref</span><span class="p">,</span> <span class="n">cadence</span> <span class="o">=</span> <span class="n">kepio</span><span class="o">.</span><span class="n">timekeys</span><span class="p">(</span><span class="n">instr</span><span class="p">,</span> <span class="n">infile</span><span class="p">,</span>
+                                                    <span class="n">logfile</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+
+    <span class="c1"># fudge non-compliant FITS keywords with no values</span>
+    <span class="n">instr</span> <span class="o">=</span> <span class="n">kepkey</span><span class="o">.</span><span class="n">emptykeys</span><span class="p">(</span><span class="n">instr</span><span class="p">,</span> <span class="n">infile</span><span class="p">,</span> <span class="n">logfile</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+
+    <span class="c1"># input file data</span>
+    <span class="n">cards0</span> <span class="o">=</span> <span class="n">instr</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">header</span><span class="o">.</span><span class="n">cards</span>
+    <span class="n">cards1</span> <span class="o">=</span> <span class="n">instr</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">header</span><span class="o">.</span><span class="n">cards</span>
+    <span class="n">cards2</span> <span class="o">=</span> <span class="n">instr</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">header</span><span class="o">.</span><span class="n">cards</span>
+    <span class="n">table</span> <span class="o">=</span> <span class="n">instr</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">[:]</span>
+    <span class="n">maskmap</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="n">instr</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+
+    <span class="n">kepmsg</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">logfile</span><span class="p">,</span> <span class="s2">&quot;Extracting information from Target Pixel File...&quot;</span><span class="p">,</span>
+               <span class="n">verbose</span><span class="p">)</span>
+
+    <span class="c1"># input table data</span>
+    <span class="n">timecorr</span> <span class="o">=</span> <span class="n">tpf</span><span class="o">.</span><span class="n">hdu</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;TIMECORR&#39;</span><span class="p">][</span><span class="n">tpf</span><span class="o">.</span><span class="n">quality_mask</span><span class="p">]</span>
+    <span class="n">cadenceno</span> <span class="o">=</span> <span class="n">tpf</span><span class="o">.</span><span class="n">hdu</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;CADENCENO&#39;</span><span class="p">][</span><span class="n">tpf</span><span class="o">.</span><span class="n">quality_mask</span><span class="p">]</span>
+    <span class="n">newshape</span> <span class="o">=</span> <span class="p">(</span><span class="n">tpf</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">tpf</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">tpf</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+    <span class="n">raw_cnts</span> <span class="o">=</span> <span class="n">tpf</span><span class="o">.</span><span class="n">hdu</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;RAW_CNTS&#39;</span><span class="p">][</span><span class="n">tpf</span><span class="o">.</span><span class="n">quality_mask</span><span class="p">]</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">newshape</span><span class="p">)</span>
+    <span class="n">flux_err</span> <span class="o">=</span> <span class="n">tpf</span><span class="o">.</span><span class="n">hdu</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;FLUX_ERR&#39;</span><span class="p">][</span><span class="n">tpf</span><span class="o">.</span><span class="n">quality_mask</span><span class="p">]</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">newshape</span><span class="p">)</span>
+    <span class="n">flux_bkg</span> <span class="o">=</span> <span class="n">tpf</span><span class="o">.</span><span class="n">hdu</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;FLUX_BKG&#39;</span><span class="p">][</span><span class="n">tpf</span><span class="o">.</span><span class="n">quality_mask</span><span class="p">]</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">newshape</span><span class="p">)</span>
+    <span class="n">flux_bkg_err</span> <span class="o">=</span> <span class="n">tpf</span><span class="o">.</span><span class="n">hdu</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;FLUX_BKG_ERR&#39;</span><span class="p">][</span><span class="n">tpf</span><span class="o">.</span><span class="n">quality_mask</span><span class="p">]</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">newshape</span><span class="p">)</span>
+    <span class="n">cosmic_rays</span> <span class="o">=</span> <span class="n">tpf</span><span class="o">.</span><span class="n">hdu</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;COSMIC_RAYS&#39;</span><span class="p">][</span><span class="n">tpf</span><span class="o">.</span><span class="n">quality_mask</span><span class="p">]</span>
+    <span class="n">time</span> <span class="o">=</span> <span class="n">tpf</span><span class="o">.</span><span class="n">hdu</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;TIME&#39;</span><span class="p">][</span><span class="n">tpf</span><span class="o">.</span><span class="n">quality_mask</span><span class="p">]</span>
+    <span class="n">flux</span> <span class="o">=</span> <span class="n">tpf</span><span class="o">.</span><span class="n">hdu</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;FLUX&#39;</span><span class="p">][</span><span class="n">tpf</span><span class="o">.</span><span class="n">quality_mask</span><span class="p">]</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">newshape</span><span class="p">)</span>
+    <span class="n">quality</span> <span class="o">=</span> <span class="n">tpf</span><span class="o">.</span><span class="n">hdu</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;QUALITY&#39;</span><span class="p">][</span><span class="n">tpf</span><span class="o">.</span><span class="n">quality_mask</span><span class="p">]</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1">#  ---for FITS wave #2</span>
+        <span class="n">pos_corr1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">tpf</span><span class="o">.</span><span class="n">hdu</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;POS_CORR1&#39;</span><span class="p">][</span><span class="n">tpf</span><span class="o">.</span><span class="n">quality_mask</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float64&#39;</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">pos_corr1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">time</span><span class="p">))</span>
+        <span class="c1"># ---temporary before FITS wave #2</span>
+        <span class="n">pos_corr1</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1">#  ---for FITS wave #2</span>
+        <span class="n">pos_corr2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">tpf</span><span class="o">.</span><span class="n">hdu</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;POS_CORR2&#39;</span><span class="p">][</span><span class="n">tpf</span><span class="o">.</span><span class="n">quality_mask</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float64&#39;</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">pos_corr2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">time</span><span class="p">))</span>
+        <span class="c1"># ---temporary before FITS wave #2</span>
+        <span class="n">pos_corr2</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+
+    <span class="c1"># dummy columns for output file</span>
+    <span class="n">psf_centr1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">time</span><span class="p">))</span>
+    <span class="n">psf_centr1</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+    <span class="n">psf_centr2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">time</span><span class="p">))</span>
+    <span class="n">psf_centr2</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+    <span class="n">mom_centr1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">time</span><span class="p">))</span>
+    <span class="n">mom_centr1</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+    <span class="n">mom_centr2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">time</span><span class="p">))</span>
+    <span class="n">mom_centr2</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+    <span class="n">psf_centr1_err</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">time</span><span class="p">))</span>
+    <span class="n">psf_centr1_err</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+    <span class="n">psf_centr2_err</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">time</span><span class="p">))</span>
+    <span class="n">psf_centr2_err</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+    <span class="n">mom_centr1_err</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">time</span><span class="p">))</span>
+    <span class="n">mom_centr1_err</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+    <span class="n">mom_centr2_err</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">time</span><span class="p">))</span>
+    <span class="n">mom_centr2_err</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+
+    <span class="c1"># read mask definition file</span>
+    <span class="k">if</span> <span class="s1">&#39;aper&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">maskfile</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">and</span> <span class="n">maskfile</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">!=</span> <span class="s1">&#39;all&#39;</span><span class="p">:</span>
+        <span class="n">maskx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([],</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span>
+        <span class="n">masky</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([],</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span>
+        <span class="n">lines</span> <span class="o">=</span> <span class="n">kepio</span><span class="o">.</span><span class="n">openascii</span><span class="p">(</span><span class="n">maskfile</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">logfile</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">:</span>
+            <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;|&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">line</span><span class="p">)</span> <span class="o">==</span> <span class="mi">6</span><span class="p">:</span>
+                <span class="n">y0</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
+                <span class="n">x0</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">4</span><span class="p">])</span>
+                <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;;&#39;</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">items</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">masky</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">masky</span><span class="p">,</span><span class="n">y0</span> <span class="o">+</span> <span class="nb">int</span><span class="p">(</span><span class="n">items</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]))</span>
+                        <span class="n">maskx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">maskx</span><span class="p">,</span><span class="n">x0</span> <span class="o">+</span> <span class="nb">int</span><span class="p">(</span><span class="n">items</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]))</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="k">continue</span>
+        <span class="n">kepio</span><span class="o">.</span><span class="n">closeascii</span><span class="p">(</span><span class="n">lines</span><span class="p">,</span> <span class="n">logfile</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">maskx</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">masky</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">errmsg</span> <span class="o">=</span> <span class="s1">&#39;ERROR -- KEPEXTRACT: </span><span class="si">{}</span><span class="s1"> contains no pixels.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">maskfile</span><span class="p">)</span>
+            <span class="n">kepmsg</span><span class="o">.</span><span class="n">err</span><span class="p">(</span><span class="n">logfile</span><span class="p">,</span> <span class="n">errmsg</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+
+    <span class="c1"># subimage physical WCS data</span>
+    <span class="n">crpix1p</span> <span class="o">=</span> <span class="n">cards2</span><span class="p">[</span><span class="s1">&#39;CRPIX1P&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+    <span class="n">crpix2p</span> <span class="o">=</span> <span class="n">cards2</span><span class="p">[</span><span class="s1">&#39;CRPIX2P&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+    <span class="n">crval1p</span> <span class="o">=</span> <span class="n">cards2</span><span class="p">[</span><span class="s1">&#39;CRVAL1P&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+    <span class="n">crval2p</span> <span class="o">=</span> <span class="n">cards2</span><span class="p">[</span><span class="s1">&#39;CRVAL2P&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+    <span class="n">cdelt1p</span> <span class="o">=</span> <span class="n">cards2</span><span class="p">[</span><span class="s1">&#39;CDELT1P&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+    <span class="n">cdelt2p</span> <span class="o">=</span> <span class="n">cards2</span><span class="p">[</span><span class="s1">&#39;CDELT2P&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+
+    <span class="c1"># define new subimage bitmap...</span>
+    <span class="k">if</span> <span class="s1">&#39;aper&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">maskfile</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">and</span> <span class="n">maskfile</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">!=</span> <span class="s1">&#39;all&#39;</span><span class="p">:</span>
+        <span class="n">aperx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([],</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span>
+        <span class="n">apery</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([],</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span>
+        <span class="n">aperb</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([],</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">maskmap</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">maskmap</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
+                <span class="n">aperx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">aperx</span><span class="p">,</span> <span class="n">crval1p</span> <span class="o">+</span> <span class="p">(</span><span class="n">j</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">crpix1p</span><span class="p">)</span> <span class="o">*</span> <span class="n">cdelt1p</span><span class="p">)</span>
+                <span class="n">apery</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">apery</span><span class="p">,</span> <span class="n">crval2p</span> <span class="o">+</span> <span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">crpix2p</span><span class="p">)</span> <span class="o">*</span> <span class="n">cdelt2p</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">maskmap</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">aperb</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">aperb</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">aperb</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">aperb</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+                    <span class="n">maskmap</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+                    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">maskx</span><span class="p">)):</span>
+                        <span class="k">if</span> <span class="n">aperx</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">maskx</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="ow">and</span> <span class="n">apery</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">masky</span><span class="p">[</span><span class="n">k</span><span class="p">]:</span>
+                            <span class="n">aperb</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">3</span>
+                            <span class="n">maskmap</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="mi">3</span>
+
+    <span class="c1"># trap case where no aperture needs to be defined but pixel positions are</span>
+    <span class="c1"># still required for centroiding</span>
+    <span class="k">if</span> <span class="n">maskfile</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;all&#39;</span><span class="p">:</span>
+        <span class="n">aperx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([],</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span>
+        <span class="n">apery</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([],</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span>
+        <span class="n">aperb</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([],</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">maskmap</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">maskmap</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
+                <span class="n">aperx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">aperx</span><span class="p">,</span><span class="n">crval1p</span> <span class="o">+</span> <span class="p">(</span><span class="n">j</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">crpix1p</span><span class="p">)</span> <span class="o">*</span> <span class="n">cdelt1p</span><span class="p">)</span>
+                <span class="n">apery</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">apery</span><span class="p">,</span><span class="n">crval2p</span> <span class="o">+</span> <span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">crpix2p</span><span class="p">)</span> <span class="o">*</span> <span class="n">cdelt2p</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">maskmap</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">aperb</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">aperb</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">aperb</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">aperb</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+                    <span class="n">maskmap</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="mi">3</span>
+
+    <span class="c1"># ...or use old subimage bitmap</span>
+    <span class="k">if</span> <span class="s1">&#39;aper&#39;</span> <span class="ow">in</span> <span class="n">maskfile</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+        <span class="n">aperx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([],</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span>
+        <span class="n">apery</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([],</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span>
+        <span class="n">aperb</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([],</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">maskmap</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">maskmap</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
+                <span class="n">aperb</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">aperb</span><span class="p">,</span> <span class="n">maskmap</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">])</span>
+                <span class="n">aperx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">aperx</span><span class="p">,</span> <span class="n">crval1p</span> <span class="o">+</span> <span class="p">(</span><span class="n">j</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">crpix1p</span><span class="p">)</span> <span class="o">*</span> <span class="n">cdelt1p</span><span class="p">)</span>
+                <span class="n">apery</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">apery</span><span class="p">,</span> <span class="n">crval2p</span> <span class="o">+</span> <span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">crpix2p</span><span class="p">)</span> <span class="o">*</span> <span class="n">cdelt2p</span><span class="p">)</span>
+
+    <span class="c1"># subtract median pixel value for background?</span>
+    <span class="n">sky</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">time</span><span class="p">),</span> <span class="s1">&#39;float32&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">bkg</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">time</span><span class="p">)):</span>
+            <span class="n">sky</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nanmedian</span><span class="p">(</span><span class="n">flux</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:])</span>
+
+    <span class="c1"># legal mask defined?</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">aperb</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">errmsg</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;ERROR -- KEPEXTRACT: no legal pixels within the subimage&#39;</span>
+                  <span class="s1">&#39; are defined.&#39;</span><span class="p">)</span>
+        <span class="n">kepmsg</span><span class="o">.</span><span class="n">err</span><span class="p">(</span><span class="n">logfile</span><span class="p">,</span> <span class="n">errmsg</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+
+    <span class="c1"># construct new table flux data</span>
+    <span class="n">naper</span> <span class="o">=</span> <span class="p">(</span><span class="n">aperb</span> <span class="o">==</span> <span class="mi">3</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+    <span class="n">ntime</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">time</span><span class="p">)</span>
+    <span class="n">sap_flux</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([],</span> <span class="s1">&#39;float32&#39;</span><span class="p">)</span>
+    <span class="n">sap_flux_err</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([],</span> <span class="s1">&#39;float32&#39;</span><span class="p">)</span>
+    <span class="n">sap_bkg</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([],</span> <span class="s1">&#39;float32&#39;</span><span class="p">)</span>
+    <span class="n">sap_bkg_err</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([],</span> <span class="s1">&#39;float32&#39;</span><span class="p">)</span>
+    <span class="n">raw_flux</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([],</span><span class="s1">&#39;float32&#39;</span><span class="p">)</span>
+    <span class="n">kepmsg</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">logfile</span><span class="p">,</span><span class="s2">&quot;Aperture photometry...&quot;</span><span class="p">,</span><span class="n">verbose</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">time</span><span class="p">)),</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Aperture photometry&quot;</span><span class="p">):</span>
+        <span class="n">work1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([],</span> <span class="s1">&#39;float64&#39;</span><span class="p">)</span>
+        <span class="n">work2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([],</span> <span class="s1">&#39;float64&#39;</span><span class="p">)</span>
+        <span class="n">work3</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([],</span> <span class="s1">&#39;float64&#39;</span><span class="p">)</span>
+        <span class="n">work4</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([],</span> <span class="s1">&#39;float64&#39;</span><span class="p">)</span>
+        <span class="n">work5</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([],</span> <span class="s1">&#39;float64&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">aperb</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="n">aperb</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+                <span class="n">work1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">work1</span><span class="p">,</span> <span class="n">flux</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">-</span> <span class="n">sky</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+                <span class="n">work2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">work2</span><span class="p">,</span> <span class="n">flux_err</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">])</span>
+                <span class="n">work3</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">work3</span><span class="p">,</span> <span class="n">flux_bkg</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">])</span>
+                <span class="n">work4</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">work4</span><span class="p">,</span> <span class="n">flux_bkg_err</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">])</span>
+                <span class="n">work5</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">work5</span><span class="p">,</span> <span class="n">raw_cnts</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">])</span>
+        <span class="n">sap_flux</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sap_flux</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nansum</span><span class="p">(</span><span class="n">work1</span><span class="p">))</span>
+        <span class="n">sap_flux_err</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sap_flux_err</span><span class="p">,</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">nansum</span><span class="p">(</span><span class="n">work2</span> <span class="o">*</span> <span class="n">work2</span><span class="p">)))</span>
+        <span class="n">sap_bkg</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sap_bkg</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nansum</span><span class="p">(</span><span class="n">work3</span><span class="p">))</span>
+        <span class="n">sap_bkg_err</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sap_bkg_err</span><span class="p">,</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">nansum</span><span class="p">(</span><span class="n">work4</span> <span class="o">*</span> <span class="n">work4</span><span class="p">)))</span>
+        <span class="n">raw_flux</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">raw_flux</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nansum</span><span class="p">(</span><span class="n">work5</span><span class="p">))</span>
+
+    <span class="n">kepmsg</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">logfile</span><span class="p">,</span><span class="s2">&quot;Sample moments...&quot;</span><span class="p">,</span><span class="n">verbose</span><span class="p">)</span>
+    <span class="c1"># construct new table moment data</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">ntime</span><span class="p">),</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Computing moments&quot;</span><span class="p">):</span>
+        <span class="n">xf</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">naper</span><span class="p">))</span>
+        <span class="n">yf</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">naper</span><span class="p">))</span>
+        <span class="n">f</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">naper</span><span class="p">))</span>
+        <span class="n">xfe</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">naper</span><span class="p">))</span>
+        <span class="n">yfe</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">naper</span><span class="p">))</span>
+        <span class="n">fe</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">naper</span><span class="p">))</span>
+        <span class="n">k</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">aperb</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="n">aperb</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+                <span class="n">k</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="n">xf</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">aperx</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">*</span> <span class="n">flux</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span>
+                <span class="n">xfe</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">aperx</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">*</span> <span class="n">flux_err</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span>
+                <span class="n">yf</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">apery</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">*</span> <span class="n">flux</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span>
+                <span class="n">yfe</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">apery</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">*</span> <span class="n">flux_err</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span>
+                <span class="n">f</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">flux</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span>
+                <span class="n">fe</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">flux_err</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span>
+        <span class="n">xfsum</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nansum</span><span class="p">(</span><span class="n">xf</span><span class="p">)</span>
+        <span class="n">yfsum</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nansum</span><span class="p">(</span><span class="n">yf</span><span class="p">)</span>
+        <span class="n">fsum</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nansum</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+        <span class="n">xfsume</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">nansum</span><span class="p">(</span><span class="n">xfe</span> <span class="o">*</span> <span class="n">xfe</span><span class="p">)</span> <span class="o">/</span> <span class="n">naper</span><span class="p">)</span>
+        <span class="n">yfsume</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">nansum</span><span class="p">(</span><span class="n">yfe</span> <span class="o">*</span> <span class="n">yfe</span><span class="p">)</span> <span class="o">/</span> <span class="n">naper</span><span class="p">)</span>
+        <span class="n">fsume</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">nansum</span><span class="p">(</span><span class="n">fe</span> <span class="o">*</span> <span class="n">fe</span><span class="p">)</span> <span class="o">/</span> <span class="n">naper</span><span class="p">)</span>
+        <span class="c1"># Ignore &quot;RuntimeWarning: invalid value encountered in double_scalars&quot;</span>
+        <span class="k">with</span> <span class="n">np</span><span class="o">.</span><span class="n">errstate</span><span class="p">(</span><span class="n">divide</span><span class="o">=</span><span class="s1">&#39;ignore&#39;</span><span class="p">,</span> <span class="n">invalid</span><span class="o">=</span><span class="s1">&#39;ignore&#39;</span><span class="p">):</span>
+            <span class="n">mom_centr1</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">xfsum</span> <span class="o">/</span> <span class="n">fsum</span>
+            <span class="n">mom_centr2</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">yfsum</span> <span class="o">/</span> <span class="n">fsum</span>
+            <span class="n">mom_centr1_err</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="n">xfsume</span> <span class="o">/</span> <span class="n">xfsum</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="p">((</span><span class="n">fsume</span> <span class="o">/</span> <span class="n">fsum</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">))</span>
+            <span class="n">mom_centr2_err</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="n">yfsume</span> <span class="o">/</span> <span class="n">yfsum</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="p">((</span><span class="n">fsume</span> <span class="o">/</span> <span class="n">fsum</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">))</span>
+    <span class="n">mom_centr1_err</span> <span class="o">=</span> <span class="n">mom_centr1_err</span> <span class="o">*</span> <span class="n">mom_centr1</span>
+    <span class="n">mom_centr2_err</span> <span class="o">=</span> <span class="n">mom_centr2_err</span> <span class="o">*</span> <span class="n">mom_centr2</span>
+
+    <span class="k">if</span> <span class="n">psfcentroid</span><span class="p">:</span>
+        <span class="n">kepmsg</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">logfile</span><span class="p">,</span><span class="s2">&quot;PSF Centroiding...&quot;</span><span class="p">,</span><span class="n">verbose</span><span class="p">)</span>
+        <span class="c1"># construct new table PSF data</span>
+        <span class="n">psf_centr1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">ntime</span><span class="p">))</span>
+        <span class="n">psf_centr2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">ntime</span><span class="p">))</span>
+        <span class="n">psf_centr1_err</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">ntime</span><span class="p">))</span>
+        <span class="n">psf_centr2_err</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">ntime</span><span class="p">))</span>
+        <span class="n">modx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">naper</span><span class="p">))</span>
+        <span class="n">mody</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">naper</span><span class="p">))</span>
+        <span class="n">k</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">aperb</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">aperb</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">==</span> <span class="mi">3</span><span class="p">):</span>
+                <span class="n">k</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="n">modx</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">aperx</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
+                <span class="n">mody</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">apery</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">ntime</span><span class="p">),</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;PSF centroiding&#39;</span><span class="p">):</span>
+            <span class="n">modf</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">naper</span><span class="p">))</span>
+            <span class="n">k</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+            <span class="n">guess</span> <span class="o">=</span> <span class="p">[</span><span class="n">mom_centr1</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">mom_centr2</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">nanmax</span><span class="p">(</span><span class="n">flux</span><span class="p">[</span><span class="n">i</span><span class="p">:]),</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">aperb</span><span class="p">)):</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">aperb</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">==</span> <span class="mi">3</span><span class="p">):</span>
+                    <span class="n">k</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="n">modf</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">flux</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">]</span>
+                    <span class="n">args</span> <span class="o">=</span> <span class="p">(</span><span class="n">modx</span><span class="p">,</span> <span class="n">mody</span><span class="p">,</span> <span class="n">modf</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">ans</span> <span class="o">=</span> <span class="n">leastsq</span><span class="p">(</span><span class="n">kepfunc</span><span class="o">.</span><span class="n">PRFgauss2d</span><span class="p">,</span> <span class="n">guess</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">,</span> <span class="n">xtol</span><span class="o">=</span><span class="mf">1.0e-8</span><span class="p">,</span>
+                              <span class="n">ftol</span><span class="o">=</span><span class="mf">1.0e-4</span><span class="p">,</span> <span class="n">full_output</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="n">s_sq</span> <span class="o">=</span> <span class="p">(</span><span class="n">ans</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="s1">&#39;fvec&#39;</span><span class="p">]</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">/</span> <span class="p">(</span><span class="n">ntime</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">guess</span><span class="p">))</span>
+                <span class="n">psf_centr1</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">ans</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">psf_centr2</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">ans</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="k">pass</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">psf_centr1_err</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">sqrt</span><span class="p">(</span><span class="n">diag</span><span class="p">(</span><span class="n">ans</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">s_sq</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">psf_centr1_err</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">psf_centr2_err</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">sqrt</span><span class="p">(</span><span class="n">diag</span><span class="p">(</span><span class="n">ans</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">s_sq</span><span class="p">))[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">psf_centr2_err</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+
+    <span class="c1"># construct output primary extension</span>
+    <span class="n">hdu0</span> <span class="o">=</span> <span class="n">pyfits</span><span class="o">.</span><span class="n">PrimaryHDU</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">cards0</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="n">cards0</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">keyword</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">hdu0</span><span class="o">.</span><span class="n">header</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">hdu0</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="n">cards0</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">keyword</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">cards0</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">cards0</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">comment</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">hdu0</span><span class="o">.</span><span class="n">header</span><span class="o">.</span><span class="n">cards</span><span class="p">[</span><span class="n">cards0</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">keyword</span><span class="p">]</span><span class="o">.</span><span class="n">comment</span> <span class="o">=</span> <span class="n">cards0</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">comment</span>
+    <span class="n">kepkey</span><span class="o">.</span><span class="n">history</span><span class="p">(</span><span class="n">call</span><span class="p">,</span> <span class="n">hdu0</span><span class="p">,</span> <span class="n">outfile</span><span class="p">,</span> <span class="n">logfile</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+    <span class="n">outstr</span> <span class="o">=</span> <span class="n">pyfits</span><span class="o">.</span><span class="n">HDUList</span><span class="p">(</span><span class="n">hdu0</span><span class="p">)</span>
+
+    <span class="c1"># construct output light curve extension</span>
+    <span class="n">col1</span> <span class="o">=</span> <span class="n">pyfits</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;TIME&#39;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;D&#39;</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;BJD - 2454833&#39;</span><span class="p">,</span>
+                         <span class="n">array</span><span class="o">=</span><span class="n">time</span><span class="p">)</span>
+    <span class="n">col2</span> <span class="o">=</span> <span class="n">pyfits</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;TIMECORR&#39;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;E&#39;</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;d&#39;</span><span class="p">,</span> <span class="n">array</span><span class="o">=</span><span class="n">timecorr</span><span class="p">)</span>
+    <span class="n">col3</span> <span class="o">=</span> <span class="n">pyfits</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;CADENCENO&#39;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;J&#39;</span><span class="p">,</span> <span class="n">array</span><span class="o">=</span><span class="n">cadenceno</span><span class="p">)</span>
+    <span class="n">col4</span> <span class="o">=</span> <span class="n">pyfits</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;SAP_FLUX&#39;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;E&#39;</span><span class="p">,</span> <span class="n">array</span><span class="o">=</span><span class="n">sap_flux</span><span class="p">)</span>
+    <span class="n">col5</span> <span class="o">=</span> <span class="n">pyfits</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;SAP_FLUX_ERR&#39;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;E&#39;</span><span class="p">,</span> <span class="n">array</span><span class="o">=</span><span class="n">sap_flux_err</span><span class="p">)</span>
+    <span class="n">col6</span> <span class="o">=</span> <span class="n">pyfits</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;SAP_BKG&#39;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;E&#39;</span><span class="p">,</span> <span class="n">array</span><span class="o">=</span><span class="n">sap_bkg</span><span class="p">)</span>
+    <span class="n">col7</span> <span class="o">=</span> <span class="n">pyfits</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;SAP_BKG_ERR&#39;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;E&#39;</span><span class="p">,</span> <span class="n">array</span><span class="o">=</span><span class="n">sap_bkg_err</span><span class="p">)</span>
+    <span class="n">col8</span> <span class="o">=</span> <span class="n">pyfits</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;PDCSAP_FLUX&#39;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;E&#39;</span><span class="p">,</span> <span class="n">array</span><span class="o">=</span><span class="n">sap_flux</span><span class="p">)</span>
+    <span class="n">col9</span> <span class="o">=</span> <span class="n">pyfits</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;PDCSAP_FLUX_ERR&#39;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;E&#39;</span><span class="p">,</span>
+                         <span class="n">array</span><span class="o">=</span><span class="n">sap_flux_err</span><span class="p">)</span>
+    <span class="n">col10</span> <span class="o">=</span> <span class="n">pyfits</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;SAP_QUALITY&#39;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;J&#39;</span><span class="p">,</span> <span class="n">array</span><span class="o">=</span><span class="n">quality</span><span class="p">)</span>
+    <span class="n">col11</span> <span class="o">=</span> <span class="n">pyfits</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;PSF_CENTR1&#39;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;E&#39;</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;pixel&#39;</span><span class="p">,</span>
+                          <span class="n">array</span><span class="o">=</span><span class="n">psf_centr1</span><span class="p">)</span>
+    <span class="n">col12</span> <span class="o">=</span> <span class="n">pyfits</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;PSF_CENTR1_ERR&#39;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;E&#39;</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;pixel&#39;</span><span class="p">,</span>
+                          <span class="n">array</span><span class="o">=</span><span class="n">psf_centr1_err</span><span class="p">)</span>
+    <span class="n">col13</span> <span class="o">=</span> <span class="n">pyfits</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;PSF_CENTR2&#39;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;E&#39;</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;pixel&#39;</span><span class="p">,</span>
+                          <span class="n">array</span><span class="o">=</span><span class="n">psf_centr2</span><span class="p">)</span>
+    <span class="n">col14</span> <span class="o">=</span> <span class="n">pyfits</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;PSF_CENTR2_ERR&#39;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;E&#39;</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;pixel&#39;</span><span class="p">,</span>
+                          <span class="n">array</span><span class="o">=</span><span class="n">psf_centr2_err</span><span class="p">)</span>
+    <span class="n">col15</span> <span class="o">=</span> <span class="n">pyfits</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;MOM_CENTR1&#39;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;E&#39;</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;pixel&#39;</span><span class="p">,</span>
+                          <span class="n">array</span><span class="o">=</span><span class="n">mom_centr1</span><span class="p">)</span>
+    <span class="n">col16</span> <span class="o">=</span> <span class="n">pyfits</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;MOM_CENTR1_ERR&#39;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;E&#39;</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;pixel&#39;</span><span class="p">,</span>
+                          <span class="n">array</span><span class="o">=</span><span class="n">mom_centr1_err</span><span class="p">)</span>
+    <span class="n">col17</span> <span class="o">=</span> <span class="n">pyfits</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;MOM_CENTR2&#39;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;E&#39;</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;pixel&#39;</span><span class="p">,</span>
+                          <span class="n">array</span><span class="o">=</span><span class="n">mom_centr2</span><span class="p">)</span>
+    <span class="n">col18</span> <span class="o">=</span> <span class="n">pyfits</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;MOM_CENTR2_ERR&#39;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;E&#39;</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;pixel&#39;</span><span class="p">,</span>
+                          <span class="n">array</span><span class="o">=</span><span class="n">mom_centr2_err</span><span class="p">)</span>
+    <span class="n">col19</span> <span class="o">=</span> <span class="n">pyfits</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;POS_CORR1&#39;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;E&#39;</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;pixel&#39;</span><span class="p">,</span>
+                          <span class="n">array</span><span class="o">=</span><span class="n">pos_corr1</span><span class="p">)</span>
+    <span class="n">col20</span> <span class="o">=</span> <span class="n">pyfits</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;POS_CORR2&#39;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;E&#39;</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;pixel&#39;</span><span class="p">,</span>
+                          <span class="n">array</span><span class="o">=</span><span class="n">pos_corr2</span><span class="p">)</span>
+    <span class="n">col21</span> <span class="o">=</span> <span class="n">pyfits</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;RAW_FLUX&#39;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;E&#39;</span><span class="p">,</span> <span class="n">array</span><span class="o">=</span><span class="n">raw_flux</span><span class="p">)</span>
+    <span class="n">cols</span> <span class="o">=</span> <span class="n">pyfits</span><span class="o">.</span><span class="n">ColDefs</span><span class="p">([</span><span class="n">col1</span><span class="p">,</span> <span class="n">col2</span><span class="p">,</span> <span class="n">col3</span><span class="p">,</span> <span class="n">col4</span><span class="p">,</span> <span class="n">col5</span><span class="p">,</span> <span class="n">col6</span><span class="p">,</span> <span class="n">col7</span><span class="p">,</span> <span class="n">col8</span><span class="p">,</span>
+                           <span class="n">col9</span><span class="p">,</span> <span class="n">col10</span><span class="p">,</span> <span class="n">col11</span><span class="p">,</span> <span class="n">col12</span><span class="p">,</span> <span class="n">col13</span><span class="p">,</span> <span class="n">col14</span><span class="p">,</span> <span class="n">col15</span><span class="p">,</span>
+                           <span class="n">col16</span><span class="p">,</span> <span class="n">col17</span><span class="p">,</span> <span class="n">col18</span><span class="p">,</span> <span class="n">col19</span><span class="p">,</span> <span class="n">col20</span><span class="p">,</span> <span class="n">col21</span><span class="p">])</span>
+    <span class="n">hdu1</span> <span class="o">=</span> <span class="n">pyfits</span><span class="o">.</span><span class="n">BinTableHDU</span><span class="o">.</span><span class="n">from_columns</span><span class="p">(</span><span class="n">cols</span><span class="p">)</span>
+    <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;TTYPE1&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;TIME&#39;</span><span class="p">,</span> <span class="s1">&#39;column title: data time stamps&#39;</span><span class="p">)</span>
+    <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;TFORM1&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;D&#39;</span><span class="p">,</span> <span class="s1">&#39;data type: float64&#39;</span><span class="p">)</span>
+    <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;TUNIT1&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;BJD - 2454833&#39;</span><span class="p">,</span>
+                             <span class="s1">&#39;column units: barycenter corrected JD&#39;</span><span class="p">)</span>
+    <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;TDISP1&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;D12.7&#39;</span><span class="p">,</span> <span class="s1">&#39;column display format&#39;</span><span class="p">)</span>
+    <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;TTYPE2&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;TIMECORR&#39;</span><span class="p">,</span>
+                             <span class="s1">&#39;column title: barycentric-timeslice correction&#39;</span><span class="p">)</span>
+    <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;TFORM2&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;E&#39;</span><span class="p">,</span> <span class="s1">&#39;data type: float32&#39;</span><span class="p">)</span>
+    <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;TUNIT2&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;d&#39;</span><span class="p">,</span> <span class="s1">&#39;column units: days&#39;</span><span class="p">)</span>
+    <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;TTYPE3&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;CADENCENO&#39;</span><span class="p">,</span>
+                             <span class="s1">&#39;column title: unique cadence number&#39;</span><span class="p">)</span>
+    <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;TFORM3&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;J&#39;</span><span class="p">,</span> <span class="s1">&#39;column format: signed integer32&#39;</span><span class="p">)</span>
+    <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;TTYPE4&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;SAP_FLUX&#39;</span><span class="p">,</span>
+                             <span class="s1">&#39;column title: aperture photometry flux&#39;</span><span class="p">)</span>
+    <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;TFORM4&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;E&#39;</span><span class="p">,</span> <span class="s1">&#39;column format: float32&#39;</span><span class="p">)</span>
+    <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;TUNIT4&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;e-/s&#39;</span><span class="p">,</span> <span class="s1">&#39;column units: electrons per second&#39;</span><span class="p">)</span>
+    <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;TTYPE5&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;SAP_FLUX_ERR&#39;</span><span class="p">,</span>
+                             <span class="s1">&#39;column title: aperture phot. flux error&#39;</span><span class="p">)</span>
+    <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;TFORM5&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;E&#39;</span><span class="p">,</span> <span class="s1">&#39;column format: float32&#39;</span><span class="p">)</span>
+    <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;TUNIT5&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;e-/s&#39;</span><span class="p">,</span>
+                             <span class="s1">&#39;column units: electrons per second (1-sigma)&#39;</span><span class="p">)</span>
+    <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;TTYPE6&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;SAP_BKG&#39;</span><span class="p">,</span>
+                             <span class="s1">&#39;column title: aperture phot. background flux&#39;</span><span class="p">)</span>
+    <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;TFORM6&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;E&#39;</span><span class="p">,</span><span class="s1">&#39;column format: float32&#39;</span><span class="p">)</span>
+    <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;TUNIT6&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;e-/s&#39;</span><span class="p">,</span> <span class="s1">&#39;column units: electrons per second&#39;</span><span class="p">)</span>
+    <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;TTYPE7&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;SAP_BKG_ERR&#39;</span><span class="p">,</span>
+                             <span class="s1">&#39;column title: ap. phot. background flux error&#39;</span><span class="p">)</span>
+    <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;TFORM7&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;E&#39;</span><span class="p">,</span> <span class="s1">&#39;column format: float32&#39;</span><span class="p">)</span>
+    <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;TUNIT7&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;e-/s&#39;</span><span class="p">,</span>
+                             <span class="s1">&#39;column units: electrons per second (1-sigma)&#39;</span><span class="p">)</span>
+    <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;TTYPE8&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;PDCSAP_FLUX&#39;</span><span class="p">,</span>
+                             <span class="s1">&#39;column title: PDC photometry flux&#39;</span><span class="p">)</span>
+    <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;TFORM8&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;E&#39;</span><span class="p">,</span> <span class="s1">&#39;column format: float32&#39;</span><span class="p">)</span>
+    <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;TUNIT8&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;e-/s&#39;</span><span class="p">,</span> <span class="s1">&#39;column units: electrons per second&#39;</span><span class="p">)</span>
+    <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;TTYPE9&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;PDCSAP_FLUX_ERR&#39;</span><span class="p">,</span> <span class="s1">&#39;column title: PDC flux error&#39;</span><span class="p">)</span>
+    <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;TFORM9&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;E&#39;</span><span class="p">,</span> <span class="s1">&#39;column format: float32&#39;</span><span class="p">)</span>
+    <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;TUNIT9&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;e-/s&#39;</span><span class="p">,</span>
+                             <span class="s1">&#39;column units: electrons per second (1-sigma)&#39;</span><span class="p">)</span>
+    <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;TTYPE10&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;SAP_QUALITY&#39;</span><span class="p">,</span>
+                              <span class="s1">&#39;column title: aperture photometry quality flag&#39;</span><span class="p">)</span>
+    <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;TFORM10&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;J&#39;</span><span class="p">,</span> <span class="s1">&#39;column format: signed integer32&#39;</span><span class="p">)</span>
+    <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;TTYPE11&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;PSF_CENTR1&#39;</span><span class="p">,</span>
+                              <span class="s1">&#39;column title: PSF fitted column centroid&#39;</span><span class="p">)</span>
+    <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;TFORM11&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;E&#39;</span><span class="p">,</span> <span class="s1">&#39;column format: float32&#39;</span><span class="p">)</span>
+    <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;TUNIT11&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;pixel&#39;</span><span class="p">,</span> <span class="s1">&#39;column units: pixel&#39;</span><span class="p">)</span>
+    <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;TTYPE12&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;PSF_CENTR1_ERR&#39;</span><span class="p">,</span>
+                              <span class="s1">&#39;column title: PSF fitted column error&#39;</span><span class="p">)</span>
+    <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;TFORM12&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;E&#39;</span><span class="p">,</span> <span class="s1">&#39;column format: float32&#39;</span><span class="p">)</span>
+    <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;TUNIT12&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;pixel&#39;</span><span class="p">,</span> <span class="s1">&#39;column units: pixel&#39;</span><span class="p">)</span>
+    <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;TTYPE13&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;PSF_CENTR2&#39;</span><span class="p">,</span>
+                              <span class="s1">&#39;column title: PSF fitted row centroid&#39;</span><span class="p">)</span>
+    <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;TFORM13&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;E&#39;</span><span class="p">,</span> <span class="s1">&#39;column format: float32&#39;</span><span class="p">)</span>
+    <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;TUNIT13&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;pixel&#39;</span><span class="p">,</span> <span class="s1">&#39;column units: pixel&#39;</span><span class="p">)</span>
+    <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;TTYPE14&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;PSF_CENTR2_ERR&#39;</span><span class="p">,</span>
+                              <span class="s1">&#39;column title: PSF fitted row error&#39;</span><span class="p">)</span>
+    <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;TFORM14&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;E&#39;</span><span class="p">,</span> <span class="s1">&#39;column format: float32&#39;</span><span class="p">)</span>
+    <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;TUNIT14&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;pixel&#39;</span><span class="p">,</span> <span class="s1">&#39;column units: pixel&#39;</span><span class="p">)</span>
+    <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;TTYPE15&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;MOM_CENTR1&#39;</span><span class="p">,</span>
+                              <span class="s1">&#39;column title: moment-derived column centroid&#39;</span><span class="p">)</span>
+    <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;TFORM15&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;E&#39;</span><span class="p">,</span> <span class="s1">&#39;column format: float32&#39;</span><span class="p">)</span>
+    <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;TUNIT15&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;pixel&#39;</span><span class="p">,</span> <span class="s1">&#39;column units: pixel&#39;</span><span class="p">)</span>
+    <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;TTYPE16&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;MOM_CENTR1_ERR&#39;</span><span class="p">,</span>
+                              <span class="s1">&#39;column title: moment-derived column error&#39;</span><span class="p">)</span>
+    <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;TFORM16&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;E&#39;</span><span class="p">,</span> <span class="s1">&#39;column format: float32&#39;</span><span class="p">)</span>
+    <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;TUNIT16&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;pixel&#39;</span><span class="p">,</span> <span class="s1">&#39;column units: pixel&#39;</span><span class="p">)</span>
+    <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;TTYPE17&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;MOM_CENTR2&#39;</span><span class="p">,</span>
+                              <span class="s1">&#39;column title: moment-derived row centroid&#39;</span><span class="p">)</span>
+    <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;TFORM17&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;E&#39;</span><span class="p">,</span> <span class="s1">&#39;column format: float32&#39;</span><span class="p">)</span>
+    <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;TUNIT17&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;pixel&#39;</span><span class="p">,</span> <span class="s1">&#39;column units: pixel&#39;</span><span class="p">)</span>
+    <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;TTYPE18&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;MOM_CENTR2_ERR&#39;</span><span class="p">,</span>
+                              <span class="s1">&#39;column title: moment-derived row error&#39;</span><span class="p">)</span>
+    <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;TFORM18&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;E&#39;</span><span class="p">,</span> <span class="s1">&#39;column format: float32&#39;</span><span class="p">)</span>
+    <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;TUNIT18&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;pixel&#39;</span><span class="p">,</span> <span class="s1">&#39;column units: pixel&#39;</span><span class="p">)</span>
+    <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;TTYPE19&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;POS_CORR1&#39;</span><span class="p">,</span>
+                              <span class="s1">&#39;column title: col correction for vel. abbern&#39;</span><span class="p">)</span>
+    <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;TFORM19&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;E&#39;</span><span class="p">,</span> <span class="s1">&#39;column format: float32&#39;</span><span class="p">)</span>
+    <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;TUNIT19&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;pixel&#39;</span><span class="p">,</span> <span class="s1">&#39;column units: pixel&#39;</span><span class="p">)</span>
+    <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;TTYPE20&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;POS_CORR2&#39;</span><span class="p">,</span>
+                              <span class="s1">&#39;column title: row correction for vel. abbern&#39;</span><span class="p">)</span>
+    <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;TFORM20&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;E&#39;</span><span class="p">,</span> <span class="s1">&#39;column format: float32&#39;</span><span class="p">)</span>
+    <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;TUNIT20&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;pixel&#39;</span><span class="p">,</span> <span class="s1">&#39;column units: pixel&#39;</span><span class="p">)</span>
+    <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;TTYPE21&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;RAW_FLUX&#39;</span><span class="p">,</span>
+                              <span class="s1">&#39;column title: raw aperture photometry flux&#39;</span><span class="p">)</span>
+    <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;TFORM21&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;E&#39;</span><span class="p">,</span> <span class="s1">&#39;column format: float32&#39;</span><span class="p">)</span>
+    <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;TUNIT21&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;e-/s&#39;</span><span class="p">,</span> <span class="s1">&#39;column units: electrons per second&#39;</span><span class="p">)</span>
+    <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;EXTNAME&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;LIGHTCURVE&#39;</span><span class="p">,</span> <span class="s1">&#39;name of extension&#39;</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">cards1</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">cards1</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">keyword</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="ow">and</span>
+            <span class="n">cards1</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">keyword</span><span class="p">[:</span><span class="mi">4</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;TTYP&#39;</span><span class="p">,</span> <span class="s1">&#39;TFOR&#39;</span><span class="p">,</span> <span class="s1">&#39;TUNI&#39;</span><span class="p">,</span> <span class="s1">&#39;TDIS&#39;</span><span class="p">,</span>
+                                          <span class="s1">&#39;TDIM&#39;</span><span class="p">,</span> <span class="s1">&#39;WCAX&#39;</span><span class="p">,</span> <span class="s1">&#39;1CTY&#39;</span><span class="p">,</span> <span class="s1">&#39;2CTY&#39;</span><span class="p">,</span>
+                                          <span class="s1">&#39;1CRP&#39;</span><span class="p">,</span> <span class="s1">&#39;2CRP&#39;</span><span class="p">,</span> <span class="s1">&#39;1CRV&#39;</span><span class="p">,</span> <span class="s1">&#39;2CRV&#39;</span><span class="p">,</span>
+                                          <span class="s1">&#39;1CUN&#39;</span><span class="p">,</span> <span class="s1">&#39;2CUN&#39;</span><span class="p">,</span> <span class="s1">&#39;1CDE&#39;</span><span class="p">,</span> <span class="s1">&#39;2CDE&#39;</span><span class="p">,</span>
+                                          <span class="s1">&#39;1CTY&#39;</span><span class="p">,</span> <span class="s1">&#39;2CTY&#39;</span><span class="p">,</span> <span class="s1">&#39;1CDL&#39;</span><span class="p">,</span> <span class="s1">&#39;2CDL&#39;</span><span class="p">,</span>
+                                          <span class="s1">&#39;11PC&#39;</span><span class="p">,</span> <span class="s1">&#39;12PC&#39;</span><span class="p">,</span> <span class="s1">&#39;21PC&#39;</span><span class="p">,</span> <span class="s1">&#39;22PC&#39;</span><span class="p">]):</span>
+            <span class="n">hdu1</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="n">cards1</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">keyword</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">cards1</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+                                              <span class="n">cards1</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">comment</span><span class="p">)</span>
+    <span class="n">outstr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">hdu1</span><span class="p">)</span>
+
+    <span class="c1"># construct output mask bitmap extension</span>
+    <span class="n">hdu2</span> <span class="o">=</span> <span class="n">pyfits</span><span class="o">.</span><span class="n">ImageHDU</span><span class="p">(</span><span class="n">maskmap</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">cards2</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="n">cards2</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">keyword</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">hdu2</span><span class="o">.</span><span class="n">header</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">hdu2</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="n">cards2</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">keyword</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">cards2</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+                                              <span class="n">cards2</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">comment</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">hdu2</span><span class="o">.</span><span class="n">header</span><span class="o">.</span><span class="n">cards</span><span class="p">[</span><span class="n">cards2</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">keyword</span><span class="p">]</span><span class="o">.</span><span class="n">comment</span> <span class="o">=</span> <span class="n">cards2</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">comment</span>
+    <span class="n">outstr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">hdu2</span><span class="p">)</span>
+
+    <span class="c1"># write output file</span>
+    <span class="n">kepmsg</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">logfile</span><span class="p">,</span> <span class="s2">&quot;Writing output file </span><span class="si">{}</span><span class="s2">...&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">outfile</span><span class="p">),</span> <span class="n">verbose</span><span class="p">)</span>
+    <span class="n">outstr</span><span class="o">.</span><span class="n">writeto</span><span class="p">(</span><span class="n">outfile</span><span class="p">,</span> <span class="n">checksum</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="c1"># close input structure</span>
+    <span class="n">instr</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="c1"># end time</span>
+    <span class="n">kepmsg</span><span class="o">.</span><span class="n">clock</span><span class="p">(</span><span class="s1">&#39;KEPEXTRACT finished at&#39;</span><span class="p">,</span> <span class="n">logfile</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span></div>
+
+<span class="k">def</span> <span class="nf">kepextract_main</span><span class="p">():</span>
+    <span class="kn">import</span> <span class="nn">argparse</span>
+
+    <span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">(</span>
+            <span class="n">description</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;Derive a light curve from a target pixel file, with&#39;</span>
+                         <span class="s1">&#39; user-defined apertures&#39;</span><span class="p">),</span>
+             <span class="n">formatter_class</span><span class="o">=</span><span class="n">PyKEArgumentHelpFormatter</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;infile&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Name of input target pixel file&#39;</span><span class="p">,</span>
+                        <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--outfile&#39;</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;Name of FITS file to output.&#39;</span>
+                              <span class="s1">&#39; If None, outfile is infile-kepextract.&#39;</span><span class="p">),</span>
+                        <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--bitmask&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span>
+                        <span class="n">default</span><span class="o">=</span><span class="n">KeplerQualityFlags</span><span class="o">.</span><span class="n">DEFAULT_BITMASK</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;QUALITY bitmask used to reject cadences&#39;</span>
+                              <span class="s1">&#39; with poor-quality data (default: </span><span class="si">{}</span><span class="s1">).&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                                        <span class="n">KeplerQualityFlags</span><span class="o">.</span><span class="n">DEFAULT_BITMASK</span><span class="p">)))</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--maskfile&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s1">&#39;ALL&#39;</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Name of mask defintion ASCII file&#39;</span><span class="p">,</span>
+                        <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--bkg&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_true&#39;</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Subtract background from data?&#39;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--psfcentroid&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_true&#39;</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;Measure the star&#39;s position by fitting a 2D&quot;</span>
+                              <span class="s2">&quot; Gaussian PSF to the pixels in the mask. This&quot;</span>
+                              <span class="s2">&quot; will populate values for PSF_CENTR1 (column&quot;</span>
+                              <span class="s2">&quot; position) and PSF_CENTR2 (row position) in the&quot;</span>
+                              <span class="s2">&quot; output file.&quot;</span><span class="p">))</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--overwrite&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_true&#39;</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Overwrite output file?&#39;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--verbose&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_true&#39;</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Write to a log file?&#39;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--logfile&#39;</span><span class="p">,</span> <span class="s1">&#39;-l&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Name of ascii log file&#39;</span><span class="p">,</span>
+                        <span class="n">default</span><span class="o">=</span><span class="s1">&#39;kepextract.log&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">)</span>
+    <span class="n">args</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">()</span>
+    <span class="n">kepextract</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">infile</span><span class="p">,</span> <span class="n">outfile</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">outfile</span><span class="p">,</span> <span class="n">bitmask</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">bitmask</span><span class="p">,</span>
+               <span class="n">maskfile</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">maskfile</span><span class="p">,</span> <span class="n">bkg</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">bkg</span><span class="p">,</span> <span class="n">psfcentroid</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">psfcentroid</span><span class="p">,</span>
+               <span class="n">overwrite</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">overwrite</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">verbose</span><span class="p">,</span> <span class="n">logfile</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">logfile</span><span class="p">)</span>
+</pre></div>
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright PyKE Developers and Contributors.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'3.0.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

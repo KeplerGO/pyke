@@ -13,8 +13,13 @@ missions.
 .. .. image:: _static/images/pyke-overview.png
 
 *******************
-:doc:`whatsnew/3.0`
+:doc:`whatsnew/3.1`
 *******************
+
+.. toctree::
+    :maxdepth: 1
+
+    ../tutorials/ipython_notebooks/whatsnew31.ipynb
 
 .. _user-docs:
 

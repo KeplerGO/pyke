@@ -210,11 +210,45 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="kepdynamic-construct-a-dynamic-power-spectrum-from-kepler-time-series-data">
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast,
+.nboutput.nblast {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast + .nbinput {
+    margin-top: -19px;
+}
+
+/* nice headers on first paragraph of info/warning boxes */
+.admonition .first {
+    margin: -12px;
+    padding: 6px 12px;
+    margin-bottom: 12px;
+    color: #fff;
+    line-height: 1;
+    display: block;
+}
+.admonition.warning .first {
+    background: #f0b37e;
+}
+.admonition.note .first {
+    background: #6ab0de;
+}
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+</style>
+<div class="section" id="kepdynamic-construct-a-dynamic-power-spectrum-from-kepler-time-series-data">
 <h1><strong>kepdynamic</strong>: construct a dynamic power spectrum from Kepler time series data<a class="headerlink" href="#kepdynamic-construct-a-dynamic-power-spectrum-from-kepler-time-series-data" title="Permalink to this headline">¶</a></h1>
 <dl class="function">
 <dt id="pyke.kepdynamic.kepdynamic">
-<code class="descclassname">pyke.kepdynamic.</code><code class="descname">kepdynamic</code><span class="sig-paren">(</span><em>infile</em>, <em>outfile=None</em>, <em>fcol='SAP_FLUX'</em>, <em>pmin=0.1</em>, <em>pmax=10.0</em>, <em>nfreq=100</em>, <em>deltat=10.0</em>, <em>nslice=10</em>, <em>plot=False</em>, <em>plotscale='log'</em>, <em>cmap='PuBu'</em>, <em>overwrite=False</em>, <em>verbose=False</em>, <em>logfile='kepdynamic.log'</em><span class="sig-paren">)</span><a class="headerlink" href="#pyke.kepdynamic.kepdynamic" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">pyke.kepdynamic.</code><code class="descname">kepdynamic</code><span class="sig-paren">(</span><em>infile</em>, <em>outfile=None</em>, <em>datacol='SAP_FLUX'</em>, <em>pmin=0.1</em>, <em>pmax=10.0</em>, <em>nfreq=2000</em>, <em>deltat=10.0</em>, <em>nslice=10</em>, <em>plot=False</em>, <em>plotscale='log'</em>, <em>cmap='PuBu'</em>, <em>noninteractive=False</em>, <em>overwrite=False</em>, <em>verbose=False</em>, <em>logfile='kepdynamic.log'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyke/kepdynamic.html#kepdynamic"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyke.kepdynamic.kepdynamic" title="Permalink to this definition">¶</a></dt>
 <dd><p>kepdynamic – Construct a dynamic (time-dependent) power spectrum from
 time series data</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -231,7 +265,7 @@ curve within the first data extension.</p>
 <div><p>The name of the output FITS file with a new image extension containing
 the dynamic power spectrum.</p>
 </div></blockquote>
-<p><strong>fcol</strong> : str</p>
+<p><strong>datacol</strong> : str</p>
 <blockquote>
 <div><p>The name of the FITS table column in extension 1 of infile upon which
 the sequence power spectra will be calculated.</p>
@@ -271,6 +305,10 @@ If nslice is large, the time slices will overlap. Both cases are valid.</p>
 <blockquote>
 <div><p>A matplotlib colormap scheme.</p>
 </div></blockquote>
+<p><strong>non-interactive</strong> : bool</p>
+<blockquote>
+<div><p>If True, prevents the matplotlib window to pop up.</p>
+</div></blockquote>
 <p><strong>overwrite</strong> : bool</p>
 <blockquote>
 <div><p>Overwrite the output file?</p>
@@ -288,7 +326,7 @@ If nslice is large, the time slices will overlap. Both cases are valid.</p>
 </tbody>
 </table>
 <p class="rubric">Examples</p>
-<div class="highlight-bash"><div class="highlight"><pre><span></span>$ kepdynamic kplr002436324-2009259160929_llc.fits --fcol SAP_FLUX
+<div class="highlight-bash"><div class="highlight"><pre><span></span>$ kepdynamic kplr002436324-2009259160929_llc.fits --datacol SAP_FLUX
 --pmin <span class="m">0</span>.08 --pmax <span class="m">0</span>.1 --nfreq <span class="m">500</span> --deltat <span class="m">5</span>.0 --nslice <span class="m">500</span> --plot --verbose
 </pre></div>
 </div>
