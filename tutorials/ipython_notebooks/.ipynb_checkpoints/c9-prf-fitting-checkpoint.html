@@ -92,6 +92,9 @@
             
             
               <ul>
+<li class="toctree-l1"><a class="reference internal" href="../whatsnew31.html">What’s new in PyKE 3.1?</a></li>
+</ul>
+<ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../quickstart.html">Quickstart</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../install.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../overview.html">PyKE tasks</a></li>
@@ -389,7 +392,7 @@ oktopus:</strong></p>
 </pre></div>
 </div>
 <div class="output_area highlight-none"><div class="highlight"><pre>
-<span></span>&#39;3.1.dev&#39;
+<span></span>&#39;3.1.beta0&#39;
 </pre></div>
 </div>
 </div>
@@ -419,7 +422,7 @@ oktopus:</strong></p>
 </pre></div>
 </div>
 <div class="output_area highlight-none"><div class="highlight"><pre>
-<span></span>&#39;0.1.dev11&#39;
+<span></span>&#39;0.1.dev12&#39;
 </pre></div>
 </div>
 </div>
@@ -586,7 +589,7 @@ from the drawn apertures:</p>
 </pre></div>
 </div>
 <div class="output_area highlight-none"><div class="highlight"><pre>
-<span></span>&lt;matplotlib.text.Text at 0x120f2be48&gt;
+<span></span>&lt;matplotlib.text.Text at 0x11c498898&gt;
 </pre></div>
 </div>
 </div>
@@ -616,7 +619,7 @@ from the drawn apertures:</p>
 </pre></div>
 </div>
 <div class="output_area highlight-none"><div class="highlight"><pre>
-<span></span>&lt;matplotlib.text.Text at 0x12101aac8&gt;
+<span></span>&lt;matplotlib.text.Text at 0x11c6130b8&gt;
 </pre></div>
 </div>
 </div>
@@ -648,7 +651,7 @@ class.</p>
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="n">bkg</span> <span class="o">=</span> <span class="n">tpf</span><span class="o">.</span><span class="n">estimate_bkg_per_pixel</span><span class="p">()</span>
+<span></span><span class="n">bkg</span> <span class="o">=</span> <span class="n">tpf</span><span class="o">.</span><span class="n">estimate_bkg_per_pixel</span><span class="p">(</span><span class="n">method</span><span class="o">=</span><span class="s1">&#39;mode&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -671,7 +674,7 @@ class.</p>
 </pre></div>
 </div>
 <div class="output_area highlight-none"><div class="highlight"><pre>
-<span></span>&lt;matplotlib.text.Text at 0x1212ff518&gt;
+<span></span>&lt;matplotlib.text.Text at 0x11c7cef28&gt;
 </pre></div>
 </div>
 </div>
@@ -834,7 +837,7 @@ objects to the <code class="docutils literal"><span class="pre">PRFPhotometry</s
 data <code class="docutils literal"><span class="pre">tpf.flux</span></code>.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none"><div class="highlight"><pre>
-<span></span>In [27]:
+<span></span>In [26]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
@@ -851,11 +854,11 @@ data <code class="docutils literal"><span class="pre">tpf.flux</span></code>.</p
   result_value = self.fun(*argvals, **kwargs)
 /Users/jvmirca/anaconda3/lib/python3.6/site-packages/scipy/optimize/optimize.py:1927: RuntimeWarning: invalid value encountered in double_scalars
   tmp2 = (x - v) * (fx - fw)
- 30%|██▉       | 374/1255 [00:16&lt;00:43, 20.31it/s]/Users/jvmirca/anaconda3/lib/python3.6/site-packages/scipy/optimize/optimize.py:1928: RuntimeWarning: invalid value encountered in double_scalars
+ 30%|██▉       | 373/1255 [00:17&lt;00:37, 23.45it/s]/Users/jvmirca/anaconda3/lib/python3.6/site-packages/scipy/optimize/optimize.py:1928: RuntimeWarning: invalid value encountered in double_scalars
   p = (x - v) * tmp2 - (x - w) * tmp1
 /Users/jvmirca/anaconda3/lib/python3.6/site-packages/scipy/optimize/optimize.py:1929: RuntimeWarning: invalid value encountered in double_scalars
   tmp2 = 2.0 * (tmp2 - tmp1)
-100%|██████████| 1255/1255 [00:58&lt;00:00, 21.36it/s]
+100%|██████████| 1255/1255 [00:52&lt;00:00, 25.19it/s]
 </pre></div></div>
 </div>
 <p>Note that our Poisson likelihood assumption is embedded in the
@@ -865,7 +868,7 @@ data <code class="docutils literal"><span class="pre">tpf.flux</span></code>.</p
 <code class="docutils literal"><span class="pre">opt_params</span></code> attribute:</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none"><div class="highlight"><pre>
-<span></span>In [28]:
+<span></span>In [27]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
@@ -882,7 +885,7 @@ data <code class="docutils literal"><span class="pre">tpf.flux</span></code>.</p
 <p>Let’s visualize the parameters as a function of time:</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none"><div class="highlight"><pre>
-<span></span>In [29]:
+<span></span>In [28]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
@@ -896,7 +899,7 @@ data <code class="docutils literal"><span class="pre">tpf.flux</span></code>.</p
 </div>
 <div class="nboutput docutils container">
 <div class="prompt highlight-none"><div class="highlight"><pre>
-<span></span>Out[29]:
+<span></span>Out[28]:
 </pre></div>
 </div>
 <div class="output_area highlight-none"><div class="highlight"><pre>
@@ -914,7 +917,7 @@ data <code class="docutils literal"><span class="pre">tpf.flux</span></code>.</p
 <p>Oops! That outlier is probably the funny cadence we identified before:</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none"><div class="highlight"><pre>
-<span></span>In [30]:
+<span></span>In [29]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
@@ -924,7 +927,7 @@ data <code class="docutils literal"><span class="pre">tpf.flux</span></code>.</p
 </div>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none"><div class="highlight"><pre>
-<span></span>In [31]:
+<span></span>In [30]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
@@ -934,7 +937,7 @@ data <code class="docutils literal"><span class="pre">tpf.flux</span></code>.</p
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt highlight-none"><div class="highlight"><pre>
-<span></span>Out[31]:
+<span></span>Out[30]:
 </pre></div>
 </div>
 <div class="output_area highlight-none"><div class="highlight"><pre>
@@ -944,7 +947,7 @@ data <code class="docutils literal"><span class="pre">tpf.flux</span></code>.</p
 </div>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none"><div class="highlight"><pre>
-<span></span>In [32]:
+<span></span>In [31]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
@@ -958,7 +961,7 @@ data <code class="docutils literal"><span class="pre">tpf.flux</span></code>.</p
 </div>
 <div class="nboutput docutils container">
 <div class="prompt highlight-none"><div class="highlight"><pre>
-<span></span>Out[32]:
+<span></span>Out[31]:
 </pre></div>
 </div>
 <div class="output_area highlight-none"><div class="highlight"><pre>
@@ -975,7 +978,7 @@ data <code class="docutils literal"><span class="pre">tpf.flux</span></code>.</p
 </div>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none"><div class="highlight"><pre>
-<span></span>In [33]:
+<span></span>In [32]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
@@ -988,11 +991,11 @@ data <code class="docutils literal"><span class="pre">tpf.flux</span></code>.</p
 </div>
 <div class="nboutput docutils container">
 <div class="prompt highlight-none"><div class="highlight"><pre>
-<span></span>Out[33]:
+<span></span>Out[32]:
 </pre></div>
 </div>
 <div class="output_area highlight-none"><div class="highlight"><pre>
-<span></span>&lt;matplotlib.text.Text at 0x120d10c88&gt;
+<span></span>&lt;matplotlib.text.Text at 0x10ada09b0&gt;
 </pre></div>
 </div>
 </div>
@@ -1005,7 +1008,7 @@ data <code class="docutils literal"><span class="pre">tpf.flux</span></code>.</p
 </div>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none"><div class="highlight"><pre>
-<span></span>In [34]:
+<span></span>In [33]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
@@ -1018,11 +1021,11 @@ data <code class="docutils literal"><span class="pre">tpf.flux</span></code>.</p
 </div>
 <div class="nboutput docutils container">
 <div class="prompt highlight-none"><div class="highlight"><pre>
-<span></span>Out[34]:
+<span></span>Out[33]:
 </pre></div>
 </div>
 <div class="output_area highlight-none"><div class="highlight"><pre>
-<span></span>&lt;matplotlib.text.Text at 0x120d4c198&gt;
+<span></span>&lt;matplotlib.text.Text at 0x11bf7f9b0&gt;
 </pre></div>
 </div>
 </div>
@@ -1035,7 +1038,7 @@ data <code class="docutils literal"><span class="pre">tpf.flux</span></code>.</p
 </div>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none"><div class="highlight"><pre>
-<span></span>In [35]:
+<span></span>In [34]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
@@ -1049,11 +1052,11 @@ data <code class="docutils literal"><span class="pre">tpf.flux</span></code>.</p
 </div>
 <div class="nboutput docutils container">
 <div class="prompt highlight-none"><div class="highlight"><pre>
-<span></span>Out[35]:
+<span></span>Out[34]:
 </pre></div>
 </div>
 <div class="output_area highlight-none"><div class="highlight"><pre>
-<span></span>&lt;matplotlib.text.Text at 0x111aa6b38&gt;
+<span></span>&lt;matplotlib.text.Text at 0x11bf6d400&gt;
 </pre></div>
 </div>
 </div>
@@ -1066,7 +1069,7 @@ data <code class="docutils literal"><span class="pre">tpf.flux</span></code>.</p
 </div>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none"><div class="highlight"><pre>
-<span></span>In [36]:
+<span></span>In [35]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
@@ -1079,11 +1082,11 @@ data <code class="docutils literal"><span class="pre">tpf.flux</span></code>.</p
 </div>
 <div class="nboutput docutils container">
 <div class="prompt highlight-none"><div class="highlight"><pre>
-<span></span>Out[36]:
+<span></span>Out[35]:
 </pre></div>
 </div>
 <div class="output_area highlight-none"><div class="highlight"><pre>
-<span></span>&lt;matplotlib.text.Text at 0x121169080&gt;
+<span></span>&lt;matplotlib.text.Text at 0x10d03dc18&gt;
 </pre></div>
 </div>
 </div>
@@ -1096,7 +1099,7 @@ data <code class="docutils literal"><span class="pre">tpf.flux</span></code>.</p
 </div>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none"><div class="highlight"><pre>
-<span></span>In [37]:
+<span></span>In [36]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
@@ -1109,11 +1112,11 @@ data <code class="docutils literal"><span class="pre">tpf.flux</span></code>.</p
 </div>
 <div class="nboutput docutils container">
 <div class="prompt highlight-none"><div class="highlight"><pre>
-<span></span>Out[37]:
+<span></span>Out[36]:
 </pre></div>
 </div>
 <div class="output_area highlight-none"><div class="highlight"><pre>
-<span></span>&lt;matplotlib.text.Text at 0x1221948d0&gt;
+<span></span>&lt;matplotlib.text.Text at 0x11d13fef0&gt;
 </pre></div>
 </div>
 </div>
@@ -1126,7 +1129,7 @@ data <code class="docutils literal"><span class="pre">tpf.flux</span></code>.</p
 </div>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none"><div class="highlight"><pre>
-<span></span>In [38]:
+<span></span>In [37]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
@@ -1140,7 +1143,7 @@ data <code class="docutils literal"><span class="pre">tpf.flux</span></code>.</p
 </div>
 <div class="nboutput docutils container">
 <div class="prompt highlight-none"><div class="highlight"><pre>
-<span></span>Out[38]:
+<span></span>Out[37]:
 </pre></div>
 </div>
 <div class="output_area highlight-none"><div class="highlight"><pre>
@@ -1158,7 +1161,7 @@ data <code class="docutils literal"><span class="pre">tpf.flux</span></code>.</p
 <p>We can retrieve the residuals using the <code class="docutils literal"><span class="pre">get_residuals</span></code> method:</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none"><div class="highlight"><pre>
-<span></span>In [39]:
+<span></span>In [38]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
@@ -1168,7 +1171,7 @@ data <code class="docutils literal"><span class="pre">tpf.flux</span></code>.</p
 </div>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none"><div class="highlight"><pre>
-<span></span>In [40]:
+<span></span>In [39]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
@@ -1179,11 +1182,11 @@ data <code class="docutils literal"><span class="pre">tpf.flux</span></code>.</p
 </div>
 <div class="nboutput docutils container">
 <div class="prompt highlight-none"><div class="highlight"><pre>
-<span></span>Out[40]:
+<span></span>Out[39]:
 </pre></div>
 </div>
 <div class="output_area highlight-none"><div class="highlight"><pre>
-<span></span>&lt;matplotlib.colorbar.Colorbar at 0x122db3f28&gt;
+<span></span>&lt;matplotlib.colorbar.Colorbar at 0x10add9048&gt;
 </pre></div>
 </div>
 </div>
@@ -1198,7 +1201,7 @@ data <code class="docutils literal"><span class="pre">tpf.flux</span></code>.</p
 below:</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none"><div class="highlight"><pre>
-<span></span>In [41]:
+<span></span>In [40]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
@@ -1209,7 +1212,7 @@ below:</p>
 </div>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none"><div class="highlight"><pre>
-<span></span>In [42]:
+<span></span>In [41]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
@@ -1221,7 +1224,7 @@ below:</p>
 <p>Let’s then visualize the single models:</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none"><div class="highlight"><pre>
-<span></span>In [43]:
+<span></span>In [42]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
@@ -1232,11 +1235,11 @@ below:</p>
 </div>
 <div class="nboutput docutils container">
 <div class="prompt highlight-none"><div class="highlight"><pre>
-<span></span>Out[43]:
+<span></span>Out[42]:
 </pre></div>
 </div>
 <div class="output_area highlight-none"><div class="highlight"><pre>
-<span></span>&lt;matplotlib.colorbar.Colorbar at 0x120dfc940&gt;
+<span></span>&lt;matplotlib.colorbar.Colorbar at 0x11c2aada0&gt;
 </pre></div>
 </div>
 </div>
@@ -1249,7 +1252,7 @@ below:</p>
 </div>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none"><div class="highlight"><pre>
-<span></span>In [44]:
+<span></span>In [43]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
@@ -1260,11 +1263,11 @@ below:</p>
 </div>
 <div class="nboutput docutils container">
 <div class="prompt highlight-none"><div class="highlight"><pre>
-<span></span>Out[44]:
+<span></span>Out[43]:
 </pre></div>
 </div>
 <div class="output_area highlight-none"><div class="highlight"><pre>
-<span></span>&lt;matplotlib.colorbar.Colorbar at 0x12171df60&gt;
+<span></span>&lt;matplotlib.colorbar.Colorbar at 0x11c254668&gt;
 </pre></div>
 </div>
 </div>
