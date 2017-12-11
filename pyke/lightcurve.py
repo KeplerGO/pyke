@@ -220,8 +220,7 @@ class KeplerLightCurveFile(object):
             raise KeyError("{} is not a valid flux type. Available types are: {}".
                            format(flux_type, self._flux_types))
 
-
-   def _quality_mask(self, quality_bitmask):
+    def _quality_mask(self, quality_bitmask):
         """Returns a boolean mask which flags all good-quality cadences.
         Parameters
         ----------
