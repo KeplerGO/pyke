@@ -99,32 +99,6 @@ class LightCurve(object):
     def to_csv(self):
         raise NotImplementedError()
 
-    def plot(self, ax=None, norm=True,**kwargs):
-        """
-        Plot a Light Curve.
-        """
-        if ax is None:
-            fig, ax = plt.subplots(1)
-        t0=float(int(self.time[0] / 100) * 100.0)
-        f = self.flux
-        ferr = self.flux_err
-        if norm:
-            ferr/=np.nanmedian(f)
-            f/=np.nanmedian(f)
-        try:
-            plt.errorbar(self.time-t0, f,ferr, color='#363636', **kwargs)
-        except:
-            plt.errorbar(self.time-t0, f, ferr, **kwargs)
-
-        plt.fill(self.time-t0, self.flux, fc='#a8a7a7', linewidth=0.0, alpha=0.3)
-        xlab = 'BJD $-$ {}'.format(int(t0+2454833.))
-        ylab1 = 'Flux (e$^-$ s$^{-1}$)'
-        if norm:
-            ylab1 = 'Normalized Flux'
-        plt.xlabel(xlab, {'color' : 'k'})
-        plt.ylabel(ylab1, {'color' : 'k'})
-        plt.grid()
-
 
 class KeplerLightCurve(LightCurve):
     """Defines a light curve class for NASA's Kepler and K2 missions.
@@ -312,53 +286,6 @@ class KeplerLightCurveFile(object):
         types = [n for n in self.hdu[1].data.columns.names if 'FLUX' in n]
         types = [n for n in types if not ('ERR' in n)]
         return types
-
-
-    def plot(self, plottype = None, ax=None, norm=True, **kwargs):
-        """
-        Plot a Light Curve.
-
-        Parameters
-        ----------
-        plottype : list of FLUX types to plot
-        """
-        if ax is None:
-            fig, ax = plt.subplots(1)
-        if plottype is None:
-            plottype = self._flux_types()
-        if isinstance(plottype,str):
-            plottype=[plottype]
-        if not hasattr(plottype,'__iter__'):
-            plottype=[plottype]
-
-        id = self.SAP_FLUX.id
-        for pl in plottype:
-            try:
-                lc = self.get_lightcurve(pl)
-            except:
-                continue
-            f = lc.flux
-            ferr = lc.flux_err
-            t = self.time
-            if norm:
-                ferr/=np.nanmedian(f)
-                f/=np.nanmedian(f)
-            t0=float(int(t[0] / 100) * 100.0)
-            plt.errorbar(t-t0, f, ferr, **kwargs,label='{}'.format(pl))
-
-
-        plt.legend()
-#        plt.fill(t-t0, f, fc='#a8a7a7', linewidth=0.0, alpha=0.3)
-
-        xlab = 'BJD $-$ {:d}'.format(int(t0+2454833))
-        if norm:
-            ylab1 = 'Normalized Flux'
-        else:
-            ylab1 = 'Flux (e$^-$ s$^{-1}$)'
-        plt.xlabel(xlab, {'color' : 'k'})
-        plt.ylabel(ylab1, {'color' : 'k'})
-        plt.title('Kepler ID: {}'.format(id))
-        plt.grid()
 
 class Detrender(object):
     """
