@@ -35,7 +35,7 @@ It provides the following key improvements:
   from within a Python session
 * The PRF photometry tools were refactored into a more flexible interface
 
-See the following IPython notebook for examples of the new features and changes: ADD NOTEBOOK URL.
+See the following IPython notebook for examples of the new features and changes: http://pyke.keplerscience.org/tutorials/ipython_notebooks/whatsnew31.html.
 
 Quickstart
 ----------
