@@ -58,36 +58,28 @@ class KeplerTargetPixelFile(TargetPixelFile):
         http://archive.stsci.edu/kepler/manuals/archive_manual.pdf
     """
 
+
     def __init__(self, path, aperture_mask=None,
-                 quality_bitmask='default',
+                 quality_bitmask=KeplerQualityFlags.DEFAULT_BITMASK,
                  **kwargs):
         self.path = path
         self.hdu = fits.open(self.path, **kwargs)
+        self.quality_bitmask = quality_bitmask
         self.quality_mask = self._quality_mask(quality_bitmask)
         self.aperture_mask = aperture_mask
 
     def _quality_mask(self, quality_bitmask):
         """Returns a boolean mask which flags all good-quality cadences.
-
         Parameters
         ----------
         quality_bitmask : int
             Bitmask. See ref. [1], table 2-3.
         """
-        if (quality_bitmask is None) or (quality_bitmask is 'None'):
-            bitmask=None
-        if (quality_bitmask is 'default'):
-            bitmask=KeplerQualityFlags.DEFAULT_BITMASK
-        if (quality_bitmask is 'conservative'):
-            bitmask=KeplerQualityFlags.CONSERVATIVE_BITMASK
-        if (quality_bitmask is 'hard'):
-            bitmask=KeplerQualityFlags.QUALITY_ZERO_BITMASK
-        if not (quality_bitmask in [None,'None','default','conservative','hard']):
-            bitmask=KeplerQualityFlags.DEFAULT_BITMASK
-        if bitmask is None:
-            return ~np.zeros(len(self.hdu[1].data['TIME']),dtype=bool)
-        else:
-            return (self.hdu[1].data['QUALITY'] & bitmask) == 0
+        return (self.hdu[1].data['QUALITY'] & quality_bitmask) == 0
+
+    def header(self, ext=0):
+        """Returns the header for a given extension."""
+        return self.hdu[ext].header
 
 
     def header(self, ext=0):

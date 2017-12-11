@@ -194,9 +194,8 @@ class KeplerLightCurveFile(object):
         Keyword arguments to be passed to astropy.io.fits.open.
     """
 
-    def __init__(self, path, quality_bitmask='default',
+    def __init__(self, path, quality_bitmask=KeplerQualityFlags.DEFAULT_BITMASK,
                  **kwargs):
-
         self.path = path
         self.hdu = pyfits.open(self.path, **kwargs)
         self.quality_bitmask = quality_bitmask
@@ -222,28 +221,15 @@ class KeplerLightCurveFile(object):
                            format(flux_type, self._flux_types))
 
 
-    def _quality_mask(self, quality_bitmask):
+   def _quality_mask(self, quality_bitmask):
         """Returns a boolean mask which flags all good-quality cadences.
-
         Parameters
         ----------
         quality_bitmask : int
             Bitmask. See ref. [1], table 2-3.
         """
-        if (quality_bitmask is None) or (quality_bitmask is 'None'):
-            bitmask=None
-        if (quality_bitmask is 'default'):
-            bitmask=KeplerQualityFlags.DEFAULT_BITMASK
-        if (quality_bitmask is 'conservative'):
-            bitmask=KeplerQualityFlags.CONSERVATIVE_BITMASK
-        if (quality_bitmask is 'hard'):
-            bitmask=KeplerQualityFlags.QUALITY_ZERO_BITMASK
-        if not (quality_bitmask in [None,'None','default','conservative','hard']):
-            bitmask=KeplerQualityFlags.DEFAULT_BITMASK
-        if bitmask is None:
-            return ~np.zeros(len(self.hdu[1].data['TIME']),dtype=bool)
-        else:
-            return (self.hdu[1].data['SAP_QUALITY'] & bitmask) == 0
+        return (self.hdu[1].data['SAP_QUALITY'] & quality_bitmask) == 0
+
 
     @property
     def SAP_FLUX(self):
