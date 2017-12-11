@@ -47,7 +47,10 @@ class KeplerTargetPixelFile(TargetPixelFile):
         Kepler pipeline's aperture if the value 'kepler-pipeline' is passed.
         The default behaviour is to use all pixels.
     quality_bitmask : int
-        Bitmask specifying quality flags of cadences that should be ignored.
+        Bitmask specifying quality flags of cadences that should be ignored:
+            default: recommended quality mask
+            conservative: removes more flags, known to remove good data
+            hard: removes all data that has been flagged
 
     References
     ----------
@@ -56,11 +59,10 @@ class KeplerTargetPixelFile(TargetPixelFile):
     """
 
     def __init__(self, path, aperture_mask=None,
-                 quality_bitmask=KeplerQualityFlags.DEFAULT_BITMASK,
+                 quality_bitmask='default',
                  **kwargs):
         self.path = path
         self.hdu = fits.open(self.path, **kwargs)
-        self.quality_bitmask = quality_bitmask
         self.quality_mask = self._quality_mask(quality_bitmask)
         self.aperture_mask = aperture_mask
 
@@ -72,7 +74,21 @@ class KeplerTargetPixelFile(TargetPixelFile):
         quality_bitmask : int
             Bitmask. See ref. [1], table 2-3.
         """
-        return (self.hdu[1].data['QUALITY'] & quality_bitmask) == 0
+        if (quality_bitmask is None) or (quality_bitmask is 'None'):
+            bitmask=None
+        if (quality_bitmask is 'default'):
+            bitmask=KeplerQualityFlags.DEFAULT_BITMASK
+        if (quality_bitmask is 'conservative'):
+            bitmask=KeplerQualityFlags.CONSERVATIVE_BITMASK
+        if (quality_bitmask is 'hard'):
+            bitmask=KeplerQualityFlags.QUALITY_ZERO_BITMASK
+        if not (quality_bitmask in [None,'None','default','conservative','hard']):
+            bitmask=KeplerQualityFlags.DEFAULT_BITMASK
+        if bitmask is None:
+            return ~np.zeros(len(self.hdu[1].data['TIME']),dtype=bool)
+        else:
+            return (self.hdu[1].data['QUALITY'] & bitmask) == 0
+
 
     def header(self, ext=0):
         """Returns the header for a given extension."""
@@ -226,7 +242,10 @@ class KeplerTargetPixelFile(TargetPixelFile):
         raise NotImplementedError
 
     def _get_aperture_flux(self):
-        return np.nansum(self.flux[:, self.aperture_mask], axis=1)
+        af = np.nansum(self.flux[:, self.aperture_mask], axis=1)
+        npix = np.sum(self.aperture_mask)
+        er = (1./npix)*(np.nansum(self.flux_err[:, self.aperture_mask]**2, axis=1)**0.5)
+        return af,er
 
     def get_bkg_lightcurve(self, method='median'):
         return self.estimate_bkg_per_pixel(method=method) * self.aperture_npix
@@ -246,8 +265,8 @@ class KeplerTargetPixelFile(TargetPixelFile):
             cadence.
         """
 
-        aperture_flux = self._get_aperture_flux()
+        aperture_flux, aperture_flux_err = self._get_aperture_flux()
         if subtract_bkg:
             aperture_flux = aperture_flux - self.get_bkg_lightcurve()
 
-        return LightCurve(flux=aperture_flux, time=self.time)
+        return LightCurve(flux=aperture_flux, time=self.time, flux_err = aperture_flux_err)

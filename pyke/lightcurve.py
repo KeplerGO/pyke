@@ -7,7 +7,7 @@ import oktopus
 import requests
 from bs4 import BeautifulSoup
 from .utils import channel_to_module_output, KeplerQualityFlags
-
+from matplotlib import pyplot as plt
 
 __all__ = ['LightCurve', 'KeplerLightCurveFile', 'KeplerCBVCorrector',
            'SimplePixelLevelDecorrelationDetrender']
@@ -99,6 +99,32 @@ class LightCurve(object):
     def to_csv(self):
         raise NotImplementedError()
 
+    def plot(self, ax=None, norm=True,**kwargs):
+        """
+        Plot a Light Curve.
+        """
+        if ax is None:
+            fig, ax = plt.subplots(1)
+        t0=float(int(self.time[0] / 100) * 100.0)
+        f = self.flux
+        ferr = self.flux_err
+        if norm:
+            ferr/=np.nanmedian(f)
+            f/=np.nanmedian(f)
+        try:
+            plt.errorbar(self.time-t0, f,ferr, color='#363636', **kwargs)
+        except:
+            plt.errorbar(self.time-t0, f, ferr, **kwargs)
+
+        plt.fill(self.time-t0, self.flux, fc='#a8a7a7', linewidth=0.0, alpha=0.3)
+        xlab = 'BJD $-$ {}'.format(int(t0+2454833.))
+        ylab1 = 'Flux (e$^-$ s$^{-1}$)'
+        if norm:
+            ylab1 = 'Normalized Flux'
+        plt.xlabel(xlab, {'color' : 'k'})
+        plt.ylabel(ylab1, {'color' : 'k'})
+        plt.grid()
+
 
 class KeplerLightCurve(LightCurve):
     """Defines a light curve class for NASA's Kepler and K2 missions.
@@ -127,12 +153,14 @@ class KeplerLightCurve(LightCurve):
         Mission name
     cadenceno : array-like
         Cadence numbers corresponding to every time measurement
+    id : int
+        Kepler ID number
     """
 
     def __init__(self, time, flux, flux_err=None, centroid_col=None,
                  centroid_row=None, quality=None, quality_bitmask=None,
                  channel=None, campaign=None, quarter=None, mission=None,
-                 cadenceno=None):
+                 cadenceno=None, id = None):
         super(KeplerLightCurve, self).__init__(time, flux, flux_err)
         self.centroid_col = centroid_col
         self.centroid_row = centroid_row
@@ -143,6 +171,7 @@ class KeplerLightCurve(LightCurve):
         self.quarter = quarter
         self.mission = mission
         self.cadenceno = cadenceno
+        self.id = id
 
     def to_fits(self):
         raise NotImplementedError()
@@ -157,13 +186,17 @@ class KeplerLightCurveFile(object):
     path : str
         Directory path or url to a lightcurve FITS file.
     quality_bitmask : int
-        Bitmask specifying quality flags of cadences that should be ignored.
+        Bitmask specifying quality flags of cadences that should be ignored:
+            default: recommended quality mask
+            conservative: removes more flags, known to remove good data
+            hard: removes all data that has been flagged
     kwargs : dict
         Keyword arguments to be passed to astropy.io.fits.open.
     """
 
-    def __init__(self, path, quality_bitmask=KeplerQualityFlags.DEFAULT_BITMASK,
+    def __init__(self, path, quality_bitmask='default',
                  **kwargs):
+
         self.path = path
         self.hdu = pyfits.open(self.path, **kwargs)
         self.quality_bitmask = quality_bitmask
@@ -182,10 +215,12 @@ class KeplerLightCurveFile(object):
                                     campaign=self.campaign,
                                     quarter=self.quarter,
                                     mission=self.mission,
-                                    cadenceno=self.cadenceno)
+                                    cadenceno=self.cadenceno,
+                                    id = self.hdu[0].header['KEPLERID'])
         else:
             raise KeyError("{} is not a valid flux type. Available types are: {}".
                            format(flux_type, self._flux_types))
+
 
     def _quality_mask(self, quality_bitmask):
         """Returns a boolean mask which flags all good-quality cadences.
@@ -195,7 +230,20 @@ class KeplerLightCurveFile(object):
         quality_bitmask : int
             Bitmask. See ref. [1], table 2-3.
         """
-        return (self.hdu[1].data['SAP_QUALITY'] & quality_bitmask) == 0
+        if (quality_bitmask is None) or (quality_bitmask is 'None'):
+            bitmask=None
+        if (quality_bitmask is 'default'):
+            bitmask=KeplerQualityFlags.DEFAULT_BITMASK
+        if (quality_bitmask is 'conservative'):
+            bitmask=KeplerQualityFlags.CONSERVATIVE_BITMASK
+        if (quality_bitmask is 'hard'):
+            bitmask=KeplerQualityFlags.QUALITY_ZERO_BITMASK
+        if not (quality_bitmask in [None,'None','default','conservative','hard']):
+            bitmask=KeplerQualityFlags.DEFAULT_BITMASK
+        if bitmask is None:
+            return ~np.zeros(len(self.hdu[1].data['TIME']),dtype=bool)
+        else:
+            return (self.hdu[1].data['SAP_QUALITY'] & bitmask) == 0
 
     @property
     def SAP_FLUX(self):
@@ -261,8 +309,56 @@ class KeplerLightCurveFile(object):
 
     def _flux_types(self):
         """Returns a list of available flux types for this light curve file"""
-        return [n for n in  self.hdu[1].data.columns.names if 'FLUX' in n]
+        types = [n for n in self.hdu[1].data.columns.names if 'FLUX' in n]
+        types = [n for n in types if not ('ERR' in n)]
+        return types
 
+
+    def plot(self, plottype = None, ax=None, norm=True, **kwargs):
+        """
+        Plot a Light Curve.
+
+        Parameters
+        ----------
+        plottype : list of FLUX types to plot
+        """
+        if ax is None:
+            fig, ax = plt.subplots(1)
+        if plottype is None:
+            plottype = self._flux_types()
+        if isinstance(plottype,str):
+            plottype=[plottype]
+        if not hasattr(plottype,'__iter__'):
+            plottype=[plottype]
+
+        id = self.SAP_FLUX.id
+        for pl in plottype:
+            try:
+                lc = self.get_lightcurve(pl)
+            except:
+                continue
+            f = lc.flux
+            ferr = lc.flux_err
+            t = self.time
+            if norm:
+                ferr/=np.nanmedian(f)
+                f/=np.nanmedian(f)
+            t0=float(int(t[0] / 100) * 100.0)
+            plt.errorbar(t-t0, f, ferr, **kwargs,label='{}'.format(pl))
+
+
+        plt.legend()
+#        plt.fill(t-t0, f, fc='#a8a7a7', linewidth=0.0, alpha=0.3)
+
+        xlab = 'BJD $-$ {:d}'.format(int(t0+2454833))
+        if norm:
+            ylab1 = 'Normalized Flux'
+        else:
+            ylab1 = 'Flux (e$^-$ s$^{-1}$)'
+        plt.xlabel(xlab, {'color' : 'k'})
+        plt.ylabel(ylab1, {'color' : 'k'})
+        plt.title('Kepler ID: {}'.format(id))
+        plt.grid()
 
 class Detrender(object):
     """
