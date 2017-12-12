@@ -8,6 +8,7 @@ import requests
 from bs4 import BeautifulSoup
 from .utils import channel_to_module_output, KeplerQualityFlags
 from matplotlib import pyplot as plt
+from .periodogram import Periodogram
 
 __all__ = ['LightCurve', 'KeplerLightCurveFile', 'KeplerCBVCorrector',
            'SimplePixelLevelDecorrelationDetrender']
@@ -98,6 +99,7 @@ class LightCurve(object):
 
     def to_csv(self):
         raise NotImplementedError()
+
 
 
 class KeplerLightCurve(LightCurve):
