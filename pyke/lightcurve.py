@@ -329,7 +329,7 @@ class KeplerLightCurveFile(object):
                 ferr/=np.nanmedian(f)
                 f/=np.nanmedian(f)
             t0=float(int(t[0] / 100) * 100.0)
-            plt.errorbar(t-t0, f, ferr, **kwargs,label='{}'.format(pl))
+            plt.errorbar(t-t0, f, ferr,label='{}'.format(pl),**kwargs)
 
 
         plt.legend()
