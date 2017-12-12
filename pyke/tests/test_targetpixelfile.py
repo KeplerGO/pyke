@@ -1,6 +1,6 @@
 import numpy as np
 from astropy.utils.data import get_pkg_data_filename
-
+import pytest
 from ..targetpixelfile import KeplerTargetPixelFile, KeplerQualityFlags
 
 
@@ -18,7 +18,12 @@ def test_tpf_shapes():
 
 def test_tpf_zeros():
     """Does the LightCurve of a zero-flux TPF make sense?"""
-    tpf = KeplerTargetPixelFile(filename_tpf_all_zeros)
+    tpf = KeplerTargetPixelFile(filename_tpf_all_zeros,quality_bitmask=None)
+    lc = tpf.to_lightcurve()
+    #IF you don't mask out bad data, time contains NaNs:
+    assert np.any(lc.time != tpf.time)
+    #When you do mask out bad data everything should work.
+    tpf = KeplerTargetPixelFile(filename_tpf_all_zeros,quality_bitmask='hard')
     lc = tpf.to_lightcurve()
     assert len(lc.time) == len(lc.flux)
     assert np.all(lc.time == tpf.time)
@@ -43,3 +48,21 @@ def test_quality_flag_decoding():
     assert KeplerQualityFlags.decode(flags[5][0] + flags[7][0]) == [flags[5][1], flags[7][1]]
     assert KeplerQualityFlags.decode(flags[3][0] + flags[4][0] + flags[5][0]) \
         == [flags[3][1], flags[4][1], flags[5][1]]
+
+
+@pytest.mark.parametrize("quality_bitmask,answer",[('hard',1101),
+                                            ('conservative',1141),
+                                            ('default',1275),
+                                            ('None',1290),
+                                            (None,1290),
+                                            (1,1290),
+                                            (100,1278),
+                                            (2096639,1101)])
+
+
+def test_bitmasking(quality_bitmask,answer):
+    '''Test whether the bitmasking behaves like it should'''
+    tpf = KeplerTargetPixelFile(filename_tpf_one_center,quality_bitmask=quality_bitmask)
+    lc = tpf.to_lightcurve()
+    flux = lc.flux
+    assert len(flux) == answer
