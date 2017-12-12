@@ -97,7 +97,7 @@ class LightCurve(object):
         raise NotImplementedError()
 
     def plot(self, t=None, flux=None, flux_err=None, ax=None, norm=True, xlabel = 'Time - 2454833 (days)',
-            ylabel = 'Normalised Flux',color='#363636', fill=True, grid=True, **kwargs):
+            ylabel = 'Normalised Flux', title=None, color='#363636', fill=False, grid=True, legend=True, **kwargs):
         """
         Plot a Light Curve.
         """
@@ -117,9 +117,12 @@ class LightCurve(object):
             plt.fill(t, flux, fc='#a8a7a7', linewidth=0.0, alpha=0.3)
         if grid:
             plt.grid(alpha=0.3)
+        if legend:
+            plt.legend()
+        if not( title is None):
+            plt.title(title)
         plt.xlabel(xlabel, {'color' : 'k'})
         plt.ylabel(ylabel, {'color' : 'k'})
-
 
 
 
@@ -302,7 +305,7 @@ class KeplerLightCurveFile(object):
         return types
 
 
-    def plot(self, plottype = None, ax=None, norm=True, **kwargs):
+    def plot(self, plottype = None, **kwargs):
         """
         Plot all the flux extensinos in a light curve.
 
@@ -310,23 +313,26 @@ class KeplerLightCurveFile(object):
         ----------
         plottype : list of FLUX types to plot. Default is to plot all available
         """
-        if ax is None:
+        if not ('ax' in kwargs):
             fig, ax = plt.subplots(1)
+            kwargs['ax'] = ax
+        if not ('title' in kwargs):
+            keplerid = self.SAP_FLUX.keplerid
+            kwargs['title'] = 'KeplerID: {}'.format(keplerid)
         if plottype is None:
             plottype = self._flux_types()
         if isinstance(plottype,str):
             plottype=[plottype]
         if not hasattr(plottype,'__iter__'):
             plottype=[plottype]
-
-        id = self.SAP_FLUX.keplerid
         for i,pl in enumerate(plottype):
             try:
                 lc = self.get_lightcurve(pl)
             except:
                 continue
-            lc.plot(ax=ax,color='C{}'.format(i),label=pl)
-            ax.legend()
+            kwargs['color'] = 'C{}'.format(i)
+            lc.plot(label=pl, **kwargs)
+
 
 class Detrender(object):
     """
