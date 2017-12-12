@@ -93,37 +93,36 @@ class LightCurve(object):
     def fold(self, phase, period):
         return LightCurve(((self.time - phase + 0.5 * period) / period) % 1 - 0.5, self.flux)
 
-    def draw(self):
-        raise NotImplementedError("Should we implement a LightCurveDrawer class?")
-
     def to_csv(self):
         raise NotImplementedError()
 
-    def plot(self, ax=None, norm=True,**kwargs):
+    def plot(self, t=None, flux=None, flux_err=None, ax=None, norm=True, xlabel = 'Time - 2454833 (days)',
+            ylabel = 'Normalised Flux',color='#363636', fill=True, grid=True, **kwargs):
         """
         Plot a Light Curve.
         """
         if ax is None:
             fig, ax = plt.subplots(1)
-        t0=float(int(self.time[0] / 100) * 100.0)
-        f = self.flux
-        ferr = self.flux_err
+        if t == None:
+            t = self.time
+        if flux == None:
+            flux = self.flux
+        if flux_err == None:
+            flux_err = self.flux_err
         if norm:
-            ferr/=np.nanmedian(f)
-            f/=np.nanmedian(f)
-        try:
-            plt.errorbar(self.time-t0, f,ferr, color='#363636', **kwargs)
-        except:
-            plt.errorbar(self.time-t0, f, ferr, **kwargs)
+            flux_err/=np.nanmedian(flux)
+            flux/=np.nanmedian(flux)
+        plt.errorbar(t, flux,flux_err, color=color, **kwargs)
+        if fill:
+            plt.fill(t, flux, fc='#a8a7a7', linewidth=0.0, alpha=0.3)
+        if grid:
+            plt.grid(alpha=0.3)
+        plt.xlabel(xlabel, {'color' : 'k'})
+        plt.ylabel(ylabel, {'color' : 'k'})
 
-        plt.fill(self.time-t0, self.flux, fc='#a8a7a7', linewidth=0.0, alpha=0.3)
-        xlab = 'BJD $-$ {}'.format(int(t0+2454833.))
-        ylab1 = 'Flux (e$^-$ s$^{-1}$)'
-        if norm:
-            ylab1 = 'Normalized Flux'
-        plt.xlabel(xlab, {'color' : 'k'})
-        plt.ylabel(ylab1, {'color' : 'k'})
-        plt.grid()
+
+
+
 
 
 class KeplerLightCurve(LightCurve):
@@ -175,6 +174,10 @@ class KeplerLightCurve(LightCurve):
 
     def to_fits(self):
         raise NotImplementedError()
+
+    def plot(self,**kwargs):
+        super(KeplerLightCurve, self).plot(**kwargs)
+
 
 
 class KeplerLightCurveFile(object):
@@ -301,11 +304,11 @@ class KeplerLightCurveFile(object):
 
     def plot(self, plottype = None, ax=None, norm=True, **kwargs):
         """
-        Plot a Light Curve.
+        Plot all the flux extensinos in a light curve.
 
         Parameters
         ----------
-        plottype : list of FLUX types to plot
+        plottype : list of FLUX types to plot. Default is to plot all available
         """
         if ax is None:
             fig, ax = plt.subplots(1)
@@ -317,33 +320,13 @@ class KeplerLightCurveFile(object):
             plottype=[plottype]
 
         id = self.SAP_FLUX.keplerid
-        for pl in plottype:
+        for i,pl in enumerate(plottype):
             try:
                 lc = self.get_lightcurve(pl)
             except:
                 continue
-            f = lc.flux
-            ferr = lc.flux_err
-            t = self.time
-            if norm:
-                ferr/=np.nanmedian(f)
-                f/=np.nanmedian(f)
-            t0=float(int(t[0] / 100) * 100.0)
-            plt.errorbar(t-t0, f, ferr,label='{}'.format(pl),**kwargs)
-
-
-        plt.legend()
-#        plt.fill(t-t0, f, fc='#a8a7a7', linewidth=0.0, alpha=0.3)
-
-        xlab = 'BJD $-$ {:d}'.format(int(t0+2454833))
-        if norm:
-            ylab1 = 'Normalized Flux'
-        else:
-            ylab1 = 'Flux (e$^-$ s$^{-1}$)'
-        plt.xlabel(xlab, {'color' : 'k'})
-        plt.ylabel(ylab1, {'color' : 'k'})
-        plt.title('Kepler ID: {}'.format(id))
-        plt.grid()
+            lc.plot(ax=ax,color='C{}'.format(i),label=pl)
+            ax.legend()
 
 class Detrender(object):
     """
