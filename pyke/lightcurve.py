@@ -145,7 +145,7 @@ class KeplerLightCurve(LightCurve):
         self.quarter = quarter
         self.mission = mission
         self.cadenceno = cadenceno
-        self.id = id
+        self.keplerid = keplerid
 
     def to_fits(self):
         raise NotImplementedError()
@@ -190,11 +190,10 @@ class KeplerLightCurveFile(object):
                                     quarter=self.quarter,
                                     mission=self.mission,
                                     cadenceno=self.cadenceno,
-                                    id = self.hdu[0].header['KEPLERID'])
+                                    keplerid=self.hdu[0].header['KEPLERID'])
         else:
             raise KeyError("{} is not a valid flux type. Available types are: {}".
                            format(flux_type, self._flux_types))
-
 
     def _quality_mask(self, bitmask):
         """Returns a boolean mask which flags all good-quality cadences.
@@ -215,7 +214,6 @@ class KeplerLightCurveFile(object):
         if bitmask is None:
             return ~np.zeros(len(self.hdu[1].data['TIME']),dtype=bool)
         return (self.hdu[1].data['SAP_QUALITY'] & bitmask) == 0
-
 
     @property
     def SAP_FLUX(self):
