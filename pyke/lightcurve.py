@@ -89,9 +89,7 @@ class LightCurve(object):
             flatten_lc.flux_err = self.flux_err / trend_signal
         trend_lc = copy.copy(self)
         trend_lc.flux = trend_signal
-
         return flatten_lc, trend_lc
-
 
     def draw(self):
         raise NotImplementedError("Should we implement a LightCurveDrawer class?")
@@ -177,7 +175,7 @@ class KeplerLightCurve(LightCurve):
         self.quarter = quarter
         self.mission = mission
         self.cadenceno = cadenceno
-        self.id = id
+        self.keplerid = keplerid
 
     def to_fits(self):
         raise NotImplementedError()
@@ -233,11 +231,10 @@ class KeplerLightCurveFile(object):
                                     quarter=self.quarter,
                                     mission=self.mission,
                                     cadenceno=self.cadenceno,
-                                    id = self.hdu[0].header['KEPLERID'])
+                                    keplerid=self.hdu[0].header['KEPLERID'])
         else:
             raise KeyError("{} is not a valid flux type. Available types are: {}".
                            format(flux_type, self._flux_types))
-
 
     def _quality_mask(self, bitmask, mask):
         """Returns a boolean mask which flags all good-quality cadences.
@@ -262,7 +259,6 @@ class KeplerLightCurveFile(object):
             return ~np.zeros(len(self.hdu[1].data['TIME']),dtype=bool)
         else:
             return (self.hdu[1].data['SAP_QUALITY'] & bitmask) == 0
-
 
     @property
     def SAP_FLUX(self):
@@ -356,11 +352,9 @@ class Detrender(object):
         """
         pass
 
-
 class SystematicsCorrector(object):
     def correct(self):
         pass
-
 
 class KeplerCBVCorrector(SystematicsCorrector):
     r"""Remove systematic trends from Kepler light curves by fitting
