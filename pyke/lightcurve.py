@@ -96,19 +96,16 @@ class LightCurve(object):
     def to_csv(self):
         raise NotImplementedError()
 
-    def plot(self, t=None, flux=None, flux_err=None, ax=None, norm=True, xlabel = 'Time - 2454833 (days)',
+    def plot(self, ax=None, norm=True, xlabel = 'Time - 2454833 (days)',
             ylabel = 'Normalised Flux', title=None, color='#363636', fill=False, grid=True, legend=True, **kwargs):
         """
         Plot a Light Curve.
         """
         if ax is None:
             fig, ax = plt.subplots(1)
-        if t == None:
-            t = self.time
-        if flux == None:
-            flux = self.flux
-        if flux_err == None:
-            flux_err = self.flux_err
+        t = self.time
+        flux = self.flux
+        flux_err = self.flux_err
         if norm:
             flux_err/=np.nanmedian(flux)
             flux/=np.nanmedian(flux)
