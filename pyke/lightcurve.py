@@ -204,22 +204,22 @@ class KeplerLightCurveFile(object):
         quality_bitmask : int
             Bitmask. See ref. [1], table 2-3.
         """
+        bitmask_dict = {'default': KeplerQualityFlags.DEFAULT_BITMASK,
+                'conservative': KeplerQualityFlags.CONSERVATIVE_BITMASK,
+                'hard': KeplerQualityFlags.QUALITY_ZERO_BITMASK,
+                'None':None,
+                None:None}
         if bitmask == None:
-            if (mask is None) or (mask is 'None'):
-                bitmask=None
-            if (mask is 'default'):
+            if not (mask in bitmask_dict.keys()):
                 bitmask=KeplerQualityFlags.DEFAULT_BITMASK
-            if (mask is 'conservative'):
-                bitmask=KeplerQualityFlags.CONSERVATIVE_BITMASK
-            if (mask is 'hard'):
-                bitmask=KeplerQualityFlags.QUALITY_ZERO_BITMASK
-            if not (mask in [None,'None','default','conservative','hard']):
-                bitmask=KeplerQualityFlags.DEFAULT_BITMASK
+            else:
+                bitmask = bitmask_dict[mask]
             self.quality_bitmask=bitmask
         if bitmask is None:
             return ~np.zeros(len(self.hdu[1].data['TIME']),dtype=bool)
         else:
             return (self.hdu[1].data['SAP_QUALITY'] & bitmask) == 0
+
 
 
     @property
@@ -286,9 +286,7 @@ class KeplerLightCurveFile(object):
 
     def _flux_types(self):
         """Returns a list of available flux types for this light curve file"""
-        types = [n for n in self.hdu[1].data.columns.names if 'FLUX' in n]
-        types = [n for n in types if not ('ERR' in n)]
-        return types
+        return [n for n in self.hdu[1].data.columns.names if ('FLUX' in n and not 'ERR' in n)]
 
 class Detrender(object):
     """

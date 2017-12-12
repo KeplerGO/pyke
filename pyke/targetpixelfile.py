@@ -76,23 +76,21 @@ class KeplerTargetPixelFile(TargetPixelFile):
         quality_bitmask : int
             Bitmask. See ref. [1], table 2-3.
         """
+        bitmask_dict = {'default': KeplerQualityFlags.DEFAULT_BITMASK,
+                'conservative': KeplerQualityFlags.CONSERVATIVE_BITMASK,
+                'hard': KeplerQualityFlags.QUALITY_ZERO_BITMASK,
+                'None':None,
+                None:None}
         if bitmask == None:
-            if (mask is None) or (mask is 'None'):
-                bitmask=None
-            if (mask is 'default'):
+            if not (mask in bitmask_dict.keys()):
                 bitmask=KeplerQualityFlags.DEFAULT_BITMASK
-            if (mask is 'conservative'):
-                bitmask=KeplerQualityFlags.CONSERVATIVE_BITMASK
-            if (mask is 'hard'):
-                bitmask=KeplerQualityFlags.QUALITY_ZERO_BITMASK
-            if not (mask in [None,'None','default','conservative','hard']):
-                bitmask=KeplerQualityFlags.DEFAULT_BITMASK
+            else:
+                bitmask = bitmask_dict[mask]
             self.quality_bitmask=bitmask
         if bitmask is None:
             return ~np.zeros(len(self.hdu[1].data['TIME']),dtype=bool)
         else:
             return (self.hdu[1].data['QUALITY'] & bitmask) == 0
-
 
     def header(self, ext=0):
         """Returns the header for a given extension."""
