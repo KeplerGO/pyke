@@ -81,11 +81,6 @@ class KeplerTargetPixelFile(TargetPixelFile):
         """Returns the header for a given extension."""
         return self.hdu[ext].header
 
-
-    def header(self, ext=0):
-        """Returns the header for a given extension."""
-        return self.hdu[ext].header
-
     @property
     def keplerid(self):
         return self.header()['KEPLERID']

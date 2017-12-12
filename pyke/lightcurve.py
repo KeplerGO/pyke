@@ -160,7 +160,7 @@ class KeplerLightCurve(LightCurve):
     def __init__(self, time, flux, flux_err=None, centroid_col=None,
                  centroid_row=None, quality=None, quality_bitmask=None,
                  channel=None, campaign=None, quarter=None, mission=None,
-                 cadenceno=None, id = None):
+                 cadenceno=None, keplerid=None):
         super(KeplerLightCurve, self).__init__(time, flux, flux_err)
         self.centroid_col = centroid_col
         self.centroid_row = centroid_row
@@ -171,7 +171,7 @@ class KeplerLightCurve(LightCurve):
         self.quarter = quarter
         self.mission = mission
         self.cadenceno = cadenceno
-        self.id = id
+        self.keplerid = keplerid
 
     def to_fits(self):
         raise NotImplementedError()
@@ -215,7 +215,7 @@ class KeplerLightCurveFile(object):
                                     quarter=self.quarter,
                                     mission=self.mission,
                                     cadenceno=self.cadenceno,
-                                    id = self.hdu[0].header['KEPLERID'])
+                                    keplerid=self.hdu[0].header['KEPLERID'])
         else:
             raise KeyError("{} is not a valid flux type. Available types are: {}".
                            format(flux_type, self._flux_types))
@@ -316,7 +316,7 @@ class KeplerLightCurveFile(object):
         if not hasattr(plottype,'__iter__'):
             plottype=[plottype]
 
-        id = self.SAP_FLUX.id
+        id = self.SAP_FLUX.keplerid
         for pl in plottype:
             try:
                 lc = self.get_lightcurve(pl)
