@@ -92,8 +92,6 @@ class LightCurve(object):
 
         return flatten_lc, trend_lc
 
-    def fold(self, phase, period):
-        return LightCurve(((self.time - phase + 0.5 * period) / period) % 1 - 0.5, self.flux)
 
     def draw(self):
         raise NotImplementedError("Should we implement a LightCurveDrawer class?")
@@ -101,9 +99,35 @@ class LightCurve(object):
     def to_csv(self):
         raise NotImplementedError()
 
-    def periodogram(self):
-        p = Periodogram(self.time,self.flux,self.flux_err)
-        print(p)
+    def periodogram(self,**kwargs):
+        p = Periodogram(self.time,self.flux,self.flux_err,**kwargs)
+        return p
+
+    def fold(self, phase=None, period=None, double=False, plot=True, **kwargs):
+        if period is None:
+            p = self.periodogram(**kwargs)
+            period = p.per()
+            if double:
+                period*=2
+            if phase is None:
+                ok = np.isfinite(self.flux)
+                s = np.argsort(self.time[ok]/period % 1)
+                smooth = signal.savgol_filter(self.flux[ok][s],21,5)
+                m = np.argmin(smooth)
+                phase = (self.time[ok][s]/period % 1)[m]
+        if phase is None:
+            phase=0
+        s = np.argsort(self.time/period % 1)
+        ph = ((self.time - ((phase+0.5) * period)) / period) % 1 - 0.5
+        if plot:
+            plt.plot(ph, f.flux,marker='.',ls='',ms=1)
+            plt.xlabel('Phase')
+            plt.ylabel('Counts ($e^-s^{-1}$)')
+            plt.title('Best fit Period: {:5.3} days'.format(period))
+        self.period = period
+        self.phase = phase
+        self.folded_time = ph
+
 
 class KeplerLightCurve(LightCurve):
     """Defines a light curve class for NASA's Kepler and K2 missions.
@@ -292,6 +316,39 @@ class KeplerLightCurveFile(object):
         types = [n for n in self.hdu[1].data.columns.names if 'FLUX' in n]
         types = [n for n in types if not ('ERR' in n)]
         return types
+
+    def periodogram(self, fluxtype = 'SAP_FLUX', **kwargs):
+        f = self.get_lightcurve(fluxtype)
+        p = Periodogram(self.time,f.flux,f.flux_err,**kwargs)
+        return p
+
+
+    def fold(self, fluxtype = 'SAP_FLUX', phase=None, period=None, double=False, plot=False, **kwargs):
+        f = self.get_lightcurve(fluxtype)
+        if period is None:
+            p = self.periodogram(fluxtype,**kwargs)
+            period = p.per()
+            if double:
+                period*=2
+            if phase is None:
+                ok = np.isfinite(f.flux)
+                s = np.argsort(self.time[ok]/period % 1)
+                smooth = signal.savgol_filter(f.flux[ok][s],21,5)
+                m = np.argmin(smooth)
+                phase = (self.time[ok][s]/period % 1)[m]
+        if phase is None:
+            phase=0
+        ph = ((self.time - ((phase+0.5) * period)) / period) % 1 - 0.5
+        if plot:
+            plt.plot(ph, f.flux,marker='.',ls='',ms=1)
+            plt.xlabel('Phase')
+            plt.ylabel('Counts ($e^-s^{-1}$)')
+            plt.title('Best fit Period: {:5.3} days'.format(period))
+        self.period = period
+        self.phase = phase
+        self.folded_time=ph
+
+
 
 class Detrender(object):
     """
