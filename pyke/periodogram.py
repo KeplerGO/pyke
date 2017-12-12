@@ -17,6 +17,7 @@ class Periodogram(object):
         model.optimizer.quiet=True
         model.optimizer.period_range = (minper, maxper)
         model.fit(self.time, self.flux, self.flux.max()-self.flux.min())
+
         self.lomb_per=model.best_period
 
     def per(self):
