@@ -240,8 +240,8 @@ class KeplerTargetPixelFile(TargetPixelFile):
 
     def _get_aperture_flux(self):
         af = np.nansum(self.flux[:, self.aperture_mask], axis=1)
-        npix = np.sum(self.aperture_mask)
-        er = (1./npix)*(np.nansum(self.flux_err[:, self.aperture_mask]**2, axis=1)**0.5)
+        npix = np.sum(self.aperture_mask).astype(float)
+        er = np.sqrt(np.nansum(self.flux_err[:, self.aperture_mask]**2, axis=1)) / npix
         return af,er
 
     def get_bkg_lightcurve(self, method='median'):
