@@ -112,18 +112,18 @@ class LightCurve(object):
         if norm:
             flux_err/=np.nanmedian(flux)
             flux/=np.nanmedian(flux)
-        plt.errorbar(t, flux,flux_err, color=color, **kwargs)
+        ax.errorbar(t, flux,flux_err, color=color, **kwargs)
         if fill:
-            plt.fill(t, flux, fc='#a8a7a7', linewidth=0.0, alpha=0.3)
+            ax.fill(t, flux, fc='#a8a7a7', linewidth=0.0, alpha=0.3)
         if grid:
-            plt.grid(alpha=0.3)
+            ax.grid(alpha=0.3)
         if legend:
-            plt.legend()
+            ax.legend()
         if not( title is None):
-            plt.title(title)
-        plt.xlabel(xlabel, {'color' : 'k'})
-        plt.ylabel(ylabel, {'color' : 'k'})
-
+            ax.set_title(title)
+        ax.set_xlabel(xlabel, {'color' : 'k'})
+        ax.set_ylabel(ylabel, {'color' : 'k'})
+        return ax
 
 
 
