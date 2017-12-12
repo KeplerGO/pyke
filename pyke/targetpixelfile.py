@@ -48,9 +48,9 @@ class KeplerTargetPixelFile(TargetPixelFile):
         The default behaviour is to use all pixels.
     quality_bitmask : int
         Bitmask specifying quality flags of cadences that should be ignored:
-            default: recommended quality mask
-            conservative: removes more flags, known to remove good data
-            hard: removes all data that has been flagged
+            Default: recommended quality mask
+            Conservative: removes more flags, known to remove good data
+            Hard: removes all data that has been flagged
 
     References
     ----------
