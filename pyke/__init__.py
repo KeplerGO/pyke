@@ -50,5 +50,5 @@ from .kepwindow import *
 from .prf import *
 from .lightcurve import *
 from .targetpixelfile import *
-from .periodograms import *
+from .periodogram import *
 from .utils import *

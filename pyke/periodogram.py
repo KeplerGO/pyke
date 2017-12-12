@@ -1,6 +1,8 @@
 import numpy as np
 from gatspy import periodic
 
+__all__ = ['Periodogram']
+
 class Periodogram(object):
     '''
     Implements different periodograms when passed a lightcurve object'''
@@ -15,7 +17,7 @@ class Periodogram(object):
         model.optimizer.quiet=True
         model.optimizer.period_range = (minper, maxper)
         model.fit(self.time, self.flux, self.flux.max()-self.flux.min())
-        self.per=model.best_period
+        self.lomb_per=model.best_period
 
     def per(self):
         '''Returns the best fit period'''

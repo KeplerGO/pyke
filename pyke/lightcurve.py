@@ -10,6 +10,7 @@ from .utils import channel_to_module_output, KeplerQualityFlags
 from matplotlib import pyplot as plt
 from .periodogram import Periodogram
 
+
 __all__ = ['LightCurve', 'KeplerLightCurveFile', 'KeplerCBVCorrector',
            'SimplePixelLevelDecorrelationDetrender']
 
@@ -100,7 +101,9 @@ class LightCurve(object):
     def to_csv(self):
         raise NotImplementedError()
 
-
+    def periodogram(self):
+        p = Periodogram(self.time,self.flux,self.flux_err)
+        print(p)
 
 class KeplerLightCurve(LightCurve):
     """Defines a light curve class for NASA's Kepler and K2 missions.
