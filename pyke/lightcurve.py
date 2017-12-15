@@ -15,30 +15,22 @@ __all__ = ['LightCurve', 'KeplerLightCurveFile', 'KeplerCBVCorrector',
 
 class LightCurve(object):
     """
-    Implements a basic time-series class for a generic lightcurve.
+    Implements a simple class for a generic light curve.
 
     Attributes
     ----------
     time : array-like
-        Time-line
+        Time measurements
     flux : array-like
         Data flux for every time point
     flux_err : array-like
-        Uncertainty in each flux data point
-    quality : array-like
-        Array indicating the quality of each data point
-    centroid_col, centroid_row : array-like, array-like
-        Centroid column and row coordinates as a function of time
+        Uncertainty on each flux data point
     """
 
-    def __init__(self, time, flux, flux_err=None, quality=None, centroid_col=None,
-                 centroid_row=None):
+    def __init__(self, time, flux, flux_err=None):
         self.time = time
         self.flux = flux
         self.flux_err = flux_err
-        self.quality = quality
-        self.centroid_col = centroid_col
-        self.centroid_row = centroid_row
 
     def stitch(self, *others):
         """
@@ -57,21 +49,13 @@ class LightCurve(object):
         time = self.time
         flux = self.flux
         flux_err = self.flux_err
-        quality = self.quality
-        centroid_col = self.centroid_col
-        centroid_row = self.centroid_row
 
         for i in range(len(others)):
             time = np.append(time, others[i].time)
             flux = np.append(flux, others[i].flux)
             flux_err = np.append(flux_err, others[i].flux_err)
-            quality = np.append(quality, others[i].quality)
-            centroid_col = np.append(centroid_col, others[i].centroid_col)
-            centroid_row = np.append(centroid_row, others[i].centroid_row)
 
-        return LightCurve(time=time, flux=flux, flux_err=flux_err,
-                          quality=quality, centroid_col=centroid_col,
-                          centroid_row=centroid_row)
+        return LightCurve(time=time, flux=flux, flux_err=flux_err)
 
     def flatten(self, window_length=101, polyorder=3, **kwargs):
         """
@@ -115,12 +99,67 @@ class LightCurve(object):
     def to_csv(self):
         raise NotImplementedError()
 
+
+class KeplerLightCurve(LightCurve):
+    """Defines a light curve class for NASA's Kepler and K2 missions.
+
+    Attributes
+    ----------
+    time : array-like
+        Time measurements
+    flux : array-like
+        Data flux for every time point
+    flux_err : array-like
+        Uncertainty on each flux data point
+    centroid_col, centroid_row : array-like, array-like
+        Centroid column and row coordinates as a function of time
+    quality : array-like
+        Array indicating the quality of each data point
+    quality_bitmask : int
+        Bitmask specifying quality flags of cadences that should be ignored
+    channel : int
+        Channel number
+    campaign : int
+        Campaign number
+    quarter : int
+        Quarter number
+    mission : str
+        Mission name
+    cadenceno : array-like
+        Cadence numbers corresponding to every time measurement
+    """
+
+    def __init__(self, time, flux, flux_err=None, centroid_col=None,
+                 centroid_row=None, quality=None, quality_bitmask=None,
+                 channel=None, campaign=None, quarter=None, mission=None,
+                 cadenceno=None):
+        super(KeplerLightCurve, self).__init__(time, flux, flux_err)
+        self.centroid_col = centroid_col
+        self.centroid_row = centroid_row
+        self.quality = quality
+        self.quality_bitmask = quality_bitmask
+        self.channel = channel
+        self.campaign = campaign
+        self.quarter = quarter
+        self.mission = mission
+        self.cadenceno = cadenceno
+
     def to_fits(self):
         raise NotImplementedError()
 
 
 class KeplerLightCurveFile(object):
-    """Defines a LightCurveFile class for NASA's Kepler and K2 missions.
+    """Defines a class for a given light curve FITS file from NASA's Kepler and
+    K2 missions.
+
+    Attributes
+    ----------
+    path : str
+        Directory path or url to a lightcurve FITS file.
+    quality_bitmask : int
+        Bitmask specifying quality flags of cadences that should be ignored.
+    kwargs : dict
+        Keyword arguments to be passed to astropy.io.fits.open.
     """
 
     def __init__(self, path, quality_bitmask=KeplerQualityFlags.DEFAULT_BITMASK,
@@ -132,12 +171,18 @@ class KeplerLightCurveFile(object):
 
     def get_lightcurve(self, flux_type, centroid_type='MOM_CENTR'):
         if flux_type in self._flux_types():
-            return LightCurve(self.hdu[1].data['TIME'][self.quality_mask],
-                              self.hdu[1].data[flux_type][self.quality_mask],
-                              flux_err=self.hdu[1].data[flux_type + "_ERR"][self.quality_mask],
-                              quality=self.hdu[1].data['SAP_QUALITY'][self.quality_mask],
-                              centroid_col=self.hdu[1].data[centroid_type + "1"][self.quality_mask],
-                              centroid_row=self.hdu[1].data[centroid_type + "2"][self.quality_mask])
+            return KeplerLightCurve(self.hdu[1].data['TIME'][self.quality_mask],
+                                    self.hdu[1].data[flux_type][self.quality_mask],
+                                    flux_err=self.hdu[1].data[flux_type + "_ERR"][self.quality_mask],
+                                    centroid_col=self.hdu[1].data[centroid_type + "1"][self.quality_mask],
+                                    centroid_row=self.hdu[1].data[centroid_type + "2"][self.quality_mask],
+                                    quality=self.hdu[1].data['SAP_QUALITY'][self.quality_mask],
+                                    quality_bitmask=self.quality_bitmask,
+                                    channel=self.channel,
+                                    campaign=self.campaign,
+                                    quarter=self.quarter,
+                                    mission=self.mission,
+                                    cadenceno=self.cadenceno)
         else:
             raise KeyError("{} is not a valid flux type. Available types are: {}".
                            format(flux_type, self._flux_types))
@@ -154,30 +199,44 @@ class KeplerLightCurveFile(object):
 
     @property
     def SAP_FLUX(self):
-        """Returns a LightCurve object for SAP_FLUX"""
+        """Returns a KeplerLightCurve object for SAP_FLUX"""
         return self.get_lightcurve('SAP_FLUX')
 
     @property
     def PDCSAP_FLUX(self):
-        """Returns a LightCurve object for PDCSAP_FLUX"""
+        """Returns a KeplerLightCurve object for PDCSAP_FLUX"""
         return self.get_lightcurve('PDCSAP_FLUX')
 
     @property
     def time(self):
+        """Time measurements"""
         return self.hdu[1].data['TIME'][self.quality_mask]
 
     @property
+    def cadenceno(self):
+        """Cadence number"""
+        return self.hdu[1].data['CADENCENO'][self.quality_mask]
+
+    @property
     def channel(self):
+        """Channel number"""
         return self.header(ext=0)['CHANNEL']
 
     @property
     def quarter(self):
-        return self.header(ext=0)['QUARTER']
+        """Quarter number"""
+        try:
+            return self.header(ext=0)['QUARTER']
+        except KeyError:
+            return None
 
     @property
     def campaign(self):
         """Campaign number"""
-        return self.header(ext=0)['CAMPAIGN']
+        try:
+            return self.header(ext=0)['CAMPAIGN']
+        except KeyError:
+            return None
 
     @property
     def mission(self):
@@ -197,6 +256,7 @@ class KeplerLightCurveFile(object):
         return KeplerCBVCorrector(self).correct(cbvs=cbvs)
 
     def header(self, ext=0):
+        """Header of the object at extension `ext`"""
         return self.hdu[ext].header
 
     def _flux_types(self):
@@ -269,11 +329,14 @@ class KeplerCBVCorrector(SystematicsCorrector):
     @lc_file.setter
     def lc_file(self, value):
         # this enables `lc_file` to be either a string
-        # or an object from KeplerLightCurve
+        # or an object from KeplerLightCurveFile
         if isinstance(value, str):
             self._lc_file = KeplerLightCurveFile(value)
         elif isinstance(value, KeplerLightCurveFile):
             self._lc_file = value
+        else:
+            raise ValueError("lc_file must be either a string or a"
+                             " KeplerLightCurveFile instance, got {}.".format(value))
 
     @property
     def coeffs(self):

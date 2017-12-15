@@ -104,6 +104,11 @@ class KeplerQualityFlags(object):
     DEFAULT_BITMASK = (AttitudeTweak | SafeMode | CoarsePoint | EarthPoint |
                        Desat | ApertureCosmic | ManualExclude | NoData | ThrusterFiring)
 
+    # This bitmask includes flags that are known to identify both good and bad cadences.
+    # Use it wisely.
+    CONSERVATIVE_BITMASK = (DEFAULT_BITMASK | SensitivityDropout | CollateralCosmic
+                            | PossibleThrusterFiring)
+
     # Using this bitmask only QUALITY == 0 cadences will remain
     QUALITY_ZERO_BITMASK = 2096639
 
@@ -155,6 +160,7 @@ class KeplerQualityFlags(object):
             if quality & flag > 0:
                 result.append(cls.STRINGS[flag])
         return result
+
 
 def plot_image(image, scale='linear', origin='lower', xlabel='Pixel Column Number',
                ylabel='Pixel Row Number', title=None, **kwargs):
