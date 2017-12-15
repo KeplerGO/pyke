@@ -140,12 +140,11 @@ class PRFPhotometry(object):
         self.opt_params = self.opt_params.reshape((tpf_flux.shape[0], len(x0)))
         self.residuals = self.residuals.reshape(tpf_flux.shape)
 
-        for t in tqdm.tqdm.(cadences):
-            uncertainties = loss.loglikelihood.uncertainties(opt_params[t])
-            self.uncertainties = np.append(self.uncertainties, uncertainties)
-        self.uncertainties = self.uncertainties.reshape((tpf_flux.shape[0], len(x0)))
-
         if return_uncertainties:
+            for t in tqdm.tqdm(cadences):
+                uncertainties = loss.loglikelihood.uncertainties(self.opt_params[t])
+                self.uncertainties = np.append(self.uncertainties, uncertainties)
+            self.uncertainties = self.uncertainties.reshape((tpf_flux.shape[0], len(x0)))
             return self.opt_params, self.uncertainties
         else:
             return self.opt_params
