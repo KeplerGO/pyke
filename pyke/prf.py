@@ -54,7 +54,7 @@ class PRFPhotometry(object):
     Uncertainties are derived based on the Fisher Information Matrix.
     Interested readers might find the following references useful:
         * https://en.wikipedia.org/wiki/Fisher_information
-        * https://en.wikipedia.org/wiki/Cramer–Rao_bound
+        * https://en.wikipedia.org/wiki/Cramer-Rao_bound
         * https://en.wikipedia.org/wiki/Observed_information
 
     Examples
