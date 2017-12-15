@@ -88,7 +88,7 @@ class PRFPhotometry(object):
         self.uncertainties = np.array([])
 
     def fit(self, tpf_flux, x0=None, cadences='all', method='powell',
-            **kwargs):
+            return_uncertainties=False, **kwargs):
         """
         Fits the scene model to the given data in ``tpf_flux``.
 
@@ -104,6 +104,8 @@ class PRFPhotometry(object):
         cadences : array-like of ints or str
             A list or array that contains the cadences which will be fitted.
             Default is to fit all cadences.
+        return_uncertainties : bool
+            Return uncertainties on the fitted parameters.
         kwargs : dict
             Dictionary of additional parameters to be passed to
             `scipy.optimize.minimize`.
@@ -132,16 +134,21 @@ class PRFPhotometry(object):
             result = loss.fit(x0=x0, method='powell', **kwargs)
             opt_params = result.x
             residuals = tpf_flux[t] - self.scene_model(*opt_params)
-            uncertainties = loss.loglikelihood.uncertainties(opt_params)
             self.loss_value = np.append(self.loss_value, result.fun)
             self.opt_params = np.append(self.opt_params, opt_params)
             self.residuals = np.append(self.residuals, residuals)
-            self.uncertainties = np.append(self.uncertainties, uncertainties)
-        self.uncertainties = self.uncertainties.reshape((tpf_flux.shape[0], len(x0)))
         self.opt_params = self.opt_params.reshape((tpf_flux.shape[0], len(x0)))
         self.residuals = self.residuals.reshape(tpf_flux.shape)
 
-        return self.opt_params
+        for t in tqdm.tqdm.(cadences):
+            uncertainties = loss.loglikelihood.uncertainties(opt_params[t])
+            self.uncertainties = np.append(self.uncertainties, uncertainties)
+        self.uncertainties = self.uncertainties.reshape((tpf_flux.shape[0], len(x0)))
+
+        if return_uncertainties:
+            return self.opt_params, self.uncertainties
+        else:
+            return self.opt_params
 
     def get_residuals(self):
         return self.residuals
