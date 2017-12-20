@@ -127,14 +127,14 @@ class KeplerLightCurve(LightCurve):
         Mission name
     cadenceno : array-like
         Cadence numbers corresponding to every time measurement
-    id : int
+    keplerid : int
         Kepler ID number
     """
 
     def __init__(self, time, flux, flux_err=None, centroid_col=None,
                  centroid_row=None, quality=None, quality_bitmask=None,
                  channel=None, campaign=None, quarter=None, mission=None,
-                 cadenceno=None, id = None):
+                 cadenceno=None, keplerid=None):
         super(KeplerLightCurve, self).__init__(time, flux, flux_err)
         self.centroid_col = centroid_col
         self.centroid_row = centroid_row
