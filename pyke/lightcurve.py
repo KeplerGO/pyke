@@ -96,33 +96,57 @@ class LightCurve(object):
     def to_csv(self):
         raise NotImplementedError()
 
-    def plot(self, ax=None, norm=True, xlabel = 'Time - 2454833 (days)',
-            ylabel = 'Normalised Flux', title=None, color='#363636', fill=False, grid=True, legend=True, **kwargs):
+    def plot(self, ax=None, norm=True, xlabel='Time - 2454833 (days)',
+            ylabel='Normalised Flux', title=None, color='#363636', fill=False, grid=True, legend=True, **kwargs):
         """
-        Plot a Light Curve.
+        Plots a light curve
+
+        Parameters
+        ----------
+        ax :
+            A frame to plot into. If no frame is provided, one will be generated.
+        norm : bool
+            Normalised the lightcurve
+        xlabel : str
+            Plot x axis label
+        ylabel : str
+            Plot y axis label
+        title : str
+            Plot set_title
+        color: str
+            Color to plot flux points
+        fill: bool
+            Shade the region between 0 and flux
+        grid: bool
+            Add a grid to the plot
+        legend: bool
+            Add a legend to the plot
+        **kwargs : dict
+            Dictionary of arguments to be passed to `matplotlib.pyplot.plot`.
+
+        Returns
+        -------
+        ax :
+            matplotlib.pyplot frame
         """
+
         if ax is None:
             fig, ax = plt.subplots(1)
-        t = self.time
-        flux = self.flux
-        flux_err = self.flux_err
         if norm:
-            flux_err/=np.nanmedian(flux)
-            flux/=np.nanmedian(flux)
-        ax.errorbar(t, flux,flux_err, color=color, **kwargs)
+            flux_err /= np.nanmedian(flux)
+            flux /= np.nanmedian(flux)
+        ax.errorbar(self.time, self.flux, self.flux_err, color=color, **kwargs)
         if fill:
-            ax.fill(t, flux, fc='#a8a7a7', linewidth=0.0, alpha=0.3)
+            ax.fill(self.time, self.flux, fc='#a8a7a7', linewidth=0.0, alpha=0.3)
         if grid:
             ax.grid(alpha=0.3)
         if legend:
             ax.legend()
-        if not( title is None):
+        if title is not None:
             ax.set_title(title)
         ax.set_xlabel(xlabel, {'color' : 'k'})
         ax.set_ylabel(ylabel, {'color' : 'k'})
         return ax
-
-
 
 
 class KeplerLightCurve(LightCurve):
@@ -177,7 +201,6 @@ class KeplerLightCurve(LightCurve):
 
     def plot(self,**kwargs):
         super(KeplerLightCurve, self).plot(**kwargs)
-
 
 
 class KeplerLightCurveFile(object):
