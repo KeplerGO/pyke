@@ -152,7 +152,7 @@ class KeplerLightCurve(LightCurve):
         Mission name
     cadenceno : array-like
         Cadence numbers corresponding to every time measurement
-    id : int
+    keplerid : int
         Kepler ID number
     """
 
