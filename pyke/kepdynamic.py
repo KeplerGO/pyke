@@ -2,17 +2,18 @@ from .utils import PyKEArgumentHelpFormatter
 import re
 import numpy as np
 from astropy.io import fits as pyfits
+from astropy.stats import LombScargle
 from matplotlib import pyplot as plt
 from tqdm import tqdm
-from . import kepio, kepmsg, kepkey, kepstat, kepfourier
+from . import kepio, kepmsg, kepkey, kepstat
 
 
 __all__ = ['kepdynamic']
 
 
-def kepdynamic(infile, outfile=None, fcol='SAP_FLUX', pmin=0.1, pmax=10., nfreq=100,
+def kepdynamic(infile, outfile=None, datacol='SAP_FLUX', pmin=0.1, pmax=10., nfreq=2000,
                deltat=10., nslice=10, plot=False, plotscale='log', cmap='PuBu',
-               overwrite=False, verbose=False, logfile='kepdynamic.log'):
+               noninteractive=False, overwrite=False, verbose=False, logfile='kepdynamic.log'):
     """
     kepdynamic -- Construct a dynamic (time-dependent) power spectrum from
     time series data
@@ -25,7 +26,7 @@ def kepdynamic(infile, outfile=None, fcol='SAP_FLUX', pmin=0.1, pmax=10., nfreq=
     outfile : string
         The name of the output FITS file with a new image extension containing
         the dynamic power spectrum.
-    fcol : str
+    datacol : str
         The name of the FITS table column in extension 1 of infile upon which
         the sequence power spectra will be calculated.
     pmin : float [day]
@@ -49,6 +50,8 @@ def kepdynamic(infile, outfile=None, fcol='SAP_FLUX', pmin=0.1, pmax=10., nfreq=
         Plot the output Fourier spectrum?
     cmap : str
         A matplotlib colormap scheme.
+    non-interactive : bool
+        If True, prevents the matplotlib window to pop up.
     overwrite : bool
         Overwrite the output file?
     verbose : boolean
@@ -60,7 +63,7 @@ def kepdynamic(infile, outfile=None, fcol='SAP_FLUX', pmin=0.1, pmax=10., nfreq=
     --------
     .. code-block:: bash
 
-        $ kepdynamic kplr002436324-2009259160929_llc.fits --fcol SAP_FLUX
+        $ kepdynamic kplr002436324-2009259160929_llc.fits --datacol SAP_FLUX
         --pmin 0.08 --pmax 0.1 --nfreq 500 --deltat 5.0 --nslice 500 --plot --verbose
 
     .. image:: ../_static/images/api/kepdynamic.png
@@ -76,7 +79,7 @@ def kepdynamic(infile, outfile=None, fcol='SAP_FLUX', pmin=0.1, pmax=10., nfreq=
     call = ('KEPDYNAMIC -- '
             + ' infile={}'.format(infile)
             + ' outfile={}'.format(outfile)
-            + ' fcol={}'.format(fcol)
+            + ' datacol={}'.format(datacol)
             + ' pmin={}'.format(pmin)
             + ' pmax={}'.format(pmax)
             + ' nfreq={}'.format(nfreq)
@@ -120,7 +123,7 @@ def kepdynamic(infile, outfile=None, fcol='SAP_FLUX', pmin=0.1, pmax=10., nfreq=
 
     # read table columns
     barytime = kepio.readtimecol(infile, instr[1].data, logfile, verbose)
-    signal = kepio.readfitscol(infile, instr[1].data, fcol, logfile, verbose)
+    signal = kepio.readfitscol(infile, instr[1].data, datacol, logfile, verbose)
     barytime = barytime + bjdref
     signal = signal / cadenom
 
@@ -160,7 +163,9 @@ def kepdynamic(infile, outfile=None, fcol='SAP_FLUX', pmin=0.1, pmax=10., nfreq=
         y = y - np.median(y)
 
         # determine FT power
-        fr, power = kepfourier.ft(x, y, fmin, fmax, deltaf, False)
+        fr = np.linspace(fmin, fmax, nfreq)
+        power = LombScargle(x, y, y.max()-y.min()).power(fr)
+
         for j in range(len(power)):
             dynam.append(power[j])
 
@@ -229,8 +234,8 @@ def kepdynamic(infile, outfile=None, fcol='SAP_FLUX', pmin=0.1, pmax=10., nfreq=
     plt.ylabel(r'Frequency (d$^{-1}$)', {'color' : 'k'})
     plt.grid()
     plt.savefig(re.sub('\.\S+', '.png', outfile), dpi=100)
-
-    plt.show()
+    if not noninteractive:
+        plt.show()
 
     kepmsg.clock('KEPDYNAMIC completed at', logfile, verbose)
 
@@ -245,13 +250,13 @@ def kepdynamic_main():
                         help=('Name of FITS file to output.'
                               ' If None, outfile is infile-kepdynamic.'),
                         default=None)
-    parser.add_argument('--fcol', default='SAP_FLUX',
+    parser.add_argument('--datacol', default='SAP_FLUX',
                         help='Name of data column to plot', type=str)
     parser.add_argument('--pmin', default=0.1,
                         help='Minimum search period [days]', type=float)
     parser.add_argument('--pmax', default=10.,
                         help='Maximum search period [days]', type=float)
-    parser.add_argument('--nfreq', default=100,
+    parser.add_argument('--nfreq', default=2000,
                         help='Number of frequency intervals', type=int)
     parser.add_argument('--deltat', default=10.,
                         help='Length of time slice [days]', type=float)
@@ -263,6 +268,9 @@ def kepdynamic_main():
                         choices=['linear', 'log', 'squareroot', 'loglog'])
     parser.add_argument('--cmap', default='PuBu', help='image colormap',
                         type=str)
+    parser.add_argument('--non-interactive', action='store_true',
+                        help='Pop up matplotlib plot window?',
+                        dest='noninteractive')
     parser.add_argument('--overwrite', action='store_true',
                         help='Overwrite output file?')
     parser.add_argument('--verbose', action='store_true',
@@ -270,6 +278,7 @@ def kepdynamic_main():
     parser.add_argument('--logfile', '-l', help='Name of ascii log file',
                         default='kepdynamic.log', dest='logfile', type=str)
     args = parser.parse_args()
-    kepdynamic(args.infile, args.outfile, args.fcol, args.pmin, args.pmax,
+    kepdynamic(args.infile, args.outfile, args.datacol, args.pmin, args.pmax,
                args.nfreq, args.deltat, args.nslice, args.plot, args.plotscale,
-               args.cmap, args.overwrite, args.verbose, args.logfile)
+               args.cmap, args.noninteractive, args.overwrite, args.verbose,
+               args.logfile)

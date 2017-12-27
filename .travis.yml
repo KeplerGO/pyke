@@ -4,10 +4,10 @@ python:
   - 3.5
   - 3.6
 before_install:
-  - sudo apt-get install -y python-numpy python-scipy
-  - pip install --no-deps oktopus
   - pip install codecov
   - pip install pytest-cov
+  - pip install sphinx_rtd_theme
+  - pip install numpydoc
 install:
   - pip install -r requirements.txt
 before_script: # configure a headless display to test plot generation
@@ -16,7 +16,7 @@ before_script: # configure a headless display to test plot generation
   - sleep 3 # give xvfb some time to start
 # command to run tests
 script:
-  - pytest --cov .
+  - pytest
 
 after_success:
   - codecov

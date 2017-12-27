@@ -3,14 +3,13 @@
 from __future__ import absolute_import
 import os
 PACKAGEDIR = os.path.abspath(os.path.dirname(__file__))
-# Where are the Kepler PRF files stored by default?
-DEFAULT_PRFDIR = os.path.expanduser('~/.pyke/kepler-prf-calibration-data/')
 import matplotlib
 matplotlib.use('TkAgg')
 
 from .version import __version__
 from .keparray import *
 from .kepbls import *
+from .kepclean import *
 from .kepclip import *
 from .kepconvert import *
 from .kepcotrend import *
@@ -24,7 +23,7 @@ from .kepfit import *
 from .kepflatten import *
 from .kepfold import *
 from .kepfourier import *
-from .kepft import *
+from .kepperiodogram import *
 from .kepfunc import *
 from .kephead import *
 from .kepimages import *
@@ -48,6 +47,7 @@ from .keptimefix import *
 from .keptrial import *
 from .keptrim import *
 from .kepwindow import *
+from .prf import *
 from .lightcurve import *
 from .targetpixelfile import *
 from .utils import *
