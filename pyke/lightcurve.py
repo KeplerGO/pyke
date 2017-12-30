@@ -91,7 +91,17 @@ class LightCurve(object):
         return flatten_lc, trend_lc
 
     def fold(self, phase, period):
-        return LightCurve(((self.time - phase + 0.5 * period) / period) % 1 - 0.5, self.flux)
+        """
+
+        Parameters
+        ----------
+        phase : float
+        period : float
+            Period upon which to fold the data
+        """
+        fold_time = ((self.time - phase + 0.5 * period) / period) % 1 - 0.5
+        sorted_args = np.argsort(fold_time)
+        return LightCurve(fold_time[sorted_args], self.flux[sorted_args])
 
     def draw(self):
         raise NotImplementedError("Should we implement a LightCurveDrawer class?")
