@@ -31,6 +31,10 @@ class LightCurve(object):
         self.time = time
         self.flux = flux
         self.flux_err = flux_err
+        # If the data was given as a list, convert it into a NumPy array
+        for attr in ['time', 'flux', 'flux_err']:
+            if isinstance(getattr(self, attr), list):
+                setattr(self, attr, np.array(getattr(self, attr)))
 
     def stitch(self, *others):
         """
@@ -90,14 +94,25 @@ class LightCurve(object):
 
         return flatten_lc, trend_lc
 
-    def fold(self, phase, period):
-        """
+    def fold(self, period, phase=0.):
+        """Folds the lightcurve at a specified ``period`` and ``phase``.
+
+        This method returns a new ``LightCurve`` object in which the time
+        values range between -0.5 to +0.5.  Data points which occur exactly
+        at ``phase`` or an integer multiple of `phase + n*period` have time
+        value 0.0.
 
         Parameters
         ----------
-        phase : float
         period : float
-            Period upon which to fold the data
+            The period upon which to fold.
+        phase : float, optional
+            Time reference point.
+
+        Returns
+        -------
+        folded_lightcurve : A new ``LightCurve`` in which the data are folded
+            and sorted by phase.
         """
         fold_time = ((self.time - phase + 0.5 * period) / period) % 1 - 0.5
         sorted_args = np.argsort(fold_time)
