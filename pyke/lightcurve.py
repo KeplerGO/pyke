@@ -28,13 +28,9 @@ class LightCurve(object):
     """
 
     def __init__(self, time, flux, flux_err=None):
-        self.time = time
-        self.flux = flux
-        self.flux_err = flux_err
-        # If the data was given as a list, convert it into a NumPy array
-        for attr in ['time', 'flux', 'flux_err']:
-            if isinstance(getattr(self, attr), list):
-                setattr(self, attr, np.array(getattr(self, attr)))
+        self.time = np.asarray(time)
+        self.flux = np.asarray(flux)
+        self.flux_err = np.asarray(flux_err)
 
     def stitch(self, *others):
         """
