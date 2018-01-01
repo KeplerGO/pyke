@@ -56,7 +56,6 @@ class KeplerTargetPixelFile(TargetPixelFile):
         self.hdu = fits.open(self.path, **kwargs)
         self.quality_bitmask = quality_bitmask
         self.quality_mask = self._quality_mask(quality_bitmask)
-        self.aperture_mask = aperture_mask
 
     def _quality_mask(self, quality_bitmask):
         """Returns a boolean mask which flags all good-quality cadences.

@@ -12,7 +12,6 @@ def test_tpf_shapes():
     """Are the data array shapes of the TargetPixelFile object consistent?"""
     tpf = KeplerTargetPixelFile(filename_tpf_all_zeros)
     assert tpf.quality_mask.shape == tpf.hdu[1].data['TIME'].shape
-    assert tpf.aperture_mask.shape == tpf.hdu[1].data['FLUX'][0].shape
     assert tpf.flux.shape == tpf.flux_err.shape
 
 
