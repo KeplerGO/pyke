@@ -30,7 +30,10 @@ class LightCurve(object):
     def __init__(self, time, flux, flux_err=None):
         self.time = np.asarray(time)
         self.flux = np.asarray(flux)
-        self.flux_err = np.asarray(flux_err)
+        if flux_err is not None:
+            self.flux_err = np.asarray(flux_err)
+        else:
+            self.flux_err = None
 
     def stitch(self, *others):
         """
