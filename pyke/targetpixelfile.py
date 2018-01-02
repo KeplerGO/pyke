@@ -2,7 +2,7 @@ import numpy as np
 import scipy
 import matplotlib.pyplot as plt
 from astropy.io import fits
-from .lightcurve import LightCurve
+from .lightcurve import KeplerLightCurve
 from .utils import KeplerQualityFlags, plot_image
 
 
@@ -187,7 +187,7 @@ class KeplerTargetPixelFile(TargetPixelFile):
 
         Returns
         -------
-        lc : LightCurve object
+        lc : KeplerLightCurve object
             Array containing the summed flux within the aperture for each
             cadence.
         """
