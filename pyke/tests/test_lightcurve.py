@@ -1,5 +1,5 @@
 from numpy.testing import assert_almost_equal
-from ..lightcurve import KeplerCBVCorrector, KeplerLightCurveFile
+from ..lightcurve import LightCurve, KeplerCBVCorrector, KeplerLightCurveFile
 
 # 8th Quarter of Tabby's star
 TABBY_Q8 = ("https://archive.stsci.edu/missions/kepler/lightcurves"
@@ -24,3 +24,10 @@ def test_KeplerLightCurve():
     assert kplc.campaign is None
     assert kplc.quarter == lcf.quarter
     assert kplc.mission == 'Kepler'
+
+
+def test_lightcurve_fold():
+    """Test the ``LightCurve.fold()`` method."""
+    lc = LightCurve(time=[1, 2, 3], flux=[1, 1, 1])
+    assert_almost_equal(lc.fold(period=1).time[0], 0)
+    assert_almost_equal(lc.fold(period=1, phase=-0.1).time[0], 0.1)
