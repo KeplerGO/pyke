@@ -2,7 +2,7 @@ import numpy as np
 import scipy
 import matplotlib.pyplot as plt
 from astropy.io import fits
-from .lightcurve import KeplerLightCurve
+from .lightcurve import KeplerLightCurve, LightCurve
 from .utils import KeplerQualityFlags, plot_image
 
 
@@ -94,6 +94,32 @@ class KeplerTargetPixelFile(TargetPixelFile):
     @property
     def row(self):
         return self.hdu['TARGETTABLES'].header['2CRV5P']
+
+    @property
+    def centroids(self, aperture_mask=None):
+        """Returns centroids based on sample moments.
+
+        Parameters
+        ----------
+        aperture_mask : array-like or None
+            A boolean array describing the aperture such that `False` means
+            that the pixel will be masked out. The default behaviour is to
+            use all pixels.
+
+        Returns
+        -------
+        col_centr, row_centr : tuple
+            Arrays containing centroids for column and row at each cadence
+        """
+        yy, xx = np.indices(self.flux.shape) + 0.5
+        yy = self.row + yy
+        xx = self.column + xx
+        total_flux = np.nansum(self.flux[:, aperture_mask], axis=1), axis=1)
+        col_centr = np.nansum(xx * self.flux[:, aperture_mask], axis=1) / total_flux
+        row_centr = np.nansum(yy * self.flux[:, aperture_mask], axis=1) / total_flux
+
+        return col_centr, row_centr
+
 
     def plot(self, frame=None, cadenceno=None, **kwargs):
         """
@@ -191,11 +217,12 @@ class KeplerTargetPixelFile(TargetPixelFile):
             Array containing the summed flux within the aperture for each
             cadence.
         """
+        centroid_col, centroid_row = self.centroids(aperture_mask)
 
         return KeplerLightCurve(flux=np.nansum(self.flux[:, aperture_mask], axis=1),
                                 time=self.time, flux_err=self.flux_err,
-                                centroid_col=self.hdu[1].data["MOM_CENTR1"][self.quality_mask],
-                                centroid_row=self.hdu[1].data["MOM_CENTR2"][self.quality_mask],
+                                centroid_col=centroid_col,
+                                centroid_row=centroid_row,
                                 quality=self.quality,
                                 channel=self.channel,
                                 campaign=self.campaign,
@@ -204,13 +231,5 @@ class KeplerTargetPixelFile(TargetPixelFile):
                                 cadenceno=self.cadenceno)
 
     def get_bkg_lightcurve(self, aperture_mask=None):
-        return KeplerLightCurve(flux=np.nansum(self.flux_bkg[:, aperture_mask], axis=1),
-                                time=self.time, flux_err=self.flux_bkg_err,
-                                centroid_col=self.hdu[1].data["MOM_CENTR1"][self.quality_mask],
-                                centroid_row=self.hdu[1].data["MOM_CENTR2"][self.quality_mask],
-                                quality=self.quality,
-                                channel=self.channel,
-                                campaign=self.campaign,
-                                quarter=self.quarter,
-                                mission=self.mission,
-                                cadenceno=self.cadenceno)
+        return LightCurve(flux=np.nansum(self.flux_bkg[:, aperture_mask], axis=1),
+                          time=self.time, flux_err=self.flux_bkg_err)
