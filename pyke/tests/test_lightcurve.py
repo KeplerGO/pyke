@@ -1,6 +1,6 @@
 import pytest
 from numpy.testing import assert_almost_equal
-from ..lightcurve import KeplerCBVCorrector, KeplerLightCurveFile
+from ..lightcurve import LightCurve, KeplerCBVCorrector, KeplerLightCurveFile
 
 # 8th Quarter of Tabby's star
 TABBY_Q8 = ("https://archive.stsci.edu/missions/kepler/lightcurves"
@@ -41,3 +41,10 @@ def test_bitmasking(quality_bitmask,answer):
     lcf = KeplerLightCurveFile(TABBY_Q8,quality_bitmask=quality_bitmask)
     flux = lcf.get_lightcurve('SAP_FLUX').flux
     assert len(flux) == answer
+
+
+def test_lightcurve_fold():
+    """Test the ``LightCurve.fold()`` method."""
+    lc = LightCurve(time=[1, 2, 3], flux=[1, 1, 1])
+    assert_almost_equal(lc.fold(period=1).time[0], 0)
+    assert_almost_equal(lc.fold(period=1, phase=-0.1).time[0], 0.1)

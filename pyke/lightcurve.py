@@ -28,9 +28,9 @@ class LightCurve(object):
     """
 
     def __init__(self, time, flux, flux_err=None):
-        self.time = time
-        self.flux = flux
-        self.flux_err = flux_err
+        self.time = np.asarray(time)
+        self.flux = np.asarray(flux)
+        self.flux_err = np.asarray(flux_err)
 
     def stitch(self, *others):
         """
@@ -90,8 +90,30 @@ class LightCurve(object):
 
         return flatten_lc, trend_lc
 
-    def fold(self, phase, period):
-        return LightCurve(((self.time - phase + 0.5 * period) / period) % 1 - 0.5, self.flux)
+    def fold(self, period, phase=0.):
+        """Folds the lightcurve at a specified ``period`` and ``phase``.
+
+        This method returns a new ``LightCurve`` object in which the time
+        values range between -0.5 to +0.5.  Data points which occur exactly
+        at ``phase`` or an integer multiple of `phase + n*period` have time
+        value 0.0.
+
+        Parameters
+        ----------
+        period : float
+            The period upon which to fold.
+        phase : float, optional
+            Time reference point.
+
+        Returns
+        -------
+        folded_lightcurve : LightCurve object
+            A new ``LightCurve`` in which the data are folded and sorted by
+            phase.
+        """
+        fold_time = ((self.time - phase + 0.5 * period) / period) % 1 - 0.5
+        sorted_args = np.argsort(fold_time)
+        return LightCurve(fold_time[sorted_args], self.flux[sorted_args])
 
     def draw(self):
         raise NotImplementedError("Should we implement a LightCurveDrawer class?")
