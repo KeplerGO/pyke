@@ -2,6 +2,7 @@ import copy
 import numpy as np
 from scipy import signal
 from astropy.io import fits as pyfits
+from astropy.stats import sigma_clip
 from tqdm import tqdm
 import oktopus
 import requests
@@ -30,7 +31,10 @@ class LightCurve(object):
     def __init__(self, time, flux, flux_err=None):
         self.time = np.asarray(time)
         self.flux = np.asarray(flux)
-        self.flux_err = np.asarray(flux_err)
+        if flux_err is not None:
+            self.flux_err = np.asarray(flux_err)
+        else:
+            self.flux_err = None
 
     def stitch(self, *others):
         """
@@ -79,12 +83,14 @@ class LightCurve(object):
         trend_lc : LightCurve object
             Trend in the lightcurve data
         """
-        trend_signal = signal.savgol_filter(x=self.flux, window_length=window_length,
+        lc_clean = self.remove_nans()  # The SG filter does not allow NaNs
+        trend_signal = signal.savgol_filter(x=lc_clean.flux,
+                                            window_length=window_length,
                                             polyorder=polyorder, **kwargs)
-        flatten_lc = copy.copy(self)
-        flatten_lc.flux = self.flux / trend_signal
-        if self.flux_err is not None:
-            flatten_lc.flux_err = self.flux_err / trend_signal
+        flatten_lc = copy.copy(lc_clean)
+        flatten_lc.flux = lc_clean.flux / trend_signal
+        if flatten_lc.flux_err is not None:
+            flatten_lc.flux_err = lc_clean.flux_err / trend_signal
         trend_lc = copy.copy(self)
         trend_lc.flux = trend_signal
 
@@ -114,6 +120,107 @@ class LightCurve(object):
         fold_time = ((self.time - phase + 0.5 * period) / period) % 1 - 0.5
         sorted_args = np.argsort(fold_time)
         return LightCurve(fold_time[sorted_args], self.flux[sorted_args])
+
+    def remove_nans(self):
+        """Removes cadences where the flux is NaN.
+
+        Returns
+        -------
+        clean_lightcurve : LightCurve object
+            A new ``LightCurve`` from which NaNs fluxes have been removed.
+        """
+        lc = copy.copy(self)
+        nan_mask = np.isnan(lc.flux)
+        lc.time = self.time[~nan_mask]
+        lc.flux = self.flux[~nan_mask]
+        if lc.flux_err is not None:
+            lc.flux_err = self.flux_err[~nan_mask]
+        return lc
+
+    def remove_outliers(self, sigma=5.):
+        """Removes outlier flux values using sigma-clipping.
+
+        This method returns a new LightCurve object from which flux values
+        are removed if they are separated from the mean flux by `sigma` times
+        the standard deviation.
+
+        Parameters
+        ----------
+        sigma : float, optional
+            The number of standard deviations to use for clipping outliers.
+            Defaults to 5.
+
+        Returns
+        -------
+        clean_lightcurve : LightCurve object
+            A new ``LightCurve`` in which outliers have been removed.
+        """
+        new_lc = copy.copy(self)
+        outlier_mask = sigma_clip(data=new_lc.flux, sigma=sigma).mask
+        new_lc.time = self.time[~outlier_mask]
+        new_lc.flux = self.flux[~outlier_mask]
+        if new_lc.flux_err is not None:
+            new_lc.flux_err = self.flux_err[~outlier_mask]
+        return new_lc
+
+    def cdpp(self, transit_duration=13, savgol_window=101, savgol_polyorder=2,
+             sigma_clip=5., norm_factor=1.4):
+        """Estimate the CDPP noise metric using the Savitzky-Golay (SG) method.
+
+        An interesting estimate of the noise in a lightcurve is the scatter that
+        remains after all long term trends have been removed. This is the kernel
+        of the idea behind the Combined Differential Photometric Precision (CDPP).
+        The Kepler Pipeline uses a wavelet-based algorithm to calculate the
+        signal-to-noise of the specific waveform of transits of various
+        durations. In this implementation, we use the simpler CDPP proxy
+        algorithm as discussed by Gilliland et al (2011ApJS..197....6G)
+        and Van Cleve et al (2016PASP..128g5002V).
+
+        The steps are:
+            1. Remove low frequency signals using a Savitzky-Golay filter.
+            2. Remove outliers using sigma-clipping.
+            3. Compute the standard deviation of a running mean with
+               configurable window length equal to `transit_duration`.
+
+        Parameters
+        ----------
+        transit_duration : int, optional
+            The transit duration in cadences. This is the length of the window
+            used to compute the running mean. The default is 13, which
+            corresponds to a 6.5 hour transit in data sampled at 30-min cadence.
+        savgol_window : int, optional
+            Width of Savitsky-Golay filter in cadences (odd number).
+            Default value 101 (2.0 days in Kepler Long Cadence mode).
+        savgol_polyorder : int, optional
+            Polynomial order of the Savitsky-Golay filter.
+            The recommended value is 2.
+        sigma_clip : float, optional
+            The number of standard deviations to use for clipping outliers.
+            The default is 5.
+        norm_factor : float, optional
+            Noise normalization factor for the SG filter.  Recommended
+            value for 13 cadence transit and 101 cadence window is 1.40.
+
+        Returns
+        -------
+        cdpp : float
+            Savitzky-Golay CDPP noise metric in units parts-per-million (ppm).
+
+        Notes
+        -----
+        This implementation is adapted from the Matlab version used by
+        Jeff van Cleve:
+        svn+ssh://murzim/repo/so/trunk/Develop/jvc/common/compute_SG_noise.m
+        """
+        if not isinstance(transit_duration, int):
+            raise TypeError("transit_duration must be an integer")
+        detrended_lc, _ = self.flatten(window_length=savgol_window,
+                                       polyorder=savgol_polyorder)
+        cleaned_lc = detrended_lc.remove_outliers(sigma=sigma_clip)
+        mean_filter = np.ones(transit_duration) / float(transit_duration)
+        running_mean = np.convolve(cleaned_lc.flux, mean_filter, mode='same')
+        cdpp_ppm = norm_factor * np.std(running_mean) * 1e6
+        return cdpp_ppm
 
     def draw(self):
         raise NotImplementedError("Should we implement a LightCurveDrawer class?")
