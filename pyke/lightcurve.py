@@ -30,9 +30,9 @@ class LightCurve(object):
     """
 
     def __init__(self, time, flux, flux_err=None):
-        self.time = time
-        self.flux = flux
-        self.flux_err = flux_err
+        self.time = np.asarray(time)
+        self.flux = np.asarray(flux)
+        self.flux_err = np.asarray(flux_err)
 
     def stitch(self, *others):
         """
@@ -97,12 +97,48 @@ class LightCurve(object):
     def to_csv(self):
         raise NotImplementedError()
 
-    def periodogram(self,**kwargs):
-        p = Periodogram(self.time,self.flux,self.flux_err,**kwargs)
+    def periodogram(self, minper=None, maxper=None, nterms=1):
+        """
+        Creates a periodogram object
+
+        Parameters
+        ----------
+        minper : float
+            Minimum period to search
+        maxper : float
+            Maximum period to search
+        nterms : int
+            Number of terms to use for Lomb-Scargle periodogram. (Default 1)
+
+        Returns
+        -------
+        p : periodogram object
+            Periodogram object
+        """
+        p = Periodogram(self.time, self.flux, self.flux_err, minper, maxper, nterms)
         return p
 
-    def find_period(self,**kwargs):
-        p = self.periodogram(**kwargs)
+    def find_period(self, minper=None, maxper=None, nterms=1):
+        """
+        Finds the best fit period in the light curve
+
+        Parameters
+        ----------
+        minper : float
+            Minimum period to search
+        maxper : float
+            Maximum period to search
+        nterms : int
+            Number of terms to use for Lomb-Scargle periodogram. (Default 1)
+
+        Returns
+        -------
+        period : float
+            Best fit period
+        phase : float
+            Best fit phase
+        """
+        p = self.periodogram(minper, maxper, nterms)
         period = p.per()
         ok = np.isfinite(self.flux)
         s = np.argsort(self.time[ok]/period % 1)
@@ -112,6 +148,27 @@ class LightCurve(object):
         return period,phase
 
     def fold(self, period=None, phase=None, plot=False, **kwargs):
+        """
+        Folds a lightcurve on the bestfit period
+
+        Parameters
+        ----------
+        period : float
+            Period to fold at. If none, the best fit period will be found.
+        phase : float
+            Phase to fold at. If none, the best fit phase will be found.
+        plot : bool
+            Whether or not to return a plot
+        **kwargs : dict
+            Dictionary of arguments to be passed to `periodogram`.
+
+        Returns
+        -------
+        period : float
+            Best fit period
+        phase : float
+            Best fit phase
+        """
         if period is None:
             p,ph = self.find_period(**kwargs)
             period = p

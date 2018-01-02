@@ -11,10 +11,24 @@ mpl.rc('axes', color_cycle=["#4C72B0", "#55A868", "#C44E52",
 __all__ = ['Periodogram']
 
 class Periodogram(object):
-    '''
-    Implements different periodograms when passed a lightcurve object'''
+    """Defines a periodogram class for Kepler/K2 data
 
-    def __init__(self, time, flux, flux_err=None, minper = None, maxper = None, nterms=1):
+    Attributes
+    ----------
+    time : array-like
+        Time measurements
+    flux : array-like
+        Data flux for every time point
+    flux_err : array-like
+        Uncertainty on each flux data point
+    minper : float
+        Minimum period to search
+    maxper : float
+        Maximum period to search
+    nterms : int
+        Number of terms to use for Lomb-Scargle periodogram. (Default 1)
+    """
+    def __init__(self, time, flux, flux_err=None, minper=None, maxper=None, nterms=1):
         self.time = time
         self.flux = flux
         if flux_err is None:
@@ -30,21 +44,38 @@ class Periodogram(object):
         self.clean()
         self.LombScargle()
 
-
     def clean(self):
+        """
+        Remove infinite values
+        """
         ok = np.isfinite(self.flux)
         self.time=self.time[ok]
         self.flux=self.flux[ok]
         self.flux_err=self.flux_err[ok]
 
     def LombScargle(self,samples = 40):
+        """
+        Creates a Lomb Scargle Periodogram
+
+        Parameters
+        ----------
+        samples : int
+            Number of samples to take in the
+        """
         LS = LombScargle(self.time, self.flux, self.flux.max()-self.flux.min(),nterms=self.nterms)
         frequency, power = LS.autopower(maximum_frequency=1./self.minper,minimum_frequency=1./self.maxper,samples_per_peak=samples)
         self.lomb_per = 1./frequency[np.argmax(power)]
         self.lomb_periods = 1./frequency
         self.lomb_power = power
 
-    def plot_LombScargle(self, ax = None, line=True,**kwargs):
+    def BLS(self):
+        '''Not implemented'''
+        pass
+
+    def plot(self, ax = None, line=True,**kwargs):
+        """
+        Plot the periodogram object
+        """
         if ax is None:
             fig, ax = plt.subplots()
         ax.plot(self.lomb_periods, self.lomb_power,**kwargs)
@@ -54,5 +85,5 @@ class Periodogram(object):
             ax.text(self.lomb_per*1.1,self.lomb_power.max(),'Best Fit Period', ha='left',va='center')
 
     def per(self):
-        '''Returns the best fit period'''
+        '''Returns the best fit period.'''
         return self.lomb_per
