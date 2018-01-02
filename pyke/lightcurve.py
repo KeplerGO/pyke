@@ -132,16 +132,19 @@ class LightCurve(object):
 
         if ax is None:
             fig, ax = plt.subplots(1)
+        flux = self.flux
+        flux_err = self.flux_err
         if norm:
             flux_err /= np.nanmedian(flux)
             flux /= np.nanmedian(flux)
-        ax.errorbar(self.time, self.flux, self.flux_err, color=color, **kwargs)
+        ax.errorbar(self.time, flux, flux_err, color=color, **kwargs)
         if fill:
-            ax.fill(self.time, self.flux, fc='#a8a7a7', linewidth=0.0, alpha=0.3)
+            ax.fill(self.time, flux, fc='#a8a7a7', linewidth=0.0, alpha=0.3)
         if grid:
             ax.grid(alpha=0.3)
         if legend:
-            ax.legend()
+            if 'label' in kwargs:
+                ax.legend()
         if title is not None:
             ax.set_title(title)
         ax.set_xlabel(xlabel, {'color' : 'k'})
