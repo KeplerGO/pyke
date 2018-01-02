@@ -1,6 +1,7 @@
 import numpy as np
 from astropy.stats import LombScargle
 import warnings
+from scipy import signal
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 mpl.style.use('ggplot')
@@ -11,7 +12,8 @@ mpl.rc('axes', color_cycle=["#4C72B0", "#55A868", "#C44E52",
 __all__ = ['Periodogram']
 
 class Periodogram(object):
-    """Defines a periodogram class for Kepler/K2 data
+    """Defines a periodogram class for Kepler/K2 data. Searches for periods using
+    astropy.LombScargle and Box Least Squares.
 
     Attributes
     ----------
@@ -37,10 +39,12 @@ class Periodogram(object):
         self.minper = minper
         self.maxper = maxper
         self.nterms = nterms
+        self.dur = time.max() - time.min()
+        self.npoints = len(self.time)
         if self.minper is None:
-            self.minper=np.median(self.time[1:]-self.time[0:-1])*4
+            self.minper = np.median(self.time[1:] - self.time[0:-1])*4
         if self.maxper is None:
-            self.maxper=np.nanmax(self.time-self.time.min())/4.
+            self.maxper = np.nanmax(self.time - self.time.min())/4.
         self.clean()
         self.LombScargle()
 
@@ -49,11 +53,11 @@ class Periodogram(object):
         Remove infinite values
         """
         ok = np.isfinite(self.flux)
-        self.time=self.time[ok]
-        self.flux=self.flux[ok]
-        self.flux_err=self.flux_err[ok]
+        self.time = self.time[ok]
+        self.flux = self.flux[ok]
+        self.flux_err = self.flux_err[ok]
 
-    def LombScargle(self,samples = 40):
+    def LombScargle(self,samples=40):
         """
         Creates a Lomb Scargle Periodogram
 
@@ -62,19 +66,36 @@ class Periodogram(object):
         samples : int
             Number of samples to take in the
         """
-        LS = LombScargle(self.time, self.flux, self.flux.max()-self.flux.min(),nterms=self.nterms)
-        frequency, power = LS.autopower(maximum_frequency=1./self.minper,minimum_frequency=1./self.maxper,samples_per_peak=samples)
-        self.lomb_per = 1./frequency[np.argmax(power)]
-        self.lomb_periods = 1./frequency
+        LS = LombScargle(self.time, self.flux, self.flux.max()-self.flux.min(), nterms=self.nterms)
+        frequency, power = LS.autopower(maximum_frequency=1./self.minper, minimum_frequency=1./self.maxper, samples_per_peak=samples)
+        self.lomb_per = 1. / frequency[np.argmax(power)]
+        self.lomb_periods = 1. / frequency
         self.lomb_power = power
+
+        s = np.argsort(self.time / self.lomb_per % 1)
+        dp = self.npoints * (self.lomb_per * 5 / self.dur)
+        if dp % 2 == 0:
+            dp += 1
+        smooth = signal.savgol_filter(self.flux[s], dp, 3)
+        m = np.argmin(smooth)
+        self.lomb_phase = (self.time[s] / period % 1)[m]
 
     def BLS(self):
         '''Not implemented'''
         pass
 
-    def plot(self, ax = None, line=True,**kwargs):
+    def plot(self, ax=None, line=True, **kwargs):
         """
         Plot the periodogram object
+
+        Parameters
+        ----------
+        ax : matplotlib frame
+            Frame to plot the figure into. If unspecified, creates a new figure and frame.
+        line : bool
+            Plot a line at the bestfit period
+        **kwargs : dict
+            Dictionary of keyword values to pass to 'matplotlib.pyplot.plot'
         """
         if ax is None:
             fig, ax = plt.subplots()
@@ -87,3 +108,7 @@ class Periodogram(object):
     def per(self):
         '''Returns the best fit period.'''
         return self.lomb_per
+
+    def phase(self):
+        '''Returns the best fit phase.'''
+        return self.lomb_phase
