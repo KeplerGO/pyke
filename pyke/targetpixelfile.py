@@ -127,8 +127,8 @@ class KeplerTargetPixelFile(TargetPixelFile):
         yy = self.row + yy
         xx = self.column + xx
         total_flux = np.nansum(self.flux[:, aperture_mask], axis=1)
-        col_centr = np.nansum(xx * self.flux[:, aperture_mask], axis=1) / total_flux
-        row_centr = np.nansum(yy * self.flux[:, aperture_mask], axis=1) / total_flux
+        col_centr = np.nansum(xx * aperture_mask * self.flux) / total_flux
+        row_centr = np.nansum(yy * aperture_mask * self.flux) / total_flux
 
         return col_centr, row_centr
 
@@ -268,5 +268,9 @@ class KeplerTargetPixelFile(TargetPixelFile):
                                 cadenceno=self.cadenceno)
 
     def get_bkg_lightcurve(self, aperture_mask=None):
+        if aperture_mask is None:
+            mask = self.hdu[1].data['FLUX'][100] == self.hdu[1].data['FLUX'][100]
+            aperture_mask = np.ones((self.shape[1], self.shape[2]), dtype=bool) * mask
+
         return LightCurve(flux=np.nansum(self.flux_bkg[:, aperture_mask], axis=1),
                           time=self.time, flux_err=self.flux_bkg_err)

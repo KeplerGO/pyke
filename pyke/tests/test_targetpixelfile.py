@@ -54,13 +54,3 @@ def test_bitmasking(quality_bitmask, answer):
     lc = tpf.to_lightcurve()
     flux = lc.flux
     assert len(flux) == answer
-
-def test_aperture_masking_errors():
-    """Check that aperture flux returns valid flux_errors when a hard bitmask is used."""
-    tpf = KeplerTargetPixelFile(filename_tpf_one_center, quality_bitmask='hard')
-    af, er = tpf._get_aperture_flux()
-    assert len(af) == len(er)
-    assert np.all(er > 0)
-    assert isinstance(er[0], np.float32)
-    assert np.all(np.isfinite(af))
-    assert np.all(np.isfinite(er))
