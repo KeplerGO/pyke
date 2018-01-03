@@ -341,8 +341,9 @@ class KeplerLightCurveFile(object):
     ----------
     path : str
         Directory path or url to a lightcurve FITS file.
-    quality_bitmask : int
-        Bitmask specifying quality flags of cadences that should be ignored:
+    quality_bitmask : str or int
+        Bitmask specifying quality flags of cadences that should be ignored.
+        If a string is passed, it has the following meaning:
 
             * default: recommended quality mask
             * hard: removes more flags, known to remove good data
