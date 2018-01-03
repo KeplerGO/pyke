@@ -104,7 +104,6 @@ class KeplerTargetPixelFile(TargetPixelFile):
     def row(self):
         return self.hdu['TARGETTABLES'].header['2CRV5P']
 
-    @property
     def centroids(self, aperture_mask=None):
         """Returns centroids based on sample moments.
 
@@ -120,7 +119,11 @@ class KeplerTargetPixelFile(TargetPixelFile):
         col_centr, row_centr : tuple
             Arrays containing centroids for column and row at each cadence
         """
-        yy, xx = np.indices(self.flux.shape) + 0.5
+        if aperture_mask is None:
+            mask = self.hdu[1].data['FLUX'][100] == self.hdu[1].data['FLUX'][100]
+            aperture_mask = np.ones((self.shape[1], self.shape[2]), dtype=bool) * mask
+
+        yy, xx = np.indices(self.shape[1:]) + 0.5
         yy = self.row + yy
         xx = self.column + xx
         total_flux = np.nansum(self.flux[:, aperture_mask], axis=1)
@@ -206,6 +209,27 @@ class KeplerTargetPixelFile(TargetPixelFile):
         """Returns the quality flag integer of every good cadence."""
         return self.hdu[1].data['QUALITY'][self.quality_mask]
 
+    @property
+    def quarter(self):
+        """Quarter number"""
+        try:
+            return self.header(ext=0)['QUARTER']
+        except KeyError:
+            return None
+
+    @property
+    def campaign(self):
+        """Campaign number"""
+        try:
+            return self.header(ext=0)['CAMPAIGN']
+        except KeyError:
+            return None
+
+    @property
+    def mission(self):
+        """Mission name"""
+        return self.header(ext=0)['MISSION']
+
     def to_fits(self):
         """Save the TPF to fits"""
         raise NotImplementedError
@@ -226,6 +250,10 @@ class KeplerTargetPixelFile(TargetPixelFile):
             Array containing the summed flux within the aperture for each
             cadence.
         """
+        if aperture_mask is None:
+            mask = self.hdu[1].data['FLUX'][100] == self.hdu[1].data['FLUX'][100]
+            aperture_mask = np.ones((self.shape[1], self.shape[2]), dtype=bool) * mask
+
         centroid_col, centroid_row = self.centroids(aperture_mask)
 
         return KeplerLightCurve(flux=np.nansum(self.flux[:, aperture_mask], axis=1),
