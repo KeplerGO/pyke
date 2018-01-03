@@ -258,8 +258,9 @@ class LightCurve(object):
         flux = self.flux
         flux_err = self.flux_err
         if normalize:
-            flux_err /= np.nanmedian(flux)
-            flux /= np.nanmedian(flux)
+            flux = flux / np.nanmedian(flux)
+            if flux_err is not None:
+                flux_err = flux_err / np.nanmedian(flux)
         ax.errorbar(self.time, flux, flux_err, color=color, **kwargs)
         if fill:
             ax.fill(self.time, flux, fc='#a8a7a7', linewidth=0.0, alpha=0.3)
