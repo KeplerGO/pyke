@@ -2,7 +2,7 @@ import numpy as np
 import scipy
 import matplotlib.pyplot as plt
 from astropy.io import fits
-from .lightcurve import LightCurve
+from .lightcurve import KeplerLightCurve, LightCurve
 from .utils import KeplerQualityFlags, plot_image
 
 
@@ -41,13 +41,13 @@ class KeplerTargetPixelFile(TargetPixelFile):
     ----------
     path : str
         Path to fits file.
-    aperture_mask : array-like or str
-        A boolean array describing the aperture such that `False` means
-        that the pixel will be masked out. It can also use the default
-        Kepler pipeline's aperture if the value 'kepler-pipeline' is passed.
-        The default behaviour is to use all pixels.
-    quality_bitmask : int
+    quality_bitmask : str or int
         Bitmask specifying quality flags of cadences that should be ignored.
+        If a string is passed, it has the following meaning:
+
+            * "default": recommended quality mask
+            * "conservative": removes more flags, known to remove good data
+            * "hard": removes all data that has been flagged
 
     References
     ----------
@@ -55,24 +55,26 @@ class KeplerTargetPixelFile(TargetPixelFile):
         http://archive.stsci.edu/kepler/manuals/archive_manual.pdf
     """
 
-    def __init__(self, path, aperture_mask=None,
-                 quality_bitmask=KeplerQualityFlags.DEFAULT_BITMASK,
+    def __init__(self, path, quality_bitmask=KeplerQualityFlags.DEFAULT_BITMASK,
                  **kwargs):
         self.path = path
         self.hdu = fits.open(self.path, **kwargs)
         self.quality_bitmask = quality_bitmask
         self.quality_mask = self._quality_mask(quality_bitmask)
-        self.aperture_mask = aperture_mask
 
-    def _quality_mask(self, quality_bitmask):
+    def _quality_mask(self, bitmask):
         """Returns a boolean mask which flags all good-quality cadences.
 
         Parameters
         ----------
-        quality_bitmask : int
+        bitmask : str or int
             Bitmask. See ref. [1], table 2-3.
         """
-        return (self.hdu[1].data['QUALITY'] & quality_bitmask) == 0
+        if bitmask is None:
+            return np.ones(len(self.hdu[1].data['TIME']), dtype=bool)
+        elif isinstance(bitmask, str):
+            bitmask = KeplerQualityFlags.OPTIONS[bitmask]
+        return (self.hdu[1].data['QUALITY'] & bitmask) == 0
 
     def header(self, ext=0):
         """Returns the header for a given extension."""
@@ -102,47 +104,10 @@ class KeplerTargetPixelFile(TargetPixelFile):
     def row(self):
         return self.hdu['TARGETTABLES'].header['2CRV5P']
 
-    def plot(self, frame=None, cadenceno=None, **kwargs):
-        """
-        Plot a target pixel file at a given frame (index) or cadence number.
-
-        Parameters
-        ----------
-        frame : int
-            Frame number.
-        cadenceno : int
-            Alternatively, a cadence number can be provided.
-            This argument has priority over frame number.
-        """
-        if cadenceno is not None:
-            frame = np.argwhere(cadenceno == self.cadenceno)[0][0]
-        elif frame is None:
-            raise ValueError("Either frame or cadenceno must be provided.")
-
-        pflux = self.flux[frame]
-        plot_image(pflux, title='Kepler ID: {}'.format(self.keplerid),
-                   extent=(self.column, self.column + self.shape[2],
-                           self.row, self.row + self.shape[1]), **kwargs)
-
     @property
-    def aperture_mask(self):
-        return self._aperture_mask
-
-    @aperture_mask.setter
-    def aperture_mask(self, mask):
-        if mask == 'kepler-pipeline':
-            self._aperture_mask = self.hdu[-1].data == 3
-        elif mask is not None:
-            self._aperture_mask = mask
-        else:
-            mask = self.hdu[1].data['FLUX'][100] == self.hdu[1].data['FLUX'][100]
-            self._aperture_mask = np.ones((self.shape[1], self.shape[2]),
-                                          dtype=bool) * mask
-
-    @property
-    def aperture_npix(self):
-        """Number of pixels in the aperture"""
-        return self.aperture_mask.sum()
+    def pipeline_mask(self):
+        """Returns the aperture mask used by the Kepler pipeline"""
+        return self.hdu[-1].data > 2
 
     @property
     def n_good_cadences(self):
@@ -185,69 +150,128 @@ class KeplerTargetPixelFile(TargetPixelFile):
         return self.hdu[1].data['FLUX_BKG'][self.quality_mask]
 
     @property
+    def flux_bkg_err(self):
+        return self.hdu[1].data['FLUX_BKG_ERR'][self.quality_mask]
+
+    @property
     def quality(self):
         """Returns the quality flag integer of every good cadence."""
         return self.hdu[1].data['QUALITY'][self.quality_mask]
 
-    def estimate_bkg_per_pixel(self, method='median'):
-        """Returns an estimate of the background value per pixel for every
-        cadence.
+    @property
+    def quarter(self):
+        """Quarter number"""
+        try:
+            return self.header(ext=0)['QUARTER']
+        except KeyError:
+            return None
 
-        Parameters
-        ----------
-        method : str
-            The method used to estimate the background:
-                * 'median' - median of the pixel values per cadence.
-                * 'mean' - mean of the pixel values per cadence.
-                * 'mode' - mode of the pixel values per cadence (usually slow).
-                * 'kepler_pipeline' - uses the background values estimated by
-                   the kepler pipeline.
+    @property
+    def campaign(self):
+        """Campaign number"""
+        try:
+            return self.header(ext=0)['CAMPAIGN']
+        except KeyError:
+            return None
 
-        Returns
-        -------
-        value : array-like
-            Array in which the i-th element represents an estimate of the
-            background density at the i-th cadence.
-        """
-        if method == 'median':
-            return np.nanmedian(self.flux[:, self.aperture_mask], axis=1)
-        elif method == 'mean':
-            return np.nanmean(self.flux[:, self.aperture_mask], axis=1)
-        elif method == 'mode':
-            return scipy.stats.mode(self.flux[:, self.aperture_mask], axis=1,
-                                    nan_policy='omit')[0].reshape(-1)
-        elif method == 'kepler_pipeline':
-            return np.nansum(self.flux_bkg[:, self.aperture_mask], axis=1) / self.aperture_npix
-        else:
-            raise ValueError("method {} is not available".format(method))
+    @property
+    def mission(self):
+        """Mission name"""
+        return self.header(ext=0)['MISSION']
 
     def to_fits(self):
         """Save the TPF to fits"""
         raise NotImplementedError
 
-    def _get_aperture_flux(self):
-        return np.nansum(self.flux[:, self.aperture_mask], axis=1)
-
-    def get_bkg_lightcurve(self, method='median'):
-        return self.estimate_bkg_per_pixel(method=method) * self.aperture_npix
-
-    def to_lightcurve(self, subtract_bkg=False):
-        """Performs apperture photometry and optionally detrends the lightcurve.
+    def to_lightcurve(self, aperture_mask=None):
+        """Performs aperture photometry.
 
         Attributes
         ----------
-        subtract_bkg : bool
-            Whether or not to subtract the background.
+        aperture_mask : array-like
+            A boolean array describing the aperture such that `False` means
+            that the pixel will be masked out.
+            The default behaviour is to use all pixels.
 
         Returns
         -------
-        lc : LightCurve object
+        lc : KeplerLightCurve object
             Array containing the summed flux within the aperture for each
             cadence.
         """
+        if aperture_mask is None:
+            mask = ~np.isnan(self.hdu[1].data['FLUX'][100])
+            aperture_mask = np.ones((self.shape[1], self.shape[2]),
+                                    dtype=bool) * mask
 
-        aperture_flux = self._get_aperture_flux()
-        if subtract_bkg:
-            aperture_flux = aperture_flux - self.get_bkg_lightcurve()
+        centroid_col, centroid_row = self.centroids(aperture_mask)
 
-        return LightCurve(flux=aperture_flux, time=self.time)
+        return KeplerLightCurve(flux=np.nansum(self.flux[:, aperture_mask], axis=1),
+                                time=self.time, flux_err=self.flux_err,
+                                centroid_col=centroid_col,
+                                centroid_row=centroid_row,
+                                quality=self.quality,
+                                channel=self.channel,
+                                campaign=self.campaign,
+                                quarter=self.quarter,
+                                mission=self.mission,
+                                cadenceno=self.cadenceno)
+
+    def centroids(self, aperture_mask=None):
+        """Returns centroids based on sample moments.
+
+        Parameters
+        ----------
+        aperture_mask : array-like or None
+            A boolean array describing the aperture such that `False` means
+            that the pixel will be masked out. The default behaviour is to
+            use all pixels.
+
+        Returns
+        -------
+        col_centr, row_centr : tuple
+            Arrays containing centroids for column and row at each cadence
+        """
+        if aperture_mask is None:
+            mask = ~np.isnan(self.hdu[1].data['FLUX'][100])
+            aperture_mask = np.ones((self.shape[1], self.shape[2]),
+                                    dtype=bool) * mask
+
+        yy, xx = np.indices(self.shape[1:]) + 0.5
+        yy = self.row + yy
+        xx = self.column + xx
+        total_flux = np.nansum(self.flux[:, aperture_mask], axis=1)
+        col_centr = np.nansum(xx * aperture_mask * self.flux) / total_flux
+        row_centr = np.nansum(yy * aperture_mask * self.flux) / total_flux
+
+        return col_centr, row_centr
+
+    def plot(self, frame=None, cadenceno=None, **kwargs):
+        """
+        Plot a target pixel file at a given frame (index) or cadence number.
+
+        Parameters
+        ----------
+        frame : int
+            Frame number.
+        cadenceno : int
+            Alternatively, a cadence number can be provided.
+            This argument has priority over frame number.
+        """
+        if cadenceno is not None:
+            frame = np.argwhere(cadenceno == self.cadenceno)[0][0]
+        elif frame is None:
+            raise ValueError("Either frame or cadenceno must be provided.")
+
+        pflux = self.flux[frame]
+        plot_image(pflux, title='Kepler ID: {}'.format(self.keplerid),
+                   extent=(self.column, self.column + self.shape[2],
+                           self.row, self.row + self.shape[1]), **kwargs)
+
+    def get_bkg_lightcurve(self, aperture_mask=None):
+        if aperture_mask is None:
+            mask = self.hdu[1].data['FLUX'][100] == self.hdu[1].data['FLUX'][100]
+            aperture_mask = np.ones((self.shape[1], self.shape[2]), dtype=bool) * mask
+
+        return LightCurve(flux=np.nansum(self.flux_bkg[:, aperture_mask], axis=1),
+                          time=self.time, flux_err=self.flux_bkg_err)
