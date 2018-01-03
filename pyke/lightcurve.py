@@ -344,8 +344,8 @@ class KeplerLightCurveFile(object):
     quality_bitmask : int
         Bitmask specifying quality flags of cadences that should be ignored:
             default: recommended quality mask
-            conservative: removes more flags, known to remove good data
-            hard: removes all data that has been flagged
+            hard: removes more flags, known to remove good data
+            hardest: removes all data that has been flagged
     kwargs : dict
         Keyword arguments to be passed to astropy.io.fits.open.
     """
