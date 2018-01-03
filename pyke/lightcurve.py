@@ -370,7 +370,7 @@ class KeplerLightCurveFile(object):
             plottype=[plottype]
         if not hasattr(plottype,'__iter__'):
             plottype=[plottype]
-        for i,pl in enumerate(plottype):
+        for i, pl in enumerate(plottype):
             try:
                 lc = self.get_lightcurve(pl)
             except:
