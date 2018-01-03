@@ -1,3 +1,4 @@
+import pytest
 from numpy.testing import assert_almost_equal
 from ..lightcurve import LightCurve, KeplerCBVCorrector, KeplerLightCurveFile
 
@@ -9,8 +10,7 @@ def test_kepler_cbv_fit():
     # comparing that the two methods to do cbv fit are the nearly the same
     cbv = KeplerCBVCorrector(TABBY_Q8)
     cbv_lc = cbv.correct()
-    assert_almost_equal(cbv.coeffs, [0.08534423, 0.10814261], decimal=4)
-
+    assert_almost_equal(cbv.coeffs, [0.08534423, 0.10814261], decimal=3)
     lcf = KeplerLightCurveFile(TABBY_Q8)
     cbv_lcf = lcf.compute_cotrended_lightcurve()
     assert_almost_equal(cbv_lc.flux, cbv_lcf.flux)
@@ -24,6 +24,16 @@ def test_KeplerLightCurve():
     assert kplc.campaign is None
     assert kplc.quarter == lcf.quarter
     assert kplc.mission == 'Kepler'
+
+
+@pytest.mark.parametrize("quality_bitmask,answer", [('hard', 2661),
+    ('conservative', 2713), ('default', 2924), (None, 3279),
+    (1, 3279), (100, 3252), (2096639, 2661)])
+def test_bitmasking(quality_bitmask, answer):
+    '''Test whether the bitmasking behaves like it should'''
+    lcf = KeplerLightCurveFile(TABBY_Q8, quality_bitmask=quality_bitmask)
+    flux = lcf.get_lightcurve('SAP_FLUX').flux
+    assert len(flux) == answer
 
 
 def test_lightcurve_fold():

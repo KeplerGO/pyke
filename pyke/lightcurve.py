@@ -122,8 +122,8 @@ class LightCurve(object):
         raise NotImplementedError()
 
     def plot(self, ax=None, normalize=True, xlabel='Time - 2454833 (days)',
-            ylabel='Normalized Flux', title=None, color='#363636', fill=False,
-            grid=True, **kwargs):
+             ylabel='Normalized Flux', title=None, color='#363636', fill=False,
+             grid=True, **kwargs):
         """Plots the light curve.
 
         Parameters
@@ -244,7 +244,6 @@ class KeplerLightCurveFile(object):
     kwargs : dict
         Keyword arguments to be passed to astropy.io.fits.open.
     """
-
     def __init__(self, path, quality_bitmask=KeplerQualityFlags.DEFAULT_BITMASK,
                  **kwargs):
         self.path = path
@@ -271,15 +270,24 @@ class KeplerLightCurveFile(object):
             raise KeyError("{} is not a valid flux type. Available types are: {}".
                            format(flux_type, self._flux_types))
 
-    def _quality_mask(self, quality_bitmask):
+    def _quality_mask(self, bitmask):
         """Returns a boolean mask which flags all good-quality cadences.
+
         Parameters
         ----------
-        quality_bitmask : int
+        bitmask : str or int
             Bitmask. See ref. [1], table 2-3.
-        """
-        return (self.hdu[1].data['SAP_QUALITY'] & quality_bitmask) == 0
 
+        Returns
+        -------
+        boolean_mask : array of bool
+            Boolean array in which `True` means the data is of good quality.
+        """
+        if bitmask is None:
+            return np.ones(len(self.hdu[1].data['TIME']), dtype=bool)
+        elif isinstance(bitmask, str):
+            bitmask = KeplerQualityFlags.OPTIONS[bitmask]
+        return (self.hdu[1].data['SAP_QUALITY'] & bitmask) == 0
 
     @property
     def SAP_FLUX(self):
