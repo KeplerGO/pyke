@@ -191,7 +191,8 @@ def running_mean(data, window_size):
 
     Parameters
     ----------
-    data : array
+    data : array of numbers
+        The running mean will be computed on this data.
     window_size : int
         Window length used to compute the running mean.
     """
