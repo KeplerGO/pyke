@@ -214,7 +214,7 @@ class LightCurve(object):
         detrended_lc, _ = self.flatten(window_length=savgol_window,
                                        polyorder=savgol_polyorder)
         cleaned_lc = detrended_lc.remove_outliers(sigma=sigma_clip)
-        mean = running_mean(cleaned_lc.flux, transit_duration)
+        mean = running_mean(data=cleaned_lc.flux, window_size=transit_duration)
         cdpp_ppm = np.std(mean) * 1e6
         return cdpp_ppm
 
