@@ -184,3 +184,17 @@ def plot_image(image, scale='linear', origin='lower', xlabel='Pixel Column Numbe
         plt.ylabel(ylabel)
         plt.title(title)
         plt.colorbar(norm=norm)
+
+
+def running_mean(data, window_size):
+    """Returns the moving average of an array `data`.
+
+    Parameters
+    ----------
+    data : array of numbers
+        The running mean will be computed on this data.
+    window_size : int
+        Window length used to compute the running mean.
+    """
+    cumsum = np.cumsum(np.insert(data, 0, 0))
+    return (cumsum[window_size:] - cumsum[:-window_size]) / float(window_size)
