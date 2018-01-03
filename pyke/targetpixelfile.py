@@ -104,57 +104,6 @@ class KeplerTargetPixelFile(TargetPixelFile):
     def row(self):
         return self.hdu['TARGETTABLES'].header['2CRV5P']
 
-    def centroids(self, aperture_mask=None):
-        """Returns centroids based on sample moments.
-
-        Parameters
-        ----------
-        aperture_mask : array-like or None
-            A boolean array describing the aperture such that `False` means
-            that the pixel will be masked out. The default behaviour is to
-            use all pixels.
-
-        Returns
-        -------
-        col_centr, row_centr : tuple
-            Arrays containing centroids for column and row at each cadence
-        """
-        if aperture_mask is None:
-            mask = self.hdu[1].data['FLUX'][100] == self.hdu[1].data['FLUX'][100]
-            aperture_mask = np.ones((self.shape[1], self.shape[2]), dtype=bool) * mask
-
-        yy, xx = np.indices(self.shape[1:]) + 0.5
-        yy = self.row + yy
-        xx = self.column + xx
-        total_flux = np.nansum(self.flux[:, aperture_mask], axis=1)
-        col_centr = np.nansum(xx * aperture_mask * self.flux) / total_flux
-        row_centr = np.nansum(yy * aperture_mask * self.flux) / total_flux
-
-        return col_centr, row_centr
-
-
-    def plot(self, frame=None, cadenceno=None, **kwargs):
-        """
-        Plot a target pixel file at a given frame (index) or cadence number.
-
-        Parameters
-        ----------
-        frame : int
-            Frame number.
-        cadenceno : int
-            Alternatively, a cadence number can be provided.
-            This argument has priority over frame number.
-        """
-        if cadenceno is not None:
-            frame = np.argwhere(cadenceno == self.cadenceno)[0][0]
-        elif frame is None:
-            raise ValueError("Either frame or cadenceno must be provided.")
-
-        pflux = self.flux[frame]
-        plot_image(pflux, title='Kepler ID: {}'.format(self.keplerid),
-                   extent=(self.column, self.column + self.shape[2],
-                           self.row, self.row + self.shape[1]), **kwargs)
-
     @property
     def pipeline_mask(self):
         """Returns the aperture mask used by the Kepler pipeline"""
@@ -251,8 +200,9 @@ class KeplerTargetPixelFile(TargetPixelFile):
             cadence.
         """
         if aperture_mask is None:
-            mask = self.hdu[1].data['FLUX'][100] == self.hdu[1].data['FLUX'][100]
-            aperture_mask = np.ones((self.shape[1], self.shape[2]), dtype=bool) * mask
+            mask = ~np.isnan(self.hdu[1].data['FLUX'][100])
+            aperture_mask = np.ones((self.shape[1], self.shape[2]),
+                                    dtype=bool) * mask
 
         centroid_col, centroid_row = self.centroids(aperture_mask)
 
@@ -266,6 +216,57 @@ class KeplerTargetPixelFile(TargetPixelFile):
                                 quarter=self.quarter,
                                 mission=self.mission,
                                 cadenceno=self.cadenceno)
+
+    def centroids(self, aperture_mask=None):
+        """Returns centroids based on sample moments.
+
+        Parameters
+        ----------
+        aperture_mask : array-like or None
+            A boolean array describing the aperture such that `False` means
+            that the pixel will be masked out. The default behaviour is to
+            use all pixels.
+
+        Returns
+        -------
+        col_centr, row_centr : tuple
+            Arrays containing centroids for column and row at each cadence
+        """
+        if aperture_mask is None:
+            mask = ~np.isnan(self.hdu[1].data['FLUX'][100])
+            aperture_mask = np.ones((self.shape[1], self.shape[2]),
+                                    dtype=bool) * mask
+
+        yy, xx = np.indices(self.shape[1:]) + 0.5
+        yy = self.row + yy
+        xx = self.column + xx
+        total_flux = np.nansum(self.flux[:, aperture_mask], axis=1)
+        col_centr = np.nansum(xx * aperture_mask * self.flux) / total_flux
+        row_centr = np.nansum(yy * aperture_mask * self.flux) / total_flux
+
+        return col_centr, row_centr
+
+    def plot(self, frame=None, cadenceno=None, **kwargs):
+        """
+        Plot a target pixel file at a given frame (index) or cadence number.
+
+        Parameters
+        ----------
+        frame : int
+            Frame number.
+        cadenceno : int
+            Alternatively, a cadence number can be provided.
+            This argument has priority over frame number.
+        """
+        if cadenceno is not None:
+            frame = np.argwhere(cadenceno == self.cadenceno)[0][0]
+        elif frame is None:
+            raise ValueError("Either frame or cadenceno must be provided.")
+
+        pflux = self.flux[frame]
+        plot_image(pflux, title='Kepler ID: {}'.format(self.keplerid),
+                   extent=(self.column, self.column + self.shape[2],
+                           self.row, self.row + self.shape[1]), **kwargs)
 
     def get_bkg_lightcurve(self, aperture_mask=None):
         if aperture_mask is None:
