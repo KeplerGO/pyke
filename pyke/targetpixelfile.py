@@ -47,14 +47,16 @@ class KeplerTargetPixelFile(TargetPixelFile):
         Kepler pipeline's aperture if the value 'kepler-pipeline' is passed.
         The default behaviour is to use all pixels.
     quality_bitmask : int
-        Bitmask specifying quality flags of cadences that should be ignored.
+        Bitmask specifying quality flags of cadences that should be ignored:
+            Default: recommended quality mask
+            Conservative: removes more flags, known to remove good data
+            Hard: removes all data that has been flagged
 
     References
     ----------
     .. [1] Kepler: A Search for Terrestrial Planets. Kepler Archive Manual.
         http://archive.stsci.edu/kepler/manuals/archive_manual.pdf
     """
-
     def __init__(self, path, aperture_mask=None,
                  quality_bitmask=KeplerQualityFlags.DEFAULT_BITMASK,
                  **kwargs):
@@ -226,7 +228,9 @@ class KeplerTargetPixelFile(TargetPixelFile):
         raise NotImplementedError
 
     def _get_aperture_flux(self):
-        return np.nansum(self.flux[:, self.aperture_mask], axis=1)
+        af = np.nansum(self.flux[:, self.aperture_mask], axis=1)
+        er = np.nansum(self.flux_err[:, self.aperture_mask]**2, axis=1)**0.5
+        return af, er
 
     def get_bkg_lightcurve(self, method='median'):
         return self.estimate_bkg_per_pixel(method=method) * self.aperture_npix
@@ -246,8 +250,9 @@ class KeplerTargetPixelFile(TargetPixelFile):
             cadence.
         """
 
-        aperture_flux = self._get_aperture_flux()
+        aperture_flux, aperture_flux_err = self._get_aperture_flux()
         if subtract_bkg:
             aperture_flux = aperture_flux - self.get_bkg_lightcurve()
 
-        return LightCurve(flux=aperture_flux, time=self.time)
+        return LightCurve(flux=aperture_flux, time=self.time,
+                          flux_err=aperture_flux_err)
