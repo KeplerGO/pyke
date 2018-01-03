@@ -13,15 +13,8 @@ class TargetPixelFile(object):
     """
     TargetPixelFile class
     """
-    def to_lightcurve(self, method=None, subtract_bkg=False, **kwargs):
+    def to_lightcurve(self):
         """Returns a raw light curve of the TPF.
-
-        Attributes
-        ----------
-        method : str or None
-            Method to detrend the light curve.
-        kwargs : dict
-            Keyword arguments passed to the detrending method.
 
         Returns
         -------
