@@ -272,9 +272,10 @@ class KeplerLightCurveFile(object):
 
     def _quality_mask(self, bitmask):
         """Returns a boolean mask which flags all good-quality cadences.
+
         Parameters
         ----------
-        bitmask : int
+        bitmask : str or int
             Bitmask. See ref. [1], table 2-3.
 
         Returns

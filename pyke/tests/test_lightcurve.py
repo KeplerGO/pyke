@@ -29,9 +29,7 @@ def test_KeplerLightCurve():
 @pytest.mark.parametrize("quality_bitmask,answer", [('hard', 2661),
     ('conservative', 2713), ('default', 2924), (None, 3279),
     (1, 3279), (100, 3252), (2096639, 2661)])
-
-
-def test_bitmasking(quality_bitmask,answer):
+def test_bitmasking(quality_bitmask, answer):
     '''Test whether the bitmasking behaves like it should'''
     lcf = KeplerLightCurveFile(TABBY_Q8, quality_bitmask=quality_bitmask)
     flux = lcf.get_lightcurve('SAP_FLUX').flux

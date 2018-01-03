@@ -72,7 +72,7 @@ class KeplerTargetPixelFile(TargetPixelFile):
 
         Parameters
         ----------
-        quality_bitmask : int
+        bitmask : str or int
             Bitmask. See ref. [1], table 2-3.
         """
         if bitmask is None:

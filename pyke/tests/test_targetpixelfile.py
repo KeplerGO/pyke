@@ -17,12 +17,12 @@ def test_tpf_shapes():
 
 def test_tpf_zeros():
     """Does the LightCurve of a zero-flux TPF make sense?"""
-    tpf = KeplerTargetPixelFile(filename_tpf_all_zeros,quality_bitmask=None)
+    tpf = KeplerTargetPixelFile(filename_tpf_all_zeros, quality_bitmask=None)
     lc = tpf.to_lightcurve()
-    #IF you don't mask out bad data, time contains NaNs:
-    assert np.any(lc.time != tpf.time)
+    # If you don't mask out bad data, time contains NaNs
+    assert np.any(lc.time != tpf.time)  # Using the property that NaN does not equal NaN
     #When you do mask out bad data everything should work.
-    tpf = KeplerTargetPixelFile(filename_tpf_all_zeros,quality_bitmask='hard')
+    tpf = KeplerTargetPixelFile(filename_tpf_all_zeros, quality_bitmask='hard')
     lc = tpf.to_lightcurve()
     assert len(lc.time) == len(lc.flux)
     assert np.all(lc.time == tpf.time)
@@ -49,8 +49,7 @@ def test_quality_flag_decoding():
 @pytest.mark.parametrize("quality_bitmask,answer",[('hard', 1101),
     ('conservative', 1141), ('default', 1275), (None, 1290),
     (1, 1290), (100, 1278), (2096639, 1101)])
-
-def test_bitmasking(quality_bitmask,answer):
+def test_bitmasking(quality_bitmask, answer):
     '''Test whether the bitmasking behaves like it should'''
     tpf = KeplerTargetPixelFile(filename_tpf_one_center, quality_bitmask=quality_bitmask)
     lc = tpf.to_lightcurve()
@@ -58,6 +57,7 @@ def test_bitmasking(quality_bitmask,answer):
     assert len(flux) == answer
 
 def test_aperture_masking_errors():
+    """Check that aperture flux returns valid flux_errors when a hard bitmask is used."""
     tpf = KeplerTargetPixelFile(filename_tpf_one_center, quality_bitmask='hard')
     af, er = tpf._get_aperture_flux()
     assert len(af) == len(er)
