@@ -123,7 +123,7 @@ class KeplerTargetPixelFile(TargetPixelFile):
         yy, xx = np.indices(self.flux.shape) + 0.5
         yy = self.row + yy
         xx = self.column + xx
-        total_flux = np.nansum(self.flux[:, aperture_mask], axis=1), axis=1)
+        total_flux = np.nansum(self.flux[:, aperture_mask], axis=1)
         col_centr = np.nansum(xx * self.flux[:, aperture_mask], axis=1) / total_flux
         row_centr = np.nansum(yy * self.flux[:, aperture_mask], axis=1) / total_flux
 
