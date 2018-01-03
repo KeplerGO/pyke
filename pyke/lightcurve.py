@@ -7,7 +7,7 @@ from tqdm import tqdm
 import oktopus
 import requests
 from bs4 import BeautifulSoup
-from .utils import channel_to_module_output, KeplerQualityFlags
+from .utils import running_mean, channel_to_module_output, KeplerQualityFlags
 
 
 __all__ = ['LightCurve', 'KeplerLightCurveFile', 'KeplerCBVCorrector',
@@ -164,7 +164,7 @@ class LightCurve(object):
         return new_lc
 
     def cdpp(self, transit_duration=13, savgol_window=101, savgol_polyorder=2,
-             sigma_clip=5., norm_factor=1.4):
+             sigma_clip=5.):
         """Estimate the CDPP noise metric using the Savitzky-Golay (SG) method.
 
         An interesting estimate of the noise in a lightcurve is the scatter that
@@ -197,9 +197,6 @@ class LightCurve(object):
         sigma_clip : float, optional
             The number of standard deviations to use for clipping outliers.
             The default is 5.
-        norm_factor : float, optional
-            Noise normalization factor for the SG filter.  Recommended
-            value for 13 cadence transit and 101 cadence window is 1.40.
 
         Returns
         -------
@@ -209,7 +206,7 @@ class LightCurve(object):
         Notes
         -----
         This implementation is adapted from the Matlab version used by
-        Jeff van Cleve:
+        Jeff van Cleve but lacks the normalization factor used there:
         svn+ssh://murzim/repo/so/trunk/Develop/jvc/common/compute_SG_noise.m
         """
         if not isinstance(transit_duration, int):
@@ -217,9 +214,8 @@ class LightCurve(object):
         detrended_lc, _ = self.flatten(window_length=savgol_window,
                                        polyorder=savgol_polyorder)
         cleaned_lc = detrended_lc.remove_outliers(sigma=sigma_clip)
-        mean_filter = np.ones(transit_duration) / float(transit_duration)
-        running_mean = np.convolve(cleaned_lc.flux, mean_filter, mode='same')
-        cdpp_ppm = norm_factor * np.std(running_mean) * 1e6
+        mean = running_mean(cleaned_lc.flux, transit_duration)
+        cdpp_ppm = np.std(mean) * 1e6
         return cdpp_ppm
 
     def draw(self):
