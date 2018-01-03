@@ -325,9 +325,6 @@ class KeplerLightCurve(LightCurve):
     def to_fits(self):
         raise NotImplementedError()
 
-    def plot(self, **kwargs):
-        super(KeplerLightCurve, self).plot(**kwargs)
-
 
 class KeplerLightCurveFile(object):
     """Defines a class for a given light curve FITS file from NASA's Kepler and
