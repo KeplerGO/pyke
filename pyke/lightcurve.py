@@ -119,7 +119,9 @@ class LightCurve(object):
         """
         fold_time = ((self.time - phase + 0.5 * period) / period) % 1 - 0.5
         sorted_args = np.argsort(fold_time)
-        return LightCurve(fold_time[sorted_args], self.flux[sorted_args])
+        if self.flux_err is None:
+            return LightCurve(fold_time[sorted_args], self.flux[sorted_args])
+        return LightCurve(fold_time[sorted_args], self.flux[sorted_args], flux_err=self.flux_err[sorted_args])
 
     def remove_nans(self):
         """Removes cadences where the flux is NaN.
@@ -222,8 +224,8 @@ class LightCurve(object):
         raise NotImplementedError()
 
     def plot(self, ax=None, normalize=True, xlabel='Time - 2454833 (days)',
-             ylabel='Normalized Flux', title=None, color='#363636', fill=False,
-             grid=True, **kwargs):
+             ylabel='Normalized Flux', title=None, color='#363636', linestyle="",
+             fill=False, grid=True, **kwargs):
         """Plots the light curve.
 
         Parameters
@@ -258,10 +260,15 @@ class LightCurve(object):
         flux = self.flux
         flux_err = self.flux_err
         if normalize:
-            flux = flux / np.nanmedian(flux)
             if flux_err is not None:
                 flux_err = flux_err / np.nanmedian(flux)
-        ax.errorbar(self.time, flux, flux_err, color=color, **kwargs)
+            flux = flux / np.nanmedian(flux)
+        if flux_err is None:
+            ax.plot(self.time, flux, marker='o', color=color, linestyle=linestyle,
+                       **kwargs)
+        else:
+            ax.errorbar(self.time, flux, flux_err, color=color, linestyle=linestyle,
+                        **kwargs)
         if fill:
             ax.fill(self.time, flux, fc='#a8a7a7', linewidth=0.0, alpha=0.3)
         if grid:
