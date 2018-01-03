@@ -118,6 +118,15 @@ class LightCurve(object):
         sorted_args = np.argsort(fold_time)
         return LightCurve(fold_time[sorted_args], self.flux[sorted_args])
 
+    def bin(self, binsize):
+        flux_err = None
+        if self.flux_err is not None:
+            flux_err = self.self.flux_err[:-q or None].reshape(-1, N).mean(axis=-1)
+        q = len(self.flux) % binsize
+        return LightCurve(time=self.time[:-q or None].reshape(-1, N).mean(axis=-1),
+                          flux=self.flux[:-q or None].reshape(-1, N).mean(axis=-1),
+                          flux_err=flux_err)
+
     def draw(self):
         raise NotImplementedError("Should we implement a LightCurveDrawer class?")
 
