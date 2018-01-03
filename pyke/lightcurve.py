@@ -121,10 +121,10 @@ class LightCurve(object):
     def bin(self, binsize):
         flux_err = None
         if self.flux_err is not None:
-            flux_err = self.self.flux_err[:-q or None].reshape(-1, N).mean(axis=-1)
+            flux_err = np.nanmean(self.self.flux_err[:-q or None].reshape(-1, N), axis=-1)
         q = len(self.flux) % binsize
-        return LightCurve(time=self.time[:-q or None].reshape(-1, N).mean(axis=-1),
-                          flux=self.flux[:-q or None].reshape(-1, N).mean(axis=-1),
+        return LightCurve(time=np.nanmean(self.time[:-q or None].reshape(-1, N), axis=-1),
+                          flux=np.nanmean(self.flux[:-q or None].reshape(-1, N), axis=-1),
                           flux_err=flux_err)
 
     def draw(self):
