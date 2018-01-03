@@ -218,9 +218,6 @@ class LightCurve(object):
         cdpp_ppm = np.std(mean) * 1e6
         return cdpp_ppm
 
-    def draw(self):
-        raise NotImplementedError("Should we implement a LightCurveDrawer class?")
-
     def to_csv(self):
         raise NotImplementedError()
 
