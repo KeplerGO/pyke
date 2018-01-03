@@ -343,9 +343,10 @@ class KeplerLightCurveFile(object):
         Directory path or url to a lightcurve FITS file.
     quality_bitmask : int
         Bitmask specifying quality flags of cadences that should be ignored:
-            default: recommended quality mask
-            hard: removes more flags, known to remove good data
-            hardest: removes all data that has been flagged
+
+            * default: recommended quality mask
+            * hard: removes more flags, known to remove good data
+            * hardest: removes all data that has been flagged
     kwargs : dict
         Keyword arguments to be passed to astropy.io.fits.open.
     """
