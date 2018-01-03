@@ -47,9 +47,9 @@ def test_quality_flag_decoding():
         == [flags[3][1], flags[4][1], flags[5][1]]
 
 @pytest.mark.parametrize("quality_bitmask,answer",[('hard', 1101),
-    ('conservative', 1141), ('default', 1275), ('None', 1290), (None, 1290),
+    ('conservative', 1141), ('default', 1275), (None, 1290),
     (1, 1290), (100, 1278), (2096639, 1101)])
-    
+
 def test_bitmasking(quality_bitmask,answer):
     '''Test whether the bitmasking behaves like it should'''
     tpf = KeplerTargetPixelFile(filename_tpf_one_center, quality_bitmask=quality_bitmask)

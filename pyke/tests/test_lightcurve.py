@@ -27,7 +27,7 @@ def test_KeplerLightCurve():
 
 
 @pytest.mark.parametrize("quality_bitmask,answer", [('hard', 2661),
-    ('conservative', 2713), ('default', 2924), ('None', 3279), (None, 3279),
+    ('conservative', 2713), ('default', 2924), (None, 3279),
     (1, 3279), (100, 3252), (2096639, 2661)])
 
 
