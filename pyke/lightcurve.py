@@ -118,17 +118,18 @@ class LightCurve(object):
     def to_csv(self):
         raise NotImplementedError()
 
-    def plot(self, ax=None, norm=True, xlabel='Time - 2454833 (days)',
-            ylabel='Normalised Flux', title=None, color='#363636', fill=False, grid=True, legend=True, **kwargs):
-        """
-        Plots a light curve
+    def plot(self, ax=None, normalize=True, xlabel='Time - 2454833 (days)',
+            ylabel='Normalized Flux', title=None, color='#363636', fill=False,
+            grid=True, **kwargs):
+        """Plots the light curve.
 
         Parameters
         ----------
-        ax :
-            A frame to plot into. If no frame is provided, one will be generated.
-        norm : bool
-            Normalised the lightcurve
+        ax : matplotlib.axes._subplots.AxesSubplot
+            A matplotlib axes object to plot into. If no axes is provided,
+            a new one be generated.
+        normalize : bool
+            Normalized the lightcurve
         xlabel : str
             Plot x axis label
         ylabel : str
@@ -141,22 +142,19 @@ class LightCurve(object):
             Shade the region between 0 and flux
         grid: bool
             Add a grid to the plot
-        legend: bool
-            Add a legend to the plot
         **kwargs : dict
             Dictionary of arguments to be passed to `matplotlib.pyplot.plot`.
 
         Returns
         -------
-        ax :
-            matplotlib.pyplot frame
+        ax : matplotlib.axes._subplots.AxesSubplot
+            The matplotlib axes object.
         """
-
         if ax is None:
             fig, ax = plt.subplots(1)
         flux = self.flux
         flux_err = self.flux_err
-        if norm:
+        if normalize:
             flux_err /= np.nanmedian(flux)
             flux /= np.nanmedian(flux)
         ax.errorbar(self.time, flux, flux_err, color=color, **kwargs)
@@ -164,13 +162,12 @@ class LightCurve(object):
             ax.fill(self.time, flux, fc='#a8a7a7', linewidth=0.0, alpha=0.3)
         if grid:
             ax.grid(alpha=0.3)
-        if legend:
-            if 'label' in kwargs:
-                ax.legend()
+        if 'label' in kwargs:
+            ax.legend()
         if title is not None:
             ax.set_title(title)
-        ax.set_xlabel(xlabel, {'color' : 'k'})
-        ax.set_ylabel(ylabel, {'color' : 'k'})
+        ax.set_xlabel(xlabel, {'color': 'k'})
+        ax.set_ylabel(ylabel, {'color': 'k'})
         return ax
 
 
@@ -224,7 +221,7 @@ class KeplerLightCurve(LightCurve):
     def to_fits(self):
         raise NotImplementedError()
 
-    def plot(self,**kwargs):
+    def plot(self, **kwargs):
         super(KeplerLightCurve, self).plot(**kwargs)
 
 
@@ -349,33 +346,26 @@ class KeplerLightCurveFile(object):
         types = [n for n in types if not ('ERR' in n)]
         return types
 
-
-    def plot(self, plottype = None, **kwargs):
-        """
-        Plot all the flux extensinos in a light curve.
+    def plot(self, plottype=None, **kwargs):
+        """Plot all the flux types in a light curve.
 
         Parameters
         ----------
-        plottype : list of FLUX types to plot. Default is to plot all available
+        plottype : str or list of str
+            List of FLUX types to plot. Default is to plot all available.
         """
         if not ('ax' in kwargs):
             fig, ax = plt.subplots(1)
             kwargs['ax'] = ax
         if not ('title' in kwargs):
-            keplerid = self.SAP_FLUX.keplerid
-            kwargs['title'] = 'KeplerID: {}'.format(keplerid)
+            kwargs['title'] = 'KeplerID: {}'.format(self.SAP_FLUX.keplerid)
         if plottype is None:
             plottype = self._flux_types()
-        if isinstance(plottype,str):
-            plottype=[plottype]
-        if not hasattr(plottype,'__iter__'):
-            plottype=[plottype]
-        for i, pl in enumerate(plottype):
-            try:
-                lc = self.get_lightcurve(pl)
-            except:
-                continue
-            kwargs['color'] = 'C{}'.format(i)
+        if isinstance(plottype, str):
+            plottype = [plottype]
+        for idx, pl in enumerate(plottype):
+            lc = self.get_lightcurve(pl)
+            kwargs['color'] = 'C{}'.format(idx)
             lc.plot(label=pl, **kwargs)
 
 

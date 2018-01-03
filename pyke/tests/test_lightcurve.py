@@ -25,8 +25,16 @@ def test_KeplerLightCurve():
     assert kplc.quarter == lcf.quarter
     assert kplc.mission == 'Kepler'
 
+
 def test_lightcurve_fold():
     """Test the ``LightCurve.fold()`` method."""
     lc = LightCurve(time=[1, 2, 3], flux=[1, 1, 1])
     assert_almost_equal(lc.fold(period=1).time[0], 0)
     assert_almost_equal(lc.fold(period=1, phase=-0.1).time[0], 0.1)
+
+
+def test_lightcurve_plot():
+    """Sanity check to verify that lightcurve plotting works"""
+    lcf = KeplerLightCurveFile(TABBY_Q8)
+    lcf.plot()
+    lcf.SAP_FLUX.plot()

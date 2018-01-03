@@ -57,8 +57,6 @@ class KeplerTargetPixelFile(TargetPixelFile):
     .. [1] Kepler: A Search for Terrestrial Planets. Kepler Archive Manual.
         http://archive.stsci.edu/kepler/manuals/archive_manual.pdf
     """
-
-
     def __init__(self, path, aperture_mask=None,
                  quality_bitmask=KeplerQualityFlags.DEFAULT_BITMASK,
                  **kwargs):
@@ -70,6 +68,7 @@ class KeplerTargetPixelFile(TargetPixelFile):
 
     def _quality_mask(self, quality_bitmask):
         """Returns a boolean mask which flags all good-quality cadences.
+
         Parameters
         ----------
         quality_bitmask : int
@@ -230,9 +229,8 @@ class KeplerTargetPixelFile(TargetPixelFile):
 
     def _get_aperture_flux(self):
         af = np.nansum(self.flux[:, self.aperture_mask], axis=1)
-        npix = np.sum(self.aperture_mask)
-        er = (1./npix)*(np.nansum(self.flux_err[:, self.aperture_mask]**2, axis=1)**0.5)
-        return af,er
+        er = np.nansum(self.flux_err[:, self.aperture_mask]**2, axis=1)**0.5
+        return af, er
 
     def get_bkg_lightcurve(self, method='median'):
         return self.estimate_bkg_per_pixel(method=method) * self.aperture_npix
@@ -256,4 +254,5 @@ class KeplerTargetPixelFile(TargetPixelFile):
         if subtract_bkg:
             aperture_flux = aperture_flux - self.get_bkg_lightcurve()
 
-        return LightCurve(flux=aperture_flux, time=self.time, flux_err = aperture_flux_err)
+        return LightCurve(flux=aperture_flux, time=self.time,
+                          flux_err=aperture_flux_err)
