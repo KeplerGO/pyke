@@ -62,7 +62,6 @@ def test_aperture_masking_errors():
     af, er = tpf._get_aperture_flux()
     assert len(af) == len(er)
     assert np.all(er > 0)
-    assert np.all(np.abs(af) > er)
     assert isinstance(er[0], np.float32)
     assert np.all(np.isfinite(af))
     assert np.all(np.isfinite(er))
