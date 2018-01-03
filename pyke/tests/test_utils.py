@@ -1,7 +1,9 @@
 import argparse
+from numpy.testing import assert_almost_equal
 
 from ..utils import PyKEArgumentHelpFormatter
 from ..utils import module_output_to_channel, channel_to_module_output
+from ..utils import running_mean
 
 
 def test_PyKEArgumentHelpFormatter():
@@ -35,3 +37,9 @@ def test_module_output_to_channel():
     assert module_output_to_channel(13, 2) == 42
     assert module_output_to_channel(24, 4) == 84
     assert module_output_to_channel(11, 1) == 33
+
+
+def test_running_mean():
+    assert_almost_equal(running_mean([1, 2, 3], window_size=1), [1, 2, 3])
+    assert_almost_equal(running_mean([1, 2, 3], window_size=2), [1.5, 2.5])
+    assert_almost_equal(running_mean([2, 2, 2], window_size=3), [2])
