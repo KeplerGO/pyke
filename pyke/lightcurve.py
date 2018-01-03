@@ -9,6 +9,8 @@ import requests
 from bs4 import BeautifulSoup
 from .utils import running_mean, channel_to_module_output, KeplerQualityFlags
 from matplotlib import pyplot as plt
+from .periodogram import Periodogram
+
 
 __all__ = ['LightCurve', 'KeplerLightCurveFile', 'KeplerCBVCorrector',
            'SimplePixelLevelDecorrelationDetrender']
@@ -93,33 +95,13 @@ class LightCurve(object):
             flatten_lc.flux_err = lc_clean.flux_err / trend_signal
         trend_lc = copy.copy(self)
         trend_lc.flux = trend_signal
-
         return flatten_lc, trend_lc
 
-    def fold(self, period, phase=0.):
-        """Folds the lightcurve at a specified ``period`` and ``phase``.
+    def draw(self):
+        raise NotImplementedError("Should we implement a LightCurveDrawer class?")
 
-        This method returns a new ``LightCurve`` object in which the time
-        values range between -0.5 to +0.5.  Data points which occur exactly
-        at ``phase`` or an integer multiple of `phase + n*period` have time
-        value 0.0.
-
-        Parameters
-        ----------
-        period : float
-            The period upon which to fold.
-        phase : float, optional
-            Time reference point.
-
-        Returns
-        -------
-        folded_lightcurve : LightCurve object
-            A new ``LightCurve`` in which the data are folded and sorted by
-            phase.
-        """
-        fold_time = ((self.time - phase + 0.5 * period) / period) % 1 - 0.5
-        sorted_args = np.argsort(fold_time)
-        return LightCurve(fold_time[sorted_args], self.flux[sorted_args])
+    def to_csv(self):
+        raise NotImplementedError()
 
     def remove_nans(self):
         """Removes cadences where the flux is NaN.
@@ -218,8 +200,94 @@ class LightCurve(object):
         cdpp_ppm = np.std(mean) * 1e6
         return cdpp_ppm
 
-    def to_csv(self):
-        raise NotImplementedError()
+
+    def periodogram(self, minper=None, maxper=None, nterms=1):
+        """
+        Creates a periodogram object
+
+        Parameters
+        ----------
+        minper : float
+            Minimum period to search
+        maxper : float
+            Maximum period to search
+        nterms : int
+            Number of terms to use for Lomb-Scargle periodogram. (Default 1)
+
+        Returns
+        -------
+        p : periodogram object
+            Periodogram object
+        """
+        p = Periodogram(self.time, self.flux, self.flux_err, minper, maxper, nterms)
+        return p
+
+    def find_period(self, minper=None, maxper=None, nterms=1):
+        """
+        Finds the best fit period in the light curve
+        Parameters
+        ----------
+        minper : float
+            Minimum period to search
+        maxper : float
+            Maximum period to search
+        nterms : int
+            Number of terms to use for Lomb-Scargle periodogram. (Default 1)
+
+        Returns
+        -------
+        period : float
+            Best fit period
+        phase : float
+            Best fit phase
+        """
+        p = self.periodogram(minper, maxper, nterms)
+        period = p.per()
+        ok = np.isfinite(self.flux)
+        s = np.argsort(self.time[ok]/period % 1)
+        smooth = signal.savgol_filter(self.flux[ok][s],21,5)
+        m = np.argmin(smooth)
+        phase = (self.time[ok][s]/period % 1)[m]
+        return period,phase
+
+    def fold(self, period=None, phase=None, plot=False, **kwargs):
+        """Folds a lightcurve on the bestfit period
+
+        Parameters
+        ----------
+        period : float
+            Period to fold at. If none, the best fit period will be found.
+        phase : float
+            Phase to fold at. If none, the best fit phase will be found.
+        plot : bool
+            Whether or not to return a plot
+        **kwargs : dict
+            Dictionary of arguments to be passed to `periodogram`.
+
+        Returns
+        -------
+        period : float
+            Best fit period
+        phase : float
+            Best fit phase
+        """
+        if period is None:
+            p,ph = self.find_period(**kwargs)
+            period = p
+            if phase is None:
+                phase = ph
+        if phase is None:
+            phase=0
+        s = np.argsort(self.time/period % 1)
+        ph = ((self.time - ((phase+0.5) * period)) / period) % 1 - 0.5
+        if plot:
+            plt.plot(ph, self.flux,marker='.',ls='',ms=1)
+            plt.xlabel('Phase')
+            plt.ylabel('Counts ($e^-s^{-1}$)')
+            plt.title('Best fit Period: {:5.3} days'.format(period))
+        folded_flux = self.flux[np.argsort(ph)]
+        folded_time = np.sort(ph)
+        return folded_time,folded_flux
 
     def plot(self, ax=None, normalize=True, xlabel='Time - 2454833 (days)',
              ylabel='Normalized Flux', title=None, color='#363636', fill=False,
@@ -274,7 +342,6 @@ class LightCurve(object):
         ax.set_ylabel(ylabel, {'color': 'k'})
         return ax
 
-
 class KeplerLightCurve(LightCurve):
     """Defines a light curve class for NASA's Kepler and K2 missions.
 
@@ -324,6 +391,18 @@ class KeplerLightCurve(LightCurve):
 
     def to_fits(self):
         raise NotImplementedError()
+
+    def periodogram(self, **kwargs):
+        p = super(KeplerLightCurve,self).periodogram(**kwargs)
+        return p
+
+    def find_period(self,**kwargs):
+        period, phase = super(KeplerLightCurve,self).find_period(**kwargs)
+        return period, phase
+
+    def fold(self,**kwargs):
+        folded_time, folded_flux = super(KeplerLightCurve,self).fold(**kwargs)
+        return folded_time, folded_flux
 
 
 class KeplerLightCurveFile(object):
@@ -455,6 +534,21 @@ class KeplerLightCurveFile(object):
         types = [n for n in types if not ('ERR' in n)]
         return types
 
+    def periodogram(self, fluxtype = 'PDCSAP_FLUX', **kwargs):
+        f = self.get_lightcurve(fluxtype)
+        p = Periodogram(self.time,f.flux,f.flux_err,**kwargs)
+        return p
+
+    def find_period(self, fluxtype = 'PDCSAP_FLUX', **kwargs):
+        f = self.get_lightcurve(fluxtype)
+        period, phase = f.find_period(**kwargs)
+        return period, phase
+
+    def fold(self, fluxtype = 'PDCSAP_FLUX', **kwargs):
+        f = self.get_lightcurve(fluxtype)
+        folded_time, folded_flux = f.fold(**kwargs)
+        return folded_time, folded_flux
+
     def plot(self, plottype=None, **kwargs):
         """Plot all the flux types in a light curve.
 
@@ -477,7 +571,6 @@ class KeplerLightCurveFile(object):
             kwargs['color'] = 'C{}'.format(idx)
             lc.plot(label=pl, **kwargs)
 
-
 class Detrender(object):
     """
     """
@@ -487,11 +580,9 @@ class Detrender(object):
         """
         pass
 
-
 class SystematicsCorrector(object):
     def correct(self):
         pass
-
 
 class KeplerCBVCorrector(SystematicsCorrector):
     r"""Remove systematic trends from Kepler light curves by fitting
