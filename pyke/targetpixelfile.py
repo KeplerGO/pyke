@@ -3,6 +3,7 @@ import scipy
 import matplotlib.pyplot as plt
 from astropy.io import fits
 from .lightcurve import KeplerLightCurve, LightCurve
+from .prf import SimpleKeplerPRF
 from .utils import KeplerQualityFlags, plot_image
 
 
@@ -79,6 +80,18 @@ class KeplerTargetPixelFile(TargetPixelFile):
     def header(self, ext=0):
         """Returns the header for a given extension."""
         return self.hdu[ext].header
+
+    def get_prf_model(self):
+        """Returns an object of SimpleKeplerPRF initialized using the
+        necessary metadata in the tpf object.
+
+        Returns
+        -------
+        prf : instance of SimpleKeplerPRF
+        """
+
+        return SimpleKeplerPRF(channel=self.channel, shape=self.shape[1:],
+                               column=self.column, row=self.row)
 
     @property
     def keplerid(self):

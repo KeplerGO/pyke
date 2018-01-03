@@ -7,7 +7,6 @@ import sys
 from astropy.io import fits as pyfits
 from oktopus.posterior import PoissonPosterior
 from .utils import channel_to_module_output, plot_image
-from .targetpixelfile import KeplerTargetPixelFile
 
 # This is a workaround to get the number of arguments of
 # a given function.
@@ -254,28 +253,6 @@ class KeplerPRF(object):
                  rotation_angle):
         return self.evaluate(flux, center_col, center_row,
                              scale_col, scale_row, rotation_angle)
-
-    @classmethod
-    def from_tpf(cls, tpf):
-        """Returns an object of KeplerPRF (or its subclasses)
-        initialized using the necessary metadata in the tpf object.
-
-        Parameters
-        ----------
-        tpf : instance of TargetPixelFile (or its subclasses) or str
-            An object from the TargetPixelFile class or from any of its
-            subclasses or the address (url or local) of a target pixel file
-
-        Returns
-        -------
-        prf : instance of KeplerPRF (or its subclasses)
-        """
-
-        if isinstance(tpf, str):
-            tpf = KeplerTargetPixelFile(tpf)
-
-        return cls(channel=tpf.channel, shape=tpf.shape[1:],
-                   column=tpf.column, row=tpf.row)
 
     def evaluate(self, flux, center_col, center_row, scale_col, scale_row,
                  rotation_angle):
