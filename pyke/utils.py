@@ -110,7 +110,12 @@ class KeplerQualityFlags(object):
                             | PossibleThrusterFiring)
 
     # Using this bitmask only QUALITY == 0 cadences will remain
-    QUALITY_ZERO_BITMASK = 2096639
+    HARD_BITMASK = 2096639
+
+    # Give the recommended bitmask options friendly names
+    OPTIONS = {'default': DEFAULT_BITMASK,
+               'conservative': CONSERVATIVE_BITMASK,
+               'hard': HARD_BITMASK}
 
     # Pretty string descriptions for each flag
     STRINGS = {

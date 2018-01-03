@@ -46,15 +46,18 @@ class KeplerTargetPixelFile(TargetPixelFile):
         that the pixel will be masked out. It can also use the default
         Kepler pipeline's aperture if the value 'kepler-pipeline' is passed.
         The default behaviour is to use all pixels.
-    quality_bitmask : int
+    quality_bitmask : str or int
         Bitmask specifying quality flags of cadences that should be ignored.
+        If a string is passed, it has the following meaning:
+            "default": recommended quality mask
+            "conservative": removes more flags, known to remove good data
+            "hard": removes all data that has been flagged
 
     References
     ----------
     .. [1] Kepler: A Search for Terrestrial Planets. Kepler Archive Manual.
         http://archive.stsci.edu/kepler/manuals/archive_manual.pdf
     """
-
     def __init__(self, path, aperture_mask=None,
                  quality_bitmask=KeplerQualityFlags.DEFAULT_BITMASK,
                  **kwargs):
@@ -64,15 +67,19 @@ class KeplerTargetPixelFile(TargetPixelFile):
         self.quality_mask = self._quality_mask(quality_bitmask)
         self.aperture_mask = aperture_mask
 
-    def _quality_mask(self, quality_bitmask):
+    def _quality_mask(self, bitmask):
         """Returns a boolean mask which flags all good-quality cadences.
 
         Parameters
         ----------
-        quality_bitmask : int
+        bitmask : str or int
             Bitmask. See ref. [1], table 2-3.
         """
-        return (self.hdu[1].data['QUALITY'] & quality_bitmask) == 0
+        if bitmask is None:
+            return np.ones(len(self.hdu[1].data['TIME']), dtype=bool)
+        elif isinstance(bitmask, str):
+            bitmask = KeplerQualityFlags.OPTIONS[bitmask]
+        return (self.hdu[1].data['QUALITY'] & bitmask) == 0
 
     def header(self, ext=0):
         """Returns the header for a given extension."""
@@ -226,7 +233,9 @@ class KeplerTargetPixelFile(TargetPixelFile):
         raise NotImplementedError
 
     def _get_aperture_flux(self):
-        return np.nansum(self.flux[:, self.aperture_mask], axis=1)
+        af = np.nansum(self.flux[:, self.aperture_mask], axis=1)
+        er = np.nansum(self.flux_err[:, self.aperture_mask]**2, axis=1)**0.5
+        return af, er
 
     def get_bkg_lightcurve(self, method='median'):
         return self.estimate_bkg_per_pixel(method=method) * self.aperture_npix
@@ -246,8 +255,9 @@ class KeplerTargetPixelFile(TargetPixelFile):
             cadence.
         """
 
-        aperture_flux = self._get_aperture_flux()
+        aperture_flux, aperture_flux_err = self._get_aperture_flux()
         if subtract_bkg:
             aperture_flux = aperture_flux - self.get_bkg_lightcurve()
 
-        return LightCurve(flux=aperture_flux, time=self.time)
+        return LightCurve(flux=aperture_flux, time=self.time,
+                          flux_err=aperture_flux_err)

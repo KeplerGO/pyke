@@ -8,7 +8,7 @@ import oktopus
 import requests
 from bs4 import BeautifulSoup
 from .utils import running_mean, channel_to_module_output, KeplerQualityFlags
-
+from matplotlib import pyplot as plt
 
 __all__ = ['LightCurve', 'KeplerLightCurveFile', 'KeplerCBVCorrector',
            'SimplePixelLevelDecorrelationDetrender']
@@ -224,6 +224,58 @@ class LightCurve(object):
     def to_csv(self):
         raise NotImplementedError()
 
+    def plot(self, ax=None, normalize=True, xlabel='Time - 2454833 (days)',
+             ylabel='Normalized Flux', title=None, color='#363636', fill=False,
+             grid=True, **kwargs):
+        """Plots the light curve.
+
+        Parameters
+        ----------
+        ax : matplotlib.axes._subplots.AxesSubplot
+            A matplotlib axes object to plot into. If no axes is provided,
+            a new one be generated.
+        normalize : bool
+            Normalized the lightcurve
+        xlabel : str
+            Plot x axis label
+        ylabel : str
+            Plot y axis label
+        title : str
+            Plot set_title
+        color: str
+            Color to plot flux points
+        fill: bool
+            Shade the region between 0 and flux
+        grid: bool
+            Add a grid to the plot
+        **kwargs : dict
+            Dictionary of arguments to be passed to `matplotlib.pyplot.plot`.
+
+        Returns
+        -------
+        ax : matplotlib.axes._subplots.AxesSubplot
+            The matplotlib axes object.
+        """
+        if ax is None:
+            fig, ax = plt.subplots(1)
+        flux = self.flux
+        flux_err = self.flux_err
+        if normalize:
+            flux_err /= np.nanmedian(flux)
+            flux /= np.nanmedian(flux)
+        ax.errorbar(self.time, flux, flux_err, color=color, **kwargs)
+        if fill:
+            ax.fill(self.time, flux, fc='#a8a7a7', linewidth=0.0, alpha=0.3)
+        if grid:
+            ax.grid(alpha=0.3)
+        if 'label' in kwargs:
+            ax.legend()
+        if title is not None:
+            ax.set_title(title)
+        ax.set_xlabel(xlabel, {'color': 'k'})
+        ax.set_ylabel(ylabel, {'color': 'k'})
+        return ax
+
 
 class KeplerLightCurve(LightCurve):
     """Defines a light curve class for NASA's Kepler and K2 missions.
@@ -252,12 +304,14 @@ class KeplerLightCurve(LightCurve):
         Mission name
     cadenceno : array-like
         Cadence numbers corresponding to every time measurement
+    keplerid : int
+        Kepler ID number
     """
 
     def __init__(self, time, flux, flux_err=None, centroid_col=None,
                  centroid_row=None, quality=None, quality_bitmask=None,
                  channel=None, campaign=None, quarter=None, mission=None,
-                 cadenceno=None):
+                 cadenceno=None, keplerid=None):
         super(KeplerLightCurve, self).__init__(time, flux, flux_err)
         self.centroid_col = centroid_col
         self.centroid_row = centroid_row
@@ -268,9 +322,13 @@ class KeplerLightCurve(LightCurve):
         self.quarter = quarter
         self.mission = mission
         self.cadenceno = cadenceno
+        self.keplerid = keplerid
 
     def to_fits(self):
         raise NotImplementedError()
+
+    def plot(self, **kwargs):
+        super(KeplerLightCurve, self).plot(**kwargs)
 
 
 class KeplerLightCurveFile(object):
@@ -282,11 +340,13 @@ class KeplerLightCurveFile(object):
     path : str
         Directory path or url to a lightcurve FITS file.
     quality_bitmask : int
-        Bitmask specifying quality flags of cadences that should be ignored.
+        Bitmask specifying quality flags of cadences that should be ignored:
+            default: recommended quality mask
+            conservative: removes more flags, known to remove good data
+            hard: removes all data that has been flagged
     kwargs : dict
         Keyword arguments to be passed to astropy.io.fits.open.
     """
-
     def __init__(self, path, quality_bitmask=KeplerQualityFlags.DEFAULT_BITMASK,
                  **kwargs):
         self.path = path
@@ -307,20 +367,30 @@ class KeplerLightCurveFile(object):
                                     campaign=self.campaign,
                                     quarter=self.quarter,
                                     mission=self.mission,
-                                    cadenceno=self.cadenceno)
+                                    cadenceno=self.cadenceno,
+                                    keplerid=self.hdu[0].header['KEPLERID'])
         else:
             raise KeyError("{} is not a valid flux type. Available types are: {}".
                            format(flux_type, self._flux_types))
 
-    def _quality_mask(self, quality_bitmask):
+    def _quality_mask(self, bitmask):
         """Returns a boolean mask which flags all good-quality cadences.
 
         Parameters
         ----------
-        quality_bitmask : int
+        bitmask : str or int
             Bitmask. See ref. [1], table 2-3.
+
+        Returns
+        -------
+        boolean_mask : array of bool
+            Boolean array in which `True` means the data is of good quality.
         """
-        return (self.hdu[1].data['SAP_QUALITY'] & quality_bitmask) == 0
+        if bitmask is None:
+            return np.ones(len(self.hdu[1].data['TIME']), dtype=bool)
+        elif isinstance(bitmask, str):
+            bitmask = KeplerQualityFlags.OPTIONS[bitmask]
+        return (self.hdu[1].data['SAP_QUALITY'] & bitmask) == 0
 
     @property
     def SAP_FLUX(self):
@@ -386,7 +456,31 @@ class KeplerLightCurveFile(object):
 
     def _flux_types(self):
         """Returns a list of available flux types for this light curve file"""
-        return [n for n in  self.hdu[1].data.columns.names if 'FLUX' in n]
+        types = [n for n in self.hdu[1].data.columns.names if 'FLUX' in n]
+        types = [n for n in types if not ('ERR' in n)]
+        return types
+
+    def plot(self, plottype=None, **kwargs):
+        """Plot all the flux types in a light curve.
+
+        Parameters
+        ----------
+        plottype : str or list of str
+            List of FLUX types to plot. Default is to plot all available.
+        """
+        if not ('ax' in kwargs):
+            fig, ax = plt.subplots(1)
+            kwargs['ax'] = ax
+        if not ('title' in kwargs):
+            kwargs['title'] = 'KeplerID: {}'.format(self.SAP_FLUX.keplerid)
+        if plottype is None:
+            plottype = self._flux_types()
+        if isinstance(plottype, str):
+            plottype = [plottype]
+        for idx, pl in enumerate(plottype):
+            lc = self.get_lightcurve(pl)
+            kwargs['color'] = 'C{}'.format(idx)
+            lc.plot(label=pl, **kwargs)
 
 
 class Detrender(object):
