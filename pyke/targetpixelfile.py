@@ -78,13 +78,12 @@ class KeplerTargetPixelFile(TargetPixelFile):
         bitmask_dict = {'default': KeplerQualityFlags.DEFAULT_BITMASK,
                 'conservative': KeplerQualityFlags.CONSERVATIVE_BITMASK,
                 'hard': KeplerQualityFlags.QUALITY_ZERO_BITMASK,
-                'None':None,
-                None:None}
+                None: None}
 
-        if isinstance(bitmask,str):
+        if isinstance(bitmask, str):
             bitmask = bitmask_dict[bitmask]
         if bitmask is None:
-            return ~np.zeros(len(self.hdu[1].data['TIME']),dtype=bool)
+            return np.ones(len(self.hdu[1].data['TIME']),dtype=bool)
         return (self.hdu[1].data['QUALITY'] & bitmask) == 0
 
     def header(self, ext=0):
@@ -241,7 +240,7 @@ class KeplerTargetPixelFile(TargetPixelFile):
     def _get_aperture_flux(self):
         af = np.nansum(self.flux[:, self.aperture_mask], axis=1)
         npix = np.sum(self.aperture_mask).astype(float)
-        er = np.sqrt(np.nansum(self.flux_err[:, self.aperture_mask]**2, axis=1)) / npix
+        er = np.sqrt(np.nansum(self.flux_err[:, self.aperture_mask]**2, axis=1))
         return af,er
 
     def get_bkg_lightcurve(self, method='median'):
@@ -266,4 +265,4 @@ class KeplerTargetPixelFile(TargetPixelFile):
         if subtract_bkg:
             aperture_flux = aperture_flux - self.get_bkg_lightcurve()
 
-        return LightCurve(flux=aperture_flux, time=self.time, flux_err = aperture_flux_err)
+        return LightCurve(flux=aperture_flux, time=self.time, flux_err=aperture_flux_err)

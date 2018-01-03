@@ -228,13 +228,12 @@ class KeplerLightCurveFile(object):
         bitmask_dict = {'default': KeplerQualityFlags.DEFAULT_BITMASK,
                 'conservative': KeplerQualityFlags.CONSERVATIVE_BITMASK,
                 'hard': KeplerQualityFlags.QUALITY_ZERO_BITMASK,
-                'None':None,
-                None:None}
+                None: None}
 
-        if isinstance(bitmask,str):
+        if isinstance(bitmask, str):
             bitmask = bitmask_dict[bitmask]
         if bitmask is None:
-            return ~np.zeros(len(self.hdu[1].data['TIME']),dtype=bool)
+            return np.ones(len(self.hdu[1].data['TIME']),dtype=bool)
         return (self.hdu[1].data['SAP_QUALITY'] & bitmask) == 0
 
     @property
