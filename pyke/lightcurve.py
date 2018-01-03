@@ -2,11 +2,12 @@ import copy
 import numpy as np
 from scipy import signal
 from astropy.io import fits as pyfits
+from astropy.stats import sigma_clip
 from tqdm import tqdm
 import oktopus
 import requests
 from bs4 import BeautifulSoup
-from .utils import channel_to_module_output, KeplerQualityFlags
+from .utils import running_mean, channel_to_module_output, KeplerQualityFlags
 from matplotlib import pyplot as plt
 from .periodogram import Periodogram
 
@@ -32,7 +33,10 @@ class LightCurve(object):
     def __init__(self, time, flux, flux_err=None):
         self.time = np.asarray(time)
         self.flux = np.asarray(flux)
-        self.flux_err = np.asarray(flux_err)
+        if flux_err is not None:
+            self.flux_err = np.asarray(flux_err)
+        else:
+            self.flux_err = None
 
     def stitch(self, *others):
         """
@@ -81,12 +85,14 @@ class LightCurve(object):
         trend_lc : LightCurve object
             Trend in the lightcurve data
         """
-        trend_signal = signal.savgol_filter(x=self.flux, window_length=window_length,
+        lc_clean = self.remove_nans()  # The SG filter does not allow NaNs
+        trend_signal = signal.savgol_filter(x=lc_clean.flux,
+                                            window_length=window_length,
                                             polyorder=polyorder, **kwargs)
-        flatten_lc = copy.copy(self)
-        flatten_lc.flux = self.flux / trend_signal
-        if self.flux_err is not None:
-            flatten_lc.flux_err = self.flux_err / trend_signal
+        flatten_lc = copy.copy(lc_clean)
+        flatten_lc.flux = lc_clean.flux / trend_signal
+        if flatten_lc.flux_err is not None:
+            flatten_lc.flux_err = lc_clean.flux_err / trend_signal
         trend_lc = copy.copy(self)
         trend_lc.flux = trend_signal
         return flatten_lc, trend_lc
@@ -96,6 +102,104 @@ class LightCurve(object):
 
     def to_csv(self):
         raise NotImplementedError()
+
+    def remove_nans(self):
+        """Removes cadences where the flux is NaN.
+
+        Returns
+        -------
+        clean_lightcurve : LightCurve object
+            A new ``LightCurve`` from which NaNs fluxes have been removed.
+        """
+        lc = copy.copy(self)
+        nan_mask = np.isnan(lc.flux)
+        lc.time = self.time[~nan_mask]
+        lc.flux = self.flux[~nan_mask]
+        if lc.flux_err is not None:
+            lc.flux_err = self.flux_err[~nan_mask]
+        return lc
+
+    def remove_outliers(self, sigma=5.):
+        """Removes outlier flux values using sigma-clipping.
+
+        This method returns a new LightCurve object from which flux values
+        are removed if they are separated from the mean flux by `sigma` times
+        the standard deviation.
+
+        Parameters
+        ----------
+        sigma : float, optional
+            The number of standard deviations to use for clipping outliers.
+            Defaults to 5.
+
+        Returns
+        -------
+        clean_lightcurve : LightCurve object
+            A new ``LightCurve`` in which outliers have been removed.
+        """
+        new_lc = copy.copy(self)
+        outlier_mask = sigma_clip(data=new_lc.flux, sigma=sigma).mask
+        new_lc.time = self.time[~outlier_mask]
+        new_lc.flux = self.flux[~outlier_mask]
+        if new_lc.flux_err is not None:
+            new_lc.flux_err = self.flux_err[~outlier_mask]
+        return new_lc
+
+    def cdpp(self, transit_duration=13, savgol_window=101, savgol_polyorder=2,
+             sigma_clip=5.):
+        """Estimate the CDPP noise metric using the Savitzky-Golay (SG) method.
+
+        An interesting estimate of the noise in a lightcurve is the scatter that
+        remains after all long term trends have been removed. This is the kernel
+        of the idea behind the Combined Differential Photometric Precision (CDPP).
+        The Kepler Pipeline uses a wavelet-based algorithm to calculate the
+        signal-to-noise of the specific waveform of transits of various
+        durations. In this implementation, we use the simpler CDPP proxy
+        algorithm as discussed by Gilliland et al (2011ApJS..197....6G)
+        and Van Cleve et al (2016PASP..128g5002V).
+
+        The steps are:
+            1. Remove low frequency signals using a Savitzky-Golay filter.
+            2. Remove outliers using sigma-clipping.
+            3. Compute the standard deviation of a running mean with
+               configurable window length equal to `transit_duration`.
+
+        Parameters
+        ----------
+        transit_duration : int, optional
+            The transit duration in cadences. This is the length of the window
+            used to compute the running mean. The default is 13, which
+            corresponds to a 6.5 hour transit in data sampled at 30-min cadence.
+        savgol_window : int, optional
+            Width of Savitsky-Golay filter in cadences (odd number).
+            Default value 101 (2.0 days in Kepler Long Cadence mode).
+        savgol_polyorder : int, optional
+            Polynomial order of the Savitsky-Golay filter.
+            The recommended value is 2.
+        sigma_clip : float, optional
+            The number of standard deviations to use for clipping outliers.
+            The default is 5.
+
+        Returns
+        -------
+        cdpp : float
+            Savitzky-Golay CDPP noise metric in units parts-per-million (ppm).
+
+        Notes
+        -----
+        This implementation is adapted from the Matlab version used by
+        Jeff van Cleve but lacks the normalization factor used there:
+        svn+ssh://murzim/repo/so/trunk/Develop/jvc/common/compute_SG_noise.m
+        """
+        if not isinstance(transit_duration, int):
+            raise TypeError("transit_duration must be an integer")
+        detrended_lc, _ = self.flatten(window_length=savgol_window,
+                                       polyorder=savgol_polyorder)
+        cleaned_lc = detrended_lc.remove_outliers(sigma=sigma_clip)
+        mean = running_mean(data=cleaned_lc.flux, window_size=transit_duration)
+        cdpp_ppm = np.std(mean) * 1e6
+        return cdpp_ppm
+
 
     def periodogram(self, minper=None, maxper=None, nterms=1):
         """
@@ -121,7 +225,6 @@ class LightCurve(object):
     def find_period(self, minper=None, maxper=None, nterms=1):
         """
         Finds the best fit period in the light curve
-
         Parameters
         ----------
         minper : float
@@ -148,8 +251,7 @@ class LightCurve(object):
         return period,phase
 
     def fold(self, period=None, phase=None, plot=False, **kwargs):
-        """
-        Folds a lightcurve on the bestfit period
+        """Folds a lightcurve on the bestfit period
 
         Parameters
         ----------
@@ -187,6 +289,59 @@ class LightCurve(object):
         folded_time = np.sort(ph)
         return folded_time,folded_flux
 
+    def plot(self, ax=None, normalize=True, xlabel='Time - 2454833 (days)',
+             ylabel='Normalized Flux', title=None, color='#363636', fill=False,
+             grid=True, **kwargs):
+        """Plots the light curve.
+
+        Parameters
+        ----------
+        ax : matplotlib.axes._subplots.AxesSubplot
+            A matplotlib axes object to plot into. If no axes is provided,
+            a new one be generated.
+        normalize : bool
+            Normalized the lightcurve
+        xlabel : str
+            Plot x axis label
+        ylabel : str
+            Plot y axis label
+        title : str
+            Plot set_title
+        color: str
+            Color to plot flux points
+        fill: bool
+            Shade the region between 0 and flux
+        grid: bool
+            Add a grid to the plot
+        **kwargs : dict
+            Dictionary of arguments to be passed to `matplotlib.pyplot.plot`.
+
+        Returns
+        -------
+        ax : matplotlib.axes._subplots.AxesSubplot
+            The matplotlib axes object.
+        """
+        if ax is None:
+            fig, ax = plt.subplots(1)
+        flux = self.flux
+        flux_err = self.flux_err
+        if normalize:
+            flux = flux / np.nanmedian(flux)
+            if flux_err is not None:
+                flux_err = flux_err / np.nanmedian(flux)
+        ax.errorbar(self.time, flux, flux_err, color=color, **kwargs)
+        if fill:
+            ax.fill(self.time, flux, fc='#a8a7a7', linewidth=0.0, alpha=0.3)
+        if grid:
+            ax.grid(alpha=0.3)
+        if 'label' in kwargs:
+            ax.legend()
+        if title is not None:
+            ax.set_title(title)
+        ax.set_xlabel(xlabel, {'color': 'k'})
+        ax.set_ylabel(ylabel, {'color': 'k'})
+        return ax
+
 class KeplerLightCurve(LightCurve):
     """Defines a light curve class for NASA's Kepler and K2 missions.
 
@@ -214,14 +369,14 @@ class KeplerLightCurve(LightCurve):
         Mission name
     cadenceno : array-like
         Cadence numbers corresponding to every time measurement
-    id : int
+    keplerid : int
         Kepler ID number
     """
 
     def __init__(self, time, flux, flux_err=None, centroid_col=None,
                  centroid_row=None, quality=None, quality_bitmask=None,
                  channel=None, campaign=None, quarter=None, mission=None,
-                 cadenceno=None, id = None):
+                 cadenceno=None, keplerid=None):
         super(KeplerLightCurve, self).__init__(time, flux, flux_err)
         self.centroid_col = centroid_col
         self.centroid_row = centroid_row
@@ -266,13 +421,12 @@ class KeplerLightCurveFile(object):
     kwargs : dict
         Keyword arguments to be passed to astropy.io.fits.open.
     """
-
-    def __init__(self, path, quality_mask='default',quality_bitmask=None,
+    def __init__(self, path, quality_bitmask=KeplerQualityFlags.DEFAULT_BITMASK,
                  **kwargs):
         self.path = path
         self.hdu = pyfits.open(self.path, **kwargs)
         self.quality_bitmask = quality_bitmask
-        self.quality_mask = self._quality_mask(quality_bitmask,quality_mask)
+        self.quality_mask = self._quality_mask(quality_bitmask)
 
     def get_lightcurve(self, flux_type, centroid_type='MOM_CENTR'):
         if flux_type in self._flux_types():
@@ -293,29 +447,24 @@ class KeplerLightCurveFile(object):
             raise KeyError("{} is not a valid flux type. Available types are: {}".
                            format(flux_type, self._flux_types))
 
-    def _quality_mask(self, bitmask, mask):
+    def _quality_mask(self, bitmask):
         """Returns a boolean mask which flags all good-quality cadences.
+
         Parameters
         ----------
-        quality_bitmask : int
+        bitmask : str or int
             Bitmask. See ref. [1], table 2-3.
+
+        Returns
+        -------
+        boolean_mask : array of bool
+            Boolean array in which `True` means the data is of good quality.
         """
-        if bitmask == None:
-            if (mask is None) or (mask is 'None'):
-                bitmask=None
-            if (mask is 'default'):
-                bitmask=KeplerQualityFlags.DEFAULT_BITMASK
-            if (mask is 'conservative'):
-                bitmask=KeplerQualityFlags.CONSERVATIVE_BITMASK
-            if (mask is 'hard'):
-                bitmask=KeplerQualityFlags.QUALITY_ZERO_BITMASK
-            if not (mask in [None,'None','default','conservative','hard']):
-                bitmask=KeplerQualityFlags.DEFAULT_BITMASK
-            self.quality_bitmask=bitmask
         if bitmask is None:
-            return ~np.zeros(len(self.hdu[1].data['TIME']),dtype=bool)
-        else:
-            return (self.hdu[1].data['SAP_QUALITY'] & bitmask) == 0
+            return np.ones(len(self.hdu[1].data['TIME']), dtype=bool)
+        elif isinstance(bitmask, str):
+            bitmask = KeplerQualityFlags.OPTIONS[bitmask]
+        return (self.hdu[1].data['SAP_QUALITY'] & bitmask) == 0
 
     @property
     def SAP_FLUX(self):
@@ -399,6 +548,28 @@ class KeplerLightCurveFile(object):
         f = self.get_lightcurve(fluxtype)
         folded_time, folded_flux = f.fold(**kwargs)
         return folded_time, folded_flux
+
+    def plot(self, plottype=None, **kwargs):
+        """Plot all the flux types in a light curve.
+
+        Parameters
+        ----------
+        plottype : str or list of str
+            List of FLUX types to plot. Default is to plot all available.
+        """
+        if not ('ax' in kwargs):
+            fig, ax = plt.subplots(1)
+            kwargs['ax'] = ax
+        if not ('title' in kwargs):
+            kwargs['title'] = 'KeplerID: {}'.format(self.SAP_FLUX.keplerid)
+        if plottype is None:
+            plottype = self._flux_types()
+        if isinstance(plottype, str):
+            plottype = [plottype]
+        for idx, pl in enumerate(plottype):
+            lc = self.get_lightcurve(pl)
+            kwargs['color'] = 'C{}'.format(idx)
+            lc.plot(label=pl, **kwargs)
 
 class Detrender(object):
     """

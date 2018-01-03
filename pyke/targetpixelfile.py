@@ -46,53 +46,40 @@ class KeplerTargetPixelFile(TargetPixelFile):
         that the pixel will be masked out. It can also use the default
         Kepler pipeline's aperture if the value 'kepler-pipeline' is passed.
         The default behaviour is to use all pixels.
-    quality_bitmask : int
+    quality_bitmask : str or int
         Bitmask specifying quality flags of cadences that should be ignored.
-    quality_mask : str
-        String describing the type of mask that should be applied
-            default: recommended quality mask
-            conservative: removes more flags, known to remove good data
-            hard: removes all data that has been flagged
+        If a string is passed, it has the following meaning:
+            "default": recommended quality mask
+            "conservative": removes more flags, known to remove good data
+            "hard": removes all data that has been flagged
 
     References
     ----------
     .. [1] Kepler: A Search for Terrestrial Planets. Kepler Archive Manual.
         http://archive.stsci.edu/kepler/manuals/archive_manual.pdf
     """
-
-
     def __init__(self, path, aperture_mask=None,
-                 quality_mask='default',quality_bitmask=None,
+                 quality_bitmask=KeplerQualityFlags.DEFAULT_BITMASK,
                  **kwargs):
         self.path = path
         self.hdu = fits.open(self.path, **kwargs)
-        self.quality_mask = self._quality_mask(quality_bitmask,quality_mask)
+        self.quality_bitmask = quality_bitmask
+        self.quality_mask = self._quality_mask(quality_bitmask)
         self.aperture_mask = aperture_mask
 
-    def _quality_mask(self, bitmask, mask):
+    def _quality_mask(self, bitmask):
         """Returns a boolean mask which flags all good-quality cadences.
+
         Parameters
         ----------
-        quality_bitmask : int
+        bitmask : str or int
             Bitmask. See ref. [1], table 2-3.
         """
-        if bitmask == None:
-            if (mask is None) or (mask is 'None'):
-                bitmask=None
-            if (mask is 'default'):
-                bitmask=KeplerQualityFlags.DEFAULT_BITMASK
-            if (mask is 'conservative'):
-                bitmask=KeplerQualityFlags.CONSERVATIVE_BITMASK
-            if (mask is 'hard'):
-                bitmask=KeplerQualityFlags.QUALITY_ZERO_BITMASK
-            if not (mask in [None,'None','default','conservative','hard']):
-                bitmask=KeplerQualityFlags.DEFAULT_BITMASK
-            self.quality_bitmask=bitmask
         if bitmask is None:
-            return ~np.zeros(len(self.hdu[1].data['TIME']),dtype=bool)
-        else:
-            return (self.hdu[1].data['QUALITY'] & bitmask) == 0
-
+            return np.ones(len(self.hdu[1].data['TIME']), dtype=bool)
+        elif isinstance(bitmask, str):
+            bitmask = KeplerQualityFlags.OPTIONS[bitmask]
+        return (self.hdu[1].data['QUALITY'] & bitmask) == 0
 
     def header(self, ext=0):
         """Returns the header for a given extension."""
@@ -247,9 +234,8 @@ class KeplerTargetPixelFile(TargetPixelFile):
 
     def _get_aperture_flux(self):
         af = np.nansum(self.flux[:, self.aperture_mask], axis=1)
-        npix = np.sum(self.aperture_mask)
-        er = (1./npix)*(np.nansum(self.flux_err[:, self.aperture_mask]**2, axis=1)**0.5)
-        return af,er
+        er = np.nansum(self.flux_err[:, self.aperture_mask]**2, axis=1)**0.5
+        return af, er
 
     def get_bkg_lightcurve(self, method='median'):
         return self.estimate_bkg_per_pixel(method=method) * self.aperture_npix
@@ -273,4 +259,5 @@ class KeplerTargetPixelFile(TargetPixelFile):
         if subtract_bkg:
             aperture_flux = aperture_flux - self.get_bkg_lightcurve()
 
-        return LightCurve(flux=aperture_flux, time=self.time, flux_err = aperture_flux_err)
+        return LightCurve(flux=aperture_flux, time=self.time,
+                          flux_err=aperture_flux_err)
