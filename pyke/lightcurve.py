@@ -224,16 +224,16 @@ class KeplerLightCurveFile(object):
         ----------
         quality_bitmask : int
             Bitmask. See ref. [1], table 2-3.
-        """
-        bitmask_dict = {'default': KeplerQualityFlags.DEFAULT_BITMASK,
-                'conservative': KeplerQualityFlags.CONSERVATIVE_BITMASK,
-                'hard': KeplerQualityFlags.QUALITY_ZERO_BITMASK,
-                None: None}
 
-        if isinstance(bitmask, str):
-            bitmask = bitmask_dict[bitmask]
+        Returns
+        -------
+        boolean_mask : array of bool
+            Boolean array in which `True` means the data is of good quality.
+        """
         if bitmask is None:
-            return np.ones(len(self.hdu[1].data['TIME']),dtype=bool)
+            return np.ones(len(self.hdu[1].data['TIME']), dtype=bool)
+        elif isinstance(bitmask, str):
+            bitmask = KeplerQualityFlags.OPTIONS[bitmask]
         return (self.hdu[1].data['SAP_QUALITY'] & bitmask) == 0
 
     @property
