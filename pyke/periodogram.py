@@ -4,9 +4,6 @@ import warnings
 from scipy import signal
 import matplotlib.pyplot as plt
 import matplotlib as mpl
-mpl.style.use('ggplot')
-mpl.rc('axes', color_cycle=["#4C72B0", "#55A868", "#C44E52",
-                            "#8172B2", "#CCB974"])
 
 
 __all__ = ['Periodogram']
@@ -99,11 +96,12 @@ class Periodogram(object):
         """
         if ax is None:
             fig, ax = plt.subplots()
-        ax.plot(self.lomb_periods, self.lomb_power,**kwargs)
-        ax.set(xlabel='Period (days)', ylabel='Lomb Scargle Power')
-        if line:
-            plt.axvline(self.lomb_per,ls='--',lw=2,color='black')
-            ax.text(self.lomb_per*1.1,self.lomb_power.max(),'Best Fit Period', ha='left',va='center')
+        with mpl.style.use('ggplot'):
+            ax.plot(self.lomb_periods, self.lomb_power,**kwargs)
+            ax.set(xlabel='Period (days)', ylabel='Lomb Scargle Power')
+            if line:
+                plt.axvline(self.lomb_per,ls='--',lw=2,color='black')
+                ax.text(self.lomb_per*1.1,self.lomb_power.max(),'Best Fit Period', ha='left',va='center')
 
     def per(self):
         '''Returns the best fit period.'''
