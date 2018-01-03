@@ -41,8 +41,13 @@ class KeplerTargetPixelFile(TargetPixelFile):
     ----------
     path : str
         Path to fits file.
-    quality_bitmask : int
+    quality_bitmask : str or int
         Bitmask specifying quality flags of cadences that should be ignored.
+        If a string is passed, it has the following meaning:
+
+            * "default": recommended quality mask
+            * "conservative": removes more flags, known to remove good data
+            * "hard": removes all data that has been flagged
 
     References
     ----------
@@ -57,15 +62,19 @@ class KeplerTargetPixelFile(TargetPixelFile):
         self.quality_bitmask = quality_bitmask
         self.quality_mask = self._quality_mask(quality_bitmask)
 
-    def _quality_mask(self, quality_bitmask):
+    def _quality_mask(self, bitmask):
         """Returns a boolean mask which flags all good-quality cadences.
 
         Parameters
         ----------
-        quality_bitmask : int
+        bitmask : str or int
             Bitmask. See ref. [1], table 2-3.
         """
-        return (self.hdu[1].data['QUALITY'] & quality_bitmask) == 0
+        if bitmask is None:
+            return np.ones(len(self.hdu[1].data['TIME']), dtype=bool)
+        elif isinstance(bitmask, str):
+            bitmask = KeplerQualityFlags.OPTIONS[bitmask]
+        return (self.hdu[1].data['QUALITY'] & bitmask) == 0
 
     def header(self, ext=0):
         """Returns the header for a given extension."""
