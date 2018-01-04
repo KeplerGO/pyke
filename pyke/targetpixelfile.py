@@ -46,8 +46,8 @@ class KeplerTargetPixelFile(TargetPixelFile):
         If a string is passed, it has the following meaning:
 
             * "default": recommended quality mask
-            * "conservative": removes more flags, known to remove good data
-            * "hard": removes all data that has been flagged
+            * "hard": removes more flags, known to remove good data
+            * "hardest": removes all data that has been flagged
 
     References
     ----------
