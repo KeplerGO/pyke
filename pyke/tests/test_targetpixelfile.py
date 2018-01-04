@@ -32,7 +32,7 @@ def test_tpf_zeros():
 def test_tpf_ones():
     """Does the LightCurve of a one-flux TPF make sense?"""
     tpf = KeplerTargetPixelFile(filename_tpf_one_center)
-    lc = tpf.to_lightcurve()
+    lc = tpf.to_lightcurve(aperture_mask='all')
     assert np.all(lc.flux == 1)
 
 def test_quality_flag_decoding():
