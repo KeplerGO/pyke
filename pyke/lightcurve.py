@@ -61,7 +61,7 @@ class LightCurve(object):
 
         return LightCurve(time=time, flux=flux, flux_err=flux_err)
 
-    def flatten(self, window_length=101, polyorder=3, **kwargs):
+    def flatten(self, window_length=101, polyorder=3, return_trend=False, **kwargs):
         """
         Removes low frequency trend using scipy's Savitzky-Golay filter.
 
@@ -73,13 +73,17 @@ class LightCurve(object):
         polyorder : int
             The order of the polynomial used to fit the samples. ``polyorder``
             must be less than window_length.
+        return_trend : bool
+            If `True`, the method will return a tuple of two elements
+            (flattened_lc, trend_lc) where trend_lc is the removed trend.
         **kwargs : dict
             Dictionary of arguments to be passed to `scipy.signal.savgol_filter`.
 
         Returns
         -------
         flatten_lc : LightCurve object
-            Flattened lightcurve
+            Flattened lightcurve.
+        If `return_trend` is `True`, the method will also return:
         trend_lc : LightCurve object
             Trend in the lightcurve data
         """
@@ -91,10 +95,12 @@ class LightCurve(object):
         flatten_lc.flux = lc_clean.flux / trend_signal
         if flatten_lc.flux_err is not None:
             flatten_lc.flux_err = lc_clean.flux_err / trend_signal
-        trend_lc = copy.copy(self)
-        trend_lc.flux = trend_signal
 
-        return flatten_lc, trend_lc
+        if return_trend:
+            trend_lc = copy.copy(self)
+            trend_lc.flux = trend_signal
+            return flatten_lc, trend_lc
+        return flatten_lc
 
     def fold(self, period, phase=0.):
         """Folds the lightcurve at a specified ``period`` and ``phase``.
@@ -119,7 +125,9 @@ class LightCurve(object):
         """
         fold_time = ((self.time - phase + 0.5 * period) / period) % 1 - 0.5
         sorted_args = np.argsort(fold_time)
-        return LightCurve(fold_time[sorted_args], self.flux[sorted_args])
+        if self.flux_err is None:
+            return LightCurve(fold_time[sorted_args], self.flux[sorted_args])
+        return LightCurve(fold_time[sorted_args], self.flux[sorted_args], flux_err=self.flux_err[sorted_args])
 
     def remove_nans(self):
         """Removes cadences where the flux is NaN.
@@ -137,7 +145,7 @@ class LightCurve(object):
             lc.flux_err = self.flux_err[~nan_mask]
         return lc
 
-    def remove_outliers(self, sigma=5.):
+    def remove_outliers(self, sigma=5., **kwargs):
         """Removes outlier flux values using sigma-clipping.
 
         This method returns a new LightCurve object from which flux values
@@ -149,6 +157,8 @@ class LightCurve(object):
         sigma : float, optional
             The number of standard deviations to use for clipping outliers.
             Defaults to 5.
+        **kwargs : dict
+            Dictionary of arguments to be passed to `astropy.stats.sigma_clip`.
 
         Returns
         -------
@@ -156,7 +166,7 @@ class LightCurve(object):
             A new ``LightCurve`` in which outliers have been removed.
         """
         new_lc = copy.copy(self)
-        outlier_mask = sigma_clip(data=new_lc.flux, sigma=sigma).mask
+        outlier_mask = sigma_clip(data=new_lc.flux, sigma=sigma, **kwargs).mask
         new_lc.time = self.time[~outlier_mask]
         new_lc.flux = self.flux[~outlier_mask]
         if new_lc.flux_err is not None:
@@ -211,8 +221,8 @@ class LightCurve(object):
         """
         if not isinstance(transit_duration, int):
             raise TypeError("transit_duration must be an integer")
-        detrended_lc, _ = self.flatten(window_length=savgol_window,
-                                       polyorder=savgol_polyorder)
+        detrended_lc = self.flatten(window_length=savgol_window,
+                                    polyorder=savgol_polyorder)
         cleaned_lc = detrended_lc.remove_outliers(sigma=sigma_clip)
         mean = running_mean(data=cleaned_lc.flux, window_size=transit_duration)
         cdpp_ppm = np.std(mean) * 1e6
@@ -222,8 +232,8 @@ class LightCurve(object):
         raise NotImplementedError()
 
     def plot(self, ax=None, normalize=True, xlabel='Time - 2454833 (days)',
-             ylabel='Normalized Flux', title=None, color='#363636', fill=False,
-             grid=True, **kwargs):
+             ylabel='Normalized Flux', title=None, color='#363636', linestyle="",
+             fill=False, grid=True, **kwargs):
         """Plots the light curve.
 
         Parameters
@@ -258,10 +268,15 @@ class LightCurve(object):
         flux = self.flux
         flux_err = self.flux_err
         if normalize:
-            flux = flux / np.nanmedian(flux)
             if flux_err is not None:
                 flux_err = flux_err / np.nanmedian(flux)
-        ax.errorbar(self.time, flux, flux_err, color=color, **kwargs)
+            flux = flux / np.nanmedian(flux)
+        if flux_err is None:
+            ax.plot(self.time, flux, marker='o', color=color, linestyle=linestyle,
+                       **kwargs)
+        else:
+            ax.errorbar(self.time, flux, flux_err, color=color, linestyle=linestyle,
+                        **kwargs)
         if fill:
             ax.fill(self.time, flux, fc='#a8a7a7', linewidth=0.0, alpha=0.3)
         if grid:
@@ -334,11 +349,13 @@ class KeplerLightCurveFile(object):
     ----------
     path : str
         Directory path or url to a lightcurve FITS file.
-    quality_bitmask : int
-        Bitmask specifying quality flags of cadences that should be ignored:
-            default: recommended quality mask
-            conservative: removes more flags, known to remove good data
-            hard: removes all data that has been flagged
+    quality_bitmask : str or int
+        Bitmask specifying quality flags of cadences that should be ignored.
+        If a string is passed, it has the following meaning:
+
+            * default: recommended quality mask
+            * hard: removes more flags, known to remove good data
+            * hardest: removes all data that has been flagged
     kwargs : dict
         Keyword arguments to be passed to astropy.io.fits.open.
     """

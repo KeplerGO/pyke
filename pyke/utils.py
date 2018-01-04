@@ -102,20 +102,21 @@ class KeplerQualityFlags(object):
 
     # Which is the recommended QUALITY mask to identify bad data?
     DEFAULT_BITMASK = (AttitudeTweak | SafeMode | CoarsePoint | EarthPoint |
-                       Desat | ApertureCosmic | ManualExclude | NoData | ThrusterFiring)
+                       Desat | ApertureCosmic | ManualExclude |
+                       DetectorAnomaly | NoData | ThrusterFiring)
 
     # This bitmask includes flags that are known to identify both good and bad cadences.
     # Use it wisely.
-    CONSERVATIVE_BITMASK = (DEFAULT_BITMASK | SensitivityDropout | CollateralCosmic
-                            | PossibleThrusterFiring)
+    HARD_BITMASK = (DEFAULT_BITMASK | SensitivityDropout | CollateralCosmic |
+                    PossibleThrusterFiring)
 
     # Using this bitmask only QUALITY == 0 cadences will remain
-    HARD_BITMASK = 2096639
+    HARDEST_BITMASK = 2096639
 
     # Give the recommended bitmask options friendly names
     OPTIONS = {'default': DEFAULT_BITMASK,
-               'conservative': CONSERVATIVE_BITMASK,
-               'hard': HARD_BITMASK}
+               'hard': HARD_BITMASK,
+               'hardest': HARDEST_BITMASK}
 
     # Pretty string descriptions for each flag
     STRINGS = {

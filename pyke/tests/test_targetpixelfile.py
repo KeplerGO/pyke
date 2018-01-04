@@ -12,7 +12,6 @@ def test_tpf_shapes():
     """Are the data array shapes of the TargetPixelFile object consistent?"""
     tpf = KeplerTargetPixelFile(filename_tpf_all_zeros)
     assert tpf.quality_mask.shape == tpf.hdu[1].data['TIME'].shape
-    assert tpf.aperture_mask.shape == tpf.hdu[1].data['FLUX'][0].shape
     assert tpf.flux.shape == tpf.flux_err.shape
 
 def test_tpf_zeros():
@@ -33,7 +32,7 @@ def test_tpf_zeros():
 def test_tpf_ones():
     """Does the LightCurve of a one-flux TPF make sense?"""
     tpf = KeplerTargetPixelFile(filename_tpf_one_center)
-    lc = tpf.to_lightcurve()
+    lc = tpf.to_lightcurve(aperture_mask='all')
     assert np.all(lc.flux == 1)
 
 def test_quality_flag_decoding():
@@ -46,8 +45,8 @@ def test_quality_flag_decoding():
     assert KeplerQualityFlags.decode(flags[3][0] + flags[4][0] + flags[5][0]) \
         == [flags[3][1], flags[4][1], flags[5][1]]
 
-@pytest.mark.parametrize("quality_bitmask,answer",[('hard', 1101),
-    ('conservative', 1141), ('default', 1275), (None, 1290),
+@pytest.mark.parametrize("quality_bitmask,answer",[('hardest', 1101),
+    ('hard', 1101), ('default', 1233), (None, 1290),
     (1, 1290), (100, 1278), (2096639, 1101)])
 def test_bitmasking(quality_bitmask, answer):
     '''Test whether the bitmasking behaves like it should'''
@@ -55,13 +54,3 @@ def test_bitmasking(quality_bitmask, answer):
     lc = tpf.to_lightcurve()
     flux = lc.flux
     assert len(flux) == answer
-
-def test_aperture_masking_errors():
-    """Check that aperture flux returns valid flux_errors when a hard bitmask is used."""
-    tpf = KeplerTargetPixelFile(filename_tpf_one_center, quality_bitmask='hard')
-    af, er = tpf._get_aperture_flux()
-    assert len(af) == len(er)
-    assert np.all(er > 0)
-    assert isinstance(er[0], np.float32)
-    assert np.all(np.isfinite(af))
-    assert np.all(np.isfinite(er))
