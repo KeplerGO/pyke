@@ -196,15 +196,16 @@ class KeplerTargetPixelFile(TargetPixelFile):
         """Save the TPF to fits"""
         raise NotImplementedError
 
-    def to_lightcurve(self, aperture_mask=None):
+    def to_lightcurve(self, aperture_mask='pipeline'):
         """Performs aperture photometry.
 
         Attributes
         ----------
-        aperture_mask : array-like
+        aperture_mask : array-like, 'pipeline', or 'all'
             A boolean array describing the aperture such that `False` means
             that the pixel will be masked out.
-            The default behaviour is to use all pixels.
+            If the string 'all' is passed, all pixels will be used.
+            The default behaviour is to use the Kepler pipeline mask.
 
         Returns
         -------
@@ -212,7 +213,9 @@ class KeplerTargetPixelFile(TargetPixelFile):
             Array containing the summed flux within the aperture for each
             cadence.
         """
-        if aperture_mask is None:
+        if aperture_mask == 'pipeline':
+            aperture_mask = self.pipeline_mask
+        elif aperture_mask == 'all':
             mask = ~np.isnan(self.hdu[1].data['FLUX'][100])
             aperture_mask = np.ones((self.shape[1], self.shape[2]),
                                     dtype=bool) * mask
@@ -231,22 +234,25 @@ class KeplerTargetPixelFile(TargetPixelFile):
                                 mission=self.mission,
                                 cadenceno=self.cadenceno)
 
-    def centroids(self, aperture_mask=None):
+    def centroids(self, aperture_mask='pipeline'):
         """Returns centroids based on sample moments.
 
         Parameters
         ----------
-        aperture_mask : array-like or None
+        aperture_mask : array-like, 'pipeline', or 'all'
             A boolean array describing the aperture such that `False` means
-            that the pixel will be masked out. The default behaviour is to
-            use all pixels.
+            that the pixel will be masked out.
+            If the string 'all' is passed, all pixels will be used.
+            The default behaviour is to use the Kepler pipeline mask.
 
         Returns
         -------
         col_centr, row_centr : tuple
             Arrays containing centroids for column and row at each cadence
         """
-        if aperture_mask is None:
+        if aperture_mask == 'pipeline':
+            aperture_mask = self.pipeline_mask
+        elif aperture_mask == 'all':
             mask = ~np.isnan(self.hdu[1].data['FLUX'][100])
             aperture_mask = np.ones((self.shape[1], self.shape[2]),
                                     dtype=bool) * mask
