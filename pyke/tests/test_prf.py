@@ -98,17 +98,16 @@ def test_scene_model():
     assert scene.bkg_order == 1
     assert (scene.n_params == [0, 3]).all()
 
-def test_from_tpf():
+def test_get_model_prf():
     tpf_fn = get_pkg_data_filename("data/test-tpf-star.fits")
     tpf = KeplerTargetPixelFile(tpf_fn)
 
     prf = SimpleKeplerPRF(channel=tpf.channel, shape=tpf.shape[1:],
                           column=tpf.column, row=tpf.row)
-    prf_from_str = SimpleKeplerPRF.from_tpf(tpf_fn)
-    prf_from_tpf = SimpleKeplerPRF.from_tpf(tpf)
+    prf_from_tpf = tpf.get_prf_model()
 
-    assert type(prf) == type(prf_from_str) == type(prf_from_tpf)
-    assert prf.channel == prf_from_str.channel == prf_from_tpf.channel
-    assert prf.shape == prf_from_str.shape == prf_from_tpf.shape
-    assert prf.column == prf_from_str.column == prf_from_tpf.column
-    assert prf.row == prf_from_str.row == prf_from_tpf.row
+    assert type(prf) == type(prf_from_tpf)
+    assert prf.channel == prf_from_tpf.channel
+    assert prf.shape == prf_from_tpf.shape
+    assert prf.column == prf_from_tpf.column
+    assert prf.row == prf_from_tpf.row
