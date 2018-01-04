@@ -168,7 +168,7 @@ class LightCurve(object):
         return new_lc
 
     def bin(self, binsize=13):
-        """Bins a lightcurve.
+        """Bins a lightcurve using a block mean of size `binsize`.
 
         Parameters
         ----------
@@ -178,6 +178,7 @@ class LightCurve(object):
         Returns
         -------
         binned_lc : LightCurve object
+            Binned lightcurve.
         """
 
         binned_lc = copy.copy(self)
@@ -190,13 +191,12 @@ class LightCurve(object):
         if self.flux_err is not None:
             flux_err = self.flux_err[:-q or None].reshape(-1, binsize)
             if q == 0:
-                binned_lc.flux_err = math.sqrt(np.nansum(flux_err ** 2, axis=-1)) / binsize
+                binned_lc.flux_err = np.sqrt(np.nansum(flux_err ** 2, axis=-1)) / binsize
             else:
-                binned_lc.flux_err = math.sqrt(np.nansum(flux_err[:-1] ** 2, axis=-1)) / binsize
+                binned_lc.flux_err = np.sqrt(np.nansum(flux_err[:-1] ** 2, axis=-1)) / binsize
                 binned_lc.flux_err = np.append(binned_lc.flux_err,
-                                               math.sqrt(np.nansum(flux_err[-1] ** 2, axis=-1))/q)
+                                               math.sqrt(np.nansum(flux_err[-1] ** 2)) / q)
         return binned_lc
-
 
     def cdpp(self, transit_duration=13, savgol_window=101, savgol_polyorder=2,
              sigma_clip=5.):
