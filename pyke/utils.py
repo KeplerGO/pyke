@@ -183,7 +183,8 @@ def plot_image(image, scale='linear', origin='lower', xlabel='Pixel Column Numbe
         plt.xlabel(xlabel)
         plt.ylabel(ylabel)
         plt.title(title)
-        plt.colorbar(norm=norm)
+        cb = plt.colorbar(norm=norm)
+        cb.set_label(r"$e^{-}s^{-1}$")
 
 
 def running_mean(data, window_size):
