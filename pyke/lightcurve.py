@@ -537,10 +537,6 @@ class ArcLengthDetrender(Detrender):
         _, eig_vec = linalg.eigh(np.cov(centroids))
         return np.dot(eig_vec, centroids)
 
-class EMDDetrender(Detrender):
-    """
-    Empirical Mode Decomposition Detrender
-    """
 
 class KeplerCBVCorrector(SystematicsCorrector):
     r"""Remove systematic trends from Kepler light curves by fitting
@@ -574,7 +570,6 @@ class KeplerCBVCorrector(SystematicsCorrector):
     >>> plt.plot(sap_lc.time, sap_lc.flux, 'x', markersize=1, label='SAP_FLUX') # doctest: +SKIP
     >>> plt.plot(cbv_lc.time, cbv_lc.flux, 'o', markersize=1, label='CBV_FLUX') # doctest: +SKIP
     >>> plt.legend() # doctest: +SKIP
->>>>>>> b8ab929a97c9c7173f0d683f929cbd849a95cd5c
     """
 
     def __init__(self, lc_file, loss_function=oktopus.LaplacianLikelihood):
