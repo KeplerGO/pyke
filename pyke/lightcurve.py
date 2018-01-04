@@ -181,21 +181,21 @@ class LightCurve(object):
         """
 
         binned_lc = copy.copy(self)
-        flux_err = None
+        q = len(self.flux) % binsize
+        flux = self.flux[:-q or None].reshape(-1, binsize)
+        time = self.time[:-q or None].reshape(-1, binsize)
+        binned_lc.time = np.nanmean(time, axis=-1)
+        binned_lc.flux = np.nanmean(flux, axis=-1)
 
         if self.flux_err is not None:
-            n = len(self.flux)
-            flux_err_reshaped = self.flux_err[:-q or None].reshape(-1, binsize))
-            flux_err = math.sqrt(np.nansum((flux_err_reshaped[:-1] ** 2, axis=-1))) / n
-            len_last_bin = len(flux_err_reshaped[-1])
-            flux_err = np.append(flux_err,
-                                 math.sqrt(np.nansum((flux_err_reshaped[-1] ** 2, axis=-1))) / len_last_bin)
-
-        q = len(self.flux) % binsize
-        binned_lc.time = np.nanmean(self.time[:-q or None].reshape(-1, binsize), axis=-1)
-        binned_lc.flux = np.nanmean(self.flux[:-q or None].reshape(-1, binsize), axis=-1)
-        binned_lc.flux_err = flux_err
-        return new_lc
+            flux_err = self.flux_err[:-q or None].reshape(-1, binsize)
+            if q == 0:
+                binned_lc.flux_err = math.sqrt(np.nansum(flux_err ** 2, axis=-1)) / binsize
+            else:
+                binned_lc.flux_err = math.sqrt(np.nansum(flux_err[:-1] ** 2, axis=-1)) / binsize
+                binned_lc.flux_err = np.append(binned_lc.flux_err,
+                                               math.sqrt(np.nansum(flux_err[-1] ** 2, axis=-1))/q)
+        return binned_lc
 
 
     def cdpp(self, transit_duration=13, savgol_window=101, savgol_polyorder=2,
