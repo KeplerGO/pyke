@@ -228,11 +228,14 @@ class KeplerTargetPixelFile(TargetPixelFile):
                                 centroid_col=centroid_col,
                                 centroid_row=centroid_row,
                                 quality=self.quality,
+                                quality_bitmask=self.quality_bitmask,
+                                quality_mask=self._quality_mask(self.quality_bitmask),
                                 channel=self.channel,
                                 campaign=self.campaign,
                                 quarter=self.quarter,
                                 mission=self.mission,
-                                cadenceno=self.cadenceno)
+                                cadenceno=self.cadenceno,
+                                keplerid=self.keplerid)
 
     def centroids(self, aperture_mask='pipeline'):
         """Returns centroids based on sample moments.
@@ -250,9 +253,9 @@ class KeplerTargetPixelFile(TargetPixelFile):
         col_centr, row_centr : tuple
             Arrays containing centroids for column and row at each cadence
         """
-        if aperture_mask == 'pipeline':
+        if aperture_mask is 'pipeline':
             aperture_mask = self.pipeline_mask
-        elif aperture_mask == 'all':
+        elif aperture_mask is 'all':
             mask = ~np.isnan(self.hdu[1].data['FLUX'][100])
             aperture_mask = np.ones((self.shape[1], self.shape[2]),
                                     dtype=bool) * mask

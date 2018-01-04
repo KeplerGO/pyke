@@ -299,6 +299,8 @@ class KeplerLightCurve(LightCurve):
         Array indicating the quality of each data point
     quality_bitmask : int
         Bitmask specifying quality flags of cadences that should be ignored
+    quality_mask : array-like
+        Mask applied to tpf
     channel : int
         Channel number
     campaign : int
@@ -314,7 +316,9 @@ class KeplerLightCurve(LightCurve):
     """
 
     def __init__(self, time, flux, flux_err=None, centroid_col=None,
-                 centroid_row=None, quality=None, quality_bitmask=None,
+                 centroid_row=None, quality=None,
+                 quality_bitmask=KeplerQualityFlags.DEFAULT_BITMASK,
+                 quality_mask=None,
                  channel=None, campaign=None, quarter=None, mission=None,
                  cadenceno=None, keplerid=None):
         super(KeplerLightCurve, self).__init__(time, flux, flux_err)
@@ -322,6 +326,10 @@ class KeplerLightCurve(LightCurve):
         self.centroid_row = centroid_row
         self.quality = quality
         self.quality_bitmask = quality_bitmask
+        if quality_mask is None:
+            self.quality_mask = np.asarray(self.quality & self.quality_bitmask, dtype=bool)
+        else:
+            self.quality_mask = quality_mask
         self.channel = channel
         self.campaign = campaign
         self.quarter = quarter
@@ -554,8 +562,10 @@ class KeplerCBVCorrector(SystematicsCorrector):
         # this enables `lc_file` to be either a string
         # or an object from KeplerLightCurveFile
         if isinstance(value, str):
-            self._lc_file = KeplerLightCurveFile(value)
+            self._lc_file = KeplerLightCurveFile(value).SAP_FLUX
         elif isinstance(value, KeplerLightCurveFile):
+            self._lc_file = value.SAP_FLUX
+        elif isinstance(value, KeplerLightCurve):
             self._lc_file = value
         else:
             raise ValueError("lc_file must be either a string or a"
@@ -595,22 +605,21 @@ class KeplerCBVCorrector(SystematicsCorrector):
             cbv_array.append(cbv_data.field('VECTOR_{}'.format(i))[self.lc_file.quality_mask])
         cbv_array = np.asarray(cbv_array)
 
-        sap_lc = self.lc_file.SAP_FLUX
-        median_sap_flux = np.nanmedian(sap_lc.flux)
-        norm_sap_flux = sap_lc.flux / median_sap_flux - 1
-        norm_err_sap_flux = sap_lc.flux_err / median_sap_flux
+        median_flux = np.nanmedian(self.lc_file.flux)
+        norm_flux = self.lc_file.flux / median_flux - 1
+        norm_err_flux = self.lc_file.flux_err / median_flux
 
         def mean_model(*theta):
             coeffs = np.asarray(theta)
             return np.dot(coeffs, cbv_array)
 
-        loss = self.loss_function(data=norm_sap_flux, mean=mean_model,
-                                  var=norm_err_sap_flux)
+        loss = self.loss_function(data=norm_flux, mean=mean_model,
+                                  var=norm_err_flux)
         self._opt_result = loss.fit(x0=np.zeros(len(cbvs)), method='L-BFGS-B')
         self._coeffs = self._opt_result.x
-        flux_hat = sap_lc.flux - median_sap_flux * mean_model(self._coeffs)
+        flux_hat = self.lc_file.flux - median_flux * mean_model(self._coeffs)
 
-        return LightCurve(time=sap_lc.time, flux=flux_hat.reshape(-1))
+        return LightCurve(time=self.lc_file.time, flux=flux_hat.reshape(-1))
 
     def get_cbv_url(self):
         # gets the html page and finds all references to 'a' tag
