@@ -207,7 +207,8 @@ class KeplerTargetPixelFile(TargetPixelFile):
         centroid_col, centroid_row = self.centroids(aperture_mask)
 
         return KeplerLightCurve(flux=np.nansum(self.flux[:, aperture_mask], axis=1),
-                                time=self.time, flux_err=self.flux_err,
+                                time=self.time,
+                                flux_err=np.nansum(self.flux_err[:, aperture_mask]**2, axis=1)**0.5,
                                 centroid_col=centroid_col,
                                 centroid_row=centroid_row,
                                 quality=self.quality,
