@@ -14,15 +14,8 @@ class TargetPixelFile(object):
     """
     TargetPixelFile class
     """
-    def to_lightcurve(self, method=None, subtract_bkg=False, **kwargs):
+    def to_lightcurve(self):
         """Returns a raw light curve of the TPF.
-
-        Attributes
-        ----------
-        method : str or None
-            Method to detrend the light curve.
-        kwargs : dict
-            Keyword arguments passed to the detrending method.
 
         Returns
         -------
@@ -266,24 +259,30 @@ class KeplerTargetPixelFile(TargetPixelFile):
 
         return col_centr, row_centr
 
-    def plot(self, frame=None, cadenceno=None, **kwargs):
+    def plot(self, frame=0, cadenceno=None, **kwargs):
         """
         Plot a target pixel file at a given frame (index) or cadence number.
 
         Parameters
         ----------
         frame : int
-            Frame number.
-        cadenceno : int
+            Frame number. The default is 0, i.e. the first frame.
+        cadenceno : int, optional
             Alternatively, a cadence number can be provided.
             This argument has priority over frame number.
         """
         if cadenceno is not None:
-            frame = np.argwhere(cadenceno == self.cadenceno)[0][0]
-        elif frame is None:
-            raise ValueError("Either frame or cadenceno must be provided.")
-
-        pflux = self.flux[frame]
+            try:
+                frame = np.argwhere(cadenceno == self.cadenceno)[0][0]
+            except IndexError:
+                raise ValueError("cadenceno {} is out of bounds, "
+                                 "must be in the range {}-{}.".format(
+                                    cadenceno, self.cadenceno[0], self.cadenceno[-1]))
+        try:
+            pflux = self.flux[frame]
+        except IndexError:
+            raise ValueError("frame {} is out of bounds, must be in the range "
+                             "0-{}.".format(frame, self.flux.shape[0]))
         plot_image(pflux, title='Kepler ID: {}'.format(self.keplerid),
                    extent=(self.column, self.column + self.shape[2],
                            self.row, self.row + self.shape[1]), **kwargs)
