@@ -510,7 +510,7 @@ class SystematicsCorrector(object):
     def correct(self):
         pass
 
-class ArcLengthDetrender(Detrender):
+class SFFDetrender(Detrender):
     def detrend(time, flux, centroid_col, centroid_row):
         centroids = self._rotate_centroids(centroid_col, centroid_row)
 
