@@ -169,7 +169,7 @@ class KeplerQualityFlags(object):
 
 
 def plot_image(image, scale='linear', origin='lower', xlabel='Pixel Column Number',
-               ylabel='Pixel Row Number', title=None, **kwargs):
+               ylabel='Pixel Row Number', clabel='Counts ($e^-s^{-1}$)', title=None, **kwargs):
         vmin, vmax = PercentileInterval(95.).get_limits(image)
         if scale == 'linear':
             norm = ImageNormalize(vmin=vmin, vmax=vmax, stretch=LinearStretch())
@@ -184,8 +184,8 @@ def plot_image(image, scale='linear', origin='lower', xlabel='Pixel Column Numbe
         plt.xlabel(xlabel)
         plt.ylabel(ylabel)
         plt.title(title)
-        plt.colorbar(norm=norm)
-
+        cbar = plt.colorbar(norm=norm)
+        cbar.set_label(clabel)
 
 def running_mean(data, window_size):
     """Returns the moving average of an array `data`.
