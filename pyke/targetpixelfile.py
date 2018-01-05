@@ -270,6 +270,8 @@ class KeplerTargetPixelFile(TargetPixelFile):
         cadenceno : int, optional
             Alternatively, a cadence number can be provided.
             This argument has priority over frame number.
+        kwargs : dict
+            Keywords arguments passed to `pyke.utils.plot_image`.
         """
         if cadenceno is not None:
             try:
