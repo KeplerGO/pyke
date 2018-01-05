@@ -183,7 +183,8 @@ class LightCurve(object):
         Notes
         -----
             If the ratio between the lightcurve length and the binsize is not
-            an whole number, then the remainder of the points will be ignored.
+            a whole number, then the remainder of the data points will be
+            ignored.
         """
         binned_lc = copy.copy(self)
         q = len(self.flux) % binsize
