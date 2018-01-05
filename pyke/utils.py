@@ -169,7 +169,29 @@ class KeplerQualityFlags(object):
 
 
 def plot_image(image, scale='linear', origin='lower', xlabel='Pixel Column Number',
-               ylabel='Pixel Row Number', title=None, **kwargs):
+               ylabel='Pixel Row Number', clabel='Flux ($e^{-}s^{-1}$)', title=None, **kwargs):
+        """Utility function to plot a 2D image
+
+        Parameters
+        ----------
+        image : 2d array
+            Image data.
+        scale : str
+            Scale used to stretch the colormap.
+            Options: 'linear', 'sqrt', or 'log'.
+        origin : str
+            The origin of the coordinate system.
+        xlabel : str
+            Label for the x-axis.
+        ylabel : str
+            Label for the y-axis.
+        clabel : str
+            Label for the color bar.
+        title : str or None
+            Title for the plot.
+        kwargs : dict
+            Keyword arguments to be passed to `matplotlib.pyplot.imshow`.
+        """
         vmin, vmax = PercentileInterval(95.).get_limits(image)
         if scale == 'linear':
             norm = ImageNormalize(vmin=vmin, vmax=vmax, stretch=LinearStretch())
@@ -184,9 +206,8 @@ def plot_image(image, scale='linear', origin='lower', xlabel='Pixel Column Numbe
         plt.xlabel(xlabel)
         plt.ylabel(ylabel)
         plt.title(title)
-        cb = plt.colorbar(norm=norm)
-        cb.set_label(r"$e^{-}s^{-1}$")
-
+        cbar = plt.colorbar(norm=norm)
+        cbar.set_label(clabel)
 
 def running_mean(data, window_size):
     """Returns the moving average of an array `data`.
