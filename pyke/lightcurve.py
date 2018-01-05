@@ -179,8 +179,12 @@ class LightCurve(object):
         -------
         binned_lc : LightCurve object
             Binned lightcurve.
-        """
 
+        Notes
+        -----
+            If the ratio between the lightcurve length and the binsize is not
+            an whole number, then the remainder of the points will be ignored.
+        """
         binned_lc = copy.copy(self)
         q = len(self.flux) % binsize
         flux = self.flux[:-q or None].reshape(-1, binsize)
@@ -190,12 +194,7 @@ class LightCurve(object):
 
         if self.flux_err is not None:
             flux_err = self.flux_err[:-q or None].reshape(-1, binsize)
-            if q == 0:
-                binned_lc.flux_err = np.sqrt(np.nansum(flux_err ** 2, axis=-1)) / binsize
-            else:
-                binned_lc.flux_err = np.sqrt(np.nansum(flux_err[:-1] ** 2, axis=-1)) / binsize
-                binned_lc.flux_err = np.append(binned_lc.flux_err,
-                                               math.sqrt(np.nansum(flux_err[-1] ** 2)) / q)
+            binned_lc.flux_err = np.sqrt(np.nansum(flux_err ** 2, axis=-1)) / binsize
         return binned_lc
 
     def cdpp(self, transit_duration=13, savgol_window=101, savgol_polyorder=2,

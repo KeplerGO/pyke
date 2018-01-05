@@ -1,6 +1,6 @@
 import pytest
 import numpy as np
-from numpy.testing import assert_almost_equal
+from numpy.testing import assert_almost_equal, assert_allclose
 from astropy.utils.data import get_pkg_data_filename
 from ..lightcurve import LightCurve, KeplerCBVCorrector, KeplerLightCurveFile
 
@@ -71,10 +71,9 @@ def test_lightcurve_plot():
 
 
 def test_bin():
-    fake_lc = get_pkg_data_filename("data/golden-lc.fits")
-    lc = KeplerLightCurveFile(fake_lc).SAP_FLUX
-    n = len(lc.flux)
-    import pdb; pdb.set_trace()
-    binned_lc = lc.bin()
-
-
+    lc = LightCurve(time=np.arange(10), flux=2*np.ones(10),
+                    flux_err=2**.5*np.ones(10))
+    binned_lc = lc.bin(binsize=2)
+    assert_allclose(binned_lc.flux, 2*np.ones(5))
+    assert_allclose(binned_lc.flux_err, np.ones(5))
+    assert len(binned_lc.time) == 5
