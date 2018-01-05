@@ -213,12 +213,13 @@ class KeplerTargetPixelFile(TargetPixelFile):
             Array containing the summed flux within the aperture for each
             cadence.
         """
-        if aperture_mask == 'pipeline':
-            aperture_mask = self.pipeline_mask
-        elif aperture_mask == 'all':
-            mask = ~np.isnan(self.hdu[1].data['FLUX'][100])
-            aperture_mask = np.ones((self.shape[1], self.shape[2]),
-                                    dtype=bool) * mask
+        if isinstance(aperture_mask, str):
+            if aperture_mask == 'pipeline':
+                aperture_mask = self.pipeline_mask
+            elif aperture_mask == 'all':
+                mask = ~np.isnan(self.hdu[1].data['FLUX'][100])
+                aperture_mask = np.ones((self.shape[1], self.shape[2]),
+                                        dtype=bool) * mask
 
         centroid_col, centroid_row = self.centroids(aperture_mask)
 
@@ -253,12 +254,13 @@ class KeplerTargetPixelFile(TargetPixelFile):
         col_centr, row_centr : tuple
             Arrays containing centroids for column and row at each cadence
         """
-        if aperture_mask is 'pipeline':
-            aperture_mask = self.pipeline_mask
-        elif aperture_mask is 'all':
-            mask = ~np.isnan(self.hdu[1].data['FLUX'][100])
-            aperture_mask = np.ones((self.shape[1], self.shape[2]),
-                                    dtype=bool) * mask
+        if isinstance(aperture_mask, str):
+            if aperture_mask == 'pipeline':
+                aperture_mask = self.pipeline_mask
+            elif aperture_mask == 'all':
+                mask = ~np.isnan(self.hdu[1].data['FLUX'][100])
+                aperture_mask = np.ones((self.shape[1], self.shape[2]),
+                                        dtype=bool) * mask
 
         yy, xx = np.indices(self.shape[1:]) + 0.5
         yy = self.row + yy
