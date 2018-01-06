@@ -179,20 +179,27 @@ class LightCurve(object):
              sigma_clip=5.):
         """Estimate the CDPP noise metric using the Savitzky-Golay (SG) method.
 
-        An interesting estimate of the noise in a lightcurve is the scatter that
-        remains after all long term trends have been removed. This is the kernel
-        of the idea behind the Combined Differential Photometric Precision (CDPP).
-        The Kepler Pipeline uses a wavelet-based algorithm to calculate the
-        signal-to-noise of the specific waveform of transits of various
-        durations. In this implementation, we use the simpler CDPP proxy
-        algorithm as discussed by Gilliland et al (2011ApJS..197....6G)
-        and Van Cleve et al (2016PASP..128g5002V).
+        A common estimate of the noise in a lightcurve is the scatter that
+        remains after all long term trends have been removed. This is the idea
+        behind the Combined Differential Photometric Precision (CDPP) metric.
+        The official Kepler Pipeline computes this metric using a wavelet-based
+        algorithm to calculate the signal-to-noise of the specific waveform of
+        transits of various durations. In this implementation, we use the
+        simpler "sgCDPP proxy algorithm" discussed by Gilliland et al
+        (2011ApJS..197....6G) and Van Cleve et al (2016PASP..128g5002V).
 
-        The steps are:
-            1. Remove low frequency signals using a Savitzky-Golay filter.
-            2. Remove outliers using sigma-clipping.
+        The steps of this algorithm are:
+            1. Remove low frequency signals using a Savitzky-Golay filter with
+               window length `savgol_window` and polynomial order `savgol_polyorder`.
+            2. Remove outliers by rejecting data points which are separated from
+               the mean by `sigma_clip` times the standard deviation.
             3. Compute the standard deviation of a running mean with
-               configurable window length equal to `transit_duration`.
+               a configurable window length equal to `transit_duration`.
+
+        We use a running mean (as opposed to block averaging) to strongly
+        attenuate the signal above 1/transit_duration whilst retaining
+        the original frequency sampling.  Block averaging would set the Nyquist
+        limit to 1/transit_duration.
 
         Parameters
         ----------
