@@ -514,8 +514,9 @@ class SFFDetrender(Detrender):
     (2014).
     """
 
-    def __init__(self, poly_order=5):
+    def __init__(self, poly_order=5, niters=3):
         self.poly_order = poly_order
+        self.niters = niters
 
     def detrend(self, time, flux, centroid_col, centroid_row):
         # Rotate and fit centroids
@@ -527,17 +528,16 @@ class SFFDetrender(Detrender):
         x = np.linspace(np.min(rot_row), np.max(rot_row), 1000)
         s = np.array([self.arclength(x1=xp, x=x) for xp in rot_row])
 
-        # fit BSpline
-        bspline = self.fit_bspline(time, flux)
-
-        # Normalize raw flux
-        normflux = flux / bspline(time - time[0])
-
-        # Bin and interpolate normalized flux
-        interp = self.bin_and_interpolate(s, normflux)
-
-        # Detrend the raw flux
-        detrended_flux = normflux / interp(s)
+        for n in range(self.niters):
+            # fit BSpline
+            bspline = self.fit_bspline(time, flux)
+            # Normalize raw flux
+            normflux = flux / bspline(time - time[0])
+            # Bin and interpolate normalized flux
+            interp = self.bin_and_interpolate(s, normflux)
+            # Detrend the raw flux
+            detrended_flux = normflux / interp(s)
+            flux = detrended_flux
 
         return detrended_flux
 
