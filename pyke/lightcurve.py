@@ -514,9 +514,10 @@ class SFFDetrender(Detrender):
     (2014).
     """
 
-    def __init__(self, poly_order=5, niters=3):
+    def __init__(self, poly_order=5, niters=3, bins=15):
         self.poly_order = poly_order
         self.niters = niters
+        self.bins = bins
 
     def detrend(self, time, flux, centroid_col, centroid_row):
         # Rotate and fit centroids
@@ -554,9 +555,9 @@ class SFFDetrender(Detrender):
         plt.plot(x, self.poly(x), '--')
 
     def plot_normflux_arclength(self):
-        plt.plot(self.s, self.normflux, 'ko', markesize=3)
-        plt.plot(self.s, self.normflux, 'bo', markesize=2)
-        ss = sort(self.s)
+        plt.plot(self.s, self.normflux, 'ko', markersize=3)
+        plt.plot(self.s, self.normflux, 'bo', markersize=2)
+        ss = np.sort(self.s)
         plt.plot(ss, self.interp(ss), '--')
 
     def arclength(self, x1, x):
@@ -570,13 +571,13 @@ class SFFDetrender(Detrender):
 
         return interpolate.BSpline(t, c, k)
 
-    def bin_and_interpolate(self, s, normflux, bins=15):
+    def bin_and_interpolate(self, s, normflux):
         idx = np.argsort(s)
         knots = np.array([np.min(s)]
-                         + [np.median(split) for split in np.array_split(s[idx], bins)]
+                         + [np.median(split) for split in np.array_split(s[idx], self.bins)]
                          + [np.max(s)])
         bin_means = np.array([normflux[idx][0]]
-                             + [np.mean(split) for split in np.array_split(normflux[idx], bins)]
+                             + [np.mean(split) for split in np.array_split(normflux[idx], self.bins)]
                              + [normflux[idx][-1]])
 
         return interpolate.interp1d(knots, bin_means)
