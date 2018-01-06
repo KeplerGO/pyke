@@ -13,7 +13,7 @@ from .utils import running_mean, channel_to_module_output, KeplerQualityFlags
 from matplotlib import pyplot as plt
 
 __all__ = ['LightCurve', 'KeplerLightCurveFile', 'KeplerCBVCorrector',
-           'SimplePixelLevelDecorrelationDetrender']
+           'SPLDDetrender']
 
 
 class LightCurve(object):
@@ -514,25 +514,24 @@ class SFFDetrender(Detrender):
     (2014).
     """
 
-    def __init__(self, poly_order=5, bspline_kwargs):
+    def __init__(self, poly_order=5):
         self.poly_order = poly_order
-        self.bspline_kwargs
 
     def detrend(self, time, flux, centroid_col, centroid_row):
         # Rotate and fit centroids
-        rot_row, rot_col = self._rotate_centroids(centroid_col, centroid_row)
+        rot_col, rot_row = self._rotate_centroids(centroid_col, centroid_row)
         coeffs = np.polyfit(rot_row, rot_col, self.poly_order)
         self.polyprime = np.poly1d(coeffs).deriv()
 
         # Compute the arclength s
         x = np.linspace(np.min(rot_row), np.max(rot_row), 1000)
-        s = self.arclength(x1=rot_row, x=x)
+        s = np.array([self.arclength(x1=xp, x=x) for xp in rot_row])
 
         # fit BSpline
-        bspline = self.fit_bspline(time, flux, **self.bspline_kwargs)
+        bspline = self.fit_bspline(time, flux)
 
         # Normalize raw flux
-        normflux = flux / bspline(time)
+        normflux = flux / bspline(time - time[0])
 
         # Bin and interpolate normalized flux
         interp = self.bin_and_interpolate(s, normflux)
@@ -544,17 +543,17 @@ class SFFDetrender(Detrender):
 
     def _rotate_centroids(self, centroid_col, centroid_row):
         centroids = np.array([centroid_col, centroid_row])
-        eig_vals, eig_vecs = linalg.eigh(np.cov(centroids))
-        return np.dot(eig_vec, centroids)
+        _, eig_vecs = linalg.eigh(np.cov(centroids))
+        return np.dot(eig_vecs, centroids)
 
-    @np.vectorize
-    def arclength(self, x1, support):
+    def arclength(self, x1, x):
         mask = x < x1
-        return np.trapz(np.sqrt(1 + self.polyprime(x[mask]) ** 2))
+        return np.trapz(y=np.sqrt(1 + self.polyprime(x[mask]) ** 2), x=x[mask])
 
-    def fit_bspline(self, time, flux, s=0, **kwargs):
-        knots = np.arange(time[0], time[-1], 1.5)
-        t, c, k = interpolate.splrep(time, flux, t=knots, s=0, **kwargs)
+    def fit_bspline(self, time, flux, s=0):
+        time = time - time[0]
+        knots = np.arange(0, time[-1], 1.5)
+        t, c, k = interpolate.splrep(time, flux, t=knots[1:], s=0, task=-1)
 
         return interpolate.BSpline(t, c, k)
 
