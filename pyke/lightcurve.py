@@ -508,40 +508,80 @@ class KeplerLightCurveFile(object):
             kwargs['color'] = 'C{}'.format(idx)
             lc.plot(label=pl, **kwargs)
 
-
 class SFFDetrender(Detrender):
     """Implements a similar procedure as described by Vanderburg and Johnson
-    (2014).
+    (2014). Briefly, the algorithm implemented in this class can be described
+    as follows
+
+       (1) Rotate the centroid measurements onto the subspace spanned by the
+           eigenvectors of the centroid covariance matrix
+       (2) Fit a polynomial to the rotated centroids
+       (3) Compute the arclength of such polynomial
+       (4) Fit a BSpline of the raw flux as a function of time
+       (5) Normalize the raw flux by the fitted BSpline computed in step (4)
+       (6) Bin and interpolate the normalized flux as function of the arclength
+       (7) Divide the raw flux by the piecewise linear interpolation done in step [(6)
+       (8) Set raw flux as the flux computed in step (7) and repeat
+
+    Attributes
+    ----------
+    poly_order : int
+        Degree of the polynomial which will be used to fit one
+        centroid as a function of the other.
+    niters : int
+        Number of iterations of the aforementioned algorithm.
+    bins : int
+        Number of bins to be used in step (6).
+    windows : int
+        Number of windows to subdivide the data.
     """
 
-    def __init__(self, poly_order=5, niters=3, bins=15):
+    def __init__(self, poly_order=5, niters=3, bins=15, windows=1):
         self.poly_order = poly_order
         self.niters = niters
         self.bins = bins
+        self.windows = windows
 
     def detrend(self, time, flux, centroid_col, centroid_row):
-        # Rotate and fit centroids
-        self.rot_col, self.rot_row = self._rotate_centroids(centroid_col, centroid_row)
-        coeffs = np.polyfit(self.rot_row, self.rot_col, self.poly_order)
-        self.poly = np.poly1d(coeffs)
-        self.polyprime = np.poly1d(coeffs).deriv()
+        """
+        time : array-like
+            Time measurements
+        flux : array-like
+            Data flux for every time point
+        centroid_col, centroid_row : array-like, array-like
+            Centroid column and row coordinates as a function of time
+        """
+        time = np.array_split(time, self.windows)
+        flux = np.array_split(flux, self.windows)
+        centroid_col = np.array_split(centroid_col, self.windows)
+        centroid_row = np.array_split(centroid_row, self.windows)
 
-        # Compute the arclength s
-        x = np.linspace(np.min(self.rot_row), np.max(self.rot_row), 1000)
-        self.s = np.array([self.arclength(x1=xp, x=x) for xp in self.rot_row])
+        flux_d = np.array([])
+        for i in range(self.windows):
+            # Rotate and fit centroids
+            self.rot_col, self.rot_row = self._rotate_centroids(centroid_col[i], centroid_row[i])
+            coeffs = np.polyfit(self.rot_row, self.rot_col, self.poly_order)
+            self.poly = np.poly1d(coeffs)
+            self.polyprime = np.poly1d(coeffs).deriv()
 
-        for n in range(self.niters):
-            # fit BSpline
-            bspline = self.fit_bspline(time, flux)
-            # Normalize raw flux
-            self.normflux = flux / bspline(time - time[0])
-            # Bin and interpolate normalized flux
-            self.interp = self.bin_and_interpolate(self.s, self.normflux)
-            # Detrend the raw flux
-            detrended_flux = self.normflux / self.interp(self.s)
-            flux = detrended_flux
+            # Compute the arclength s
+            x = np.linspace(np.min(self.rot_row), np.max(self.rot_row), 10000)
+            self.s = np.array([self.arclength(x1=xp, x=x) for xp in self.rot_row])
 
-        return detrended_flux
+            for n in range(self.niters):
+                # fit BSpline
+                bspline = self.fit_bspline(time[i], flux[i])
+                # Normalize raw flux
+                self.normflux = flux[i] / bspline(time[i] - time[i][0])
+                # Bin and interpolate normalized flux
+                self.interp = self.bin_and_interpolate(self.s, self.normflux)
+                # Detrend the raw flux
+                detrended_flux = self.normflux / self.interp(self.s)
+                flux[i] = detrended_flux
+
+            flux_d = np.append(flux_d, flux[i])
+
+        return flux_d
 
     def _rotate_centroids(self, centroid_col, centroid_row):
         centroids = np.array([centroid_col, centroid_row])
@@ -561,6 +601,9 @@ class SFFDetrender(Detrender):
         plt.plot(ss, self.interp(ss), '--')
 
     def arclength(self, x1, x):
+        """Compute the arclength of the polynomial used to fit the centroid
+        measurements.
+        """
         mask = x < x1
         return np.trapz(y=np.sqrt(1 + self.polyprime(x[mask]) ** 2), x=x[mask])
 
