@@ -520,21 +520,22 @@ class SFFDetrender(Detrender):
 
     def detrend(self, time, flux, centroid_col, centroid_row):
         # Rotate and fit centroids
-        rot_col, rot_row = self._rotate_centroids(centroid_col, centroid_row)
+        self.rot_col, self.rot_row = self._rotate_centroids(centroid_col, centroid_row)
         coeffs = np.polyfit(rot_row, rot_col, self.poly_order)
+        self.poly = np.poly1d(coeffs)
         self.polyprime = np.poly1d(coeffs).deriv()
 
         # Compute the arclength s
         x = np.linspace(np.min(rot_row), np.max(rot_row), 1000)
-        s = np.array([self.arclength(x1=xp, x=x) for xp in rot_row])
+        self.s = np.array([self.arclength(x1=xp, x=x) for xp in rot_row])
 
         for n in range(self.niters):
             # fit BSpline
             bspline = self.fit_bspline(time, flux)
             # Normalize raw flux
-            normflux = flux / bspline(time - time[0])
+            self.normflux = flux / bspline(time - time[0])
             # Bin and interpolate normalized flux
-            interp = self.bin_and_interpolate(s, normflux)
+            self.interp = self.bin_and_interpolate(s, normflux)
             # Detrend the raw flux
             detrended_flux = normflux / interp(s)
             flux = detrended_flux
@@ -545,6 +546,19 @@ class SFFDetrender(Detrender):
         centroids = np.array([centroid_col, centroid_row])
         _, eig_vecs = linalg.eigh(np.cov(centroids))
         return np.dot(eig_vecs, centroids)
+
+    def plot_rotated_centroids():
+        plt.plot(self.rot_row, self.rot_col, 'ko', markersize=3)
+        plt.plot(self.rot_row, self.rot_col, 'ro', markersize=2)
+        x = np.linspace(min(self.rot_row), max(self.rot_row), 200)
+        plt.plot(x, self.poly(x), '--')
+
+    def plot_normflux_arclength():
+        plt.plot(self.s, self.normflux, 'ko', markesize=3)
+        plt.plot(self.s, self.normflux, 'bo', markesize=2)
+        ss = sort(self.s)
+        plt.plot(ss, self.interp(ss), '--')
+
 
     def arclength(self, x1, x):
         mask = x < x1
