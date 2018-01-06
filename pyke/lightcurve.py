@@ -2,7 +2,7 @@ import copy
 import numpy as np
 from scipy import linalg
 from oktopus import L1Norm
-from scipy import signal
+from scipy import signal, interpolate
 from astropy.io import fits as pyfits
 from astropy.stats import sigma_clip
 from tqdm import tqdm
@@ -292,6 +292,18 @@ class LightCurve(object):
         return ax
 
 
+class Detrender(object):
+    def detrend(self):
+        """
+        Returns a LightCurve object
+        """
+        pass
+
+class SystematicsCorrector(object):
+    def correct(self):
+        pass
+
+
 class KeplerLightCurve(LightCurve):
     """Defines a light curve class for NASA's Kepler and K2 missions.
 
@@ -497,45 +509,52 @@ class KeplerLightCurveFile(object):
             lc.plot(label=pl, **kwargs)
 
 
-class Detrender(object):
-    """
-    """
-    def detrend(self):
-        """
-        Returns a LightCurve object
-        """
-        pass
-
-class SystematicsCorrector(object):
-    def correct(self):
-        pass
-
 class SFFDetrender(Detrender):
+    """Implements a similar procedure as described by Vanderburg and Johnson
+    (2014).
+    """
+
+    def __init__(self, poly_order=5, bspline_kwargs):
+        self.poly_order = poly_order
+
     def detrend(time, flux, centroid_col, centroid_row):
-        centroids = self._rotate_centroids(centroid_col, centroid_row)
+        # Rotate and fit centroids
+        rot_row, rot_col = self._rotate_centroids(centroid_col, centroid_row)
+        coeffs = np.polyfit(rot_row, rot_col, self.poly_order)
+        self.polyprime = np.poly1d(coeffs).deriv()
 
-        # fit a polynomial to rotated centroids
+        # Compute the arclength s
+        x = np.linspace(np.min(rot_row), np.max(rot_row), 1000)
+        s = self.arclength(x1=rot_row, x=x)
 
-        # compute the length of the curve of this polynomial
+        # fit BSpline
+        bspline = self.fit_bspline(time, flux, **bspline_kwargs)
 
-        #-----
+        # Normalize raw flux
+        flux = flux / bspline(time)
 
-        # fit B-splines to the light curve
-
-        # divide raw light curve by B-splines
-
-        # fit polynomial to flux as a function of arclength
-
-        # divide the raw light curve by the polynomial fit
-
-        # iterate between fitting a B-spline to the light curve and
-        # a polynomial to flux as a function of arclength
-        pass
+        # Bin and interpolate normalized flux
 
     def _rotate_centroids(centroid_col, centroid_row):
         centroids = np.array([centroid_col, centroid_row])
-        _, eig_vec = linalg.eigh(np.cov(centroids))
+        eig_vals, eig_vecs = linalg.eigh(np.cov(centroids))
         return np.dot(eig_vec, centroids)
+
+    @np.vectorize
+    def arclength(x1, support):
+        mask = x < x1
+        return np.trapz(np.sqrt(1 + self.polyprime(x[mask]) ** 2))
+
+    def fit_bspline(time, flux, s=0, **kwargs):
+        knots = np.arange(time[0], time[-1], 1.5)
+        t, c, k = interpolate.splrep(time, flux, t=knots, s=0, **kwargs)
+
+        return interpolate.BSpline(t, c, k)
+
+    def breakpoints(campaign):
+        """Return a break point as a function of the campaign number.
+        """
+        pass
 
 
 class KeplerCBVCorrector(SystematicsCorrector):
@@ -675,9 +694,9 @@ class KeplerCBVCorrector(SystematicsCorrector):
         return self.cbv_base_url + cbv_file
 
 
-class SimplePixelLevelDecorrelationDetrender(Detrender):
+class SPLDDetrender(Detrender):
     r"""
-    Implements the basic first order Pixel Level Decorrelation (PLD) proposed by
+    Implements the simple first order Pixel Level Decorrelation (PLD) proposed by
     Deming et. al. [1]_ and Luger et. al. [2]_, [3]_.
 
     Attributes
