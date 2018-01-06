@@ -48,18 +48,18 @@ def test_lightcurve_fold():
 def test_cdpp():
     """Test the basics of the CDPP noise metric."""
     # A flat lightcurve should have a CDPP close to zero
-    assert_almost_equal(LightCurve(np.arange(200), np.ones(200)).cdpp(), 0)
+    assert_almost_equal(LightCurve(np.arange(200), np.ones(200)).cdpp(norm_factor=1), 0)
     # An artificial lightcurve with sigma=100ppm should have cdpp=100ppm
     lc = LightCurve(np.arange(10000), np.random.normal(loc=1, scale=100e-6, size=10000))
-    assert_almost_equal(lc.cdpp(transit_duration=1), 100, decimal=-0.5)
+    assert_almost_equal(lc.cdpp(transit_duration=1, norm_factor=1), 100, decimal=-0.5)
 
 
 def test_cdpp_tabby():
     """Compare the cdpp noise metric against the pipeline value."""
     lcf = KeplerLightCurveFile(TABBY_Q8)
-    # Tabby's star shows dips after cadence 1000 which increase the cdpp
-    lc = LightCurve(lcf.PDCSAP_FLUX.time[:1000], lcf.PDCSAP_FLUX.flux[:1000])
-    assert(np.abs(lc.cdpp() - lcf.header(ext=1)['CDPP6_0']) < 30)
+    # Tabby's star shows dips after cadence 1000 which may confuse the cdpp
+    lc = LightCurve(lcf.PDCSAP_FLUX.time, lcf.PDCSAP_FLUX.flux)
+    assert_almost_equal(lc.cdpp(), lcf.header(ext=1)['CDPP6_0'])
 
 
 def test_lightcurve_plot():

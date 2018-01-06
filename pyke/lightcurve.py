@@ -174,7 +174,7 @@ class LightCurve(object):
         return new_lc
 
     def cdpp(self, transit_duration=13, savgol_window=101, savgol_polyorder=2,
-             sigma_clip=5.):
+             sigma_clip=5., norm_factor=1.4):
         """Estimate the CDPP noise metric using the Savitzky-Golay (SG) method.
 
         An interesting estimate of the noise in a lightcurve is the scatter that
@@ -207,6 +207,13 @@ class LightCurve(object):
         sigma_clip : float, optional
             The number of standard deviations to use for clipping outliers.
             The default is 5.
+        norm_factor : float, optional
+            Noise normalization factor for the SG filter.  Recommended
+            value for 13 cadence transit and 101 cadence window is 1.4.
+            The normalization factor is determined by passing White Gaussian
+            Noise to the same filter and using it to normalize the cdpp
+            such that this function scales exactly as 1/sqrt(transit_duration)
+            for white noise.
 
         Returns
         -------
@@ -225,7 +232,7 @@ class LightCurve(object):
                                     polyorder=savgol_polyorder)
         cleaned_lc = detrended_lc.remove_outliers(sigma=sigma_clip)
         mean = running_mean(data=cleaned_lc.flux, window_size=transit_duration)
-        cdpp_ppm = np.std(mean) * 1e6
+        cdpp_ppm = norm_factor * np.std(mean) * 1e6
         return cdpp_ppm
 
     def to_csv(self):
