@@ -516,8 +516,9 @@ class SFFDetrender(Detrender):
 
     def __init__(self, poly_order=5, bspline_kwargs):
         self.poly_order = poly_order
+        self.bspline_kwargs
 
-    def detrend(time, flux, centroid_col, centroid_row):
+    def detrend(self, time, flux, centroid_col, centroid_row):
         # Rotate and fit centroids
         rot_row, rot_col = self._rotate_centroids(centroid_col, centroid_row)
         coeffs = np.polyfit(rot_row, rot_col, self.poly_order)
@@ -528,30 +529,47 @@ class SFFDetrender(Detrender):
         s = self.arclength(x1=rot_row, x=x)
 
         # fit BSpline
-        bspline = self.fit_bspline(time, flux, **bspline_kwargs)
+        bspline = self.fit_bspline(time, flux, **self.bspline_kwargs)
 
         # Normalize raw flux
-        flux = flux / bspline(time)
+        normflux = flux / bspline(time)
 
         # Bin and interpolate normalized flux
+        interp = self.bin_and_interpolate(s, normflux)
 
-    def _rotate_centroids(centroid_col, centroid_row):
+        # Detrend the raw flux
+        detrended_flux = normflux / interp(s)
+
+        return detrended_flux
+
+    def _rotate_centroids(self, centroid_col, centroid_row):
         centroids = np.array([centroid_col, centroid_row])
         eig_vals, eig_vecs = linalg.eigh(np.cov(centroids))
         return np.dot(eig_vec, centroids)
 
     @np.vectorize
-    def arclength(x1, support):
+    def arclength(self, x1, support):
         mask = x < x1
         return np.trapz(np.sqrt(1 + self.polyprime(x[mask]) ** 2))
 
-    def fit_bspline(time, flux, s=0, **kwargs):
+    def fit_bspline(self, time, flux, s=0, **kwargs):
         knots = np.arange(time[0], time[-1], 1.5)
         t, c, k = interpolate.splrep(time, flux, t=knots, s=0, **kwargs)
 
         return interpolate.BSpline(t, c, k)
 
-    def breakpoints(campaign):
+    def bin_and_interpolate(self, s, normflux, bins=15):
+        idx = np.argsort(s)
+        knots = np.array([np.min(s)]
+                         + [np.median(split) for split in np.array_split(s[idx], bins)]
+                         + [np.max(s)])
+        bin_means = np.array([normflux[idx][0]]
+                             + [np.mean(split) for split in np.array_split(normflux[idx], bins)]
+                             + [normflux[idx][-1]])
+
+        return interpolate.interp1d(knots, bin_means)
+
+    def breakpoints(self, campaign):
         """Return a break point as a function of the campaign number.
         """
         pass
