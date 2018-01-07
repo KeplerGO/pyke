@@ -625,6 +625,18 @@ class SFFCorrector(object):
     def arclength(self, x1, x):
         """Compute the arclength of the polynomial used to fit the centroid
         measurements.
+
+        Parameters
+        ----------
+        x1 : float
+            Upper limit of the integration domain.
+        x : ndarray
+            Domain at which the arclength integrand is defined.
+
+        Returns
+        -------
+        arclength : float
+            Result of the integral from x[0] to x1.
         """
         mask = x < x1
         return np.trapz(y=np.sqrt(1 + self.polyprime(x[mask]) ** 2), x=x[mask])
@@ -632,8 +644,7 @@ class SFFCorrector(object):
     def fit_bspline(self, time, flux, s=0):
         time = time - time[0]
         knots = np.arange(0, time[-1], 1.5)
-        t, c, k = interpolate.splrep(time, flux, t=knots[1:], s=0, task=-1)
-
+        t, c, k = interpolate.splrep(time, flux, t=knots[1:], s=s, task=-1)
         return interpolate.BSpline(t, c, k)
 
     def bin_and_interpolate(self, s, normflux, bins):
@@ -644,7 +655,6 @@ class SFFCorrector(object):
         bin_means = np.array([normflux[idx][0]]
                              + [np.mean(split) for split in np.array_split(normflux[idx], bins)]
                              + [normflux[idx][-1]])
-
         return interpolate.interp1d(knots, bin_means)
 
     def breakpoints(self, campaign):
