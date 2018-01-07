@@ -3,7 +3,7 @@ import numpy as np
 from numpy.testing import assert_almost_equal
 from astropy.utils.data import get_pkg_data_filename
 from ..lightcurve import (LightCurve, KeplerCBVCorrector, KeplerLightCurveFile,
-                          SFFCorrector)
+                          SFFCorrector, KeplerLightCurve)
 
 # 8th Quarter of Tabby's star
 TABBY_Q8 = ("https://archive.stsci.edu/missions/kepler/lightcurves"
@@ -104,3 +104,15 @@ def test_sff_corrector():
     # rather than the full set of centroids
     assert_almost_equal(4*sff.s + 0.136, arclength, decimal=2)
     assert_almost_equal(sff.interp(sff.s), correction, decimal=3)
+
+    # test using KeplerLightCurve interface
+    klc = KeplerLightCurve(time=time, flux=raw_flux, centroid_col=centroid_col,
+                           centroid_row=centroid_row)
+    klc = klc.correct(niters=1)
+    sff = klc.corrector
+
+    assert_almost_equal(klc.flux*sff.bspline(time-time[0]),
+                        corrected_flux, decimal=3)
+    assert_almost_equal(4*sff.s + 0.136, arclength, decimal=2)
+    assert_almost_equal(sff.interp(sff.s), correction, decimal=3)
+

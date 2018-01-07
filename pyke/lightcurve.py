@@ -12,8 +12,8 @@ from bs4 import BeautifulSoup
 from .utils import running_mean, channel_to_module_output, KeplerQualityFlags
 from matplotlib import pyplot as plt
 
-__all__ = ['LightCurve', 'KeplerLightCurveFile', 'KeplerCBVCorrector',
-           'SPLDCorrector', 'SFFCorrector']
+__all__ = ['LightCurve', 'KeplerLightCurve', 'KeplerLightCurveFile',
+           'KeplerCBVCorrector', 'SPLDCorrector', 'SFFCorrector']
 
 
 class LightCurve(object):
@@ -346,6 +346,30 @@ class KeplerLightCurve(LightCurve):
         self.cadenceno = cadenceno
         self.keplerid = keplerid
 
+    def correct(self, method='vanderburg', **kwargs):
+        """Corrects a lightcurve for motion-dependent systematical errors.
+
+        Parameters
+        ----------
+        method : str
+        kwargs : dict
+
+        Returns
+        -------
+        new_lc : KeplerLightCurve object
+            Corrected lightcurve
+        """
+        if method == 'vanderburg':
+            self.corrector = SFFCorrector(**kwargs)
+            corrected_lc = self.corrector.correct(time=self.time, flux=self.flux,
+                                                  centroid_col=self.centroid_col,
+                                                  centroid_row=self.centroid_row)
+        else:
+            raise ValueError("method {} is not available.".format(method))
+        new_lc = copy.copy(self)
+        new_lc.flux = corrected_lc.flux
+        return new_lc
+
     def to_fits(self):
         raise NotImplementedError()
 
@@ -573,9 +597,9 @@ class SFFCorrector(object):
                 self.normflux = flux[i] / self.bspline(time[i] - time[i][0])
                 # Bin and interpolate normalized flux
                 self.interp = self.bin_and_interpolate(self.s, self.normflux)
-                # Detrend the raw flux
-                detrended_flux = self.normflux / self.interp(self.s)
-                flux[i] = detrended_flux
+                # Correcte the raw flux
+                corrected_flux = self.normflux / self.interp(self.s)
+                flux[i] = corrected_flux
 
             flux_hat = np.append(flux_hat, flux[i])
 
