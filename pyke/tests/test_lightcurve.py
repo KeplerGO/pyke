@@ -3,7 +3,7 @@ import numpy as np
 from numpy.testing import assert_almost_equal
 from astropy.utils.data import get_pkg_data_filename
 from ..lightcurve import (LightCurve, KeplerCBVCorrector, KeplerLightCurveFile,
-                          SFFDetrender)
+                          SFFCorrector)
 
 # 8th Quarter of Tabby's star
 TABBY_Q8 = ("https://archive.stsci.edu/missions/kepler/lightcurves"
@@ -71,7 +71,12 @@ def test_lightcurve_plot():
     lcf.SAP_FLUX.plot()
 
 
-def test_sff_detrender():
+def test_sff_corrector():
+    """Does our code agree with the example presented in Vanderburg
+    and Jhonson (2014)?"""
+    # The following csv file, provided by Vanderburg and Jhonson
+    # at https://www.cfa.harvard.edu/~avanderb/k2/ep60021426.html,
+    # contains the results of applying SFF to EPIC 60021426.
     fn = get_pkg_data_filename('./data/ep60021426alldiagnostics.csv')
     data = np.genfromtxt(fn, delimiter=',', skip_header=1)
     mask = data[:, -2] == 0 # indicates whether the thrusters were on or off
@@ -83,17 +88,19 @@ def test_sff_detrender():
     arclength = data[:, 5][mask]
     correction = data[:, 6][mask]
 
-    sff = SFFDetrender(niters=1)
-    flux_detrended = sff.detrend(time=time, flux=raw_flux, centroid_col=centroid_col,
-                                 centroid_row=centroid_row)
+    sff = SFFCorrector(niters=1)
+    corrected_lc = sff.correct(time=time, flux=raw_flux,
+                               centroid_col=centroid_col,
+                               centroid_row=centroid_row)
     # the factor self.bspline(time-time[0]) accounts for
     # the long term trend which is divided out in order to get a "flat"
     # lightcurve.
-    assert_almost_equal(flux_detrended*sff.bspline(time-time[0]),
+    assert_almost_equal(corrected_lc.flux*sff.bspline(time-time[0]),
                         corrected_flux, decimal=3)
     # the factor of 4 below accounts for the conversion
     # between pixel units to arcseconds
     # the factor of 0.136 accounts for the fact that
     # we are using the preprocessed (outlier-removed) centroids
+    # rather than the full set of centroids
     assert_almost_equal(4*sff.s + 0.136, arclength, decimal=2)
     assert_almost_equal(sff.interp(sff.s), correction, decimal=3)

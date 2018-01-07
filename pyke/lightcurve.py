@@ -13,7 +13,7 @@ from .utils import running_mean, channel_to_module_output, KeplerQualityFlags
 from matplotlib import pyplot as plt
 
 __all__ = ['LightCurve', 'KeplerLightCurveFile', 'KeplerCBVCorrector',
-           'SPLDDetrender']
+           'SPLDCorrector', 'SFFCorrector']
 
 
 class LightCurve(object):
@@ -299,18 +299,6 @@ class LightCurve(object):
         return ax
 
 
-class Detrender(object):
-    def detrend(self):
-        """
-        Returns a LightCurve object
-        """
-        pass
-
-class SystematicsCorrector(object):
-    def correct(self):
-        pass
-
-
 class KeplerLightCurve(LightCurve):
     """Defines a light curve class for NASA's Kepler and K2 missions.
 
@@ -515,7 +503,8 @@ class KeplerLightCurveFile(object):
             kwargs['color'] = 'C{}'.format(idx)
             lc.plot(label=pl, **kwargs)
 
-class SFFDetrender(Detrender):
+
+class SFFCorrector(object):
     """Implements a similar procedure as described by Vanderburg and Johnson
     (2014). Briefly, the algorithm implemented in this class can be described
     as follows
@@ -543,14 +532,16 @@ class SFFDetrender(Detrender):
         Number of windows to subdivide the data.
     """
 
-    def __init__(self, poly_order=5, niters=3, bins=15, windows=1):
-        self.poly_order = poly_order
+    def __init__(self, polyorder=5, niters=3, bins=15, windows=1):
+        self.polyorder = polyorder
         self.niters = niters
         self.bins = bins
         self.windows = windows
 
-    def detrend(self, time, flux, centroid_col, centroid_row):
+    def correct(self, time, flux, centroid_col, centroid_row):
         """
+        Parameters
+        ----------
         time : array-like
             Time measurements
         flux : array-like
@@ -563,11 +554,11 @@ class SFFDetrender(Detrender):
         centroid_col = np.array_split(centroid_col, self.windows)
         centroid_row = np.array_split(centroid_row, self.windows)
 
-        flux_d = np.array([])
+        flux_hat = np.array([])
         for i in range(self.windows):
             # Rotate and fit centroids
             self.rot_col, self.rot_row = self._rotate_centroids(centroid_col[i], centroid_row[i])
-            coeffs = np.polyfit(self.rot_row, self.rot_col, self.poly_order)
+            coeffs = np.polyfit(self.rot_row, self.rot_col, self.polyorder)
             self.poly = np.poly1d(coeffs)
             self.polyprime = np.poly1d(coeffs).deriv()
 
@@ -586,22 +577,22 @@ class SFFDetrender(Detrender):
                 detrended_flux = self.normflux / self.interp(self.s)
                 flux[i] = detrended_flux
 
-            flux_d = np.append(flux_d, flux[i])
+            flux_hat = np.append(flux_hat, flux[i])
 
-        return flux_d
+        return LightCurve(time=time, flux=flux_hat)
 
     def _rotate_centroids(self, centroid_col, centroid_row):
         centroids = np.array([centroid_col, centroid_row])
         _, eig_vecs = linalg.eigh(np.cov(centroids))
         return np.dot(eig_vecs, centroids)
 
-    def plot_rotated_centroids(self):
+    def _plot_rotated_centroids(self):
         plt.plot(self.rot_row, self.rot_col, 'ko', markersize=3)
         plt.plot(self.rot_row, self.rot_col, 'ro', markersize=2)
         x = np.linspace(min(self.rot_row), max(self.rot_row), 200)
         plt.plot(x, self.poly(x), '--')
 
-    def plot_normflux_arclength(self):
+    def _plot_normflux_arclength(self):
         plt.plot(self.s, self.normflux, 'ko', markersize=3)
         plt.plot(self.s, self.normflux, 'bo', markersize=2)
         ss = np.sort(self.s)
@@ -638,7 +629,7 @@ class SFFDetrender(Detrender):
         pass
 
 
-class KeplerCBVCorrector(SystematicsCorrector):
+class KeplerCBVCorrector(object):
     r"""Remove systematic trends from Kepler light curves by fitting
     cotrending basis vectors.
 
@@ -775,7 +766,7 @@ class KeplerCBVCorrector(SystematicsCorrector):
         return self.cbv_base_url + cbv_file
 
 
-class SPLDDetrender(Detrender):
+class SPLDCorrector(object):
     r"""
     Implements the simple first order Pixel Level Decorrelation (PLD) proposed by
     Deming et. al. [1]_ and Luger et. al. [2]_, [3]_.
@@ -807,17 +798,17 @@ class SPLDDetrender(Detrender):
         self.time = time
         self.tpf_flux = tpf_flux
 
-    def detrend(self, window_length=None, polyorder=2):
+    def correct(self, window_length=None, polyorder=2):
         k = window_length
         if not k:
             k = int(len(self.time) / 2) - 1
         n_windows = int(len(self.time) / k)
-        flux_detrended = np.array([])
+        flux_hat = np.array([])
         for n in range(1, n_windows + 1):
-            flux_detrended = np.append(flux_detrended,
-                                       self._pld(self.tpf_flux[(n - 1) * k:n * k], polyorder))
-        flux_detrended = np.append(flux_detrended, self._pld(self.tpf_flux[n * k:], polyorder))
-        return LightCurve(self.time, flux_detrended + np.nanmedian(np.nansum(self.tpf_flux, axis=(1, 2))))
+            flux_hat = np.append(flux_hat,
+                                 self._pld(self.tpf_flux[(n - 1) * k:n * k], polyorder))
+        flux_hat = np.append(flux_hat, self._pld(self.tpf_flux[n * k:], polyorder))
+        return LightCurve(self.time, flux_hat + np.nanmedian(np.nansum(self.tpf_flux, axis=(1, 2))))
 
     def _pld(self, tpf_flux, polyorder=2):
         if len(tpf_flux) == 0:
@@ -829,5 +820,5 @@ class SPLDDetrender(Detrender):
         X = np.hstack((X, np.array([np.linspace(0, 1, tpf_flux.shape[0]) ** n for n in range(polyorder+1)]).T))
         opt_weights = np.linalg.solve(np.dot(X.T, X), np.dot(X.T, lightcurve))
         model = np.dot(X, opt_weights)
-        flux_detrended = lightcurve - model
-        return flux_detrended
+        flux_hat = lightcurve - model
+        return flux_hat
