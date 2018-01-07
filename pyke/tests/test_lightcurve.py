@@ -80,6 +80,8 @@ def test_sff_detrender():
     corrected_flux = data[:, 2][mask]
     centroid_col = data[:, 3][mask]
     centroid_row = data[:, 4][mask]
+    arclength = data[:, 5][mask]
+    correction = data[:, 6][mask]
 
     sff = SFFDetrender(niters=1)
     flux_detrended = sff.detrend(time=time, flux=raw_flux, centroid_col=centroid_col,
@@ -89,3 +91,9 @@ def test_sff_detrender():
     # lightcurve.
     assert_almost_equal(flux_detrended*sff.bspline(time-time[0]),
                         corrected_flux, decimal=3)
+    # the factor of 4 below accounts for the conversion
+    # between pixel units to arcseconds
+    # the factor of 0.136 accounts for the fact that
+    # we are using the preprocessed (outlier-removed) centroids
+    assert_almost_equal(4*sff.s + 0.136, arclength, decimal=2)
+    assert_almost_equal(sff.interp(sff.s), correction, decimal=3)
