@@ -360,10 +360,10 @@ class KeplerLightCurve(LightCurve):
             Corrected lightcurve
         """
         if method == 'vanderburg':
-            self.corrector = SFFCorrector(**kwargs)
-            corrected_lc = self.corrector.correct(time=self.time, flux=self.flux,
-                                                  centroid_col=self.centroid_col,
-                                                  centroid_row=self.centroid_row)
+            self.corrector = SFFCorrector(time=self.time, flux=self.flux,
+                                          centroid_col=self.centroid_col,
+                                          centroid_row=self.centroid_row)
+            corrected_lc = self.corrector.correct(**kwargs)
         else:
             raise ValueError("method {} is not available.".format(method))
         new_lc = copy.copy(self)
@@ -545,44 +545,44 @@ class SFFCorrector(object):
 
     Attributes
     ----------
-    poly_order : int
-        Degree of the polynomial which will be used to fit one
-        centroid as a function of the other.
-    niters : int
-        Number of iterations of the aforementioned algorithm.
-    bins : int
-        Number of bins to be used in step (6).
-    windows : int
-        Number of windows to subdivide the data.
+    time : array-like
+        Time measurements
+    flux : array-like
+        Data flux for every time point
+    centroid_col, centroid_row : array-like, array-like
+        Centroid column and row coordinates as a function of time
     """
 
-    def __init__(self, polyorder=5, niters=3, bins=15, windows=1):
-        self.polyorder = polyorder
-        self.niters = niters
-        self.bins = bins
-        self.windows = windows
+    def __init__(self, time, flux, centroid_col, centroid_row):
+        self.time = time
+        self.flux = flux
+        self.centroid_col = centroid_col
+        self.centroid_row = centroid_row
 
-    def correct(self, time, flux, centroid_col, centroid_row):
+    def correct(self, polyorder=5, niters=3, bins=15, windows=1):
         """
         Parameters
         ----------
-        time : array-like
-            Time measurements
-        flux : array-like
-            Data flux for every time point
-        centroid_col, centroid_row : array-like, array-like
-            Centroid column and row coordinates as a function of time
+        polyorder : int
+            Degree of the polynomial which will be used to fit one
+            centroid as a function of the other.
+        niters : int
+            Number of iterations of the aforementioned algorithm.
+        bins : int
+            Number of bins to be used in step (6).
+        windows : int
+            Number of windows to subdivide the data.
         """
-        time = np.array_split(time, self.windows)
-        flux = np.array_split(flux, self.windows)
-        centroid_col = np.array_split(centroid_col, self.windows)
-        centroid_row = np.array_split(centroid_row, self.windows)
+        time = np.array_split(self.time, windows)
+        flux = np.array_split(self.flux, windows)
+        centroid_col = np.array_split(self.centroid_col, windows)
+        centroid_row = np.array_split(self.centroid_row, windows)
 
         flux_hat = np.array([])
-        for i in range(self.windows):
+        for i in range(windows):
             # Rotate and fit centroids
-            self.rot_col, self.rot_row = self._rotate_centroids(centroid_col[i], centroid_row[i])
-            coeffs = np.polyfit(self.rot_row, self.rot_col, self.polyorder)
+            self.rot_col, self.rot_row = self.rotate_centroids(centroid_col[i], centroid_row[i])
+            coeffs = np.polyfit(self.rot_row, self.rot_col, polyorder)
             self.poly = np.poly1d(coeffs)
             self.polyprime = np.poly1d(coeffs).deriv()
 
@@ -590,22 +590,22 @@ class SFFCorrector(object):
             x = np.linspace(np.min(self.rot_row), np.max(self.rot_row), 10000)
             self.s = np.array([self.arclength(x1=xp, x=x) for xp in self.rot_row])
 
-            for n in range(self.niters):
+            for n in range(niters):
                 # fit BSpline
                 self.bspline = self.fit_bspline(time[i], flux[i])
                 # Normalize raw flux
                 self.normflux = flux[i] / self.bspline(time[i] - time[i][0])
                 # Bin and interpolate normalized flux
-                self.interp = self.bin_and_interpolate(self.s, self.normflux)
+                self.interp = self.bin_and_interpolate(self.s, self.normflux, bins)
                 # Correcte the raw flux
                 corrected_flux = self.normflux / self.interp(self.s)
                 flux[i] = corrected_flux
 
             flux_hat = np.append(flux_hat, flux[i])
 
-        return LightCurve(time=time, flux=flux_hat)
+        return LightCurve(time=self.time, flux=flux_hat)
 
-    def _rotate_centroids(self, centroid_col, centroid_row):
+    def rotate_centroids(self, centroid_col, centroid_row):
         centroids = np.array([centroid_col, centroid_row])
         _, eig_vecs = linalg.eigh(np.cov(centroids))
         return np.dot(eig_vecs, centroids)
@@ -636,13 +636,13 @@ class SFFCorrector(object):
 
         return interpolate.BSpline(t, c, k)
 
-    def bin_and_interpolate(self, s, normflux):
+    def bin_and_interpolate(self, s, normflux, bins):
         idx = np.argsort(s)
         knots = np.array([np.min(s)]
-                         + [np.median(split) for split in np.array_split(s[idx], self.bins)]
+                         + [np.median(split) for split in np.array_split(s[idx], bins)]
                          + [np.max(s)])
         bin_means = np.array([normflux[idx][0]]
-                             + [np.mean(split) for split in np.array_split(normflux[idx], self.bins)]
+                             + [np.mean(split) for split in np.array_split(normflux[idx], bins)]
                              + [normflux[idx][-1]])
 
         return interpolate.interp1d(knots, bin_means)

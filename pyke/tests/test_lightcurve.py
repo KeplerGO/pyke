@@ -88,10 +88,10 @@ def test_sff_corrector():
     arclength = data[:, 5][mask]
     correction = data[:, 6][mask]
 
-    sff = SFFCorrector(niters=1)
-    corrected_lc = sff.correct(time=time, flux=raw_flux,
-                               centroid_col=centroid_col,
-                               centroid_row=centroid_row)
+    sff = SFFCorrector(time=time, flux=raw_flux,
+                       centroid_col=centroid_col,
+                       centroid_row=centroid_row)
+    corrected_lc = sff.correct(niters=1)
     # the factor self.bspline(time-time[0]) accounts for
     # the long term trend which is divided out in order to get a "flat"
     # lightcurve.
