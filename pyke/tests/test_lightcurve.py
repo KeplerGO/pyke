@@ -1,7 +1,9 @@
 import pytest
 import numpy as np
 from numpy.testing import assert_almost_equal
-from ..lightcurve import LightCurve, KeplerCBVCorrector, KeplerLightCurveFile
+from astropy.utils.data import get_pkg_data_filename
+from ..lightcurve import (LightCurve, KeplerCBVCorrector, KeplerLightCurveFile,
+                          SFFDetrender)
 
 # 8th Quarter of Tabby's star
 TABBY_Q8 = ("https://archive.stsci.edu/missions/kepler/lightcurves"
@@ -67,3 +69,23 @@ def test_lightcurve_plot():
     lcf = KeplerLightCurveFile(TABBY_Q8)
     lcf.plot()
     lcf.SAP_FLUX.plot()
+
+
+def test_sff_detrender():
+    fn = get_pkg_data_filename('./data/ep60021426alldiagnostics.csv')
+    data = np.genfromtxt(fn, delimiter=',', skip_header=1)
+    mask = data[:, -2] == 0 # indicates whether the thrusters were on or off
+    time = data[:, 0][mask]
+    raw_flux = data[:, 1][mask]
+    corrected_flux = data[:, 2][mask]
+    centroid_col = data[:, 3][mask]
+    centroid_row = data[:, 4][mask]
+
+    sff = SFFDetrender(niters=1)
+    flux_detrended = sff.detrend(time=time, flux=raw_flux, centroid_col=centroid_col,
+                                 centroid_row=centroid_row)
+    # the factor self.bspline(time-time[0]) accounts for
+    # the long term trend which is divided out in order to get a "flat"
+    # lightcurve.
+    assert_almost_equal(flux_detrended*sff.bspline(time-time[0]),
+                        corrected_flux, decimal=3)

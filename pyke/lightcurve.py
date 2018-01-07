@@ -577,9 +577,9 @@ class SFFDetrender(Detrender):
 
             for n in range(self.niters):
                 # fit BSpline
-                bspline = self.fit_bspline(time[i], flux[i])
+                self.bspline = self.fit_bspline(time[i], flux[i])
                 # Normalize raw flux
-                self.normflux = flux[i] / bspline(time[i] - time[i][0])
+                self.normflux = flux[i] / self.bspline(time[i] - time[i][0])
                 # Bin and interpolate normalized flux
                 self.interp = self.bin_and_interpolate(self.s, self.normflux)
                 # Detrend the raw flux
