@@ -548,7 +548,7 @@ class SFFCorrector(object):
     def __init__(self):
         pass
 
-    def correct(self, time, flux, centroid_col, centriod_row,
+    def correct(self, time, flux, centroid_col, centroid_row,
                 polyorder=5, niters=3, bins=15, windows=1):
         """
         Parameters
