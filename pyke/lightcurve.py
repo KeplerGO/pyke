@@ -360,10 +360,11 @@ class KeplerLightCurve(LightCurve):
             Corrected lightcurve
         """
         if method == 'vanderburg':
-            self.corrector = SFFCorrector(time=self.time, flux=self.flux,
-                                          centroid_col=self.centroid_col,
-                                          centroid_row=self.centroid_row)
-            corrected_lc = self.corrector.correct(**kwargs)
+            self.corrector = SFFCorrector()
+            corrected_lc = self.corrector.correct(time=self.time, flux=self.flux,
+                                                  centroid_col=self.centroid_col,
+                                                  centroid_row=self.centroid_row,
+                                                  **kwargs)
         else:
             raise ValueError("method {} is not available.".format(method))
         new_lc = copy.copy(self)
@@ -542,27 +543,22 @@ class SFFCorrector(object):
        (6) Bin and interpolate the normalized flux as function of the arclength
        (7) Divide the raw flux by the piecewise linear interpolation done in step [(6)
        (8) Set raw flux as the flux computed in step (7) and repeat
-
-    Attributes
-    ----------
-    time : array-like
-        Time measurements
-    flux : array-like
-        Data flux for every time point
-    centroid_col, centroid_row : array-like, array-like
-        Centroid column and row coordinates as a function of time
     """
 
-    def __init__(self, time, flux, centroid_col, centroid_row):
-        self.time = time
-        self.flux = flux
-        self.centroid_col = centroid_col
-        self.centroid_row = centroid_row
+    def __init__(self):
+        pass
 
-    def correct(self, polyorder=5, niters=3, bins=15, windows=1):
+    def correct(self, time, flux, centroid_col, centriod_row,
+                polyorder=5, niters=3, bins=15, windows=1):
         """
         Parameters
         ----------
+        time : array-like
+            Time measurements
+        flux : array-like
+            Data flux for every time point
+        centroid_col, centroid_row : array-like, array-like
+            Centroid column and row coordinates as a function of time
         polyorder : int
             Degree of the polynomial which will be used to fit one
             centroid as a function of the other.
@@ -573,10 +569,10 @@ class SFFCorrector(object):
         windows : int
             Number of windows to subdivide the data.
         """
-        time = np.array_split(self.time, windows)
-        flux = np.array_split(self.flux, windows)
-        centroid_col = np.array_split(self.centroid_col, windows)
-        centroid_row = np.array_split(self.centroid_row, windows)
+        time = np.array_split(time, windows)
+        flux = np.array_split(flux, windows)
+        centroid_col = np.array_split(centroid_col, windows)
+        centroid_row = np.array_split(centroid_row, windows)
 
         flux_hat = np.array([])
         for i in range(windows):
@@ -603,7 +599,7 @@ class SFFCorrector(object):
 
             flux_hat = np.append(flux_hat, flux[i])
 
-        return LightCurve(time=self.time, flux=flux_hat)
+        return LightCurve(time=time, flux=flux_hat)
 
     def rotate_centroids(self, centroid_col, centroid_row):
         centroids = np.array([centroid_col, centroid_row])
@@ -807,10 +803,7 @@ class SPLDCorrector(object):
 
     Attributes
     ----------
-    time : array-like
-        Time array
-    tpf_flux : array-like
-        Pixel values series
+
 
     Notes
     -----
@@ -828,21 +821,30 @@ class SPLDCorrector(object):
            saturated stars, and Kepler-like photometry down to K_p = 15.
     """
 
-    def __init__(self, time, tpf_flux):
-        self.time = time
-        self.tpf_flux = tpf_flux
+    def __init__(self):
+        pass
 
-    def correct(self, window_length=None, polyorder=2):
+    def correct(self, time, tpf_flux, window_length=None, polyorder=2):
+        """
+        Parameters
+        ----------
+        time : array-like
+            Time array
+        tpf_flux : array-like
+            Pixel values series
+        window_length : int
+        polyorder : int
+        """
         k = window_length
         if not k:
-            k = int(len(self.time) / 2) - 1
-        n_windows = int(len(self.time) / k)
+            k = int(len(time) / 2) - 1
+        n_windows = int(len(time) / k)
         flux_hat = np.array([])
         for n in range(1, n_windows + 1):
             flux_hat = np.append(flux_hat,
-                                 self._pld(self.tpf_flux[(n - 1) * k:n * k], polyorder))
-        flux_hat = np.append(flux_hat, self._pld(self.tpf_flux[n * k:], polyorder))
-        return LightCurve(self.time, flux_hat + np.nanmedian(np.nansum(self.tpf_flux, axis=(1, 2))))
+                                 self._pld(tpf_flux[(n - 1) * k:n * k], polyorder))
+        flux_hat = np.append(flux_hat, self._pld(tpf_flux[n * k:], polyorder))
+        return LightCurve(time, flux_hat + np.nanmedian(np.nansum(tpf_flux, axis=(1, 2))))
 
     def _pld(self, tpf_flux, polyorder=2):
         if len(tpf_flux) == 0:
