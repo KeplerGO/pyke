@@ -568,6 +568,11 @@ class SFFCorrector(object):
             Number of bins to be used in step (6).
         windows : int
             Number of windows to subdivide the data.
+
+        Returns
+        -------
+        corrected_lightcurve : LightCurve object
+            Returns a corrected lightcurve object.
         """
         timecopy = time
         time = np.array_split(time, windows)
