@@ -36,7 +36,7 @@ class LightCurve(object):
         if flux_err is not None:
             self.flux_err = np.asarray(flux_err)
         else:
-            self.flux_err = None
+            self.flux_err = np.nan * np.ones_like(self.time)
 
     def stitch(self, *others):
         """
