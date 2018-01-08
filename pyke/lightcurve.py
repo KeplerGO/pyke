@@ -569,6 +569,7 @@ class SFFCorrector(object):
         windows : int
             Number of windows to subdivide the data.
         """
+        timecopy = time
         time = np.array_split(time, windows)
         flux = np.array_split(flux, windows)
         centroid_col = np.array_split(centroid_col, windows)
@@ -599,7 +600,7 @@ class SFFCorrector(object):
 
             flux_hat = np.append(flux_hat, flux[i])
 
-        return LightCurve(time=time, flux=flux_hat)
+        return LightCurve(time=timecopy, flux=flux_hat)
 
     def rotate_centroids(self, centroid_col, centroid_row):
         centroids = np.array([centroid_col, centroid_row])
