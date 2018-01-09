@@ -549,7 +549,7 @@ class SFFCorrector(object):
         pass
 
     def correct(self, time, flux, centroid_col, centroid_row,
-                polyorder=5, niters=3, bins=15, windows=1):
+                polyorder=5, niters=3, bins=15, windows=1, sigma=3.):
         """
         Parameters
         ----------
@@ -598,7 +598,7 @@ class SFFCorrector(object):
                 # Normalize raw flux
                 self.normflux = flux[i] / self.bspline(time[i] - time[i][0])
                 # Bin and interpolate normalized flux
-                self.interp = self.bin_and_interpolate(self.s, self.normflux, bins)
+                self.interp = self.bin_and_interpolate(self.s, self.normflux, bins, sigma=3.)
                 # Correcte the raw flux
                 corrected_flux = self.normflux / self.interp(self.s)
                 flux[i] = corrected_flux
@@ -649,14 +649,21 @@ class SFFCorrector(object):
         t, c, k = interpolate.splrep(time, flux, t=knots[1:], s=s, task=-1)
         return interpolate.BSpline(t, c, k)
 
-    def bin_and_interpolate(self, s, normflux, bins):
+    def bin_and_interpolate(self, s, normflux, bins, sigma):
         idx = np.argsort(s)
+        s_srtd = s[idx]
+        normflux_srtd = normflux[idx]
+
+        outlier_mask = sigma_clip(data=normflux_srtd, sigma=sigma).mask
+        normflux_srtd = normflux_srtd[~outlier_mask]
+        s_srtd = s_srtd[~outlier_mask]
+
         knots = np.array([np.min(s)]
-                         + [np.median(split) for split in np.array_split(s[idx], bins)]
+                         + [np.median(split) for split in np.array_split(s_srtd, bins)]
                          + [np.max(s)])
-        bin_means = np.array([normflux[idx][0]]
-                             + [np.mean(split) for split in np.array_split(normflux[idx], bins)]
-                             + [normflux[idx][-1]])
+        bin_means = np.array([normflux_srtd[0]]
+                             + [np.mean(split) for split in np.array_split(normflux_srtd, bins)]
+                             + [normflux_srtd[-1]])
         return interpolate.interp1d(knots, bin_means)
 
     def breakpoints(self, campaign):
