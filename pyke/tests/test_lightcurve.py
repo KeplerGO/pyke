@@ -80,13 +80,13 @@ def test_sff_corrector():
     fn = get_pkg_data_filename('./data/ep60021426alldiagnostics.csv')
     data = np.genfromtxt(fn, delimiter=',', skip_header=1)
     mask = data[:, -2] == 0 # indicates whether the thrusters were on or off
-    time = data[:, 0][mask]
-    raw_flux = data[:, 1][mask]
-    corrected_flux = data[:, 2][mask]
-    centroid_col = data[:, 3][mask]
-    centroid_row = data[:, 4][mask]
-    arclength = data[:, 5][mask]
-    correction = data[:, 6][mask]
+    time = data[:, 0]
+    raw_flux = data[:, 1]
+    corrected_flux = data[:, 2]
+    centroid_col = data[:, 3]
+    centroid_row = data[:, 4]
+    arclength = data[:, 5]
+    correction = data[:, 6]
 
     sff = SFFCorrector()
     corrected_lc = sff.correct(time=time, flux=raw_flux,
@@ -101,10 +101,7 @@ def test_sff_corrector():
     assert_array_equal(time, corrected_lc.time)
     # the factor of 4 below accounts for the conversion
     # between pixel units to arcseconds
-    # the factor of 0.136 accounts for the fact that
-    # we are using the preprocessed (outlier-removed) centroids
-    # rather than the full set of centroids
-    assert_almost_equal(4*sff.s + 0.136, arclength, decimal=2)
+    assert_almost_equal(4*sff.s, arclength, decimal=2)
     assert_almost_equal(sff.interp(sff.s), correction, decimal=3)
 
     # test using KeplerLightCurve interface
@@ -115,7 +112,7 @@ def test_sff_corrector():
 
     assert_almost_equal(klc.flux*sff.bspline(time-time[0]),
                         corrected_flux, decimal=3)
-    assert_almost_equal(4*sff.s + 0.136, arclength, decimal=2)
+    assert_almost_equal(4*sff.s, arclength, decimal=2)
     assert_almost_equal(sff.interp(sff.s), correction, decimal=3)
     assert_array_equal(time, klc.time)
 
