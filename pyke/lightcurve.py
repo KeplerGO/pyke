@@ -314,6 +314,8 @@ class KeplerLightCurve(LightCurve):
         Array indicating the quality of each data point
     quality_bitmask : int
         Bitmask specifying quality flags of cadences that should be ignored
+    quality_mask : array-like
+        Mask applied to tpf
     channel : int
         Channel number
     campaign : int
@@ -329,7 +331,9 @@ class KeplerLightCurve(LightCurve):
     """
 
     def __init__(self, time, flux, flux_err=None, centroid_col=None,
-                 centroid_row=None, quality=None, quality_bitmask=None,
+                 centroid_row=None, quality=None,
+                 quality_bitmask=KeplerQualityFlags.DEFAULT_BITMASK,
+                 quality_mask=None,
                  channel=None, campaign=None, quarter=None, mission=None,
                  cadenceno=None, keplerid=None):
         super(KeplerLightCurve, self).__init__(time, flux, flux_err)
@@ -337,6 +341,10 @@ class KeplerLightCurve(LightCurve):
         self.centroid_row = centroid_row
         self.quality = quality
         self.quality_bitmask = quality_bitmask
+        if quality_mask is None:
+            self.quality_mask = np.asarray(self.quality & self.quality_bitmask, dtype=bool)
+        else:
+            self.quality_mask = quality_mask
         self.channel = channel
         self.campaign = campaign
         self.quarter = quarter
@@ -527,9 +535,9 @@ class KeplerCBVCorrector(SystematicsCorrector):
 
     Attributes
     ----------
-    lc_file : KeplerLightCurveFile object or str
-        An instance from KeplerLightCurveFile or a path for the .fits
-        file of a NASA's Kepler/K2 light curve.
+    lightcurve : KeplerLightCurveFile object or KeplerLightCurve object or str
+        An instance of either KeplerLightCurveFile or KeplerLightCurve
+        or a path for the .fits file of a NASA's Kepler/K2 light curve.
     loss_function : oktopus.Likelihood subclass
         A class that describes a cost function.
         The default is :class:`oktopus.LaplacianLikelihood`, which is tantamount
@@ -551,30 +559,33 @@ class KeplerCBVCorrector(SystematicsCorrector):
     >>> plt.legend() # doctest: +SKIP
     """
 
-    def __init__(self, lc_file, loss_function=oktopus.LaplacianLikelihood):
-        self.lc_file = lc_file
+    def __init__(self, lightcurve, loss_function=oktopus.LaplacianLikelihood):
+        self.lightcurve = lightcurve
         self.loss_function = loss_function
 
-        if self.lc_file.mission == 'Kepler':
+        if self.lightcurve.mission == 'Kepler':
             self.cbv_base_url = "http://archive.stsci.edu/missions/kepler/cbv/"
-        elif self.lc_file.mission == 'K2':
+        elif self.lightcurve.mission == 'K2':
             self.cbv_base_url = "http://archive.stsci.edu/missions/k2/cbv/"
 
     @property
-    def lc_file(self):
-        return self._lc_file
+    def lightcurve(self):
+        return self._lightcurve
 
-    @lc_file.setter
-    def lc_file(self, value):
-        # this enables `lc_file` to be either a string
+    @lightcurve.setter
+    def lightcurve(self, value):
+        # this enables `lightcurve` to be either a string
         # or an object from KeplerLightCurveFile
         if isinstance(value, str):
-            self._lc_file = KeplerLightCurveFile(value)
+            self._lightcurve = KeplerLightCurveFile(value).SAP_FLUX
         elif isinstance(value, KeplerLightCurveFile):
-            self._lc_file = value
+            self._lightcurve = value.SAP_FLUX
+        elif isinstance(value, KeplerLightCurve):
+            self._lightcurve = value
         else:
-            raise ValueError("lc_file must be either a string or a"
-                             " KeplerLightCurveFile instance, got {}.".format(value))
+            raise ValueError("lightcurve must be a string or either a"
+                             " KeplerLightCurveFile or KeplerLightCurve"
+                             " instance, got {}.".format(value))
 
     @property
     def coeffs(self):
@@ -601,31 +612,30 @@ class KeplerCBVCorrector(SystematicsCorrector):
             The list of cotrending basis vectors to fit to the data. For example,
             [1, 2] will fit the first two basis vectors.
         """
-        module, output = channel_to_module_output(self.lc_file.channel)
+        module, output = channel_to_module_output(self.lightcurve.channel)
         cbv_file = pyfits.open(self.get_cbv_url())
         cbv_data = cbv_file['MODOUT_{0}_{1}'.format(module, output)].data
 
         cbv_array = []
         for i in cbvs:
-            cbv_array.append(cbv_data.field('VECTOR_{}'.format(i))[self.lc_file.quality_mask])
+            cbv_array.append(cbv_data.field('VECTOR_{}'.format(i))[self.lightcurve.quality_mask])
         cbv_array = np.asarray(cbv_array)
 
-        sap_lc = self.lc_file.SAP_FLUX
-        median_sap_flux = np.nanmedian(sap_lc.flux)
-        norm_sap_flux = sap_lc.flux / median_sap_flux - 1
-        norm_err_sap_flux = sap_lc.flux_err / median_sap_flux
+        median_flux = np.nanmedian(self.lightcurve.flux)
+        norm_flux = self.lightcurve.flux / median_flux - 1
+        norm_err_flux = self.lightcurve.flux_err / median_flux
 
         def mean_model(*theta):
             coeffs = np.asarray(theta)
             return np.dot(coeffs, cbv_array)
 
-        loss = self.loss_function(data=norm_sap_flux, mean=mean_model,
-                                  var=norm_err_sap_flux)
+        loss = self.loss_function(data=norm_flux, mean=mean_model,
+                                  var=norm_err_flux)
         self._opt_result = loss.fit(x0=np.zeros(len(cbvs)), method='L-BFGS-B')
         self._coeffs = self._opt_result.x
-        flux_hat = sap_lc.flux - median_sap_flux * mean_model(self._coeffs)
+        flux_hat = self.lightcurve.flux - median_flux * mean_model(self._coeffs)
 
-        return LightCurve(time=sap_lc.time, flux=flux_hat.reshape(-1))
+        return LightCurve(time=self.lightcurve.time, flux=flux_hat.reshape(-1))
 
     def get_cbv_url(self):
         # gets the html page and finds all references to 'a' tag
@@ -634,19 +644,19 @@ class KeplerCBVCorrector(SystematicsCorrector):
         soup = BeautifulSoup(requests.get(self.cbv_base_url).text, 'html.parser')
         cbv_files = [fn['href'] for fn in soup.find_all('a') if fn['href'].endswith('fits')]
 
-        if self.lc_file.mission == 'Kepler':
-            if self.lc_file.quarter < 10:
-                quarter = 'q0' + str(self.lc_file.quarter)
+        if self.lightcurve.mission == 'Kepler':
+            if self.lightcurve.quarter < 10:
+                quarter = 'q0' + str(self.lightcurve.quarter)
             else:
-                quarter = 'q' + str(self.lc_file.quarter)
+                quarter = 'q' + str(self.lightcurve.quarter)
             for cbv_file in cbv_files:
                 if quarter + '-d25' in cbv_file:
                     break
-        elif self.lc_file.mission == 'K2':
-            if self.lc_file.campaign <= 8:
-                campaign = 'c0' + str(self.lc_file.campaign)
+        elif self.lightcurve.mission == 'K2':
+            if self.lightcurve.campaign <= 8:
+                campaign = 'c0' + str(self.lightcurve.campaign)
             else:
-                campaign = 'c' + str(self.lc_file.campaign)
+                campaign = 'c' + str(self.lightcurve.campaign)
             for cbv_file in cbv_files:
                 if campaign in cbv_file:
                     break
