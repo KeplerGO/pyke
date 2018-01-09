@@ -98,7 +98,7 @@ def test_sff_corrector():
     # lightcurve.
     assert_almost_equal(corrected_lc.flux*sff.bspline(time-time[0]),
                         corrected_flux, decimal=3)
-    assert_equal(time, corrected_lc.time)
+    assert_array_equal(time, corrected_lc.time)
     # the factor of 4 below accounts for the conversion
     # between pixel units to arcseconds
     # the factor of 0.136 accounts for the fact that
@@ -117,6 +117,5 @@ def test_sff_corrector():
                         corrected_flux, decimal=3)
     assert_almost_equal(4*sff.s + 0.136, arclength, decimal=2)
     assert_almost_equal(sff.interp(sff.s), correction, decimal=3)
-    assert_equal(time, klc.time)
-
+    assert_array_equal(time, klc.time)
 
