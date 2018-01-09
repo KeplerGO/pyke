@@ -259,7 +259,7 @@ class KeplerTargetPixelFile(TargetPixelFile):
 
         return col_centr, row_centr
 
-    def plot(self, frame=0, cadenceno=None, **kwargs):
+    def plot(self, frame=0, cadenceno=None, bkg=False, **kwargs):
         """
         Plot a target pixel file at a given frame (index) or cadence number.
 
@@ -270,6 +270,8 @@ class KeplerTargetPixelFile(TargetPixelFile):
         cadenceno : int, optional
             Alternatively, a cadence number can be provided.
             This argument has priority over frame number.
+        bkg : bool
+            If True, background will be added to the tpf.
         kwargs : dict
             Keywords arguments passed to `pyke.utils.plot_image`.
         """
@@ -281,7 +283,10 @@ class KeplerTargetPixelFile(TargetPixelFile):
                                  "must be in the range {}-{}.".format(
                                     cadenceno, self.cadenceno[0], self.cadenceno[-1]))
         try:
-            pflux = self.flux[frame]
+            if bkg:
+                pflux = self.flux[frame] + self.flux_bkg[frame]
+            else:
+                pflux = self.flux[frame]
         except IndexError:
             raise ValueError("frame {} is out of bounds, must be in the range "
                              "0-{}.".format(frame, self.flux.shape[0]))
