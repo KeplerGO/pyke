@@ -1,6 +1,6 @@
 import pytest
 import numpy as np
-from numpy.testing import assert_almost_equal
+from numpy.testing import assert_almost_equal, assert_array_equal
 from astropy.utils.data import get_pkg_data_filename
 from ..lightcurve import (LightCurve, KeplerCBVCorrector, KeplerLightCurveFile,
                           SFFCorrector, KeplerLightCurve)
