@@ -11,6 +11,8 @@ import requests
 from bs4 import BeautifulSoup
 from .utils import running_mean, channel_to_module_output, KeplerQualityFlags
 from matplotlib import pyplot as plt
+from matplotlib.figure import Figure
+
 
 __all__ = ['LightCurve', 'KeplerLightCurve', 'KeplerLightCurveFile',
            'KeplerCBVCorrector', 'SPLDCorrector', 'SFFCorrector']
@@ -581,7 +583,7 @@ class SFFCorrector(object):
         centroid_row = np.array_split(centroid_row, windows)
 
         flux_hat = np.array([])
-        for i in range(windows):
+        for i in tqdm(range(windows)):
             # Rotate and fit centroids
             self.rot_col, self.rot_row = self.rotate_centroids(centroid_col[i], centroid_row[i])
             coeffs = np.polyfit(self.rot_row, self.rot_col, polyorder)
@@ -613,16 +615,27 @@ class SFFCorrector(object):
         return np.dot(eig_vecs, centroids)
 
     def _plot_rotated_centroids(self):
-        plt.plot(self.rot_row, self.rot_col, 'ko', markersize=3)
-        plt.plot(self.rot_row, self.rot_col, 'ro', markersize=2)
+        fig = plt.figure()
+        ax = fig.add_subplot(111)
+        ax.plot(self.rot_row, self.rot_col, 'ko', markersize=3)
+        ax.plot(self.rot_row, self.rot_col, 'ro', markersize=2)
         x = np.linspace(min(self.rot_row), max(self.rot_row), 200)
-        plt.plot(x, self.poly(x), '--')
+        ax.plot(x, self.poly(x), '--')
+        return ax
 
     def _plot_normflux_arclength(self):
-        plt.plot(self.s, self.normflux, 'ko', markersize=3)
-        plt.plot(self.s, self.normflux, 'bo', markersize=2)
-        ss = np.sort(self.s)
-        plt.plot(ss, self.interp(ss), '--')
+        idx = np.argsort(self.s)
+        ss = self.s[idx]
+        ff = self.normflux[idx]
+
+        fig = plt.figure()
+        ax = fig.add_subplot(111)
+        ax.plot(ss[~self.outlier_mask], self.normflux[~self.outlier_mask], 'ko', markersize=3)
+        ax.plot(ss[~self.outlier_mask], self.normflux[~self.outlier_mask], 'bo', markersize=2)
+        ax.plot(ss[~self.outlier_mask], self.interp([~self.outlier_mask]), '--')
+        ax.plot(ss[self.outlier_mask], self.normflux[self.outlier_mask], 'ko', markersize=3)
+        ax.plot(ss[self.outlier_mask], self.normflux[self.outlier_mask], 'ro', markersize=2)
+        return ax
 
     def arclength(self, x1, x):
         """Compute the arclength of the polynomial used to fit the centroid
@@ -654,13 +667,13 @@ class SFFCorrector(object):
         s_srtd = s[idx]
         normflux_srtd = normflux[idx]
 
-        outlier_mask = sigma_clip(data=normflux_srtd, sigma=sigma).mask
-        normflux_srtd = normflux_srtd[~outlier_mask]
-        s_srtd = s_srtd[~outlier_mask]
+        self.outlier_mask = sigma_clip(data=normflux_srtd, sigma=sigma).mask
+        normflux_srtd = normflux_srtd[~self.outlier_mask]
+        s_srtd = s_srtd[~self.outlier_mask]
 
-        knots = np.array([np.min(s)]
+        knots = np.array([np.min(s_srtd)]
                          + [np.median(split) for split in np.array_split(s_srtd, bins)]
-                         + [np.max(s)])
+                         + [np.max(s_srtd)])
         bin_means = np.array([normflux_srtd[0]]
                              + [np.mean(split) for split in np.array_split(normflux_srtd, bins)]
                              + [normflux_srtd[-1]])
