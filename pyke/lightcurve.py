@@ -625,16 +625,22 @@ class SFFCorrector(object):
 
     def _plot_normflux_arclength(self):
         idx = np.argsort(self.s)
-        ss = self.s[idx]
-        ff = self.normflux[idx]
+        s_srtd = self.s[idx]
+        normflux_srtd = self.normflux[idx]
 
         fig = plt.figure()
         ax = fig.add_subplot(111)
-        ax.plot(ss[~self.outlier_mask], self.normflux[~self.outlier_mask], 'ko', markersize=3)
-        ax.plot(ss[~self.outlier_mask], self.normflux[~self.outlier_mask], 'bo', markersize=2)
-        ax.plot(ss[~self.outlier_mask], self.interp([~self.outlier_mask]), '--')
-        ax.plot(ss[self.outlier_mask], self.normflux[self.outlier_mask], 'ko', markersize=3)
-        ax.plot(ss[self.outlier_mask], self.normflux[self.outlier_mask], 'ro', markersize=2)
+        ax.plot(s_srtd[~self.outlier_mask], normflux_srtd[~self.outlier_mask],
+                'ko', markersize=3)
+        ax.plot(s_srtd[~self.outlier_mask], normflux_srtd[~self.outlier_mask],
+                'bo', markersize=2)
+
+        ax.plot(s_srtd[self.outlier_mask], normflux_srtd[self.outlier_mask],
+                'ko', markersize=3)
+        ax.plot(s_srtd[self.outlier_mask], normflux_srtd[self.outlier_mask],
+                'ro', markersize=2)
+
+        ax.plot(s_srtd, self.interp(s_srtd), '--')
         return ax
 
     def arclength(self, x1, x):
