@@ -683,7 +683,8 @@ class SFFCorrector(object):
         bin_means = np.array([normflux_srtd[0]]
                              + [np.mean(split) for split in np.array_split(normflux_srtd, bins)]
                              + [normflux_srtd[-1]])
-        return interpolate.interp1d(knots, bin_means)
+        return interpolate.interp1d(knots, bin_means, bounds_error=False,
+                                    fill_value='extrapolate')
 
     def breakpoints(self, campaign):
         """Return a break point as a function of the campaign number.
