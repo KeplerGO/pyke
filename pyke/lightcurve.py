@@ -551,7 +551,8 @@ class SFFCorrector(object):
         pass
 
     def correct(self, time, flux, centroid_col, centroid_row,
-                polyorder=5, niters=3, bins=15, windows=1, sigma=3.):
+                polyorder=5, niters=3, bins=15, windows=1, sigma_1=3.,
+                sigma_2=5.):
         """
         Parameters
         ----------
@@ -570,6 +571,9 @@ class SFFCorrector(object):
             Number of bins to be used in step (6).
         windows : int
             Number of windows to subdivide the data.
+        sigma_1, sigma_2 : float, float
+            Sigma values which will be used to reject outliers
+            in steps (6) and (2), respectivelly.
 
         Returns
         -------
@@ -585,8 +589,12 @@ class SFFCorrector(object):
         flux_hat = np.array([])
         for i in tqdm(range(windows)):
             # Rotate and fit centroids
-            self.rot_col, self.rot_row = self.rotate_centroids(centroid_col[i], centroid_row[i])
-            coeffs = np.polyfit(self.rot_row, self.rot_col, polyorder)
+            self.rot_col, self.rot_row = self.rotate_centroids(centroid_col[i],
+                                                               centroid_row[i])
+            self.outlier_cent = sigma_clip(data=self.rot_col,
+                                           sigma=sigma_2).mask
+            coeffs = np.polyfit(self.rot_row[~self.outlier_cent],
+                                self.rot_col[~self.outlier_cent], polyorder)
             self.poly = np.poly1d(coeffs)
             self.polyprime = np.poly1d(coeffs).deriv()
 
@@ -600,7 +608,8 @@ class SFFCorrector(object):
                 # Normalize raw flux
                 self.normflux = flux[i] / self.bspline(time[i] - time[i][0])
                 # Bin and interpolate normalized flux
-                self.interp = self.bin_and_interpolate(self.s, self.normflux, bins, sigma=3.)
+                self.interp = self.bin_and_interpolate(self.s, self.normflux, bins,
+                                                       sigma=sigma_1)
                 # Correcte the raw flux
                 corrected_flux = self.normflux / self.interp(self.s)
                 flux[i] = corrected_flux
@@ -617,10 +626,18 @@ class SFFCorrector(object):
     def _plot_rotated_centroids(self):
         fig = plt.figure()
         ax = fig.add_subplot(111)
-        ax.plot(self.rot_row, self.rot_col, 'ko', markersize=3)
-        ax.plot(self.rot_row, self.rot_col, 'ro', markersize=2)
+        ax.plot(self.rot_row[~self.outlier_cent], self.rot_col[~self.outlier_cent],
+                'ko', markersize=3)
+        ax.plot(self.rot_row[~self.outlier_cent], self.rot_col[~self.outlier_cent],
+                'bo', markersize=2)
+        ax.plot(self.rot_row[self.outlier_cent], self.rot_col[self.outlier_cent],
+                'ko', markersize=3)
+        ax.plot(self.rot_row[self.outlier_cent], self.rot_col[self.outlier_cent],
+                'ro', markersize=2)
         x = np.linspace(min(self.rot_row), max(self.rot_row), 200)
         ax.plot(x, self.poly(x), '--')
+        plt.xlabel("Rotated row centroid")
+        plt.ylabel("Rotated column centroid")
         return ax
 
     def _plot_normflux_arclength(self):
@@ -634,13 +651,13 @@ class SFFCorrector(object):
                 'ko', markersize=3)
         ax.plot(s_srtd[~self.outlier_mask], normflux_srtd[~self.outlier_mask],
                 'bo', markersize=2)
-
         ax.plot(s_srtd[self.outlier_mask], normflux_srtd[self.outlier_mask],
                 'ko', markersize=3)
         ax.plot(s_srtd[self.outlier_mask], normflux_srtd[self.outlier_mask],
                 'ro', markersize=2)
-
         ax.plot(s_srtd, self.interp(s_srtd), '--')
+        plt.xlabel(r"Arclength $(s)$")
+        plt.ylabel(r"Flux $(e^{-}s^{-1})$")
         return ax
 
     def arclength(self, x1, x):
