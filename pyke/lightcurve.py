@@ -599,7 +599,8 @@ class SFFCorrector(object):
             self.polyprime = np.poly1d(coeffs).deriv()
 
             # Compute the arclength s
-            x = np.linspace(np.min(self.rot_row), np.max(self.rot_row), 10000)
+            x = np.linspace(np.min(self.rot_row[~self.outlier_cent]),
+                            np.max(self.rot_row[~self.outlier_cent]), 10000)
             self.s = np.array([self.arclength(x1=xp, x=x) for xp in self.rot_row])
 
             for n in range(niters):
@@ -610,7 +611,7 @@ class SFFCorrector(object):
                 # Bin and interpolate normalized flux
                 self.interp = self.bin_and_interpolate(self.s, self.normflux, bins,
                                                        sigma=sigma_1)
-                # Correcte the raw flux
+                # Correct the raw flux
                 corrected_flux = self.normflux / self.interp(self.s)
                 flux[i] = corrected_flux
 
