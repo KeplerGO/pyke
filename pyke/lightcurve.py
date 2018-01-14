@@ -354,7 +354,10 @@ class KeplerLightCurve(LightCurve):
         Parameters
         ----------
         method : str
+            Method used to correct the lightcurve
         kwargs : dict
+            Dictionary of keyword arguments to be passed to the function
+            defined by `method`.
 
         Returns
         -------
