@@ -540,12 +540,12 @@ class KeplerCBVCorrector(SystematicsCorrector):
     >>> import matplotlib.pyplot as plt
     >>> from pyke import KeplerCBVCorrector, KeplerLightCurveFile
     >>> fn = ("https://archive.stsci.edu/missions/kepler/lightcurves/"
-    ...       "0084/008462852/kplr008462852-2011073133259_llc.fits")
-    >>> cbv = KeplerCBVCorrector(fn)
+    ...       "0084/008462852/kplr008462852-2011073133259_llc.fits") # doctest: +SKIP
+    >>> cbv = KeplerCBVCorrector(fn) # doctest: +SKIP
     Downloading https://archive.stsci.edu/missions/kepler/lightcurves/0084/008462852/kplr008462852-2011073133259_llc.fits [Done]
-    >>> cbv_lc = cbv.correct()
+    >>> cbv_lc = cbv.correct() # doctest: +SKIP
     Downloading http://archive.stsci.edu/missions/kepler/cbv/kplr2011073133259-q08-d25_lcbv.fits [Done]
-    >>> sap_lc = KeplerLightCurveFile(fn).SAP_FLUX
+    >>> sap_lc = KeplerLightCurveFile(fn).SAP_FLUX # doctest: +SKIP
     >>> plt.plot(sap_lc.time, sap_lc.flux, 'x', markersize=1, label='SAP_FLUX') # doctest: +SKIP
     >>> plt.plot(cbv_lc.time, cbv_lc.flux, 'o', markersize=1, label='CBV_FLUX') # doctest: +SKIP
     >>> plt.legend() # doctest: +SKIP
