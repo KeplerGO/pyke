@@ -207,7 +207,7 @@ class LightCurve(object):
             binned_lc.flux_err = np.array(
                                     [np.sqrt(np.nansum(a**2))
                                      for a in np.array_split(self.flux_err, n_bins)]
-                                  ) / binsize
+                                 ) / binsize
         else:
             # compute the standard deviation from the data
             binned_lc.flux_err = np.array([np.nanstd(a)
