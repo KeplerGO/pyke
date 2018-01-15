@@ -1,6 +1,7 @@
 import pytest
 import numpy as np
-from numpy.testing import assert_almost_equal
+from numpy.testing import assert_almost_equal, assert_allclose
+from astropy.utils.data import get_pkg_data_filename
 from ..lightcurve import LightCurve, KeplerCBVCorrector, KeplerLightCurveFile
 
 # 8th Quarter of Tabby's star
@@ -28,7 +29,7 @@ def test_KeplerLightCurve():
     assert kplc.mission == 'Kepler'
 
 
-@pytest.mark.parametrize("quality_bitmask,answer", [('hardest', 2661),
+@pytest.mark.parametrize("quality_bitmask, answer", [('hardest', 2661),
     ('hard', 2706), ('default', 2917), (None, 3279),
     (1, 3279), (100, 3252), (2096639, 2661)])
 def test_bitmasking(quality_bitmask, answer):
@@ -67,3 +68,12 @@ def test_lightcurve_plot():
     lcf = KeplerLightCurveFile(TABBY_Q8)
     lcf.plot()
     lcf.SAP_FLUX.plot()
+
+
+def test_bin():
+    lc = LightCurve(time=np.arange(10), flux=2*np.ones(10),
+                    flux_err=2**.5*np.ones(10))
+    binned_lc = lc.bin(binsize=2)
+    assert_allclose(binned_lc.flux, 2*np.ones(5))
+    assert_allclose(binned_lc.flux_err, np.ones(5))
+    assert len(binned_lc.time) == 5
