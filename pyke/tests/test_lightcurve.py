@@ -30,7 +30,7 @@ def test_KeplerLightCurve():
     assert kplc.mission == 'Kepler'
 
 
-@pytest.mark.parametrize("quality_bitmask,answer", [('hardest', 2661),
+@pytest.mark.parametrize("quality_bitmask, answer", [('hardest', 2661),
     ('hard', 2706), ('default', 2917), (None, 3279),
     (1, 3279), (100, 3252), (2096639, 2661)])
 def test_bitmasking(quality_bitmask, answer):
@@ -116,3 +116,10 @@ def test_sff_corrector():
     assert_almost_equal(sff.interp(sff.s), correction, decimal=3)
     assert_array_equal(time, klc.time)
 
+def test_bin():
+    lc = LightCurve(time=np.arange(10), flux=2*np.ones(10),
+                    flux_err=2**.5*np.ones(10))
+    binned_lc = lc.bin(binsize=2)
+    assert_allclose(binned_lc.flux, 2*np.ones(5))
+    assert_allclose(binned_lc.flux_err, np.ones(5))
+    assert len(binned_lc.time) == 5
