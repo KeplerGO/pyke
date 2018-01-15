@@ -1,4 +1,5 @@
 import copy
+import math
 import numpy as np
 from scipy import linalg
 from oktopus import L1Norm
@@ -158,7 +159,7 @@ class LightCurve(object):
 
         Parameters
         ----------
-        sigma : float, optional
+        sigma : float
             The number of standard deviations to use for clipping outliers.
             Defaults to 5.
         **kwargs : dict
@@ -176,6 +177,54 @@ class LightCurve(object):
         if new_lc.flux_err is not None:
             new_lc.flux_err = self.flux_err[~outlier_mask]
         return new_lc
+
+    def bin(self, binsize=13, method='mean'):
+        """Bins a lightcurve using a block mean of size `binsize`.
+
+        Parameters
+        ----------
+        binsize : int
+            Number of cadences to include in every bin.
+        method: str, one of 'mean' or 'median'
+            The summary statistic to return for each bin. Default: 'mean'.
+
+        Returns
+        -------
+        binned_lc : LightCurve object
+            Binned lightcurve.
+
+        Notes
+        -----
+        - If the ratio between the lightcurve length and the binsize is not
+          a whole number, then the remainder of the data points will be
+          ignored.
+        - If the original lightcurve contains flux uncertainties (flux_err),
+          the binned lightcurve will report the root-mean-square error.
+          If no uncertainties are included, the binned curve will return the
+          standard deviation of the data.
+        """
+        available_methods = ['mean', 'median']
+        if method not in available_methods:
+            raise ValueError("method must be one of: {}".format(available_methods))
+        methodf = np.__dict__['nan' + method]
+
+        n_bins = self.flux.size // binsize
+        binned_lc = copy.copy(self)
+        binned_lc.time = np.array([methodf(a) for a in np.array_split(self.time, n_bins)])
+        binned_lc.flux = np.array([methodf(a) for a in np.array_split(self.flux, n_bins)])
+
+        if self.flux_err is not None:
+            # root-mean-square error
+            binned_lc.flux_err = np.array(
+                                    [np.sqrt(np.nansum(a**2))
+                                     for a in np.array_split(self.flux_err, n_bins)]
+                                 ) / binsize
+        else:
+            # compute the standard deviation from the data
+            binned_lc.flux_err = np.array([np.nanstd(a)
+                                           for a in np.array_split(self.flux, n_bins)])
+
+        return binned_lc
 
     def cdpp(self, transit_duration=13, savgol_window=101, savgol_polyorder=2,
              sigma_clip=5.):
@@ -736,12 +785,12 @@ class KeplerCBVCorrector(object):
     >>> import matplotlib.pyplot as plt
     >>> from pyke import KeplerCBVCorrector, KeplerLightCurveFile
     >>> fn = ("https://archive.stsci.edu/missions/kepler/lightcurves/"
-    ...       "0084/008462852/kplr008462852-2011073133259_llc.fits")
-    >>> cbv = KeplerCBVCorrector(fn)
+    ...       "0084/008462852/kplr008462852-2011073133259_llc.fits") # doctest: +SKIP
+    >>> cbv = KeplerCBVCorrector(fn) # doctest: +SKIP
     Downloading https://archive.stsci.edu/missions/kepler/lightcurves/0084/008462852/kplr008462852-2011073133259_llc.fits [Done]
-    >>> cbv_lc = cbv.correct()
+    >>> cbv_lc = cbv.correct() # doctest: +SKIP
     Downloading http://archive.stsci.edu/missions/kepler/cbv/kplr2011073133259-q08-d25_lcbv.fits [Done]
-    >>> sap_lc = KeplerLightCurveFile(fn).SAP_FLUX
+    >>> sap_lc = KeplerLightCurveFile(fn).SAP_FLUX # doctest: +SKIP
     >>> plt.plot(sap_lc.time, sap_lc.flux, 'x', markersize=1, label='SAP_FLUX') # doctest: +SKIP
     >>> plt.plot(cbv_lc.time, cbv_lc.flux, 'o', markersize=1, label='CBV_FLUX') # doctest: +SKIP
     >>> plt.legend() # doctest: +SKIP
