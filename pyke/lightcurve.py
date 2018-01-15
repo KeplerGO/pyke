@@ -397,13 +397,14 @@ class KeplerLightCurve(LightCurve):
         self.cadenceno = cadenceno
         self.keplerid = keplerid
 
-    def correct(self, method='vanderburg', **kwargs):
-        """Corrects a lightcurve for motion-dependent systematical errors.
+    def correct(self, method='sff', **kwargs):
+        """Corrects a lightcurve for motion-dependent systematic errors.
 
         Parameters
         ----------
         method : str
-            Method used to correct the lightcurve
+            Method used to correct the lightcurve.
+            Right now only 'sff' (Vanderburg's Self-Flat Fielding) is supported.
         kwargs : dict
             Dictionary of keyword arguments to be passed to the function
             defined by `method`.
@@ -413,7 +414,7 @@ class KeplerLightCurve(LightCurve):
         new_lc : KeplerLightCurve object
             Corrected lightcurve
         """
-        if method == 'vanderburg':
+        if method == 'sff':
             self.corrector = SFFCorrector()
             corrected_lc = self.corrector.correct(time=self.time, flux=self.flux,
                                                   centroid_col=self.centroid_col,
@@ -584,8 +585,10 @@ class KeplerLightCurveFile(object):
 
 
 class SFFCorrector(object):
-    """Implements a similar procedure as described by Vanderburg and Johnson
-    (2014). Briefly, the algorithm implemented in this class can be described
+    """Implements the Self-Flat-Fielding (SFF) systematics removal method.
+
+    This method is described in detail by Vanderburg and Johnson (2014).
+    Briefly, the algorithm implemented in this class can be described
     as follows
 
        (1) Rotate the centroid measurements onto the subspace spanned by the
@@ -605,7 +608,8 @@ class SFFCorrector(object):
     def correct(self, time, flux, centroid_col, centroid_row,
                 polyorder=5, niters=3, bins=15, windows=1, sigma_1=3.,
                 sigma_2=5.):
-        """
+        """Returns a systematics-corrected LightCurve.
+
         Parameters
         ----------
         time : array-like
@@ -620,9 +624,11 @@ class SFFCorrector(object):
         niters : int
             Number of iterations of the aforementioned algorithm.
         bins : int
-            Number of bins to be used in step (6).
+            Number of bins to be used in step (6) to create the
+            piece-wise interpolation of arclength vs flux correction.
         windows : int
-            Number of windows to subdivide the data.
+            Number of windows to subdivide the data.  The SFF algorithm
+            is ran independently in each window.
         sigma_1, sigma_2 : float, float
             Sigma values which will be used to reject outliers
             in steps (6) and (2), respectivelly.
@@ -639,10 +645,15 @@ class SFFCorrector(object):
         centroid_row = np.array_split(centroid_row, windows)
 
         flux_hat = np.array([])
+        # The SFF algorithm is going to be run on each window independently
         for i in tqdm(range(windows)):
-            # Rotate and fit centroids
+            # To make it easier (and more numerically stable) to fit a
+            # characteristic polynomial that describes the spacecraft motion,
+            # we rotate the centroids to a new coordinate frame in which
+            # the dominant direction of motion is aligned with the x-axis.
             self.rot_col, self.rot_row = self.rotate_centroids(centroid_col[i],
                                                                centroid_row[i])
+            # Next, we fit the motion polynomial after removing outliers
             self.outlier_cent = sigma_clip(data=self.rot_col,
                                            sigma=sigma_2).mask
             coeffs = np.polyfit(self.rot_row[~self.outlier_cent],
@@ -650,17 +661,22 @@ class SFFCorrector(object):
             self.poly = np.poly1d(coeffs)
             self.polyprime = np.poly1d(coeffs).deriv()
 
-            # Compute the arclength s
+            # Compute the arclength s.  It is the length of the polynomial
+            # (fitted above) that describes the typical motion.
             x = np.linspace(np.min(self.rot_row[~self.outlier_cent]),
                             np.max(self.rot_row[~self.outlier_cent]), 10000)
             self.s = np.array([self.arclength(x1=xp, x=x) for xp in self.rot_row])
 
+            # Next, we find and apply the correction iteratively
             for n in range(niters):
-                # fit BSpline
+                # First, fit a spline to capture the long-term varation
+                # We don't want to fit the long-term trend because we know
+                # that the K2 motion noise is a high-frequency effect.
                 self.bspline = self.fit_bspline(time[i], flux[i])
-                # Normalize raw flux
+                # Remove the long-term variation by dividing the flux by the spline
                 self.normflux = flux[i] / self.bspline(time[i] - time[i][0])
-                # Bin and interpolate normalized flux
+                # Bin and interpolate normalized flux to capture the dependency
+                # of the flux as a function of arclength
                 self.interp = self.bin_and_interpolate(self.s, self.normflux, bins,
                                                        sigma=sigma_1)
                 # Correct the raw flux
@@ -672,6 +688,10 @@ class SFFCorrector(object):
         return LightCurve(time=timecopy, flux=flux_hat)
 
     def rotate_centroids(self, centroid_col, centroid_row):
+        """Rotate the coordinate frame of the (col, row) centroids to a new (x,y)
+        frame in which the dominant motion of the spacecraft is aligned with
+        the x axis.  This makes it easier to fit a characteristic polynomial
+        that describes the motion."""
         centroids = np.array([centroid_col, centroid_row])
         _, eig_vecs = linalg.eigh(np.cov(centroids))
         return np.dot(eig_vecs, centroids)
@@ -727,12 +747,13 @@ class SFFCorrector(object):
         Returns
         -------
         arclength : float
-            Result of the integral from x[0] to x1.
+            Result of the arclength integral from x[0] to x1.
         """
         mask = x < x1
         return np.trapz(y=np.sqrt(1 + self.polyprime(x[mask]) ** 2), x=x[mask])
 
     def fit_bspline(self, time, flux, s=0):
+        """s describes the "smoothness" of the spline"""
         time = time - time[0]
         knots = np.arange(0, time[-1], 1.5)
         t, c, k = interpolate.splrep(time, flux, t=knots[1:], s=s, task=-1)
@@ -758,8 +779,12 @@ class SFFCorrector(object):
 
     def breakpoints(self, campaign):
         """Return a break point as a function of the campaign number.
+
+        The intention of this function is to implement a smart way to determine
+        the boundaries of the windows on which the SFF algorithm is applied
+        independently. However, this is not implemented yet in this version.
         """
-        pass
+        raise NotImplementedError()
 
 
 class KeplerCBVCorrector(object):
