@@ -539,7 +539,7 @@ class KeplerLightCurveFile(object):
         """Mission name"""
         return self.header(ext=0)['MISSION']
 
-    def compute_cotrended_lightcurve(self, cbvs=[1, 2]):
+    def compute_cotrended_lightcurve(self, cbvs=[1, 2], **kwargs):
         """Returns a LightCurve object after cotrending the SAP_FLUX
         against the cotrending basis vectors.
 
@@ -548,8 +548,11 @@ class KeplerLightCurveFile(object):
         cbvs : list of ints
             The list of cotrending basis vectors to fit to the data. For example,
             [1, 2] will fit the first two basis vectors.
+        kwargs : dict
+            Dictionary of keyword arguments to be passed to
+            KeplerCBVCorrector.correct.
         """
-        return KeplerCBVCorrector(self).correct(cbvs=cbvs)
+        return KeplerCBVCorrector(self).correct(cbvs=cbvs, **kwargs)
 
     def header(self, ext=0):
         """Header of the object at extension `ext`"""
@@ -860,7 +863,7 @@ class KeplerCBVCorrector(object):
         """
         return self._opt_result
 
-    def correct(self, cbvs=[1, 2]):
+    def correct(self, cbvs=[1, 2], method='powell', options={}):
         """
         Correct the SAP_FLUX by fitting a number of cotrending basis vectors
         `cbvs`.
@@ -870,6 +873,11 @@ class KeplerCBVCorrector(object):
         cbvs : list of ints
             The list of cotrending basis vectors to fit to the data. For example,
             [1, 2] will fit the first two basis vectors.
+        method : str
+            Numerical optimization method. See scipy.optimize.minimize for the
+            full list of methods.
+        options : dict
+            Dictionary of options to be passed to scipy.optimize.minimize.
         """
         module, output = channel_to_module_output(self.lc_file.channel)
         cbv_file = pyfits.open(self.get_cbv_url())
@@ -891,7 +899,8 @@ class KeplerCBVCorrector(object):
 
         loss = self.loss_function(data=norm_sap_flux, mean=mean_model,
                                   var=norm_err_sap_flux)
-        self._opt_result = loss.fit(x0=np.zeros(len(cbvs)), method='L-BFGS-B')
+        self._opt_result = loss.fit(x0=np.zeros(len(cbvs)), method=method,
+                                    options=options)
         self._coeffs = self._opt_result.x
         flux_hat = sap_lc.flux - median_sap_flux * mean_model(self._coeffs)
 
