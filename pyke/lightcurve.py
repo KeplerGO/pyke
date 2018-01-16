@@ -179,7 +179,8 @@ class LightCurve(object):
         return new_lc
 
     def bin(self, binsize=13, method='mean'):
-        """Bins a lightcurve using a block mean of size `binsize`.
+        """Bins a lightcurve using a function defined by `method`
+        on blocks of samples of size `binsize`.
 
         Parameters
         ----------
