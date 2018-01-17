@@ -552,6 +552,11 @@ class KeplerLightCurveFile(object):
         kwargs : dict
             Dictionary of keyword arguments to be passed to
             KeplerCBVCorrector.correct.
+
+        Returns
+        -------
+        lc : LightCurve object
+            CBV flux-corrected lightcurve.
         """
         return KeplerCBVCorrector(self).correct(cbvs=cbvs, **kwargs)
 
