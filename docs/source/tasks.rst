@@ -55,4 +55,4 @@ Click on a task in the list below to retrieve detailed documentation.
 .. toctree::
     :maxdepth: 2
 
-    api/index
+    tasks/index

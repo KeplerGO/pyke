@@ -1,0 +1,37 @@
+******************
+List of PyKE tools
+******************
+
+.. toctree::
+
+    kepbls
+    kepclip
+    kepconvert
+    kepcotrend
+    kepdetrend
+    kepdiffim
+    kepdraw
+    kepdynamic
+    kepextract
+    kepffi
+    kepfilter
+    kepflatten
+    kepfold
+    kepft
+    kephead
+    kepimages
+    kepmask
+    kepoutlier
+    keppca
+    keppixseries
+    kepprf
+    kepprfphot
+    keprange
+    kepsff
+    kepsmooth
+    kepstddev
+    kepstitch
+    keptimefix
+    keptrial
+    keptrim
+    kepwindow

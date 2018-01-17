@@ -5,6 +5,10 @@ from astropy.visualization import (PercentileInterval, ImageNormalize,
                                    SqrtStretch, LogStretch, LinearStretch)
 
 
+__all__ = ['KeplerQualityFlags', 'module_output_to_channel',
+           'channel_to_module_output']
+
+
 class PyKEArgumentHelpFormatter(HelpFormatter):
     """Help message formatter which adds default values to argument help,
     except for boolean arguments.
@@ -22,7 +26,20 @@ class PyKEArgumentHelpFormatter(HelpFormatter):
 
 
 def module_output_to_channel(module, output):
-    """Returns the cCCD channel number for a given module and output pair."""
+    """Returns the CCD channel number for a given module and output pair.
+
+    Parameters
+    ----------
+    module : int
+        Module number
+    output : int
+        Output number
+
+    Returns
+    -------
+    channel : int
+        Channel number
+    """
     if module < 1 or module > 26:
         raise ValueError("Module number must be in range 1-26.")
     if output < 1 or output > 4:
@@ -31,7 +48,18 @@ def module_output_to_channel(module, output):
 
 
 def channel_to_module_output(channel):
-    """Returns a (module, output) pair given a CCD channel number."""
+    """Returns a (module, output) pair given a CCD channel number.
+
+    Parameters
+    ----------
+    channel : int
+        Channel number
+
+    Returns
+    -------
+    module, output : tuple of ints
+        Module and Output number
+    """
     if channel < 1 or channel > 88:
         raise ValueError("Channel number must be in the range 1-88.")
     lookup = _get_channel_lookup_array()
@@ -168,8 +196,9 @@ class KeplerQualityFlags(object):
         return result
 
 
-def plot_image(image, scale='linear', origin='lower', xlabel='Pixel Column Number',
-               ylabel='Pixel Row Number', clabel='Flux ($e^{-}s^{-1}$)', title=None, **kwargs):
+def plot_image(image, scale='linear', origin='lower',
+               xlabel='Pixel Column Number', ylabel='Pixel Row Number',
+               clabel='Flux ($e^{-}s^{-1}$)', title=None, **kwargs):
         """Utility function to plot a 2D image
 
         Parameters
