@@ -32,7 +32,8 @@ Documentation
 
    quickstart
    install
-   overview
+   api/index
+   tasks
    contributing
    citing
 
@@ -49,4 +50,7 @@ Tutorials
 Acknowledgment
 **************
 
-PyKE is a community project `developed on GitHub <https://github.com/KeplerGO/PyKE>`_ and supported by the `Kepler/K2 Guest Observer Office <https://keplerscience.arc.nasa.gov>`_. Please consider :ref:`citing PyKE <citing>` if you find this code useful in your research.
+PyKE is a community project `developed on GitHub <https://github.com/KeplerGO/PyKE>`_
+and supported by the `Kepler/K2 Guest Observer Office <https://keplerscience.arc.nasa.gov>`_.
+Please consider :ref:`citing PyKE <citing>` if you find this code useful in your
+research.

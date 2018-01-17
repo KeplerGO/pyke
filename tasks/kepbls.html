@@ -1,0 +1,450 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>kepbls: perform Box-Least Square searches for periodic exoplanet transits &mdash; PyKE 3.0.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../genindex.html"/>
+        <link rel="search" title="Search" href="../search.html"/>
+    <link rel="top" title="PyKE 3.0.0 documentation" href="../index.html"/>
+        <link rel="up" title="List of PyKE tools" href="index.html"/>
+        <link rel="next" title="kepclip: remove unwanted time ranges from Kepler time series data" href="kepclip.html"/>
+        <link rel="prev" title="List of PyKE tools" href="index.html"/> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> PyKE
+          
+
+          
+            
+            <img src="../_static/pyke-white.png" class="logo" />
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                3.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/ipython_notebooks/whatsnew31.html">What’s new in PyKE 3.1?</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/index.html">API documentation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../tasks.html">PyKE tasks</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../tasks.html#calling-tasks-from-python">Calling tasks from Python</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../tasks.html#calling-tasks-from-a-terminal">Calling tasks from a terminal</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="index.html">List of PyKE tools</a><ul class="current">
+<li class="toctree-l4 current"><a class="current reference internal" href="#"><strong>kepbls</strong>: perform Box-Least Square searches for periodic exoplanet transits</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kepclip.html"><strong>kepclip</strong>: remove unwanted time ranges from Kepler time series data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kepconvert.html"><strong>kepconvert</strong>: convert Kepler FITS time series to or from a different file format</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kepcotrend.html"><strong>kepcotrend</strong>: remove systematic trends Kepler light curves using cotrending basis vectors</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kepdetrend.html"><strong>kepdetrend</strong>: detrend aperture photometry data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kepdiffim.html"><strong>kepdiffim</strong>: difference imaging of pixels within a target mask</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kepdraw.html"><strong>kepdraw</strong>: interactive plotting of Kepler time series data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kepdynamic.html"><strong>kepdynamic</strong>: construct a dynamic power spectrum from Kepler time series data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kepextract.html"><strong>kepextract</strong>: create a light curve from a target pixel file by summing user-selected pixels</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kepffi.html"><strong>kepffi</strong>: display a portion of a Full Frame Image (FFI) and define custom target apertures</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kepfilter.html"><strong>kepfilter</strong>: bandpass filtering of Kepler light curve data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kepflatten.html"><strong>kepflatten</strong>: remove low frequency variability from time-series, preserve transits and flares</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kepfold.html"><strong>kepfold</strong>: phase-fold light curve data on linear ephemeris</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kepft.html"><strong>kepft</strong>: calculate and store a Fourier Transform from a Kepler time series</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kephead.html"><strong>kephead</strong>: search for and list FITS keywords in Kepler data files</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kepimages.html"><strong>kepimages</strong>: create a series of separate FITS image files from a Target Pixel File</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kepmask.html"><strong>kepmask</strong>: plot, create or edit custom target masks for target pixel files</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kepoutlier.html"><strong>kepoutlier</strong>: remove or replace statistical outliers from time series data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="keppca.html"><strong>keppca</strong>: perform principal component analysis upon a target pixel file</a></li>
+<li class="toctree-l4"><a class="reference internal" href="keppixseries.html"><strong>keppixseries</strong>: individual time series photometry for all pixels within a target mask</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kepprf.html"><strong>kepprf</strong>: fit a PSF model to a specific image within a Target Pixel File</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kepprfphot.html"><strong>kepprfphot</strong>: fit a PSF model to time series observations within a Target Pixel File</a></li>
+<li class="toctree-l4"><a class="reference internal" href="keprange.html"><strong>keprange</strong>: define time ranges interactively for use with other PyKE tasks</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kepsff.html"><strong>kepsff</strong>: remove motion-correlated noise from aperture light curve data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kepsmooth.html"><strong>kepsmooth</strong>: smooth light curves by convolution with a choice of analytical function</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kepstddev.html"><strong>kepstddev</strong>: calculate Combined Differential Photometric Precision for a time series light curve</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kepstitch.html"><strong>kepstitch</strong>: append short cadence months and/or long cadence quarters</a></li>
+<li class="toctree-l4"><a class="reference internal" href="keptimefix.html"><strong>keptimefix</strong>: correct a time stamp error in the target pixel files</a></li>
+<li class="toctree-l4"><a class="reference internal" href="keptrial.html"><strong>keptrial</strong>: calculate best period and error estimate from time series</a></li>
+<li class="toctree-l4"><a class="reference internal" href="keptrim.html"><strong>keptrim</strong>: trim pixels from Target Pixel Files</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kepwindow.html"><strong>kepwindow</strong>: calculate and store the window function for a Kepler time series</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../citing.html">Citing</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/index.html">Photometry tutorials</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">PyKE</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../tasks.html">PyKE tasks</a> &raquo;</li>
+        
+          <li><a href="index.html">List of PyKE tools</a> &raquo;</li>
+        
+      <li><strong>kepbls</strong>: perform Box-Least Square searches for periodic exoplanet transits</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/tasks/kepbls.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast,
+.nboutput.nblast {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast + .nbinput {
+    margin-top: -19px;
+}
+
+/* nice headers on first paragraph of info/warning boxes */
+.admonition .first {
+    margin: -12px;
+    padding: 6px 12px;
+    margin-bottom: 12px;
+    color: #fff;
+    line-height: 1;
+    display: block;
+}
+.admonition.warning .first {
+    background: #f0b37e;
+}
+.admonition.note .first {
+    background: #6ab0de;
+}
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+</style>
+<div class="section" id="kepbls-perform-box-least-square-searches-for-periodic-exoplanet-transits">
+<h1><strong>kepbls</strong>: perform Box-Least Square searches for periodic exoplanet transits<a class="headerlink" href="#kepbls-perform-box-least-square-searches-for-periodic-exoplanet-transits" title="Permalink to this headline">¶</a></h1>
+<dl class="function">
+<dt id="pyke.kepbls.kepbls">
+<code class="descclassname">pyke.kepbls.</code><code class="descname">kepbls</code><span class="sig-paren">(</span><em>infile</em>, <em>outfile=None</em>, <em>datacol='DETSAP_FLUX'</em>, <em>errcol='DETSAP_FLUX_ERR'</em>, <em>minper=1.0</em>, <em>maxper=30</em>, <em>mindur=0.5</em>, <em>maxdur=12</em>, <em>nsearch=1000</em>, <em>nbins=1000</em>, <em>plot=False</em>, <em>overwrite=False</em>, <em>verbose=False</em>, <em>logfile='kepbls.log'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyke/kepbls.html#kepbls"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyke.kepbls.kepbls" title="Permalink to this definition">¶</a></dt>
+<dd><p>kepbls – Perform Box-Least Square searches for periodic exoplanet transits</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>infile</strong> : str</p>
+<blockquote>
+<div><p>The name of a standard format FITS file containing a Kepler light
+curve within the first data extension. The data in <strong>infile</strong> will
+typically have been flattened by <code class="docutils literal"><span class="pre">kepflatten</span></code>. Multiple quarters can
+be searched by appending light curves within a single file using
+<code class="docutils literal"><span class="pre">kepstitch</span></code>.</p>
+</div></blockquote>
+<p><strong>outfile</strong> : str</p>
+<blockquote>
+<div><p>The name of the output FITS file. <strong>outfile</strong> will be a direct copy of
+<strong>infile</strong> but with a new extension called BLS appended containing a
+table of i) trial periods, PERIOD, ii) a reference Barycentric Julian
+Date (BJD) corresponding the center of the most transit-like structure
+in the folded light curve at the trial period, BJD0, iii) a duration
+(in hours) corresponding the width of the most transit-like structure
+in the folded light curve at the trial period, DURATION, and iv) the
+normalized signal residue of the most transit-like structure in the
+folded light curve at the trial period, SIG_RES. The definition of
+SIG_RES is provided in equation 5 of Kovacs, Zucker and Mazeh (2002).
+The maximum calculated value of SIG_RES and the corresponding trial
+period, BJD epoch and transit duration are stored as keywords in the
+BLS extension called SIGNRES, PERIOD, BJD0, TRANSDUR.</p>
+</div></blockquote>
+<p><strong>datacol</strong> : str</p>
+<blockquote>
+<div><p>The column name containing data stored within FITS extension 1 of
+<strong>infile</strong>. This data will be searched for outliers. Typically this
+name is DETSAP_FLUX (Detrended Simple Aperture Photometry fluxes). This
+version of the data is computed by the task <code class="docutils literal"><span class="pre">kepflatten</span></code>.
+Other flux data will be accepted - SAP_FLUX (Simple Aperture
+Photometry), PDCSAP_FLUX (Pre-search Data Conditioning fluxes) or
+CBVSAP_FLUX (SAP_FLUX corrected for systematic artifacts by the PyKE
+tool kepcotrend). However neither of these three options are
+recommended because the flux data contain either astrophysical
+variability, systematic variability, or both.</p>
+</div></blockquote>
+<p><strong>errcol</strong> : str</p>
+<blockquote>
+<div><p>The column name containing photometric 1-sigma errors stored within
+extension 1 of infile. Typically this name is DETSAP_FLUX_ERR.</p>
+</div></blockquote>
+<p><strong>minper</strong> : float [days]</p>
+<blockquote>
+<div><p>The shortest trial period on which to search for transits.</p>
+</div></blockquote>
+<p><strong>maxper</strong> : float [days]</p>
+<blockquote>
+<div><p>The longest trial period on which to search for transits.</p>
+</div></blockquote>
+<p><strong>mindur</strong> : float [hours]</p>
+<blockquote>
+<div><p>For each trial period, the BLS function will be fit to the data by
+i) iterating upon the epoch of mid-transit in the model, and
+ii) adjusting the width of the modeled transit. The width is adjusted
+systematically in step sizes equaling the cadence of the input data.
+<strong>mindur</strong> provides a lower limit to the range of transit widths
+tested.</p>
+</div></blockquote>
+<p><strong>maxdur</strong> : float [hours]</p>
+<blockquote>
+<div><p>Provides an upper limit to the range of transit widths tested over each
+trial period.</p>
+</div></blockquote>
+<p><strong>nsearch</strong> : int</p>
+<blockquote>
+<div><p>The number of trial periods to search between the lower bound
+<strong>minper</strong> and the upper bound <strong>maxper</strong>.</p>
+</div></blockquote>
+<p><strong>nbins</strong> : int</p>
+<blockquote>
+<div><p>Before the BLS transit model is fit to the data, data are folded upon
+the trail orbital period and then phase binned by calculating the mean
+flux level within each bin interval. <strong>nbins</strong> is the number of phase bins
+in which to store the data before each fit.</p>
+</div></blockquote>
+<p><strong>plot</strong> : bool</p>
+<blockquote>
+<div><p>Plot the calculated Normalized Signal Residue as a function of trial
+orbital period?</p>
+</div></blockquote>
+<p><strong>overwrite</strong> : bool</p>
+<blockquote>
+<div><p>Overwrite the output file? If overwrite is False and an existing file
+has the same name as outfile then the task will stop with an error.</p>
+</div></blockquote>
+<p><strong>verbose</strong> : bool</p>
+<blockquote>
+<div><p>Print informative messages and warnings to the shell and logfile?</p>
+</div></blockquote>
+<p><strong>logfile</strong> : str</p>
+<blockquote class="last">
+<div><p>Name of the logfile containing error and warning messages.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
+<p>After using <code class="docutils literal"><span class="pre">kepflatten</span></code> to remove low frequency variability in <code class="docutils literal"><span class="pre">kplr011904151-2009350155506_llc.fits</span></code>,
+we can use the output, <code class="docutils literal"><span class="pre">kepflatten.fits</span></code>, into <code class="docutils literal"><span class="pre">kepbls</span></code>, i.e.,</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>$ kepbls kepflatten.fits --datacol DETSAP_FLUX --errcol DETSAP_FLUX_ERR
+--minper <span class="m">0</span>.8 --maxper <span class="m">1</span>.0 --mindur <span class="m">1</span>.0 --maxdur <span class="m">12</span>.0 --nsearch <span class="m">1000</span>
+--nbins <span class="m">1000</span> --plot --verbose
+
+     Best trial <span class="nv">period</span> <span class="o">=</span> <span class="m">0</span>.8375062346458435 days
+   Time of mid-transit <span class="o">=</span> BJD <span class="m">2455093</span>.5457274746
+      Transit <span class="nv">duration</span> <span class="o">=</span> <span class="m">1</span>.7099086232483387 hours
+Maximum signal <span class="nv">residue</span> <span class="o">=</span> <span class="m">4</span>.487271046981536e-06
+</pre></div>
+</div>
+<img alt="../_images/kepbls.png" class="align-center" src="../_images/kepbls.png" />
+</dd></dl>
+
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="kepclip.html" class="btn btn-neutral float-right" title="kepclip: remove unwanted time ranges from Kepler time series data" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="index.html" class="btn btn-neutral" title="List of PyKE tools" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright PyKE Developers and Contributors.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'3.0.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

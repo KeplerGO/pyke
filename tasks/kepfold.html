@@ -1,0 +1,405 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>kepfold: phase-fold light curve data on linear ephemeris &mdash; PyKE 3.0.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../genindex.html"/>
+        <link rel="search" title="Search" href="../search.html"/>
+    <link rel="top" title="PyKE 3.0.0 documentation" href="../index.html"/>
+        <link rel="up" title="List of PyKE tools" href="index.html"/>
+        <link rel="next" title="kepft: calculate and store a Fourier Transform from a Kepler time series" href="kepft.html"/>
+        <link rel="prev" title="kepflatten: remove low frequency variability from time-series, preserve transits and flares" href="kepflatten.html"/> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> PyKE
+          
+
+          
+            
+            <img src="../_static/pyke-white.png" class="logo" />
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                3.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/ipython_notebooks/whatsnew31.html">What’s new in PyKE 3.1?</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/index.html">API documentation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../tasks.html">PyKE tasks</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../tasks.html#calling-tasks-from-python">Calling tasks from Python</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../tasks.html#calling-tasks-from-a-terminal">Calling tasks from a terminal</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="index.html">List of PyKE tools</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="kepbls.html"><strong>kepbls</strong>: perform Box-Least Square searches for periodic exoplanet transits</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kepclip.html"><strong>kepclip</strong>: remove unwanted time ranges from Kepler time series data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kepconvert.html"><strong>kepconvert</strong>: convert Kepler FITS time series to or from a different file format</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kepcotrend.html"><strong>kepcotrend</strong>: remove systematic trends Kepler light curves using cotrending basis vectors</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kepdetrend.html"><strong>kepdetrend</strong>: detrend aperture photometry data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kepdiffim.html"><strong>kepdiffim</strong>: difference imaging of pixels within a target mask</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kepdraw.html"><strong>kepdraw</strong>: interactive plotting of Kepler time series data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kepdynamic.html"><strong>kepdynamic</strong>: construct a dynamic power spectrum from Kepler time series data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kepextract.html"><strong>kepextract</strong>: create a light curve from a target pixel file by summing user-selected pixels</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kepffi.html"><strong>kepffi</strong>: display a portion of a Full Frame Image (FFI) and define custom target apertures</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kepfilter.html"><strong>kepfilter</strong>: bandpass filtering of Kepler light curve data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kepflatten.html"><strong>kepflatten</strong>: remove low frequency variability from time-series, preserve transits and flares</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#"><strong>kepfold</strong>: phase-fold light curve data on linear ephemeris</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kepft.html"><strong>kepft</strong>: calculate and store a Fourier Transform from a Kepler time series</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kephead.html"><strong>kephead</strong>: search for and list FITS keywords in Kepler data files</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kepimages.html"><strong>kepimages</strong>: create a series of separate FITS image files from a Target Pixel File</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kepmask.html"><strong>kepmask</strong>: plot, create or edit custom target masks for target pixel files</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kepoutlier.html"><strong>kepoutlier</strong>: remove or replace statistical outliers from time series data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="keppca.html"><strong>keppca</strong>: perform principal component analysis upon a target pixel file</a></li>
+<li class="toctree-l4"><a class="reference internal" href="keppixseries.html"><strong>keppixseries</strong>: individual time series photometry for all pixels within a target mask</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kepprf.html"><strong>kepprf</strong>: fit a PSF model to a specific image within a Target Pixel File</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kepprfphot.html"><strong>kepprfphot</strong>: fit a PSF model to time series observations within a Target Pixel File</a></li>
+<li class="toctree-l4"><a class="reference internal" href="keprange.html"><strong>keprange</strong>: define time ranges interactively for use with other PyKE tasks</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kepsff.html"><strong>kepsff</strong>: remove motion-correlated noise from aperture light curve data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kepsmooth.html"><strong>kepsmooth</strong>: smooth light curves by convolution with a choice of analytical function</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kepstddev.html"><strong>kepstddev</strong>: calculate Combined Differential Photometric Precision for a time series light curve</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kepstitch.html"><strong>kepstitch</strong>: append short cadence months and/or long cadence quarters</a></li>
+<li class="toctree-l4"><a class="reference internal" href="keptimefix.html"><strong>keptimefix</strong>: correct a time stamp error in the target pixel files</a></li>
+<li class="toctree-l4"><a class="reference internal" href="keptrial.html"><strong>keptrial</strong>: calculate best period and error estimate from time series</a></li>
+<li class="toctree-l4"><a class="reference internal" href="keptrim.html"><strong>keptrim</strong>: trim pixels from Target Pixel Files</a></li>
+<li class="toctree-l4"><a class="reference internal" href="kepwindow.html"><strong>kepwindow</strong>: calculate and store the window function for a Kepler time series</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../citing.html">Citing</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/index.html">Photometry tutorials</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">PyKE</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../tasks.html">PyKE tasks</a> &raquo;</li>
+        
+          <li><a href="index.html">List of PyKE tools</a> &raquo;</li>
+        
+      <li><strong>kepfold</strong>: phase-fold light curve data on linear ephemeris</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/tasks/kepfold.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast,
+.nboutput.nblast {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast + .nbinput {
+    margin-top: -19px;
+}
+
+/* nice headers on first paragraph of info/warning boxes */
+.admonition .first {
+    margin: -12px;
+    padding: 6px 12px;
+    margin-bottom: 12px;
+    color: #fff;
+    line-height: 1;
+    display: block;
+}
+.admonition.warning .first {
+    background: #f0b37e;
+}
+.admonition.note .first {
+    background: #6ab0de;
+}
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+</style>
+<div class="section" id="kepfold-phase-fold-light-curve-data-on-linear-ephemeris">
+<h1><strong>kepfold</strong>: phase-fold light curve data on linear ephemeris<a class="headerlink" href="#kepfold-phase-fold-light-curve-data-on-linear-ephemeris" title="Permalink to this headline">¶</a></h1>
+<dl class="function">
+<dt id="pyke.kepfold.kepfold">
+<code class="descclassname">pyke.kepfold.</code><code class="descname">kepfold</code><span class="sig-paren">(</span><em>infile</em>, <em>outfile=None</em>, <em>period=None</em>, <em>bjd0=None</em>, <em>bindata=False</em>, <em>nbins=1000</em>, <em>datacol='SAP_FLUX'</em>, <em>noninteractive=False</em>, <em>overwrite=False</em>, <em>verbose=False</em>, <em>logfile='kepfold.log'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyke/kepfold.html#kepfold"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyke.kepfold.kepfold" title="Permalink to this definition">¶</a></dt>
+<dd><p>kepfold: Phase-fold light curve data on linear ephemeris.</p>
+<p>kepfold calculates the phase of all time-tagged data points relative to a
+user-supplied linear ephemeris. The relation is:</p>
+<p><span class="math">\(TIME\)</span> is the column within the FITS light curve file containing
+barycenter-corrected time stamps. <span class="math">\(bjd0\)</span> is a user-supplied BJD for
+zero phase. period is a user-supplied period in units of days. PHASE is the
+calculated phase for each time stamp; these results are written to a new
+float column in the LIGHT CURVE extension of the input file before being
+exported as a new file with name defined by the user. Optionally, kepfold
+will plot the data folded on the ephemeris and store it within a new FITS
+extension of the output file called FOLDED.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>inile</strong> : str</p>
+<blockquote>
+<div><p>The name of a MAST standard format FITS file containing a Kepler light
+curve within the first data extension.</p>
+</div></blockquote>
+<p><strong>outfile</strong> : str</p>
+<blockquote>
+<div><p>The name of the output FITS file with a new extension containing a
+phased light curve.</p>
+</div></blockquote>
+<p><strong>period</strong> : str</p>
+<blockquote>
+<div><p>Period over which to fold the light curve, in units of days.</p>
+</div></blockquote>
+<p><strong>bjd0</strong> : float</p>
+<blockquote>
+<div><p>Time of zero phase for the folded data, in units of BJD.</p>
+</div></blockquote>
+<p><strong>bindata: bool</strong></p>
+<blockquote>
+<div><p>Collect the data into discrete bins during the fold?</p>
+</div></blockquote>
+<p><strong>nbins</strong> : int</p>
+<blockquote>
+<div><p>The number of phase bins to calculate.</p>
+</div></blockquote>
+<p><strong>datacol</strong> : str</p>
+<blockquote>
+<div><p>The name of the FITS table column in extension 1 of infile upon which
+the Fourier transform will be calculated.</p>
+</div></blockquote>
+<p><strong>non-interactive</strong> : bool</p>
+<blockquote>
+<div><p>If True, prevents the matplotlib window to pop up.</p>
+</div></blockquote>
+<p><strong>overwrite</strong> : bool</p>
+<blockquote>
+<div><p>Overwrite the output file?</p>
+</div></blockquote>
+<p><strong>verbose</strong> : bool</p>
+<blockquote>
+<div><p>Print informative messages and warnings to the shell and logfile?</p>
+</div></blockquote>
+<p><strong>logfile</strong> : str</p>
+<blockquote class="last">
+<div><p>Name of the logfile containing error and warning messages.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>$ kepfold kplr010544976-2009201121230_slc.fits
+  <span class="m">0</span>.350471 <span class="m">2455002</span>.825 --bindata --verbose
+</pre></div>
+</div>
+<img alt="../_images/kepfold.png" src="../_images/kepfold.png" />
+</dd></dl>
+
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="kepft.html" class="btn btn-neutral float-right" title="kepft: calculate and store a Fourier Transform from a Kepler time series" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="kepflatten.html" class="btn btn-neutral" title="kepflatten: remove low frequency variability from time-series, preserve transits and flares" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright PyKE Developers and Contributors.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'3.0.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

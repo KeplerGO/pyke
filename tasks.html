@@ -1,0 +1,370 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>PyKE tasks &mdash; PyKE 3.0.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="PyKE 3.0.0 documentation" href="index.html"/>
+        <link rel="next" title="List of PyKE tools" href="tasks/index.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> PyKE
+          
+
+          
+            
+            <img src="_static/pyke-white.png" class="logo" />
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                3.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="tutorials/ipython_notebooks/whatsnew31.html">What’s new in PyKE 3.1?</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/index.html">API documentation</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">PyKE tasks</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#calling-tasks-from-python">Calling tasks from Python</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#calling-tasks-from-a-terminal">Calling tasks from a terminal</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tasks/index.html">List of PyKE tools</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="citing.html">Citing</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="tutorials/index.html">Photometry tutorials</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">PyKE</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>PyKE tasks</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/tasks.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast,
+.nboutput.nblast {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast + .nbinput {
+    margin-top: -19px;
+}
+
+/* nice headers on first paragraph of info/warning boxes */
+.admonition .first {
+    margin: -12px;
+    padding: 6px 12px;
+    margin-bottom: 12px;
+    color: #fff;
+    line-height: 1;
+    display: block;
+}
+.admonition.warning .first {
+    background: #f0b37e;
+}
+.admonition.note .first {
+    background: #6ab0de;
+}
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+</style>
+<div class="section" id="pyke-tasks">
+<span id="tasks"></span><h1>PyKE tasks<a class="headerlink" href="#pyke-tasks" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="calling-tasks-from-python">
+<h2>Calling tasks from Python<a class="headerlink" href="#calling-tasks-from-python" title="Permalink to this headline">¶</a></h2>
+<p>PyKE provides a set of tasks which can be called both as Python functions
+and as command-line utilities. For example, PyKE provides <code class="docutils literal"><span class="pre">kepextract</span></code>,
+which creates a lightcurve from a Target Pixel File.
+You can import and use <code class="docutils literal"><span class="pre">kepextract</span></code> in Python as follows:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pyke</span> <span class="k">import</span> <span class="n">kepextract</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">kepextract</span><span class="p">(</span><span class="s2">&quot;target-pixel-file.fits&quot;</span><span class="p">,</span> <span class="s2">&quot;output-lightcurve.fits&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This will create a file called <code class="docutils literal"><span class="pre">output-lightcurve.fits</span></code> on your current
+directory, which stores the extracted lightcurve. Subsequently, this lightcurve
+can be visualized using <code class="docutils literal"><span class="pre">kepdraw</span></code>:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pyke</span> <span class="k">import</span> <span class="n">kepdraw</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">kepdraw</span><span class="p">(</span><span class="s2">&quot;output-lightcurve.fits&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>If you are using an interactive IPython shell, you can learn about the use
+of every task and its optional parameters by adding a question mark behind
+the function name and hitting return:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span>In [1]: kepextract?
+</pre></div>
+</div>
+</div>
+<div class="section" id="calling-tasks-from-a-terminal">
+<h2>Calling tasks from a terminal<a class="headerlink" href="#calling-tasks-from-a-terminal" title="Permalink to this headline">¶</a></h2>
+<p>For convenience, many of PyKE’s tasks are installed as command-line utilities
+on your system. This allows you to perform common tasks from your favorite
+terminal without having to open a Python interpreter. For instance, the example
+showed in the previous section can be done from a terminal session as follows:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span>$ kepextract target-pixel-file.fits output-lightcurve.fits
+</pre></div>
+</div>
+<p>And its help documentation can can be retrieved using:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span>$ kepextract --help
+</pre></div>
+</div>
+<p>More generally, most of PyKE’s tasks can be run from a terminal using the following pattern:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span>$ name-of-the-tool input-file output-file --options
+</pre></div>
+</div>
+<p>where <code class="docutils literal"><span class="pre">input-file</span></code> is either a light curve or a target pixel file and
+<code class="docutils literal"><span class="pre">output-file</span></code> is the destination of the output.
+Click on a task in the list below to retrieve detailed documentation.</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="tasks/index.html">List of PyKE tools</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tasks/kepbls.html"><strong>kepbls</strong>: perform Box-Least Square searches for periodic exoplanet transits</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tasks/kepclip.html"><strong>kepclip</strong>: remove unwanted time ranges from Kepler time series data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tasks/kepconvert.html"><strong>kepconvert</strong>: convert Kepler FITS time series to or from a different file format</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tasks/kepcotrend.html"><strong>kepcotrend</strong>: remove systematic trends Kepler light curves using cotrending basis vectors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tasks/kepdetrend.html"><strong>kepdetrend</strong>: detrend aperture photometry data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tasks/kepdiffim.html"><strong>kepdiffim</strong>: difference imaging of pixels within a target mask</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tasks/kepdraw.html"><strong>kepdraw</strong>: interactive plotting of Kepler time series data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tasks/kepdynamic.html"><strong>kepdynamic</strong>: construct a dynamic power spectrum from Kepler time series data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tasks/kepextract.html"><strong>kepextract</strong>: create a light curve from a target pixel file by summing user-selected pixels</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tasks/kepffi.html"><strong>kepffi</strong>: display a portion of a Full Frame Image (FFI) and define custom target apertures</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tasks/kepfilter.html"><strong>kepfilter</strong>: bandpass filtering of Kepler light curve data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tasks/kepflatten.html"><strong>kepflatten</strong>: remove low frequency variability from time-series, preserve transits and flares</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tasks/kepfold.html"><strong>kepfold</strong>: phase-fold light curve data on linear ephemeris</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tasks/kepft.html"><strong>kepft</strong>: calculate and store a Fourier Transform from a Kepler time series</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tasks/kephead.html"><strong>kephead</strong>: search for and list FITS keywords in Kepler data files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tasks/kepimages.html"><strong>kepimages</strong>: create a series of separate FITS image files from a Target Pixel File</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tasks/kepmask.html"><strong>kepmask</strong>: plot, create or edit custom target masks for target pixel files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tasks/kepoutlier.html"><strong>kepoutlier</strong>: remove or replace statistical outliers from time series data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tasks/keppca.html"><strong>keppca</strong>: perform principal component analysis upon a target pixel file</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tasks/keppixseries.html"><strong>keppixseries</strong>: individual time series photometry for all pixels within a target mask</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tasks/kepprf.html"><strong>kepprf</strong>: fit a PSF model to a specific image within a Target Pixel File</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tasks/kepprfphot.html"><strong>kepprfphot</strong>: fit a PSF model to time series observations within a Target Pixel File</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tasks/keprange.html"><strong>keprange</strong>: define time ranges interactively for use with other PyKE tasks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tasks/kepsff.html"><strong>kepsff</strong>: remove motion-correlated noise from aperture light curve data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tasks/kepsmooth.html"><strong>kepsmooth</strong>: smooth light curves by convolution with a choice of analytical function</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tasks/kepstddev.html"><strong>kepstddev</strong>: calculate Combined Differential Photometric Precision for a time series light curve</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tasks/kepstitch.html"><strong>kepstitch</strong>: append short cadence months and/or long cadence quarters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tasks/keptimefix.html"><strong>keptimefix</strong>: correct a time stamp error in the target pixel files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tasks/keptrial.html"><strong>keptrial</strong>: calculate best period and error estimate from time series</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tasks/keptrim.html"><strong>keptrim</strong>: trim pixels from Target Pixel Files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tasks/kepwindow.html"><strong>kepwindow</strong>: calculate and store the window function for a Kepler time series</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="tasks/index.html" class="btn btn-neutral float-right" title="List of PyKE tools" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright PyKE Developers and Contributors.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'3.0.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>
