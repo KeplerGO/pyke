@@ -1,6 +1,7 @@
 import numpy as np
 import scipy
 import matplotlib.pyplot as plt
+from matplotlib import patches
 from astropy.io import fits
 from .lightcurve import KeplerLightCurve, LightCurve
 from .prf import SimpleKeplerPRF
@@ -259,7 +260,8 @@ class KeplerTargetPixelFile(TargetPixelFile):
 
         return col_centr, row_centr
 
-    def plot(self, frame=0, cadenceno=None, bkg=False, **kwargs):
+    def plot(self, frame=0, cadenceno=None, bkg=False, aperture_mask=None,
+             **kwargs):
         """
         Plot a target pixel file at a given frame (index) or cadence number.
 
@@ -271,7 +273,9 @@ class KeplerTargetPixelFile(TargetPixelFile):
             Alternatively, a cadence number can be provided.
             This argument has priority over frame number.
         bkg : bool
-            If True, background will be added to the tpf.
+            If True, background will be added to the pixel values.
+        aperture_mask : ndarray
+            Highlight pixels selected by aperture_mask.
         kwargs : dict
             Keywords arguments passed to `pyke.utils.plot_image`.
         """
@@ -290,9 +294,18 @@ class KeplerTargetPixelFile(TargetPixelFile):
         except IndexError:
             raise ValueError("frame {} is out of bounds, must be in the range "
                              "0-{}.".format(frame, self.flux.shape[0]))
-        plot_image(pflux, title='Kepler ID: {}'.format(self.keplerid),
-                   extent=(self.column, self.column + self.shape[2],
-                           self.row, self.row + self.shape[1]), **kwargs)
+        fig, ax = plot_image(pflux, title='Kepler ID: {}'.format(self.keplerid),
+                             extent=(self.column, self.column + self.shape[2],
+                             self.row, self.row + self.shape[1]), **kwargs)
+
+        if aperture_mask is not None:
+            for i in range(self.shape[1]):
+                for j in range(self.shape[2]):
+                    if aperture_mask[i, j]:
+                        ax.add_patch(patches.Rectangle((j+self.column, i+self.row),
+                                                       1, 1, color='pink', fill=True,
+                                                       alpha=.6))
+        return fig, ax
 
     def get_bkg_lightcurve(self, aperture_mask=None):
         if aperture_mask is None:

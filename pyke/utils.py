@@ -221,6 +221,7 @@ def plot_image(image, scale='linear', origin='lower',
         kwargs : dict
             Keyword arguments to be passed to `matplotlib.pyplot.imshow`.
         """
+        fig, ax = plt.subplots()
         vmin, vmax = PercentileInterval(95.).get_limits(image)
         if scale == 'linear':
             norm = ImageNormalize(vmin=vmin, vmax=vmax, stretch=LinearStretch())
@@ -231,12 +232,12 @@ def plot_image(image, scale='linear', origin='lower',
         else:
             raise ValueError("scale {} is not available.".format(scale))
 
-        plt.imshow(image, origin=origin, norm=norm, **kwargs)
-        plt.xlabel(xlabel)
-        plt.ylabel(ylabel)
-        plt.title(title)
-        cbar = plt.colorbar(norm=norm)
-        cbar.set_label(clabel)
+        cax = ax.imshow(image, origin=origin, norm=norm, **kwargs)
+        ax.set_xlabel(xlabel)
+        ax.set_ylabel(ylabel)
+        ax.set_title(title)
+        cbar = fig.colorbar(cax, norm=norm, label=clabel)
+        return fig, ax
 
 def running_mean(data, window_size):
     """Returns the moving average of an array `data`.
