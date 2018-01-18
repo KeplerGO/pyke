@@ -150,7 +150,7 @@ class LightCurve(object):
             lc.flux_err = self.flux_err[~nan_mask]
         return lc
 
-    def remove_outliers(self, sigma=5., **kwargs):
+    def remove_outliers(self, sigma=5., return_mask=False, **kwargs):
         """Removes outlier flux values using sigma-clipping.
 
         This method returns a new LightCurve object from which flux values
@@ -162,6 +162,9 @@ class LightCurve(object):
         sigma : float
             The number of standard deviations to use for clipping outliers.
             Defaults to 5.
+        return_mask : bool
+            Whether or not to return the mask indicating which data points
+            were removed. Entries marked as `True` are considered outliers.
         **kwargs : dict
             Dictionary of arguments to be passed to `astropy.stats.sigma_clip`.
 
@@ -176,6 +179,9 @@ class LightCurve(object):
         new_lc.flux = self.flux[~outlier_mask]
         if new_lc.flux_err is not None:
             new_lc.flux_err = self.flux_err[~outlier_mask]
+
+        if return_mask:
+            return new_lc, outlier_mask
         return new_lc
 
     def bin(self, binsize=13, method='mean'):
