@@ -815,7 +815,7 @@ class KeplerCBVCorrector(object):
     lc_file : KeplerLightCurveFile object or str
         An instance from KeplerLightCurveFile or a path for the .fits
         file of a NASA's Kepler/K2 light curve.
-    loss_function : oktopus.Likelihood subclass
+    likelihood : oktopus.Likelihood subclass
         A class that describes a cost function.
         The default is :class:`oktopus.LaplacianLikelihood`, which is tantamount
         to the L1 norm.
@@ -836,9 +836,11 @@ class KeplerCBVCorrector(object):
     >>> plt.legend() # doctest: +SKIP
     """
 
-    def __init__(self, lc_file, loss_function=oktopus.LaplacianLikelihood):
+    def __init__(self, lc_file, likelihood=oktopus.LaplacianLikelihood,
+                 prior=oktopus.LaplacianPrior):
         self.lc_file = lc_file
-        self.loss_function = loss_function
+        self.likelihood = likelihood
+        self.prior = prior
         self._ncbvs = 15 # number of cbvs for Kepler/K2
 
         if self.lc_file.mission == 'Kepler':
@@ -910,45 +912,41 @@ class KeplerCBVCorrector(object):
             coeffs = np.asarray(theta)
             return np.dot(coeffs, cbv_array)
 
-        loss = self.loss_function(data=norm_sap_flux, mean=mean_model,
-                                  var=norm_err_sap_flux)
-        self._opt_result = loss.fit(x0=np.zeros(len(cbvs)), method=method,
-                                    options=options)
+        prior = self.prior(mean=np.zeros(len(cbvs)), var=16.)
+        likelihood = self.likelihood(data=norm_sap_flux, mean=mean_model,
+                                     var=norm_err_sap_flux)
+        x0 = likelihood.fit(x0=prior.mean, method=method, options=options).x
+        posterior = oktopus.Posterior(likelihood=likelihood, prior=prior)
+
+        self._opt_result = posterior.fit(x0=x0, method=method,
+                                         options=options)
         self._coeffs = self._opt_result.x
         flux_hat = sap_lc.flux - median_sap_flux * mean_model(self._coeffs)
-
         return LightCurve(time=sap_lc.time, flux=flux_hat.reshape(-1))
 
-    def get_cbvs_list(self, ftol=1e-2):
-        """Returns the smallest subsequence of subsequent CBVs such that the
-        relative absolute error to the next subsequent subsequence does not
-        exceed `ftol`. If such subsequence doesn't exist, returns an empty list.
-
-        Parameters
-        ----------
-        ftol : float
-            Tolerance upon which the relative error between subsequent lists of
-            CBVs will be compared.
+    def get_cbvs_list(self, method='bayes-factor'):
+        """Returns the subsequence of subsequent CBVs that maximizes
+        Bayes' factor.
 
         Returns
         -------
         cbv_list : list
-            Smallest set of sequential CBVs that satistify the relative error
-            criterion stated above.
+            Subsequence of subsequent CBVs that maximizes the Bayes' factor.
         """
 
-        cost = []
+        self.bayes_factor, cost = [], [] # bayes_factor here is actually the
+                                         # negative log of the bayes factor
         self.correct(cbvs=[1], options={'xtol': 1e-6, 'ftol':1e-6, 'maxfev': 2000})
         cost.append(self.opt_result.fun)
-        for n in range(2, self._ncbvs):
+        for n in tqdm(range(2, self._ncbvs+1)):
             cbv_list = list(range(1, n+1))
             self.correct(cbv_list, options={'xtol': 1e-6, 'ftol':1e-6, 'maxfev': 2000})
             cost.append(self.opt_result.fun)
-            rel_err = math.fabs((cost[n-1] - cost[n-2]) / max(1, cost[n-2]))
-            if rel_err < ftol:
-                return list(range(1, n))
-
-        return []
+            self.bayes_factor.append(math.fabs((cost[n-1] - cost[n-2])))
+        k = np.argmin(self.bayes_factor)
+        # transform to get the actual Bayes factor
+        self.bayes_factor = np.exp(-np.array(self.bayes_factor))
+        return list(range(1, k+2))
 
     def get_cbv_url(self):
         # gets the html page and finds all references to 'a' tag
