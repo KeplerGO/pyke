@@ -839,6 +839,7 @@ class KeplerCBVCorrector(object):
     def __init__(self, lc_file, loss_function=oktopus.LaplacianLikelihood):
         self.lc_file = lc_file
         self.loss_function = loss_function
+        self._ncbvs = 15 # number of cbvs for Kepler/K2
 
         if self.lc_file.mission == 'Kepler':
             self.cbv_base_url = "http://archive.stsci.edu/missions/kepler/cbv/"
@@ -917,6 +918,37 @@ class KeplerCBVCorrector(object):
         flux_hat = sap_lc.flux - median_sap_flux * mean_model(self._coeffs)
 
         return LightCurve(time=sap_lc.time, flux=flux_hat.reshape(-1))
+
+    def get_cbvs_list(self, ftol=1e-2):
+        """Returns the smallest subsequence of subsequent CBVs such that the
+        relative absolute error to the next subsequent subsequence does not
+        exceed `ftol`. If such subsequence doesn't exist, returns an empty list.
+
+        Parameters
+        ----------
+        ftol : float
+            Tolerance upon which the relative error between subsequent lists of
+            CBVs will be compared.
+
+        Returns
+        -------
+        cbv_list : list
+            Smallest set of sequential CBVs that satistify the relative error
+            criterion stated above.
+        """
+
+        cost = []
+        self.correct(cbvs=[1], options={'xtol': 1e-6, 'ftol':1e-6, 'maxfev': 2000})
+        cost.append(self.opt_result.fun)
+        for n in range(2, self._ncbvs):
+            cbv_list = list(range(1, n+1))
+            self.correct(cbv_list, options={'xtol': 1e-6, 'ftol':1e-6, 'maxfev': 2000})
+            cost.append(self.opt_result.fun)
+            rel_err = math.fabs((cost[n-1] - cost[n-2]) / max(1, cost[n-2]))
+            if rel_err < ftol:
+                return list(range(1, n))
+
+        return []
 
     def get_cbv_url(self):
         # gets the html page and finds all references to 'a' tag
