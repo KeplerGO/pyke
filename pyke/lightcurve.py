@@ -942,7 +942,7 @@ class KeplerCBVCorrector(object):
             cbv_list = list(range(1, n+1))
             self.correct(cbv_list, options={'xtol': 1e-6, 'ftol':1e-6, 'maxfev': 2000})
             cost.append(self.opt_result.fun)
-            self.bayes_factor.append(math.fabs((cost[n-1] - cost[n-2])))
+            self.bayes_factor.append((cost[n-2] - cost[n-1]))
         k = np.argmin(self.bayes_factor)
         # transform to get the actual Bayes factor
         self.bayes_factor = np.exp(-np.array(self.bayes_factor))
