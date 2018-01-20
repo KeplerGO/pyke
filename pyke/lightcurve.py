@@ -102,7 +102,7 @@ class LightCurve(object):
             flatten_lc.flux_err = lc_clean.flux_err / trend_signal
 
         if return_trend:
-            trend_lc = copy.copy(self)
+            trend_lc = copy.copy(lc_clean)
             trend_lc.flux = trend_signal
             return flatten_lc, trend_lc
         return flatten_lc
