@@ -192,14 +192,20 @@ class KeplerTargetPixelFile(TargetPixelFile):
         raise NotImplementedError
 
     def _parse_aperture_mask(self, aperture_mask):
-        """Parse the aperture mask parameter as given by a user.
+        """Parse the `aperture_mask` parameter as given by a user.
+
+        The `aperture_mask` parameter is accepted by a number of methods.
+        This method ensures that the parameter is always parsed in the same way.
 
         Parameters
         ----------
         aperture_mask : array-like, 'pipeline', 'all', or None
             A boolean array describing the aperture such that `False` means
             that the pixel will be masked out.
-            If None or 'all' are passed, all pixels will be used.
+            If None or 'all' are passed, a mask that is `True` everywhere will
+            be returned.
+            If 'pipeline' is passed, the mask suggested by the Kepler pipeline
+            will be returned.
 
         Returns
         -------
@@ -214,7 +220,7 @@ class KeplerTargetPixelFile(TargetPixelFile):
                 aperture_mask = np.ones((self.shape[1], self.shape[2]), dtype=bool)
             elif aperture_mask == 'pipeline':
                 aperture_mask = self.pipeline_mask
-            self._last_aperture_mask = aperture_mask
+        self._last_aperture_mask = aperture_mask
         return aperture_mask
 
     def to_lightcurve(self, aperture_mask='pipeline'):
