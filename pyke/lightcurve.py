@@ -841,7 +841,7 @@ class KeplerCBVCorrector(object):
         self.lc_file = lc_file
         self.likelihood = likelihood
         self.prior = prior
-        self._ncbvs = 15 # number of cbvs for Kepler/K2
+        self._ncbvs = 16 # number of cbvs for Kepler/K2
 
         if self.lc_file.mission == 'Kepler':
             self.cbv_base_url = "http://archive.stsci.edu/missions/kepler/cbv/"
