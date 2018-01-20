@@ -143,7 +143,8 @@ class LightCurve(object):
         Returns
         -------
         normalized_lightcurve : LightCurve object
-            A new ``LightCurve`` in which the flux is normalized to 1.
+            A new ``LightCurve`` in which `flux` and `flux_err` are divided
+            by the median.
         """
         lc = copy.copy(self)
         if lc.flux_err is not None:
