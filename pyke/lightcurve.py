@@ -926,12 +926,16 @@ class KeplerCBVCorrector(object):
 
     def get_cbvs_list(self, method='bayes-factor'):
         """Returns the subsequence of subsequent CBVs that maximizes
-        Bayes' factor.
+        Bayes' factor [1]_.
 
         Returns
         -------
         cbv_list : list
             Subsequence of subsequent CBVs that maximizes the Bayes' factor.
+
+        References
+        ----------
+        .. [1] https://en.wikipedia.org/wiki/Bayes_factor
         """
 
         self.bayes_factor, cost = [], [] # bayes_factor here is actually the
