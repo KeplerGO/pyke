@@ -942,10 +942,19 @@ class KeplerCBVCorrector(object):
             cbv_list = list(range(1, n+1))
             self.correct(cbv_list, options={'xtol': 1e-6, 'ftol':1e-6, 'maxfev': 2000})
             cost.append(self.opt_result.fun)
+            # cost is the negative log of the posterior evaluated at the
+            # Maximum A Posterior Probability (MAP) estimator
             self.bayes_factor.append((cost[n-2] - cost[n-1]))
+            # so cost[n-2] - cost[n-1] = -log(p1) + log(p2) = log(p2/p1)
+            # where p1 is the posterior probability (evaluated at the MAP)
+            # for the model with n-2 cbvs and p2 is the posterior probability
+            # also evaluated at the MAP for the model with n-1 cbvs
         k = np.argmin(self.bayes_factor)
         # transform to get the actual Bayes factor
         self.bayes_factor = np.exp(-np.array(self.bayes_factor))
+        # the k+2 here comes from the fact that Python indexes begin
+        # from 0 and we count CBVs starting from 1 and also
+        # note that range(1, k) equals the interval [1, k), which excludes k.
         return list(range(1, k+2))
 
     def get_cbv_url(self):
