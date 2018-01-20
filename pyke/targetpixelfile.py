@@ -1,3 +1,4 @@
+import warnings
 import numpy as np
 import scipy
 import matplotlib.pyplot as plt
@@ -190,10 +191,36 @@ class KeplerTargetPixelFile(TargetPixelFile):
         """Save the TPF to fits"""
         raise NotImplementedError
 
+    def _parse_aperture_mask(self, aperture_mask):
+        """Parse the aperture mask parameter as given by a user.
+
+        Parameters
+        ----------
+        aperture_mask : array-like, 'pipeline', 'all', or None
+            A boolean array describing the aperture such that `False` means
+            that the pixel will be masked out.
+            If None or 'all' are passed, all pixels will be used.
+
+        Returns
+        -------
+        aperture_mask : ndarray
+            2D boolean numpy array containing `True` for selected pixels.
+        """
+        with warnings.catch_warnings():
+            # `aperture_mask` supports both arrays and string values; these yield
+            # uninteresting FutureWarnings when compared, so let's ignore that.
+            warnings.simplefilter(action='ignore', category=FutureWarning)
+            if aperture_mask is None or aperture_mask == 'all':
+                aperture_mask = np.ones((self.shape[1], self.shape[2]), dtype=bool)
+            elif aperture_mask == 'pipeline':
+                aperture_mask = self.pipeline_mask
+            self._last_aperture_mask = aperture_mask
+        return aperture_mask
+
     def to_lightcurve(self, aperture_mask='pipeline'):
         """Performs aperture photometry.
 
-        Attributes
+        Parameters
         ----------
         aperture_mask : array-like, 'pipeline', or 'all'
             A boolean array describing the aperture such that `False` means
@@ -207,13 +234,7 @@ class KeplerTargetPixelFile(TargetPixelFile):
             Array containing the summed flux within the aperture for each
             cadence.
         """
-        if aperture_mask == 'pipeline':
-            aperture_mask = self.pipeline_mask
-        elif aperture_mask == 'all':
-            mask = ~np.isnan(self.hdu[1].data['FLUX'][100])
-            aperture_mask = np.ones((self.shape[1], self.shape[2]),
-                                    dtype=bool) * mask
-
+        aperture_mask = self._parse_aperture_mask(aperture_mask)
         centroid_col, centroid_row = self.centroids(aperture_mask)
 
         return KeplerLightCurve(flux=np.nansum(self.flux[:, aperture_mask], axis=1),
@@ -244,13 +265,7 @@ class KeplerTargetPixelFile(TargetPixelFile):
         col_centr, row_centr : tuple
             Arrays containing centroids for column and row at each cadence
         """
-        if aperture_mask == 'pipeline':
-            aperture_mask = self.pipeline_mask
-        elif aperture_mask == 'all':
-            mask = ~np.isnan(self.hdu[1].data['FLUX'][100])
-            aperture_mask = np.ones((self.shape[1], self.shape[2]),
-                                    dtype=bool) * mask
-
+        aperture_mask = self._parse_aperture_mask(aperture_mask)
         yy, xx = np.indices(self.shape[1:]) + 0.5
         yy = self.row + yy
         xx = self.column + xx
@@ -299,6 +314,7 @@ class KeplerTargetPixelFile(TargetPixelFile):
                              self.row, self.row + self.shape[1]), **kwargs)
 
         if aperture_mask is not None:
+            aperture_mask = self._parse_aperture_mask(aperture_mask)
             for i in range(self.shape[1]):
                 for j in range(self.shape[2]):
                     if aperture_mask[i, j]:
@@ -308,9 +324,6 @@ class KeplerTargetPixelFile(TargetPixelFile):
         return fig, ax
 
     def get_bkg_lightcurve(self, aperture_mask=None):
-        if aperture_mask is None:
-            mask = self.hdu[1].data['FLUX'][100] == self.hdu[1].data['FLUX'][100]
-            aperture_mask = np.ones((self.shape[1], self.shape[2]), dtype=bool) * mask
-
+        aperture_mask = self._parse_aperture_mask(aperture_mask)
         return LightCurve(flux=np.nansum(self.flux_bkg[:, aperture_mask], axis=1),
                           time=self.time, flux_err=self.flux_bkg_err)

@@ -51,18 +51,18 @@ class PRFPhotometry(object):
     >>> from oktopus import UniformPrior
     >>> tpf = KeplerTargetPixelFile("https://archive.stsci.edu/missions/kepler/"
     ...                             "target_pixel_files/0084/008462852/"
-    ...                             "kplr008462852-2013098041711_lpd-targ.fits.gz")
+    ...                             "kplr008462852-2013098041711_lpd-targ.fits.gz") # doctest: +SKIP
     Downloading https://archive.stsci.edu/missions/kepler/target_pixel_files/0084/008462852/kplr008462852-2013098041711_lpd-targ.fits.gz [Done]
-    >>> prf = SimpleKeplerPRF(tpf.channel, tpf.shape[1:], tpf.column, tpf.row)
+    >>> prf = SimpleKeplerPRF(tpf.channel, tpf.shape[1:], tpf.column, tpf.row) # doctest: +SKIP
     Downloading http://archive.stsci.edu/missions/kepler/fpc/prf/extracted/kplr16.4_2011265_prf.fits [Done]
-    >>> scene = SceneModel(prfs=prf)
-    >>> prior = UniformPrior(lb=[1.2e5, 230., 128.,1e2], ub=[3.4e5, 235., 133., 1e3])
-    >>> phot = PRFPhotometry(scene, prior)
-    >>> results = phot.fit(tpf.flux)
-    >>> flux_fit = results[:, 0]
-    >>> x_fit = results[:, 1]
-    >>> y_fit = results[:, 2]
-    >>> bkg_fit = results[:, 3]
+    >>> scene = SceneModel(prfs=prf) # doctest: +SKIP
+    >>> prior = UniformPrior(lb=[1.2e5, 230., 128.,1e2], ub=[3.4e5, 235., 133., 1e3]) # doctest: +SKIP
+    >>> phot = PRFPhotometry(scene, prior) # doctest: +SKIP
+    >>> results = phot.fit(tpf.flux) # doctest: +SKIP
+    >>> flux_fit = results[:, 0] # doctest: +SKIP
+    >>> x_fit = results[:, 1] # doctest: +SKIP
+    >>> y_fit = results[:, 2] # doctest: +SKIP
+    >>> bkg_fit = results[:, 3] # doctest: +SKIP
     """
 
     def __init__(self, scene_model, prior, loss_function=PoissonPosterior, **kwargs):
@@ -230,10 +230,10 @@ class KeplerPRF(object):
     >>> import math
     >>> import matplotlib.pyplot as plt
     >>> from pyke import KeplerPRF
-    >>> kepprf = KeplerPRF(channel=44, shape=(10, 10), column=5, row=5)
+    >>> kepprf = KeplerPRF(channel=44, shape=(10, 10), column=5, row=5) # doctest: +SKIP
     Downloading http://archive.stsci.edu/missions/kepler/fpc/prf/extracted/kplr13.4_2011265_prf.fits [Done]
     >>> prf = kepprf(flux=1000, center_col=10, center_row=10,
-    ...              scale_row=0.7, scale_col=0.7, rotation_angle=math.pi/2)
+    ...              scale_row=0.7, scale_col=0.7, rotation_angle=math.pi/2) # doctest: +SKIP
     >>> plt.imshow(prf, origin='lower') # doctest: +SKIP
 
     References
