@@ -134,6 +134,24 @@ class LightCurve(object):
             return LightCurve(fold_time[sorted_args], self.flux[sorted_args])
         return LightCurve(fold_time[sorted_args], self.flux[sorted_args], flux_err=self.flux_err[sorted_args])
 
+    def normalize(self):
+        """Returns a normalized version of the lightcurve.
+
+        The normalized lightcurve is obtained by dividing `flux` and `flux_err`
+        by the median flux.
+
+        Returns
+        -------
+        normalized_lightcurve : LightCurve object
+            A new ``LightCurve`` in which `flux` and `flux_err` are divided
+            by the median.
+        """
+        lc = copy.copy(self)
+        if lc.flux_err is not None:
+            lc.flux_err = lc.flux_err / np.nanmedian(lc.flux)
+        lc.flux = lc.flux / np.nanmedian(lc.flux)
+        return lc
+
     def remove_nans(self):
         """Removes cadences where the flux is NaN.
 
@@ -309,7 +327,7 @@ class LightCurve(object):
             A matplotlib axes object to plot into. If no axes is provided,
             a new one be generated.
         normalize : bool
-            Normalized the lightcurve
+            Normalize the lightcurve before plotting?
         xlabel : str
             Plot x axis label
         ylabel : str
@@ -332,18 +350,17 @@ class LightCurve(object):
         """
         if ax is None:
             fig, ax = plt.subplots(1)
-        flux = self.flux
-        flux_err = self.flux_err
         if normalize:
-            if flux_err is not None:
-                flux_err = flux_err / np.nanmedian(flux)
-            flux = flux / np.nanmedian(flux)
-        if flux_err is None:
-            ax.plot(self.time, flux, marker='o', color=color, linestyle=linestyle,
-                       **kwargs)
+            normalized_lc = self.normalize()
+            flux, flux_err = normalized_lc.flux, normalized_lc.flux_err
         else:
-            ax.errorbar(self.time, flux, flux_err, color=color, linestyle=linestyle,
-                        **kwargs)
+            flux, flux_err = self.flux, self.flux_err
+        if flux_err is None:
+            ax.plot(self.time, flux, marker='o', color=color,
+                    linestyle=linestyle, **kwargs)
+        else:
+            ax.errorbar(self.time, flux, flux_err, color=color,
+                        linestyle=linestyle, **kwargs)
         if fill:
             ax.fill(self.time, flux, fc='#a8a7a7', linewidth=0.0, alpha=0.3)
         if grid:
