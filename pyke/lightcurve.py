@@ -1007,3 +1007,43 @@ class SPLDCorrector(object):
         model = np.dot(X, opt_weights)
         flux_hat = lightcurve - model
         return flux_hat
+
+
+class BoxLikePeriodSearch(object):
+    def __init__(self):
+        pass
+
+    def search(self, lc, minper, maxper, nperiods):
+        def box(height, depth, to, width):
+            """
+            Parameters
+            ----------
+            height : float
+                Out-of-transit amplitude
+            depth : float
+                Transit depth
+            to : float
+                Time of the first data point considered as due to a transit
+            width : float
+                Approximate number of data points that are part of a transit
+            """
+            t = np.linspace(-.5, .5, len(lc.time))
+            val = np.zeros(len(lc.time))
+            val[t < to] = height
+            val[(t >= to) * (t < to + width)] = height - depth
+            val[t >= to + width] = height
+            return val
+
+        lc = lc.normalize()
+        fun, params = [], []
+        trial_periods = np.linspace(minper, maxper, nperiods)
+        for p in trial_periods:
+            folded = lc.fold(period=p)
+            # var should be set to the uncertainty in the data point
+            ll = GaussianLikelihood(data=folded.flux, mean=box, var=1.)
+            res = ll.fit(x0=(1., np.mean(folded.flux) - 0.01, 0., 0.005),
+                         method='powell')
+            params.append(res.x)
+            fun.append(res.fun)
+
+        return fun, trial_periods, params
