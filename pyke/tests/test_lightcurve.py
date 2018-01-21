@@ -131,3 +131,30 @@ def test_normalize():
     """Does the `LightCurve.normalize()` method normalize the flux?"""
     lc = LightCurve(time=np.arange(10), flux=5*np.ones(10))
     assert_allclose(np.median(lc.normalize().flux), 1)
+
+
+def test_to_pandas():
+    """Test the `LightCurve.to_pandas()` method."""
+    time, flux, flux_err = range(3), np.ones(3), np.zeros(3)
+    lc = LightCurve(time, flux, flux_err)
+    df = lc.to_pandas()
+    assert_allclose(df.index, time)
+    assert_allclose(df.flux, flux)
+    assert_allclose(df.flux_err, flux_err)
+
+
+def test_to_table():
+    """Test the `LightCurve.to_table()` method."""
+    time, flux, flux_err = range(3), np.ones(3), np.zeros(3)
+    lc = LightCurve(time, flux, flux_err)
+    tbl = lc.to_table()
+    assert_allclose(tbl['time'], time)
+    assert_allclose(tbl['flux'], flux)
+    assert_allclose(tbl['flux_err'], flux_err)
+
+
+def test_to_csv():
+    """Test the `LightCurve.to_csv()` method."""
+    time, flux, flux_err = range(3), np.ones(3), np.zeros(3)
+    lc = LightCurve(time, flux, flux_err)
+    assert(lc.to_csv() == 'time,flux,flux_err\n0,1.0,0.0\n1,1.0,0.0\n2,1.0,0.0\n')
