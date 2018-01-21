@@ -276,8 +276,8 @@ class KeplerTargetPixelFile(TargetPixelFile):
         yy = self.row + yy
         xx = self.column + xx
         total_flux = np.nansum(self.flux[:, aperture_mask], axis=1)
-        col_centr = np.nansum(xx * aperture_mask * self.flux) / total_flux
-        row_centr = np.nansum(yy * aperture_mask * self.flux) / total_flux
+        col_centr = np.nansum(xx * aperture_mask * self.flux, axis=(1, 2)) / total_flux
+        row_centr = np.nansum(yy * aperture_mask * self.flux, axis=(1, 2)) / total_flux
 
         return col_centr, row_centr
 

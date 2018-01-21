@@ -34,6 +34,10 @@ def test_tpf_ones():
     tpf = KeplerTargetPixelFile(filename_tpf_one_center)
     lc = tpf.to_lightcurve(aperture_mask='all')
     assert np.all(lc.flux == 1)
+    assert np.all((lc.centroid_col < tpf.column+tpf.shape[1]).all()
+                  * (lc.centroid_col > tpf.column).all())
+    assert np.all((lc.centroid_row < tpf.row+tpf.shape[2]).all()
+                  * (lc.centroid_row > tpf.row).all())
 
 def test_quality_flag_decoding():
     """Can the QUALITY flags be parsed correctly?"""
