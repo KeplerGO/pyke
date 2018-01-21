@@ -137,10 +137,14 @@ def test_to_pandas():
     """Test the `LightCurve.to_pandas()` method."""
     time, flux, flux_err = range(3), np.ones(3), np.zeros(3)
     lc = LightCurve(time, flux, flux_err)
-    df = lc.to_pandas()
-    assert_allclose(df.index, time)
-    assert_allclose(df.flux, flux)
-    assert_allclose(df.flux_err, flux_err)
+    try:
+        df = lc.to_pandas()
+        assert_allclose(df.index, time)
+        assert_allclose(df.flux, flux)
+        assert_allclose(df.flux_err, flux_err)
+    except ImportError:
+        # pandas is an optional dependency
+        pass
 
 
 def test_to_table():
@@ -156,5 +160,9 @@ def test_to_table():
 def test_to_csv():
     """Test the `LightCurve.to_csv()` method."""
     time, flux, flux_err = range(3), np.ones(3), np.zeros(3)
-    lc = LightCurve(time, flux, flux_err)
-    assert(lc.to_csv() == 'time,flux,flux_err\n0,1.0,0.0\n1,1.0,0.0\n2,1.0,0.0\n')
+    try:
+        lc = LightCurve(time, flux, flux_err)
+        assert(lc.to_csv() == 'time,flux,flux_err\n0,1.0,0.0\n1,1.0,0.0\n2,1.0,0.0\n')
+    except ImportError:
+        # pandas is an optional dependency
+        pass
