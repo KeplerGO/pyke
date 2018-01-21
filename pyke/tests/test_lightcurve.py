@@ -4,11 +4,14 @@ from numpy.testing import (assert_almost_equal, assert_array_equal,
                            assert_allclose)
 from astropy.utils.data import get_pkg_data_filename
 from ..lightcurve import (LightCurve, KeplerCBVCorrector, KeplerLightCurveFile,
-                          SFFCorrector, KeplerLightCurve)
+                          SFFCorrector, KeplerLightCurve, BoxLikePeriodSearch)
 
 # 8th Quarter of Tabby's star
 TABBY_Q8 = ("https://archive.stsci.edu/missions/kepler/lightcurves"
             "/0084/008462852/kplr008462852-2011073133259_llc.fits")
+
+KEPLER10 = ("https://archive.stsci.edu/missions/kepler/lightcurves/"
+            "0119/011904151/kplr011904151-2010009091648_llc.fits")
 
 
 def test_kepler_cbv_fit():
@@ -131,3 +134,16 @@ def test_normalize():
     """Does the `LightCurve.normalize()` method normalize the flux?"""
     lc = LightCurve(time=np.arange(10), flux=5*np.ones(10))
     assert_allclose(np.median(lc.normalize().flux), 1)
+
+
+def test_brute_force_box_search_period():
+    """Can we recover the orbital period of Kepler-10b?"""
+    answer = 0.837
+    klc = KeplerLightCurveFile(KEPLER10)
+    pdc = klc.PDCSAP_FLUX
+    flat = pdc.flatten()
+
+    boxsearch = BoxLikePeriodSearch()
+    _, _, kepler10b_period = boxsearch.search(flat, minper=0, maxper=5,
+                                              nperiods=1000)
+    assert abs(kepler10b_period - answer) < 1e-2
