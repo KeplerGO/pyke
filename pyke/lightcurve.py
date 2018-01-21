@@ -1073,7 +1073,7 @@ class BoxLikePeriodSearch(object):
     def __init__(self):
         pass
 
-    def search(self, lc, minper, maxper, nperiods, prior=None):
+    def search(self, lc, minper, maxper, nperiods=2000, prior=None):
         """
         Parameters
         ----------
