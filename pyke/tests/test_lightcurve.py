@@ -117,6 +117,7 @@ def test_sff_corrector():
     assert_almost_equal(sff.interp(sff.s), correction, decimal=3)
     assert_array_equal(time, klc.time)
 
+
 def test_bin():
     lc = LightCurve(time=np.arange(10), flux=2*np.ones(10),
                     flux_err=2**.5*np.ones(10))
@@ -124,3 +125,9 @@ def test_bin():
     assert_allclose(binned_lc.flux, 2*np.ones(5))
     assert_allclose(binned_lc.flux_err, np.ones(5))
     assert len(binned_lc.time) == 5
+
+
+def test_normalize():
+    """Does the `LightCurve.normalize()` method normalize the flux?"""
+    lc = LightCurve(time=np.arange(10), flux=5*np.ones(10))
+    assert_allclose(np.median(lc.normalize().flux), 1)

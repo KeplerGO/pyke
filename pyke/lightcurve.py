@@ -102,7 +102,7 @@ class LightCurve(object):
             flatten_lc.flux_err = lc_clean.flux_err / trend_signal
 
         if return_trend:
-            trend_lc = copy.copy(self)
+            trend_lc = copy.copy(lc_clean)
             trend_lc.flux = trend_signal
             return flatten_lc, trend_lc
         return flatten_lc
@@ -133,6 +133,24 @@ class LightCurve(object):
         if self.flux_err is None:
             return LightCurve(fold_time[sorted_args], self.flux[sorted_args])
         return LightCurve(fold_time[sorted_args], self.flux[sorted_args], flux_err=self.flux_err[sorted_args])
+
+    def normalize(self):
+        """Returns a normalized version of the lightcurve.
+
+        The normalized lightcurve is obtained by dividing `flux` and `flux_err`
+        by the median flux.
+
+        Returns
+        -------
+        normalized_lightcurve : LightCurve object
+            A new ``LightCurve`` in which `flux` and `flux_err` are divided
+            by the median.
+        """
+        lc = copy.copy(self)
+        if lc.flux_err is not None:
+            lc.flux_err = lc.flux_err / np.nanmedian(lc.flux)
+        lc.flux = lc.flux / np.nanmedian(lc.flux)
+        return lc
 
     def remove_nans(self):
         """Removes cadences where the flux is NaN.
@@ -309,7 +327,7 @@ class LightCurve(object):
             A matplotlib axes object to plot into. If no axes is provided,
             a new one be generated.
         normalize : bool
-            Normalized the lightcurve
+            Normalize the lightcurve before plotting?
         xlabel : str
             Plot x axis label
         ylabel : str
@@ -332,18 +350,17 @@ class LightCurve(object):
         """
         if ax is None:
             fig, ax = plt.subplots(1)
-        flux = self.flux
-        flux_err = self.flux_err
         if normalize:
-            if flux_err is not None:
-                flux_err = flux_err / np.nanmedian(flux)
-            flux = flux / np.nanmedian(flux)
-        if flux_err is None:
-            ax.plot(self.time, flux, marker='o', color=color, linestyle=linestyle,
-                       **kwargs)
+            normalized_lc = self.normalize()
+            flux, flux_err = normalized_lc.flux, normalized_lc.flux_err
         else:
-            ax.errorbar(self.time, flux, flux_err, color=color, linestyle=linestyle,
-                        **kwargs)
+            flux, flux_err = self.flux, self.flux_err
+        if flux_err is None:
+            ax.plot(self.time, flux, marker='o', color=color,
+                    linestyle=linestyle, **kwargs)
+        else:
+            ax.errorbar(self.time, flux, flux_err, color=color,
+                        linestyle=linestyle, **kwargs)
         if fill:
             ax.fill(self.time, flux, fc='#a8a7a7', linewidth=0.0, alpha=0.3)
         if grid:
@@ -815,7 +832,7 @@ class KeplerCBVCorrector(object):
     lc_file : KeplerLightCurveFile object or str
         An instance from KeplerLightCurveFile or a path for the .fits
         file of a NASA's Kepler/K2 light curve.
-    loss_function : oktopus.Likelihood subclass
+    likelihood : oktopus.Likelihood subclass
         A class that describes a cost function.
         The default is :class:`oktopus.LaplacianLikelihood`, which is tantamount
         to the L1 norm.
@@ -836,9 +853,12 @@ class KeplerCBVCorrector(object):
     >>> plt.legend() # doctest: +SKIP
     """
 
-    def __init__(self, lc_file, loss_function=oktopus.LaplacianLikelihood):
+    def __init__(self, lc_file, likelihood=oktopus.LaplacianLikelihood,
+                 prior=oktopus.LaplacianPrior):
         self.lc_file = lc_file
-        self.loss_function = loss_function
+        self.likelihood = likelihood
+        self.prior = prior
+        self._ncbvs = 16 # number of cbvs for Kepler/K2
 
         if self.lc_file.mission == 'Kepler':
             self.cbv_base_url = "http://archive.stsci.edu/missions/kepler/cbv/"
@@ -909,14 +929,54 @@ class KeplerCBVCorrector(object):
             coeffs = np.asarray(theta)
             return np.dot(coeffs, cbv_array)
 
-        loss = self.loss_function(data=norm_sap_flux, mean=mean_model,
-                                  var=norm_err_sap_flux)
-        self._opt_result = loss.fit(x0=np.zeros(len(cbvs)), method=method,
-                                    options=options)
+        prior = self.prior(mean=np.zeros(len(cbvs)), var=16.)
+        likelihood = self.likelihood(data=norm_sap_flux, mean=mean_model,
+                                     var=norm_err_sap_flux)
+        x0 = likelihood.fit(x0=prior.mean, method=method, options=options).x
+        posterior = oktopus.Posterior(likelihood=likelihood, prior=prior)
+
+        self._opt_result = posterior.fit(x0=x0, method=method,
+                                         options=options)
         self._coeffs = self._opt_result.x
         flux_hat = sap_lc.flux - median_sap_flux * mean_model(self._coeffs)
-
         return LightCurve(time=sap_lc.time, flux=flux_hat.reshape(-1))
+
+    def get_cbvs_list(self, method='bayes-factor'):
+        """Returns the subsequence of subsequent CBVs that maximizes
+        Bayes' factor [1]_.
+
+        Returns
+        -------
+        cbv_list : list
+            Subsequence of subsequent CBVs that maximizes the Bayes' factor.
+
+        References
+        ----------
+        .. [1] https://en.wikipedia.org/wiki/Bayes_factor
+        """
+
+        self.bayes_factor, cost = [], [] # bayes_factor here is actually the
+                                         # negative log of the bayes factor
+        self.correct(cbvs=[1], options={'xtol': 1e-6, 'ftol':1e-6, 'maxfev': 2000})
+        cost.append(self.opt_result.fun)
+        for n in tqdm(range(2, self._ncbvs+1)):
+            cbv_list = list(range(1, n+1))
+            self.correct(cbv_list, options={'xtol': 1e-6, 'ftol':1e-6, 'maxfev': 2000})
+            cost.append(self.opt_result.fun)
+            # cost is the negative log of the posterior evaluated at the
+            # Maximum A Posterior Probability (MAP) estimator
+            self.bayes_factor.append((cost[n-2] - cost[n-1]))
+            # so cost[n-2] - cost[n-1] = -log(p1) + log(p2) = log(p2/p1)
+            # where p1 is the posterior probability (evaluated at the MAP)
+            # for the model with n-2 cbvs and p2 is the posterior probability
+            # also evaluated at the MAP for the model with n-1 cbvs
+        k = np.argmin(self.bayes_factor)
+        # transform to get the actual Bayes factor
+        self.bayes_factor = np.exp(-np.array(self.bayes_factor))
+        # the k+2 here comes from the fact that Python indexes begin
+        # from 0 and we count CBVs starting from 1 and also
+        # note that range(1, k) equals the interval [1, k), which excludes k.
+        return list(range(1, k+2))
 
     def get_cbv_url(self):
         # gets the html page and finds all references to 'a' tag
