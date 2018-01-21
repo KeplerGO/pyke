@@ -1122,10 +1122,8 @@ class BoxLikePeriodSearch(object):
             # var should be set to the uncertainty in the data point
             ll = oktopus.GaussianPosterior(data=folded.flux, mean=box, var=1.,
                                            prior=prior)
-            # height, depth, to, width
-            res = ll.fit(x0=prior.mean,
-                         method='powell', options={'ftol':1e-9, 'xtol':1e-9,
-                                                   'maxfev': 2000})
+            res = ll.fit(x0=prior.mean, method='powell',
+                         options={'ftol':1e-9, 'xtol':1e-9, 'maxfev': 2000})
             fun.append(res.fun)
 
         return fun, trial_periods, trial_periods[np.argmin(fun)]
