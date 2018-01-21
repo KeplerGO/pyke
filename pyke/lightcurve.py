@@ -1074,6 +1074,32 @@ class BoxLikePeriodSearch(object):
         pass
 
     def search(self, lc, minper, maxper, nperiods, prior=None):
+        """
+        Parameters
+        ----------
+        lc : LightCurve object
+            An object from KeplerLightCurve or LightCurve
+        minper : float
+            Minimum period to search for.
+        maxper : float
+            Maximum period to search for.
+        nperiods : int
+            Number of periods to search between `minper` and `maxper`.
+        prior : Prior object
+            Prior probability on the parameters of the box function.
+
+        Returns
+        -------
+        fun : list
+            Negative log posterior of the fit. The "best" period is
+            therefore the one with the smallest negative log posterior
+            probability.
+        trial_periods : list
+            List of trial periods.
+        best_period : float
+            Best period.
+        """
+
         def box(amplitude, depth, to, width):
             """A simple box function defined in the interval [-.5, .5].
             `to` is the time of the first discontinuity.
@@ -1086,7 +1112,7 @@ class BoxLikePeriodSearch(object):
             return val
 
         lc = lc.normalize()
-        fun, params = [], []
+        fun = []
         trial_periods = np.linspace(minper, maxper, nperiods)
         if prior is None:
             prior = oktopus.UniformPrior(lb=[0.9, 0., -.4, 0.],
@@ -1100,7 +1126,6 @@ class BoxLikePeriodSearch(object):
             res = ll.fit(x0=prior.mean,
                          method='powell', options={'ftol':1e-9, 'xtol':1e-9,
                                                    'maxfev': 2000})
-            params.append(res.x)
             fun.append(res.fun)
 
-        return fun, trial_periods, params
+        return fun, trial_periods, trial_periods[np.argmin(fun)]
