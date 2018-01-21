@@ -1073,36 +1073,33 @@ class BoxLikePeriodSearch(object):
     def __init__(self):
         pass
 
-    def search(self, lc, minper, maxper, nperiods):
-        def box(height, depth, to, width):
-            """
-            Parameters
-            ----------
-            height : float
-                Out-of-transit amplitude
-            depth : float
-                Transit depth
-            to : float
-                Time of the first data point considered as due to a transit
-            width : float
-                Approximate number of data points that are part of a transit
+    def search(self, lc, minper, maxper, nperiods, prior=None):
+        def box(amplitude, depth, to, width):
+            """A simple box function defined in the interval [-.5, .5].
+            `to` is the time of the first discontinuity.
             """
             t = np.linspace(-.5, .5, len(lc.time))
             val = np.zeros(len(lc.time))
-            val[t < to] = height
-            val[(t >= to) * (t < to + width)] = height - depth
-            val[t >= to + width] = height
+            val[t < to] = amplitude
+            val[(t >= to) * (t < to + width)] = amplitude - depth
+            val[t >= to + width] = amplitude
             return val
 
         lc = lc.normalize()
         fun, params = [], []
         trial_periods = np.linspace(minper, maxper, nperiods)
-        for p in trial_periods:
+        if prior is None:
+            prior = oktopus.UniformPrior(lb=[0.9, 0., -.4, 0.],
+                                         ub=[1.15, .5, .5, .5])
+        for p in tqdm(trial_periods):
             folded = lc.fold(period=p)
             # var should be set to the uncertainty in the data point
-            ll = GaussianLikelihood(data=folded.flux, mean=box, var=1.)
-            res = ll.fit(x0=(1., np.mean(folded.flux) - 0.01, 0., 0.005),
-                         method='powell')
+            ll = oktopus.GaussianPosterior(data=folded.flux, mean=box, var=1.,
+                                           prior=prior)
+            # height, depth, to, width
+            res = ll.fit(x0=prior.mean,
+                         method='powell', options={'ftol':1e-9, 'xtol':1e-9,
+                                                   'maxfev': 2000})
             params.append(res.x)
             fun.append(res.fun)
 
