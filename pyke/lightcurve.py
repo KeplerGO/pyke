@@ -13,7 +13,8 @@ from matplotlib import pyplot as plt
 
 
 __all__ = ['LightCurve', 'KeplerLightCurve', 'KeplerLightCurveFile',
-           'KeplerCBVCorrector', 'SPLDCorrector', 'SFFCorrector']
+           'KeplerCBVCorrector', 'SPLDCorrector', 'SFFCorrector',
+           'box_period_search']
 
 
 class LightCurve(object):
@@ -1117,3 +1118,83 @@ class SPLDCorrector(object):
         model = np.dot(X, opt_weights)
         flux_hat = lightcurve - model
         return flux_hat
+
+
+def box_period_search(lc, min_period=0.5, max_period=30, nperiods=2000,
+                      prior=None):
+    """
+    Implements a brute force search to find transit-like periodic events.
+    This function fits a "box" model defined as:
+
+    .. math::
+
+        \Pi (t) =
+            \left\{
+                \begin{array}{ll}
+                    a, & t < t_o,\\
+                    a - d, & t_o \leq t < t_o + w, \\
+                    a, & t \geq t_o + w
+                \end{array}
+            \right.
+
+    to a list of `nperiods` periods between `min_period` and `max_period`.
+    It's assumed that the best period is the one that maximizes the posterior
+    probability of the fit.
+
+    Parameters
+    ----------
+    lc : LightCurve object
+        An object from KeplerLightCurve or LightCurve.
+        Note that flattening the lightcurve beforehand does aid the quest
+        for the transit period.
+    min_period : float
+        Minimum period to search for. Units must be the same as `lc.time`.
+    max_period : float
+        Maximum period to search for. Units must be the same as `lc.time`.
+    nperiods : int
+        Number of periods to search between `min_period` and `max_period`.
+    prior : oktopus.Prior object
+        Prior probability on the parameters of the box function,
+        namely, `amplitude`, `depth`, `to` (time of the first discontinuity),
+        and `width`.
+
+    Returns
+    -------
+    log_posterior : list
+        Log posterior (up to an additive constant) of the fit. The "best"
+        period is therefore the one that maximizes the log posterior
+        probability.
+    trial_periods : numpy array
+        List of trial periods.
+    best_period : float
+        Best period.
+    """
+
+    def box(amplitude, depth, to, width):
+        """A simple box function defined in the interval [-.5, .5].
+        `to` is the time of the first discontinuity.
+        """
+        t = np.linspace(-.5, .5, len(lc.time))
+        val = np.zeros(len(lc.time))
+        val[t < to] = amplitude
+        val[(t >= to) * (t < to + width)] = amplitude - depth
+        val[t >= to + width] = amplitude
+        return val
+
+    if prior is None:
+        prior = oktopus.UniformPrior(lb=[0.9, 0., -.4, 0.],
+                                     ub=[1.15, .5, .5, .3])
+    lc = lc.normalize()
+    log_posterior = []
+    trial_periods = np.linspace(min_period, max_period, nperiods)
+    for p in tqdm(trial_periods):
+        folded = lc.fold(period=p)
+        # var should be set to the uncertainty in the data point
+        ll = oktopus.GaussianPosterior(data=folded.flux, mean=box, var=1.,
+                                       prior=prior)
+        res = ll.fit(x0=prior.mean, method='powell',
+                     options={'ftol':1e-9, 'xtol':1e-9, 'maxfev': 2000})
+        # fun is the negative log posterior
+        log_posterior.append(-res.fun)
+
+    return log_posterior, trial_periods, trial_periods[np.argmax(log_posterior)]
