@@ -1070,7 +1070,8 @@ class SPLDCorrector(object):
         return flux_hat
 
 
-def box_period_search(lc, min_period, max_period, nperiods=2000, prior=None):
+def box_period_search(lc, min_period=0.5, max_period=30, nperiods=2000,
+                      prior=None):
     """
     Implements a brute force search to find transit-like periodic events.
     This function fits a "box" model defined as:
@@ -1132,7 +1133,7 @@ def box_period_search(lc, min_period, max_period, nperiods=2000, prior=None):
 
     if prior is None:
         prior = oktopus.UniformPrior(lb=[0.9, 0., -.4, 0.],
-                                     ub=[1.15, .5, .5, .5])
+                                     ub=[1.15, .1, .5, .3])
     lc = lc.normalize()
     log_posterior = []
     trial_periods = np.linspace(min_period, max_period, nperiods)
