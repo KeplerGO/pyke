@@ -1,6 +1,6 @@
 ..
 
-Example 3: Separating a background EB from a foreground star
+Example 2: Separating a background EB from a foreground star
 ============================================================
 
 The likelihood of source confusion around any given target is high.
