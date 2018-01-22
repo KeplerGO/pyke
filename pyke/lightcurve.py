@@ -1133,7 +1133,7 @@ def box_period_search(lc, min_period=0.5, max_period=30, nperiods=2000,
 
     if prior is None:
         prior = oktopus.UniformPrior(lb=[0.9, 0., -.4, 0.],
-                                     ub=[1.15, .1, .5, .3])
+                                     ub=[1.15, .5, .5, .3])
     lc = lc.normalize()
     log_posterior = []
     trial_periods = np.linspace(min_period, max_period, nperiods)

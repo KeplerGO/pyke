@@ -143,6 +143,6 @@ def test_box_period_search():
     pdc = klc.PDCSAP_FLUX
     flat = pdc.flatten()
 
-    _, _, kepler10b_period = box_period_search(flat, min_period=0,
-                                               max_period=5, nperiods=1000)
+    _, _, kepler10b_period = box_period_search(flat, min_period=.5,
+                                               max_period=1, nperiods=100)
     assert abs(kepler10b_period - answer) < 1e-2
