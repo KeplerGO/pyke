@@ -10,8 +10,8 @@ PyKE: Kepler, K2 & TESS Data Analysis Tools
                     :target: https://ci.appveyor.com/project/mirca/pyke
 .. |cov-badge| image:: https://codecov.io/gh/KeplerGO/pyke/branch/master/graph/badge.svg
               :target: https://codecov.io/gh/KeplerGO/pyke
-.. |doi-badge| image:: https://zenodo.org/badge/DOI/10.5281/zenodo.835584.svg
-              :target: https://doi.org/10.5281/zenodo.835584
+.. |doi-badge| image:: https://zenodo.org/badge/DOI/10.5281/zenodo.835583.svg
+              :target: https://doi.org/10.5281/zenodo.835583
 
 
 **Developed since 2012, PyKE offers a user-friendly way to inspect and analyze
