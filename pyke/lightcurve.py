@@ -1,18 +1,15 @@
 import copy
-import math
 import numpy as np
-from scipy import linalg
-from oktopus import L1Norm
-from scipy import signal, interpolate
+from scipy import linalg, signal, interpolate
+import oktopus
 from astropy.io import fits as pyfits
 from astropy.stats import sigma_clip
+from astropy.table import Table
 from tqdm import tqdm
-import oktopus
 import requests
 from bs4 import BeautifulSoup
 from .utils import running_mean, channel_to_module_output, KeplerQualityFlags
 from matplotlib import pyplot as plt
-from matplotlib.figure import Figure
 
 
 __all__ = ['LightCurve', 'KeplerLightCurve', 'KeplerLightCurveFile',
@@ -378,14 +375,12 @@ class LightCurve(object):
 
         Returns
         -------
-        dataframe : `astropy.table.Table` object
+        table : `astropy.table.Table` object
             An AstroPy Table with columns 'time', 'flux', and 'flux_err'.
         """
-        from astropy.table import Table
-        tbl = Table(data=(self.time, self.flux, self.flux_err),
-                    names=('time', 'flux', 'flux_err'),
-                    meta=self.meta)
-        return tbl
+        return Table(data=(self.time, self.flux, self.flux_err),
+                     names=('time', 'flux', 'flux_err'),
+                     meta=self.meta)
 
     def to_pandas(self):
         """Export the LightCurve as a Pandas DataFrame.
@@ -419,6 +414,12 @@ class LightCurve(object):
             a string.
         **kwargs : dict
             Dictionary of arguments to be passed to `pandas.DataFrame.to_csv()`.
+
+        Returns
+        -------
+        csv : str or None
+            Returns a csv-formatted string if `path_or_buf=None`,
+            returns None otherwise.
         """
         return self.to_pandas().to_csv(path_or_buf=path_or_buf, **kwargs)
 
