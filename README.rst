@@ -1,6 +1,9 @@
-PyKE: Command Line Tools for Kepler, K2 & TESS Data Analysis
-============================================================
-|pypi-badge| |ci-badge| |appveyor-badge| |cov-badge| |doi-badge|
+PyKE
+====
+
+**Easy command line tools for Kepler, K2 & TESS data analysis.**
+
+|pypi-badge| |ci-badge| |appveyor-badge| |doi-badge|
 
 .. |pypi-badge| image:: https://img.shields.io/pypi/v/pyketools.svg
                 :target: https://pypi.python.org/pypi/pyketools
@@ -8,21 +11,19 @@ PyKE: Command Line Tools for Kepler, K2 & TESS Data Analysis
               :target: https://travis-ci.org/KeplerGO/pyke
 .. |appveyor-badge| image:: https://ci.appveyor.com/api/projects/status/6jvv5d7a142gwm8a/branch/master?svg=true
                     :target: https://ci.appveyor.com/project/mirca/pyke
-.. |cov-badge| image:: https://codecov.io/gh/KeplerGO/pyke/branch/master/graph/badge.svg
-              :target: https://codecov.io/gh/KeplerGO/pyke
 .. |doi-badge| image:: https://zenodo.org/badge/DOI/10.5281/zenodo.835583.svg
               :target: https://doi.org/10.5281/zenodo.835583
 
 
-**Developed since 2012, PyKE offers a user-friendly way to inspect and analyze
-the pixels and lightcurves obtained by NASA's Kepler, K2, and TESS missions.**
+Developed since 2012, PyKE offers a user-friendly way to inspect and analyze
+the pixels and lightcurves obtained by NASA's Kepler, K2, and TESS missions.
 
 Documentation
 -------------
 
 Documentation is hosted at `pyke.keplerscience.org <http://pyke.keplerscience.org>`_.
 
-What's new in PyKE v3.1? (December 2017)
+What's new in PyKE v3.1? (January 2017)
 ----------------------------------------
 
 PyKE3 is the latest generation of the Kepler/K2/TESS toolkit.
