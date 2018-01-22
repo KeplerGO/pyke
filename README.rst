@@ -1,5 +1,5 @@
-PyKE: Kepler, K2 & TESS Data Analysis Tools
-============================================
+PyKE: Command Line Tools for Kepler, K2 & TESS Data Analysis
+============================================================
 |pypi-badge| |ci-badge| |appveyor-badge| |cov-badge| |doi-badge|
 
 .. |pypi-badge| image:: https://img.shields.io/pypi/v/pyketools.svg
