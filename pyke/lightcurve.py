@@ -1,18 +1,15 @@
 import copy
-import math
 import numpy as np
-from scipy import linalg
-from oktopus import L1Norm
-from scipy import signal, interpolate
+from scipy import linalg, signal, interpolate
+import oktopus
 from astropy.io import fits as pyfits
 from astropy.stats import sigma_clip
+from astropy.table import Table
 from tqdm import tqdm
-import oktopus
 import requests
 from bs4 import BeautifulSoup
 from .utils import running_mean, channel_to_module_output, KeplerQualityFlags
 from matplotlib import pyplot as plt
-from matplotlib.figure import Figure
 
 
 __all__ = ['LightCurve', 'KeplerLightCurve', 'KeplerLightCurveFile',
@@ -32,15 +29,18 @@ class LightCurve(object):
         Data flux for every time point
     flux_err : array-like
         Uncertainty on each flux data point
+    meta : dict
+        Free-form metadata associated with the LightCurve.
     """
 
-    def __init__(self, time, flux, flux_err=None):
+    def __init__(self, time, flux, flux_err=None, meta={}):
         self.time = np.asarray(time)
         self.flux = np.asarray(flux)
         if flux_err is not None:
             self.flux_err = np.asarray(flux_err)
         else:
             self.flux_err = np.nan * np.ones_like(self.time)
+        self.meta = meta
 
     def stitch(self, *others):
         """
@@ -314,9 +314,6 @@ class LightCurve(object):
         cdpp_ppm = np.std(mean) * 1e6
         return cdpp_ppm
 
-    def to_csv(self):
-        raise NotImplementedError()
-
     def plot(self, ax=None, normalize=True, xlabel='Time - 2454833 (days)',
              ylabel='Normalized Flux', title=None, color='#363636', linestyle="",
              fill=False, grid=True, **kwargs):
@@ -373,6 +370,59 @@ class LightCurve(object):
         ax.set_xlabel(xlabel, {'color': 'k'})
         ax.set_ylabel(ylabel, {'color': 'k'})
         return ax
+
+    def to_table(self):
+        """Export the LightCurve as an AstroPy Table.
+
+        Returns
+        -------
+        table : `astropy.table.Table` object
+            An AstroPy Table with columns 'time', 'flux', and 'flux_err'.
+        """
+        return Table(data=(self.time, self.flux, self.flux_err),
+                     names=('time', 'flux', 'flux_err'),
+                     meta=self.meta)
+
+    def to_pandas(self):
+        """Export the LightCurve as a Pandas DataFrame.
+
+        Returns
+        -------
+        dataframe : `pandas.DataFrame` object
+            A dataframe indexed by `time` and containing the columns `flux`
+            and `flux_err`.
+        """
+        try:
+            import pandas as pd
+        # PyKE does not require pandas, so check for import success.
+        except ImportError:
+            raise ImportError("You need to install pandas to use the "
+                              "LightCurve.to_pandas() method.")
+        df = pd.DataFrame(data={'flux': self.flux, 'flux_err': self.flux_err},
+                          index=self.time,
+                          columns=['flux', 'flux_err'])
+        df.index.name = 'time'
+        df.meta = self.meta
+        return df
+
+    def to_csv(self, path_or_buf=None, **kwargs):
+        """Writes the LightCurve to a csv file.
+
+        Parameters
+        ----------
+        path_or_buf : string or file handle, default None
+            File path or object, if None is provided the result is returned as
+            a string.
+        **kwargs : dict
+            Dictionary of arguments to be passed to `pandas.DataFrame.to_csv()`.
+
+        Returns
+        -------
+        csv : str or None
+            Returns a csv-formatted string if `path_or_buf=None`,
+            returns None otherwise.
+        """
+        return self.to_pandas().to_csv(path_or_buf=path_or_buf, **kwargs)
 
 
 class KeplerLightCurve(LightCurve):

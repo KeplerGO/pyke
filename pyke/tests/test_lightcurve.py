@@ -146,3 +146,38 @@ def test_box_period_search():
     _, _, kepler10b_period = box_period_search(flat, min_period=.5,
                                                max_period=1, nperiods=100)
     assert abs(kepler10b_period - answer) < 1e-2
+
+
+def test_to_pandas():
+    """Test the `LightCurve.to_pandas()` method."""
+    time, flux, flux_err = range(3), np.ones(3), np.zeros(3)
+    lc = LightCurve(time, flux, flux_err)
+    try:
+        df = lc.to_pandas()
+        assert_allclose(df.index, time)
+        assert_allclose(df.flux, flux)
+        assert_allclose(df.flux_err, flux_err)
+    except ImportError:
+        # pandas is an optional dependency
+        pass
+
+
+def test_to_table():
+    """Test the `LightCurve.to_table()` method."""
+    time, flux, flux_err = range(3), np.ones(3), np.zeros(3)
+    lc = LightCurve(time, flux, flux_err)
+    tbl = lc.to_table()
+    assert_allclose(tbl['time'], time)
+    assert_allclose(tbl['flux'], flux)
+    assert_allclose(tbl['flux_err'], flux_err)
+
+
+def test_to_csv():
+    """Test the `LightCurve.to_csv()` method."""
+    time, flux, flux_err = range(3), np.ones(3), np.zeros(3)
+    try:
+        lc = LightCurve(time, flux, flux_err)
+        assert(lc.to_csv() == 'time,flux,flux_err\n0,1.0,0.0\n1,1.0,0.0\n2,1.0,0.0\n')
+    except ImportError:
+        # pandas is an optional dependency
+        pass
