@@ -1,6 +1,6 @@
 ..
 
-Example 4: Removing Stellar Astrophysics and Quarter Stitching
+Example 3: Removing Stellar Astrophysics and Quarter Stitching
 ==============================================================
 
 The purpose of this tutorial is to flatten both systematic artifacts and

@@ -13,8 +13,6 @@
 
   
   
-  
-  
 
   
 
@@ -44,7 +42,6 @@
 
 <body class="wy-body-for-nav" role="document">
 
-   
   <div class="wy-grid-for-nav">
 
     
@@ -88,16 +85,14 @@
           
             
             
-              
-            
-            
-              <ul>
-<li class="toctree-l1"><a class="reference internal" href="../whatsnew31.html">What’s new in PyKE 3.1?</a></li>
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../whatsnew31.html">What’s new in PyKE 3?</a></li>
 </ul>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../quickstart.html">Quickstart</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../install.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../overview.html">PyKE tasks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/index.html">API documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tasks.html">PyKE tasks</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../contributing.html">Contributing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../citing.html">Citing</a></li>
 </ul>
@@ -115,10 +110,8 @@
 
       
       <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
-        
-          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../../../index.html">PyKE</a>
-        
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../../index.html">PyKE</a>
       </nav>
 
 
@@ -127,40 +120,23 @@
         <div class="rst-content">
           
 
-
-
-
-
-
-
-
-
-
-
-
+ 
 
 
 
 <div role="navigation" aria-label="breadcrumbs navigation">
-
   <ul class="wy-breadcrumbs">
-    
-      <li><a href="../../../index.html">Docs</a> &raquo;</li>
-        
-      <li>Fitting PRFs in K2 TPFs from Campaign 9.1</li>
-    
-    
+    <li><a href="../../../index.html">Docs</a> &raquo;</li>
+      
+    <li>Fitting PRFs in K2 TPFs from Campaign 9.1</li>
       <li class="wy-breadcrumbs-aside">
         
-            
+          
             <a href="../../../_sources/tutorials/ipython_notebooks/psfphotometry/c9-prf-fitting.ipynb.txt" rel="nofollow"> View page source</a>
           
         
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
@@ -376,7 +352,7 @@ oktopus:</strong></p>
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">pyke</span>
+<span></span>import pyke
 </pre></div>
 </div>
 </div>
@@ -386,7 +362,7 @@ oktopus:</strong></p>
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="n">pyke</span><span class="o">.</span><span class="n">__version__</span>
+<span></span>pyke.__version__
 </pre></div>
 </div>
 </div>
@@ -406,7 +382,7 @@ oktopus:</strong></p>
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">oktopus</span>
+<span></span>import oktopus
 </pre></div>
 </div>
 </div>
@@ -416,7 +392,7 @@ oktopus:</strong></p>
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="n">oktopus</span><span class="o">.</span><span class="n">__version__</span>
+<span></span>oktopus.__version__
 </pre></div>
 </div>
 </div>
@@ -439,15 +415,15 @@ scientific Python stack:</p>
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="o">%</span><span class="k">matplotlib</span> inline
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
-<span class="kn">from</span> <span class="nn">matplotlib</span> <span class="k">import</span> <span class="n">rc</span>
-<span class="n">rc</span><span class="p">(</span><span class="s1">&#39;text&#39;</span><span class="p">,</span> <span class="n">usetex</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="n">font</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;family&#39;</span> <span class="p">:</span> <span class="s1">&#39;serif&#39;</span><span class="p">,</span>
-        <span class="s1">&#39;size&#39;</span>   <span class="p">:</span> <span class="mi">22</span><span class="p">,</span>
-        <span class="s1">&#39;serif&#39;</span>  <span class="p">:</span> <span class="s1">&#39;New Century Schoolbook&#39;</span><span class="p">}</span>
-<span class="n">rc</span><span class="p">(</span><span class="s1">&#39;font&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">font</span><span class="p">)</span>
+<span></span>%matplotlib inline
+import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib import rc
+rc(&#39;text&#39;, usetex=True)
+font = {&#39;family&#39; : &#39;serif&#39;,
+        &#39;size&#39;   : 22,
+        &#39;serif&#39;  : &#39;New Century Schoolbook&#39;}
+rc(&#39;font&#39;, **font)
 </pre></div>
 </div>
 </div>
@@ -460,7 +436,7 @@ import <code class="docutils literal"><span class="pre">KeplerTargetPixelFile</s
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">pyke</span> <span class="k">import</span> <span class="n">KeplerTargetPixelFile</span><span class="p">,</span> <span class="n">KeplerQualityFlags</span>
+<span></span>from pyke import KeplerTargetPixelFile, KeplerQualityFlags
 </pre></div>
 </div>
 </div>
@@ -472,7 +448,7 @@ import <code class="docutils literal"><span class="pre">photutils</span></code> 
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">photutils.aperture</span> <span class="k">as</span> <span class="nn">apr</span>
+<span></span>import photutils.aperture as apr
 </pre></div>
 </div>
 </div>
@@ -484,7 +460,7 @@ for the scene. We can import those from <code class="docutils literal"><span cla
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">pyke.prf</span> <span class="k">import</span> <span class="n">SimpleKeplerPRF</span><span class="p">,</span> <span class="n">SceneModel</span><span class="p">,</span> <span class="n">PRFPhotometry</span>
+<span></span>from pyke.prf import SimpleKeplerPRF, SceneModel, PRFPhotometry
 </pre></div>
 </div>
 </div>
@@ -495,7 +471,7 @@ for the scene. We can import those from <code class="docutils literal"><span cla
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">oktopus</span> <span class="k">import</span> <span class="n">UniformPrior</span>
+<span></span>from oktopus import UniformPrior
 </pre></div>
 </div>
 </div>
@@ -508,9 +484,9 @@ either give a url or a local path to the file):</p>
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="n">tpf</span> <span class="o">=</span> <span class="n">KeplerTargetPixelFile</span><span class="p">(</span><span class="s1">&#39;https://archive.stsci.edu/missions/k2/target_pixel_files/c91/&#39;</span>
-                            <span class="s1">&#39;224300000/64000/ktwo224364733-c91_lpd-targ.fits.gz&#39;</span><span class="p">,</span>
-                            <span class="n">quality_bitmask</span><span class="o">=</span><span class="n">KeplerQualityFlags</span><span class="o">.</span><span class="n">CONSERVATIVE_BITMASK</span><span class="p">)</span>
+<span></span>tpf = KeplerTargetPixelFile(&#39;https://archive.stsci.edu/missions/k2/target_pixel_files/c91/&#39;
+                            &#39;224300000/64000/ktwo224364733-c91_lpd-targ.fits.gz&#39;,
+                            quality_bitmask=KeplerQualityFlags.CONSERVATIVE_BITMASK)
 </pre></div>
 </div>
 </div>
@@ -526,7 +502,7 @@ that cadences that have specific <code class="docutils literal"><span class="pre
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="n">tpf</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">frame</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+<span></span>tpf.plot(frame=100)
 </pre></div>
 </div>
 </div>
@@ -545,9 +521,9 @@ that cadences that have specific <code class="docutils literal"><span class="pre
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="n">tpf</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">frame</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
-<span class="n">apr</span><span class="o">.</span><span class="n">CircularAperture</span><span class="p">((</span><span class="mf">941.5</span><span class="p">,</span> <span class="mf">878.5</span><span class="p">),</span> <span class="n">r</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s1">&#39;cyan&#39;</span><span class="p">)</span>
-<span class="n">apr</span><span class="o">.</span><span class="n">CircularAperture</span><span class="p">((</span><span class="mf">944.5</span><span class="p">,</span> <span class="mf">875.5</span><span class="p">),</span> <span class="n">r</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s1">&#39;cyan&#39;</span><span class="p">)</span>
+<span></span>tpf.plot(frame=100)
+apr.CircularAperture((941.5, 878.5), r=2).plot(color=&#39;cyan&#39;)
+apr.CircularAperture((944.5, 875.5), r=2).plot(color=&#39;cyan&#39;)
 </pre></div>
 </div>
 </div>
@@ -566,10 +542,10 @@ from the drawn apertures:</p>
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="n">lc1</span><span class="p">,</span> <span class="n">lc2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">tpf</span><span class="o">.</span><span class="n">time</span><span class="p">)),</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">tpf</span><span class="o">.</span><span class="n">time</span><span class="p">))</span>
-<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">tpf</span><span class="o">.</span><span class="n">time</span><span class="p">)):</span>
-    <span class="n">lc1</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">apr</span><span class="o">.</span><span class="n">CircularAperture</span><span class="p">((</span><span class="mf">941.5</span> <span class="o">-</span> <span class="n">tpf</span><span class="o">.</span><span class="n">column</span><span class="p">,</span> <span class="mf">878.5</span> <span class="o">-</span> <span class="n">tpf</span><span class="o">.</span><span class="n">row</span><span class="p">),</span> <span class="n">r</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">do_photometry</span><span class="p">(</span><span class="n">tpf</span><span class="o">.</span><span class="n">flux</span><span class="p">[</span><span class="n">i</span><span class="p">])[</span><span class="mi">0</span><span class="p">]</span>
-    <span class="n">lc2</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">apr</span><span class="o">.</span><span class="n">CircularAperture</span><span class="p">((</span><span class="mf">944.5</span> <span class="o">-</span> <span class="n">tpf</span><span class="o">.</span><span class="n">column</span><span class="p">,</span> <span class="mf">875.5</span> <span class="o">-</span> <span class="n">tpf</span><span class="o">.</span><span class="n">row</span><span class="p">),</span> <span class="n">r</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">do_photometry</span><span class="p">(</span><span class="n">tpf</span><span class="o">.</span><span class="n">flux</span><span class="p">[</span><span class="n">i</span><span class="p">])[</span><span class="mi">0</span><span class="p">]</span>
+<span></span>lc1, lc2 = np.zeros(len(tpf.time)), np.zeros(len(tpf.time))
+for i in range(len(tpf.time)):
+    lc1[i] = apr.CircularAperture((941.5 - tpf.column, 878.5 - tpf.row), r=2).do_photometry(tpf.flux[i])[0]
+    lc2[i] = apr.CircularAperture((944.5 - tpf.column, 875.5 - tpf.row), r=2).do_photometry(tpf.flux[i])[0]
 </pre></div>
 </div>
 </div>
@@ -580,10 +556,10 @@ from the drawn apertures:</p>
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">[</span><span class="mi">17</span><span class="p">,</span> <span class="mi">4</span><span class="p">])</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">tpf</span><span class="o">.</span><span class="n">time</span><span class="p">,</span> <span class="n">lc1</span><span class="p">,</span> <span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Time&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;Flux&quot;</span><span class="p">)</span>
+<span></span>plt.figure(figsize=[17, 4])
+plt.plot(tpf.time, lc1, &#39;o&#39;, markersize=2)
+plt.xlabel(&quot;Time&quot;)
+plt.ylabel(&quot;Flux&quot;)
 </pre></div>
 </div>
 </div>
@@ -610,10 +586,10 @@ from the drawn apertures:</p>
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">[</span><span class="mi">17</span><span class="p">,</span> <span class="mi">4</span><span class="p">])</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">tpf</span><span class="o">.</span><span class="n">time</span><span class="p">,</span> <span class="n">lc2</span><span class="p">,</span> <span class="s1">&#39;ro&#39;</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Time&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;Flux&quot;</span><span class="p">)</span>
+<span></span>plt.figure(figsize=[17, 4])
+plt.plot(tpf.time, lc2, &#39;ro&#39;, markersize=2)
+plt.xlabel(&quot;Time&quot;)
+plt.ylabel(&quot;Flux&quot;)
 </pre></div>
 </div>
 </div>
@@ -655,7 +631,7 @@ class.</p>
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="n">bkg</span> <span class="o">=</span> <span class="n">tpf</span><span class="o">.</span><span class="n">estimate_bkg_per_pixel</span><span class="p">(</span><span class="n">method</span><span class="o">=</span><span class="s1">&#39;mode&#39;</span><span class="p">)</span>
+<span></span>bkg = tpf.estimate_bkg_per_pixel(method=&#39;mode&#39;)
 </pre></div>
 </div>
 </div>
@@ -665,10 +641,10 @@ class.</p>
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">[</span><span class="mi">17</span><span class="p">,</span> <span class="mi">4</span><span class="p">])</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">tpf</span><span class="o">.</span><span class="n">time</span><span class="p">,</span> <span class="n">bkg</span><span class="p">,</span> <span class="s1">&#39;ko&#39;</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Time&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;Flux&quot;</span><span class="p">)</span>
+<span></span>plt.figure(figsize=[17, 4])
+plt.plot(tpf.time, bkg, &#39;ko&#39;, markersize=2)
+plt.xlabel(&quot;Time&quot;)
+plt.ylabel(&quot;Flux&quot;)
 </pre></div>
 </div>
 </div>
@@ -698,7 +674,7 @@ data to see what’s going on:</p>
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="n">funny_cadence</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argwhere</span><span class="p">(</span><span class="n">bkg</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+<span></span>funny_cadence = np.argwhere(bkg &lt; 0)[0][0]
 </pre></div>
 </div>
 </div>
@@ -708,7 +684,7 @@ data to see what’s going on:</p>
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="n">tpf</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">frame</span><span class="o">=</span><span class="n">funny_cadence</span><span class="p">)</span>
+<span></span>tpf.plot(frame=funny_cadence)
 </pre></div>
 </div>
 </div>
@@ -728,11 +704,11 @@ cadence for now and move on to our PRF photometry.</p>
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">[</span><span class="mi">17</span><span class="p">,</span> <span class="mi">4</span><span class="p">])</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">tpf</span><span class="o">.</span><span class="n">time</span><span class="p">,</span> <span class="n">bkg</span><span class="p">,</span> <span class="s1">&#39;ko&#39;</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Time&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;Flux&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">(</span><span class="mi">2150</span><span class="p">,</span> <span class="mi">2400</span><span class="p">)</span>
+<span></span>plt.figure(figsize=[17, 4])
+plt.plot(tpf.time, bkg, &#39;ko&#39;, markersize=2)
+plt.xlabel(&quot;Time&quot;)
+plt.ylabel(&quot;Flux&quot;)
+plt.ylim(2150, 2400)
 </pre></div>
 </div>
 </div>
@@ -760,7 +736,7 @@ cadence for now and move on to our PRF photometry.</p>
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="n">sprf</span> <span class="o">=</span> <span class="n">SimpleKeplerPRF</span><span class="p">(</span><span class="n">tpf</span><span class="o">.</span><span class="n">channel</span><span class="p">,</span> <span class="n">tpf</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="n">tpf</span><span class="o">.</span><span class="n">column</span><span class="p">,</span> <span class="n">tpf</span><span class="o">.</span><span class="n">row</span><span class="p">)</span>
+<span></span>sprf = SimpleKeplerPRF(tpf.channel, tpf.shape[1:], tpf.column, tpf.row)
 </pre></div>
 </div>
 </div>
@@ -775,7 +751,7 @@ model. This model is parametrized by stellar positions and flux.</p>
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="n">scene</span> <span class="o">=</span> <span class="n">SceneModel</span><span class="p">(</span><span class="n">prfs</span><span class="o">=</span><span class="p">[</span><span class="n">sprf</span><span class="p">]</span> <span class="o">*</span> <span class="mi">2</span><span class="p">)</span>
+<span></span>scene = SceneModel(prfs=[sprf] * 2)
 </pre></div>
 </div>
 </div>
@@ -793,8 +769,8 @@ that using the <code class="docutils literal"><span class="pre">UniformPrior</sp
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="n">prior</span> <span class="o">=</span> <span class="n">UniformPrior</span><span class="p">(</span><span class="n">lb</span><span class="o">=</span><span class="p">[</span><span class="mf">10e3</span><span class="p">,</span> <span class="mf">940.</span><span class="p">,</span> <span class="mf">877.</span><span class="p">,</span> <span class="mf">10e3</span><span class="p">,</span> <span class="mf">943.</span><span class="p">,</span> <span class="mf">874.</span><span class="p">,</span> <span class="mf">1e3</span><span class="p">],</span>
-                     <span class="n">ub</span><span class="o">=</span><span class="p">[</span><span class="mf">60e3</span><span class="p">,</span> <span class="mf">944.</span><span class="p">,</span> <span class="mf">880.</span><span class="p">,</span> <span class="mf">60e3</span><span class="p">,</span> <span class="mf">947.</span><span class="p">,</span> <span class="mf">877.</span><span class="p">,</span> <span class="mf">4e3</span><span class="p">])</span>
+<span></span>prior = UniformPrior(lb=[10e3, 940., 877., 10e3, 943., 874., 1e3],
+                     ub=[60e3, 944., 880., 60e3, 947., 877., 4e3])
 </pre></div>
 </div>
 </div>
@@ -814,7 +790,7 @@ probability:</p>
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="n">scene</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="o">*</span><span class="n">prior</span><span class="o">.</span><span class="n">mean</span><span class="p">)</span>
+<span></span>scene.plot(*prior.mean)
 </pre></div>
 </div>
 </div>
@@ -833,7 +809,7 @@ objects to the <code class="docutils literal"><span class="pre">PRFPhotometry</s
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="n">phot</span> <span class="o">=</span> <span class="n">PRFPhotometry</span><span class="p">(</span><span class="n">scene_model</span><span class="o">=</span><span class="n">scene</span><span class="p">,</span> <span class="n">prior</span><span class="o">=</span><span class="n">prior</span><span class="p">)</span>
+<span></span>phot = PRFPhotometry(scene_model=scene, prior=prior)
 </pre></div>
 </div>
 </div>
@@ -845,7 +821,7 @@ data <code class="docutils literal"><span class="pre">tpf.flux</span></code>.</p
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="n">opt_params</span> <span class="o">=</span> <span class="n">phot</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">tpf</span><span class="o">.</span><span class="n">flux</span><span class="p">)</span>
+<span></span>opt_params = phot.fit(tpf.flux)
 </pre></div>
 </div>
 </div>
@@ -876,13 +852,13 @@ data <code class="docutils literal"><span class="pre">tpf.flux</span></code>.</p
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="n">flux_1</span> <span class="o">=</span> <span class="n">opt_params</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
-<span class="n">xcenter_1</span> <span class="o">=</span> <span class="n">opt_params</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span>
-<span class="n">ycenter_1</span> <span class="o">=</span> <span class="n">opt_params</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span>
-<span class="n">flux_2</span> <span class="o">=</span> <span class="n">opt_params</span><span class="p">[:,</span> <span class="mi">3</span><span class="p">]</span>
-<span class="n">xcenter_2</span> <span class="o">=</span> <span class="n">opt_params</span><span class="p">[:,</span> <span class="mi">4</span><span class="p">]</span>
-<span class="n">ycenter_2</span> <span class="o">=</span> <span class="n">opt_params</span><span class="p">[:,</span> <span class="mi">5</span><span class="p">]</span>
-<span class="n">bkg_hat</span> <span class="o">=</span> <span class="n">opt_params</span><span class="p">[:,</span> <span class="mi">6</span><span class="p">]</span>
+<span></span>flux_1 = opt_params[:, 0]
+xcenter_1 = opt_params[:, 1]
+ycenter_1 = opt_params[:, 2]
+flux_2 = opt_params[:, 3]
+xcenter_2 = opt_params[:, 4]
+ycenter_2 = opt_params[:, 5]
+bkg_hat = opt_params[:, 6]
 </pre></div>
 </div>
 </div>
@@ -893,11 +869,11 @@ data <code class="docutils literal"><span class="pre">tpf.flux</span></code>.</p
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">[</span><span class="mi">18</span><span class="p">,</span> <span class="mi">4</span><span class="p">])</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">tpf</span><span class="o">.</span><span class="n">time</span><span class="p">,</span> <span class="n">flux_1</span><span class="p">,</span> <span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;Flux&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Time&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">()</span>
+<span></span>plt.figure(figsize=[18, 4])
+plt.plot(tpf.time, flux_1, &#39;o&#39;, markersize=2)
+plt.ylabel(&quot;Flux&quot;)
+plt.xlabel(&quot;Time&quot;)
+plt.ylim()
 </pre></div>
 </div>
 </div>
@@ -925,7 +901,7 @@ data <code class="docutils literal"><span class="pre">tpf.flux</span></code>.</p
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="n">outlier</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argwhere</span><span class="p">(</span><span class="n">flux_1</span> <span class="o">&gt;</span> <span class="mi">25000</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+<span></span>outlier = np.argwhere(flux_1 &gt; 25000)[0][0]
 </pre></div>
 </div>
 </div>
@@ -935,7 +911,7 @@ data <code class="docutils literal"><span class="pre">tpf.flux</span></code>.</p
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="n">outlier</span> <span class="o">==</span> <span class="n">funny_cadence</span>
+<span></span>outlier == funny_cadence
 </pre></div>
 </div>
 </div>
@@ -955,11 +931,11 @@ data <code class="docutils literal"><span class="pre">tpf.flux</span></code>.</p
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">[</span><span class="mi">18</span><span class="p">,</span> <span class="mi">4</span><span class="p">])</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">tpf</span><span class="o">.</span><span class="n">time</span><span class="p">,</span> <span class="n">flux_1</span><span class="p">,</span> <span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;Flux&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Time&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">(</span><span class="mi">20500</span><span class="p">,</span> <span class="mi">22000</span><span class="p">)</span>
+<span></span>plt.figure(figsize=[18, 4])
+plt.plot(tpf.time, flux_1, &#39;o&#39;, markersize=2)
+plt.ylabel(&quot;Flux&quot;)
+plt.xlabel(&quot;Time&quot;)
+plt.ylim(20500, 22000)
 </pre></div>
 </div>
 </div>
@@ -986,10 +962,10 @@ data <code class="docutils literal"><span class="pre">tpf.flux</span></code>.</p
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">[</span><span class="mi">18</span><span class="p">,</span> <span class="mi">4</span><span class="p">])</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">tpf</span><span class="o">.</span><span class="n">time</span><span class="p">,</span> <span class="n">xcenter_1</span><span class="p">,</span> <span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;Column position&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Time&quot;</span><span class="p">)</span>
+<span></span>plt.figure(figsize=[18, 4])
+plt.plot(tpf.time, xcenter_1, &#39;o&#39;, markersize=2)
+plt.ylabel(&quot;Column position&quot;)
+plt.xlabel(&quot;Time&quot;)
 </pre></div>
 </div>
 </div>
@@ -1016,10 +992,10 @@ data <code class="docutils literal"><span class="pre">tpf.flux</span></code>.</p
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">[</span><span class="mi">18</span><span class="p">,</span> <span class="mi">4</span><span class="p">])</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">tpf</span><span class="o">.</span><span class="n">time</span><span class="p">,</span> <span class="n">ycenter_1</span><span class="p">,</span> <span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;Row position&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Time&quot;</span><span class="p">)</span>
+<span></span>plt.figure(figsize=[18, 4])
+plt.plot(tpf.time, ycenter_1, &#39;o&#39;, markersize=2)
+plt.ylabel(&quot;Row position&quot;)
+plt.xlabel(&quot;Time&quot;)
 </pre></div>
 </div>
 </div>
@@ -1046,11 +1022,11 @@ data <code class="docutils literal"><span class="pre">tpf.flux</span></code>.</p
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">[</span><span class="mi">18</span><span class="p">,</span> <span class="mi">4</span><span class="p">])</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">tpf</span><span class="o">.</span><span class="n">time</span><span class="p">,</span> <span class="n">flux_2</span><span class="p">,</span> <span class="s1">&#39;ro&#39;</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">(</span><span class="mi">17000</span><span class="p">,</span> <span class="mi">19000</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;Flux&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Time&quot;</span><span class="p">)</span>
+<span></span>plt.figure(figsize=[18, 4])
+plt.plot(tpf.time, flux_2, &#39;ro&#39;, markersize=2)
+plt.ylim(17000, 19000)
+plt.ylabel(&quot;Flux&quot;)
+plt.xlabel(&quot;Time&quot;)
 </pre></div>
 </div>
 </div>
@@ -1077,10 +1053,10 @@ data <code class="docutils literal"><span class="pre">tpf.flux</span></code>.</p
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">[</span><span class="mi">18</span><span class="p">,</span> <span class="mi">4</span><span class="p">])</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">tpf</span><span class="o">.</span><span class="n">time</span><span class="p">,</span> <span class="n">xcenter_2</span><span class="p">,</span> <span class="s1">&#39;ro&#39;</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;Column position&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Time&quot;</span><span class="p">)</span>
+<span></span>plt.figure(figsize=[18, 4])
+plt.plot(tpf.time, xcenter_2, &#39;ro&#39;, markersize=2)
+plt.ylabel(&quot;Column position&quot;)
+plt.xlabel(&quot;Time&quot;)
 </pre></div>
 </div>
 </div>
@@ -1107,10 +1083,10 @@ data <code class="docutils literal"><span class="pre">tpf.flux</span></code>.</p
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">[</span><span class="mi">18</span><span class="p">,</span> <span class="mi">4</span><span class="p">])</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">tpf</span><span class="o">.</span><span class="n">time</span><span class="p">,</span> <span class="n">ycenter_2</span><span class="p">,</span> <span class="s1">&#39;ro&#39;</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;Row position&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Time&quot;</span><span class="p">)</span>
+<span></span>plt.figure(figsize=[18, 4])
+plt.plot(tpf.time, ycenter_2, &#39;ro&#39;, markersize=2)
+plt.ylabel(&quot;Row position&quot;)
+plt.xlabel(&quot;Time&quot;)
 </pre></div>
 </div>
 </div>
@@ -1137,11 +1113,11 @@ data <code class="docutils literal"><span class="pre">tpf.flux</span></code>.</p
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">[</span><span class="mi">18</span><span class="p">,</span> <span class="mi">4</span><span class="p">])</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">tpf</span><span class="o">.</span><span class="n">time</span><span class="p">,</span> <span class="n">bkg_hat</span><span class="p">,</span> <span class="s1">&#39;ko&#39;</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;Background Flux&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Time&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">(</span><span class="mi">2350</span><span class="p">,</span> <span class="mi">2650</span><span class="p">)</span>
+<span></span>plt.figure(figsize=[18, 4])
+plt.plot(tpf.time, bkg_hat, &#39;ko&#39;, markersize=2)
+plt.ylabel(&quot;Background Flux&quot;)
+plt.xlabel(&quot;Time&quot;)
+plt.ylim(2350, 2650)
 </pre></div>
 </div>
 </div>
@@ -1169,7 +1145,7 @@ data <code class="docutils literal"><span class="pre">tpf.flux</span></code>.</p
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="n">residuals</span> <span class="o">=</span> <span class="n">phot</span><span class="o">.</span><span class="n">get_residuals</span><span class="p">()</span>
+<span></span>residuals = phot.get_residuals()
 </pre></div>
 </div>
 </div>
@@ -1179,8 +1155,8 @@ data <code class="docutils literal"><span class="pre">tpf.flux</span></code>.</p
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">residuals</span><span class="p">[</span><span class="mi">100</span><span class="p">],</span> <span class="n">origin</span><span class="o">=</span><span class="s1">&#39;lower&#39;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">()</span>
+<span></span>plt.imshow(residuals[100], origin=&#39;lower&#39;)
+plt.colorbar()
 </pre></div>
 </div>
 </div>
@@ -1209,8 +1185,8 @@ below:</p>
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="n">prf_1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">scene</span><span class="o">.</span><span class="n">prfs</span><span class="p">[</span><span class="mi">0</span><span class="p">](</span><span class="o">*</span><span class="n">phot</span><span class="o">.</span><span class="n">opt_params</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">])</span>
-                  <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">tpf</span><span class="o">.</span><span class="n">time</span><span class="p">))])</span>
+<span></span>prf_1 = np.array([scene.prfs[0](*phot.opt_params[i, 0:3])
+                  for i in range(len(tpf.time))])
 </pre></div>
 </div>
 </div>
@@ -1220,8 +1196,8 @@ below:</p>
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="n">prf_2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">scene</span><span class="o">.</span><span class="n">prfs</span><span class="p">[</span><span class="mi">1</span><span class="p">](</span><span class="o">*</span><span class="n">phot</span><span class="o">.</span><span class="n">opt_params</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">3</span><span class="p">:</span><span class="mi">6</span><span class="p">])</span>
-                  <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">tpf</span><span class="o">.</span><span class="n">time</span><span class="p">))])</span>
+<span></span>prf_2 = np.array([scene.prfs[1](*phot.opt_params[i, 3:6])
+                  for i in range(len(tpf.time))])
 </pre></div>
 </div>
 </div>
@@ -1232,8 +1208,8 @@ below:</p>
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">prf_1</span><span class="p">[</span><span class="mi">100</span><span class="p">],</span> <span class="n">origin</span><span class="o">=</span><span class="s1">&#39;lower&#39;</span><span class="p">,</span> <span class="n">extent</span><span class="o">=</span><span class="p">(</span><span class="mi">940</span><span class="p">,</span> <span class="mi">949</span><span class="p">,</span> <span class="mi">872</span><span class="p">,</span> <span class="mi">880</span><span class="p">))</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">()</span>
+<span></span>plt.imshow(prf_1[100], origin=&#39;lower&#39;, extent=(940, 949, 872, 880))
+plt.colorbar()
 </pre></div>
 </div>
 </div>
@@ -1260,8 +1236,8 @@ below:</p>
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">prf_2</span><span class="p">[</span><span class="mi">100</span><span class="p">],</span> <span class="n">origin</span><span class="o">=</span><span class="s1">&#39;lower&#39;</span><span class="p">,</span> <span class="n">extent</span><span class="o">=</span><span class="p">(</span><span class="mi">940</span><span class="p">,</span> <span class="mi">949</span><span class="p">,</span> <span class="mi">872</span><span class="p">,</span> <span class="mi">880</span><span class="p">))</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">()</span>
+<span></span>plt.imshow(prf_2[100], origin=&#39;lower&#39;, extent=(940, 949, 872, 880))
+plt.colorbar()
 </pre></div>
 </div>
 </div>
@@ -1282,12 +1258,19 @@ below:</p>
 <img alt="../../../_images/tutorials_ipython_notebooks_psfphotometry_c9-prf-fitting_81_1.png" src="../../../_images/tutorials_ipython_notebooks_psfphotometry_c9-prf-fitting_81_1.png" />
 </div>
 </div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span>
+</pre></div>
+</div>
+</div>
 </div>
 
 
-           </div>
-           <div class="articleComments">
-            
            </div>
           </div>
           <footer>
@@ -1322,8 +1305,7 @@ below:</p>
             VERSION:'3.0.0',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true,
-            SOURCELINK_SUFFIX: '.txt'
+            HAS_SOURCE:  true
         };
     </script>
       <script type="text/javascript" src="../../../_static/jquery.js"></script>

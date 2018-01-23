@@ -13,8 +13,6 @@
 
   
   
-  
-  
 
   
 
@@ -44,7 +42,6 @@
 
 <body class="wy-body-for-nav" role="document">
 
-   
   <div class="wy-grid-for-nav">
 
     
@@ -88,16 +85,14 @@
           
             
             
-              
-            
-            
-              <ul>
-<li class="toctree-l1"><a class="reference internal" href="../whatsnew31.html">What’s new in PyKE 3.1?</a></li>
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../whatsnew31.html">What’s new in PyKE 3?</a></li>
 </ul>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../quickstart.html">Quickstart</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../install.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../overview.html">PyKE tasks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/index.html">API documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tasks.html">PyKE tasks</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../contributing.html">Contributing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../citing.html">Citing</a></li>
 </ul>
@@ -115,10 +110,8 @@
 
       
       <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
-        
-          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../../../index.html">PyKE</a>
-        
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../../index.html">PyKE</a>
       </nav>
 
 
@@ -127,40 +120,23 @@
         <div class="rst-content">
           
 
-
-
-
-
-
-
-
-
-
-
-
+ 
 
 
 
 <div role="navigation" aria-label="breadcrumbs navigation">
-
   <ul class="wy-breadcrumbs">
-    
-      <li><a href="../../../index.html">Docs</a> &raquo;</li>
-        
-      <li>&lt;no title&gt;</li>
-    
-    
+    <li><a href="../../../index.html">Docs</a> &raquo;</li>
+      
+    <li>&lt;no title&gt;</li>
       <li class="wy-breadcrumbs-aside">
         
-            
+          
             <a href="../../../_sources/tutorials/ipython_notebooks/motion-correction/trappist1.ipynb.txt" rel="nofollow"> View page source</a>
           
         
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
@@ -370,8 +346,8 @@ div.nboutput div.output_area.stderr {
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">pyke</span> <span class="k">import</span> <span class="n">KeplerTargetPixelFile</span>
-<span class="o">%</span><span class="k">matplotlib</span> inline
+<span></span>from pyke import KeplerTargetPixelFile
+%matplotlib inline
 </pre></div>
 </div>
 </div>
@@ -381,7 +357,7 @@ div.nboutput div.output_area.stderr {
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span></span>import numpy as np
 </pre></div>
 </div>
 </div>
@@ -391,7 +367,7 @@ div.nboutput div.output_area.stderr {
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span></span>import matplotlib.pyplot as plt
 </pre></div>
 </div>
 </div>
@@ -401,7 +377,7 @@ div.nboutput div.output_area.stderr {
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">oktopus</span> <span class="k">import</span> <span class="n">UniformPrior</span><span class="p">,</span> <span class="n">JointPrior</span>
+<span></span>from oktopus import UniformPrior, JointPrior
 </pre></div>
 </div>
 </div>
@@ -411,8 +387,8 @@ div.nboutput div.output_area.stderr {
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">pyke</span> <span class="k">import</span> <span class="n">PRFPhotometry</span><span class="p">,</span> <span class="n">SceneModel</span>
-<span class="kn">from</span> <span class="nn">pyke.utils</span> <span class="k">import</span> <span class="n">KeplerQualityFlags</span>
+<span></span>from pyke import PRFPhotometry, SceneModel
+from pyke.utils import KeplerQualityFlags
 </pre></div>
 </div>
 </div>
@@ -422,8 +398,8 @@ div.nboutput div.output_area.stderr {
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="n">tpf</span> <span class="o">=</span> <span class="n">KeplerTargetPixelFile</span><span class="p">(</span><span class="s1">&#39;https://archive.stsci.edu/missions/k2/target_pixel_files/c12/246100000/99000/ktwo246199087-c12_lpd-targ.fits.gz&#39;</span><span class="p">,</span>
-                            <span class="n">quality_mask</span><span class="o">=</span><span class="n">KeplerQualityFlags</span><span class="o">.</span><span class="n">HARDEST_BITMASK</span><span class="p">)</span>
+<span></span>tpf = KeplerTargetPixelFile(&#39;https://archive.stsci.edu/missions/k2/target_pixel_files/c12/246100000/99000/ktwo246199087-c12_lpd-targ.fits.gz&#39;,
+                            quality_mask=KeplerQualityFlags.HARDEST_BITMASK)
 </pre></div>
 </div>
 </div>
@@ -433,7 +409,7 @@ div.nboutput div.output_area.stderr {
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="n">tpf</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+<span></span>tpf.plot()
 </pre></div>
 </div>
 </div>
@@ -450,7 +426,7 @@ div.nboutput div.output_area.stderr {
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="n">prf</span> <span class="o">=</span> <span class="n">tpf</span><span class="o">.</span><span class="n">get_prf_model</span><span class="p">()</span>
+<span></span>prf = tpf.get_prf_model()
 </pre></div>
 </div>
 </div>
@@ -460,10 +436,10 @@ div.nboutput div.output_area.stderr {
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="n">prior_column</span> <span class="o">=</span> <span class="n">UniformPrior</span><span class="p">(</span><span class="n">lb</span><span class="o">=</span><span class="mi">990</span><span class="p">,</span> <span class="n">ub</span><span class="o">=</span><span class="mi">996</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;column&#39;</span><span class="p">)</span>
-<span class="n">prior_row</span> <span class="o">=</span> <span class="n">UniformPrior</span><span class="p">(</span><span class="n">lb</span><span class="o">=</span><span class="mi">25</span><span class="p">,</span> <span class="n">ub</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;row&#39;</span><span class="p">)</span>
-<span class="n">prior_flux</span> <span class="o">=</span> <span class="n">UniformPrior</span><span class="p">(</span><span class="n">lb</span><span class="o">=</span><span class="mf">4e3</span><span class="p">,</span> <span class="n">ub</span><span class="o">=</span><span class="mf">2e4</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;flux&#39;</span><span class="p">)</span>
-<span class="n">prior_bkg</span> <span class="o">=</span> <span class="n">UniformPrior</span><span class="p">(</span><span class="n">lb</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">ub</span><span class="o">=</span><span class="mf">2e3</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;bkg&#39;</span><span class="p">)</span>
+<span></span>prior_column = UniformPrior(lb=990, ub=996, name=&#39;column&#39;)
+prior_row = UniformPrior(lb=25, ub=30, name=&#39;row&#39;)
+prior_flux = UniformPrior(lb=4e3, ub=2e4, name=&#39;flux&#39;)
+prior_bkg = UniformPrior(lb=1, ub=2e3, name=&#39;bkg&#39;)
 </pre></div>
 </div>
 </div>
@@ -473,7 +449,7 @@ div.nboutput div.output_area.stderr {
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="n">prior</span> <span class="o">=</span> <span class="n">JointPrior</span><span class="p">(</span><span class="n">prior_flux</span><span class="p">,</span> <span class="n">prior_column</span><span class="p">,</span> <span class="n">prior_row</span><span class="p">,</span> <span class="n">prior_bkg</span><span class="p">)</span>
+<span></span>prior = JointPrior(prior_flux, prior_column, prior_row, prior_bkg)
 </pre></div>
 </div>
 </div>
@@ -483,7 +459,7 @@ div.nboutput div.output_area.stderr {
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="n">scene</span> <span class="o">=</span> <span class="n">SceneModel</span><span class="p">(</span><span class="n">prfs</span><span class="o">=</span><span class="p">[</span><span class="n">prf</span><span class="p">])</span>
+<span></span>scene = SceneModel(prfs=[prf])
 </pre></div>
 </div>
 </div>
@@ -493,7 +469,7 @@ div.nboutput div.output_area.stderr {
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="n">phot</span> <span class="o">=</span> <span class="n">PRFPhotometry</span><span class="p">(</span><span class="n">scene_model</span><span class="o">=</span><span class="n">scene</span><span class="p">,</span> <span class="n">prior</span><span class="o">=</span><span class="n">prior</span><span class="p">)</span>
+<span></span>phot = PRFPhotometry(scene_model=scene, prior=prior)
 </pre></div>
 </div>
 </div>
@@ -503,7 +479,7 @@ div.nboutput div.output_area.stderr {
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="n">results</span> <span class="o">=</span> <span class="n">phot</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">tpf</span><span class="o">.</span><span class="n">flux</span> <span class="o">+</span> <span class="n">tpf</span><span class="o">.</span><span class="n">flux_bkg</span><span class="p">)</span>
+<span></span>results = phot.fit(tpf.flux + tpf.flux_bkg)
 </pre></div>
 </div>
 </div>
@@ -529,10 +505,10 @@ div.nboutput div.output_area.stderr {
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="n">flux</span> <span class="o">=</span> <span class="n">results</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
-<span class="n">col</span> <span class="o">=</span> <span class="n">results</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span>
-<span class="n">row</span> <span class="o">=</span> <span class="n">results</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span>
-<span class="n">bkg</span> <span class="o">=</span> <span class="n">results</span><span class="p">[:,</span> <span class="mi">3</span><span class="p">]</span>
+<span></span>flux = results[:, 0]
+col = results[:, 1]
+row = results[:, 2]
+bkg = results[:, 3]
 </pre></div>
 </div>
 </div>
@@ -542,8 +518,8 @@ div.nboutput div.output_area.stderr {
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">[</span><span class="mi">14</span><span class="p">,</span> <span class="mi">4</span><span class="p">])</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">tpf</span><span class="o">.</span><span class="n">time</span><span class="p">,</span> <span class="n">flux</span><span class="p">,</span> <span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span></span>plt.figure(figsize=[14, 4])
+plt.plot(tpf.time, flux, &#39;o&#39;, markersize=2)
 </pre></div>
 </div>
 </div>
@@ -570,7 +546,7 @@ div.nboutput div.output_area.stderr {
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="n">q</span> <span class="o">=</span> <span class="n">tpf</span><span class="o">.</span><span class="n">time</span> <span class="o">&lt;</span> <span class="mi">2956</span>
+<span></span>q = tpf.time &lt; 2956
 </pre></div>
 </div>
 </div>
@@ -580,8 +556,8 @@ div.nboutput div.output_area.stderr {
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">[</span><span class="mi">14</span><span class="p">,</span> <span class="mi">4</span><span class="p">])</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">tpf</span><span class="o">.</span><span class="n">time</span><span class="p">[</span><span class="n">q</span><span class="p">],</span> <span class="n">flux</span><span class="p">[</span><span class="n">q</span><span class="p">],</span> <span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span></span>plt.figure(figsize=[14, 4])
+plt.plot(tpf.time[q], flux[q], &#39;o&#39;, markersize=2)
 </pre></div>
 </div>
 </div>
@@ -608,9 +584,9 @@ div.nboutput div.output_area.stderr {
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">[</span><span class="mi">14</span><span class="p">,</span> <span class="mi">4</span><span class="p">])</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">tpf</span><span class="o">.</span><span class="n">time</span><span class="p">[</span><span class="o">~</span><span class="n">q</span><span class="p">],</span> <span class="n">flux</span><span class="p">[</span><span class="o">~</span><span class="n">q</span><span class="p">],</span> <span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">(</span><span class="mi">5400</span><span class="p">,</span> <span class="mi">6000</span><span class="p">)</span>
+<span></span>plt.figure(figsize=[14, 4])
+plt.plot(tpf.time[~q], flux[~q], &#39;o&#39;, markersize=2)
+plt.ylim(5400, 6000)
 </pre></div>
 </div>
 </div>
@@ -637,8 +613,8 @@ div.nboutput div.output_area.stderr {
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">[</span><span class="mi">14</span><span class="p">,</span> <span class="mi">4</span><span class="p">])</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">tpf</span><span class="o">.</span><span class="n">time</span><span class="p">[</span><span class="n">q</span><span class="p">],</span> <span class="n">col</span><span class="p">[</span><span class="n">q</span><span class="p">],</span> <span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span></span>plt.figure(figsize=[14, 4])
+plt.plot(tpf.time[q], col[q], &#39;o&#39;, markersize=2)
 </pre></div>
 </div>
 </div>
@@ -665,8 +641,8 @@ div.nboutput div.output_area.stderr {
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">[</span><span class="mi">14</span><span class="p">,</span> <span class="mi">4</span><span class="p">])</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">tpf</span><span class="o">.</span><span class="n">time</span><span class="p">[</span><span class="n">q</span><span class="p">],</span> <span class="n">row</span><span class="p">[</span><span class="n">q</span><span class="p">],</span> <span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span></span>plt.figure(figsize=[14, 4])
+plt.plot(tpf.time[q], row[q], &#39;o&#39;, markersize=2)
 </pre></div>
 </div>
 </div>
@@ -693,7 +669,7 @@ div.nboutput div.output_area.stderr {
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="n">np</span><span class="o">.</span><span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="s1">&#39;ignore&#39;</span><span class="p">)</span>
+<span></span>np.warnings.filterwarnings(&#39;ignore&#39;)
 </pre></div>
 </div>
 </div>
@@ -703,7 +679,7 @@ div.nboutput div.output_area.stderr {
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">pyke.lightcurve</span> <span class="k">import</span> <span class="n">SFFCorrector</span>
+<span></span>from pyke.lightcurve import SFFCorrector
 </pre></div>
 </div>
 </div>
@@ -713,12 +689,12 @@ div.nboutput div.output_area.stderr {
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="n">sff</span> <span class="o">=</span> <span class="n">SFFCorrector</span><span class="p">()</span>
-<span class="n">lc1</span> <span class="o">=</span> <span class="n">sff</span><span class="o">.</span><span class="n">correct</span><span class="p">(</span><span class="n">tpf</span><span class="o">.</span><span class="n">time</span><span class="p">[</span><span class="n">q</span><span class="p">],</span> <span class="n">flux</span><span class="p">[</span><span class="n">q</span><span class="p">],</span> <span class="n">col</span><span class="p">[</span><span class="n">q</span><span class="p">],</span> <span class="n">row</span><span class="p">[</span><span class="n">q</span><span class="p">],</span> <span class="n">niters</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">windows</span><span class="o">=</span><span class="mi">13</span><span class="p">,</span> <span class="n">polyorder</span><span class="o">=</span><span class="mi">6</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">[</span><span class="mi">14</span><span class="p">,</span> <span class="mi">4</span><span class="p">])</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">lc1</span><span class="o">.</span><span class="n">time</span><span class="p">,</span> <span class="n">lc1</span><span class="o">.</span><span class="n">flux</span><span class="p">,</span> <span class="s1">&#39;ko&#39;</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">lc1</span><span class="o">.</span><span class="n">time</span><span class="p">,</span> <span class="n">lc1</span><span class="o">.</span><span class="n">flux</span><span class="p">,</span> <span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">(</span><span class="o">.</span><span class="mi">975</span><span class="p">,</span> <span class="mf">1.025</span><span class="p">)</span>
+<span></span>sff = SFFCorrector()
+lc1 = sff.correct(tpf.time[q], flux[q], col[q], row[q], niters=10, windows=13, polyorder=6)
+plt.figure(figsize=[14, 4])
+plt.plot(lc1.time, lc1.flux, &#39;ko&#39;, markersize=3)
+plt.plot(lc1.time, lc1.flux, &#39;o&#39;, markersize=2)
+plt.ylim(.975, 1.025)
 </pre></div>
 </div>
 </div>
@@ -753,8 +729,8 @@ div.nboutput div.output_area.stderr {
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="n">sff</span><span class="o">.</span><span class="n">_plot_normflux_arclength</span><span class="p">()</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">(</span><span class="o">.</span><span class="mi">9</span><span class="p">,</span> <span class="mf">1.1</span><span class="p">)</span>
+<span></span>sff._plot_normflux_arclength()
+plt.ylim(.9, 1.1)
 </pre></div>
 </div>
 </div>
@@ -781,7 +757,7 @@ div.nboutput div.output_area.stderr {
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="n">sff</span><span class="o">.</span><span class="n">_plot_rotated_centroids</span><span class="p">()</span>
+<span></span>sff._plot_rotated_centroids()
 </pre></div>
 </div>
 </div>
@@ -808,11 +784,11 @@ div.nboutput div.output_area.stderr {
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="n">lc2</span> <span class="o">=</span> <span class="n">sff</span><span class="o">.</span><span class="n">correct</span><span class="p">(</span><span class="n">tpf</span><span class="o">.</span><span class="n">time</span><span class="p">[</span><span class="o">~</span><span class="n">q</span><span class="p">],</span> <span class="n">flux</span><span class="p">[</span><span class="o">~</span><span class="n">q</span><span class="p">],</span> <span class="n">col</span><span class="p">[</span><span class="o">~</span><span class="n">q</span><span class="p">],</span> <span class="n">row</span><span class="p">[</span><span class="o">~</span><span class="n">q</span><span class="p">],</span> <span class="n">niters</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">windows</span><span class="o">=</span><span class="mi">13</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">[</span><span class="mi">14</span><span class="p">,</span> <span class="mi">4</span><span class="p">])</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">lc2</span><span class="o">.</span><span class="n">time</span><span class="p">,</span> <span class="n">lc2</span><span class="o">.</span><span class="n">flux</span><span class="p">,</span> <span class="s1">&#39;ko&#39;</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">lc2</span><span class="o">.</span><span class="n">time</span><span class="p">,</span> <span class="n">lc2</span><span class="o">.</span><span class="n">flux</span><span class="p">,</span> <span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">(</span><span class="o">.</span><span class="mi">975</span><span class="p">,</span> <span class="mf">1.025</span><span class="p">)</span>
+<span></span>lc2 = sff.correct(tpf.time[~q], flux[~q], col[~q], row[~q], niters=10, windows=13)
+plt.figure(figsize=[14, 4])
+plt.plot(lc2.time, lc2.flux, &#39;ko&#39;, markersize=3)
+plt.plot(lc2.time, lc2.flux, &#39;o&#39;, markersize=2)
+plt.ylim(.975, 1.025)
 </pre></div>
 </div>
 </div>
@@ -847,7 +823,7 @@ div.nboutput div.output_area.stderr {
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="n">lc</span> <span class="o">=</span> <span class="n">lc1</span><span class="o">.</span><span class="n">stitch</span><span class="p">(</span><span class="n">lc2</span><span class="p">)</span>
+<span></span>lc = lc1.stitch(lc2)
 </pre></div>
 </div>
 </div>
@@ -857,10 +833,10 @@ div.nboutput div.output_area.stderr {
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">[</span><span class="mi">14</span><span class="p">,</span> <span class="mi">4</span><span class="p">])</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">lc</span><span class="o">.</span><span class="n">time</span><span class="p">,</span> <span class="n">lc</span><span class="o">.</span><span class="n">flux</span><span class="p">,</span> <span class="s1">&#39;ko&#39;</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">lc</span><span class="o">.</span><span class="n">time</span><span class="p">,</span> <span class="n">lc</span><span class="o">.</span><span class="n">flux</span><span class="p">,</span> <span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">(</span><span class="o">.</span><span class="mi">975</span><span class="p">,</span> <span class="mf">1.025</span><span class="p">)</span>
+<span></span>plt.figure(figsize=[14, 4])
+plt.plot(lc.time, lc.flux, &#39;ko&#39;, markersize=3)
+plt.plot(lc.time, lc.flux, &#39;o&#39;, markersize=2)
+plt.ylim(.975, 1.025)
 </pre></div>
 </div>
 </div>
@@ -887,12 +863,12 @@ div.nboutput div.output_area.stderr {
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="n">fold_p1</span> <span class="o">=</span> <span class="n">lc</span><span class="o">.</span><span class="n">fold</span><span class="p">(</span><span class="mf">1.5108739</span><span class="p">,</span> <span class="n">phase</span><span class="o">=</span><span class="mf">2457322.51736</span> <span class="o">-</span> <span class="mf">2454833.0</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">[</span><span class="mi">7</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">fold_p1</span><span class="o">.</span><span class="n">time</span><span class="p">,</span> <span class="n">fold_p1</span><span class="o">.</span><span class="n">flux</span><span class="p">,</span> <span class="s1">&#39;ko&#39;</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=.</span><span class="mi">2</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">fold_p1</span><span class="o">.</span><span class="n">time</span><span class="p">,</span> <span class="n">fold_p1</span><span class="o">.</span><span class="n">flux</span><span class="p">,</span> <span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=.</span><span class="mi">2</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">(</span><span class="o">.</span><span class="mi">975</span><span class="p">,</span> <span class="mf">1.025</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">xlim</span><span class="p">(</span><span class="o">-.</span><span class="mi">05</span><span class="p">,</span> <span class="o">.</span><span class="mi">05</span><span class="p">)</span>
+<span></span>fold_p1 = lc.fold(1.5108739, phase=2457322.51736 - 2454833.0)
+plt.figure(figsize=[7, 3])
+plt.plot(fold_p1.time, fold_p1.flux, &#39;ko&#39;, markersize=3, alpha=.2)
+plt.plot(fold_p1.time, fold_p1.flux, &#39;o&#39;, markersize=2, alpha=.2)
+plt.ylim(.975, 1.025)
+plt.xlim(-.05, .05)
 </pre></div>
 </div>
 </div>
@@ -919,12 +895,12 @@ div.nboutput div.output_area.stderr {
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="n">fold_p2</span> <span class="o">=</span> <span class="n">lc</span><span class="o">.</span><span class="n">fold</span><span class="p">(</span><span class="mf">2.421818</span><span class="p">,</span> <span class="n">phase</span><span class="o">=</span><span class="mf">2457282.80728</span> <span class="o">-</span> <span class="mf">2454833.0</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">[</span><span class="mi">7</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">fold_p2</span><span class="o">.</span><span class="n">time</span><span class="p">,</span> <span class="n">fold_p2</span><span class="o">.</span><span class="n">flux</span><span class="p">,</span> <span class="s1">&#39;ko&#39;</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=.</span><span class="mi">2</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">fold_p2</span><span class="o">.</span><span class="n">time</span><span class="p">,</span> <span class="n">fold_p2</span><span class="o">.</span><span class="n">flux</span><span class="p">,</span> <span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=.</span><span class="mi">2</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">(</span><span class="o">.</span><span class="mi">975</span><span class="p">,</span> <span class="mf">1.025</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">xlim</span><span class="p">(</span><span class="o">-.</span><span class="mi">05</span><span class="p">,</span> <span class="o">.</span><span class="mi">05</span><span class="p">)</span>
+<span></span>fold_p2 = lc.fold(2.421818, phase=2457282.80728 - 2454833.0)
+plt.figure(figsize=[7, 3])
+plt.plot(fold_p2.time, fold_p2.flux, &#39;ko&#39;, markersize=3, alpha=.2)
+plt.plot(fold_p2.time, fold_p2.flux, &#39;o&#39;, markersize=2, alpha=.2)
+plt.ylim(.975, 1.025)
+plt.xlim(-.05, .05)
 </pre></div>
 </div>
 </div>
@@ -951,12 +927,12 @@ div.nboutput div.output_area.stderr {
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="n">fold_p3</span> <span class="o">=</span> <span class="n">lc</span><span class="o">.</span><span class="n">fold</span><span class="p">(</span><span class="mf">4.049610</span><span class="p">,</span> <span class="n">phase</span><span class="o">=</span><span class="mf">2457670.14165</span> <span class="o">-</span> <span class="mf">2454833.0</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">[</span><span class="mi">7</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">fold_p3</span><span class="o">.</span><span class="n">time</span><span class="p">,</span> <span class="n">fold_p3</span><span class="o">.</span><span class="n">flux</span><span class="p">,</span> <span class="s1">&#39;ko&#39;</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=.</span><span class="mi">2</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">fold_p3</span><span class="o">.</span><span class="n">time</span><span class="p">,</span> <span class="n">fold_p3</span><span class="o">.</span><span class="n">flux</span><span class="p">,</span> <span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=.</span><span class="mi">2</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">(</span><span class="o">.</span><span class="mi">975</span><span class="p">,</span> <span class="mf">1.025</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">xlim</span><span class="p">(</span><span class="o">-.</span><span class="mi">05</span><span class="p">,</span> <span class="o">.</span><span class="mi">05</span><span class="p">)</span>
+<span></span>fold_p3 = lc.fold(4.049610, phase=2457670.14165 - 2454833.0)
+plt.figure(figsize=[7, 3])
+plt.plot(fold_p3.time, fold_p3.flux, &#39;ko&#39;, markersize=3, alpha=.2)
+plt.plot(fold_p3.time, fold_p3.flux, &#39;o&#39;, markersize=2, alpha=.2)
+plt.ylim(.975, 1.025)
+plt.xlim(-.05, .05)
 </pre></div>
 </div>
 </div>
@@ -983,12 +959,12 @@ div.nboutput div.output_area.stderr {
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="n">fold_p4</span> <span class="o">=</span> <span class="n">lc</span><span class="o">.</span><span class="n">fold</span><span class="p">(</span><span class="mf">6.099615</span><span class="p">,</span> <span class="n">phase</span><span class="o">=</span><span class="mf">2457660.37859</span> <span class="o">-</span> <span class="mf">2454833.0</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">[</span><span class="mi">7</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">fold_p4</span><span class="o">.</span><span class="n">time</span><span class="p">,</span> <span class="n">fold_p4</span><span class="o">.</span><span class="n">flux</span><span class="p">,</span> <span class="s1">&#39;ko&#39;</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=.</span><span class="mi">2</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">fold_p4</span><span class="o">.</span><span class="n">time</span><span class="p">,</span> <span class="n">fold_p4</span><span class="o">.</span><span class="n">flux</span><span class="p">,</span> <span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=.</span><span class="mi">2</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">(</span><span class="o">.</span><span class="mi">975</span><span class="p">,</span> <span class="mf">1.025</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">xlim</span><span class="p">(</span><span class="o">-.</span><span class="mi">05</span><span class="p">,</span> <span class="o">.</span><span class="mi">05</span><span class="p">)</span>
+<span></span>fold_p4 = lc.fold(6.099615, phase=2457660.37859 - 2454833.0)
+plt.figure(figsize=[7, 3])
+plt.plot(fold_p4.time, fold_p4.flux, &#39;ko&#39;, markersize=3, alpha=.2)
+plt.plot(fold_p4.time, fold_p4.flux, &#39;o&#39;, markersize=2, alpha=.2)
+plt.ylim(.975, 1.025)
+plt.xlim(-.05, .05)
 </pre></div>
 </div>
 </div>
@@ -1015,12 +991,12 @@ div.nboutput div.output_area.stderr {
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="n">fold_p5</span> <span class="o">=</span> <span class="n">lc</span><span class="o">.</span><span class="n">fold</span><span class="p">(</span><span class="mf">9.206690</span><span class="p">,</span> <span class="n">phase</span><span class="o">=</span><span class="mf">2457671.39767</span> <span class="o">-</span> <span class="mf">2454833.0</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">[</span><span class="mi">7</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">fold_p5</span><span class="o">.</span><span class="n">time</span><span class="p">,</span> <span class="n">fold_p5</span><span class="o">.</span><span class="n">flux</span><span class="p">,</span> <span class="s1">&#39;ko&#39;</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=.</span><span class="mi">2</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">fold_p5</span><span class="o">.</span><span class="n">time</span><span class="p">,</span> <span class="n">fold_p5</span><span class="o">.</span><span class="n">flux</span><span class="p">,</span> <span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=.</span><span class="mi">2</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">(</span><span class="o">.</span><span class="mi">975</span><span class="p">,</span> <span class="mf">1.025</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">xlim</span><span class="p">(</span><span class="o">-.</span><span class="mi">05</span><span class="p">,</span> <span class="o">.</span><span class="mi">05</span><span class="p">)</span>
+<span></span>fold_p5 = lc.fold(9.206690, phase=2457671.39767 - 2454833.0)
+plt.figure(figsize=[7, 3])
+plt.plot(fold_p5.time, fold_p5.flux, &#39;ko&#39;, markersize=3, alpha=.2)
+plt.plot(fold_p5.time, fold_p5.flux, &#39;o&#39;, markersize=2, alpha=.2)
+plt.ylim(.975, 1.025)
+plt.xlim(-.05, .05)
 </pre></div>
 </div>
 </div>
@@ -1047,12 +1023,12 @@ div.nboutput div.output_area.stderr {
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="n">fold_p6</span> <span class="o">=</span> <span class="n">lc</span><span class="o">.</span><span class="n">fold</span><span class="p">(</span><span class="mf">12.35294</span><span class="p">,</span> <span class="n">phase</span><span class="o">=</span><span class="mf">2457665.34937</span> <span class="o">-</span> <span class="mf">2454833.0</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">[</span><span class="mi">7</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">fold_p6</span><span class="o">.</span><span class="n">time</span><span class="p">,</span> <span class="n">fold_p6</span><span class="o">.</span><span class="n">flux</span><span class="p">,</span> <span class="s1">&#39;ko&#39;</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=.</span><span class="mi">2</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">fold_p6</span><span class="o">.</span><span class="n">time</span><span class="p">,</span> <span class="n">fold_p6</span><span class="o">.</span><span class="n">flux</span><span class="p">,</span> <span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=.</span><span class="mi">2</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">(</span><span class="o">.</span><span class="mi">975</span><span class="p">,</span> <span class="mf">1.025</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">xlim</span><span class="p">(</span><span class="o">-.</span><span class="mi">05</span><span class="p">,</span> <span class="o">.</span><span class="mi">05</span><span class="p">)</span>
+<span></span>fold_p6 = lc.fold(12.35294, phase=2457665.34937 - 2454833.0)
+plt.figure(figsize=[7, 3])
+plt.plot(fold_p6.time, fold_p6.flux, &#39;ko&#39;, markersize=3, alpha=.2)
+plt.plot(fold_p6.time, fold_p6.flux, &#39;o&#39;, markersize=2, alpha=.2)
+plt.ylim(.975, 1.025)
+plt.xlim(-.05, .05)
 </pre></div>
 </div>
 </div>
@@ -1079,12 +1055,12 @@ div.nboutput div.output_area.stderr {
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="n">fold_p7</span> <span class="o">=</span> <span class="n">lc</span><span class="o">.</span><span class="n">fold</span><span class="p">(</span><span class="mf">18.767</span><span class="p">,</span> <span class="n">phase</span><span class="o">=</span><span class="mf">2457662.55284</span> <span class="o">-</span> <span class="mf">2454833.0</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">[</span><span class="mi">7</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">fold_p7</span><span class="o">.</span><span class="n">time</span><span class="p">,</span> <span class="n">fold_p7</span><span class="o">.</span><span class="n">flux</span><span class="p">,</span> <span class="s1">&#39;ko&#39;</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=.</span><span class="mi">2</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">fold_p7</span><span class="o">.</span><span class="n">time</span><span class="p">,</span> <span class="n">fold_p7</span><span class="o">.</span><span class="n">flux</span><span class="p">,</span> <span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=.</span><span class="mi">2</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">(</span><span class="o">.</span><span class="mi">975</span><span class="p">,</span> <span class="mf">1.025</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">xlim</span><span class="p">(</span><span class="o">-.</span><span class="mi">05</span><span class="p">,</span> <span class="o">.</span><span class="mi">05</span><span class="p">)</span>
+<span></span>fold_p7 = lc.fold(18.767, phase=2457662.55284 - 2454833.0)
+plt.figure(figsize=[7, 3])
+plt.plot(fold_p7.time, fold_p7.flux, &#39;ko&#39;, markersize=3, alpha=.2)
+plt.plot(fold_p7.time, fold_p7.flux, &#39;o&#39;, markersize=2, alpha=.2)
+plt.ylim(.975, 1.025)
+plt.xlim(-.05, .05)
 </pre></div>
 </div>
 </div>
@@ -1105,11 +1081,18 @@ div.nboutput div.output_area.stderr {
 <img alt="../../../_images/tutorials_ipython_notebooks_motion-correction_trappist1_34_1.png" src="../../../_images/tutorials_ipython_notebooks_motion-correction_trappist1_34_1.png" />
 </div>
 </div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span>
+</pre></div>
+</div>
+</div>
 
 
-           </div>
-           <div class="articleComments">
-            
            </div>
           </div>
           <footer>
@@ -1144,8 +1127,7 @@ div.nboutput div.output_area.stderr {
             VERSION:'3.0.0',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true,
-            SOURCELINK_SUFFIX: '.txt'
+            HAS_SOURCE:  true
         };
     </script>
       <script type="text/javascript" src="../../../_static/jquery.js"></script>

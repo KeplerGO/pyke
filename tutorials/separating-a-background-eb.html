@@ -8,11 +8,9 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Example 3: Separating a background EB from a foreground star &mdash; PyKE 3.0.0 documentation</title>
+  <title>Example 2: Separating a background EB from a foreground star &mdash; PyKE 3.0.0 documentation</title>
   
 
-  
-  
   
   
 
@@ -37,7 +35,7 @@
         <link rel="search" title="Search" href="../search.html"/>
     <link rel="top" title="PyKE 3.0.0 documentation" href="../index.html"/>
         <link rel="up" title="Photometry tutorials" href="index.html"/>
-        <link rel="next" title="Example 4: Removing Stellar Astrophysics and Quarter Stitching" href="removing-stellar-astroph-quarter-stitch.html"/>
+        <link rel="next" title="Example 3: Removing Stellar Astrophysics and Quarter Stitching" href="removing-stellar-astroph-quarter-stitch.html"/>
         <link rel="prev" title="Example 1: Aperture photometry on a K2 target" href="aperture-photometry-in-k2.html"/> 
 
   
@@ -47,7 +45,6 @@
 
 <body class="wy-body-for-nav" role="document">
 
-   
   <div class="wy-grid-for-nav">
 
     
@@ -91,23 +88,21 @@
           
             
             
-              
-            
-            
-              <ul>
-<li class="toctree-l1"><a class="reference internal" href="ipython_notebooks/whatsnew31.html">What’s new in PyKE 3.1?</a></li>
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="ipython_notebooks/whatsnew31.html">What’s new in PyKE 3?</a></li>
 </ul>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Quickstart</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../install.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../overview.html">PyKE tasks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/index.html">API documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tasks.html">PyKE tasks</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../contributing.html">Contributing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../citing.html">Citing</a></li>
 </ul>
 <ul class="current">
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">Photometry tutorials</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="aperture-photometry-in-k2.html">Example 1: Aperture photometry on a K2 target</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Example 3: Separating a background EB from a foreground star</a><ul>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Example 2: Separating a background EB from a foreground star</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#step-1-plot-archived-sap-data">Step 1: Plot archived SAP data</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#step-2-plot-archived-pdcsap-data">Step 2: Plot archived PDCSAP data</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#step-3-plot-archived-photometric-time-series-for-individual-target-pixels">Step 3: Plot archived photometric time-series for individual target pixels</a></li>
@@ -116,7 +111,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#step-6-mitigate-for-systematic-artifacts-in-new-sap-light-curves">Step 6: Mitigate for systematic artifacts in new SAP light curves</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="removing-stellar-astroph-quarter-stitch.html">Example 4: Removing Stellar Astrophysics and Quarter Stitching</a></li>
+<li class="toctree-l2"><a class="reference internal" href="removing-stellar-astroph-quarter-stitch.html">Example 3: Removing Stellar Astrophysics and Quarter Stitching</a></li>
 </ul>
 </li>
 </ul>
@@ -131,10 +126,8 @@
 
       
       <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
-        
-          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../index.html">PyKE</a>
-        
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../index.html">PyKE</a>
       </nav>
 
 
@@ -143,42 +136,25 @@
         <div class="rst-content">
           
 
-
-
-
-
-
-
-
-
-
-
-
+ 
 
 
 
 <div role="navigation" aria-label="breadcrumbs navigation">
-
   <ul class="wy-breadcrumbs">
-    
-      <li><a href="../index.html">Docs</a> &raquo;</li>
-        
+    <li><a href="../index.html">Docs</a> &raquo;</li>
+      
           <li><a href="index.html">Photometry tutorials</a> &raquo;</li>
-        
-      <li>Example 3: Separating a background EB from a foreground star</li>
-    
-    
+      
+    <li>Example 2: Separating a background EB from a foreground star</li>
       <li class="wy-breadcrumbs-aside">
         
-            
+          
             <a href="../_sources/tutorials/separating-a-background-eb.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
@@ -218,8 +194,8 @@
     margin-right: 4px;  /* make room for the exclamation icon */
 }
 </style>
-<div class="section" id="example-3-separating-a-background-eb-from-a-foreground-star">
-<h1>Example 3: Separating a background EB from a foreground star<a class="headerlink" href="#example-3-separating-a-background-eb-from-a-foreground-star" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="example-2-separating-a-background-eb-from-a-foreground-star">
+<h1>Example 2: Separating a background EB from a foreground star<a class="headerlink" href="#example-2-separating-a-background-eb-from-a-foreground-star" title="Permalink to this headline">¶</a></h1>
 <p>The likelihood of source confusion around any given target is high.
 One cannot be certain whether astrophysical variability across a Kepler light curve comes entirely from the target star.
 In order to resolve the sources of variability within a target mask,
@@ -327,18 +303,15 @@ $ kepcotrend kepextract_eb.fits --outfile kepcotrend_eb.fits
 
 
            </div>
-           <div class="articleComments">
-            
-           </div>
           </div>
           <footer>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="removing-stellar-astroph-quarter-stitch.html" class="btn btn-neutral float-right" title="Example 4: Removing Stellar Astrophysics and Quarter Stitching" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="removing-stellar-astroph-quarter-stitch.html" class="btn btn-neutral float-right" title="Example 3: Removing Stellar Astrophysics and Quarter Stitching" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="aperture-photometry-in-k2.html" class="btn btn-neutral" title="Example 1: Aperture photometry on a K2 target" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="aperture-photometry-in-k2.html" class="btn btn-neutral" title="Example 1: Aperture photometry on a K2 target" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -372,8 +345,7 @@ $ kepcotrend kepextract_eb.fits --outfile kepcotrend_eb.fits
             VERSION:'3.0.0',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true,
-            SOURCELINK_SUFFIX: '.txt'
+            HAS_SOURCE:  true
         };
     </script>
       <script type="text/javascript" src="../_static/jquery.js"></script>

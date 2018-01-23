@@ -1,0 +1,396 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Example 5: Fitting CBVs to Remove Long Term Trends &mdash; PyKE 3.0.0 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../genindex.html"/>
+        <link rel="search" title="Search" href="../search.html"/>
+    <link rel="top" title="PyKE 3.0.0 documentation" href="../index.html"/>
+        <link rel="up" title="Photometry tutorials" href="index.html"/>
+        <link rel="prev" title="Example 4: Removing Stellar Astrophysics and Quarter Stitching" href="removing-stellar-astroph-quarter-stitch.html"/> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> PyKE
+          
+
+          
+            
+            <img src="../_static/pyke-white.png" class="logo" />
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                3.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../overview.html">PyKE tasks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../citing.html">Citing</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Photometry tutorials</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="aperture-photometry-in-k2.html">Example 1: Aperture photometry on a K2 target</a></li>
+<li class="toctree-l2"><a class="reference internal" href="psf-photometry-in-k2.html">Example 2: PSF photometry in a K2 cluster</a></li>
+<li class="toctree-l2"><a class="reference internal" href="separating-a-background-eb.html">Example 3: Separating a background EB from a foreground star</a></li>
+<li class="toctree-l2"><a class="reference internal" href="removing-stellar-astroph-quarter-stitch.html">Example 4: Removing Stellar Astrophysics and Quarter Stitching</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Example 5: Fitting CBVs to Remove Long Term Trends</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#what-are-cbvs">What are CBVs</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../index.html">PyKE</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="index.html">Photometry tutorials</a> &raquo;</li>
+      
+    <li>Example 5: Fitting CBVs to Remove Long Term Trends</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../_sources/tutorials/fitting-CBVs.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast,
+.nboutput.nblast {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast + .nbinput {
+    margin-top: -19px;
+}
+
+/* nice headers on first paragraph of info/warning boxes */
+.admonition .first {
+    margin: -12px;
+    padding: 6px 12px;
+    margin-bottom: 12px;
+    color: #fff;
+    line-height: 1;
+    display: block;
+}
+.admonition.warning .first {
+    background: #f0b37e;
+}
+.admonition.note .first {
+    background: #6ab0de;
+}
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+</style>
+<div class="section" id="example-5-fitting-cbvs-to-remove-long-term-trends">
+<h1>Example 5: Fitting CBVs to Remove Long Term Trends<a class="headerlink" href="#example-5-fitting-cbvs-to-remove-long-term-trends" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="what-are-cbvs">
+<h2>What are CBVs<a class="headerlink" href="#what-are-cbvs" title="Permalink to this headline">¶</a></h2>
+<p>Cotrending Basis Vectors are used to remove long term trends in light
+curves. They are built from the most common trends observed in each
+channel. You can read more about CBVs in <a class="reference external" href="https://arxiv.org/pdf/1207.3093.pdf">Demystifying Kepler
+Data</a>. They can be used to clean
+lightcurves of common trends experience by all targets.</p>
+<p><em>kepcotrend</em> can be used to remove CBVs from a light curve. The new
+light curve is put in a new extention to the fits file.</p>
+<p>Below is an example workflow to remove CBVs from a supernova light curve
+in <em>Kepler</em>. The first stage is to obtain both the light curve and the
+CBV file for that quarter. (You can download CBVs
+<a class="reference external" href="https://archive.stsci.edu/kepler/cbv.html">here</a> for Kepler and
+<a class="reference external" href="https://archive.stsci.edu/ktwo/cbv.html">here</a> for K2.)</p>
+<div class="highlight-ipython3"><div class="highlight"><pre><span></span>!wget https://archive.stsci.edu/missions/kepler/lightcurves/0084/008462852/kplr008462852-2011073133259_llc.fits
+</pre></div>
+</div>
+<div class="highlight-default"><div class="highlight"><pre><span></span>--2017-10-23 17:12:41--  https://archive.stsci.edu/missions/kepler/lightcurves/0084/008462852/kplr008462852-2011073133259_llc.fits
+Resolving archive.stsci.edu... 130.167.252.39
+Connecting to archive.stsci.edu|130.167.252.39|:443... connected.
+HTTP request sent, awaiting response... 200 OK
+Length: 357120 (349K) [text/plain]
+Saving to: ‘kplr008462852-2011073133259_llc.fits.1’
+
+kplr008462852-20110 100%[===================&gt;] 348.75K   472KB/s    in 0.7s
+
+2017-10-23 17:12:43 (472 KB/s) - ‘kplr008462852-2011073133259_llc.fits.1’ saved [357120/357120]
+</pre></div>
+</div>
+<div class="highlight-ipython3"><div class="highlight"><pre><span></span>!wget https://archive.stsci.edu/missions/kepler/cbv/kplr2011073133259-q08-d25_lcbv.fits
+</pre></div>
+</div>
+<div class="highlight-default"><div class="highlight"><pre><span></span>--2017-10-23 17:13:03--  https://archive.stsci.edu/missions/kepler/cbv/kplr2011073133259-q08-d25_lcbv.fits
+Resolving archive.stsci.edu... 130.167.252.39
+Connecting to archive.stsci.edu|130.167.252.39|:443... connected.
+HTTP request sent, awaiting response... 200 OK
+Length: 21925440 (21M) [application/fits]
+Saving to: ‘kplr2011073133259-q08-d25_lcbv.fits.1’
+
+kplr2011073133259-q 100%[===================&gt;]  20.91M   297KB/s    in 62s
+
+2017-10-23 17:14:06 (343 KB/s) - ‘kplr2011073133259-q08-d25_lcbv.fits.1’ saved [21925440/21925440]
+</pre></div>
+</div>
+<p>We can plot up the light curve using kepdraw. We’ve downloaded quarter 8
+of KIC 8462852, which undergos large flux dips over time periods of a
+few days. kepdraw will plot the light curve and save it to
+<em>kplr008462852-2011073133259_llc-kepdraw.png</em></p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>%%bash
+kepdraw kplr008462852-2011073133259_llc.fits --non-interactive
+</pre></div>
+</div>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">Found</span> <span class="n">the</span> <span class="n">following</span> <span class="n">flux</span> <span class="n">columns</span><span class="p">:</span> <span class="n">SAP_FLUX</span><span class="p">,</span> <span class="n">SAP_FLUX_ERR</span><span class="p">,</span> <span class="n">PDCSAP_FLUX</span><span class="p">,</span> <span class="n">PDCSAP_FLUX_ERR</span>
+<span class="n">Using</span> <span class="n">data</span> <span class="n">column</span> <span class="n">PDCSAP_FLUX</span> <span class="n">on</span> <span class="n">the</span> <span class="n">plot</span><span class="o">...</span>
+<span class="n">Writing</span> <span class="n">output</span> <span class="n">file</span> <span class="n">kplr008462852</span><span class="o">-</span><span class="mi">2011073133259</span><span class="n">_llc</span><span class="o">-</span><span class="n">kepdraw</span><span class="o">.</span><span class="n">png</span><span class="o">...</span>
+</pre></div>
+</div>
+<div class="figure">
+<img alt="" src="../_images/kplr008462852-2011073133259_llc-kepdraw.png" />
+</div>
+<p>Now let’s use kepcotrend to remove the CBVs from the light curve. It is
+up to the user to determine how many CBVs should be fit; too few and
+there will be residual trends, too many and the lightcurve will be
+overfit, removing astrophysical data. We’ll use the first two for this
+star.</p>
+<p>kepcotrend takes in the lightcurve file name, the CBV file name and a
+list of CBVs to use. (We are using ‘1 2’.) The results are two
+coefficients for each of the CBVs and a png image of the fit.</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>%%bash
+kepcotrend kplr008462852-2011073133259_llc.fits kplr2011073133259-q08-d25_lcbv.fits <span class="s1">&#39;1 2&#39;</span> --plot <span class="se">\</span>
+--overwrite --non-interactive --outfile out.fits
+</pre></div>
+</div>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">Writing</span> <span class="n">output</span> <span class="n">file</span> <span class="n">kplr008462852</span><span class="o">-</span><span class="mi">2011073133259</span><span class="n">_llc</span><span class="o">-</span><span class="n">kepcotrend</span><span class="o">.</span><span class="n">fits</span><span class="o">...</span>
+      <span class="o">-----</span>
+<span class="n">reduced</span> <span class="n">chi2</span><span class="p">:</span> <span class="mf">51658.12955052195</span>
+<span class="n">rms</span><span class="p">:</span> <span class="mf">3357.82526764298</span>
+<span class="n">Coefficient</span> <span class="n">of</span> <span class="n">CBV</span> <span class="c1">#1: [ 0.03127181]</span>
+<span class="n">Coefficient</span> <span class="n">of</span> <span class="n">CBV</span> <span class="c1">#2: [-0.21461379]</span>
+      <span class="o">-----</span>
+</pre></div>
+</div>
+<div class="figure">
+<img alt="" src="../_images/kplr008462852-2011073133259_llc-kepcotrend.png" />
+</div>
+<p>That seems to have fit very poorly. Unfortunately the CBVs are being fit
+to the large dip in flux and this is causing a very poor fit. We can
+mask out this feature using keprange. Using the call below a window will
+pop up and allow the user to select a time range. keprange will save a
+text file containing those time stamps.</p>
+<p>You should see an interface pop up that looks like the following
+<img alt="image0" src="../_images/keprange1.png" /></p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>%%bash
+keprange kplr008462852-2011073133259_llc.fits --overwrite
+</pre></div>
+</div>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="mf">2455617.56890755</span><span class="p">,</span><span class="mf">2455630.0185563867</span>
+
+<span class="n">Wrote</span> <span class="n">ASCII</span> <span class="n">file</span> <span class="n">kplr008462852</span><span class="o">-</span><span class="mi">2011073133259</span><span class="n">_llc</span><span class="o">-</span><span class="n">keprange</span><span class="o">.</span><span class="n">txt</span>
+</pre></div>
+</div>
+<p>Now we can pass kepcotrend the range file and it will fit the CBVs
+ignoring these data points. It will then apply the correction to all
+datapoints. This is shown below.</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>%%bash
+kepcotrend kplr008462852-2011073133259_llc.fits kplr2011073133259-q08-d25_lcbv.fits <span class="s1">&#39;1 2&#39;</span> --plot <span class="se">\</span>
+--overwrite --non-interactive --outfile out.fits --maskfile kplr008462852-2011073133259_llc-keprange.txt
+</pre></div>
+</div>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">Writing</span> <span class="n">output</span> <span class="n">file</span> <span class="n">out</span><span class="o">.</span><span class="n">fits</span><span class="o">...</span>
+      <span class="o">-----</span>
+<span class="n">reduced</span> <span class="n">chi2</span><span class="p">:</span> <span class="mf">7079.055789270921</span>
+<span class="n">rms</span><span class="p">:</span> <span class="mf">1278.6256990911806</span>
+<span class="n">Coefficient</span> <span class="n">of</span> <span class="n">CBV</span> <span class="c1">#1: [-0.09308594]</span>
+<span class="n">Coefficient</span> <span class="n">of</span> <span class="n">CBV</span> <span class="c1">#2: [-0.09540007]</span>
+      <span class="o">-----</span>
+</pre></div>
+</div>
+<div class="figure">
+<img alt="" src="../_images/out.png" />
+</div>
+<p>kepcotrend has made a new fits file and added a new flux column to the
+first extention called ‘CBVSAP_FLUX’. We can plot up this new, CBV
+corrected flux using kepdraw and check that it has been corrected. This
+is below and the long term trends have been successfully removed.</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>%%bash
+kepdraw out.fits --non-interactive --datacol CBVSAP_FLUX
+</pre></div>
+</div>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">Writing</span> <span class="n">output</span> <span class="n">file</span> <span class="n">out</span><span class="o">-</span><span class="n">kepdraw</span><span class="o">.</span><span class="n">png</span><span class="o">...</span>
+</pre></div>
+</div>
+<div class="figure">
+<img alt="" src="../_images/out-kepdraw.png" />
+</div>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+      
+        <a href="removing-stellar-astroph-quarter-stitch.html" class="btn btn-neutral" title="Example 4: Removing Stellar Astrophysics and Quarter Stitching" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright PyKE Developers and Contributors.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'3.0.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

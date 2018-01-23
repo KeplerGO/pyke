@@ -8,11 +8,9 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>What’s new in PyKE 3.1? &mdash; PyKE 3.0.0 documentation</title>
+  <title>What’s new in PyKE 3? &mdash; PyKE 3.0.0 documentation</title>
   
 
-  
-  
   
   
 
@@ -44,7 +42,6 @@
 
 <body class="wy-body-for-nav" role="document">
 
-   
   <div class="wy-grid-for-nav">
 
     
@@ -88,16 +85,14 @@
           
             
             
-              
-            
-            
-              <ul>
-<li class="toctree-l1"><a class="reference internal" href="../whatsnew31.html">What’s new in PyKE 3.1?</a></li>
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../whatsnew31.html">What’s new in PyKE 3?</a></li>
 </ul>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../quickstart.html">Quickstart</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../install.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../overview.html">PyKE tasks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/index.html">API documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tasks.html">PyKE tasks</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../contributing.html">Contributing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../citing.html">Citing</a></li>
 </ul>
@@ -115,10 +110,8 @@
 
       
       <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
-        
-          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../../../index.html">PyKE</a>
-        
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../../index.html">PyKE</a>
       </nav>
 
 
@@ -127,40 +120,23 @@
         <div class="rst-content">
           
 
-
-
-
-
-
-
-
-
-
-
-
+ 
 
 
 
 <div role="navigation" aria-label="breadcrumbs navigation">
-
   <ul class="wy-breadcrumbs">
-    
-      <li><a href="../../../index.html">Docs</a> &raquo;</li>
-        
-      <li>What’s new in PyKE 3.1?</li>
-    
-    
+    <li><a href="../../../index.html">Docs</a> &raquo;</li>
+      
+    <li>What’s new in PyKE 3?</li>
       <li class="wy-breadcrumbs-aside">
         
-            
+          
             <a href="../../../_sources/tutorials/ipython_notebooks/.ipynb_checkpoints/whatsnew31-checkpoint.ipynb.txt" rel="nofollow"> View page source</a>
           
         
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
@@ -364,198 +340,86 @@ div.nboutput div.output_area.stderr {
     margin-right: 4px;  /* make room for the exclamation icon */
 }
 </style>
-<div class="section" id="What's-new-in-PyKE-3.1?">
-<h1>What’s new in PyKE 3.1?<a class="headerlink" href="#What's-new-in-PyKE-3.1?" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="Utility-functions">
-<h2>Utility functions<a class="headerlink" href="#Utility-functions" title="Permalink to this headline">¶</a></h2>
-<p><code class="docutils literal"><span class="pre">PyKE</span></code> has included two convinience functions to convert between
-<code class="docutils literal"><span class="pre">module.output</span></code> to <code class="docutils literal"><span class="pre">channel</span></code> and vice-versa:</p>
+<div class="section" id="What's-new-in-PyKE-3?">
+<h1>What’s new in PyKE 3?<a class="headerlink" href="#What's-new-in-PyKE-3?" title="Permalink to this headline">¶</a></h1>
+<p>Developed since 2012, PyKE offers a user-friendly way to inspect and
+analyze the pixels and lightcurves obtained by NASA’s Kepler and K2.</p>
+<p>The latest version of PyKE, v3.1, was released in January 2018 and adds
+a new object-oriented Python API which is intended to aid the
+development of custom pipelines and tools by the community.</p>
+<div class="section" id="Introducing-a-generic-LightCurve-class">
+<h2>Introducing a generic LightCurve class<a class="headerlink" href="#Introducing-a-generic-LightCurve-class" title="Permalink to this headline">¶</a></h2>
+<p>The most notable change is the introduction of a generic <code class="docutils literal"><span class="pre">LightCurve</span></code>
+class which provides operations that are intended to suit time series
+data from any astronomical survey. A light curve is simply instantiated
+as follows:</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none"><div class="highlight"><pre>
-<span></span>In [1]:
+<span></span>In [ ]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="o">%</span><span class="k">matplotlib</span> inline
-<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span></span>from pyke import LightCurve
+lc = LightCurve(time=[1, 2, 3], flux=[78.4, 79.6, 76.5])
+</pre></div>
+</div>
+</div>
+<p>A <code class="docutils literal"><span class="pre">LightCurve</span></code> object provides easy access to a range of common
+operations, such as <code class="docutils literal"><span class="pre">fold()</span></code>, <code class="docutils literal"><span class="pre">flatten()</span></code>, <code class="docutils literal"><span class="pre">remove_outliers()</span></code>,
+<code class="docutils literal"><span class="pre">cdpp()</span></code>, <code class="docutils literal"><span class="pre">plot()</span></code>, and more.</p>
+<p>To demonstrate these operations, let’s create a <code class="docutils literal"><span class="pre">LightCurve</span></code> object
+from a <code class="docutils literal"><span class="pre">KeplerLightCurveFile</span></code> we obtain from the data archive at MAST:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span>from pyke import KeplerLightCurveFile
+lcfile = KeplerLightCurveFile(&quot;https://archive.stsci.edu/missions/kepler/lightcurves/0119/011904151/kplr011904151-2010009091648_llc.fits&quot;)
+lc = lcfile.SAP_FLUX
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span>%matplotlib inline
+from matplotlib import rcParams
+rcParams[&quot;figure.figsize&quot;] = (14, 5)
+lc.plot()
 </pre></div>
 </div>
 </div>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none"><div class="highlight"><pre>
-<span></span>In [2]:
+<span></span>In [17]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">pyke.utils</span> <span class="k">import</span> <span class="n">module_output_to_channel</span><span class="p">,</span> <span class="n">channel_to_module_output</span>
+<span></span>import matplotlib.pyplot as pl
+pl.plot(lc.time, lc.flux)
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>Out[17]:
+</pre></div>
+</div>
+<div class="output_area highlight-none"><div class="highlight"><pre>
+<span></span>[&lt;matplotlib.lines.Line2D at 0x7ff347cacd68&gt;]
 </pre></div>
 </div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
-<div class="stderr output_area docutils container">
-<div class="highlight"><pre>
-/Users/jvmirca/anaconda3/lib/python3.6/site-packages/matplotlib/__init__.py:1405: UserWarning:
-This call to matplotlib.use() has no effect because the backend has already
-been chosen; matplotlib.use() must be called *before* pylab, matplotlib.pyplot,
-or matplotlib.backends is imported for the first time.
-
-  warnings.warn(_use_error_msg)
-</pre></div></div>
-</div>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none"><div class="highlight"><pre>
-<span></span>In [3]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="n">module_output_to_channel</span><span class="p">(</span><span class="n">module</span><span class="o">=</span><span class="mi">19</span><span class="p">,</span> <span class="n">output</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt highlight-none"><div class="highlight"><pre>
-<span></span>Out[3]:
-</pre></div>
-</div>
-<div class="output_area highlight-none"><div class="highlight"><pre>
-<span></span>67
-</pre></div>
-</div>
-</div>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none"><div class="highlight"><pre>
-<span></span>In [4]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="n">channel_to_module_output</span><span class="p">(</span><span class="mi">67</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt highlight-none"><div class="highlight"><pre>
-<span></span>Out[4]:
-</pre></div>
-</div>
-<div class="output_area highlight-none"><div class="highlight"><pre>
-<span></span>(19, 3)
-</pre></div>
-</div>
-</div>
-<p><code class="docutils literal"><span class="pre">PyKE</span> <span class="pre">3.1</span></code> includes <code class="docutils literal"><span class="pre">KeplerQualityFlags</span></code> class which encodes the
-meaning of the Kepler QUALITY bitmask flags as documented in the Kepler
-Archive Manual (Table 2.3):</p>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none"><div class="highlight"><pre>
-<span></span>In [5]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">pyke.utils</span> <span class="k">import</span> <span class="n">KeplerQualityFlags</span>
-</pre></div>
-</div>
-</div>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none"><div class="highlight"><pre>
-<span></span>In [6]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="n">KeplerQualityFlags</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt highlight-none"><div class="highlight"><pre>
-<span></span>Out[6]:
-</pre></div>
-</div>
-<div class="output_area highlight-none"><div class="highlight"><pre>
-<span></span>[&#39;Attitude tweak&#39;]
-</pre></div>
-</div>
-</div>
-<p>It also can handle multiple flags:</p>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none"><div class="highlight"><pre>
-<span></span>In [7]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="n">KeplerQualityFlags</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="mi">1024</span> <span class="o">+</span> <span class="mi">1048576</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt highlight-none"><div class="highlight"><pre>
-<span></span>Out[7]:
-</pre></div>
-</div>
-<div class="output_area highlight-none"><div class="highlight"><pre>
-<span></span>[&#39;Attitude tweak&#39;, &#39;Sudden sensitivity dropout&#39;, &#39;Thruster firing&#39;]
-</pre></div>
-</div>
-</div>
-<p>A few quality flags are already computed:</p>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none"><div class="highlight"><pre>
-<span></span>In [8]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="n">KeplerQualityFlags</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">KeplerQualityFlags</span><span class="o">.</span><span class="n">DEFAULT_BITMASK</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt highlight-none"><div class="highlight"><pre>
-<span></span>Out[8]:
-</pre></div>
-</div>
-<div class="output_area highlight-none"><div class="highlight"><pre>
-<span></span>[&#39;Attitude tweak&#39;,
- &#39;Safe mode&#39;,
- &#39;Coarse point&#39;,
- &#39;Earth point&#39;,
- &#39;Desaturation event&#39;,
- &#39;Cosmic ray in optimal aperture&#39;,
- &#39;Manual exclude&#39;,
- &#39;No data&#39;,
- &#39;Thruster firing&#39;]
-</pre></div>
-</div>
-</div>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none"><div class="highlight"><pre>
-<span></span>In [9]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="n">KeplerQualityFlags</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">KeplerQualityFlags</span><span class="o">.</span><span class="n">CONSERVATIVE_BITMASK</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt highlight-none"><div class="highlight"><pre>
-<span></span>Out[9]:
-</pre></div>
-</div>
-<div class="output_area highlight-none"><div class="highlight"><pre>
-<span></span>[&#39;Attitude tweak&#39;,
- &#39;Safe mode&#39;,
- &#39;Coarse point&#39;,
- &#39;Earth point&#39;,
- &#39;Desaturation event&#39;,
- &#39;Cosmic ray in optimal aperture&#39;,
- &#39;Manual exclude&#39;,
- &#39;Sudden sensitivity dropout&#39;,
- &#39;Cosmic ray in collateral data&#39;,
- &#39;No data&#39;,
- &#39;Possible thruster firing&#39;,
- &#39;Thruster firing&#39;]
-</pre></div>
+<div class="output_area docutils container">
+<img alt="../../../_images/tutorials_ipython_notebooks_.ipynb_checkpoints_whatsnew31-checkpoint_8_1.png" src="../../../_images/tutorials_ipython_notebooks_.ipynb_checkpoints_whatsnew31-checkpoint_8_1.png" />
 </div>
 </div>
 </div>
@@ -569,7 +433,7 @@ used to handle target pixel files:</p>
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">pyke</span> <span class="k">import</span> <span class="n">KeplerTargetPixelFile</span>
+<span></span>from pyke import KeplerTargetPixelFile
 </pre></div>
 </div>
 </div>
@@ -581,8 +445,8 @@ or a url:</p>
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="n">tpf</span> <span class="o">=</span> <span class="n">KeplerTargetPixelFile</span><span class="p">(</span><span class="s1">&#39;https://archive.stsci.edu/missions/k2/target_pixel_files/c14/&#39;</span>
-                            <span class="s1">&#39;200100000/82000/ktwo200182949-c14_lpd-targ.fits.gz&#39;</span><span class="p">)</span>
+<span></span>tpf = KeplerTargetPixelFile(&#39;https://archive.stsci.edu/missions/k2/target_pixel_files/c14/&#39;
+                            &#39;200100000/82000/ktwo200182949-c14_lpd-targ.fits.gz&#39;)
 </pre></div>
 </div>
 </div>
@@ -594,9 +458,9 @@ or a url:</p>
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="n">tpf</span> <span class="o">=</span> <span class="n">KeplerTargetPixelFile</span><span class="p">(</span><span class="s1">&#39;https://archive.stsci.edu/missions/k2/target_pixel_files/c14/&#39;</span>
-                            <span class="s1">&#39;200100000/82000/ktwo200182949-c14_lpd-targ.fits.gz&#39;</span><span class="p">,</span>
-                            <span class="n">quality_bitmask</span><span class="o">=</span><span class="n">KeplerQualityFlags</span><span class="o">.</span><span class="n">CONSERVATIVE_BITMASK</span><span class="p">)</span>
+<span></span>tpf = KeplerTargetPixelFile(&#39;https://archive.stsci.edu/missions/k2/target_pixel_files/c14/&#39;
+                            &#39;200100000/82000/ktwo200182949-c14_lpd-targ.fits.gz&#39;,
+                            quality_bitmask=KeplerQualityFlags.CONSERVATIVE_BITMASK)
 </pre></div>
 </div>
 </div>
@@ -610,10 +474,10 @@ in which case the default aperture used by Kepler’s pipeline is applied.</p>
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="n">tpf</span> <span class="o">=</span> <span class="n">KeplerTargetPixelFile</span><span class="p">(</span><span class="s1">&#39;https://archive.stsci.edu/missions/k2/target_pixel_files/c14/&#39;</span>
-                            <span class="s1">&#39;200100000/82000/ktwo200182949-c14_lpd-targ.fits.gz&#39;</span><span class="p">,</span>
-                            <span class="n">aperture_mask</span><span class="o">=</span><span class="s1">&#39;kepler-pipeline&#39;</span><span class="p">,</span>
-                            <span class="n">quality_bitmask</span><span class="o">=</span><span class="n">KeplerQualityFlags</span><span class="o">.</span><span class="n">CONSERVATIVE_BITMASK</span><span class="p">)</span>
+<span></span>tpf = KeplerTargetPixelFile(&#39;https://archive.stsci.edu/missions/k2/target_pixel_files/c14/&#39;
+                            &#39;200100000/82000/ktwo200182949-c14_lpd-targ.fits.gz&#39;,
+                            aperture_mask=&#39;kepler-pipeline&#39;,
+                            quality_bitmask=KeplerQualityFlags.CONSERVATIVE_BITMASK)
 </pre></div>
 </div>
 </div>
@@ -623,7 +487,7 @@ in which case the default aperture used by Kepler’s pipeline is applied.</p>
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="n">tpf</span><span class="o">.</span><span class="n">aperture_mask</span>
+<span></span>tpf.aperture_mask
 </pre></div>
 </div>
 </div>
@@ -652,7 +516,7 @@ shape. The whole <code class="docutils literal"><span class="pre">header</span><
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="n">tpf</span><span class="o">.</span><span class="n">header</span><span class="p">(</span><span class="n">ext</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span></span>tpf.header(ext=0)
 </pre></div>
 </div>
 </div>
@@ -727,7 +591,7 @@ property:</p>
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="n">tpf</span><span class="o">.</span><span class="n">flux</span><span class="o">.</span><span class="n">shape</span>
+<span></span>tpf.flux.shape
 </pre></div>
 </div>
 </div>
@@ -750,7 +614,7 @@ method:</p>
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="n">tpf</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">frame</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span></span>tpf.plot(frame=1)
 </pre></div>
 </div>
 </div>
@@ -758,7 +622,7 @@ method:</p>
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../../../_images/tutorials_ipython_notebooks_.ipynb_checkpoints_whatsnew31-checkpoint_31_0.png" src="../../../_images/tutorials_ipython_notebooks_.ipynb_checkpoints_whatsnew31-checkpoint_31_0.png" />
+<img alt="../../../_images/tutorials_ipython_notebooks_.ipynb_checkpoints_whatsnew31-checkpoint_25_0.png" src="../../../_images/tutorials_ipython_notebooks_.ipynb_checkpoints_whatsnew31-checkpoint_25_0.png" />
 </div>
 </div>
 <p>We can perform aperture photometry using the method <code class="docutils literal"><span class="pre">to_lightcurve</span></code>:</p>
@@ -768,7 +632,7 @@ method:</p>
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="n">lc</span> <span class="o">=</span> <span class="n">tpf</span><span class="o">.</span><span class="n">to_lightcurve</span><span class="p">()</span>
+<span></span>lc = tpf.to_lightcurve()
 </pre></div>
 </div>
 </div>
@@ -778,8 +642,8 @@ method:</p>
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">[</span><span class="mi">17</span><span class="p">,</span> <span class="mi">4</span><span class="p">])</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">lc</span><span class="o">.</span><span class="n">time</span><span class="p">,</span> <span class="n">lc</span><span class="o">.</span><span class="n">flux</span><span class="p">)</span>
+<span></span>plt.figure(figsize=[17, 4])
+plt.plot(lc.time, lc.flux)
 </pre></div>
 </div>
 </div>
@@ -797,12 +661,9 @@ method:</p>
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../../../_images/tutorials_ipython_notebooks_.ipynb_checkpoints_whatsnew31-checkpoint_34_1.png" src="../../../_images/tutorials_ipython_notebooks_.ipynb_checkpoints_whatsnew31-checkpoint_34_1.png" />
+<img alt="../../../_images/tutorials_ipython_notebooks_.ipynb_checkpoints_whatsnew31-checkpoint_28_1.png" src="../../../_images/tutorials_ipython_notebooks_.ipynb_checkpoints_whatsnew31-checkpoint_28_1.png" />
 </div>
 </div>
-</div>
-<div class="section" id="Light-Curves">
-<h2>Light Curves<a class="headerlink" href="#Light-Curves" title="Permalink to this headline">¶</a></h2>
 <p>Let’s see how the previous light curve compares against the
 <code class="docutils literal"><span class="pre">'SAP_FLUX'</span></code> produced by Kepler’s pipeline. For that, we are going to
 explore the <code class="docutils literal"><span class="pre">KeplerLightCurveFile</span></code> class:</p>
@@ -812,7 +673,7 @@ explore the <code class="docutils literal"><span class="pre">KeplerLightCurveFil
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">pyke.lightcurve</span> <span class="k">import</span> <span class="n">KeplerLightCurveFile</span>
+<span></span>from pyke.lightcurve import KeplerLightCurveFile
 </pre></div>
 </div>
 </div>
@@ -822,9 +683,9 @@ explore the <code class="docutils literal"><span class="pre">KeplerLightCurveFil
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="n">klc</span> <span class="o">=</span> <span class="n">KeplerLightCurveFile</span><span class="p">(</span><span class="s1">&#39;https://archive.stsci.edu/missions/k2/lightcurves/&#39;</span>
-                           <span class="s1">&#39;c14/200100000/82000/ktwo200182949-c14_llc.fits&#39;</span><span class="p">,</span>
-                           <span class="n">quality_bitmask</span><span class="o">=</span><span class="n">KeplerQualityFlags</span><span class="o">.</span><span class="n">CONSERVATIVE_BITMASK</span><span class="p">)</span>
+<span></span>klc = KeplerLightCurveFile(&#39;https://archive.stsci.edu/missions/k2/lightcurves/&#39;
+                           &#39;c14/200100000/82000/ktwo200182949-c14_llc.fits&#39;,
+                           quality_bitmask=KeplerQualityFlags.CONSERVATIVE_BITMASK)
 </pre></div>
 </div>
 </div>
@@ -834,7 +695,7 @@ explore the <code class="docutils literal"><span class="pre">KeplerLightCurveFil
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="n">sap_lc</span> <span class="o">=</span> <span class="n">klc</span><span class="o">.</span><span class="n">SAP_FLUX</span>
+<span></span>sap_lc = klc.SAP_FLUX
 </pre></div>
 </div>
 </div>
@@ -844,11 +705,11 @@ explore the <code class="docutils literal"><span class="pre">KeplerLightCurveFil
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">[</span><span class="mi">17</span><span class="p">,</span> <span class="mi">4</span><span class="p">])</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">lc</span><span class="o">.</span><span class="n">time</span><span class="p">,</span> <span class="n">lc</span><span class="o">.</span><span class="n">flux</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">sap_lc</span><span class="o">.</span><span class="n">time</span><span class="p">,</span> <span class="n">sap_lc</span><span class="o">.</span><span class="n">flux</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Flux (e-/s)&#39;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Time (BJD - 2454833)&#39;</span><span class="p">)</span>
+<span></span>plt.figure(figsize=[17, 4])
+plt.plot(lc.time, lc.flux)
+plt.plot(sap_lc.time, sap_lc.flux)
+plt.ylabel(&#39;Flux (e-/s)&#39;)
+plt.xlabel(&#39;Time (BJD - 2454833)&#39;)
 </pre></div>
 </div>
 </div>
@@ -866,7 +727,7 @@ explore the <code class="docutils literal"><span class="pre">KeplerLightCurveFil
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../../../_images/tutorials_ipython_notebooks_.ipynb_checkpoints_whatsnew31-checkpoint_40_1.png" src="../../../_images/tutorials_ipython_notebooks_.ipynb_checkpoints_whatsnew31-checkpoint_40_1.png" />
+<img alt="../../../_images/tutorials_ipython_notebooks_.ipynb_checkpoints_whatsnew31-checkpoint_33_1.png" src="../../../_images/tutorials_ipython_notebooks_.ipynb_checkpoints_whatsnew31-checkpoint_33_1.png" />
 </div>
 </div>
 <p>Now, let’s correct this light curve using by fitting cotrending basis
@@ -879,7 +740,7 @@ class or the <code class="docutils literal"><span class="pre">compute_cotrended_
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="n">klc_corrected</span> <span class="o">=</span> <span class="n">klc</span><span class="o">.</span><span class="n">compute_cotrended_lightcurve</span><span class="p">(</span><span class="n">cbvs</span><span class="o">=</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">17</span><span class="p">))</span>
+<span></span>klc_corrected = klc.compute_cotrended_lightcurve(cbvs=range(1, 17))
 </pre></div>
 </div>
 </div>
@@ -889,10 +750,10 @@ class or the <code class="docutils literal"><span class="pre">compute_cotrended_
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">[</span><span class="mi">17</span><span class="p">,</span> <span class="mi">4</span><span class="p">])</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">klc_corrected</span><span class="o">.</span><span class="n">time</span><span class="p">,</span> <span class="n">klc_corrected</span><span class="o">.</span><span class="n">flux</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Flux (e-/s)&#39;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Time (BJD - 2454833)&#39;</span><span class="p">)</span>
+<span></span>plt.figure(figsize=[17, 4])
+plt.plot(klc_corrected.time, klc_corrected.flux)
+plt.ylabel(&#39;Flux (e-/s)&#39;)
+plt.xlabel(&#39;Time (BJD - 2454833)&#39;)
 </pre></div>
 </div>
 </div>
@@ -910,7 +771,7 @@ class or the <code class="docutils literal"><span class="pre">compute_cotrended_
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../../../_images/tutorials_ipython_notebooks_.ipynb_checkpoints_whatsnew31-checkpoint_43_1.png" src="../../../_images/tutorials_ipython_notebooks_.ipynb_checkpoints_whatsnew31-checkpoint_43_1.png" />
+<img alt="../../../_images/tutorials_ipython_notebooks_.ipynb_checkpoints_whatsnew31-checkpoint_36_1.png" src="../../../_images/tutorials_ipython_notebooks_.ipynb_checkpoints_whatsnew31-checkpoint_36_1.png" />
 </div>
 </div>
 <div class="nbinput nblast docutils container">
@@ -919,7 +780,7 @@ class or the <code class="docutils literal"><span class="pre">compute_cotrended_
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="n">pdcsap_lc</span> <span class="o">=</span> <span class="n">klc</span><span class="o">.</span><span class="n">PDCSAP_FLUX</span>
+<span></span>pdcsap_lc = klc.PDCSAP_FLUX
 </pre></div>
 </div>
 </div>
@@ -929,11 +790,11 @@ class or the <code class="docutils literal"><span class="pre">compute_cotrended_
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">[</span><span class="mi">17</span><span class="p">,</span> <span class="mi">4</span><span class="p">])</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">klc_corrected</span><span class="o">.</span><span class="n">time</span><span class="p">,</span> <span class="n">klc_corrected</span><span class="o">.</span><span class="n">flux</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">pdcsap_lc</span><span class="o">.</span><span class="n">time</span><span class="p">,</span> <span class="n">pdcsap_lc</span><span class="o">.</span><span class="n">flux</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Flux (e-/s)&#39;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Time (BJD - 2454833)&#39;</span><span class="p">)</span>
+<span></span>plt.figure(figsize=[17, 4])
+plt.plot(klc_corrected.time, klc_corrected.flux)
+plt.plot(pdcsap_lc.time, pdcsap_lc.flux)
+plt.ylabel(&#39;Flux (e-/s)&#39;)
+plt.xlabel(&#39;Time (BJD - 2454833)&#39;)
 </pre></div>
 </div>
 </div>
@@ -951,7 +812,200 @@ class or the <code class="docutils literal"><span class="pre">compute_cotrended_
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../../../_images/tutorials_ipython_notebooks_.ipynb_checkpoints_whatsnew31-checkpoint_45_1.png" src="../../../_images/tutorials_ipython_notebooks_.ipynb_checkpoints_whatsnew31-checkpoint_45_1.png" />
+<img alt="../../../_images/tutorials_ipython_notebooks_.ipynb_checkpoints_whatsnew31-checkpoint_38_1.png" src="../../../_images/tutorials_ipython_notebooks_.ipynb_checkpoints_whatsnew31-checkpoint_38_1.png" />
+</div>
+</div>
+</div>
+<div class="section" id="Utility-functions">
+<h2>Utility functions<a class="headerlink" href="#Utility-functions" title="Permalink to this headline">¶</a></h2>
+<p><code class="docutils literal"><span class="pre">PyKE</span></code> has included two convinience functions to convert between
+<code class="docutils literal"><span class="pre">module.output</span></code> to <code class="docutils literal"><span class="pre">channel</span></code> and vice-versa:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span>%matplotlib inline
+import matplotlib.pyplot as plt
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span>from pyke.utils import module_output_to_channel, channel_to_module_output
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="stderr output_area docutils container">
+<div class="highlight"><pre>
+/Users/jvmirca/anaconda3/lib/python3.6/site-packages/matplotlib/__init__.py:1405: UserWarning:
+This call to matplotlib.use() has no effect because the backend has already
+been chosen; matplotlib.use() must be called *before* pylab, matplotlib.pyplot,
+or matplotlib.backends is imported for the first time.
+
+  warnings.warn(_use_error_msg)
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span>module_output_to_channel(module=19, output=3)
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>Out[3]:
+</pre></div>
+</div>
+<div class="output_area highlight-none"><div class="highlight"><pre>
+<span></span>67
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span>channel_to_module_output(67)
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>Out[4]:
+</pre></div>
+</div>
+<div class="output_area highlight-none"><div class="highlight"><pre>
+<span></span>(19, 3)
+</pre></div>
+</div>
+</div>
+<p><code class="docutils literal"><span class="pre">PyKE</span> <span class="pre">3.1</span></code> includes <code class="docutils literal"><span class="pre">KeplerQualityFlags</span></code> class which encodes the
+meaning of the Kepler QUALITY bitmask flags as documented in the Kepler
+Archive Manual (Table 2.3):</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span>from pyke.utils import KeplerQualityFlags
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span>KeplerQualityFlags.decode(1)
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>Out[6]:
+</pre></div>
+</div>
+<div class="output_area highlight-none"><div class="highlight"><pre>
+<span></span>[&#39;Attitude tweak&#39;]
+</pre></div>
+</div>
+</div>
+<p>It also can handle multiple flags:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span>KeplerQualityFlags.decode(1 + 1024 + 1048576)
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>Out[7]:
+</pre></div>
+</div>
+<div class="output_area highlight-none"><div class="highlight"><pre>
+<span></span>[&#39;Attitude tweak&#39;, &#39;Sudden sensitivity dropout&#39;, &#39;Thruster firing&#39;]
+</pre></div>
+</div>
+</div>
+<p>A few quality flags are already computed:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span>KeplerQualityFlags.decode(KeplerQualityFlags.DEFAULT_BITMASK)
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>Out[8]:
+</pre></div>
+</div>
+<div class="output_area highlight-none"><div class="highlight"><pre>
+<span></span>[&#39;Attitude tweak&#39;,
+ &#39;Safe mode&#39;,
+ &#39;Coarse point&#39;,
+ &#39;Earth point&#39;,
+ &#39;Desaturation event&#39;,
+ &#39;Cosmic ray in optimal aperture&#39;,
+ &#39;Manual exclude&#39;,
+ &#39;No data&#39;,
+ &#39;Thruster firing&#39;]
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span>KeplerQualityFlags.decode(KeplerQualityFlags.CONSERVATIVE_BITMASK)
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>Out[9]:
+</pre></div>
+</div>
+<div class="output_area highlight-none"><div class="highlight"><pre>
+<span></span>[&#39;Attitude tweak&#39;,
+ &#39;Safe mode&#39;,
+ &#39;Coarse point&#39;,
+ &#39;Earth point&#39;,
+ &#39;Desaturation event&#39;,
+ &#39;Cosmic ray in optimal aperture&#39;,
+ &#39;Manual exclude&#39;,
+ &#39;Sudden sensitivity dropout&#39;,
+ &#39;Cosmic ray in collateral data&#39;,
+ &#39;No data&#39;,
+ &#39;Possible thruster firing&#39;,
+ &#39;Thruster firing&#39;]
+</pre></div>
 </div>
 </div>
 </div>
@@ -964,7 +1018,7 @@ class or the <code class="docutils literal"><span class="pre">compute_cotrended_
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">pyke.prf</span> <span class="k">import</span> <span class="n">PRFPhotometry</span><span class="p">,</span> <span class="n">SceneModel</span><span class="p">,</span> <span class="n">SimpleKeplerPRF</span>
+<span></span>from pyke.prf import PRFPhotometry, SceneModel, SimpleKeplerPRF
 </pre></div>
 </div>
 </div>
@@ -976,9 +1030,9 @@ object of the following TPF:</p>
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="n">tpf</span> <span class="o">=</span> <span class="n">KeplerTargetPixelFile</span><span class="p">(</span><span class="s1">&#39;https://archive.stsci.edu/missions/k2/target_pixel_files/c14/&#39;</span>
-                            <span class="s1">&#39;201500000/43000/ktwo201543306-c14_lpd-targ.fits.gz&#39;</span><span class="p">,</span>
-                            <span class="n">quality_bitmask</span><span class="o">=</span><span class="n">KeplerQualityFlags</span><span class="o">.</span><span class="n">CONSERVATIVE_BITMASK</span><span class="p">)</span>
+<span></span>tpf = KeplerTargetPixelFile(&#39;https://archive.stsci.edu/missions/k2/target_pixel_files/c14/&#39;
+                            &#39;201500000/43000/ktwo201543306-c14_lpd-targ.fits.gz&#39;,
+                            quality_bitmask=KeplerQualityFlags.CONSERVATIVE_BITMASK)
 </pre></div>
 </div>
 </div>
@@ -988,7 +1042,7 @@ object of the following TPF:</p>
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="n">tpf</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">frame</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+<span></span>tpf.plot(frame=100)
 </pre></div>
 </div>
 </div>
@@ -996,7 +1050,7 @@ object of the following TPF:</p>
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../../../_images/tutorials_ipython_notebooks_.ipynb_checkpoints_whatsnew31-checkpoint_51_0.png" src="../../../_images/tutorials_ipython_notebooks_.ipynb_checkpoints_whatsnew31-checkpoint_51_0.png" />
+<img alt="../../../_images/tutorials_ipython_notebooks_.ipynb_checkpoints_whatsnew31-checkpoint_58_0.png" src="../../../_images/tutorials_ipython_notebooks_.ipynb_checkpoints_whatsnew31-checkpoint_58_0.png" />
 </div>
 </div>
 <div class="nbinput nblast docutils container">
@@ -1005,8 +1059,8 @@ object of the following TPF:</p>
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="n">scene</span> <span class="o">=</span> <span class="n">SceneModel</span><span class="p">(</span><span class="n">prfs</span><span class="o">=</span><span class="p">[</span><span class="n">SimpleKeplerPRF</span><span class="p">(</span><span class="n">channel</span><span class="o">=</span><span class="n">tpf</span><span class="o">.</span><span class="n">channel</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="n">tpf</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span>
-                                         <span class="n">column</span><span class="o">=</span><span class="n">tpf</span><span class="o">.</span><span class="n">column</span><span class="p">,</span> <span class="n">row</span><span class="o">=</span><span class="n">tpf</span><span class="o">.</span><span class="n">row</span><span class="p">)])</span>
+<span></span>scene = SceneModel(prfs=[SimpleKeplerPRF(channel=tpf.channel, shape=tpf.shape[1:],
+                                         column=tpf.column, row=tpf.row)])
 </pre></div>
 </div>
 </div>
@@ -1020,7 +1074,7 @@ the target, and a constant background level. We can do that with
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">oktopus.prior</span> <span class="k">import</span> <span class="n">UniformPrior</span>
+<span></span>from oktopus.prior import UniformPrior
 </pre></div>
 </div>
 </div>
@@ -1030,8 +1084,8 @@ the target, and a constant background level. We can do that with
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="n">unif_prior</span> <span class="o">=</span> <span class="n">UniformPrior</span><span class="p">(</span><span class="n">lb</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mf">1090.</span><span class="p">,</span> <span class="mf">706.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">],</span>
-                          <span class="n">ub</span><span class="o">=</span><span class="p">[</span><span class="mf">1e5</span><span class="p">,</span> <span class="mf">1096.</span><span class="p">,</span> <span class="mf">712.</span><span class="p">,</span> <span class="mf">1e5</span><span class="p">])</span>
+<span></span>unif_prior = UniformPrior(lb=[0, 1090., 706., 0.],
+                          ub=[1e5, 1096., 712., 1e5])
 </pre></div>
 </div>
 </div>
@@ -1041,7 +1095,7 @@ the target, and a constant background level. We can do that with
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="n">scene</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="o">*</span><span class="n">unif_prior</span><span class="o">.</span><span class="n">mean</span><span class="p">)</span>
+<span></span>scene.plot(*unif_prior.mean)
 </pre></div>
 </div>
 </div>
@@ -1049,7 +1103,7 @@ the target, and a constant background level. We can do that with
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../../../_images/tutorials_ipython_notebooks_.ipynb_checkpoints_whatsnew31-checkpoint_56_0.png" src="../../../_images/tutorials_ipython_notebooks_.ipynb_checkpoints_whatsnew31-checkpoint_56_0.png" />
+<img alt="../../../_images/tutorials_ipython_notebooks_.ipynb_checkpoints_whatsnew31-checkpoint_63_0.png" src="../../../_images/tutorials_ipython_notebooks_.ipynb_checkpoints_whatsnew31-checkpoint_63_0.png" />
 </div>
 </div>
 <div class="nbinput nblast docutils container">
@@ -1058,7 +1112,7 @@ the target, and a constant background level. We can do that with
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="n">prf_phot</span> <span class="o">=</span> <span class="n">PRFPhotometry</span><span class="p">(</span><span class="n">scene_model</span><span class="o">=</span><span class="n">scene</span><span class="p">,</span> <span class="n">prior</span><span class="o">=</span><span class="n">unif_prior</span><span class="p">)</span>
+<span></span>prf_phot = PRFPhotometry(scene_model=scene, prior=unif_prior)
 </pre></div>
 </div>
 </div>
@@ -1068,7 +1122,7 @@ the target, and a constant background level. We can do that with
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="n">results</span> <span class="o">=</span> <span class="n">prf_phot</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">tpf</span><span class="o">.</span><span class="n">flux</span> <span class="o">+</span> <span class="n">tpf</span><span class="o">.</span><span class="n">flux_bkg</span><span class="p">)</span>
+<span></span>results = prf_phot.fit(tpf.flux + tpf.flux_bkg)
 </pre></div>
 </div>
 </div>
@@ -1094,8 +1148,8 @@ the target, and a constant background level. We can do that with
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">prf_phot</span><span class="o">.</span><span class="n">residuals</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">origin</span><span class="o">=</span><span class="s1">&#39;lower&#39;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">()</span>
+<span></span>plt.imshow(prf_phot.residuals[1], origin=&#39;lower&#39;)
+plt.colorbar()
 </pre></div>
 </div>
 </div>
@@ -1113,7 +1167,7 @@ the target, and a constant background level. We can do that with
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../../../_images/tutorials_ipython_notebooks_.ipynb_checkpoints_whatsnew31-checkpoint_59_1.png" src="../../../_images/tutorials_ipython_notebooks_.ipynb_checkpoints_whatsnew31-checkpoint_59_1.png" />
+<img alt="../../../_images/tutorials_ipython_notebooks_.ipynb_checkpoints_whatsnew31-checkpoint_66_1.png" src="../../../_images/tutorials_ipython_notebooks_.ipynb_checkpoints_whatsnew31-checkpoint_66_1.png" />
 </div>
 </div>
 <div class="nbinput nblast docutils container">
@@ -1122,10 +1176,10 @@ the target, and a constant background level. We can do that with
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="n">flux</span> <span class="o">=</span> <span class="n">results</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
-<span class="n">xcenter</span> <span class="o">=</span> <span class="n">results</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span>
-<span class="n">ycenter</span> <span class="o">=</span> <span class="n">results</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span>
-<span class="n">bkg_density</span> <span class="o">=</span> <span class="n">results</span><span class="p">[:,</span> <span class="mi">3</span><span class="p">]</span>
+<span></span>flux = results[:, 0]
+xcenter = results[:, 1]
+ycenter = results[:, 2]
+bkg_density = results[:, 3]
 </pre></div>
 </div>
 </div>
@@ -1135,10 +1189,10 @@ the target, and a constant background level. We can do that with
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">[</span><span class="mi">17</span><span class="p">,</span> <span class="mi">4</span><span class="p">])</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">tpf</span><span class="o">.</span><span class="n">time</span><span class="p">,</span> <span class="n">flux</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Flux (e-/s)&#39;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Time (BJD - 2454833)&#39;</span><span class="p">)</span>
+<span></span>plt.figure(figsize=[17, 4])
+plt.plot(tpf.time, flux)
+plt.ylabel(&#39;Flux (e-/s)&#39;)
+plt.xlabel(&#39;Time (BJD - 2454833)&#39;)
 </pre></div>
 </div>
 </div>
@@ -1156,7 +1210,7 @@ the target, and a constant background level. We can do that with
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../../../_images/tutorials_ipython_notebooks_.ipynb_checkpoints_whatsnew31-checkpoint_61_1.png" src="../../../_images/tutorials_ipython_notebooks_.ipynb_checkpoints_whatsnew31-checkpoint_61_1.png" />
+<img alt="../../../_images/tutorials_ipython_notebooks_.ipynb_checkpoints_whatsnew31-checkpoint_68_1.png" src="../../../_images/tutorials_ipython_notebooks_.ipynb_checkpoints_whatsnew31-checkpoint_68_1.png" />
 </div>
 </div>
 <div class="nbinput docutils container">
@@ -1165,10 +1219,10 @@ the target, and a constant background level. We can do that with
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">[</span><span class="mi">17</span><span class="p">,</span> <span class="mi">4</span><span class="p">])</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">tpf</span><span class="o">.</span><span class="n">time</span><span class="p">,</span> <span class="n">xcenter</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Column position&#39;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Time (BJD - 2454833)&#39;</span><span class="p">)</span>
+<span></span>plt.figure(figsize=[17, 4])
+plt.plot(tpf.time, xcenter)
+plt.ylabel(&#39;Column position&#39;)
+plt.xlabel(&#39;Time (BJD - 2454833)&#39;)
 </pre></div>
 </div>
 </div>
@@ -1186,7 +1240,7 @@ the target, and a constant background level. We can do that with
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../../../_images/tutorials_ipython_notebooks_.ipynb_checkpoints_whatsnew31-checkpoint_62_1.png" src="../../../_images/tutorials_ipython_notebooks_.ipynb_checkpoints_whatsnew31-checkpoint_62_1.png" />
+<img alt="../../../_images/tutorials_ipython_notebooks_.ipynb_checkpoints_whatsnew31-checkpoint_69_1.png" src="../../../_images/tutorials_ipython_notebooks_.ipynb_checkpoints_whatsnew31-checkpoint_69_1.png" />
 </div>
 </div>
 <div class="nbinput docutils container">
@@ -1195,10 +1249,10 @@ the target, and a constant background level. We can do that with
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">[</span><span class="mi">17</span><span class="p">,</span> <span class="mi">4</span><span class="p">])</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">tpf</span><span class="o">.</span><span class="n">time</span><span class="p">,</span> <span class="n">ycenter</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Row position&#39;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Time (BJD - 2454833)&#39;</span><span class="p">)</span>
+<span></span>plt.figure(figsize=[17, 4])
+plt.plot(tpf.time, ycenter)
+plt.ylabel(&#39;Row position&#39;)
+plt.xlabel(&#39;Time (BJD - 2454833)&#39;)
 </pre></div>
 </div>
 </div>
@@ -1216,7 +1270,7 @@ the target, and a constant background level. We can do that with
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../../../_images/tutorials_ipython_notebooks_.ipynb_checkpoints_whatsnew31-checkpoint_63_1.png" src="../../../_images/tutorials_ipython_notebooks_.ipynb_checkpoints_whatsnew31-checkpoint_63_1.png" />
+<img alt="../../../_images/tutorials_ipython_notebooks_.ipynb_checkpoints_whatsnew31-checkpoint_70_1.png" src="../../../_images/tutorials_ipython_notebooks_.ipynb_checkpoints_whatsnew31-checkpoint_70_1.png" />
 </div>
 </div>
 <div class="nbinput docutils container">
@@ -1225,10 +1279,10 @@ the target, and a constant background level. We can do that with
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">[</span><span class="mi">17</span><span class="p">,</span> <span class="mi">4</span><span class="p">])</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">tpf</span><span class="o">.</span><span class="n">time</span><span class="p">,</span> <span class="n">bkg_density</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Background density&#39;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Time (BJD - 2454833)&#39;</span><span class="p">)</span>
+<span></span>plt.figure(figsize=[17, 4])
+plt.plot(tpf.time, bkg_density)
+plt.ylabel(&#39;Background density&#39;)
+plt.xlabel(&#39;Time (BJD - 2454833)&#39;)
 </pre></div>
 </div>
 </div>
@@ -1246,7 +1300,7 @@ the target, and a constant background level. We can do that with
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../../../_images/tutorials_ipython_notebooks_.ipynb_checkpoints_whatsnew31-checkpoint_64_1.png" src="../../../_images/tutorials_ipython_notebooks_.ipynb_checkpoints_whatsnew31-checkpoint_64_1.png" />
+<img alt="../../../_images/tutorials_ipython_notebooks_.ipynb_checkpoints_whatsnew31-checkpoint_71_1.png" src="../../../_images/tutorials_ipython_notebooks_.ipynb_checkpoints_whatsnew31-checkpoint_71_1.png" />
 </div>
 </div>
 <p>For more examples on PRF photometry, please see our tutorials page:
@@ -1255,9 +1309,6 @@ the target, and a constant background level. We can do that with
 </div>
 
 
-           </div>
-           <div class="articleComments">
-            
            </div>
           </div>
           <footer>
@@ -1292,8 +1343,7 @@ the target, and a constant background level. We can do that with
             VERSION:'3.0.0',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true,
-            SOURCELINK_SUFFIX: '.txt'
+            HAS_SOURCE:  true
         };
     </script>
       <script type="text/javascript" src="../../../_static/jquery.js"></script>

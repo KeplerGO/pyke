@@ -14,8 +14,6 @@
 
   
   
-  
-  
 
   
 
@@ -45,7 +43,6 @@
 
 <body class="wy-body-for-nav" role="document">
 
-   
   <div class="wy-grid-for-nav">
 
     
@@ -89,11 +86,8 @@
           
             
             
-              
-            
-            
-              <ul>
-<li class="toctree-l1"><a class="reference internal" href="tutorials/ipython_notebooks/whatsnew31.html">What’s new in PyKE 3.1?</a></li>
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="tutorials/ipython_notebooks/whatsnew31.html">What’s new in PyKE 3?</a></li>
 </ul>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quickstart</a></li>
@@ -117,10 +111,8 @@
 
       
       <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
-        
-          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="index.html">PyKE</a>
-        
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">PyKE</a>
       </nav>
 
 
@@ -133,34 +125,17 @@
 
 
 
-
-
-
-
-
-
-
-
-
-
 <div role="navigation" aria-label="breadcrumbs navigation">
-
   <ul class="wy-breadcrumbs">
-    
-      <li><a href="index.html">Docs</a> &raquo;</li>
-        
-      <li>Index</li>
-    
-    
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+    <li>Index</li>
       <li class="wy-breadcrumbs-aside">
         
-            
+          
         
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
@@ -215,9 +190,11 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/lightcurve.html#pyke.lightcurve.LightCurve.bin">bin() (pyke.lightcurve.LightCurve method)</a>
 </li>
+      <li><a href="api/lightcurve.html#pyke.lightcurve.SFFCorrector.bin_and_interpolate">bin_and_interpolate() (pyke.lightcurve.SFFCorrector method)</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/lightcurve.html#pyke.lightcurve.SFFCorrector.bin_and_interpolate">bin_and_interpolate() (pyke.lightcurve.SFFCorrector method)</a>
+      <li><a href="api/lightcurve.html#pyke.lightcurve.box_period_search">box_period_search() (in module pyke.lightcurve)</a>
 </li>
       <li><a href="api/lightcurve.html#pyke.lightcurve.SFFCorrector.breakpoints">breakpoints() (pyke.lightcurve.SFFCorrector method)</a>
 </li>
@@ -339,12 +316,14 @@
 </li>
       <li><a href="api/lightcurve.html#pyke.lightcurve.KeplerCBVCorrector.get_cbv_url">get_cbv_url() (pyke.lightcurve.KeplerCBVCorrector method)</a>
 </li>
-      <li><a href="api/prf.html#pyke.prf.get_initial_guesses">get_initial_guesses() (in module pyke.prf)</a>
+      <li><a href="api/lightcurve.html#pyke.lightcurve.KeplerCBVCorrector.get_cbvs_list">get_cbvs_list() (pyke.lightcurve.KeplerCBVCorrector method)</a>
 </li>
-      <li><a href="api/lightcurve.html#pyke.lightcurve.KeplerLightCurveFile.get_lightcurve">get_lightcurve() (pyke.lightcurve.KeplerLightCurveFile method)</a>
+      <li><a href="api/prf.html#pyke.prf.get_initial_guesses">get_initial_guesses() (in module pyke.prf)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/lightcurve.html#pyke.lightcurve.KeplerLightCurveFile.get_lightcurve">get_lightcurve() (pyke.lightcurve.KeplerLightCurveFile method)</a>
+</li>
       <li><a href="api/targetpixelfile.html#pyke.targetpixelfile.KeplerTargetPixelFile.get_prf_model">get_prf_model() (pyke.targetpixelfile.KeplerTargetPixelFile method)</a>
 </li>
       <li><a href="api/prf.html#pyke.prf.PRFPhotometry.get_residuals">get_residuals() (pyke.prf.PRFPhotometry method)</a>
@@ -511,6 +490,8 @@
 </li>
       <li><a href="api/utils.html#pyke.utils.KeplerQualityFlags.NoFinePoint">NoFinePoint (pyke.utils.KeplerQualityFlags attribute)</a>
 </li>
+      <li><a href="api/lightcurve.html#pyke.lightcurve.LightCurve.normalize">normalize() (pyke.lightcurve.LightCurve method)</a>
+</li>
   </ul></td>
 </tr></table>
 
@@ -639,10 +620,10 @@
         <li><a href="api/targetpixelfile.html#pyke.targetpixelfile.KeplerTargetPixelFile.time">(pyke.targetpixelfile.KeplerTargetPixelFile attribute)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/lightcurve.html#pyke.lightcurve.LightCurve.to_csv">to_csv() (pyke.lightcurve.LightCurve method)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/lightcurve.html#pyke.lightcurve.KeplerLightCurve.to_fits">to_fits() (pyke.lightcurve.KeplerLightCurve method)</a>
 
       <ul>
@@ -650,6 +631,10 @@
 </li>
       </ul></li>
       <li><a href="api/targetpixelfile.html#pyke.targetpixelfile.KeplerTargetPixelFile.to_lightcurve">to_lightcurve() (pyke.targetpixelfile.KeplerTargetPixelFile method)</a>
+</li>
+      <li><a href="api/lightcurve.html#pyke.lightcurve.LightCurve.to_pandas">to_pandas() (pyke.lightcurve.LightCurve method)</a>
+</li>
+      <li><a href="api/lightcurve.html#pyke.lightcurve.LightCurve.to_table">to_table() (pyke.lightcurve.LightCurve method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -664,9 +649,6 @@
 
 
 
-           </div>
-           <div class="articleComments">
-            
            </div>
           </div>
           <footer>
@@ -701,8 +683,7 @@
             VERSION:'3.0.0',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true,
-            SOURCELINK_SUFFIX: '.txt'
+            HAS_SOURCE:  true
         };
     </script>
       <script type="text/javascript" src="_static/jquery.js"></script>

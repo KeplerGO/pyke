@@ -13,8 +13,6 @@
 
   
   
-  
-  
 
   
 
@@ -46,7 +44,6 @@
 
 <body class="wy-body-for-nav" role="document">
 
-   
   <div class="wy-grid-for-nav">
 
     
@@ -90,11 +87,8 @@
           
             
             
-              
-            
-            
-              <ul>
-<li class="toctree-l1"><a class="reference internal" href="../tutorials/ipython_notebooks/whatsnew31.html">What’s new in PyKE 3.1?</a></li>
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/ipython_notebooks/whatsnew31.html">What’s new in PyKE 3?</a></li>
 </ul>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Quickstart</a></li>
@@ -127,10 +121,8 @@
 
       
       <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
-        
-          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../index.html">PyKE</a>
-        
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../index.html">PyKE</a>
       </nav>
 
 
@@ -139,42 +131,25 @@
         <div class="rst-content">
           
 
-
-
-
-
-
-
-
-
-
-
-
+ 
 
 
 
 <div role="navigation" aria-label="breadcrumbs navigation">
-
   <ul class="wy-breadcrumbs">
-    
-      <li><a href="../index.html">Docs</a> &raquo;</li>
-        
+    <li><a href="../index.html">Docs</a> &raquo;</li>
+      
           <li><a href="index.html">API documentation</a> &raquo;</li>
-        
-      <li>Target Pixel File</li>
-    
-    
+      
+    <li>Target Pixel File</li>
       <li class="wy-breadcrumbs-aside">
         
-            
+          
             <a href="../_sources/api/targetpixelfile.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
@@ -222,24 +197,24 @@
 <dd><p>Defines a TargetPixelFile class for the Kepler/K2 Mission.
 Enables extraction of raw lightcurves and centroid positions.</p>
 <p class="rubric">References</p>
-<table class="docutils citation" frame="void" id="r99" rules="none">
+<table class="docutils citation" frame="void" id="r7" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id1">[R99]</a></td><td>Kepler: A Search for Terrestrial Planets. Kepler Archive Manual.
+<tr><td class="label"><a class="fn-backref" href="#id1">[R7]</a></td><td>Kepler: A Search for Terrestrial Planets. Kepler Archive Manual.
 <a class="reference external" href="http://archive.stsci.edu/kepler/manuals/archive_manual.pdf">http://archive.stsci.edu/kepler/manuals/archive_manual.pdf</a></td></tr>
 </tbody>
 </table>
 <p class="rubric">Attributes</p>
 <table border="1" class="docutils">
 <colgroup>
-<col width="6%" />
-<col width="94%" />
+<col width="5%" />
+<col width="95%" />
 </colgroup>
 <tbody valign="top">
-<tr class="row-odd"><td><strong>path</strong></td>
+<tr class="row-odd"><td>path</td>
 <td>(str) Path to fits file.</td>
 </tr>
-<tr class="row-even"><td><strong>quality_bitmask</strong></td>
+<tr class="row-even"><td>quality_bitmask</td>
 <td>(str or int) Bitmask specifying quality flags of cadences that should be ignored. If a string is passed, it has the following meaning:  * “default”: recommended quality mask * “hard”: removes more flags, known to remove good data * “hardest”: removes all data that has been flagged</td>
 </tr>
 </tbody>
@@ -263,7 +238,7 @@ Enables extraction of raw lightcurves and centroid positions.</p>
 <tr class="row-even"><td><a class="reference internal" href="#pyke.targetpixelfile.KeplerTargetPixelFile.header" title="pyke.targetpixelfile.KeplerTargetPixelFile.header"><code class="xref py py-obj docutils literal"><span class="pre">header</span></code></a>([ext])</td>
 <td>Returns the header for a given extension.</td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="#pyke.targetpixelfile.KeplerTargetPixelFile.plot" title="pyke.targetpixelfile.KeplerTargetPixelFile.plot"><code class="xref py py-obj docutils literal"><span class="pre">plot</span></code></a>([frame,&nbsp;cadenceno,&nbsp;bkg])</td>
+<tr class="row-odd"><td><a class="reference internal" href="#pyke.targetpixelfile.KeplerTargetPixelFile.plot" title="pyke.targetpixelfile.KeplerTargetPixelFile.plot"><code class="xref py py-obj docutils literal"><span class="pre">plot</span></code></a>([frame,&nbsp;cadenceno,&nbsp;bkg,&nbsp;aperture_mask])</td>
 <td>Plot a target pixel file at a given frame (index) or cadence number.</td>
 </tr>
 <tr class="row-even"><td><a class="reference internal" href="#pyke.targetpixelfile.KeplerTargetPixelFile.to_fits" title="pyke.targetpixelfile.KeplerTargetPixelFile.to_fits"><code class="xref py py-obj docutils literal"><span class="pre">to_fits</span></code></a>()</td>
@@ -413,7 +388,7 @@ necessary metadata in the tpf object.</p>
 
 <dl class="method">
 <dt id="pyke.targetpixelfile.KeplerTargetPixelFile.plot">
-<code class="descname">plot</code><span class="sig-paren">(</span><em>frame=0</em>, <em>cadenceno=None</em>, <em>bkg=False</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyke/targetpixelfile.html#KeplerTargetPixelFile.plot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyke.targetpixelfile.KeplerTargetPixelFile.plot" title="Permalink to this definition">¶</a></dt>
+<code class="descname">plot</code><span class="sig-paren">(</span><em>frame=0</em>, <em>cadenceno=None</em>, <em>bkg=False</em>, <em>aperture_mask=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyke/targetpixelfile.html#KeplerTargetPixelFile.plot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyke.targetpixelfile.KeplerTargetPixelFile.plot" title="Permalink to this definition">¶</a></dt>
 <dd><p>Plot a target pixel file at a given frame (index) or cadence number.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -430,7 +405,11 @@ This argument has priority over frame number.</p>
 </div></blockquote>
 <p><strong>bkg</strong> : bool</p>
 <blockquote>
-<div><p>If True, background will be added to the tpf.</p>
+<div><p>If True, background will be added to the pixel values.</p>
+</div></blockquote>
+<p><strong>aperture_mask</strong> : ndarray</p>
+<blockquote>
+<div><p>Highlight pixels selected by aperture_mask.</p>
 </div></blockquote>
 <p><strong>kwargs</strong> : dict</p>
 <blockquote class="last">
@@ -485,24 +464,21 @@ This argument has priority over frame number.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>lc</strong> : KeplerLightCurve object</p>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>aperture_mask</strong> : array-like, ‘pipeline’, or ‘all’</p>
+<blockquote>
+<div><p>A boolean array describing the aperture such that <cite>False</cite> means
+that the pixel will be masked out.
+If the string ‘all’ is passed, all pixels will be used.
+The default behaviour is to use the Kepler pipeline mask.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>lc</strong> : KeplerLightCurve object</p>
 <blockquote class="last">
 <div><p>Array containing the summed flux within the aperture for each
 cadence.</p>
 </div></blockquote>
 </td>
-</tr>
-</tbody>
-</table>
-<p class="rubric">Attributes</p>
-<table border="1" class="docutils">
-<colgroup>
-<col width="6%" />
-<col width="94%" />
-</colgroup>
-<tbody valign="top">
-<tr class="row-odd"><td><strong>aperture_mask</strong></td>
-<td>(array-like, ‘pipeline’, or ‘all’) A boolean array describing the aperture such that <cite>False</cite> means that the pixel will be masked out. If the string ‘all’ is passed, all pixels will be used. The default behaviour is to use the Kepler pipeline mask.</td>
 </tr>
 </tbody>
 </table>
@@ -517,16 +493,13 @@ cadence.</p>
 
 
            </div>
-           <div class="articleComments">
-            
-           </div>
           </div>
           <footer>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
       
-        <a href="index.html" class="btn btn-neutral" title="API documentation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="index.html" class="btn btn-neutral" title="API documentation" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -560,8 +533,7 @@ cadence.</p>
             VERSION:'3.0.0',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true,
-            SOURCELINK_SUFFIX: '.txt'
+            HAS_SOURCE:  true
         };
     </script>
       <script type="text/javascript" src="../_static/jquery.js"></script>

@@ -13,8 +13,6 @@
 
   
   
-  
-  
 
   
 
@@ -45,7 +43,6 @@
 
 <body class="wy-body-for-nav" role="document">
 
-   
   <div class="wy-grid-for-nav">
 
     
@@ -89,11 +86,8 @@
           
             
             
-              
-            
-            
-              <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../tutorials/ipython_notebooks/whatsnew31.html">What’s new in PyKE 3.1?</a></li>
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/ipython_notebooks/whatsnew31.html">What’s new in PyKE 3?</a></li>
 </ul>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../quickstart.html">Quickstart</a></li>
@@ -117,10 +111,8 @@
 
       
       <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
-        
-          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../../index.html">PyKE</a>
-        
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../index.html">PyKE</a>
       </nav>
 
 
@@ -133,36 +125,19 @@
 
 
 
-
-
-
-
-
-
-
-
-
-
 <div role="navigation" aria-label="breadcrumbs navigation">
-
   <ul class="wy-breadcrumbs">
-    
-      <li><a href="../../index.html">Docs</a> &raquo;</li>
-        
+    <li><a href="../../index.html">Docs</a> &raquo;</li>
+      
           <li><a href="../index.html">Module code</a> &raquo;</li>
-        
-      <li>pyke.prf</li>
-    
-    
+      
+    <li>pyke.prf</li>
       <li class="wy-breadcrumbs-aside">
         
-            
+          
         
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
@@ -222,18 +197,18 @@
 <span class="sd">    &gt;&gt;&gt; from oktopus import UniformPrior</span>
 <span class="sd">    &gt;&gt;&gt; tpf = KeplerTargetPixelFile(&quot;https://archive.stsci.edu/missions/kepler/&quot;</span>
 <span class="sd">    ...                             &quot;target_pixel_files/0084/008462852/&quot;</span>
-<span class="sd">    ...                             &quot;kplr008462852-2013098041711_lpd-targ.fits.gz&quot;)</span>
+<span class="sd">    ...                             &quot;kplr008462852-2013098041711_lpd-targ.fits.gz&quot;) # doctest: +SKIP</span>
 <span class="sd">    Downloading https://archive.stsci.edu/missions/kepler/target_pixel_files/0084/008462852/kplr008462852-2013098041711_lpd-targ.fits.gz [Done]</span>
-<span class="sd">    &gt;&gt;&gt; prf = SimpleKeplerPRF(tpf.channel, tpf.shape[1:], tpf.column, tpf.row)</span>
+<span class="sd">    &gt;&gt;&gt; prf = SimpleKeplerPRF(tpf.channel, tpf.shape[1:], tpf.column, tpf.row) # doctest: +SKIP</span>
 <span class="sd">    Downloading http://archive.stsci.edu/missions/kepler/fpc/prf/extracted/kplr16.4_2011265_prf.fits [Done]</span>
-<span class="sd">    &gt;&gt;&gt; scene = SceneModel(prfs=prf)</span>
-<span class="sd">    &gt;&gt;&gt; prior = UniformPrior(lb=[1.2e5, 230., 128.,1e2], ub=[3.4e5, 235., 133., 1e3])</span>
-<span class="sd">    &gt;&gt;&gt; phot = PRFPhotometry(scene, prior)</span>
-<span class="sd">    &gt;&gt;&gt; results = phot.fit(tpf.flux)</span>
-<span class="sd">    &gt;&gt;&gt; flux_fit = results[:, 0]</span>
-<span class="sd">    &gt;&gt;&gt; x_fit = results[:, 1]</span>
-<span class="sd">    &gt;&gt;&gt; y_fit = results[:, 2]</span>
-<span class="sd">    &gt;&gt;&gt; bkg_fit = results[:, 3]</span>
+<span class="sd">    &gt;&gt;&gt; scene = SceneModel(prfs=prf) # doctest: +SKIP</span>
+<span class="sd">    &gt;&gt;&gt; prior = UniformPrior(lb=[1.2e5, 230., 128.,1e2], ub=[3.4e5, 235., 133., 1e3]) # doctest: +SKIP</span>
+<span class="sd">    &gt;&gt;&gt; phot = PRFPhotometry(scene, prior) # doctest: +SKIP</span>
+<span class="sd">    &gt;&gt;&gt; results = phot.fit(tpf.flux) # doctest: +SKIP</span>
+<span class="sd">    &gt;&gt;&gt; flux_fit = results[:, 0] # doctest: +SKIP</span>
+<span class="sd">    &gt;&gt;&gt; x_fit = results[:, 1] # doctest: +SKIP</span>
+<span class="sd">    &gt;&gt;&gt; y_fit = results[:, 2] # doctest: +SKIP</span>
+<span class="sd">    &gt;&gt;&gt; bkg_fit = results[:, 3] # doctest: +SKIP</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scene_model</span><span class="p">,</span> <span class="n">prior</span><span class="p">,</span> <span class="n">loss_function</span><span class="o">=</span><span class="n">PoissonPosterior</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
@@ -401,10 +376,10 @@
 <span class="sd">    &gt;&gt;&gt; import math</span>
 <span class="sd">    &gt;&gt;&gt; import matplotlib.pyplot as plt</span>
 <span class="sd">    &gt;&gt;&gt; from pyke import KeplerPRF</span>
-<span class="sd">    &gt;&gt;&gt; kepprf = KeplerPRF(channel=44, shape=(10, 10), column=5, row=5)</span>
+<span class="sd">    &gt;&gt;&gt; kepprf = KeplerPRF(channel=44, shape=(10, 10), column=5, row=5) # doctest: +SKIP</span>
 <span class="sd">    Downloading http://archive.stsci.edu/missions/kepler/fpc/prf/extracted/kplr13.4_2011265_prf.fits [Done]</span>
 <span class="sd">    &gt;&gt;&gt; prf = kepprf(flux=1000, center_col=10, center_row=10,</span>
-<span class="sd">    ...              scale_row=0.7, scale_col=0.7, rotation_angle=math.pi/2)</span>
+<span class="sd">    ...              scale_row=0.7, scale_col=0.7, rotation_angle=math.pi/2) # doctest: +SKIP</span>
 <span class="sd">    &gt;&gt;&gt; plt.imshow(prf, origin=&#39;lower&#39;) # doctest: +SKIP</span>
 
 <span class="sd">    References</span>
@@ -633,9 +608,6 @@
 </pre></div>
 
            </div>
-           <div class="articleComments">
-            
-           </div>
           </div>
           <footer>
   
@@ -669,8 +641,7 @@
             VERSION:'3.0.0',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true,
-            SOURCELINK_SUFFIX: '.txt'
+            HAS_SOURCE:  true
         };
     </script>
       <script type="text/javascript" src="../../_static/jquery.js"></script>
