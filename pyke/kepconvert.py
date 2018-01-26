@@ -428,5 +428,6 @@ def kepconvert_main():
     parser.add_argument('--logfile', '-l', help='Name of ascii log file',
                         default='kepconvert.log', dest='logfile', type=str)
     args = parser.parse_args()
-    kepconvert(args.infile, args.conversion, args.columns, args.outfile,
-               args.baddata, args.overwrite, args.verbose, args.logfile)
+    kepconvert(args.infile, args.conversion, args.columns, args.timeformat,
+               args.outfile, args.baddata, args.overwrite, args.verbose,
+               args.logfile)
